@@ -1,4 +1,3 @@
-from app_backend.mpcd.codices.models.token import Token
 import uuid as uuid_lib
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -9,10 +8,10 @@ from token import Token
 
 
 class Text(models.Model):
-    class TextType(Enum):
-        prose = ('pr', 'Prose')
-        lyric = ('ly', 'Lyric')
-    text_type = models.CharField(max_length=2, choices=[x.value for x in TextType])    
+    class TextType(models.TextChoices):
+        PROSE = 'P'
+        LYRIC = 'L'
+    text_type = models.CharField(choices=TextType.choices)    
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     codex_id = models.ForeignKey(Codex)
 
