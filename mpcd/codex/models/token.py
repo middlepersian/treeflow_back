@@ -342,11 +342,12 @@ class MorphologicalAnnotation(models.Model):
         X = "X", "Other"
 
     pos_tag = models.CharField(max_length=6, choices=PosTag.choices)
+    ## FIXME: Set constraint for choosing right feature set
+    pos_features = models.ArrayField(models.CharField(max_length=20, choices=POS_FEATURES), null=True, blank=True)
 
 
 class Token(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
-    line_id = models.ForeignKey(Line, on_delete=models.SET_NULL)
     tkn = models.CharField(max_length=255)
     trascription = models.TextField(blank=True)
     transliteration = models.TextField(blank=True)
@@ -360,3 +361,7 @@ class Token(models.Model):
     comment = models.TextField(blank=True)
 
     avestan = models.CharField(max_length=255, blank=True)
+
+
+class CodexToken(Token):
+    line_id = models.ForeignKey(Line, on_delete=models.SET_NULL)
