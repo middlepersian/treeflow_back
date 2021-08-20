@@ -1,9 +1,8 @@
-from _typeshed import Self
 import uuid as uuid_lib
 
 from django.db import models
 from django.urls import reverse
-from physical import Line
+from .physical import Line
 
 
 class TokenSemantics(models.Model):
@@ -200,7 +199,7 @@ class MorphologicalAnnotation(models.Model):
         )),
         ('Animacy', (
             ('Hum', 'Hum'), ('Spec', 'Spec'),
-            ('Def', 'Def')
+            ('Def', 'Def'),
             ('Nhum', 'Nhum'),
             ('Anim', 'Anim'),
             ('Inan', 'Inan')
@@ -291,7 +290,7 @@ class MorphologicalAnnotation(models.Model):
             ('Fin', 'Fin'),
             ('Inf', 'Inf'),
             ('Part', 'Part')
-        ))
+        )),
         ('Mood', (
             ('Ind', 'Imp'),
             ('Imp', 'Imp'),
@@ -346,42 +345,43 @@ class MorphologicalAnnotation(models.Model):
 
 
     # get current pos_tag for setting the right pos_features
-    @property
+    '''
+    @classmethod
     def pos_value(self):
          return self.pos_tag
 
-    if self.pos_value() == 'ADJ':
+    if pos_value() == 'ADJ':
         features = ADJ_FEATURES
-    elif self.pos_value() == 'ADV':
+    elif pos_value() == 'ADV':
         features = ADV_FEATURES
-    elif self.pos_value() == 'ADP':
+    elif pos_value() == 'ADP':
         features = ADP_FEATURES
-    elif self.pos_value() == 'AUX':
+    elif pos_value() == 'AUX':
         features = AUX_FEATURES
-    elif self.pos_value() == 'DET':
+    elif pos_value() == 'DET':
         features = DET_FEATURES
-    elif self.pos_value() == 'NOUN':
+    elif pos_value() == 'NOUN':
         features = NOUN_FEATURES
-    elif self.pos_value() == 'NUM':
+    elif pos_value() == 'NUM':
         features = NUM_FEATURES
-    elif self.pos_value() == 'PART':
+    elif pos_value() == 'PART':
         features = PART_FEATURES
-    elif self.pos_value() == 'PRON':
+    elif pos_value() == 'PRON':
         features = PRON_FEATURES
-    elif self.pos_value() == 'PUNCT':
+    elif pos_value() == 'PUNCT':
         features = PUNCT_FEATURES
-    elif self.pos_value() == 'VERB':
+    elif pos_value() == 'VERB':
         features = VERB_FEATURES
-    elif self.pos_value() == 'X':
+    elif pos_value() == 'X':
         features = X_FEATURES
 
     if features:
         pos_features = models.ArrayField(models.CharField(max_length=20, choices=features), null=True, blank=True)
-
+    '''
 
 
 class Dependency(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
     head = models.SmallIntegerField()
     class DependencyRelation(models.TextChoices):
         acl = 'acl', 'clausal modifier of noun (adnominal clause)'
@@ -412,7 +412,7 @@ class Dependency(models.Model):
 
 
 class SyntacticAnnotation(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
     dependency = models.ForeignKey(Dependency, on_delete=models.CASCADE, null=True, blank=True)
 
 
@@ -421,7 +421,7 @@ class Token(models.Model):
     tkn = models.CharField(max_length=255)
     trascription = models.TextField(blank=True)
     transliteration = models.TextField(blank=True)
-    lemma = models.ForeignKey()
+    #lemma = models.ForeignKey()
 
     morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.CASCADE, null=True)
     syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True)
