@@ -1,3 +1,4 @@
+from _typeshed import Self
 import uuid as uuid_lib
 
 from django.db import models
@@ -171,8 +172,8 @@ class MorphologicalAnnotation(models.Model):
             ('Plur', 'Plur')
         )),
         ('Case', (
-            ('Nom', 'Nom)'),
-            ('Acc', 'Acc)'),
+            ('Nom', 'Nom'),
+            ('Acc', 'Acc'),
         )),
 
         ('Definite', (
@@ -342,8 +343,77 @@ class MorphologicalAnnotation(models.Model):
         X = "X", "Other"
 
     pos_tag = models.CharField(max_length=6, choices=PosTag.choices)
-    ## FIXME: Set constraint for choosing right feature set
-    pos_features = models.ArrayField(models.CharField(max_length=20, choices=POS_FEATURES), null=True, blank=True)
+
+
+    # get current pos_tag for setting the right pos_features
+    @property
+    def pos_value(self):
+         return self.pos_tag
+
+    if self.pos_value() == 'ADJ':
+        features = ADJ_FEATURES
+    elif self.pos_value() == 'ADV':
+        features = ADV_FEATURES
+    elif self.pos_value() == 'ADP':
+        features = ADP_FEATURES
+    elif self.pos_value() == 'AUX':
+        features = AUX_FEATURES
+    elif self.pos_value() == 'DET':
+        features = DET_FEATURES
+    elif self.pos_value() == 'NOUN':
+        features = NOUN_FEATURES
+    elif self.pos_value() == 'NUM':
+        features = NUM_FEATURES
+    elif self.pos_value() == 'PART':
+        features = PART_FEATURES
+    elif self.pos_value() == 'PRON':
+        features = PRON_FEATURES
+    elif self.pos_value() == 'PUNCT':
+        features = PUNCT_FEATURES
+    elif self.pos_value() == 'VERB':
+        features = VERB_FEATURES
+    elif self.pos_value() == 'X':
+        features = X_FEATURES
+
+    if features:
+        pos_features = models.ArrayField(models.CharField(max_length=20, choices=features), null=True, blank=True)
+
+
+
+class Dependency(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    head = models.SmallIntegerField()
+    class DependencyRelation(models.TextChoices):
+        acl = 'acl', 'clausal modifier of noun (adnominal clause)'
+        advcl = 'advcl', 'adverbial clause modifier'
+        advmod = "advmod", "adverbial modifier"
+        amod = "amod", "adjectival modifier"
+        appos = "appos", "appositional modifier"
+        aux = "aux", "auxiliary"
+        case = "case", "case marking"
+        cc = "cc", "coordinating conjunction"
+        ccomp = "ccomp", "clausal complement"
+        compound = "compound", "compound"
+        conj = "conj", "conjunct"
+        cop = "cop", "copula"
+        det = "det", "determiner"
+        discourse = "discourse", "discourse element"
+        fixed = "fixed", "fixed multiword expression"
+        iobj = "iobj", "indirect object"
+        mark = "mark", "marker"
+        nmod = "nmod", "nominal modifier"
+        nsubj = "nsubj", "nominal subject"
+        nummod = "nummod", "numeric modifier"
+        obj = "obj", "object"
+        obl = "obl", "oblique nominal"
+        root = "root", "root"
+
+    dependency_relation = models.CharField(max_length=9, choices=DependencyRelation.choices)
+
+
+class SyntacticAnnotation(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    dependency = models.ForeignKey(Dependency, on_delete=models.CASCADE, null=True, blank=True)
 
 
 class Token(models.Model):
@@ -353,7 +423,8 @@ class Token(models.Model):
     transliteration = models.TextField(blank=True)
     lemma = models.ForeignKey()
 
-    morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.SET_NULL, null=True)
+    morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.CASCADE, null=True)
+    syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -364,4 +435,5 @@ class Token(models.Model):
 
 
 class CodexToken(Token):
-    line_id = models.ForeignKey(Line, on_delete=models.SET_NULL)
+    line_id = models.ForeignKey(Line, on_delete=models.
+    CASCADE)
