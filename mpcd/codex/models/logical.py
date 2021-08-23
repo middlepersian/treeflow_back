@@ -28,8 +28,8 @@ class Section (models.Model):
 
 class Sentence (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
-    section_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-    tokens =  models.ForeignKey(Token, on_delete=models.CASCADE)
+    section_id = models.ForeignKey(Section, on_delete=models.CASCADE)
+    tokens =  models.ForeignKey(Token, on_delete=models.CASCADE, related_name='prose_tokens') 
 
 
 ## Lyric
@@ -41,4 +41,4 @@ class Strophe (models.Model):
 class Verse (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     verse_id = models.ForeignKey(Strophe, on_delete=models.CASCADE)
-    tokens =  models.ForeignKey(Token, on_delete=models.CASCADE)
+    tokens =  models.ForeignKey(Token, on_delete=models.CASCADE, related_name='lyric_tokens')
