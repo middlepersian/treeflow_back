@@ -8,5 +8,4 @@ Collectfast==2.2.0  # https://github.com/antonagestam/collectfast
 
 # Django
 # ------------------------------------------------------------------------------
-django-storages[boto3]==1.11.1  # https://github.com/jschneier/django-storages
 django-anymail==8.4  # https://github.com/anymail/django-anymail
