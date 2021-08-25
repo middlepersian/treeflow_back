@@ -78,7 +78,9 @@ LOCAL_APPS = [
 
     #local apps
     "mpcd.codex.apps.CodexAppConfig",
-    "mpcd.edition.apps.EditionAppConfig"
+    "mpcd.edition.apps.EditionAppConfig",
+    "mpcd.dict.apps.DictAppConfig"
+
 
 
 
