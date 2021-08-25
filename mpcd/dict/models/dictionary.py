@@ -14,9 +14,9 @@ class PhoneticVariants(models.Model):
     
 class Entry(models.Model):
     uuid = models.UUIDField(default = uuid_lib.uuid4, editable=False, unique=True)
-    doi = models.URLField(max_length=200)
+    doi = models.URLField(max_length=200, null=True)
     lemma = models.CharField(unique=True)
-    phonetic_variants = models.ForeignKey(PhoneticVariants)
+    phonetic_variants = models.ForeignKey(PhoneticVariants, null=True)
 
 
 class Dictionary(models.Model):
