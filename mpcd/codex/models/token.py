@@ -3,6 +3,27 @@ import uuid as uuid_lib
 from django.db import models
 from django.urls import reverse
 from .physical import Line
+from mpcd.dict.models.dictionary import Entry
+
+
+class Pos(models.TextChoices):
+    ADJ = 'ADJ', 'Adjective'
+    ADP = 'ADP', 'Adposition'
+    ADV = "ADV", "Adverb"
+    AUX = "AUX", "Auxiliary"
+    CCONJ = "CCONJ", "Coordinating conjunction"
+    DET = "DET", "Determiner"
+    INTJ = "INTJ", "Interjection"
+    NOUN = "NOUN", "Noun"
+    NUM = "NUM", "Numeral"
+    PART = "PART", "Particle"
+    PRON = "PRON", "Pronoun"
+    PROPN = "PROPN", "Proper noun"
+    PUNCT = "PUNCT", "Punctuation"
+    SCONJO = "SCONJO", "Subordinating conjunction"
+    SYM = "SYM", "Symbol"
+    VERB = "VERB", "Verb"
+    X = "X", "Other"
 
 
 class TokenSemantics(models.Model):
@@ -322,63 +343,54 @@ class MorphologicalAnnotation(models.Model):
         ('Foreign', ('Yes', 'Yes'))
     ]
 
-    class PosTag(models.TextChoices):
-        ADJ = 'ADJ', 'Adjective'
-        ADP = 'ADP', 'Adposition'
-        ADV = "ADV", "Adverb"
-        AUX = "AUX", "auxiliary"
-        CCONJ = "CCONJ", "Coordinating conjunction"
-        DET = "DET", "Determiner"
-        INTJ = "INTJ", "Interjection"
-        NOUN = "NOUN", "Noun"
-        NUM = "NUM", "Numeral"
-        PART = "PART", "Particle"
-        PRON = "PRON", "Pronoun"
-        PROPN = "PROPN", "Proper noun"
-        PUNCT = "PUNCT", "Punctuation"
-        SCONJO = "SCONJO", "Subordinating conjunction"
-        SYM = "SYM", "Symbol"
-        VERB = "VERB", "Verb"
-        X = "X", "Other"
 
-    pos_tag = models.CharField(max_length=6, choices=PosTag.choices)
+    pos = models.CharField(max_length=6, choices=Pos.choices)
+     
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="%(app_label)s_%(class)s_pos_valid",
+                check=models.Q(pos__in=Pos.values),
+            )]
+
+
+    def __str__(self):
+        return self.pos
+        
+    '''
 
 
     # get current pos_tag for setting the right pos_features
-    '''
-    @classmethod
-    def pos_value(self):
-         return self.pos_tag
-
-    if pos_value() == 'ADJ':
+    if pos_tag == 'ADJ':
         features = ADJ_FEATURES
-    elif pos_value() == 'ADV':
+    elif pos_tag == 'ADV':
         features = ADV_FEATURES
-    elif pos_value() == 'ADP':
+    elif pos_tag == 'ADP':
         features = ADP_FEATURES
-    elif pos_value() == 'AUX':
+    elif pos_tag == 'AUX':
         features = AUX_FEATURES
-    elif pos_value() == 'DET':
+    elif pos_tag == 'DET':
         features = DET_FEATURES
-    elif pos_value() == 'NOUN':
+    elif pos_tag == 'NOUN':
         features = NOUN_FEATURES
-    elif pos_value() == 'NUM':
+    elif pos_tag == 'NUM':
         features = NUM_FEATURES
-    elif pos_value() == 'PART':
+    elif pos_tag == 'PART':
         features = PART_FEATURES
-    elif pos_value() == 'PRON':
+    elif pos_tag == 'PRON':
         features = PRON_FEATURES
-    elif pos_value() == 'PUNCT':
+    elif pos_tag == 'PUNCT':
         features = PUNCT_FEATURES
-    elif pos_value() == 'VERB':
+    elif pos_tag == 'VERB':
         features = VERB_FEATURES
-    elif pos_value() == 'X':
+    elif pos_tag == 'X':
         features = X_FEATURES
 
-    if features:
-        pos_features = models.ArrayField(models.CharField(max_length=20, choices=features), null=True, blank=True)
-    '''
 
+    if features != '':
+        pos_features = models.ArrayField(models.CharField(max_length=20, choices=features), null=True, blank=True)
+    
+    '''
 
 class Dependency(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
@@ -410,18 +422,24 @@ class Dependency(models.Model):
 
     dependency_relation = models.CharField(max_length=9, choices=DependencyRelation.choices)
 
+    def __str__(self):
+        return str(self.head) + '    ' + self.dependency_relation
+
 
 class SyntacticAnnotation(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
     dependency = models.ForeignKey(Dependency, on_delete=models.CASCADE, null=True, blank=True)
 
+    def __str__(self):
+        return str(self.dependency.head) + '    ' + self.dependency.dependency_relation
+
 
 class Token(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
-    tkn = models.CharField(max_length=255)
+    token = models.CharField(max_length=255)
     trascription = models.TextField(blank=True)
     transliteration = models.TextField(blank=True)
-    #lemma = models.ForeignKey()
+    lemma = models.ForeignKey(Entry, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.CASCADE, null=True)
     syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True)
@@ -432,6 +450,9 @@ class Token(models.Model):
     comment = models.TextField(blank=True)
 
     avestan = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.token
 
 
 class CodexToken(Token):
