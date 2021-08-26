@@ -26,6 +26,7 @@ class Pos(models.TextChoices):
     X = "X", "Other"
 
 
+
 class TokenSemantics(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
     meaning = models.CharField(max_length=255)
@@ -44,7 +45,7 @@ class Feature(models.Model):
     # e.g. "PronType"
     name = models.CharField(max_length=20)
     # e.g. "pronominal type"
-    description = models.CharField(max_length=150)
+    description = models.CharField(max_length=100)
     
     values = models.ManyToManyField(FeatureValue, blank=True, null=True)
 
@@ -95,6 +96,8 @@ class Dependency(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
     head = models.SmallIntegerField()
     
+
+    ## TODO: add DB constraint 
     dependency_relation = models.CharField(max_length=9, choices=DependencyRelation.choices)
 
     def __str__(self):
