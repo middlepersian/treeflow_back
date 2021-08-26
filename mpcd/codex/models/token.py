@@ -32,320 +32,27 @@ class TokenSemantics(models.Model):
     description = models.TextField(blank=True)
 
 
+class FeatureValue(models.Model):
+    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
+    # e.g. 'Prs'
+    slug = models.SlugField(unique=True)
+    # e.g. 'personal or possessive personal pronoun or determiner'
+    description = models.CharField(max_length=150)
+
+class Feature(models.Model):
+    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
+    # e.g. "PronType"
+    name = models.CharField(max_length=20)
+    # e.g. "pronominal type"
+    description = models.CharField(max_length=150)
+    
+    values = models.ManyToManyField(FeatureValue, blank=True, null=True)
+
 class MorphologicalAnnotation(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
-
-    ADJ_FEATURES = [
-        ('NumType', (
-            ('Ord', 'Ord'),
-            ('Mult', 'Mult'),
-        )),
-        ('Poss', (
-            ('Yes', 'Yes)'),
-        )),
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plur', 'Plur'),
-        )),
-        ('Case', (
-            ('Nom', 'Nom'),
-            ('Acc', 'Acc'),
-        )),
-        ('Degree', (
-            ('Cmp', 'Cmp'),
-            ('Pos', 'Pos'),
-            ('Sup', 'Sup')
-        )),
-        ('VerbForm', (
-            ('Part', 'Part'))),
-        ('Tense', (
-            ('Past', 'Past'),
-            ('Pres', 'Pres'),
-        )),
-        ('Voice', (
-            ('Act', 'Act'),
-            ('Pass', 'Pass'),
-            ('Cau', 'Cau')
-        )),
-        ('Polarity', (
-            ('Neg', 'Neg')
-        ))
-    ]
-
-    ADP_FEATURES = [
-
-        ('Pos', (
-            ('Pre', 'Pre'),
-            ('Post', 'Post'),
-            ('Circum', 'Circum')
-        ))
-
-    ]
-
-    ADV_FEATURES = [
-
-        ('PronType', (
-            ('Dem', 'Dem'),
-            ('Ind', 'Ind'),
-            ('Int', 'Int'),
-            ('Neg', 'Neg'),
-            ('Rel', 'Rel'),
-            ('Tot', 'Tot')
-        )),
-        ('NumType', (
-            ('Ord', 'Ord)'),
-            ('Mult', 'Mult)'),
-        )),
-
-        ('Degree', (
-            ('Cmp', 'Cmp'),
-            ('Pos', 'Pos'),
-            ('Sup', 'Sup')
-        )),
-        ('VerbForm', (
-            ('Part', 'Part')
-        )),
-        ('Tense', (
-            ('Past', 'Past'),
-            ('Pres', 'Pres')
-        )),
-        ('Voice', (
-            ('Act', 'Act'),
-            ('Pass', 'Pass'),
-            ('Cau', 'Cau')
-        )),
-        ('Polarity', (
-            ('Neg', 'Neg')
-        ))
-
-    ]
-
-    AUX_FEATURES = [
-
-        ('Copula', (
-            ('Yes', 'Yes')
-        )),
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plur', 'Plur'),
-        )),
-
-        ('VerbForm', (
-            ('Fin', 'Fin'),
-            ('Inf', 'Inf'),
-            ('Part', 'Part')
-        )),
-        ('Mood', (
-            ('Part', 'Part')
-        )),
-        ('Tense', (
-            ('Past', 'Past'),
-            ('Pres', 'Pres')
-        )),
-        ('Voice', (
-            ('Act', 'Act'),
-            ('Pass', 'Pass'),
-            ('Cau', 'Cau')
-        )),
-        ('Polarity', (
-            ('Neg', 'Neg')
-        )),
-        ('Person', (
-            ('1', '1'),
-            ('2', '2'),
-            ('3', '3'),
-        )),
-        ('Polite', (
-            ('Form', 'Form')
-        ))
-    ]
-
-    DET_FEATURES = [
-        ('PronType', (
-            ('Dem', 'Dem'),
-            ('Emp', 'Emp'),
-            ('Exc', 'Exc'),
-            ('Ind', 'Ind'),
-            ('Int', 'Int'),
-            ('Neg', 'Neg'),
-            ('Rel', 'Rel'),
-            ('Tot', 'Tot')
-        )),
-        ('Poss', (
-            ('Yes', 'Yes')
-        )),
-
-        ('Reflex', (
-            ('Yes', 'Yes')
-        )),
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plural', 'Plural')
-        ))
-
-    ]
-
-    NOUN_FEATURES = [
-
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plur', 'Plur')
-        )),
-        ('Case', (
-            ('Nom', 'Nom'),
-            ('Acc', 'Acc'),
-        )),
-
-        ('Definite', (
-            ('Ind', 'Ind'),
-            ('Spec', 'Spec'),
-            ('Def', 'Def')
-        )),
-        ('VerbForm', (
-            ('Part', 'Part'),
-            ('Inf', 'Inf'),
-            ('Vnoun', 'Vnoun')
-        )),
-        ('Tense', (
-            ('Past', 'Past'),
-            ('Pres', 'Pres')
-        )),
-        ('Voice', (
-            ('Act', 'Act'),
-            ('Pass', 'Pass'),
-            ('Cau', 'Cau')
-        )),
-        ('Polarity', (
-            ('Neg', 'Neg')
-        )),
-        ('Animacy', (
-            ('Hum', 'Hum'), ('Spec', 'Spec'),
-            ('Def', 'Def'),
-            ('Nhum', 'Nhum'),
-            ('Anim', 'Anim'),
-            ('Inan', 'Inan')
-        ))
-
-    ]
-
-    NUM_FEATURES = [
-
-        ('PronType', (
-            ('Dem', 'Dem'),
-            ('Ind', 'Ind'),
-            ('Int', 'Int'),
-            ('Rel', 'Rel')
-        )),
-        ('NumType', (
-            ('Card', 'Card'),
-            ('Frac', 'Frac'),
-            ('Sets', 'Sets'),
-        )),
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plur', 'Plur')
-        ))
-
-    ]
-
-    PART_FEATURES = [
-        ('PartType', (
-            ('Verbal', 'Verbal'),
-            ('Poss', 'Poss'),
-            ('Neg', 'Neg'),
-        ))
-
-    ]
-
-    PRON_FEATURES = [
-
-        ('PronType', (
-            ('Dem', 'Dem'),
-            ('Emp', 'Emp'),
-            ('Exc', 'Exc'),
-            ('Ind', 'Ind'),
-            ('Int', 'Int'),
-            ('Neg', 'Neg'),
-            ('Rel', 'Rel'),
-            ('Tot', 'Tot')
-        )),
-        ('Poss', (
-            ('Yes', 'Yes')
-        )),
-
-        ('Reflex', (
-            ('Yes', 'Yes')
-        )),
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plur', 'Plur')
-        )),
-        ('Person', (
-            ('1', '1'),
-            ('2', '2'),
-            ('3', '3'),
-        )),
-        ('Polite', (
-            ('Form', 'Form')
-        ))
-
-    ]
-
-    PUNCT_FEATURES = [
-        ('Type', (
-            ('1', '1'),
-            ('2', '2'),
-            ('3', '3'),
-            ('etc', 'etc')
-        ))
-
-    ]
-
-    VERB_FEATURES = [
-
-        ('Number', (
-            ('Sing', 'Sing'),
-            ('Plur', 'Plur')
-        )),
-        ('VerbForm', (
-            ('Fin', 'Fin'),
-            ('Inf', 'Inf'),
-            ('Part', 'Part')
-        )),
-        ('Mood', (
-            ('Ind', 'Imp'),
-            ('Imp', 'Imp'),
-            ('Sub', 'Sub'),
-            ('Opt', 'Opt')
-
-        )),
-        ('Tense', (
-            ('Past', 'Past'),
-            ('Pres', 'Pres')
-        )),
-        ('Voice', (
-            ('Act', 'Act'),
-            ('Pass', 'Pass'),
-            ('Cau', 'Cau')
-        )),
-        ('Person', (
-            ('1', '1'),
-            ('2', '2'),
-            ('3', '3')
-        )),
-        ('Polite', (
-            ('Form', 'Form')
-        ))
-
-    ]
-
-    X_FEATURES = [
-        ('Foreign', ('Yes', 'Yes'))
-    ]
-
-
-    pos = models.CharField(max_length=6, choices=Pos.choices)
-     
+    pos = models.CharField(max_length=6, choices=Pos.choices, null=True)
+    feature = models.ForeignKey(Feature, on_delete=models.CASCADE, null=True)    
+ 
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -356,46 +63,10 @@ class MorphologicalAnnotation(models.Model):
 
     def __str__(self):
         return self.pos
+
+
         
-    '''
-
-
-    # get current pos_tag for setting the right pos_features
-    if pos_tag == 'ADJ':
-        features = ADJ_FEATURES
-    elif pos_tag == 'ADV':
-        features = ADV_FEATURES
-    elif pos_tag == 'ADP':
-        features = ADP_FEATURES
-    elif pos_tag == 'AUX':
-        features = AUX_FEATURES
-    elif pos_tag == 'DET':
-        features = DET_FEATURES
-    elif pos_tag == 'NOUN':
-        features = NOUN_FEATURES
-    elif pos_tag == 'NUM':
-        features = NUM_FEATURES
-    elif pos_tag == 'PART':
-        features = PART_FEATURES
-    elif pos_tag == 'PRON':
-        features = PRON_FEATURES
-    elif pos_tag == 'PUNCT':
-        features = PUNCT_FEATURES
-    elif pos_tag == 'VERB':
-        features = VERB_FEATURES
-    elif pos_tag == 'X':
-        features = X_FEATURES
-
-
-    if features != '':
-        pos_features = models.ArrayField(models.CharField(max_length=20, choices=features), null=True, blank=True)
-    
-    '''
-
-class Dependency(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
-    head = models.SmallIntegerField()
-    class DependencyRelation(models.TextChoices):
+class DependencyRelation(models.TextChoices):
         acl = 'acl', 'clausal modifier of noun (adnominal clause)'
         advcl = 'advcl', 'adverbial clause modifier'
         advmod = "advmod", "adverbial modifier"
@@ -420,6 +91,10 @@ class Dependency(models.Model):
         obl = "obl", "oblique nominal"
         root = "root", "root"
 
+class Dependency(models.Model):
+    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
+    head = models.SmallIntegerField()
+    
     dependency_relation = models.CharField(max_length=9, choices=DependencyRelation.choices)
 
     def __str__(self):
@@ -456,5 +131,4 @@ class Token(models.Model):
 
 
 class CodexToken(Token):
-    line_id = models.ForeignKey(Line, on_delete=models.
-    CASCADE)
+    line_id = models.ForeignKey(Line, on_delete=models.CASCADE)

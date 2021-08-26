@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import Codex, Folio, Side, Line, Text, Chapter, Section, Strophe, Verse, TokenSemantics, MorphologicalAnnotation, Dependency, SyntacticAnnotation, Token, CodexToken
-
+from .models import Codex, Folio, Side, Line, Text, Chapter, Section, Strophe, Verse, TokenSemantics, MorphologicalAnnotation, Dependency, SyntacticAnnotation, Token, CodexToken, Feature, FeatureValue
 admin.site.register(Codex)
 admin.site.register(Folio)
 admin.site.register(Side)
@@ -13,6 +12,8 @@ admin.site.register(Strophe)
 admin.site.register(Verse)
 admin.site.register(TokenSemantics)
 admin.site.register(MorphologicalAnnotation)
+admin.site.register(Feature)
+admin.site.register(FeatureValue)
 admin.site.register(Dependency)
 admin.site.register(SyntacticAnnotation)
 admin.site.register(Token)
