@@ -47,7 +47,7 @@ class Feature(models.Model):
     # e.g. "pronominal type"
     description = models.CharField(max_length=100)
     
-    values = models.ManyToManyField(FeatureValue, blank=True, null=True)
+    values = models.ForeignKey(FeatureValue, blank=True, null=True)
 
 class MorphologicalAnnotation(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
