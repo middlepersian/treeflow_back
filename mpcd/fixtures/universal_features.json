@@ -1,0 +1,81 @@
+[
+    {
+      "model": "codex.feature",
+      "fields": {
+        "name": "PronType",
+        "value": "pronominal type"
+      }
+    },
+    {
+        "model": "codex.feature",
+        "fields": {
+          "name": "NumType",
+          "value": "numeral type"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Poss",
+          "value": "possessive"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Number",
+          "value": "number"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Case",
+          "value": "case"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Degree",
+          "value": "degree"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "VerbForm",
+          "value": "form of verb or deverbative"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Tense",
+          "value": "tense"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Voice",
+          "value": "voice"
+        }
+      },
+      {
+        "model": "codex.feature",
+        "fields": {
+          "name": "Polarity",
+          "value": "polarity"
+        }
+      }, {
+        "model": "codex.featurevalue",
+        "fields": {
+          "name": "Prs",
+          "value": "personal or possessive personal pronoun or determiner"
+        }
+      }
+
+  ]
+  
+  
