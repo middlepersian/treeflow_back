@@ -137,7 +137,7 @@ class DependencyManager(models.Manager):
 class Dependency(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
 
-    head = models.SmallIntegerField()
+    head = models.PositiveSmallIntegerField()
     # TODO: add DB constraint
     rel = models.CharField(max_length=9, choices=DependencyRelation.choices)
 
