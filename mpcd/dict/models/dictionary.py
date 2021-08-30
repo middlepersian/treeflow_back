@@ -5,11 +5,6 @@ from django.db.models.fields import SlugField
 from django.urls import reverse
 
 
-
-
-#class PhoneticVariants(models.Model):
-    #uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
-
 class Dictionary(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=100)
@@ -22,14 +17,14 @@ class Dictionary(models.Model):
     
 class Entry(models.Model):
     uuid = models.UUIDField(default = uuid_lib.uuid4, editable=False, unique=True)
-    doi = models.URLField(max_length=200, null=True)
     lemma = models.CharField(unique=True, max_length=30)
-    dict = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
+    dict = models.ForeignKey(Dictionary, on_delete=models.CASCADE, blank=True)
+    doi = models.URLField(max_length=200, null=True, blank=True)
+
 
     def __str__(self):
         return self.lemma
 
-    #phonetic_variants = models.ForeignKey(PhoneticVariants, null=True)
 
 
 

@@ -2,15 +2,14 @@ import uuid as uuid_lib
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
-from enum import Enum
 from .physical import Codex
 from .token import Token
 
-
-class Text(models.Model):
-    class TextType(models.TextChoices):
+class TextType(models.TextChoices):
         PROSE = 'P'
         LYRIC = 'L'
+
+class Text(models.Model):
     text_type = models.CharField(choices=TextType.choices, max_length=1)    
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     codex_id = models.ForeignKey(Codex, on_delete=models.CASCADE)

@@ -279,3 +279,7 @@ mpcd/media/
 .env
 .envs/*
 !.envs/.local/
+
+
+
+.vscode

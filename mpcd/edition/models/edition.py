@@ -17,7 +17,6 @@ class Text(models.Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     edition_id = models.ForeignKey(Edition, on_delete=models.CASCADE)
 
-
 class Chapter (models.Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     text_id = models.ForeignKey(Text, on_delete=models.CASCADE)
