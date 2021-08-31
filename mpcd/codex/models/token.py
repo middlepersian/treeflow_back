@@ -189,3 +189,7 @@ class Token(models.Model):
 
 class CodexToken(Token):
     line_id = models.ForeignKey(Line, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.token
+
+
