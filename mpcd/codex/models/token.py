@@ -4,7 +4,7 @@ from django.db import models
 from django.urls import reverse
 from .physical import Line
 from mpcd.dict.models.dictionary import Entry
-
+from simple_history.models import HistoricalRecords
 
 class Pos(models.TextChoices):
     ADJ = 'ADJ', 'Adjective'
@@ -85,8 +85,8 @@ class Feature(models.Model):
 class MorphologicalAnnotation(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
     pos = models.CharField(max_length=6, choices=Pos.choices, null=True)
-    feature = models.ForeignKey(Feature, on_delete=models.CASCADE, null=True)
-    feature_value = models.ForeignKey(FeatureValue, on_delete=models.CASCADE, null=True)
+    feature = models.ForeignKey(Feature, on_delete=models.CASCADE, null=True, blank=True)
+    feature_value = models.ForeignKey(FeatureValue, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -166,25 +166,32 @@ class SyntacticAnnotation(models.Model):
         return '{}'.format(self.dependency)
 
 
+
+
+
 class Token(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
-    token = models.CharField(max_length=255)
-    trascription = models.TextField(blank=True)
-    transliteration = models.TextField(blank=True)
+    token = models.CharField(max_length=50)
+    trascription = models.CharField(max_length = 50, blank=True)
+    transliteration = models.CharField(max_length = 50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.CASCADE, null=True, blank=True)
     syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+
 
     comment = models.TextField(blank=True)
 
     avestan = models.CharField(max_length=255, blank=True)
 
+    history = HistoricalRecords()
+
+
+
     def __str__(self):
-        return self.token
+        return  '{} {}'.format(self.token, self. morph_annotations)
 
 
 class CodexToken(Token):
