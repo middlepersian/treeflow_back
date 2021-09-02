@@ -4,6 +4,8 @@ from django.db import models
 from django.urls import reverse
 from .physical import Codex
 from .token import Token
+from simple_history.models import HistoricalRecords
+
 
 
 class TextType(models.TextChoices):
@@ -15,6 +17,7 @@ class Text(models.Model):
     text_type = models.CharField(choices=TextType.choices, max_length=1)
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     codex_id = models.ForeignKey(Codex, on_delete=models.CASCADE)
+    history = HistoricalRecords()
 
     def __str__(self):
         return '{} {}'.format(self.text_type, self.uuid)
@@ -25,6 +28,8 @@ class Text(models.Model):
 class Chapter (models.Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     text_id = models.ForeignKey(Text, on_delete=models.CASCADE)
+    history = HistoricalRecords()
+
 
     def __str__(self):
         return '{}'.format(self.uuid)
@@ -35,6 +40,8 @@ class Section (models.Model):
     chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     def __str__(self):
         return '{}'.format(self.uuid)
+    history = HistoricalRecords()
+
 
 class Sentence (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
@@ -42,6 +49,8 @@ class Sentence (models. Model):
     tokens = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='prose_tokens')
     def __str__(self):
         return '{}'.format(self.uuid)
+    history = HistoricalRecords()
+
 
 # Lyric
 
@@ -50,6 +59,8 @@ class Strophe (models.Model):
     text_id = models.ForeignKey(Text, on_delete=models.CASCADE)
     def __str__(self):
         return '{}'.format(self.uuid)
+    history = HistoricalRecords()
+
 
 class Verse (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
@@ -57,3 +68,4 @@ class Verse (models. Model):
     tokens = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='lyric_tokens')
     def __str__(self):
         return '{}'.format(self.uuid)
+    history = HistoricalRecords()
