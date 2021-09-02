@@ -41,16 +41,13 @@ class FeatureValueManager(models.Manager):
 class FeatureValue(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
     # e.g. 'Prs'
-    name = models.SlugField(unique=True)
-    # e.g. 'personal or possessive personal pronoun or determiner'
-    value = models.CharField(max_length=150, unique=True)
-
+    name = models.CharField(max_length=20, unique=True)
     objects = FeatureValueManager()
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'value'], name='featurevalue_name_value'
+                fields=['name'], name='featurevalue_name'
             )
         ]
 
@@ -67,15 +64,14 @@ class Feature(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
     # e.g. "PronType"
     name = models.CharField(max_length=20, unique=True)
-    # e.g. "pronominal type"
-    value = models.CharField(max_length=100, unique=True)
+
 
     objects = FeatureManager()
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'value'], name='feature_name_value'
+                fields=['name'], name='feature_name'
             )
         ]
 
