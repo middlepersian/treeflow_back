@@ -26,13 +26,6 @@ class Pos(models.TextChoices):
     VERB = "VERB", "VERB"
     X = "X", "X"
 
-
-class TokenSemantics(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
-    meaning = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-
-
 class FeatureValueManager(models.Manager):
     def get_by_natural_key(self, name):
         return self.get(name=name)

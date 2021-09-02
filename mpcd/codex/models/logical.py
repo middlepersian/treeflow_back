@@ -1,5 +1,4 @@
 import uuid as uuid_lib
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
 from .physical import Codex

@@ -31,5 +31,5 @@ class Section (models.Model):
 class Sentence (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     section_id = models.ForeignKey(Section, on_delete=models.CASCADE)
-    tokens =  models.ForeignKey(Token, on_delete=models.CASCADE, related_name='edition_tokens') 
+    tokens =  models.ManyToManyField(Token, related_name='edition_tokens') 
     history = HistoricalRecords()   
