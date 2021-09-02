@@ -1,1 +1,1 @@
-from .dictionary import Dictionary, Entry   
+from .dictionary import Dictionary, Entry, MeaningEnglish   

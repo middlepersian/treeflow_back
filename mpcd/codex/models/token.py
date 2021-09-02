@@ -3,7 +3,6 @@ import uuid as uuid_lib
 from django.db import models
 from django.db.models.fields import CharField
 from django.urls import reverse
-from .physical import Line
 from mpcd.dict.models.dictionary import Entry
 from simple_history.models import HistoricalRecords
 
@@ -178,8 +177,7 @@ class Pos(models.Model):
 
 class Token(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
-    token = models.CharField(max_length=50)
-    trascription = models.CharField(max_length=50, blank=True)
+    transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True)
     pos = models.ForeignKey(Pos, on_delete=models.CASCADE, null=True)
@@ -194,11 +192,5 @@ class Token(models.Model):
         return "|\n".join([p.feature.name + '=' + p.feature_value.name for p in self.features.all()])
 
     def __str__(self):
-        return '{}'.format(self.token)
+        return '{}'.format(self.transcription)
 
-
-class CodexToken(Token):
-    line_id = models.ForeignKey(Line, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.token
