@@ -8,23 +8,23 @@ from simple_history.models import HistoricalRecords
 
 
 class Pos(models.TextChoices):
-    ADJ = 'ADJ', 'Adjective'
-    ADP = 'ADP', 'Adposition'
-    ADV = "ADV", "Adverb"
-    AUX = "AUX", "Auxiliary"
-    CCONJ = "CCONJ", "Coordinating conjunction"
-    DET = "DET", "Determiner"
-    INTJ = "INTJ", "Interjection"
-    NOUN = "NOUN", "Noun"
-    NUM = "NUM", "Numeral"
-    PART = "PART", "Particle"
-    PRON = "PRON", "Pronoun"
-    PROPN = "PROPN", "Proper noun"
-    PUNCT = "PUNCT", "Punctuation"
-    SCONJO = "SCONJO", "Subordinating conjunction"
-    SYM = "SYM", "Symbol"
-    VERB = "VERB", "Verb"
-    X = "X", "Other"
+    ADJ = 'ADJ', 'ADJ'
+    ADP = 'ADP', 'ADP'
+    ADV = "ADV", "ADV"
+    AUX = "AUX", "AUX"
+    CCONJ = "CCONJ", "CCONJ"
+    DET = "DET", "DET"
+    INTJ = "INTJ", "INTJ"
+    NOUN = "NOUN", "NOUN"
+    NUM = "NUM", "NUM"
+    PART = "PART", "PART"
+    PRON = "PRON", "PRON"
+    PROPN = "PROPN", "PROPN"
+    PUNCT = "PUNCT", "PUNCT"
+    SCONJO = "SCONJO", "SCONJO"
+    SYM = "SYM", "SYM"
+    VERB = "VERB", "VERB"
+    X = "X", "X"
 
 
 class TokenSemantics(models.Model):
