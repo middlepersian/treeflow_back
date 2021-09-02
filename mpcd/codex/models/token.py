@@ -6,6 +6,7 @@ from .physical import Line
 from mpcd.dict.models.dictionary import Entry
 from simple_history.models import HistoricalRecords
 
+
 class Pos(models.TextChoices):
     ADJ = 'ADJ', 'Adjective'
     ADP = 'ADP', 'Adposition'
@@ -166,37 +167,24 @@ class SyntacticAnnotation(models.Model):
         return '{}'.format(self.dependency)
 
 
-
-
-
 class Token(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
     token = models.CharField(max_length=50)
-    trascription = models.CharField(max_length = 50, blank=True)
-    transliteration = models.CharField(max_length = 50, blank=True)
+    trascription = models.CharField(max_length=50, blank=True)
+    transliteration = models.CharField(max_length=50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.DO_NOTHING, null=True, blank=True)
-
     morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.CASCADE, null=True, blank=True)
     syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True, blank=True)
-
-
-
-
     comment = models.TextField(blank=True)
-
-    avestan = models.CharField(max_length=255, blank=True)
-
+    avestan = models.URLField(max_length=100, null=True, blank=True)
     history = HistoricalRecords()
 
-
-
     def __str__(self):
-        return  '{} {}'.format(self.token, self. morph_annotations)
+        return '{} {}'.format(self.token, self. morph_annotations)
 
 
 class CodexToken(Token):
     line_id = models.ForeignKey(Line, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.token
-
-
