@@ -11,4 +11,3 @@ class TokenViewSet(viewsets.ModelViewSet):
     queryset = Token.objects.all()
     serializer_class = TokenSerializer
     permission_classes = (IsAuthorOrReadOnly,)
-
