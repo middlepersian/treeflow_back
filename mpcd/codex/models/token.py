@@ -1,6 +1,7 @@
 import uuid as uuid_lib
 
 from django.db import models
+from django.db.models.fields import CharField
 from django.urls import reverse
 from .physical import Line
 from mpcd.dict.models.dictionary import Entry
@@ -45,9 +46,10 @@ class FeatureValue(models.Model):
     objects = FeatureValueManager()
 
     class Meta:
+        ordering = ('name',)
         constraints = [
             models.UniqueConstraint(
-                fields=['name'], name='featurevalue_name'
+                fields=['name'], name='featurevalue'
             )
         ]
 
@@ -65,14 +67,16 @@ class Feature(models.Model):
     # e.g. "PronType"
     name = models.CharField(max_length=20, unique=True)
 
-
     objects = FeatureManager()
 
     class Meta:
+        ordering = ('name',)
+
         constraints = [
             models.UniqueConstraint(
-                fields=['name'], name='feature_name'
+                fields=['name'], name='feature'
             )
+
         ]
 
     def __str__(self):
@@ -81,23 +85,18 @@ class Feature(models.Model):
 
 class MorphologicalAnnotation(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
-    pos = models.CharField(max_length=6, choices=Pos.choices, null=True)
     feature = models.ForeignKey(Feature, on_delete=models.CASCADE, null=True, blank=True)
     feature_value = models.ForeignKey(FeatureValue, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         constraints = [
-            models.CheckConstraint(
-                name="valid_pos",
-                check=models.Q(pos__in=Pos.values),
-            ),
             models.UniqueConstraint(
-                fields=['pos', 'feature', 'feature_value'], name='pos_feature_feature_value'
+                fields=['feature', 'feature_value'], name='feature_featurevalue'
             )
         ]
 
     def __str__(self):
-        return '{} {} {}'.format(self.pos, self.feature, self.feature_value)
+        return '{} {}'.format(self.feature, self.feature_value)
 
 
 class DependencyRelation(models.TextChoices):
@@ -163,20 +162,39 @@ class SyntacticAnnotation(models.Model):
         return '{}'.format(self.dependency)
 
 
+class Pos(models.Model):
+    pos = CharField(max_length=6, choices=Pos.choices)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="valid_pos",
+                check=models.Q(pos__in=Pos.values),
+            )]
+
+    def __str__(self):
+        return '{}'.format(self.pos)
+
+
 class Token(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
     token = models.CharField(max_length=50)
     trascription = models.CharField(max_length=50, blank=True)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemma = models.ForeignKey(Entry, on_delete=models.DO_NOTHING, null=True, blank=True)
-    morph_annotations = models.ForeignKey(MorphologicalAnnotation, on_delete=models.CASCADE, null=True, blank=True)
+    lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True)
+    pos = models.ForeignKey(Pos, on_delete=models.CASCADE, null=True)
+    features = models.ManyToManyField(MorphologicalAnnotation, blank=True)
     syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True, blank=True)
     comment = models.TextField(blank=True)
     avestan = models.URLField(max_length=100, null=True, blank=True)
     history = HistoricalRecords()
 
+
+    def ms_features(self):
+        return "|\n".join([p.feature.name + '=' + p.feature_value.name for p in self.features.all()])
+
     def __str__(self):
-        return '{} {}'.format(self.token, self. morph_annotations)
+        return '{}'.format(self.token)
 
 
 class CodexToken(Token):

@@ -1,81 +1,320 @@
 [
-    {
-      "model": "codex.feature",
-      "fields": {
-        "name": "PronType",
-        "value": "pronominal type"
-      }
-    },
-    {
-        "model": "codex.feature",
-        "fields": {
-          "name": "NumType",
-          "value": "numeral type"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Poss",
-          "value": "possessive"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Number",
-          "value": "number"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Case",
-          "value": "case"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Degree",
-          "value": "degree"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "VerbForm",
-          "value": "form of verb or deverbative"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Tense",
-          "value": "tense"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Voice",
-          "value": "voice"
-        }
-      },
-      {
-        "model": "codex.feature",
-        "fields": {
-          "name": "Polarity",
-          "value": "polarity"
-        }
-      }, {
-        "model": "codex.featurevalue",
-        "fields": {
-          "name": "Prs",
-          "value": "personal or possessive personal pronoun or determiner"
-        }
-      }
-
-  ]
-  
-  
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "PronType"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "NumType"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Poss"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Number"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Case"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Degree"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "VerbForm"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Tense"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Voice"
+    }
+  },
+  {
+    "model": "codex.feature",
+    "fields": {
+      "name": "Polarity"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Dem"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Neg"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Rel"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Tot"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Ord"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Mult"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Sing"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Plur"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Nom"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Acc"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Cmp"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Pos"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Sup"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Part"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Past"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Pres"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Act"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Pass"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Cau"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Pre"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Post"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Circum"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Fin"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Inf"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Ind"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Imp"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Sub"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Opt"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "1"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "2"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "3"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Emp"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Exc"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Hum"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Nhum"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Anim"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Inan"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Card"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Frac"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Sets"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Yes"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Form"
+    }
+  },
+  {
+    "model": "codex.featurevalue",
+    "fields": {
+      "name": "Verbal"
+    }
+  }
+]
