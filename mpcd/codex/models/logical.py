@@ -38,18 +38,20 @@ class Chapter (models.Model):
 class Section (models.Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    history = HistoricalRecords()
+
     def __str__(self):
         return '{}'.format(self.uuid)
-    history = HistoricalRecords()
 
 
 class Sentence (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     section_id = models.ForeignKey(Section, on_delete=models.CASCADE)
     tokens = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='prose_tokens')
+    history = HistoricalRecords()
+
     def __str__(self):
         return '{}'.format(self.uuid)
-    history = HistoricalRecords()
 
 
 # Lyric
@@ -57,15 +59,17 @@ class Sentence (models. Model):
 class Strophe (models.Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     text_id = models.ForeignKey(Text, on_delete=models.CASCADE)
+    history = HistoricalRecords()
+
     def __str__(self):
         return '{}'.format(self.uuid)
-    history = HistoricalRecords()
 
 
 class Verse (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     verse_id = models.ForeignKey(Strophe, on_delete=models.CASCADE)
     tokens = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='lyric_tokens')
+    history = HistoricalRecords()
+
     def __str__(self):
         return '{}'.format(self.uuid)
-    history = HistoricalRecords()
