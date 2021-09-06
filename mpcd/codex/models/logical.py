@@ -1,7 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
 from django.urls import reverse
-from .physical import Codex
+from .physical import Codex, CodexToken
 from .token import Token
 from simple_history.models import HistoricalRecords
 
@@ -49,7 +49,7 @@ class Section (models.Model):
 class Sentence (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     section_id = models.ForeignKey(Section, on_delete=models.CASCADE)
-    tokens = models.ManyToManyField(Token)
+    tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -70,7 +70,7 @@ class Strophe (models.Model):
 class Verse (models. Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     verse_id = models.ForeignKey(Strophe, on_delete=models.CASCADE)
-    tokens = models.ManyToManyField(Token)
+    tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
     def __str__(self):
