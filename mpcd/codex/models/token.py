@@ -1,13 +1,12 @@
 import uuid as uuid_lib
 
 from django.db import models
-from django.db.models.fields import CharField
 from django.urls import reverse
 from mpcd.dict.models.dictionary import Entry
 from simple_history.models import HistoricalRecords
 
 
-class Pos(models.TextChoices):
+class PosCh(models.TextChoices):
     ADJ = 'ADJ', 'ADJ'
     ADP = 'ADP', 'ADP'
     ADV = "ADV", "ADV"
@@ -32,7 +31,7 @@ class FeatureValueManager(models.Manager):
 
 
 class FeatureValue(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     # e.g. 'Prs'
     name = models.CharField(max_length=20, unique=True)
     objects = FeatureValueManager()
@@ -55,7 +54,7 @@ class FeatureManager(models.Manager):
 
 
 class Feature(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     # e.g. "PronType"
     name = models.CharField(max_length=20, unique=True)
 
@@ -76,7 +75,7 @@ class Feature(models.Model):
 
 
 class MorphologicalAnnotation(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     feature = models.ForeignKey(Feature, on_delete=models.CASCADE, null=True, blank=True)
     feature_value = models.ForeignKey(FeatureValue, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -123,7 +122,7 @@ class DependencyManager(models.Manager):
 
 
 class Dependency(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
 
     head = models.PositiveSmallIntegerField()
     # TODO: add DB constraint
@@ -147,7 +146,7 @@ class Dependency(models.Model):
 
 
 class SyntacticAnnotation(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     dependency = models.ForeignKey(Dependency, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -155,13 +154,13 @@ class SyntacticAnnotation(models.Model):
 
 
 class Pos(models.Model):
-    pos = CharField(max_length=6, choices=Pos.choices)
+    pos = models.CharField(max_length=6, choices=PosCh.choices, unique=True)
 
     class Meta:
         constraints = [
             models.CheckConstraint(
                 name="valid_pos",
-                check=models.Q(pos__in=Pos.values),
+                check=models.Q(pos__in=PosCh.values),
             )]
 
     def __str__(self):
@@ -169,7 +168,7 @@ class Pos(models.Model):
 
 
 class Token(models.Model):
-    uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True)

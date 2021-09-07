@@ -13,10 +13,10 @@ class TextType(models.TextChoices):
 
 
 class Text(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text_type = models.CharField(choices=TextType.choices, max_length=1)
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100, null=True)
-    codex_id = models.ForeignKey(Codex, on_delete=models.CASCADE)
+    codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -26,9 +26,9 @@ class Text(models.Model):
 # Prose
 
 class Chapter (models.Model):
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100, null=True)
-    text_id = models.ForeignKey(Text, on_delete=models.CASCADE)
+    text = models.ForeignKey(Text, on_delete=models.CASCADE)
     history = HistoricalRecords()
 
 
@@ -37,8 +37,8 @@ class Chapter (models.Model):
 
 
 class Section (models.Model):
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True)
     history = HistoricalRecords()
 
@@ -47,8 +47,8 @@ class Section (models.Model):
 
 
 class Sentence (models. Model):
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
-    section_id = models.ForeignKey(Section, on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE)
     tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
@@ -59,17 +59,17 @@ class Sentence (models. Model):
 # Lyric
 
 class Strophe (models.Model):
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
-    text_id = models.ForeignKey(Text, on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    text = models.ForeignKey(Text, on_delete=models.CASCADE)
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.uuid)
+        return '{}'.format(self.id)
 
 
 class Verse (models. Model):
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
-    verse_id = models.ForeignKey(Strophe, on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    verse = models.ForeignKey(Strophe, on_delete=models.CASCADE)
     tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
