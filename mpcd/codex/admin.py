@@ -7,7 +7,7 @@ from .models import Codex, Folio, Side, Line, Text, Chapter, Section, Sentence, 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
     list_display = [ "transcription", "transliteration","lemma", "pos" ,"ms_features", "syntax_annotations"]
     history_list_display = [ "pos" ]
-    search_fields = ['comment']
+    search_fields = ['transcription', 'comment']
 class CodexTokenHistoryAdmin(TokenHistoryAdmin): 
     list_display = [ "transcription", "transliteration","lemma", "pos" ,"ms_features", "syntax_annotations" , "line_id", "position"]
 
