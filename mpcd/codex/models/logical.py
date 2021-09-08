@@ -14,9 +14,11 @@ class TextType(models.TextChoices):
 
 class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
     text_type = models.CharField(choices=TextType.choices, max_length=1)
     name = models.CharField(max_length=100, null=True)
-    codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
+    description = models.CharField(max_length=255, blank=True)
+
     history = HistoricalRecords()
 
     def __str__(self):
@@ -28,6 +30,8 @@ class Text(models.Model):
 class Chapter (models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100, null=True)
+    comment = models.CharField(max_length=255, blank=True)
+
     text = models.ForeignKey(Text, on_delete=models.CASCADE)
     history = HistoricalRecords()
 
@@ -40,6 +44,7 @@ class Section (models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True)
+    comment = models.CharField(max_length=255, blank=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -49,6 +54,7 @@ class Section (models.Model):
 class Sentence (models. Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=255, blank=True)
     tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
@@ -61,6 +67,7 @@ class Sentence (models. Model):
 class Strophe (models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=255, blank=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -70,6 +77,7 @@ class Strophe (models.Model):
 class Verse (models. Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     verse = models.ForeignKey(Strophe, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=255, blank=True)
     tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
