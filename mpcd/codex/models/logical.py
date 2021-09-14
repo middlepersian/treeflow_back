@@ -5,17 +5,14 @@ from .physical import Codex, CodexToken
 from .token import Token
 from simple_history.models import HistoricalRecords
 
-
-
-class TextType(models.TextChoices):
-    PROSE = 'P'
-    LYRIC = 'L'
+class TextSigle(models.TextChoices):
+    pass
 
 
 class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
-    text_type = models.CharField(choices=TextType.choices, max_length=1)
+    text_sigle = models.CharField(choices=TextSigle.choices, max_length=4, null=True)
     name = models.CharField(max_length=100, null=True)
     description = models.CharField(max_length=255, blank=True)
 

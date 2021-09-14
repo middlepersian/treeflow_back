@@ -1,8 +1,6 @@
 from mpcd.codex.models.physical import CodexToken
 from rest_framework import serializers
-from .models import Codex, Folio, Side, Line
-from .models import Text, Chapter, Section, Sentence, Strophe, Verse
-from .models import Token, MorphologicalAnnotation
+from .models import Token
 from mpcd.dict.serializers import EntrySerializer
 from mpcd.dict.models import Entry
 
