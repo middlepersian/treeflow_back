@@ -1,1 +1,1 @@
-from .dictionary import *   
+from .dictionary import Dictionary, Lang, LoanWord, Translation, Category, Reference, Word, Definition, Entry

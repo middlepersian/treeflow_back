@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import IntegerRangeField
 from django.db import models
 from django.db.models.fields import CharField, URLField
 from django.urls import reverse
+from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
 
 
@@ -29,12 +30,12 @@ class LangCh(models.TextChoices):
 
 
 class CatCh(models.TextChoices):
-    leg = 'leg', 'legal'
-    eco = 'eco', 'economy'
-    the = 'the', 'theology'
-    rit = 'rit', 'ritual'
+    leg = 'legal', 'legal'
+    eco = 'econ', 'economy'
+    the = 'theo', 'theology'
+    rit = 'ritual', 'ritual'
     geo = 'geo', 'geography'
-    myt = 'myt', 'mythology'
+    myt = 'myth', 'mythology'
 
 
 class Lang(models.Model):
@@ -42,17 +43,6 @@ class Lang(models.Model):
 
     def __str__(self):
         return '{}'.format(self.language)
-
-
-class LoanWord(models. Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    word = models.CharField(unique=True, max_length=30, null=True)
-    language = models.ForeignKey(Lang, on_delete=models.CASCADE, null=True)
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return '{} - {}'.format(self.language, self.word)
-
 
 class Translation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -67,50 +57,38 @@ class Translation(models.Model):
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    category = models.CharField(max_length=5, choices=CatCh.choices, unique=True)
+    category = models.CharField(max_length=6, choices=CatCh.choices, unique=True)
 
     def __str__(self):
         return '{}'.format(self.category)
 
 
-class Author(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    name = models.CharField(max_length=20, null=True, blank=True)
-    lastname = models.CharField(max_length=20, null=True, blank=True)
-    # TODO create constrain name + lastname
-
-    def __str__(self):
-        return '{} {}'.format(self.name, self.lastname)
-
-
-class Book(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    title = models.CharField(max_length=100, blank=True)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, blank=True)
-    year = models.PositiveSmallIntegerField(blank=True, null=True)
-
-    def __str__(self):
-        return '{} {}'.format(self.title, self.author, self.year)
-
-
 class Reference(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, blank=True)
-    pages = IntegerRangeField(null=True, blank=True)
+    reference = models.CharField(unique=True, max_length=50, null=True, blank=True)
     url = URLField(null=True, blank=True)
 
     def __str__(self):
-        return '{} {}'.format(self.book, self.pages)
+        return '{}'.format(self.reference)
 
 
-class Lemma(models.Model):
+class Word(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    lemma = models.CharField(unique=True, max_length=50)
+    word = models.CharField(unique=True, max_length=50)
     language = models.ForeignKey(Lang, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return '{} {}'.format(self.language, self.lemma)
+        return '{} {}'.format(self.language, self.word)
 
+
+class LoanWord(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    word = models.CharField(unique=True, max_length=50)
+    language = models.ForeignKey(Lang, on_delete=models.CASCADE, null=True)
+    translation = models.ManyToManyField(Translation)
+
+    def __str__(self):
+        return '{} {}'.format(self.language, self.word)
 
 class Definition(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -124,14 +102,14 @@ class Definition(models.Model):
 class Entry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     dict = models.ForeignKey(Dictionary, on_delete=models.CASCADE, blank=True)
-    lemma = models.OneToOneField(Lemma, on_delete=models.CASCADE, related_name='entry_lemma')
-    loanword = models.ManyToManyField(LoanWord, blank=True)
+    lemma = models.OneToOneField(Word, on_delete=models.CASCADE, related_name='entry_lemma')
+    loanword = models.ForeignKey(LoanWord, on_delete=models.CASCADE, blank=True, null=True)
     translation = models.ManyToManyField(Translation, blank=True)
     definition = models.ManyToManyField(Definition, blank=True)
     category = models.ManyToManyField(Category, blank=True)
     literature = models.ManyToManyField(Reference, blank=True)
     comment = models.TextField(max_length=300, null=True, blank=True)
-    cross_reference = models.ManyToManyField(Lemma, related_name='entry_cross_reference', blank=True)
+    cross_reference = models.ManyToManyField(Word, related_name='entry_cross_reference', blank=True)
     history = HistoricalRecords()
 
     def _translation(self):
