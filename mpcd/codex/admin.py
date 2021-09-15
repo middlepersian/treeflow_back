@@ -1,7 +1,7 @@
 from mpcd.codex.models.logical import TokenContainer
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Codex, Folio, Side, Line, Text,  Section,  TokenContainer, MorphologicalAnnotation, Dependency, SyntacticAnnotation, Token, CodexToken, Feature, FeatureValue, Pos
+from .models import Codex, Folio, Side, Line, Text, TextSigle, Section,  TokenContainer, MorphologicalAnnotation, Dependency, SyntacticAnnotation, Token, CodexToken, Feature, FeatureValue, Pos
 
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
@@ -23,6 +23,7 @@ admin.site.register(Codex)
 admin.site.register(Folio)
 admin.site.register(Side)
 admin.site.register(Line)
+admin.site.register(TextSigle)
 admin.site.register(Text)
 admin.site.register(TokenContainer, TokenContainerHistoryAdmin)
 admin.site.register(Section)

@@ -2,20 +2,14 @@ import uuid as uuid_lib
 from django.db import models
 from django.urls import reverse
 from .physical import Codex, CodexToken
-from .token import Token
+from .sigle import TextSigle
 from simple_history.models import HistoricalRecords
-
-
-class TextSigle(models.TextChoices):
-    DMX = 'DMX', 'DMX'
-    ENN = 'ENN', 'ENN'
-
 
 
 class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
-    text_sigle = models.CharField(choices=TextSigle.choices, max_length=4, null=True)
+    text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=100, null=True)
     description = models.CharField(max_length=255, blank=True)
 
@@ -42,7 +36,8 @@ class Section(models.Model):
     section_type = models.CharField(max_length=3, choices=SECTION_TYPE, null=True)
     comment = models.CharField(max_length=255, blank=True)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, blank=True, null=True)
-    section_container = models.ForeignKey('self', null=True, on_delete=models.CASCADE, related_name='section', blank=True)
+    section_container = models.ForeignKey('self', null=True, on_delete=models.CASCADE,
+                                          related_name='section', blank=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -70,9 +65,8 @@ class TokenContainer(models.Model):
     tokens = models.ManyToManyField(CodexToken)
     history = HistoricalRecords()
 
-
     def get_tokens(self):
-        return "|".join([p.transcription for p in self.tokens.all()])    
+        return "|".join([p.transcription for p in self.tokens.all()])
 
     def __str__(self):
         return '{} {}'.format(self.container_type, self.section)
