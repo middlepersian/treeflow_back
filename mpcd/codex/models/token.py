@@ -25,50 +25,20 @@ class PosCh(models.TextChoices):
     VERB = "VERB", "VERB"
     X = "X", "X"
 
-class FeatureValueManager(models.Manager):
-    def get_by_natural_key(self, name):
-        return self.get(name=name)
-
 
 class FeatureValue(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     # e.g. 'Prs'
     name = models.CharField(max_length=20, unique=True)
-    objects = FeatureValueManager()
-
-    class Meta:
-        ordering = ('name',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name'], name='featurevalue'
-            )
-        ]
 
     def __str__(self):
         return '{}'.format(self.name)
-
-
-class FeatureManager(models.Manager):
-    def get_by_natural_key(self, name):
-        return self.get(name=name)
 
 
 class Feature(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     # e.g. "PronType"
     name = models.CharField(max_length=20, unique=True)
-
-    objects = FeatureManager()
-
-    class Meta:
-        ordering = ('name',)
-
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name'], name='feature'
-            )
-
-        ]
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -179,10 +149,8 @@ class Token(models.Model):
     avestan = models.URLField(max_length=100, null=True, blank=True)
     history = HistoricalRecords()
 
-
     def ms_features(self):
         return "|\n".join([p.feature.name + '=' + p.feature_value.name for p in self.features.all()])
 
     def __str__(self):
         return '{}'.format(self.transcription)
-
