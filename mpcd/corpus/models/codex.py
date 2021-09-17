@@ -1,15 +1,22 @@
+from mpcd.corpus.models.author import Author
 import uuid as uuid_lib
 
 from django.db import models
-from django.urls import reverse
 from simple_history.models import HistoricalRecords
 from .token import Token
+from .bibliography import BibEntry
+
 
 class Codex(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     description = models.CharField(max_length=255, blank=True)
+    scribe = models.ForeignKey(Author, on_delete=models.CASCADE)
+    library = models.CharField(max_length=100)
+    signature = models.CharField(max_length=100)
+    facsimile = models.ManyToManyField(BibEntry)
+
     history = HistoricalRecords()
 
     def __str__(self):
@@ -27,7 +34,6 @@ class Folio(models.Model):
         return '{}'.format(self.name)
 
 
-
 class Side(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100)
@@ -37,6 +43,7 @@ class Side(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.folio, self.name)
+
 
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -49,10 +56,11 @@ class Line(models.Model):
         return '{} {}'.format(self.side, self.number)
 
 
-## TODO: write constrain for position
+# TODO: write constrain for position
 class CodexToken(Token):
     line = models.ForeignKey(Line, on_delete=models.CASCADE)
     position = models.PositiveSmallIntegerField(null=True)
     history = HistoricalRecords()
+
     def __str__(self):
         return self.transcription
