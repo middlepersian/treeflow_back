@@ -147,6 +147,12 @@ class Token(models.Model):
     syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True, blank=True)
     comment = models.TextField(blank=True)
     avestan = models.URLField(max_length=100, null=True, blank=True)
+    previous = models.OneToOneField('self',
+                                    related_name='previous_token',
+                                    blank=True,
+                                    null=True,
+                                    on_delete=models.DO_NOTHING)
+
     history = HistoricalRecords()
 
     def ms_features(self):
