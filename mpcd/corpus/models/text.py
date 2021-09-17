@@ -31,7 +31,7 @@ class Text(models.Model):
 
     description = models.CharField(max_length=255, blank=True)
     resource = ForeignKey(Resource, on_delete=models.CASCADE, null=True, blank=True)
-    stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices)
+    stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

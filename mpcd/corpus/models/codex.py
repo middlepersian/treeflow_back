@@ -12,10 +12,10 @@ class Codex(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     description = models.CharField(max_length=255, blank=True)
-    scribe = models.ForeignKey(Author, on_delete=models.CASCADE)
-    library = models.CharField(max_length=100)
-    signature = models.CharField(max_length=100)
-    facsimile = models.ManyToManyField(BibEntry)
+    scribe = models.ForeignKey(Author, on_delete=models.CASCADE, blank=True, null=True)
+    library = models.CharField(max_length=100,  blank=True)
+    signature = models.CharField(max_length=100,  blank=True)
+    facsimile = models.ManyToManyField(BibEntry,  blank=True)
 
     history = HistoricalRecords()
 
