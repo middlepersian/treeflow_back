@@ -33,10 +33,7 @@ class Text(models.Model):
     resource = ForeignKey(Resource, on_delete=models.CASCADE, null=True, blank=True)
     stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    history = HistoricalRecords()
+    history = HistoricalRecords(inherit=True)
 
     class Meta:
         abstract = True
@@ -57,7 +54,7 @@ class Sentence(models.Model):
     tokens = models.ManyToManyField(Token)
 
     comment = models.CharField(max_length=255, blank=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(inherit=True)
 
     class Meta:
         abstract = True
@@ -87,8 +84,6 @@ class CodexSentence(Sentence):
 
     text = models.ForeignKey(CodexText, on_delete=models.CASCADE, null=True, blank=True)
     tokens = models.ManyToManyField(CodexToken)
-
-    history = HistoricalRecords()
 
 
 # EDITION_TEXT
