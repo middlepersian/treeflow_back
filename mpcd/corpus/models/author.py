@@ -20,3 +20,6 @@ class Author(models.Model):
                 fields=['name', 'last_name'], name='name_lastname'
             )
         ]
+
+    def __str__(self):
+        return '{} , {}'.format(self.last_name, self.name)
