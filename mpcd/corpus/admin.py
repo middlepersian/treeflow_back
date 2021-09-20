@@ -11,8 +11,8 @@ class TokenHistoryAdmin(SimpleHistoryAdmin):
 
 
 class CodexTokenHistoryAdmin(TokenHistoryAdmin):
-    list_display = ["transcription", "transliteration", "lemma", "pos",
-                    "ms_features", "syntax_annotations", "line_id", "position"]
+    list_display = ["transcription", "transliteration", 'previous', "previous_token","lemma", "pos",
+                    "ms_features", "syntax_annotations", "line", "position"]
 
 
 class TokenContainerHistoryAdmin(SimpleHistoryAdmin):
