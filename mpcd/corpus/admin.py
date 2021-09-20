@@ -1,6 +1,6 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Codex, Folio, Side, Line,  CodexText, EditionText, EditionSentence, CodexSentence, TextSigle, MorphologicalAnnotation, Dependency, SyntacticAnnotation,\
+from .models import Codex, Folio, Side, Line,  CodexText, Edition, EditionText, EditionSentence, CodexSentence, TextSigle, MorphologicalAnnotation, Dependency, SyntacticAnnotation,\
     Token, CodexToken, Feature, FeatureValue, Pos, Author, BibEntry
 
 
@@ -11,7 +11,7 @@ class TokenHistoryAdmin(SimpleHistoryAdmin):
 
 
 class CodexTokenHistoryAdmin(TokenHistoryAdmin):
-    list_display = ["transcription", "transliteration", 'previous', "previous_token","lemma", "pos",
+    list_display = ["transcription", "transliteration", 'previous', "previous_token", "lemma", "pos",
                     "ms_features", "syntax_annotations", "line", "position"]
 
 
@@ -26,6 +26,8 @@ admin.site.register(Codex)
 admin.site.register(Folio)
 admin.site.register(Side)
 admin.site.register(Line)
+
+admin.site.register(Edition)
 
 admin.site.register(TextSigle)
 admin.site.register(CodexText)
