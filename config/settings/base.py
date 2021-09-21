@@ -77,10 +77,9 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "mpcd.users.apps.UsersConfig",
 
-    #local apps
-    "mpcd.codex.apps.CodexAppConfig",
-    "mpcd.edition.apps.EditionAppConfig",
-    "mpcd.dict.apps.DictAppConfig"
+    # local apps
+    "mpcd.dict.apps.DictAppConfig",
+    "mpcd.corpus.apps.CorpusAppConfig"
 
 
 

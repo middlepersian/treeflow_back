@@ -60,7 +60,7 @@ class SigleID(models.TextChoices):
 
 
 class Genre(models.TextChoices):
-    ZAN = 'ZAN', "Zand"
+    ZAN = 'ZAN', "zand"
     PTE = 'PTE', "PT-epitomes"
     PTR = 'PTR', "PT-reworking"
     TEO = "TEO", "theological"
