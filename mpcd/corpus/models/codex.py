@@ -7,6 +7,28 @@ from .token import Token
 from .bibliography import BibEntry
 
 
+class CodexCh(models.TextChoices):
+    mk = 'MK', 'MK'
+    td1 = 'TD1', 'TD1'
+    td4a = 'TD4a', 'TD4a'
+    dh6 = 'DH6', 'DH6'
+    bk = 'BK', 'BK'
+    td2 = 'TD2', 'TD2'
+    mj = 'MJ', 'Minocher Jamaspji62(Dd)'
+    iol = 'IOL', 'IOL CCXXVIII (PRDd)'
+    b = 'B', 'B'
+    p = 'P', 'P'
+    m51 = 'M51', 'M51'
+    k20 = 'K20', 'K20'
+    k20b = 'K20b', 'K20b'
+    k27 = 'K27', 'K27'
+    k35 = 'K35', 'K35'
+    k43a = 'K43a', 'K43a'
+    k43b = 'K43b', 'K43b'
+    k26 = 'K26', 'K26'
+    msmdh = 'msMHD', 'MS of MHD'
+
+
 class Codex(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -34,21 +56,11 @@ class Folio(models.Model):
         return '{}'.format(self.name)
 
 
-class Side(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    name = models.CharField(max_length=100)
-    folio = models.ForeignKey(Folio, on_delete=models.CASCADE)
-    comment = models.CharField(max_length=255, blank=True)
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return '{} {}'.format(self.folio, self.name)
-
 
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.IntegerField()
-    side = models.ForeignKey(Side, on_delete=models.DO_NOTHING)
+    side = models.ForeignKey(Folio, on_delete=models.DO_NOTHING)
     comment = models.TextField(blank=True)
     history = HistoricalRecords()
 
