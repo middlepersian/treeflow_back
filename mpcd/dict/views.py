@@ -26,6 +26,8 @@ class WordViewSet(viewsets.ModelViewSet):
 class LoanWordViewSet(viewsets.ModelViewSet):
     queryset = LoanWord.objects.all()
     serializer_class = LoanWordSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['word','language__language']
     permission_classes = (IsAuthorOrReadOnly,)
 
 class LangViewSet(viewsets.ModelViewSet):
@@ -36,6 +38,8 @@ class LangViewSet(viewsets.ModelViewSet):
 class TranslationViewSet(viewsets.ModelViewSet):
     queryset = Translation.objects.all()
     serializer_class = TranslationSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['meaning','language__language']
     permission_classes = (IsAuthorOrReadOnly,)
 
 class CategoryViewSet(viewsets.ModelViewSet):
