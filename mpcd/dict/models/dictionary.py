@@ -106,7 +106,7 @@ class Entry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     dict = models.ForeignKey(Dictionary, on_delete=models.CASCADE, blank=True)
     lemma = models.OneToOneField(Word, on_delete=models.CASCADE, related_name='entry_lemma')
-    loanword = models.ForeignKey(LoanWord, on_delete=models.CASCADE, blank=True, null=True)
+    loanword = models.ForeignKey(LoanWord, on_delete=models.SET_NULL, blank=True, null=True)
     translation = models.ManyToManyField(Translation, blank=True)
     definition = models.ManyToManyField(Definition, blank=True)
     category = models.ManyToManyField(Category, blank=True)
