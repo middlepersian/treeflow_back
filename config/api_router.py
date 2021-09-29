@@ -2,7 +2,6 @@ from django.conf import settings
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
 from mpcd.users.api.views import UserViewSet
-from mpcd.codex.views import CodexTokenViewSet
 from mpcd.dict.views import DefinitionViewSet, EntryViewSet, DictionaryViewSet, LangViewSet, \
     ReferenceViewSet, TranslationViewSet, WordViewSet, LoanWordViewSet, CategoryViewSet
 
