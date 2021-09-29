@@ -1,20 +1,8 @@
 import uuid as uuid_lib
-from django.contrib.postgres.fields import IntegerRangeField
 from django.db import models
 from django.db.models.fields import CharField, URLField
-from django.urls import reverse
-from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
 
-
-class Dictionary(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=10)
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return self.name
 
 
 class LangCh(models.TextChoices):
@@ -24,8 +12,11 @@ class LangCh(models.TextChoices):
     ave = 'ave', 'Avestan'
     eng = 'eng', 'English'
     deu = 'deu', 'German'
+    fra = 'fra', 'French'
     grc = 'grc', 'Ancient Greek (to 1453)'
+    ita = 'ita', 'Italian'
     pal = 'pal', 'Pahlavi'
+    spa = 'spa', 'Spanish'
     xpr = 'xpr', 'Parthian'
 
 
@@ -38,11 +29,22 @@ class CatCh(models.TextChoices):
     myt = 'myth', 'mythology'
 
 
+
+class Dictionary(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=10)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return self.name
 class Lang(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     language = models.CharField(max_length=3, choices=LangCh.choices, unique=True)
 
     def __str__(self):
         return '{}'.format(self.language)
+
 
 class Translation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -89,6 +91,7 @@ class LoanWord(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.language, self.word)
+
 
 class Definition(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
