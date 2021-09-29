@@ -12,7 +12,7 @@ else:
     router = SimpleRouter()
 
 router.register("users", UserViewSet)
-router.register("codextokens", CodexTokenViewSet)
+
 
 ''' Dictionary API-Endpoints '''
 
