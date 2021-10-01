@@ -86,8 +86,8 @@ class Word(models.Model):
 class LoanWord(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     word = models.CharField(unique=True, max_length=50)
-    language = models.ForeignKey(Lang, on_delete=models.CASCADE, null=True)
-    translation = models.ManyToManyField(Translation)
+    language = models.ForeignKey(Lang, on_delete=models.CASCADE, null=True, blank=True)
+    translation = models.ManyToManyField(Translation, blank=True)
 
     def __str__(self):
         return '{} {}'.format(self.language, self.word)
