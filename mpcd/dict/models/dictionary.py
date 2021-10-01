@@ -67,7 +67,7 @@ class Category(models.Model):
 
 class Reference(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    reference = models.CharField(unique=True, max_length=50, null=True, blank=True)
+    reference = models.CharField(unique=True, max_length=300, null=True, blank=True)
     url = URLField(null=True, blank=True)
 
     def __str__(self):
