@@ -111,7 +111,7 @@ class Entry(models.Model):
     definition = models.ManyToManyField(Definition, blank=True)
     category = models.ManyToManyField(Category, blank=True)
     literature = models.ManyToManyField(Reference, blank=True)
-    comment = models.TextField(max_length=300, null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
     cross_reference = models.ManyToManyField(Word, related_name='entry_cross_reference', blank=True)
     history = HistoricalRecords()
 
