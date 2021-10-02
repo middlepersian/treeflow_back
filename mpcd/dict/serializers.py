@@ -1,26 +1,23 @@
 from rest_framework import serializers
-from drf_writable_nested.serializers import WritableNestedModelSerializer
-from .models import Entry, Dictionary, Lang, Translation, Category, Word, LoanWord, Reference, Definition
+from .models import Entry, Dictionary, Translation, Category, Word, LoanWord, Reference, Definition
+
+import logging
 
 
 class DictionarySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Dictionary
-        fields = ('pk', 'name', 'slug')
+        fields = ['id', 'slug']
+        extra_kwargs = {
+            'slug': {'validators': []}
+        }
 
 
-class LangSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Lang
-        fields = ('pk', 'language', )
-
-
-class TranslationSerializer(WritableNestedModelSerializer):
-    language = LangSerializer(allow_null=True)
-
+class TranslationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Translation
-        fields = ('pk', 'language', 'meaning')
+        fields = ['language', 'meaning']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -29,52 +26,61 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LoanWordSerializer(WritableNestedModelSerializer):
-    language = LangSerializer(allow_null=True)
+class LoanWordSerializer(serializers.ModelSerializer):
     translation = TranslationSerializer(many=True)
 
     class Meta:
         model = LoanWord
-        fields = ('pk', 'word', 'language', 'translation')
+        fields = ['word', 'language', 'translation']
 
 
 class ReferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reference
-        fields = ('pk', 'reference', 'url')
+        fields = ['reference', 'url']
 
 
-class DefinitionSerializer(WritableNestedModelSerializer):
-    language = LangSerializer(allow_null=True)
+class DefinitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Definition
-        fields = ('pk', 'definition', 'language')
+        fields = ['definition', 'language']
 
 
-class EntrySerializer(WritableNestedModelSerializer):
+class WordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Word
+        fields = ('id', 'word', 'language')
+        extra_kwargs = {
+            'word': {'validators': []}
+        }
+
+
+class EntrySerializer(serializers.ModelSerializer):
 
     dict = DictionarySerializer()
-    loanword = LoanWordSerializer(allow_null=True)
-    translation = TranslationSerializer(many=True)
-    definition = DefinitionSerializer(many=True)
-    category = CategorySerializer(many=True)
-    literature = ReferenceSerializer(many=True)
+    lemma = WordSerializer()
+    #lang = LangSerializer()
+    #loanword = LoanWordSerializer(allow_null=True)
+    #translation = TranslationSerializer(many=True)
+    #definition = DefinitionSerializer(many=True)
+    #category = CategorySerializer(many=True)
+    #literature = ReferenceSerializer(many=True)
     #cross_reference = WordSerializer(many=True)
+
+    def create(self, validated_data):
+
+        dict_data = validated_data.pop('dict')
+        lemma_data = validated_data.pop('lemma')
+
+        dict_instance = Dictionary.objects.get(**dict_data)
+        lemma_instance = Word.objects.create(**lemma_data)
+
+        entry_instance = Entry.objects.create(lemma=lemma_instance, dict=dict_instance)
+
+        return entry_instance
 
     class Meta:
         model = Entry
-        fields = ('pk', 'dict', 'loanword', 'translation', 'definition',
-                  'category', 'literature', 'comment', 'cross_reference')
-
-
-class WordSerializer(WritableNestedModelSerializer):
-
-    language = LangSerializer(allow_null=True)
-
-    # Reverse OneToOne relationship
-    entry = EntrySerializer()
-
-    class Meta:
-        model = Word
-        fields = ('pk', 'word', 'language', 'entry')
+        fields = ['id', 'dict', 'lemma']
+        

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Dictionary, Entry, Lang, Word, LoanWord, Translation, Category, Reference, Definition
+from .models import Dictionary, Entry, Word, LoanWord, Translation, Category, Reference, Definition
 
 
 
@@ -11,7 +11,6 @@ class EntryHistoryAdmin(SimpleHistoryAdmin):
 
 admin.site.register(Dictionary)
 admin.site.register(Entry, EntryHistoryAdmin)
-admin.site.register(Lang)
 admin.site.register(LoanWord)
 admin.site.register(Word)
 admin.site.register(Translation)
