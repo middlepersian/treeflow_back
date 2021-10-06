@@ -7,7 +7,6 @@ from .serializers import DefinitionSerializer, EntrySerializer, DictionarySerial
 from .permissions import IsAuthorOrReadOnly
 
 
-
 class DictionaryViewSet(viewsets.ModelViewSet):
     queryset = Dictionary.objects.all()
     serializer_class = DictionarySerializer
@@ -21,10 +20,11 @@ class EntryViewSet(viewsets.ModelViewSet):
         .select_related(
             'dict', 'lemma'
         ).prefetch_related(
-            'translations',
-            'definitions',
-            'categories',
-            'references'
+            'loanwords',
+            #  'translations',
+            #  'definitions',
+            #  'categories',
+            #  'references'
         )
     )
     serializer_class = EntrySerializer

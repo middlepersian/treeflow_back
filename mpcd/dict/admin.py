@@ -5,9 +5,9 @@ from .models import Dictionary, Entry, Word, LoanWord, Translation, Category, Re
 
 
 class EntryHistoryAdmin(SimpleHistoryAdmin):
-    list_display = [ "lemma", "_translation"]
+    list_display = [ "lemma",]
     history_list_display = ["lemma"]
-    search_fields = ["lemma", "_translation"]
+    search_fields = ["lemma",]
 
 admin.site.register(Dictionary)
 admin.site.register(Entry, EntryHistoryAdmin)

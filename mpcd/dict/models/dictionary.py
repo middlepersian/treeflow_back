@@ -1,6 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-from django.db.models.fields import CharField, URLField
+from django.db.models.fields import CharField, TextField, URLField
 from simple_history.models import HistoricalRecords
 
 
@@ -57,7 +57,7 @@ class Lang(models.Model):
 class Translation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     language = models.CharField(max_length=3, choices=LangCh.choices, blank=True, null=True)
-    meaning = models.CharField(unique=True, max_length=50)
+    meaning = models.TextField(unique=True)
 
     history = HistoricalRecords()
 
@@ -67,7 +67,7 @@ class Translation(models.Model):
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    category = models.CharField(max_length=8, choices=CatCh.choices, unique=True)
+    category = models.CharField(max_length=10, choices=CatCh.choices, unique=True)
 
     def __str__(self):
         return '{}'.format(self.category)
@@ -75,7 +75,7 @@ class Category(models.Model):
 
 class Reference(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    reference = models.CharField(unique=True, max_length=300, null=True, blank=True)
+    reference = models.CharField(unique=True, max_length=350, null=True, blank=True)
     url = URLField(null=True, blank=True)
 
     def __str__(self):
@@ -84,7 +84,7 @@ class Reference(models.Model):
 
 class Word(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    word = models.CharField(unique=True, max_length=50)
+    word = models.CharField(unique=True, max_length=100)
     language = models.CharField(max_length=3, choices=LangCh.choices, blank=True, null=True)
 
     def __str__(self):
@@ -103,7 +103,7 @@ class LoanWord(models.Model):
 
 class Definition(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    definition = CharField(unique=True, max_length=350, null=True, blank=True)
+    definition = TextField(unique=True, null=True, blank=True)
     language = models.CharField(max_length=3, choices=LangCh.choices, blank=True, null=True)
 
     def __str__(self):
