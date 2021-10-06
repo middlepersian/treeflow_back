@@ -112,10 +112,8 @@ class LoanWordSerializer(serializers.ModelSerializer):
 
 class ReferenceSerializer(serializers.ModelSerializer):
 
-    category = serializers.CharField(max_length=10)
-
     def create(self, validated_data):
-        return Category.create(**validated_data)
+        return Reference.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.reference = validated_data.get('reference', instance.reference)
@@ -170,11 +168,11 @@ class EntrySerializer(serializers.ModelSerializer):
     dict = DictionarySerializer()
     lemma = WordSerializer()
     loanwords = LoanWordSerializer(required=False, many=True, partial=True)
-    #translations = TranslationSerializer(required=False, many=True, partial=True)
-    # definitions = DefinitionSerializer(many=True, partial=True)
-    # categories = CategorySerializer(many=True, partial=True)
-    # references = ReferenceSerializer(many=True, partial=True)
-    # comment = serializers.JSONField(required=False)
+    translations = TranslationSerializer(required=False, many=True, partial=True)
+    definitions = DefinitionSerializer(many=True, partial=True)
+    categories = CategorySerializer(many=True, partial=True)
+    references = ReferenceSerializer(many=True, partial=True)
+    comment = serializers.CharField(required=False, allow_blank=True)
 
     def create(self, validated_data):
 
@@ -182,10 +180,10 @@ class EntrySerializer(serializers.ModelSerializer):
         lemma_data = validated_data.pop('lemma')
 
         loanwords_data = validated_data.pop('loanwords')
-        # translations_data = validated_data.pop('translations')
-        # definitions_data = validated_data.pop('definitions')
-        # categories_data = validated_data.pop('categories')
-        # references_data = validated_data.pop('references')
+        translations_data = validated_data.pop('translations')
+        definitions_data = validated_data.pop('definitions')
+        categories_data = validated_data.pop('categories')
+        references_data = validated_data.pop('references')
 
         dict_instance = Dictionary.objects.get(**dict_data)
         lemma_instance, created = Word.objects.get_or_create(**lemma_data)
@@ -204,7 +202,7 @@ class EntrySerializer(serializers.ModelSerializer):
             # if not, create it
             except LoanWord.DoesNotExist:
                 logger.error('loanword does not exist')
-            
+
                 translats = []
                 if loanword.get('translations'):
                     logger.error('TRANS: {}'.format(loanword.get('translations')))
@@ -212,12 +210,11 @@ class EntrySerializer(serializers.ModelSerializer):
                     for translation in translation_data:
                         try:
                             trans = Translation.objects.get(**translation)
-                            #translats.append(trans)
+                            # translats.append(trans)
                         except Translation.DoesNotExist:
                             logger.error('translation does not exist')
                             trans = Translation.objects.create(**translation)
                             translats.append(trans)
-
 
                 if translats:
                     loan_word_instance = LoanWord.objects.create(**loanword)
@@ -230,20 +227,21 @@ class EntrySerializer(serializers.ModelSerializer):
 
         # logger.error('CREATE {}'.format(lw))
 
-        '''
         for translation in translations_data:
-            entry_instance.translations.create(**translation)
+            translat, translat_created = Translation.objects.get_or_create(**translation)
+            entry_instance.translations.add(translat)
 
         for definition in definitions_data:
-            entry_instance.definitions.create(**definition)
+            defin, defin_created = Definition.objects.get_or_create(**definition)
+            entry_instance.definitions.add(defin)
 
         for category in categories_data:
-            cat = Category.objects.get(**category)
+            cat, cat_created = Category.objects.get_or_create(**category)
             entry_instance.categories.add(cat)
 
         for reference in references_data:
-            entry_instance.references.create(**reference)
-        '''
+            ref, ref_created = Reference.objects.get_or_create(**reference)
+            entry_instance.references.add(ref)
 
         return entry_instance
 
@@ -276,6 +274,5 @@ class EntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Entry
-        fields = ['id', 'dict', 'lemma', 'loanwords']
-
-        # 'translations', 'definitions', 'categories', 'references', 'comment']
+        fields = ['id', 'dict', 'lemma', 'loanwords', 'translations',
+                  'definitions', 'categories', 'references', 'comment']

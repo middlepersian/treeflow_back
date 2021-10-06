@@ -10,7 +10,7 @@ from .permissions import IsAuthorOrReadOnly
 class DictionaryViewSet(viewsets.ModelViewSet):
     queryset = Dictionary.objects.all()
     serializer_class = DictionarySerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
 
 class EntryViewSet(viewsets.ModelViewSet):
@@ -21,14 +21,14 @@ class EntryViewSet(viewsets.ModelViewSet):
             'dict', 'lemma'
         ).prefetch_related(
             'loanwords',
-            #  'translations',
-            #  'definitions',
-            #  'categories',
-            #  'references'
-        )
+            'translations',
+            'definitions',
+            'categories',
+            'references'
+        ).order_by('lemma')
     )
     serializer_class = EntrySerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
 
 class WordViewSet(viewsets.ModelViewSet):
@@ -36,7 +36,7 @@ class WordViewSet(viewsets.ModelViewSet):
     serializer_class = WordSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['word', 'language']
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
 
 class LoanWordViewSet(viewsets.ModelViewSet):
@@ -44,7 +44,7 @@ class LoanWordViewSet(viewsets.ModelViewSet):
     serializer_class = LoanWordSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['word', 'language']
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def create(self, request):
         is_many = isinstance(request.data, list)
@@ -60,7 +60,7 @@ class TranslationViewSet(viewsets.ModelViewSet):
     serializer_class = TranslationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['meaning', 'language']
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def create(self, request):
         is_many = isinstance(request.data, list)
@@ -74,7 +74,7 @@ class TranslationViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def create(self, request):
         is_many = isinstance(request.data, list)
@@ -88,7 +88,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class DefinitionViewSet(viewsets.ModelViewSet):
     queryset = Definition.objects.all()
     serializer_class = DefinitionSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def create(self, request):
         is_many = isinstance(request.data, list)
@@ -102,7 +102,7 @@ class DefinitionViewSet(viewsets.ModelViewSet):
 class ReferenceViewSet(viewsets.ModelViewSet):
     queryset = Reference.objects.all()
     serializer_class = ReferenceSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def create(self, request):
         is_many = isinstance(request.data, list)
