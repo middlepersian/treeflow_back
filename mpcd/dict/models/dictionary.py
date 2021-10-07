@@ -107,7 +107,7 @@ class Definition(models.Model):
     language = models.CharField(max_length=3, choices=LangCh.choices, blank=True, null=True)
 
     def __str__(self):
-        return '{} {}'.format(self.language, self.definition)
+        return '{}'.format(self.definition)
 
 
 class Entry(models.Model):
