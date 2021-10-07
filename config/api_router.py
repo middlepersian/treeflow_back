@@ -22,9 +22,12 @@ router.register("translations", TranslationViewSet)
 router.register("categories",CategoryViewSet)
 router.register("ref",ReferenceViewSet)
 router.register("def",DefinitionViewSet)
-router.register("entries", EntryViewSet)
-router.register("dicts", DictionaryViewSet)
+router.register("entries", EntryViewSet, basename='entry')
+router.register("dicts", DictionaryViewSet, basename='dict')
 
 
 app_name = "api"
 urlpatterns = router.urls
+
+
+

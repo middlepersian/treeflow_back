@@ -174,6 +174,11 @@ class EntrySerializer(serializers.ModelSerializer):
     references = ReferenceSerializer(many=True, partial=True)
     comment = serializers.CharField(required=False, allow_blank=True)
 
+    class Meta:
+        model = Entry
+        fields = ['id', 'dict', 'lemma', 'loanwords', 'translations',
+                  'definitions', 'categories', 'references', 'comment']
+
     def create(self, validated_data):
 
         dict_data = validated_data.pop('dict')
@@ -272,7 +277,15 @@ class EntrySerializer(serializers.ModelSerializer):
 
         return instance
 
-    class Meta:
-        model = Entry
-        fields = ['id', 'dict', 'lemma', 'loanwords', 'translations',
-                  'definitions', 'categories', 'references', 'comment']
+    '''
+    @staticmethod
+    def setup_eager_loading(queryset):
+        # select_related for 'to-one' relationships
+        queryset = queryset.select_related('dict')
+        queryset = queryset.select_related('lemma')
+
+        # prefetch_related for 'to-many' relationships
+        queryset = queryset.prefetch_related('entrans', 'entrans__language', 'entrans__meaning')
+        queryset = queryset.prefetch_related('endef', 'endef__language', 'endef__definition') 
+        return queryset
+    '''

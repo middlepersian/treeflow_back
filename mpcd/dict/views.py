@@ -5,6 +5,15 @@ from .models import Entry, Dictionary, Word, LoanWord
 from .serializers import DefinitionSerializer, EntrySerializer, DictionarySerializer, ReferenceSerializer, WordSerializer, \
     LoanWordSerializer, TranslationSerializer, CategorySerializer
 from .permissions import IsAuthorOrReadOnly
+from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
+
+
+# import the logging library
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class DictionaryViewSet(viewsets.ModelViewSet):
@@ -15,20 +24,21 @@ class DictionaryViewSet(viewsets.ModelViewSet):
 
 class EntryViewSet(viewsets.ModelViewSet):
 
-    queryset = (
-        Entry.objects
-        .select_related(
-            'dict', 'lemma'
-        ).prefetch_related(
-            'loanwords',
-            'translations',
-            'definitions',
-            'categories',
-            'references'
-        ).order_by('lemma')
-    )
+    def get_queryset(self):
+
+        queryset = Entry.objects.all()
+        queryset = queryset.select_related('dict')
+        queryset = queryset.select_related('lemma')
+        queryset = queryset.prefetch_related('loanwords', 'loanwords__translations')
+        queryset = queryset.prefetch_related('translations')
+        queryset = queryset.prefetch_related('definitions')
+        queryset = queryset.prefetch_related('categories')
+        queryset = queryset.prefetch_related('references')
+        return queryset
+
     serializer_class = EntrySerializer
     permission_classes = (IsAuthorOrReadOnly,)
+    # queryset = get_queryset()
 
 
 class WordViewSet(viewsets.ModelViewSet):

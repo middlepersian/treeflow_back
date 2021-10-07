@@ -1,6 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-from django.db.models.fields import CharField, TextField, URLField
+from django.db.models.fields import CharField, TextField, URLField, related
 from simple_history.models import HistoricalRecords
 
 
@@ -113,7 +113,7 @@ class Definition(models.Model):
 class Entry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     dict = models.ForeignKey(Dictionary, on_delete=models.CASCADE, blank=True)
-    lemma = models.OneToOneField(Word, on_delete=models.CASCADE, related_name='entry_lemma')
+    lemma = models.OneToOneField(Word, on_delete=models.CASCADE)
     loanwords = models.ManyToManyField(LoanWord, blank=True)
     translations = models.ManyToManyField(Translation, blank=True)
     definitions = models.ManyToManyField(Definition, blank=True)
@@ -122,36 +122,6 @@ class Entry(models.Model):
     comment = models.TextField(null=True, blank=True)
 
     history = HistoricalRecords()
-
-
-    def _loanwords(self):
-        loans = []
-        for p in self.loanwords.all():
-            if p.language:
-                lang = p.language
-                loans.append(lang)
-            if p.word:
-                loanword = p.word
-                loans.append(loanword)
-            if p.translations:
-                trans = " - \n".join([t.meaning for t in p.translations.all()])
-                loans.append(trans)
-
-        return " |\n".join([p for p in loans])
-
-    def _translations(self):
-        return " |\n".join([p.meaning for p in self.translations.all()])
-
-    def _definitions(self):
-        return " |\n".join([p.definition for p in self.definitions.all()])    
-
-    def _categories(self):
-        return " |\n".join([p.category for p in self.categories.all()])       
-
-    def _references(self):
-        return " |\n".join([p.reference for p in self.references.all()])    
-
-
 
     def __str__(self):
         return '{}'.format(self.lemma)
