@@ -65,7 +65,7 @@ class WordHistoryAdmin(SimpleHistoryAdmin):
 
 class LoanWordHistoryAdmin(SimpleHistoryAdmin):
     fields = ["language", "word", "translations"]
-    list_display = ["language", "word", "_translations"]
+    list_display = [ "word", "_translations", "language",]
     history_list_display = ["language", "word", ]
     search_fields = ["word", "translations__meaning"]
 
