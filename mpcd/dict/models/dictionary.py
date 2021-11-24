@@ -1,6 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-from django.db.models.fields import CharField, TextField, URLField, related
+from django.db.models.fields import TextField, URLField
 from simple_history.models import HistoricalRecords
 
 

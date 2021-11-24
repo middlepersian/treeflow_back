@@ -1,8 +1,6 @@
-from typing import Mapping
 
 from django.db import models
 from .author import Author
-
 
 class BibEntry(models.Model):
     authors = models.ManyToManyField(Author)
