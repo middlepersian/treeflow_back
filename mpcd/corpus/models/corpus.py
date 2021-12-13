@@ -50,8 +50,8 @@ class Text(models.Model):
     stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
     # in corpus.rng a text can have as source a single "edition" or a single "codex". We will leave it a bit more flexible.
-    codex_source = models.ManyToManyField(Codex, null=True, blank=True)
-    edition_source = models.ManyToManyField(Edition,  null=True, blank=True)
+    codex_source = models.ManyToManyField(Codex,  blank=True)
+    edition_source = models.ManyToManyField(Edition,  blank=True)
 
     history = HistoricalRecords(inherit=True)
 
