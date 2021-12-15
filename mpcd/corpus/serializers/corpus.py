@@ -1,17 +1,71 @@
+from functools import partial
 from app_backend.mpcd.corpus.models import corpus
+from app_backend.mpcd.corpus.serializers.sigle import SigleSerializer
 from app_backend.mpcd.corpus.serializers.token import TokenSerializer
-from ..models import Author
+from app_backend.mpcd.corpus.serializers.author import AuthorSerializer
+from app_backend.mpcd.corpus.serializers.codex import CodexSerializer
+from app_backend.mpcd.corpus.serializers.edition import EditionSerializer
+from ..models import Sigle, Corpus, Resource, Text, Sentence, Author
 from rest_framework import serializers
-from ..models import Resource, Text, Sentence
 
+# import the logging library
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
+class CorpusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Corpus
+        fields = ['id', 'name', 'slug']
 
 class ResourceSerializer(serializers.ModelSerializer):
+
+    authors = AuthorSerializer()
+
+    def create(self, validated_data):
+        authors_data = validated_data.pop('authors')
+        resource_instance, resource_created = Resource.objects.get_or_create(**validated_data)
+
+        for author in authors_data:
+            author_instance, author_created = Author.objects.get_or_create(**author)
+            resource_instance.authors.add(author_instance)
+
+        return resource_instance
+
+    def update(self, instance, validated_data):
+
+        authors_data = validated_data.pop('authors')
+
+        if authors_data:
+            logger.error('UPDATE {}'.format(authors_data))
+            for author in authors_data:
+                instance.authors.get_or_create(**author)
+        else:
+            for author in authors_data:
+                instance.authors.create(**author)
+    
+        instance.save()
+        return instance
     class Meta:
-        model = Author
+        model = Resource
         fields = ['id', 'author', 'project', 'reference']
 
 
 class TextSerializer(serializers.ModelSerializer):
+
+    corpus = serializers.SlugRelatedField(
+        queryset=Corpus.objects.all(),
+        read_only=True,
+        slug_field='slug'
+     )
+
+    text_sigle = SigleSerializer()
+    editor = AuthorSerializer(many=True, partial=True)
+    collaborator = AuthorSerializer(many=True, partial=True)
+    resource = ResourceSerializer(partial=True)
+
+    codex_source = CodexSerializer()
+    edition_source = EditionSerializer()
 
     class Meta:
         model = Text
