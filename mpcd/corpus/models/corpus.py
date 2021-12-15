@@ -30,7 +30,7 @@ class StageCh(models.TextChoices):
 
 class Resource(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True, blank=True)
+    authors = models.ManyToManyField(Author, blank=True)
     description = models.TextField(blank=True)
     project = models.TextField(blank=True)
     reference = models.URLField(blank=True, null=True)

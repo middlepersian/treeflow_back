@@ -55,8 +55,6 @@ class Folio(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
-
-
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.IntegerField()
