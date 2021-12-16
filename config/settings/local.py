@@ -65,3 +65,7 @@ INSTALLED_APPS += ["django_extensions"]
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}

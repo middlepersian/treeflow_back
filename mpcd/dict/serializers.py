@@ -142,13 +142,13 @@ class EntrySerializer(serializers.ModelSerializer):
         references_data = validated_data.pop('references')
 
         dict_instance = Dictionary.objects.get(**dict_data)
-        lemma_instance, created = Word.objects.get_or_create(**lemma_data)
-
-        entry_instance, created = Entry.objects.get_or_create(
+        lemma_instance, lemma_created = Word.objects.get_or_create(**lemma_data)
+        entry_instance, entry_created = Entry.objects.get_or_create(
             lemma=lemma_instance, dict=dict_instance, **validated_data)
 
-        for loanword in loanwords_data:
 
+        ## loanword is treated differently due to the pointer to translation inside this model
+        for loanword in loanwords_data:
             word_data = loanword.get('word')
             logger.error('WORD DATA {} {}'.format(word_data, type(word_data)))
 
@@ -215,6 +215,7 @@ class EntrySerializer(serializers.ModelSerializer):
         lemma.language = lemma_data.get('language', lemma.language)
         lemma.save()
 
+        ## TODO check if this works with translations
         loanwords_data = validated_data.pop('loanwords')
         if loanwords_data:
             logger.error('UPDATE {}'.format(loanwords_data))

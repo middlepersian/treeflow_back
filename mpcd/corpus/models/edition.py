@@ -9,7 +9,7 @@ from simple_history.models import HistoricalRecords
 class Edition(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    author = models.ManyToManyField(Author, blank=True)
+    authors = models.ManyToManyField(Author, blank=True)
     references = models.ManyToManyField(BibEntry, blank=True)
     text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True)
 
