@@ -1,6 +1,3 @@
-from rest_framework.fields import flatten_choices_dict
-
-from app_backend.mpcd.corpus.models import codex
 from ..models import Codex, Folio, Line, Author, BibEntry
 from rest_framework import serializers
 from . import AuthorSerializer, BibEntrySerializer

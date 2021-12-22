@@ -1,7 +1,7 @@
-from ..models import Sigle
+from ..models import TextSigle
 from rest_framework import serializers
 
-class SigleSerializer(serializers.ModelSerializer):
+class TextSigleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Sigle
+        model = TextSigle
         fields = ['sigle', 'genre']

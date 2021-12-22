@@ -1,11 +1,9 @@
-from functools import partial
-from app_backend.mpcd.corpus.models import corpus
-from app_backend.mpcd.corpus.serializers.sigle import SigleSerializer
-from app_backend.mpcd.corpus.serializers.token import TokenSerializer
-from app_backend.mpcd.corpus.serializers.author import AuthorSerializer
-from app_backend.mpcd.corpus.serializers.codex import CodexSerializer
-from app_backend.mpcd.corpus.serializers.edition import EditionSerializer
-from ..models import Sigle, Corpus, Resource, Text, Sentence, Author
+from .sigle import TextSigleSerializer
+from .token import TokenSerializer
+from .author import AuthorSerializer
+from .codex import CodexSerializer
+from .edition import EditionSerializer
+from ..models import Corpus, Resource, Text, Sentence, Author
 from rest_framework import serializers
 
 # import the logging library
@@ -13,10 +11,12 @@ import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+
 class CorpusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Corpus
         fields = ['id', 'name', 'slug']
+
 
 class ResourceSerializer(serializers.ModelSerializer):
 
@@ -43,9 +43,10 @@ class ResourceSerializer(serializers.ModelSerializer):
         else:
             for author in authors_data:
                 instance.authors.create(**author)
-    
+
         instance.save()
         return instance
+
     class Meta:
         model = Resource
         fields = ['id', 'author', 'project', 'reference']
@@ -53,13 +54,8 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 class TextSerializer(serializers.ModelSerializer):
 
-    corpus = serializers.SlugRelatedField(
-        queryset=Corpus.objects.all(),
-        read_only=True,
-        slug_field='slug'
-     )
-
-    text_sigle = SigleSerializer()
+    corpus = CorpusSerializer()
+    text_sigle = TextSigleSerializer()
     editor = AuthorSerializer(many=True, partial=True)
     collaborator = AuthorSerializer(many=True, partial=True)
     resource = ResourceSerializer(partial=True)
@@ -69,7 +65,7 @@ class TextSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Text
-        fields = ['id', 'name', 'text_sigle', 'description', 'resource', 'stage']
+        fields = ['id', 'corpus', 'title', 'text_sigle', 'editor', 'collaborator', 'resource', 'stage', 'codex_source', 'edition_source']
 
 
 class SentenceSerializer(serializers.ModelSerializer):

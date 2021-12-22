@@ -1,8 +1,8 @@
 from ..models import Edition, BibEntry, Author, TextSigle, Codex
 from rest_framework import serializers
-from app_backend.mpcd.corpus.serializers.author import AuthorSerializer
-from app_backend.mpcd.corpus.serializers.bibliography import BibEntrySerializer
-from app_backend.mpcd.corpus.serializers.sigle import TextSigleSerializer
+from .author import AuthorSerializer
+from .bibliography import BibEntrySerializer
+from .sigle import TextSigleSerializer
 
 # import the logging library
 import logging

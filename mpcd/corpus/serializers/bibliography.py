@@ -1,6 +1,7 @@
-from ..models import BibEntry, Author
 from rest_framework import serializers
-from . import AuthorSerializer
+from .author import AuthorSerializer
+from ..models import BibEntry, Author
+
 
 # import the logging library
 import logging
