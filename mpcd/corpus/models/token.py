@@ -1,10 +1,8 @@
 import uuid as uuid_lib
-
 from django.db import models
-from django.urls import reverse
 from mpcd.dict.models.dictionary import Entry
 from simple_history.models import HistoricalRecords
-
+from django.contrib import admin
 
 class PosCh(models.TextChoices):
     ADJ = 'ADJ', 'ADJ'
@@ -115,14 +113,6 @@ class Dependency(models.Model):
         return '{} {}'.format(str(self.head), self.rel)
 
 
-class SyntacticAnnotation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    dependency = models.ForeignKey(Dependency, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return '{}'.format(self.dependency)
-
-
 class Pos(models.Model):
     pos = models.CharField(max_length=6, choices=PosCh.choices, unique=True)
 
@@ -141,10 +131,10 @@ class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True)
+    lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True, related_name='lemma_token')
     pos = models.ForeignKey(Pos, on_delete=models.CASCADE, null=True)
-    features = models.ManyToManyField(MorphologicalAnnotation, blank=True)
-    syntax_annotations = models.ForeignKey(SyntacticAnnotation, on_delete=models.CASCADE, null=True, blank=True)
+    morphological_annotation = models.ManyToManyField(MorphologicalAnnotation, blank=True)
+    syntactic_annotation = models.ManyToManyField(Dependency, blank=True)
     comment = models.TextField(blank=True)
     avestan = models.URLField(max_length=100, null=True, blank=True)
     previous = models.OneToOneField('self',
@@ -156,7 +146,11 @@ class Token(models.Model):
     history = HistoricalRecords()
 
     def ms_features(self):
-        return "|\n".join([p.feature.name + '=' + p.feature_value.name for p in self.features.all()])
+        return "|\n".join([p.feature.name + '=' + p.feature_value.name for p in self.morphological_annotation.all()])
 
     def __str__(self):
         return '{}'.format(self.transcription)
+
+
+class TokenAdmin(admin.ModelAdmin):
+    raw_id_fields = ['lemma' ] 

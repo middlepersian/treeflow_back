@@ -7,7 +7,7 @@ from ..permissions import IsAuthorOrReadOnly
 class CodexViewSet(viewsets.ModelViewSet):
     queryset = Codex.objects.all()
     serializer_class = CodexSerializer
-    search_fields = ['name', 'slug', 'description', 'scribe', 'library', 'signature', 'facisimile']
+    search_fields = ['name', 'slug', 'description', 'scribe', 'library', 'signature', 'facsimile']
     permission_classes = (IsAuthorOrReadOnly,)
 
 

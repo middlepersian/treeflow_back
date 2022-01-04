@@ -1,4 +1,4 @@
-from .token import MorphologicalAnnotation, Dependency, SyntacticAnnotation, Feature, FeatureValue, Pos, Token
+from .token import MorphologicalAnnotation, Dependency, Feature, FeatureValue, Pos, Token, TokenAdmin
 from .sigle import TextSigle
 from .corpus import Corpus, Resource, Text, Sentence
 from .edition import Edition

@@ -2,20 +2,22 @@ from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Codex, Folio, Line, Edition, TextSigle, \
     Corpus, Resource, Text, Sentence,\
-    MorphologicalAnnotation, Dependency, SyntacticAnnotation,\
-    Token, CodexToken, Feature, FeatureValue, Pos, Author, BibEntry
+    MorphologicalAnnotation, Dependency,\
+    Token, TokenAdmin, CodexToken, Feature, FeatureValue, Pos, Author, BibEntry
 4
 
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ["transcription", "transliteration", "lemma", "pos", "ms_features", "syntax_annotations"]
+    raw_id_fields = ['lemma' ] 
+    list_display = ["transcription", "transliteration", "pos",
+                    "ms_features", "comment", "previous"]
     history_list_display = ["pos"]
     search_fields = ['transcription', 'comment']
 
 
 class CodexTokenHistoryAdmin(TokenHistoryAdmin):
     list_display = ["transcription", "transliteration", 'previous', "previous_token", "lemma", "pos",
-                    "ms_features", "syntax_annotations", "line", "position"]
+                    "ms_features", "line", "position"]
 
 
 class BibEntryHistoryAdmin(SimpleHistoryAdmin):
@@ -43,4 +45,3 @@ admin.site.register(Feature)
 admin.site.register(FeatureValue)
 admin.site.register(Pos)
 admin.site.register(Dependency)
-admin.site.register(SyntacticAnnotation)

@@ -13,6 +13,21 @@ logger = logging.getLogger(__name__)
 
 
 class CorpusSerializer(serializers.ModelSerializer):
+
+    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+
+    def create(self, validated_data):
+        return Corpus.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.id = validated_data.get('id', instance.id)
+        instance.name = validated_data.get('name', instance.name)
+        instance.slug = validated_data.get('slug', instance.slug)
+        instance.save()
+        return instance
+
     class Meta:
         model = Corpus
         fields = ['id', 'name', 'slug']
@@ -49,23 +64,34 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resource
-        fields = ['id', 'author', 'project', 'reference']
+        fields = ['id', 'authors', 'project', 'reference']
 
 
 class TextSerializer(serializers.ModelSerializer):
 
-    corpus = CorpusSerializer()
+    corpus = CorpusSerializer(partial=True)
     text_sigle = TextSigleSerializer()
-    editor = AuthorSerializer(many=True, partial=True)
-    collaborator = AuthorSerializer(many=True, partial=True)
-    resource = ResourceSerializer(partial=True)
+    editor = AuthorSerializer(many=True, partial=True, allow_null=True)
+    collaborator = AuthorSerializer(many=True, partial=True, allow_null=True)
+    resource = ResourceSerializer(partial=True, allow_null=True)
 
-    codex_source = CodexSerializer()
-    edition_source = EditionSerializer()
+    codex_source = CodexSerializer(allow_null=True, partial=True)
+    edition_source = EditionSerializer(allow_null=True, partial=True)
+
+    def create(self, validated_data):
+        corpus_data = validated_data.pop('corpus')
+        text_sigle_data = validated_data.pop('text_sigle')
+        editor_data = validated_data.pop('editor')
+        collaborator_data = validated_data.pop('collaborator')
+        resource_data = validated_data.pop('resource')
+
+        text_instance, text_created = Text.objects.create(
+            corpus=corpus_data, text_sigle=text_sigle_data, editor=editor_data, collaborator=collaborator_data, resource=resource_data, **validated_data)
 
     class Meta:
         model = Text
-        fields = ['id', 'corpus', 'title', 'text_sigle', 'editor', 'collaborator', 'resource', 'stage', 'codex_source', 'edition_source']
+        fields = ['id', 'corpus', 'title', 'text_sigle', 'editor',
+                  'collaborator', 'resource', 'stage', 'codex_source', 'edition_source']
 
 
 class SentenceSerializer(serializers.ModelSerializer):

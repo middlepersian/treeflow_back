@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from ..models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, SyntacticAnnotation, Pos, Token
-from ..serializers import FeatureValueSerializer, FeatureSerializer, MorphologicalAnnotationSerializer, DependencySerializer, SyntacticAnnotationSerializer, PosSerializer, TokenSerializer
+from ..models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, Pos, Token
+from ..serializers import FeatureValueSerializer, FeatureSerializer, MorphologicalAnnotationSerializer, DependencySerializer, PosSerializer, TokenSerializer
 from ..permissions import IsAuthorOrReadOnly
 
 
@@ -32,13 +32,6 @@ class DependencyViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
 
 
-class SyntacticAnnotationViewSet(viewsets.ModelViewSet):
-    queryset = SyntacticAnnotation.objects.all()
-    serializer_class = SyntacticAnnotationSerializer
-    search_fields = ['dependency']
-    permission_classes = (IsAuthorOrReadOnly,)
-
-
 class PosViewSet(viewsets.ModelViewSet):
     queryset = Pos.objects.all()
     serializer_class = PosSerializer
@@ -47,8 +40,18 @@ class PosViewSet(viewsets.ModelViewSet):
 
 
 class TokenViewSet(viewsets.ModelViewSet):
-    queryset = Token.objects.all()
+
+    def get_queryset(self):
+        queryset = Token.objects.all()
+        queryset = queryset.prefetch_related('lemma')
+        queryset = queryset.select_related('pos')
+        queryset = queryset.prefetch_related('morphological_annotation')
+        queryset = queryset.prefetch_related('syntactic_annotation')
+        queryset = queryset.select_related('previous')
+
+        return queryset
+
     serializer_class = TokenSerializer
     search_fields = ['transcription', 'transliteration', 'lemma',
-                     'pos', 'features', 'syntax_annotations', 'comment', 'previous']
+                     'pos', 'morphological_annotation', 'syntactic_annotation', 'comment', 'previous']
     permission_classes = (IsAuthorOrReadOnly,)

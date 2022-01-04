@@ -60,7 +60,7 @@ class CodexSerializer(serializers.ModelSerializer):
         return instance
     class Meta:
         model = Codex
-        fields = ['name', 'slug', 'description', 'scribe', 'library', 'signature', 'facisimile']
+        fields = ['name', 'slug', 'description', 'scribe', 'library', 'signature', 'facsimile']
 
 
 class FolioSerializer(serializers.ModelSerializer):
