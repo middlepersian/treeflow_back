@@ -19,7 +19,9 @@ class CorpusSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField()
 
     def create(self, validated_data):
-        return Corpus.objects.create(**validated_data)
+        corpus, created = Corpus.objects.update_or_create(slug=validated_data.get(
+            'slug', None), defaults={'name': validated_data.get('name', None)})
+        return corpus
 
     def update(self, instance, validated_data):
         instance.id = validated_data.get('id', instance.id)
@@ -39,6 +41,7 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         authors_data = validated_data.pop('authors')
+
         resource_instance, resource_created = Resource.objects.get_or_create(**validated_data)
 
         for author in authors_data:
