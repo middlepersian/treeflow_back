@@ -3,12 +3,12 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import Codex, Folio, Line, Edition, TextSigle, \
     Corpus, Resource, Text, Sentence,\
     MorphologicalAnnotation, Dependency,\
-    Token, TokenAdmin, CodexToken, Feature, FeatureValue, Pos, Author, BibEntry
+    Token, Source, CodexToken, Feature, FeatureValue, Pos, Author, BibEntry
 4
 
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
-    raw_id_fields = ['lemma' ] 
+    raw_id_fields = ['lemma']
     list_display = ["transcription", "transliteration", "pos",
                     "ms_features", "comment", "previous"]
     history_list_display = ["pos"]
@@ -33,6 +33,8 @@ admin.site.register(Line)
 admin.site.register(Resource)
 admin.site.register(Edition)
 admin.site.register(TextSigle)
+
+admin.site.register(Source)
 
 admin.site.register(Corpus)
 admin.site.register(Text)
