@@ -1,14 +1,11 @@
 from django.db.models.deletion import CASCADE
-from django.utils import translation
 from mpcd.corpus.models.token import Token
 import uuid as uuid_lib
 from django.db import models
-from django.db.models.fields.related import ForeignKey
-from .edition import Edition
 from .token import Token
-from .codex import Codex
 from .sigle import TextSigle
 from .author import Author
+from .source import Source
 from simple_history.models import HistoricalRecords
 
 
@@ -19,7 +16,7 @@ class Corpus(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class StageCh(models.TextChoices):
@@ -30,9 +27,9 @@ class StageCh(models.TextChoices):
 
 class Resource(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    authors = models.ManyToManyField(Author, blank=True)
-    description = models.TextField(blank=True)
-    project = models.TextField(blank=True)
+    authors = models.ManyToManyField(Author, blank=True, related_name='author_resource')
+    description = models.TextField(blank=True, null=True)
+    project = models.TextField(blank=True, null=True)
     reference = models.URLField(blank=True, null=True)
 
 
@@ -43,15 +40,14 @@ class Text(models.Model):
     title = models.CharField(max_length=100)
     text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True)
 
-    editor = models.ForeignKey(Author, on_delete=CASCADE, blank=True, related_name='editor_text')
-    collaborator = models.ManyToManyField(Author, blank=True, related_name='collaborator_text')
+    editors = models.ManyToManyField(Author, blank=True, related_name='editor_text')
+    collaborators = models.ManyToManyField(Author, blank=True, related_name='collaborator_text')
 
-    resource = ForeignKey(Resource, on_delete=models.CASCADE, null=True, blank=True)
+    resources = models.ManyToManyField(Resource, blank=True)
     stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
     # in corpus.rng a text can have as source a single "edition" or a single "codex". We will leave it a bit more flexible.
-    codex_source = models.ManyToManyField(Codex,  blank=True)
-    edition_source = models.ManyToManyField(Edition,  blank=True)
+    sources = models.ManyToManyField(Source, blank=True)
 
     history = HistoricalRecords(inherit=True)
 

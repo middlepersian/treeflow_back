@@ -5,6 +5,7 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from .token import Token
 from .bibliography import BibEntry
+from .source import Source
 
 
 class CodexCh(models.TextChoices):
@@ -29,11 +30,12 @@ class CodexCh(models.TextChoices):
     msmdh = 'msMHD', 'MS of MHD'
 
 
-class Codex(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
-    description = models.CharField(max_length=255, blank=True)
+class Codex(Source):
+    #id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    #name = models.CharField(max_length=255)
+    #slug = models.SlugField(unique=True)
+    #description = models.CharField(max_length=255, blank=True)
+    sigle = models.CharField(max_length=10, unique=True, choices=CodexCh.choices, default="")
     scribe = models.ForeignKey(Author, on_delete=models.CASCADE, blank=True, null=True)
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
@@ -42,7 +44,7 @@ class Codex(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.name)
+        return '{} {}'.format(self.slug, self.sigle)
 
 
 class Folio(models.Model):
@@ -54,6 +56,7 @@ class Folio(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
+
 
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)

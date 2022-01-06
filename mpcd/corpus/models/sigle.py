@@ -89,3 +89,6 @@ class TextSigle(models.Model):
                 fields=['sigle', 'genre'], name='sigle_genre'
             )
         ]
+
+    def __str__(self):
+        return '{} , {}'.format(self.sigle, self.genre)

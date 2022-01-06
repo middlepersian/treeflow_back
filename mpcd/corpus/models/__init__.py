@@ -5,3 +5,4 @@ from .edition import Edition
 from .codex import Codex, Folio, Line, CodexToken
 from .author import Author
 from .bibliography import BibEntry
+from .source import Source
