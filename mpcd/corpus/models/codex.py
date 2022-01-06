@@ -31,14 +31,10 @@ class CodexCh(models.TextChoices):
 
 
 class Codex(Source):
-    #id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    #name = models.CharField(max_length=255)
-    #slug = models.SlugField(unique=True)
-    #description = models.CharField(max_length=255, blank=True)
     sigle = models.CharField(max_length=10, unique=True, choices=CodexCh.choices, default="")
-    scribe = models.ForeignKey(Author, on_delete=models.CASCADE, blank=True, null=True)
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
+    scribe = models.ManyToManyField(Author, blank=True, null=True)
     facsimile = models.ManyToManyField(BibEntry,  blank=True)
 
     history = HistoricalRecords()

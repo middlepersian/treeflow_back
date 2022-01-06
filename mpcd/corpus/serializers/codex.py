@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class CodexSerializer(serializers.ModelSerializer):
 
-    scribe = AuthorSerializer(many=True, partial=True, required=False)
+    scribe = AuthorSerializer(many=True, partial=True, required=False, allow_null=True)
     facsimile = BibEntrySerializer(many=True, partial=True, required=False)
 
     def create(self, validated_data):
@@ -42,27 +42,25 @@ class CodexSerializer(serializers.ModelSerializer):
             logger.error('UPDATE {}'.format(scribe_data))
             for scribe in scribe_data:
                 instance.scribe.get_or_create(**scribe)
-        else:
-            logger.error('NO SCRIBE DATA')
-            for scribe in scribe_data:
-                instance.scribe.create(**scribe)
 
         facsimile_data = validated_data.pop('facsimile', None)
         if facsimile_data:
             logger.error('UPDATE {}'.format(facsimile_data))
             for facsimile in facsimile_data:
                 instance.facsimile.get_or_create(**facsimile)
-        else:
-            logger.error('NO facsimile DATA')
-            for facsimile in facsimile_data:
-                instance.facsimile.create(**facsimile)
+
+        instance.id = validated_data.get('id', instance.id)
+        instance.name = validated_data.get('name', instance.name)
+        instance.slug = validated_data.get('slug', instance.slug)
+        instance.description = validated_data.get('description', instance.description)
+
 
         instance.save()
         return instance
 
     class Meta:
         model = Codex
-        fields = ['name', 'slug', 'sigle', 'description', 'scribe', 'library', 'signature', 'facsimile']
+        fields = ['id', 'name', 'slug', 'sigle', 'description', 'scribe', 'library', 'signature', 'facsimile']
 
 
 class FolioSerializer(serializers.ModelSerializer):
@@ -88,7 +86,7 @@ class FolioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folio
-        fields = ['name', 'codex', 'comment']
+        fields = ['id', 'name', 'codex', 'comment']
 
 
 class LineSerializer(serializers.ModelSerializer):
@@ -113,4 +111,4 @@ class LineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Line
-        fields = ['number', 'folio', 'comment']
+        fields = ['id', 'number', 'folio', 'comment']
