@@ -3,7 +3,7 @@ from .token import TokenSerializer
 from .author import AuthorSerializer
 from .codex import CodexSerializer
 from .edition import EditionSerializer
-from ..models import Corpus, Resource, Text, Sentence, Author
+from ..models import Corpus, Resource, Source, Text, Sentence, Author, TextSigle
 from rest_framework import serializers
 
 # import the logging library
@@ -14,14 +14,8 @@ logger = logging.getLogger(__name__)
 
 class CorpusSerializer(serializers.ModelSerializer):
 
-    id = serializers.UUIDField(read_only=True)
-    name = serializers.CharField()
-    slug = serializers.SlugField()
-
     def create(self, validated_data):
-        corpus, created = Corpus.objects.update_or_create(slug=validated_data.get(
-            'slug', None), defaults={'name': validated_data.get('name', None)})
-        return corpus
+        return Corpus.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.id = validated_data.get('id', instance.id)
@@ -37,7 +31,7 @@ class CorpusSerializer(serializers.ModelSerializer):
 
 class ResourceSerializer(serializers.ModelSerializer):
 
-    authors = AuthorSerializer()
+    authors = AuthorSerializer(many=True, allow_null=True, partial=True)
 
     def create(self, validated_data):
         authors_data = validated_data.pop('authors')
@@ -72,29 +66,56 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 class TextSerializer(serializers.ModelSerializer):
 
-    corpus = CorpusSerializer(partial=True)
-    text_sigle = TextSigleSerializer()
-    editor = AuthorSerializer(many=True, partial=True, allow_null=True)
-    collaborator = AuthorSerializer(many=True, partial=True, allow_null=True)
-    resource = ResourceSerializer(partial=True, allow_null=True)
-
-    codex_source = CodexSerializer(allow_null=True, partial=True)
-    edition_source = EditionSerializer(allow_null=True, partial=True)
+    #corpus = CorpusSerializer(partial=True)
+    #text_sigle = TextSigleSerializer()
+    editors = AuthorSerializer(many=True, partial=True, required=False)
+    collaborators = AuthorSerializer(many=True, partial=True, required=False)
+    resources = ResourceSerializer(many=True, partial=True, required=False)
 
     def create(self, validated_data):
         corpus_data = validated_data.pop('corpus')
         text_sigle_data = validated_data.pop('text_sigle')
-        editor_data = validated_data.pop('editor')
-        collaborator_data = validated_data.pop('collaborator')
-        resource_data = validated_data.pop('resource')
+        editors_data = validated_data.pop('editor')
+        collaborators_data = validated_data.pop('collaborator')
+        resources_data = validated_data.pop('resource')
+
+        sources_data = validated_data.pop('sources')
+
+        corpus_instance = Corpus.objects.get(**corpus_data)
+        text_sigle_instance = TextSigle.objects.get(**text_sigle_data)
 
         text_instance, text_created = Text.objects.create(
-            corpus=corpus_data, text_sigle=text_sigle_data, editor=editor_data, collaborator=collaborator_data, resource=resource_data, **validated_data)
+            corpus=corpus_instance, text_sigle=text_sigle_instance, **validated_data)
+
+        for editor in editors_data:
+            edit, edit_created = Author.objects.get_or_create(**editor)
+            text_instance.editors.add(edit)
+
+        for collaborator in collaborators_data:
+            collab, collab_created = Author.objects.get_or_create(**collaborator)
+            text_instance.collaborators.add(collab)
+
+        for resource in resources_data:
+            resour, resour_created = Resource.objects.get_or_create(**resource)
+            text_instance.resources.add(resour)
+
+        for source in sources_data:
+            try:
+                source_instance = Source.objects.get(**source)
+                text_instance.sources.add(source_instance)
+            except Source.DoesNotExist:
+                source_instance = Source.objects.create(**source)
+                text_instance.sources.add(source_instance)
+
+        return text_instance
+
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
 
     class Meta:
         model = Text
-        fields = ['id', 'corpus', 'title', 'text_sigle', 'editor',
-                  'collaborator', 'resource', 'stage', 'codex_source', 'edition_source']
+        fields = ['id', 'corpus', 'title', 'text_sigle', 'editors',
+                  'collaborators', 'resources', 'stage', 'sources']
 
 
 class SentenceSerializer(serializers.ModelSerializer):
