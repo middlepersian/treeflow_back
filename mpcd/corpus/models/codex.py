@@ -34,7 +34,7 @@ class Codex(Source):
     sigle = models.CharField(max_length=10, unique=True, choices=CodexCh.choices, default="")
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
-    scribe = models.ManyToManyField(Author, blank=True, null=True)
+    scribe = models.ManyToManyField(Author, blank=True)
     facsimile = models.ManyToManyField(BibEntry,  blank=True)
 
     history = HistoricalRecords()

@@ -7,6 +7,8 @@ from .sigle import TextSigle
 from .author import Author
 from .source import Source
 from simple_history.models import HistoricalRecords
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class Corpus(models.Model):
@@ -40,13 +42,12 @@ class Text(models.Model):
     title = models.CharField(max_length=100)
     text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True)
 
-    editors = models.ManyToManyField(Author, blank=True, related_name='editor_text')
-    collaborators = models.ManyToManyField(Author, blank=True, related_name='collaborator_text')
+    editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
+    collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
 
     resources = models.ManyToManyField(Resource, blank=True)
     stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
-    # in corpus.rng a text can have as source a single "edition" or a single "codex". We will leave it a bit more flexible.
     sources = models.ManyToManyField(Source, blank=True)
 
     history = HistoricalRecords(inherit=True)
