@@ -66,17 +66,12 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 class TextSerializer(serializers.ModelSerializer):
 
-    #corpus = CorpusSerializer(partial=True)
-    #text_sigle = TextSigleSerializer()
-    editors = AuthorSerializer(many=True, partial=True, required=False)
-    collaborators = AuthorSerializer(many=True, partial=True, required=False)
     resources = ResourceSerializer(many=True, partial=True, required=False)
 
     def create(self, validated_data):
         corpus_data = validated_data.pop('corpus')
         text_sigle_data = validated_data.pop('text_sigle')
-        editors_data = validated_data.pop('editor')
-        collaborators_data = validated_data.pop('collaborator')
+
         resources_data = validated_data.pop('resource')
 
         sources_data = validated_data.pop('sources')
@@ -87,13 +82,6 @@ class TextSerializer(serializers.ModelSerializer):
         text_instance, text_created = Text.objects.create(
             corpus=corpus_instance, text_sigle=text_sigle_instance, **validated_data)
 
-        for editor in editors_data:
-            edit, edit_created = Author.objects.get_or_create(**editor)
-            text_instance.editors.add(edit)
-
-        for collaborator in collaborators_data:
-            collab, collab_created = Author.objects.get_or_create(**collaborator)
-            text_instance.collaborators.add(collab)
 
         for resource in resources_data:
             resour, resour_created = Resource.objects.get_or_create(**resource)
