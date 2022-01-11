@@ -15,21 +15,16 @@ class BibEntrySerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True, partial=True, required=False)
 
     def create(self, validated_data):
-        author_data = validated_data.pop('authors')
+        author_data = validated_data.pop('authors', None)
         title_data = validated_data.pop('title')
         year_data = validated_data.pop('year')
 
-        bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(title=title_data, year=year_data)
+        bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(
+            title=title_data, year=year_data, **validated_data)
 
-        if not bibentry_created:
-            logger.error('bibentry does not exist')
-            loan_word_instance = BibEntry.objects.create(**validated_data)
-
-        for author in author_data:
-            auth, auth_created = Author.objects.get_or_create(**author)
-
-            if not auth_created:
-                logger.error('author does not exist')
+        if author_data:
+            for author in author_data:
+                auth, auth_created = Author.objects.get_or_create(**author)
                 bibentry_instance.authors.add(auth)
 
         return bibentry_instance
@@ -50,4 +45,4 @@ class BibEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BibEntry
-        fields = ['authors', 'title', 'year']
+        fields = ['id', 'authors', 'title', 'year']

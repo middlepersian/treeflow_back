@@ -20,7 +20,6 @@ class CodexSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         scribe_data = validated_data.pop('scribe', None)
         facsimile_data = validated_data.pop('facsimile', None)
-
         codex_instance, codex_created = Codex.objects.get_or_create(**validated_data)
 
         if scribe_data:
@@ -53,14 +52,19 @@ class CodexSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.slug = validated_data.get('slug', instance.slug)
         instance.description = validated_data.get('description', instance.description)
-
+        instance.copy_date = validated_data.get('copy_date', instance.copy_date)
+        instance.copy_place_name = validated_data.get('copy_place_name', instance.copy_place_name)
+        instance.copy_place_latitude = validated_data.get('copy_place_latitude', instance.copy_place_latitude)
+        instance.library = validated_data.get('library', instance.library)
+        instance.signature = validated_data.get('signature', instance.signature)
 
         instance.save()
         return instance
 
     class Meta:
         model = Codex
-        fields = ['id', 'name', 'slug', 'sigle', 'description', 'scribe', 'library', 'signature', 'facsimile']
+        fields = ['id', 'name', 'slug', 'sigle', 'description', 'copy_date',
+                  'copy_place_name', 'copy_place_latitude', 'copy_place_longitude', 'scribe', 'library', 'signature', 'facsimile']
 
 
 class FolioSerializer(serializers.ModelSerializer):
