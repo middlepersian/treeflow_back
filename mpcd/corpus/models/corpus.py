@@ -11,6 +11,11 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class CorpusManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
+
+
 class Corpus(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
@@ -29,7 +34,7 @@ class StageCh(models.TextChoices):
 
 class Resource(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    authors = models.ManyToManyField(Author, blank=True, related_name='author_resource')
+    authors = models.ManyToManyField(Author, blank=True, related_name='resource_authors')
     description = models.TextField(blank=True, null=True)
     project = models.TextField(blank=True, null=True)
     reference = models.URLField(blank=True, null=True)
@@ -60,7 +65,7 @@ class Text(models.Model):
             )]
 
     def __str__(self):
-        return '{}'.format(self.name)
+        return '{} {}'.format(self.title, self.text_sigle.sigle)
 
 
 class Sentence(models.Model):

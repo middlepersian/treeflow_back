@@ -4,6 +4,7 @@ from mpcd.dict.models.dictionary import Entry
 from simple_history.models import HistoricalRecords
 from django.contrib import admin
 
+
 class PosCh(models.TextChoices):
     ADJ = 'ADJ', 'ADJ'
     ADP = 'ADP', 'ADP'
@@ -131,14 +132,15 @@ class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True, related_name='lemma_token')
+    lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True, related_name='token_lemma')
     pos = models.ForeignKey(Pos, on_delete=models.CASCADE, null=True)
-    morphological_annotation = models.ManyToManyField(MorphologicalAnnotation, blank=True)
-    syntactic_annotation = models.ManyToManyField(Dependency, blank=True)
+    morphological_annotation = models.ManyToManyField(
+        MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
+    syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
     comment = models.TextField(blank=True)
     avestan = models.URLField(max_length=100, null=True, blank=True)
     previous = models.OneToOneField('self',
-                                    related_name='previous_token',
+                                    related_name='token_previous',
                                     blank=True,
                                     null=True,
                                     on_delete=models.DO_NOTHING)
@@ -153,4 +155,4 @@ class Token(models.Model):
 
 
 class TokenAdmin(admin.ModelAdmin):
-    raw_id_fields = ['lemma' ] 
+    raw_id_fields = ['lemma']

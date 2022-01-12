@@ -1,3 +1,4 @@
+from django.db.models.fields import related
 from mpcd.corpus.models.author import Author
 import uuid as uuid_lib
 
@@ -41,8 +42,8 @@ class Codex(Source):
 
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
-    scribe = models.ManyToManyField(Author, blank=True)
-    facsimile = models.ManyToManyField(BibEntry,  blank=True)
+    scribe = models.ManyToManyField(Author, blank=True, related_name='codex_scribe')
+    facsimile = models.ManyToManyField(BibEntry,  blank=True, related_name='codex_facsimile')
 
     history = HistoricalRecords()
 
@@ -76,7 +77,7 @@ class Line(models.Model):
 class CodexToken(Token):
     line = models.ForeignKey(Line, on_delete=models.CASCADE)
     position = models.PositiveSmallIntegerField(null=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(inherit=True)
 
     def __str__(self):
         return self.transcription

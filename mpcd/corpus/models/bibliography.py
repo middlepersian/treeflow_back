@@ -2,9 +2,10 @@ import uuid as uuid_lib
 from django.db import models
 from .author import Author
 
+
 class BibEntry(models.Model):
-    id = models.UUIDField(primary_key=True , default=uuid_lib.uuid4, editable=False)
-    authors = models.ManyToManyField(Author)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    authors = models.ManyToManyField(Author, related_name="bib_entry_authors")
     title = models.CharField(max_length=100)
     year = models.PositiveSmallIntegerField()
     url = models.URLField(blank=True, null=True)
