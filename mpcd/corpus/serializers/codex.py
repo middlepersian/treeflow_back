@@ -71,9 +71,8 @@ class FolioSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        codex_data = validated_data.pop('lemma')
+        codex_data = validated_data.pop('codex')
         codex_instance, codex_created = Codex.objects.get_or_create(**codex_data)
-
         folio_instance, folio_created = Folio.objects.get_or_create(**validated_data, codex=codex_instance)
 
         return folio_instance
@@ -100,7 +99,6 @@ class LineSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         folio_data = validated_data.pop('folio')
         folio_instance, folio_created = Line.objects.get_or_create(**folio_data)
-
         line_instance, line_created = Line.objects.get_or_create(**validated_data, folio=folio_instance)
         return line_instance
 

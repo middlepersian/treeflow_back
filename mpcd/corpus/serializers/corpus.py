@@ -5,6 +5,7 @@ from .codex import CodexSerializer
 from .edition import EditionSerializer
 from ..models import Corpus, Resource, Source, Text, Sentence, Author, TextSigle
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 # import the logging library
 import logging
@@ -26,7 +27,8 @@ class CorpusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Corpus
-        fields = ['id', 'name', 'slug']
+        lookup_field = 'slug'
+        fields = ['name', 'slug']
 
 
 class ResourceSerializer(serializers.ModelSerializer):
@@ -34,13 +36,13 @@ class ResourceSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True, allow_null=True, partial=True)
 
     def create(self, validated_data):
-        authors_data = validated_data.pop('authors')
 
+        authors_data = validated_data.pop('authors', None)
         resource_instance, resource_created = Resource.objects.get_or_create(**validated_data)
-
-        for author in authors_data:
-            author_instance, author_created = Author.objects.get_or_create(**author)
-            resource_instance.authors.add(author_instance)
+        if authors_data:
+            for author in authors_data:
+                author_instance, author_created = Author.objects.get_or_create(**author)
+                resource_instance.authors.add(author_instance)
 
         return resource_instance
 
@@ -66,34 +68,52 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 class TextSerializer(serializers.ModelSerializer):
 
+    corpus = serializers.SlugRelatedField(slug_field='slug', queryset=Corpus.objects.all())
+    text_sigle = serializers.SlugRelatedField(slug_field='sigle', queryset=TextSigle.objects.all())
+
     resources = ResourceSerializer(many=True, partial=True, required=False)
 
     def create(self, validated_data):
-        corpus_data = validated_data.pop('corpus')
-        text_sigle_data = validated_data.pop('text_sigle')
+        corpus_data = validated_data.pop('corpus', None)
+        text_sigle_data = validated_data.pop('text_sigle', None)
 
-        resources_data = validated_data.pop('resource')
+        editors_data = validated_data.pop('editors', None)
+        collaborators_data = validated_data.pop('collaborators', None)
 
-        sources_data = validated_data.pop('sources')
+        resources_data = validated_data.pop('resources', None)
+        sources_data = validated_data.pop('sources', None)
 
-        corpus_instance = Corpus.objects.get(**corpus_data)
-        text_sigle_instance = TextSigle.objects.get(**text_sigle_data)
+        logger.error('corpus: {}'.format(corpus_data))
 
-        text_instance, text_created = Text.objects.create(
+        corpus_instance = Corpus.objects.get(slug=corpus_data.slug)
+        text_sigle_instance = TextSigle.objects.get(sigle=text_sigle_data.sigle)
+
+        text_instance = Text.objects.create(
             corpus=corpus_instance, text_sigle=text_sigle_instance, **validated_data)
 
+        if resources_data:
+            for resource in resources_data:
+                resour, resour_created = Resource.objects.get_or_create(**resource)
+                text_instance.resources.add(resour)
 
-        for resource in resources_data:
-            resour, resour_created = Resource.objects.get_or_create(**resource)
-            text_instance.resources.add(resour)
+        if editors_data:
+            for editor in editors_data:
+                editor_instance, editor_created = Author.objects.get_or_create(**editor)
+                text_instance.editors.add(editor_instance)
 
-        for source in sources_data:
-            try:
-                source_instance = Source.objects.get(**source)
-                text_instance.sources.add(source_instance)
-            except Source.DoesNotExist:
-                source_instance = Source.objects.create(**source)
-                text_instance.sources.add(source_instance)
+        if collaborators_data:
+            for collaborator in collaborators_data:
+                collaborator_instance, collaborator_created = Author.objects.get_or_create(**collaborator)
+                text_instance.collaborators.add(collaborator_instance)
+
+        if sources_data:
+            for source in sources_data:
+                try:
+                    source_instance = Source.objects.get(**source)
+                    text_instance.sources.add(source_instance)
+                except Source.DoesNotExist:
+                    source_instance = Source.objects.create(**source)
+                    text_instance.sources.add(source_instance)
 
         return text_instance
 
