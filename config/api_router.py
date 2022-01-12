@@ -8,7 +8,7 @@ from mpcd.dict.views import DefinitionViewSet, EntryViewSet, DictionaryViewSet, 
 
 from mpcd.corpus.views import AuthorViewSet
 from mpcd.corpus.views import BibEntryViewSet
-from mpcd.corpus.views import CodexViewSet
+from mpcd.corpus.views import CodexViewSet, FolioViewSet, LineViewSet
 from mpcd.corpus.views import CorpusViewSet, ResourceViewSet, TextViewSet, SentenceViewSet
 from mpcd.corpus.views import EditionViewSet
 from mpcd.corpus.views import TextSigleViewSet
@@ -29,10 +29,15 @@ router.register("users", UserViewSet)
 
 router.register("author", AuthorViewSet)
 router.register("bibliography", BibEntryViewSet)
+
 router.register("codex", CodexViewSet)
+router.register("folio", FolioViewSet)
+router.register("line", LineViewSet)
+
 router.register("corpus", CorpusViewSet)
 router.register("resource", ResourceViewSet)
 router.register("text", TextViewSet)
+
 router.register("sentence", SentenceViewSet)
 router.register("edition", EditionViewSet)
 router.register("sigle", TextSigleViewSet)
@@ -46,15 +51,15 @@ router.register("token", TokenViewSet, basename="token")
 
 ''' Dictionary API-Endpoints '''
 
-router.register("lemmas", WordViewSet)
-router.register("loanwords", LoanWordViewSet)
-router.register("translations", TranslationViewSet)
+router.register("dict", DictionaryViewSet, basename='dict')
+router.register("entry", EntryViewSet, basename='entry')
+router.register("lemma", WordViewSet)
+router.register("loanword", LoanWordViewSet)
+router.register("translation", TranslationViewSet)
 # router.register("langs",LangViewSet)
-router.register("categories", CategoryViewSet)
-router.register("references", ReferenceViewSet)
-router.register("definitions", DefinitionViewSet)
-router.register("entries", EntryViewSet, basename='entry')
-router.register("dicts", DictionaryViewSet, basename='dict')
+router.register("category", CategoryViewSet)
+router.register("reference", ReferenceViewSet)
+router.register("definition", DefinitionViewSet)
 
 
 app_name = "api"
