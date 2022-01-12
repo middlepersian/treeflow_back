@@ -7,6 +7,7 @@ from ..permissions import IsAuthorOrReadOnly
 class CorpusViewSet(viewsets.ModelViewSet):
     queryset = Corpus.objects.all()
     serializer_class = CorpusSerializer
+    lookup_field = 'slug'
     search_fields = ['name', 'slug']
     permission_classes = (IsAuthorOrReadOnly,)
 
