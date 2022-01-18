@@ -1,14 +1,15 @@
+import logging
 from .sigle import TextSigleSerializer
 from .token import TokenSerializer
 from .author import AuthorSerializer
 from .codex import CodexSerializer
 from .edition import EditionSerializer
-from ..models import Corpus, Resource, Source, Text, Sentence, Author, TextSigle
+from ..models import Corpus, Resource, Source, Text, Sentence, Author, TextSigle, Token
 from rest_framework import serializers
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 # import the logging library
-import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,8 @@ class TextSerializer(serializers.ModelSerializer):
     text_sigle = serializers.SlugRelatedField(slug_field='sigle', queryset=TextSigle.objects.all())
 
     resources = ResourceSerializer(many=True, partial=True, required=False)
+    sources = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Source.objects.all(), many=True, allow_null=True, required=False)
 
     def create(self, validated_data):
         corpus_data = validated_data.pop('corpus', None)
@@ -98,27 +101,60 @@ class TextSerializer(serializers.ModelSerializer):
 
         if editors_data:
             for editor in editors_data:
-                editor_instance, editor_created = Author.objects.get_or_create(**editor)
+                editor_instance, editor_created = User.objects.get_or_create(**editor)
                 text_instance.editors.add(editor_instance)
 
         if collaborators_data:
             for collaborator in collaborators_data:
-                collaborator_instance, collaborator_created = Author.objects.get_or_create(**collaborator)
+                collaborator_instance, collaborator_created = User.objects.get_or_create(**collaborator)
                 text_instance.collaborators.add(collaborator_instance)
 
         if sources_data:
             for source in sources_data:
-                try:
-                    source_instance = Source.objects.get(**source)
-                    text_instance.sources.add(source_instance)
-                except Source.DoesNotExist:
-                    source_instance = Source.objects.create(**source)
-                    text_instance.sources.add(source_instance)
+                source_instance = Source.objects.get(slug=source.slug)
+                text_instance.sources.add(source_instance)
 
         return text_instance
 
     def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
+
+        instance.title = validated_data.get('title', instance.title)
+
+        corpus_data = validated_data.pop('corpus', None)
+        corpus = instance.corpus
+        corpus.slug = corpus_data.slug
+
+        text_sigle_data = validated_data.pop('text_sigle', None)
+        text_sigle = instance.text_sigle
+        text_sigle.sigle = text_sigle_data.sigle
+
+        editors_data = validated_data.pop('editors', None)
+        collaborators_data = validated_data.pop('collaborators', None)
+        resources_data = validated_data.pop('resources', None)
+        sources_data = validated_data.pop('sources', None)
+
+        if editors_data:
+            for editor in editors_data:
+                editor_instance, editor_created = User.objects.get_or_create(**editor)
+                instance.editors.add(editor_instance)
+
+        if collaborators_data:
+            for collaborator in collaborators_data:
+                collaborator_instance, collaborator_created = User.objects.get_or_create(**collaborator)
+                instance.collaborators.add(collaborator_instance)
+
+        if resources_data:
+            for resource in resources_data:
+                resour, resour_created = Resource.objects.get_or_create(**resource)
+                instance.resources.add(resour)
+
+        if sources_data:
+            for source in sources_data:
+                source_instance = Source.objects.get(slug=source.slug)
+                instance.sources.add(source_instance)
+
+        instance.save()
+        return instance
 
     class Meta:
         model = Text
@@ -128,24 +164,37 @@ class TextSerializer(serializers.ModelSerializer):
 
 class SentenceSerializer(serializers.ModelSerializer):
 
-    text = TextSerializer(partial=True)
-    tokens = TokenSerializer(many=True, partial=True)
+    text = serializers.SlugRelatedField(slug_field='title', queryset=Text.objects.all())
+    tokens = TokenSerializer(many=True, partial=True, required=False)
 
     class Meta:
         model = Sentence
-        fields = ["id", "text", "tokens", "comment"]
+        fields = ["id", "text", "tokens", "translation", "comment"]
 
     def create(self, validated_data):
-        text_data = validated_data.pop('text')
-        tokens_data = validated_data.pop('tokens')
+        text_data = validated_data.pop('text', None)
+        tokens_data = validated_data.pop('tokens', None)
+        text_instance = Text.objects.get(title=text_data.title)
 
-        text_instance = Text.objects.create(text=text_data, tokens=tokens_data, **text_data)
-        return text_instance
+        sentence_instance = Sentence.objects.create(text=text_instance, **validated_data)
+
+        if tokens_data:
+            for token in tokens_data:
+                token_instance, token_created = Token.objects.get_or_create(**token)
+                sentence_instance.tokens.add(token_instance)
+        return sentence_instance
 
     def update(self, instance, validated_data):
         instance.text = validated_data.get('text', instance.text)
-        instance.tokens = validated_data.get('tokens', instance.tokens)
+        instance.translation = validated_data.get('translation', instance.translation)
 
+        tokens_data = validated_data.pop('tokens', None)
+        if tokens_data:
+            for token in tokens_data:
+                token_instance, token_created = Token.objects.get_or_create(**token)
+                instance.tokens.add(token_instance)
+
+        instance.comment = validated_data.get('comment', instance.comment)
         instance.save()
 
         return instance
