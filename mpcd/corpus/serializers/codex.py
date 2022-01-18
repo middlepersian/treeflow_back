@@ -105,7 +105,7 @@ class LineSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         folio_data = validated_data.pop('folio')
         folio = instance.folio
-        folio.name = folio_data.get('name', folio.name)
+        folio.identifier = folio_data.get('identifier', folio.identifier)
         folio.codex = folio_data.get('codex', folio.codex)
         folio.save()
 
