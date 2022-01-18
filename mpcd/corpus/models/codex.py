@@ -37,8 +37,8 @@ class Codex(Source):
     copy_date = models.TextField(null=True, blank=True)
 
     copy_place_name = models.CharField(max_length=100, null=True, blank=True)
-    copy_place_latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    copy_place_longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    copy_place_latitude = models.DecimalField(max_digits=9, decimal_places=6,blank=True, null=True)
+    copy_place_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
@@ -53,7 +53,7 @@ class Codex(Source):
 
 class Folio(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    name = models.CharField(max_length=100)
+    identifier = models.CharField(max_length=100)
     codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
     comment = models.CharField(max_length=255, blank=True)
     history = HistoricalRecords()
