@@ -89,7 +89,7 @@ class FolioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folio
-        fields = ['id', 'name', 'codex', 'comment']
+        fields = ['id', 'identifier', 'codex', 'comment']
 
 
 class LineSerializer(serializers.ModelSerializer):
