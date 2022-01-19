@@ -1,3 +1,4 @@
+from re import A
 from rest_framework import serializers
 from .author import AuthorSerializer
 from ..models import BibEntry, Author
@@ -34,10 +35,28 @@ class BibEntrySerializer(serializers.ModelSerializer):
         instance.title = validated_data.get('title', instance.title)
         instance.year = validated_data.get('year', instance.year)
 
-        authors_data = validated_data.pop('authors')
+        auths = validated_data.pop('authors')
+        logger.error('auths: {} {}'.format(type(auths), auths))
 
-        for author in authors_data:
-            instance.authors.update(**author)
+        #auths = instance.authors.update(authors)
+        #instance.authors = instance.authors.set(auths)
+        '''
+
+        for author in authors:
+            if author.get('id', None):
+                author_instance, author_created = Author.objects.get_or_create(id=author['id'])
+                # the ID exists, so we update the author
+                if not author_created:
+                    author_instance.name = author.get('name', author_instance.name)
+                    author_instance.last_name = author.get('last_name', author_instance.last_name)
+                    author_instance.save()
+                    instance.authors.add(author_instance)
+                else:
+                    # the ID does not exist, so we create the author
+                    logger.error('author:{}'.format(author))
+                    author_instance = Author.objects.create(**author)
+                    instance.authors.add(author_instance)
+        '''
 
         instance.save()
 
@@ -46,3 +65,4 @@ class BibEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = BibEntry
         fields = ['id', 'authors', 'title', 'year']
+        validators = []

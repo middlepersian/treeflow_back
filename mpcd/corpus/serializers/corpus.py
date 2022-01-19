@@ -49,7 +49,7 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        authors_data = validated_data.pop('authors')
+        authors_data = validated_data.pop('authors', None)
 
         if authors_data:
             logger.error('UPDATE {}'.format(authors_data))
@@ -65,6 +65,7 @@ class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = ['id', 'authors', 'project', 'reference']
+        validators = []
 
 
 class TextSerializer(serializers.ModelSerializer):
@@ -160,6 +161,7 @@ class TextSerializer(serializers.ModelSerializer):
         model = Text
         fields = ['id', 'corpus', 'title', 'text_sigle', 'editors',
                   'collaborators', 'resources', 'stage', 'sources']
+        validators = []
 
 
 class SentenceSerializer(serializers.ModelSerializer):
@@ -170,6 +172,7 @@ class SentenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sentence
         fields = ["id", "text", "tokens", "translation", "comment"]
+        validators = []
 
     def create(self, validated_data):
         text_data = validated_data.pop('text', None)

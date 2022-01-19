@@ -50,7 +50,7 @@ class EditionSerializer(serializers.ModelSerializer):
         if authors_data:
             logger.error('UPDATE {}'.format(authors_data))
             for author in authors_data:
-                instance.authors.get_or_create(**author)
+                instance.authors.update_or_create(**author)
         else:
             for author in authors_data:
                 instance.authors.create(**author)
