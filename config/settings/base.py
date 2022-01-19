@@ -71,20 +71,16 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
-    "simple_history"
+    "simple_history",
+    # graphene
+    "graphene_django",
 ]
 
 LOCAL_APPS = [
     "mpcd.users.apps.UsersConfig",
-
     # local apps
     "mpcd.dict.apps.DictAppConfig",
     "mpcd.corpus.apps.CorpusAppConfig"
-
-
-
-
-
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -296,4 +292,5 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # ------------------------------------------------------------------------------
 
 
-
+GRAPHENE = {
+    'SCHEMA': 'mpcd.schema.schema'}
