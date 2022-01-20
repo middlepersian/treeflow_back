@@ -4,12 +4,15 @@ import mpcd.corpus.schema
 #import mpcd.dict.schema
 
 
-class Query(mpcd.corpus.schema.Query, graphene.ObjectType):
+class Query(
+    mpcd.corpus.schema.Query,
+    graphene.ObjectType
+):
     pass
 
 
-#class Mutation(mpcd.corpus.Mutation, graphene.ObjectType):
-#    pass
+class Mutation(mpcd.corpus.schema.Mutation, graphene.ObjectType):
+    pass
 
 
-schema = graphene.Schema(query=Query)
+schema = graphene.Schema(query=Query, mutation=Mutation)

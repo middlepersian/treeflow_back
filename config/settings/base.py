@@ -293,4 +293,6 @@ CORS_URLS_REGEX = r"^/api/.*$"
 
 
 GRAPHENE = {
-    'SCHEMA': 'mpcd.schema.schema'}
+    'SCHEMA': 'mpcd.schema.schema',
+    "ATOMIC_MUTATIONS": True
+}
