@@ -53,15 +53,17 @@ class CreateBibEntry(relay.ClientIDMutation):
             return cls(success=False)
 
         else:
+            bibentry_instance = BibEntry.objects.create(title=title, year=year)
+
             for author in authors:
                 if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
                     author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
                 else:
                     author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
                     author_instance.save()
-                bibentry_instance = BibEntry.objects.create(title=title, year=year)
                 bibentry_instance.authors.add(author_instance)
-                bibentry_instance.save()
+            
+            bibentry_instance.save()
             return cls(bibentry=bibentry_instance, success=True)
 
 
