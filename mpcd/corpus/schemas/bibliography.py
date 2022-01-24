@@ -1,6 +1,4 @@
-import errno
-from xmlrpc.client import Boolean
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int
+from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Author, BibEntry
@@ -22,8 +20,14 @@ class BibEntryNode(DjangoObjectType):
                          }
         interfaces = (relay.Node,)
 
-# Queries
 
+class BibEntryInput(InputObjectType):
+    title = String()
+    year = String()
+    authors = List(AuthorInput)
+
+
+# Queries
 
 class Query(ObjectType):
     bibentry = relay.Node.Field(BibEntryNode)
@@ -31,23 +35,17 @@ class Query(ObjectType):
 
 
 # Mutations
-
-
-# Mutations
 class CreateBibEntry(relay.ClientIDMutation):
-
-    success = Boolean()
-
     class Input:
         title = String(required=True)
         year = Int(required=True)
         authors = List(AuthorInput)
 
     bibentry = Field(BibEntryNode)
+    success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, title, year, authors):
-        logger.error('ROOT: {}'.format(root))
         # check that bybentry does not exist same title and year
         if BibEntry.objects.filter(title=title, year=year).exists():
             return cls(success=False)
@@ -56,16 +54,71 @@ class CreateBibEntry(relay.ClientIDMutation):
             bibentry_instance = BibEntry.objects.create(title=title, year=year)
 
             for author in authors:
+                # check if author exists
                 if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
                     author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
                 else:
+                    # create it
                     author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
                     author_instance.save()
                 bibentry_instance.authors.add(author_instance)
-            
+
             bibentry_instance.save()
             return cls(bibentry=bibentry_instance, success=True)
 
 
+class UpdateBibEntry(relay.ClientIDMutation):
+    class Input:
+        id = ID()
+        title = String(required=True)
+        year = Int(required=True)
+        authors = List(AuthorInput)
+
+    bibentry = Field(BibEntryNode)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, title, year, authors, id):
+        # check that bib exists with id
+        if BibEntry.objects.filter(id=id):
+            bibentry_instance = BibEntry.objects.get(id=id)
+            bibentry_instance.title = title
+            bibentry_instance.year = year
+            bibentry_instance.save()
+
+            # delete all authors
+            bibentry_instance.authors.clear()
+
+            for author in authors:
+                # check if author exists
+                if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
+                    author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
+                else:
+                    # create it
+                    author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
+                    author_instance.save()
+                bibentry_instance.authors.add(author_instance)
+
+            bibentry_instance.save()
+            return cls(bibentry=bibentry_instance, success=True)
+        else:
+            return cls(success=False)
+
+
+class DeleteBibEntry(relay.ClientIDMutation):
+
+    success = Boolean()
+
+    class Input:
+        bibentry_id = ID(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, bibentry_id):
+        bibentry_instance = BibEntry.objects.get(id=bibentry_id)
+        bibentry_instance.delete()
+        return cls(success=True)
+
+
 class Mutation(ObjectType):
     create_bibentry = CreateBibEntry.Field()
+    delete_bibentry = DeleteBibEntry.Field()
+    update_bibentry = UpdateBibEntry.Field()
