@@ -44,8 +44,8 @@ class Codex(Source):
 
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
-    scribe = models.ManyToManyField(Author, blank=True, related_name='codex_scribe')
-    facsimile = models.ManyToManyField(BibEntry,  blank=True, related_name='codex_facsimile')
+    scribes = models.ManyToManyField(Author, blank=True, related_name='codex_scribes')
+    facsimiles = models.ManyToManyField(BibEntry,  blank=True, related_name='codex_facsimiles')
 
     history = HistoricalRecords()
 
@@ -67,7 +67,7 @@ class Folio(models.Model):
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.IntegerField()
-    side = models.ForeignKey(Folio, on_delete=models.DO_NOTHING)
+    folio = models.ForeignKey(Folio, on_delete=models.DO_NOTHING)
     comment = models.TextField(blank=True)
     history = HistoricalRecords()
 
