@@ -1,11 +1,11 @@
 from django.db.models.deletion import CASCADE
-from mpcd.corpus.models.token import Token
 import uuid as uuid_lib
 from django.db import models
 from .token import Token
 from .sigle import TextSigle
-from .author import Author
 from .source import Source
+from .resource import Resource
+from .token import Token
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -30,14 +30,6 @@ class StageCh(models.TextChoices):
     untouched = 'UNT', 'untouched'
     in_progess = 'PRO', 'in_progress'
     finished = 'FIN', 'finished'
-
-
-class Resource(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    authors = models.ManyToManyField(Author, blank=True, related_name='resource_authors')
-    description = models.TextField(blank=True, null=True)
-    project = models.TextField(blank=True, null=True)
-    reference = models.URLField(blank=True, null=True)
 
 
 class Text(models.Model):
