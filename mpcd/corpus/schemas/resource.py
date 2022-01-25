@@ -108,6 +108,15 @@ class DeleteResource(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
-        resource = Resource.objects.get(pk=id)
-        resource.delete()
-        return cls(resource=resource, success=True)
+        if Resource.objects.filter(pk=id).exists():
+            resource = Resource.objects.get(pk=id)
+            resource.delete()
+            return cls(resource=resource, success=True)
+        else:
+            return cls(success=False)
+
+
+class Mutation(ObjectType):
+    create_resource = CreateResource.Field()
+    update_resource = UpdateResource.Field()
+    delete_resource = DeleteResource.Field()
