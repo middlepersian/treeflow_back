@@ -113,7 +113,7 @@ class Definition(models.Model):
 class Entry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     dict = models.ForeignKey(Dictionary, on_delete=models.CASCADE, blank=True)
-    lemma = models.OneToOneField(Word, on_delete=models.CASCADE)
+    lemma = models.OneToOneField(Word, on_delete=models.CASCADE, related_name="lemma_entry")
     loanwords = models.ManyToManyField(LoanWord, blank=True)
     translations = models.ManyToManyField(Translation, blank=True)
     definitions = models.ManyToManyField(Definition, blank=True)

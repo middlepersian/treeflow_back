@@ -1,12 +1,10 @@
 from mpcd.dict.models.dictionary import Category, Definition, Reference, Translation
-from rest_framework import viewsets, filters, permissions, status
+from rest_framework import viewsets, filters, status
 from rest_framework.response import Response
 from .models import Entry, Dictionary, Word, LoanWord
 from .serializers import DefinitionSerializer, EntrySerializer, DictionarySerializer, ReferenceSerializer, WordSerializer, \
     LoanWordSerializer, TranslationSerializer, CategorySerializer
 from .permissions import IsAuthorOrReadOnly
-from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404
 
 
 # import the logging library
@@ -38,7 +36,6 @@ class EntryViewSet(viewsets.ModelViewSet):
 
     serializer_class = EntrySerializer
     permission_classes = (IsAuthorOrReadOnly,)
-    # queryset = get_queryset()
 
 
 class WordViewSet(viewsets.ModelViewSet):

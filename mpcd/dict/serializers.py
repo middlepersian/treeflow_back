@@ -82,8 +82,6 @@ class LoanWordSerializer(serializers.ModelSerializer):
             'word': {'validators': []},
             'translations': {'validators': []}
         }
-
-
 class ReferenceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -119,11 +117,11 @@ class EntrySerializer(serializers.ModelSerializer):
 
     dict = DictionarySerializer()
     lemma = WordSerializer()
-    loanwords = LoanWordSerializer(required=False, many=True, partial=True)
-    translations = TranslationSerializer(required=False, many=True, partial=True)
-    definitions = DefinitionSerializer(many=True, partial=True)
-    categories = CategorySerializer(many=True, partial=True)
-    references = ReferenceSerializer(many=True, partial=True)
+    loanwords = LoanWordSerializer(many=True, required=False)
+    translations = TranslationSerializer(many=True, required=False)
+    definitions = DefinitionSerializer(many=True, partial=True, required=False)
+    categories = CategorySerializer(many=True, partial=True, required=False)
+    references = ReferenceSerializer(many=True, partial=True, required=False)
 
     class Meta:
         model = Entry
@@ -146,8 +144,7 @@ class EntrySerializer(serializers.ModelSerializer):
         entry_instance, entry_created = Entry.objects.get_or_create(
             lemma=lemma_instance, dict=dict_instance, **validated_data)
 
-
-        ## loanword is treated differently due to the pointer to translation inside this model
+        # loanword is treated differently due to the pointer to translation inside this model
         for loanword in loanwords_data:
             word_data = loanword.get('word')
             logger.error('WORD DATA {} {}'.format(word_data, type(word_data)))
@@ -215,7 +212,7 @@ class EntrySerializer(serializers.ModelSerializer):
         lemma.language = lemma_data.get('language', lemma.language)
         lemma.save()
 
-        ## TODO check if this works with translations
+        # TODO check if this works with translations
         loanwords_data = validated_data.pop('loanwords')
         if loanwords_data:
             logger.error('UPDATE {}'.format(loanwords_data))
@@ -228,4 +225,3 @@ class EntrySerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
