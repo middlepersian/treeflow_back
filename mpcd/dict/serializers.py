@@ -1,6 +1,6 @@
 from django.utils import translation
 from rest_framework import serializers
-from .models import Entry, Dictionary, Translation, Category, Word, LoanWord, Reference, Definition
+from .models import Entry, Dictionary, Translation, Category, Lemma, LoanWord, Reference, Definition
 
 # import the logging library
 import logging
@@ -105,7 +105,7 @@ class DefinitionSerializer(serializers.ModelSerializer):
 class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Word
+        model = Lemma
         fields = ('id', 'word', 'language')
         extra_kwargs = {
             'word': {'validators': []},
@@ -140,7 +140,7 @@ class EntrySerializer(serializers.ModelSerializer):
         references_data = validated_data.pop('references')
 
         dict_instance = Dictionary.objects.get(**dict_data)
-        lemma_instance, lemma_created = Word.objects.get_or_create(**lemma_data)
+        lemma_instance, lemma_created = Lemma.objects.get_or_create(**lemma_data)
         entry_instance, entry_created = Entry.objects.get_or_create(
             lemma=lemma_instance, dict=dict_instance, **validated_data)
 

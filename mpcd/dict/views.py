@@ -1,7 +1,7 @@
-from mpcd.dict.models.dictionary import Category, Definition, Reference, Translation
+from mpcd.dict.models import Category, Definition, Reference, Translation
 from rest_framework import viewsets, filters, status
 from rest_framework.response import Response
-from .models import Entry, Dictionary, Word, LoanWord
+from .models import Entry, Dictionary, Lemma, LoanWord
 from .serializers import DefinitionSerializer, EntrySerializer, DictionarySerializer, ReferenceSerializer, WordSerializer, \
     LoanWordSerializer, TranslationSerializer, CategorySerializer
 from .permissions import IsAuthorOrReadOnly
@@ -39,7 +39,7 @@ class EntryViewSet(viewsets.ModelViewSet):
 
 
 class WordViewSet(viewsets.ModelViewSet):
-    queryset = Word.objects.all()
+    queryset = Lemma.objects.all()
     serializer_class = WordSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['word', 'language']
