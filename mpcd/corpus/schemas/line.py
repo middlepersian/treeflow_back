@@ -1,11 +1,8 @@
-from app_backend.mpcd.corpus.models import codex
-from app_backend.mpcd.corpus.models.codex import Codex, Folio
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import Codex, Author, Line
-from mpcd.corpus.schemas.codex import CodexNode
-from mpcd.corpus.schemas.folio import FolioNode
+from mpcd.corpus.models import Folio, Line
+from .folio import FolioNode, FolioInput
 
 
 # import the logging library
@@ -17,9 +14,8 @@ logger = logging.getLogger(__name__)
 class LineNode(DjangoObjectType):
 
     class Meta:
-        model = codex.Line
+        model = Line
         filter_fields = {'number': ['exact', 'icontains', 'istartswith'],
-                         'folio': ['exact', 'icontains', 'istartswith'],
                          'comment': ['exact', 'icontains', 'istartswith']}
 
         interfaces = (relay.Node, )
@@ -28,7 +24,7 @@ class LineNode(DjangoObjectType):
 class LineInput(InputObjectType):
     id = ID()
     number = String(required=True)
-    folio = FolioNode(required=True)
+    folio = FolioInput()
     comment = String(required=False)
 
 
@@ -42,7 +38,7 @@ class Query(ObjectType):
 class CreateLine(relay.ClientIDMutation):
     class Input:
         number = String(required=True)
-        folio = FolioNode(required=True)
+        folio = FolioInput()
         comment = String(required=False)
 
     line = Field(LineNode)
@@ -60,11 +56,12 @@ class CreateLine(relay.ClientIDMutation):
             line_instance.comment = comment
             return cls(line=line_instance, success=True)
 
+
 class UpdateLine(relay.ClientIDMutation):
     class Input:
         id = ID()
         number = String(required=True)
-        folio = FolioNode(required=True)
+        folio = FolioInput()
         comment = String(required=False)
 
     line = Field(LineNode)
@@ -83,6 +80,7 @@ class UpdateLine(relay.ClientIDMutation):
         else:
             return cls(success=False)
 
+
 class DeleteLine(relay.ClientIDMutation):
     class Input:
         id = ID()
@@ -96,7 +94,7 @@ class DeleteLine(relay.ClientIDMutation):
             Line.objects.get(id=id).delete()
             return cls(success=True)
         else:
-            return cls(success=False)            
+            return cls(success=False)
 
 
 class Mutation(ObjectType):

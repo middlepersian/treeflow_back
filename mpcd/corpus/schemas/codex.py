@@ -1,10 +1,9 @@
-from app_backend.mpcd.corpus.models.bibliography import BibEntry
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Codex, Author
-from mpcd.corpus.schemas.author import AuthorInput
-from mpcd.corpus.schemas.bibliography import BibEntryInput
+from .author import AuthorInput
+from .bibliography import BibEntry, BibEntryInput
 
 # import the logging library
 import logging
@@ -24,10 +23,7 @@ class CodexNode(DjangoObjectType):
                          'copy_place_longitude': ['exact', 'icontains', 'istartswith'],
 
                          'library': ['exact', 'icontains', 'istartswith'],
-                         'signature': ['exact', 'icontains', 'istartswith'],
-                         'scribes': ['exact', 'icontains', 'istartswith'],
-                         'facsimiles': ['exact', 'icontains', 'istartswith'],
-
+                         'signature': ['exact', 'icontains', 'istartswith']
                          }
         interfaces = (relay.Node,)
 
@@ -130,7 +126,7 @@ class UpdateCodex(relay.ClientIDMutation):
         library = String(required=False)
         signature = String(required=False)
         scribes = List(AuthorInput)
-        facsimiles = List(BibEntry)
+        facsimiles = List(BibEntryInput)
 
     codex = Field(CodexNode)
     success = Boolean()

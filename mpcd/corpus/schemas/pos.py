@@ -15,8 +15,6 @@ class PosNode(DjangoObjectType):
         filter_fields = {'pos': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
-    interfaces = (relay.Node,)
-
 
 class PosInput(InputObjectType):
     pos = String()
@@ -52,20 +50,19 @@ class CreatePos(relay.ClientIDMutation):
 
 class UpdatePos(relay.ClientIDMutation):
     class Input:
-        id = ID(required=True)
         pos = String()
 
     pos = Field(PosNode)
     success = Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, id, pos):
+    def mutate_and_get_payload(cls, root, info, pos):
         # check that pos does not exist
         if Pos.objects.filter(pos=pos).exists():
             return cls(success=False)
 
         else:
-            pos_instance = Pos.objects.get(id=id)
+            pos_instance = Pos.objects.get(pos=pos)
             pos_instance.pos = pos
             pos_instance.save()
 
@@ -89,7 +86,7 @@ class DeletePos(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class Mutations(ObjectType):
+class Mutation(ObjectType):
     create_pos = CreatePos.Field()
     update_pos = UpdatePos.Field()
     delete_pos = DeletePos.Field()

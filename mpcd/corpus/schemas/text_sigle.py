@@ -1,7 +1,7 @@
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import Sigle
+from mpcd.corpus.models import TextSigle
 
 
 # import the logging library
@@ -10,59 +10,58 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SigleNode(DjangoObjectType):
+class TextSigleNode(DjangoObjectType):
     class Meta:
-        model = Sigle
+        model = TextSigle
         filter_fields = {'sigle': ['exact', 'icontains', 'istartswith'],
                          'genre': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
 
-class SigleInput(InputObjectType):
-    id = ID()
+class TextSigleInput(InputObjectType):
     sigle = String()
     genre = String()
 
 
 class Query(ObjectType):
-    sigle = relay.Node.Field(SigleNode)
-    all_sigle = DjangoFilterConnectionField(SigleNode)
+    sigle = relay.Node.Field(TextSigleNode)
+    all_sigle = DjangoFilterConnectionField(TextSigleNode)
 
 
 # Mutations
 
-class CreateSigle(relay.ClientIDMutation):
+class CreateTextSigle(relay.ClientIDMutation):
     class Input:
         sigle = String()
         genre = String()
 
-    sigle = Field(SigleNode)
+    sigle = Field(TextSigleNode)
     success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, sigle, genre):
 
-        if Sigle.objects.filter(sigle=sigle, genre=genre).exists():
+        if TextSigle.objects.filter(sigle=sigle, genre=genre).exists():
             return cls(success=False)
         else:
-            sigle = Sigle.objects.create(sigle=sigle, genre=genre)
+            sigle = TextSigle.objects.create(sigle=sigle, genre=genre)
             return cls(sigle=sigle, success=True)
 
 
-class UpdateSigle(relay.ClientIDMutation):
+class UpdateTextSigle(relay.ClientIDMutation):
     class Input:
         id = ID()
         sigle = String()
         genre = String()
 
-    sigle = Field(SigleNode)
+    sigle = Field(TextSigleNode)
     success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, sigle, genre):
 
-        if Sigle.objects.filter(id=id).exists():
-            sigle = Sigle.objects.get(id=id)
+        if TextSigle.objects.filter(id=id).exists():
+            sigle = TextSigle.objects.get(id=id)
             sigle.sigle = sigle
             sigle.genre = genre
             sigle.save()
@@ -71,18 +70,18 @@ class UpdateSigle(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class DeleteSigle(relay.ClientIDMutation):
+class DeleteTextSigle(relay.ClientIDMutation):
     class Input:
         id = ID()
 
-    sigle = Field(SigleNode)
+    sigle = Field(TextSigleNode)
     success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 
-        if Sigle.objects.filter(id=id).exists():
-            sigle = Sigle.objects.get(id=id)
+        if TextSigle.objects.filter(id=id).exists():
+            sigle = TextSigle.objects.get(id=id)
             sigle.delete()
             return cls(sigle=sigle, success=True)
         else:
@@ -90,6 +89,6 @@ class DeleteSigle(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
-    create_sigle = CreateSigle.Field()
-    update_sigle = UpdateSigle.Field()
-    delete_sigle = DeleteSigle.Field()
+    create_text_sigle = CreateTextSigle.Field()
+    update_text_sigle = UpdateTextSigle.Field()
+    delete_text_sigle = DeleteTextSigle.Field()

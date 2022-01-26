@@ -1,11 +1,9 @@
-from django.db.models.deletion import CASCADE
-import uuid as uuid_lib
-from django.db import models
-from .token import Token
-from .sigle import TextSigle
-from .source import Source
 from .resource import Resource
+from .source import Source
+from .text_sigle import TextSigle
 from .token import Token
+from django.db import models
+import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -34,18 +32,18 @@ class StageCh(models.TextChoices):
 
 class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    corpus = models.ForeignKey(Corpus, on_delete=CASCADE, null=True, blank=True)
+    corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
 
     title = models.CharField(max_length=100)
-    text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True)
+    text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True, related_name='text_text_sigle')
 
     editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
 
-    resources = models.ManyToManyField(Resource, blank=True)
+    resources = models.ManyToManyField(Resource, blank=True, related_name='text_resources')
     stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
-    sources = models.ManyToManyField(Source, blank=True)
+    sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
 
     history = HistoricalRecords(inherit=True)
 
@@ -63,8 +61,8 @@ class Text(models.Model):
 class Sentence(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True)
-    tokens = models.ManyToManyField(Token)
+    text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='sentence_text')
+    tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
 
     translation = models.TextField(null=True, blank=True)
     comment = models.CharField(max_length=255, blank=True)

@@ -1,10 +1,7 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, Pos, Dependency
-from mpcd.corpus.schemas import MorphologicalAnnotationNode, MorphologicalAnnotationInput
-from mpcd.corpus.schemas import PosNode, PosInput
-from mpcd.corpus.schemas import DependencyNode, DependencyInput
+from mpcd.corpus.models import Dependency
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -14,7 +11,9 @@ logger = logging.getLogger(__name__)
 class DependencyNode(DjangoObjectType):
     class Meta:
         model = Dependency
-        filter_fields = {'rel': ['exact', 'icontains', 'istartswith']}
+        filter_fields = {
+            'head': ['exact'],
+            'rel': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
     interfaces = (relay.Node,)
@@ -51,6 +50,7 @@ class CreateDependency(relay.ClientIDMutation):
             dependency_instance = Dependency.objects.create(head=head, rel=rel)
 
             return cls(dependency=dependency_instance, success=True)
+
 
 class UpdateDependency(relay.ClientIDMutation):
     class Input:
@@ -91,7 +91,8 @@ class DeleteDependency(relay.ClientIDMutation):
             return cls(dependency=dependency_instance, success=True)
 
         else:
-            return cls(success=False)            
+            return cls(success=False)
+
 
 class Mutation(ObjectType):
     create_dependency = CreateDependency.Field()

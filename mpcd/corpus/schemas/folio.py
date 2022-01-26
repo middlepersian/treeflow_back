@@ -1,9 +1,8 @@
-from app_backend.mpcd.corpus.models import codex
-from app_backend.mpcd.corpus.models.codex import Codex, Folio
+from calendar import c
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import Codex, Author
+from mpcd.corpus.models import Codex, Folio
 from mpcd.corpus.schemas.codex import CodexInput, CodexNode
 
 
@@ -18,7 +17,6 @@ class FolioNode(DjangoObjectType):
     class Meta:
         model = Folio
         filter_fields = {'identifier': ['exact', 'icontains', 'istartswith'],
-                         'codex': ['exact', 'icontains', 'istartswith'],
                          'comment': ['exact', 'icontains', 'istartswith']}
 
         interfaces = (relay.Node, )
@@ -41,7 +39,7 @@ class Query(ObjectType):
 class CreateFolio(relay.ClientIDMutation):
     class Input:
         identifier = String(required=True)
-        codex = String(required=True)
+        codex = CodexInput()
         comment = String(required=False)
 
     folio = Field(FolioNode)
@@ -66,7 +64,7 @@ class UpdateFolio(relay.ClientIDMutation):
     class Input:
         id = ID()
         identifier = String(required=True)
-        codex = CodexNode(required=True)
+        codex = CodexInput()
         comment = String(required=False)
 
     folio = Field(FolioNode)

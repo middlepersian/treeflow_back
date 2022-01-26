@@ -1,12 +1,11 @@
 from django.db.models.fields import related
-from mpcd.corpus.models.author import Author
 import uuid as uuid_lib
-
 from django.db import models
 from simple_history.models import HistoricalRecords
 from .token import Token
 from .bibliography import BibEntry
 from .source import Source
+from .author import Author
 
 
 class CodexCh(models.TextChoices):
@@ -39,7 +38,7 @@ class Codex(Source):
     copy_date = models.TextField(null=True, blank=True)
 
     copy_place_name = models.CharField(max_length=100, null=True, blank=True)
-    copy_place_latitude = models.DecimalField(max_digits=9, decimal_places=6,blank=True, null=True)
+    copy_place_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     copy_place_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
 
     library = models.CharField(max_length=100,  blank=True)
@@ -56,7 +55,7 @@ class Codex(Source):
 class Folio(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     identifier = models.CharField(max_length=100)
-    codex = models.ForeignKey(Codex, on_delete=models.CASCADE)
+    codex = models.ForeignKey(Codex, on_delete=models.CASCADE, related_name='folio_codex')
     comment = models.CharField(max_length=255, blank=True)
     history = HistoricalRecords()
 
@@ -67,7 +66,7 @@ class Folio(models.Model):
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.IntegerField()
-    folio = models.ForeignKey(Folio, on_delete=models.DO_NOTHING)
+    folio = models.ForeignKey(Folio, on_delete=models.DO_NOTHING, related_name='line_folio')
     comment = models.TextField(blank=True)
     history = HistoricalRecords()
 
@@ -77,7 +76,7 @@ class Line(models.Model):
 
 # TODO: write constrain for position
 class CodexToken(Token):
-    line = models.ForeignKey(Line, on_delete=models.CASCADE)
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='codex_token_line')
     position = models.PositiveSmallIntegerField(null=True)
     history = HistoricalRecords(inherit=True)
 

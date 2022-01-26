@@ -1,22 +1,21 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from dataclasses import fields
+from graphene import relay, InputObjectType, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import MorphologicalAnnotation, Feature, FeatureValue
-from mpcd.corpus.schemas import FeatureNode, FeatureValueNode
+from mpcd.corpus.models import MorphologicalAnnotation
+from mpcd.corpus.schemas import FeatureValueInput, FeatureInput, FeatureNode, FeatureValueNode
 
 
 class MorphologicalAnnotationNode(DjangoObjectType):
     class Meta:
         model = MorphologicalAnnotation
-        filter_fields = {'feature': ['exact', 'icontains', 'istartswith'],
-                         'feature_value': ['exact', 'icontains', 'istartswith'],
-                         }
+        filter_fields = {'id': ['exact', 'icontains', 'istartswith']}    
         interfaces = (relay.Node,)
 
 
 class MorphologicalAnnotationInput(InputObjectType):
-    feature = FeatureNode()
-    feature_value = FeatureValueNode()
+    feature = FeatureInput()
+    feature_value = FeatureValueInput()
 
 # Queries
 
@@ -30,8 +29,8 @@ class Query(ObjectType):
 
 class CreateMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
-        feature = FeatureNode()
-        feature_value = FeatureValueNode()
+        feature = FeatureInput()
+        feature_value = FeatureValueInput()
 
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
@@ -51,8 +50,8 @@ class CreateMorphologicalAnnotation(relay.ClientIDMutation):
 class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
         id = ID()
-        feature = FeatureNode()
-        feature_value = FeatureValueNode()
+        feature = FeatureInput()
+        feature_value = FeatureValueInput()
 
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()

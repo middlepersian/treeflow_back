@@ -15,4 +15,4 @@ class Author(models.Model):
         ]
 
     def __str__(self):
-        return '{}, {} , {}'.format(self.last_name, self.name, self.id)
+        return '{}, {}'.format(self.last_name, self.name)

@@ -1,6 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-from mpcd.dict.models.dictionary import Entry
+from mpcd.dict.models import Entry
 from simple_history.models import HistoricalRecords
 from django.contrib import admin
 from .morphological_annotation import MorphologicalAnnotation

@@ -1,7 +1,7 @@
 from django.db import models
 from .author import Author
 from .bibliography import BibEntry
-from .sigle import TextSigle
+from .text_sigle import TextSigle
 from .source import Source
 from simple_history.models import HistoricalRecords
 

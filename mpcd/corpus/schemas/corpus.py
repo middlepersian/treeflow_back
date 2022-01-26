@@ -2,7 +2,6 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Corpus
-from mpcd.corpus.schemas.author import AuthorInput
 
 
 # import the logging library
