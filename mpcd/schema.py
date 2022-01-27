@@ -19,7 +19,7 @@ class Query(
         mpcd.corpus.schemas.pos.Query,
         mpcd.corpus.schemas.resource.Query,
         mpcd.corpus.schemas.text_sigle.Query,
-       # mpcd.corpus.schemas.token.Query,
+        mpcd.corpus.schemas.token.Query,
         graphene.ObjectType):
     pass
 
@@ -37,7 +37,7 @@ class Mutation(mpcd.corpus.schemas.author.Mutation,
                mpcd.corpus.schemas.pos.Mutation,
                mpcd.corpus.schemas.resource.Mutation,
                mpcd.corpus.schemas.text_sigle.Mutation,
-            #   mpcd.corpus.schemas.token.Mutation,
+               mpcd.corpus.schemas.token.Mutation,
                graphene.ObjectType):
 
     pass
