@@ -23,6 +23,7 @@ class PosCh(models.TextChoices):
 
 
 class Pos(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     pos = models.CharField(max_length=6, choices=PosCh.choices, unique=True)
 
     class Meta:

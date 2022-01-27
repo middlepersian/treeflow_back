@@ -44,29 +44,11 @@ class CreatePos(relay.ClientIDMutation):
 
         else:
             pos_instance = Pos.objects.create(pos=pos)
-
-            return cls(pos=pos_instance, success=True)
-
-
-class UpdatePos(relay.ClientIDMutation):
-    class Input:
-        pos = String()
-
-    pos = Field(PosNode)
-    success = Boolean()
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, pos):
-        # check that pos does not exist
-        if Pos.objects.filter(pos=pos).exists():
-            return cls(success=False)
-
-        else:
-            pos_instance = Pos.objects.get(pos=pos)
-            pos_instance.pos = pos
             pos_instance.save()
 
             return cls(pos=pos_instance, success=True)
+
+# Update not needed for Pos, there is a closed list available at the model
 
 
 class DeletePos(relay.ClientIDMutation):
@@ -88,5 +70,4 @@ class DeletePos(relay.ClientIDMutation):
 
 class Mutation(ObjectType):
     create_pos = CreatePos.Field()
-    update_pos = UpdatePos.Field()
     delete_pos = DeletePos.Field()

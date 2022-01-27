@@ -1,3 +1,4 @@
+from operator import indexOf
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -60,83 +61,81 @@ class CreateToken(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        logger.debug("CreateToken.mutate_and_get_payload")
+        # check if token wiht same ID already exists
         if Token.objects.filter(id=input['id']).exists():
-            return cls(errors=["Token with id {} already exists".format(input['id'])], success=False)
+            return cls(success=False)
+        # create token
         else:
+            # add transcription and transliteration
             token = Token.objects.create(transcription=input['transcription'], transliteration=input['transliteration'])
+            # check if lemma available
             if input['lemma']:
-                if Entry.objects.filter(id=input['lemma']['id']).exists():
-                    token.lemma = Entry.objects.get(id=input['lemma']['id'])
-                # create the lemma
-                else:
-                    token_lemma = Lemma.objects.create(word=input['lemma']['word'])
-                    token.lemma = token_lemma
-                    # get lemma language
-                    if Language.objects.filter(language=input['lemma']['language']).exists():
-                        token_lemma.language = Language.objects.get(language=input['lemma']['language'])
+                # check if language in mutation input is available
+                if input['lemma']['language']['identifier']:
+                    # check if lemma with same word and language already exists
+                    if Lemma.objects.filter(word=input['lemma']['word']).select_related('language').filter(identifier=input['lemma']['word']['language']['identifier']).exists():
+                        lemma = Lemma.objects.filter(word=input['lemma']['word']).select_related(
+                            'language').filter(identifier=input['lemma']['word']['language']['identifier'])[0]
 
-                    # check for translations
-                    if input['lemma']['translations']:
-                        for translation in input['lemma']['translations']:
-                            # if there is already a translation available
-                            if Translation.objects.filter(meaning=translation.meaning).exists():
-                                token_lemma.translations.add(Translation.objects.get(meaning=translation.meaning))
-                            else:
-                                local_translation = Translation.objects.create(meaning=translation.meaning)
-                                if Language.objects.filter(language=translation.language).exists():
-                                    local_translation.language = Language.objects.get(language=translation.language)
-                                local_translation.save()
-                                token_lemma.translations.add(local_translation)
+                    else:
+                        # get the language
+                        lang, lang_created = Language.objects.get_or_create(
+                            identifier=input['lemma']['word']['language']['identifier'])
 
-                token_lemma.save()
+                        if lang_created:
+                            # create the lemma
+                            lemma = Lemma.objects.create(word=input['lemma']['word'], language=lang)
+                            token.lemma = lemma
 
+            # check if pos available
             if input['pos']:
-                if Pos.objects.filter(id=input['pos']['id']).exists():
-                    token.pos = Pos.objects.get(id=input['pos']['id'])
-                else:
-                    token_pos = Pos.objects.create(pos=input['pos']['pos'])
-                    token.pos = token_pos
-                    token_pos.save()
+                # check if pos with same name already exists
+                pos = Pos.objects.get_or_create(pos=input['pos']['pos'])
+                token.pos = pos
+            # check if morphological annotation available
             if input['morphological_annotation']:
                 for annotation in input['morphological_annotation']:
-                    if MorphologicalAnnotation.objects.filter(id=annotation['id']).exists():
-                        token.morphological_annotations.add(MorphologicalAnnotation.objects.get(id=annotation['id']))
+                    # check if annotation with same feature and feature value already exists
+                    if MorphologicalAnnotation.objects.select_related('feature').filter(identifier=annotation['feature']['identifier']).select_related('feature_value').filter(identifier=annotation['feature_value']['identifier']).exists():
+                        annotation_obj = MorphologicalAnnotation.objects.select_related('feature').filter(identifier=annotation['feature']['identifier']).select_related(
+                            'feature_value').filter(identifier=annotation['feature_value']['identifier']).first()
                     else:
-                        if Feature.objects.filter(id=annotation['feature']['id']).exists():
-                            token_feature = Feature.objects.get(id=annotation['feature']['id'])
-                        else:
-                            token_feature = Feature.objects.create(feature=annotation['feature']['identifier'])
-                            token_feature.save()
-                        if FeatureValue.objects.filter(id=annotation['feature_value']['id']).exists():
-                            token_feature_value = FeatureValue.objects.get(id=annotation['feature_value']['id'])
-                        else:
-                            token_feature_value = FeatureValue.objects.create(
-                                value=annotation['feature_value']['value'])
-                            token_feature_value.save()
-                        morphological_annotation = MorphologicalAnnotation.objects.create(
-                            feature=token_feature, feature_value=token_feature_value)
-                        token.morphological_annotations.add(morphological_annotation)
+                        # create the annotation
+                        feature, feature_created = Feature.objects.get_or_create(
+                            identifier=annotation['feature']['identifier'])
+                        feature_value, feature_value_created = FeatureValue.objects.get_or_create(
+                            identifier=annotation['feature_value']['identifier'])
+                        annotation_obj = MorphologicalAnnotation.objects.create(
+                            feature=feature, feature_value=feature_value)
+
+                    token.morphological_annotations.add(annotation_obj)
+            # check if syntactic annotation available
             if input['syntactic_annotation']:
                 for annotation in input['syntactic_annotation']:
-                    if Dependency.objects.filter(id=annotation['id']).exists():
-                        token.syntactic_annotation.add(Dependency.objects.get(id=annotation['id']))
+                    # check if dependency with same head and rel already exists
+                    if Dependency.objects.filter(head=annotation['head']).filter(rel=annotation['rel']).exists():
+                        annotation_obj = Dependency.objects.filter(
+                            head=annotation['head']).filter(rel=annotation['rel']).first()
                     else:
-                        token_dependency = Dependency.objects.create(head=annotation['head'], rel=annotation['rel'])
-                        token.syntactic_annotation.add(token_dependency)
-
+                        # create the annotation
+                        annotation_obj = Dependency.objects.create(
+                            head=annotation['head'], rel=annotation['rel'])
+                    token.syntactic_annotations.add(annotation_obj)
+            # check if comment available
             if input['comment']:
                 token.comment = input['comment']
-
+            # check if avestan available
             if input['avestan']:
                 token.avestan = input['avestan']
-
+            # check if previous token available
             if input['previous']:
+                # check if previous token with assigned id already exists
                 if Token.objects.filter(id=input['previous']['id']).exists():
-                    token.previous = Token.objects.get(id=input['previous']['id'])
-                else:
-                    return cls(errors=["Token with id {} does not exist".format(input['previous']['id'])],
-                               success=False)
+                    token.previous = Token.objects.filter(id=input['previous']['id']).first()
+            # save token
             token.save()
-
             return cls(token=token, success=True)
+
+
+class Mutation(ObjectType):
+    create_token = CreateToken.Field()
