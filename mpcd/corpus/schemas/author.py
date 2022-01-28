@@ -23,7 +23,7 @@ class AuthorNode(DjangoObjectType):
 
 class AuthorInput(InputObjectType):
     name = String()
-    last_name = String()     
+    last_name = String()
 
 # Queries
 
@@ -75,14 +75,14 @@ class UpdateAuthor(relay.ClientIDMutation):
 
 
 class DeleteAuthor(relay.ClientIDMutation):
-    # return values
-    id = ID()
-    message = String()
 
     class Input:
         id = ID(required=True)
 
+    # return values
     author = Field(AuthorNode)
+    id = ID()
+    message = String()
 
     @ classmethod
     def mutate_and_get_payload(cls, root, info, id):

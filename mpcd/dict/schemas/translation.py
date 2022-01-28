@@ -90,7 +90,7 @@ class DeleteTranslation(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class Mutations(ObjectType):
+class Mutation(ObjectType):
     create_translation = CreateTranslation.Field()
     update_translation = UpdateTranslation.Field()
     delete_translation = DeleteTranslation.Field()

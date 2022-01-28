@@ -1,6 +1,7 @@
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.corpus.models import Author, BibEntry
 from mpcd.corpus.schemas.author import AuthorInput
 
@@ -80,7 +81,7 @@ class UpdateBibEntry(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, title, year, authors, id):
         # check that bib exists with id
         if BibEntry.objects.filter(id=id).exists():
-            bibentry_instance = BibEntry.objects.get(id=id)
+            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id[1]))
             bibentry_instance.title = title
             bibentry_instance.year = year
             bibentry_instance.save()
@@ -109,12 +110,12 @@ class DeleteBibEntry(relay.ClientIDMutation):
     success = Boolean()
 
     class Input:
-        bibentry_id = ID(required=True)
+        id = ID(required=True)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, bibentry_id):
-        if BibEntry.objects.filter(id=bibentry_id).exists():
-            bibentry_instance = BibEntry.objects.get(id=bibentry_id)
+    def mutate_and_get_payload(cls, root, info, id):
+        if BibEntry.objects.filter(pk=from_global_id(id[1])).exists():
+            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id[1]))
             bibentry_instance.delete()
             return cls(success=True)
         else:

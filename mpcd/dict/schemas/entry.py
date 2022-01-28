@@ -262,7 +262,7 @@ class DeleteEntry(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class Mutations(object):
+class Mutation(object):
     create_entry = CreateEntry.Field()
     update_entry = UpdateEntry.Field()
     delete_entry = DeleteEntry.Field()
