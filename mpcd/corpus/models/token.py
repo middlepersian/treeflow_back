@@ -4,7 +4,7 @@ from mpcd.dict.models import Entry
 from simple_history.models import HistoricalRecords
 from django.contrib import admin
 from .morphological_annotation import MorphologicalAnnotation
-from .pos import Pos
+from .pos import POS
 from .dependency import Dependency
 
 
@@ -13,7 +13,7 @@ class Token(models.Model):
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True, related_name='token_lemma')
-    pos = models.ForeignKey(Pos, on_delete=models.CASCADE, null=True)
+    pos = models.ForeignKey(POS, on_delete=models.CASCADE, null=True)
     morphological_annotation = models.ManyToManyField(
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")

@@ -9,5 +9,5 @@ from .source import Source
 from .feature_value import FeatureValue
 from .feature import Feature
 from .morphological_annotation import MorphologicalAnnotation
-from .pos import Pos
+from .pos import POS
 from .dependency import Dependency

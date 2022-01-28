@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from ..models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, Pos, Token
-from ..serializers import FeatureValueSerializer, FeatureSerializer, MorphologicalAnnotationSerializer, DependencySerializer, PosSerializer, TokenSerializer
+from ..models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, POS, Token
+from ..serializers import FeatureValueSerializer, FeatureSerializer, MorphologicalAnnotationSerializer, DependencySerializer, POSSerializer, TokenSerializer
 from ..permissions import IsAuthorOrReadOnly
 
 
@@ -32,10 +32,10 @@ class DependencyViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
 
 
-class PosViewSet(viewsets.ModelViewSet):
-    queryset = Pos.objects.all()
-    serializer_class = PosSerializer
-    search_fields = ['pos']
+class POSViewSet(viewsets.ModelViewSet):
+    queryset = POS.objects.all()
+    serializer_class = POSSerializer
+    search_fields = ['identifier']
     permission_classes = (IsAuthorOrReadOnly,)
 
 

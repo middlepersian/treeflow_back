@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .. models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, Pos, Token
+from .. models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, POS, Token
 from mpcd.dict.serializers import EntrySerializer
 
 # import the logging library
@@ -55,16 +55,16 @@ class DependencySerializer(serializers.ModelSerializer):
         fields = ['head', 'rel']
 
 
-class PosSerializer(serializers.ModelSerializer):
+class POSSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Pos
-        fields = ['pos']
+        model = POS
+        fields = ['identifier']
 
 
 class TokenSerializer(serializers.ModelSerializer):
 
     lemma = EntrySerializer(required=False)
-    pos = PosSerializer(required=False)
+    pos = POSSerializer(required=False)
     morphological_annotation = MorphologicalAnnotationSerializer(many=True, required=False)
     syntactic_annotation = DependencySerializer(many=True, required=False)
     previous = serializers.PrimaryKeyRelatedField(queryset=Token.objects.all(), required=False, allow_null=True)

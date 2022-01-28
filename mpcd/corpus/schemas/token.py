@@ -3,9 +3,9 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, I
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.dict.models import Entry, Lemma, Language, Translation
-from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, Pos, Dependency
+from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency
 from mpcd.corpus.schemas import MorphologicalAnnotationNode, MorphologicalAnnotationInput
-from mpcd.corpus.schemas import PosNode, PosInput
+from mpcd.corpus.schemas import POSNode, POSInput
 from mpcd.corpus.schemas import DependencyNode, DependencyInput
 from mpcd.dict.schemas import EntryNode, EntryInput
 # import the logging library
@@ -27,7 +27,7 @@ class TokenInput(InputObjectType):
     transcription = String()
     transliteration = String()
     lemma = EntryInput()
-    pos = PosInput()
+    pos = POSInput()
     morphological_annotation = List(MorphologicalAnnotationInput)
     syntactic_annotation = List(DependencyInput)
     comment = String()
@@ -49,7 +49,7 @@ class CreateToken(relay.ClientIDMutation):
         transcription = String()
         transliteration = String()
         lemma = EntryInput()
-        pos = PosInput()
+        pos = POSInput()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
         comment = String()
@@ -90,7 +90,7 @@ class CreateToken(relay.ClientIDMutation):
             # check if pos available
             if input['pos']:
                 # check if pos with same name already exists
-                pos = Pos.objects.get_or_create(pos=input['pos']['pos'])
+                pos = POS.objects.get_or_create(identifier=input['pos']['identifier'])
                 token.pos = pos
             # check if morphological annotation available
             if input['morphological_annotation']:

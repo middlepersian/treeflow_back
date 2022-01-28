@@ -10,6 +10,6 @@ from .morphological_annotation import MorphologicalAnnotationNode, Morphological
 from .text_sigle import TextSigleNode, TextSigleInput
 from .source import SourceNode
 from .dependency import DependencyNode, DependencyInput
-from .pos import PosNode, PosInput
+from .pos import POSNode, POSInput
 from .resource import ResourceNode, ResourceInput
 from .token import TokenNode, TokenInput
