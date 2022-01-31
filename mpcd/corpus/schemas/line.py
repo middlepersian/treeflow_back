@@ -1,8 +1,9 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.corpus.models import Folio, Line
-from .folio import FolioNode, FolioInput
+from .folio import FolioInput
 
 
 # import the logging library
@@ -47,12 +48,12 @@ class CreateLine(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, number, folio, comment):
         logger.debug('CreateLine.mutate_and_get_payload()')
-        if Line.objects.filter(number=number).exists() and Folio.objects.filter(id=folio.id).exists():
+        if Line.objects.filter(number=number).exists() and Folio.objects.filter(pk=from_global_id(folio.id)[1]).exists():
             return cls(success=False)
         else:
             line_instance = Line.objects.create()
             line_instance.number = number
-            line_instance.folio = Folio.objects.get(id=folio.id)
+            line_instance.folio = Folio.objects.get(pk=from_global_id(folio.id)[1])
             line_instance.comment = comment
             return cls(line=line_instance, success=True)
 
@@ -70,10 +71,10 @@ class UpdateLine(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, number, folio, comment):
         logger.debug('UpdateLine.mutate_and_get_payload()')
-        if Line.objects.filter(id=id).exists() and Folio.objects.filter(id=folio.id).exists():
-            line_instance = Line.objects.get(id=id)
+        if Line.objects.filter(pk=from_global_id(id)[1]).exists() and Folio.objects.filter(pk=from_global_id(folio.id)[1]).exists():
+            line_instance = Line.objects.get(pk=from_global_id(id)[1])
             line_instance.number = number
-            line_instance.folio = Folio.objects.get(id=folio.id)
+            line_instance.folio = Folio.objects.get(pk=from_global_id(folio.id)[1])
             line_instance.comment = comment
             line_instance.save()
             return cls(line=line_instance, success=True)
@@ -90,8 +91,8 @@ class DeleteLine(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteLine.mutate_and_get_payload()')
-        if Line.objects.filter(id=id).exists():
-            Line.objects.get(id=id).delete()
+        if Line.objects.filter(pk=from_global_id(id)[1]).exists():
+            Line.objects.get(pk=from_global_id(id)[1]).delete()
             return cls(success=True)
         else:
             return cls(success=False)

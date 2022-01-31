@@ -1,7 +1,8 @@
 from calendar import c
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.corpus.models import Codex, Folio
 from mpcd.corpus.schemas.codex import CodexInput, CodexNode
 
@@ -73,7 +74,7 @@ class UpdateFolio(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, identifier, codex, comment):
         logger.debug('UpdateFolio.mutate_and_get_payload()')
-        if Folio.objects.filter(id=id).exists() and Codex.objects.filter(id=codex.id).exists():
+        if Folio.objects.filter(pk=from_global_id(id)[1]).exists() and Codex.objects.filter(pk=from_global_id(codex.id)[1]).exists():
             folio_instance = Folio.objects.get(id=id)
             folio_instance.identifier = identifier
             folio_instance.comment = comment
@@ -94,8 +95,8 @@ class DeleteFolio(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteFolio.mutate_and_get_payload()')
-        if Folio.objects.filter(id=id).exists():
-            folio_instance = Folio.objects.get(id=id)
+        if Folio.objects.filter(pk=from_global_id(id)[1]).exists():
+            folio_instance = Folio.objects.get(pk=from_global_id(id)[1])
             folio_instance.delete()
             return cls(success=True)
         else:

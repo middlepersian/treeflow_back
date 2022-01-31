@@ -4,6 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Codex, Author
 from .author import AuthorInput
 from .bibliography import BibEntry, BibEntryInput
+from graphql_relay import from_global_id
 
 # import the logging library
 import logging
@@ -89,9 +90,9 @@ class CreateCodex(relay.ClientIDMutation):
 
             for facsimile in facsimiles:
                 # check if bibentry exists
-                if BibEntry.objects.filter(id=facsimile.id).exists():
+                if BibEntry.objects.filter(pk=from_global_id(facsimile.id)[1]).exists():
 
-                    bibentry_instance = BibEntry.objects.get(id=facsimile.id)
+                    bibentry_instance = BibEntry.objects.get(pk=from_global_id(facsimile.id)[1])
                 else:
                     # create it
                     bibentry_instance = BibEntry.objects.create(title=facsimile.title, year=facsimile.year)
@@ -134,7 +135,7 @@ class UpdateCodex(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, sigle, title, copy_date, copy_place_name, copy_place_latitude, copy_place_longitude, library, signature, scribes, facsimiles):
         # check that bib exists with id
-        if Codex.objects.filter(id=id).exists():
+        if Codex.objects.filter(pk=from_global_id(id)[1]).exists():
             codex_instance = Codex.objects.get(id=id)
             codex_instance.sigle = sigle
             codex_instance.title = title
@@ -162,9 +163,9 @@ class UpdateCodex(relay.ClientIDMutation):
             codex_instance.facsimiles.clear()
             for facsimile in facsimiles:
                 # check if bibentry exists
-                if BibEntry.objects.filter(id=facsimile.id).exists():
+                if BibEntry.objects.filter(pk=from_global_id(facsimile.id)[1]).exists():
 
-                    bibentry_instance = BibEntry.objects.get(id=facsimile.id)
+                    bibentry_instance = BibEntry.objects.get(pk=from_global_id(facsimile.id)[1])
                 else:
                     # create it
                     bibentry_instance = BibEntry.objects.create(title=facsimile.title, year=facsimile.year)
@@ -197,8 +198,8 @@ class DeleteCodex(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that codex exists with id
-        if Codex.objects.filter(id=id).exists():
-            codex_instance = Codex.objects.get(id=id)
+        if Codex.objects.filter(pk=from_global_id(id)[1]).exists():
+            codex_instance = Codex.objects.get(pk=from_global_id(id)[1])
             codex_instance.delete()
             return cls(success=True)
         else:

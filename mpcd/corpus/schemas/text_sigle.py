@@ -1,6 +1,8 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
+
 from mpcd.corpus.models import TextSigle
 
 
@@ -16,7 +18,6 @@ class TextSigleNode(DjangoObjectType):
         filter_fields = {'sigle': ['exact', 'icontains', 'istartswith'],
                          'genre': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
-
 
 class TextSigleInput(InputObjectType):
     sigle = String()
@@ -60,8 +61,8 @@ class UpdateTextSigle(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, sigle, genre):
 
-        if TextSigle.objects.filter(id=id).exists():
-            sigle = TextSigle.objects.get(id=id)
+        if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():
+            sigle = TextSigle.objects.get(pk=from_global_id(id)[1])
             sigle.sigle = sigle
             sigle.genre = genre
             sigle.save()
@@ -80,8 +81,8 @@ class DeleteTextSigle(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 
-        if TextSigle.objects.filter(id=id).exists():
-            sigle = TextSigle.objects.get(id=id)
+        if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():
+            sigle = TextSigle.objects.get(pk=from_global_id(id)[1])
             sigle.delete()
             return cls(sigle=sigle, success=True)
         else:

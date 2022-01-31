@@ -26,8 +26,6 @@ class AuthorInput(InputObjectType):
     last_name = String()
 
 # Queries
-
-
 class Query(ObjectType):
     author = relay.Node.Field(AuthorNode)
     all_authors = DjangoFilterConnectionField(AuthorNode)

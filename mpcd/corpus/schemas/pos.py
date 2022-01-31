@@ -1,6 +1,8 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
+
 from mpcd.corpus.models import POS
 
 # import the logging library
@@ -59,8 +61,8 @@ class DeletePos(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
-        if POS.objects.filter(id=id).exists():
-            pos_instance = POS.objects.get(id=id)
+        if POS.objects.filter(pk=from_global_id(id)[1]).exists():
+            pos_instance = POS.objects.get(pk=from_global_id(id)[1])
             pos_instance.delete()
             return cls(success=True)
 

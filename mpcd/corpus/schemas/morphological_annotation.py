@@ -2,6 +2,7 @@ from dataclasses import fields
 from graphene import relay, InputObjectType, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.corpus.models import MorphologicalAnnotation
 from mpcd.corpus.schemas import FeatureValueInput, FeatureInput, FeatureNode, FeatureValueNode
 
@@ -9,7 +10,7 @@ from mpcd.corpus.schemas import FeatureValueInput, FeatureInput, FeatureNode, Fe
 class MorphologicalAnnotationNode(DjangoObjectType):
     class Meta:
         model = MorphologicalAnnotation
-        filter_fields = {'id': ['exact', 'icontains', 'istartswith']}    
+        filter_fields = {'id': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
 
@@ -59,8 +60,8 @@ class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, feature, feature_value):
 
-        if MorphologicalAnnotation.objects.filter(id=id).exists():
-            morphological_annotation_instance = MorphologicalAnnotation.objects.get(id=id)
+        if MorphologicalAnnotation.objects.filter(pk=from_global_id(id)[1]).exists():
+            morphological_annotation_instance = MorphologicalAnnotation.objects.get(pk=from_global_id(id)[1])
             morphological_annotation_instance.feature = feature
             morphological_annotation_instance.feature_value = feature_value
             morphological_annotation_instance.save()
@@ -79,7 +80,7 @@ class DeleteMorphologicalAnnotation(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if MorphologicalAnnotation.objects.filter(id=id).exists():
-            morphological_annotation_instance = MorphologicalAnnotation.objects.get(id=id)
+            morphological_annotation_instance = MorphologicalAnnotation.objects.get(pk=from_global_id(id)[1])
             morphological_annotation_instance.delete()
             return cls(success=True)
 

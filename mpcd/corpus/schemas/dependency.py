@@ -1,7 +1,10 @@
 from graphene import relay, ObjectType, String, Field, ID, Boolean, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
+
 from mpcd.corpus.models import Dependency
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -64,8 +67,8 @@ class UpdateDependency(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, head, rel):
         # check that dependency does not exist
-        if Dependency.objects.filter(id=id).exists():
-            dependency_instance = Dependency.objects.get(id=id)
+        if Dependency.objects.filter(pk=from_global_id(id)[1]).exists():
+            dependency_instance = Dependency.objects.get(pk=from_global_id(id)[1])
             dependency_instance.head = head
             dependency_instance.rel = rel
             dependency_instance.save()
@@ -85,8 +88,8 @@ class DeleteDependency(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that dependency does not exist
-        if Dependency.objects.filter(id=id).exists():
-            dependency_instance = Dependency.objects.get(id=id)
+        if Dependency.objects.filter(pk=from_global_id(id)[1]).exists():
+            dependency_instance = Dependency.objects.get(pk=from_global_id(id)[1])
             dependency_instance.delete()
             return cls(dependency=dependency_instance, success=True)
 

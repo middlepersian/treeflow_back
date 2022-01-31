@@ -1,6 +1,7 @@
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.corpus.models import Resource, Author
 from mpcd.corpus.schemas.author import AuthorInput
 
@@ -78,7 +79,7 @@ class UpdateResource(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, authors, description, project, reference):
-        resource = Resource.objects.get(pk=id)
+        resource = Resource.objects.get(pk=from_global_id(id)[1])
         if Resource.objects.filter(project=project, description=description).exists():
             return cls(success=False)
         else:
@@ -108,8 +109,8 @@ class DeleteResource(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
-        if Resource.objects.filter(pk=id).exists():
-            resource = Resource.objects.get(pk=id)
+        if Resource.objects.filter(pk=from_global_id(id)[1]).exists():
+            resource = Resource.objects.get(pk=from_global_id(id)[1])
             resource.delete()
             return cls(resource=resource, success=True)
         else:

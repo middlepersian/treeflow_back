@@ -1,6 +1,8 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
+
 from mpcd.corpus.models import Corpus
 
 
@@ -74,8 +76,8 @@ class DeleteCorpus(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
-        if Corpus.objects.filter(id=id).exists():
-            Corpus.objects.get(id=id).delete()
+        if Corpus.objects.filter(pk=from_global_id(id)[1]).exists():
+            Corpus.objects.get(pk=from_global_id(id)[1]).delete()
             success = True
             return cls(success=success)
         else:
