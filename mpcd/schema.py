@@ -2,9 +2,8 @@
 import graphene
 import mpcd.corpus.schemas
 
-#import mpcd.dict.schema
 
-
+## TODO check consistency update by id or values
 class Query(
         # Corpus Queries
         mpcd.corpus.schemas.author.Query,
