@@ -42,6 +42,7 @@ class CreateFeatureValue(relay.ClientIDMutation):
             return cls(success=False)
         else:
             featurevalue = FeatureValue.objects.create(identifier=identifier)
+            featurevalue.save()
             return cls(featurevalue=featurevalue, success=True)
 
 

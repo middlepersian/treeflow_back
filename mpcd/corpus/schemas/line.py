@@ -55,6 +55,7 @@ class CreateLine(relay.ClientIDMutation):
             line_instance.number = number
             line_instance.folio = Folio.objects.get(pk=from_global_id(folio.id)[1])
             line_instance.comment = comment
+            line_instance.save()
             return cls(line=line_instance, success=True)
 
 

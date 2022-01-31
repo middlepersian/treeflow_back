@@ -42,6 +42,7 @@ class CreateCorpus(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, slug):
         corpus = Corpus.objects.create(name=name, slug=slug)
+        corpus.save()
         return CreateCorpus(corpus=corpus)
 
 

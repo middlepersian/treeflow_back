@@ -51,6 +51,7 @@ class CreateDependency(relay.ClientIDMutation):
 
         else:
             dependency_instance = Dependency.objects.create(head=head, rel=rel)
+            dependency_instance.save()
 
             return cls(dependency=dependency_instance, success=True)
 

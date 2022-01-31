@@ -45,6 +45,7 @@ class CreateMorphologicalAnnotation(relay.ClientIDMutation):
         else:
             morphological_annotation_instance = MorphologicalAnnotation.objects.create(
                 feature=feature, feature_value=feature_value)
+            morphological_annotation_instance.save()
             return cls(morphological_annotation=morphological_annotation_instance, success=True)
 
 

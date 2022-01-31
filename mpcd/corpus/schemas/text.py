@@ -3,7 +3,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Text, Author
+from mpcd.corpus.models import Text, Author, Resource, Source
 from mpcd.corpus.schemas.text_sigle import TextSigleInput
 from mpcd.corpus.schemas.corpus import CorpusNode
 from mpcd.corpus.schemas.author import AuthorInput
@@ -57,32 +57,51 @@ class CreateText(relay.ClientIDMutation):
         text_sigle = TextSigleInput()
         editors = List(AuthorInput)
         collaborators = List(AuthorInput)
-        resources = List(AuthorInput)
-        sources = List(AuthorInput)
+        resources = List(ResourceInput)
+        sources = List(SourceNode)
 
     text = Field(TextNode)
     success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, corpus, title, stage, text_sigle, editors, collaborators, resources, sources):
+
         # check that text does not exist same title and year
-        if Text.objects.filter(title=title, stage=stage).exists():
+        if Text.objects.filter(title=title).exists():
             return cls(success=False)
 
         else:
-            text_instance = Text.objects.create(id=id, corpus=corpus, title=title, stage=stage)
+            text_instance = Text.objects.create(id=id, title=title, stage=stage)
+
+            if TextSigle.objects.filter(sigle=text_sigle.sigle).exists():
+                text_sigle_instance = TextSigle.objects.get(sigle=text_sigle.sigle)
+            else:
+                text_sigle_instance = TextSigle.objects.create(sigle=text_sigle.sigle, genre=text_sigle.genre)
+            text_instance.text_sigle = text_sigle_instance
 
             for editor in editors:
-
                 author_instance, author_created = Author.objects.get_or_create(
                     name=editor.name, last_name=editor.last_name)
+                author_instance.save()
                 text_instance.editors.add(author_instance)
 
             for collaborator in collaborators:
                 author_instance, author_created = Author.objects.get_or_create(
                     name=editor.name, last_name=collaborator.last_name)
+                author_instance.save()
                 text_instance.collaborators.add(author_instance)
 
             for resource in resources:
-                # check if author exists
-                pass
+                resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
+                if resource.get('authors', None) is not None:
+                    for author in resource['authors']:
+                        author_instance, author_created = Author.objects.get_or_create(
+                            name=author.name, last_name=author.last_name)
+                        author_instance.save()
+                        resource_instance.authors.add(author_instance)
+                text_instance.resources.add(resource_instance)
+
+            for source in sources:
+                if Source.object.filter(id=source.id).exists():
+                    source_instance = Source.objects.get(pk=from_global_id(id[1]))
+                    text_instance.sources.add(source_instance)

@@ -1,4 +1,3 @@
-
 from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -26,6 +25,8 @@ class AuthorInput(InputObjectType):
     last_name = String()
 
 # Queries
+
+
 class Query(ObjectType):
     author = relay.Node.Field(AuthorNode)
     all_authors = DjangoFilterConnectionField(AuthorNode)
