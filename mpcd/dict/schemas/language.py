@@ -2,6 +2,7 @@
 from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.dict.models import Language
 
 
@@ -78,8 +79,8 @@ class DeleteLanguage(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
-        if Language.objects.filter(id=id).exists():
-            language_instance = Language.objects.get(id=id)
+        if Language.objects.filter(pk=from_global_id(id)[1]).exists():
+            language_instance = Language.objects.get(pk=from_global_id(id)[1])
             language_instance.delete()
             return cls(success=True)
 

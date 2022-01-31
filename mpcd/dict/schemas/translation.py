@@ -1,6 +1,7 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.dict.models import Translation, Language
 from mpcd.dict.schemas import LanguageInput
 
@@ -42,8 +43,8 @@ class CreateTranslation(relay.ClientIDMutation):
 
         else:
             translation_instance = Translation.objects.create(meaning=meaning)
-            if Language.objects.filter(id=language.id).exists():
-                language_instance = Language.objects.get(id=language)
+            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                language_instance = Language.objects.get(pk=from_global_id(language.id)[1])
                 translation_instance.language = language_instance
             translation_instance.save()
             return cls(translation=translation_instance, success=True)
@@ -61,11 +62,11 @@ class UpdateTranslation(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, meaning, language):
         # check that Definition  does not exist
-        if Translation.objects.filter(id=id).exists():
-            translation_instance = Translation.objects.get(id=id)
+        if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
+            translation_instance = Translation.objects.get(pk=from_global_id(id)[1])
             translation_instance.meaning = meaning
-            if Language.objects.filter(id=language.id).exists():
-                language_instance = Language.objects.get(id=language)
+            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                language_instance = Language.objects.get(pk=from_global_id(language.id)[1])
                 translation_instance.language = language_instance
             translation_instance.save()
             return cls(translation=translation_instance, success=True)
@@ -82,8 +83,8 @@ class DeleteTranslation(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
-        if Translation.objects.filter(id=id).exists():
-            translation_instance = Translation.objects.get(id=id)
+        if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
+            translation_instance = Translation.objects.get(pk=from_global_id(id)[1])
             translation_instance.delete()
             return cls(success=True)
         else:

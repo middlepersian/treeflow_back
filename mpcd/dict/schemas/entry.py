@@ -1,7 +1,9 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, List, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.dict.models import Dictionary, Lemma, Entry, Translation, Definition, Language, Category, Reference
+from graphql_relay import from_global_id
+
+from mpcd.dict.models import Dictionary, Lemma, Entry, Translation, Definition, Language, Category, Reference, LoanWord
 from mpcd.dict.schemas import DictionaryInput, LemmaInput, LoanWordInput, TranslationInput, DefinitionInput, CategoryInput, ReferenceInput
 
 
@@ -50,7 +52,7 @@ class CreateEntry(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if Entry.objects.filter(id=input['id']).exists():
+        if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
             return cls(success=False)
         else:
             # check if dict exists
@@ -168,8 +170,8 @@ class UpdateEntry(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if Entry.objects.filter(id=input['id']).exists():
-            entry = Entry.objects.get(id=input['id'])
+        if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
+            entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
             if input['dict']:
                 if Dictionary.objects.filter(slug=input['dict']['slug']).exists():
                     dict = Dictionary.objects.get(slug=input['dict']['slug'])
@@ -252,10 +254,10 @@ class DeleteEntry(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if Entry.objects.filter(id=input['id']).exists():
-            entry = Entry.objects.get(id=input['id'])
+        if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
+            entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
             entry.delete()
             return cls(success=True)
         else:

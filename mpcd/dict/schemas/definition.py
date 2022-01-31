@@ -2,6 +2,7 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Bool
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.dict.models import Definition, Language
+from graphql_relay import from_global_id
 from mpcd.dict.schemas import LanguageInput
 
 
@@ -17,6 +18,7 @@ class DefinitionInput(InputObjectType):
     language = LanguageInput()
 
 # Queries
+
 
 class Query(ObjectType):
     definition = relay.Node.Field(DefinitionNode)
@@ -36,13 +38,13 @@ class CreateDefinition(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, definition, id, language):
         # check that Definition  does not exist
-        if Definition.objects.filter(id=id).exists():
+        if Definition.objects.filter(pk=from_global_id(id)[1]).exists():
             return cls(success=False)
 
         else:
             definition_instance = Definition.objects.create(definition=definition)
-            if Language.objects.filter(id=language.id).exists():
-                language_instance = Language.objects.get(id=language)
+            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                language_instance = Language.objects.get(pk=from_global_id(id)[1])
                 definition_instance.language = language_instance
             definition_instance.save()
             return cls(definition=definition_instance, success=True)
@@ -61,9 +63,9 @@ class UpdateDefinition(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, id, definition, language):
         # check that Definition  does not exist
         if Definition.objects.filter(id=id).exists():
-            definition_instance = Definition.objects.get(id=id)
-            if Language.objects.filter(id=language.id).exists():
-                language_instance = Language.objects.get(id=language)
+            definition_instance = Definition.objects.get(pk=from_global_id(id)[1])
+            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                language_instance = Language.objects.get(pk=from_global_id(language.id)[1])
                 definition_instance.language = language_instance
             definition_instance.definition = definition
             definition_instance.save()
@@ -82,7 +84,7 @@ class DeleteDefinition(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Definition.objects.filter(id=id).exists():
-            definition_instance = Definition.objects.get(id=id)
+            definition_instance = Definition.objects.get(pk=from_global_id(id)[1])
             definition_instance.delete()
             return cls(success=True)
         else:

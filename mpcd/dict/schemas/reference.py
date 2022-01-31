@@ -1,6 +1,8 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
+
 from mpcd.dict.models import Reference
 
 
@@ -32,7 +34,7 @@ class CreateReference(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, reference, id, url):
         # check that Reference  does not exist
-        if Reference.objects.filter(id=id).exists():
+        if Reference.objects.filter(pk=from_global_id(id)[1]).exists():
             return cls(success=False)
 
         else:
@@ -53,8 +55,8 @@ class UpdateReference(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, reference, id, url):
         # check that Reference  does not exist
-        if Reference.objects.filter(id=id).exists():
-            reference_instance = Reference.objects.get(id=id)
+        if Reference.objects.filter(pk=from_global_id(id)[1]).exists():
+            reference_instance = Reference.objects.get(pk=from_global_id(id)[1])
             reference_instance.reference = reference
             reference_instance.url = url
             reference_instance.save()
@@ -72,8 +74,8 @@ class DeleteReference(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, reference, id):
         # check that Reference  does not exist
-        if Reference.objects.filter(id=id).exists():
-            reference_instance = Reference.objects.get(id=id)
+        if Reference.objects.filter(pk=from_global_id(id)[1]).exists():
+            reference_instance = Reference.objects.get(pk=from_global_id(id)[1])
             reference_instance.delete()
             return cls(success=True)
 

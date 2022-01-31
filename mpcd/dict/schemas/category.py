@@ -1,6 +1,7 @@
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.dict.models import Category
 
 
@@ -10,16 +11,19 @@ class CategoryNode(DjangoObjectType):
         filter_fields = {'category': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
+
 class CategoryInput(InputObjectType):
     category = String()
 
 # Queries
+
 
 class Query(ObjectType):
     category = relay.Node.Field(CategoryNode)
     all_categories = DjangoFilterConnectionField(CategoryNode)
 
 # Mutations
+
 
 class CreateCategory(relay.ClientIDMutation):
     class Input:
@@ -39,6 +43,7 @@ class CreateCategory(relay.ClientIDMutation):
             category_instance.save()
             return cls(category=category_instance, success=True)
 
+
 class UpdateCategory(relay.ClientIDMutation):
     class Input:
         id = ID()
@@ -50,9 +55,9 @@ class UpdateCategory(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, category):
 
-        if Category.objects.filter(id=id).exists():
+        if Category.objects.filter(pk=from_global_id(id)[1]).exists():
 
-            category_instance = Category.objects.get(id=id)
+            category_instance = Category.objects.get(pk=from_global_id(id)[1])
             category_instance.category = category
             category_instance.save()
 
@@ -60,6 +65,7 @@ class UpdateCategory(relay.ClientIDMutation):
 
         else:
             return cls(success=False)
+
 
 class DeleteCategory(relay.ClientIDMutation):
     class Input:
@@ -70,12 +76,13 @@ class DeleteCategory(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 
-        if Category.objects.filter(id=id).exists():
-            Category.objects.get(id=id).delete()
+        if Category.objects.filter(pk=from_global_id(id)[1]).exists():
+            Category.objects.get(pk=from_global_id(id)[1]).delete()
             return cls(success=True)
 
         else:
             return cls(success=False)
+
 
 class Mutation(ObjectType):
     create_category = CreateCategory.Field()

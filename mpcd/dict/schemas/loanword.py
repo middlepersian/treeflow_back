@@ -1,9 +1,12 @@
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from mpcd.dict.models import LoanWord, Translation, Language
 from mpcd.dict.schemas import LanguageInput, TranslationInput
 
+
+# TODO check if language IDs inside trnalsation are valid
 
 class LoanWordNode(DjangoObjectType):
     class Meta:
@@ -44,18 +47,18 @@ class CreateLoanWord(relay.ClientIDMutation):
 
         else:
             loanword_instance = LoanWord.objects.create(word=word)
-            if Language.objects.filter(id=language.id).exists():
-                language_instance = Language.objects.get(id=language)
+            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                language_instance = Language.objects.get(pk=from_global_id(language.id)[1])
                 loanword_instance.language = language_instance
             for translation in translations:
-                if Translation.objects.filter(id=translation.id).exists():
-                    translation_instance = Translation.objects.get(id=translation.id)
+                if Translation.objects.filter(pk=from_global_id(translation.id)[1]).exists():
+                    translation_instance = Translation.objects.get(pk=from_global_id(translation.id)[1])
                     loanword_instance.translations.add(translation_instance)
                 else:
                     translation_instance = Translation.objects.create(meaning=translation.meaning)
-                    if Language.objects.filter(id=translation.language.id).exists():
-                        language_instance = Language.objects.get(id=translation.language.id)
-                        translation_instance.language = language_instance
+                    language_instance, language_created = Language.objects.get_or_create(
+                        identifier=translation.language.identifier)
+                    translation_instance.language = language_instance
                     translation_instance.save()
                     loanword_instance.translations.add(translation_instance)
             loanword_instance.save()
@@ -75,25 +78,27 @@ class UpdateLoanWord(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, word, language, translations):
         # check that Definition  does not exist
-        if LoanWord.objects.filter(id=id).exists():
-            loanword_instance = LoanWord.objects.get(id=id)
+        if LoanWord.objects.filter(pk=from_global_id(id)[1]).exists():
+            loanword_instance = LoanWord.objects.get(pk=from_global_id(language.id)[1])
             loanword_instance.word = word
-            if Language.objects.filter(id=language.id).exists():
-                language_instance = Language.objects.get(id=language.id)
+            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                language_instance = Language.objects.get(pk=from_global_id(language.id)[1])
                 loanword_instance.language = language_instance
             for translation in translations:
-                if Translation.objects.filter(id=translation.id).exists():
-                    translation_instance = Translation.objects.get(id=translation.id)
+                if Translation.objects.filter(pk=from_global_id(language.id)[1]).exists():
+                    translation_instance = Translation.objects.get(pk=from_global_id(language.id)[1])
                     translation_instance.meaning = translation.meaning
-                    if Language.objects.filter(id=translation.language.id).exists():
-                        language_instance = Language.objects.get(id=translation.language.id)
+                    if Language.objects.filter(pk=from_global_id(translation.language.id)[1]).exists():
+                        language_instance, language_created = Language.objects.get_or_create(
+                            pk=from_global_id(translation.language.id)[1])
                         translation_instance.language = language_instance
                     translation_instance.save()
                     loanword_instance.translations.add(translation_instance)
                 else:
                     translation_instance = Translation.objects.create(meaning=translation.meaning)
                     if Language.objects.filter(id=translation.language.id).exists():
-                        language_instance = Language.objects.get(id=translation.language.id)
+                        language_instance, language_created = Language.objects.get_or_create(
+                            pk=from_global_id(translation.language.id)[1])
                         translation_instance.language = language_instance
                     translation_instance.save()
                     loanword_instance.translations.add(translation_instance)
@@ -110,8 +115,8 @@ class DeleteLoanWord(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
-        if LoanWord.objects.filter(id=id).exists():
-            loanword_instance = LoanWord.objects.get(id=id)
+        if LoanWord.objects.filter(pk=from_global_id(id)[1]).exists():
+            loanword_instance = LoanWord.objects.get(pk=from_global_id(id)[1])
             loanword_instance.delete()
             return cls(success=True)
         else:

@@ -1,6 +1,8 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
+
 from mpcd.dict.models import Dictionary
 
 
@@ -58,9 +60,9 @@ class UpdateDictionary(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, name, slug):
 
-        if Dictionary.objects.filter(id=id).exists():
+        if Dictionary.objects.filter(pk=from_global_id(id)[1]).exists():
 
-            dictionary_instance = Dictionary.objects.get(id=id)
+            dictionary_instance = Dictionary.objects.get(pk=from_global_id(id)[1])
             dictionary_instance.name = name
             dictionary_instance.slug = slug
             dictionary_instance.save()
@@ -79,8 +81,8 @@ class DeleteDictionary(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 
-        if Dictionary.objects.filter(id=id).exists():
-            Dictionary.objects.get(id=id).delete()
+        if Dictionary.objects.filter(pk=from_global_id(id)[1]).exists():
+            Dictionary.objects.get(pk=from_global_id(id)[1]).delete()
             return cls(success=True)
         else:
             return cls(success=False)
