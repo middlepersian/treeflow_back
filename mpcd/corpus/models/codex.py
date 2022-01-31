@@ -1,10 +1,8 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
-from .token import Token
 from .bibliography import BibEntry
 from .source import Source
 from .author import Author
-from .line import Line
 
 
 class CodexCh(models.TextChoices):

@@ -1,8 +1,16 @@
-from .token import  Token, TokenAdmin
+from .token import Token, TokenAdmin
 from .text_sigle import TextSigle
-from .corpus import Corpus, Resource, Text, Sentence
+from .corpus import Corpus
+from .resource import Resource
+from .text import Text
+from .sentence import Sentence
+from .section import Section
+from .section_type import SectionType
 from .edition import Edition
-from .codex import Codex, Folio, Line, CodexToken
+from .codex import Codex
+from .folio import Folio
+from .line import Line
+from .codex_token import CodexToken
 from .author import Author
 from .bibliography import BibEntry
 from .source import Source

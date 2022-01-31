@@ -1,11 +1,10 @@
-
-from .text import Text
-from .token import Token
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 User = get_user_model()
+from .text import Text
+from .token import Token
 
 
 class Sentence(models.Model):
@@ -17,7 +16,7 @@ class Sentence(models.Model):
     translation = models.TextField(null=True, blank=True)
     comment = models.CharField(max_length=255, blank=True)
 
-    history = HistoricalRecords(inherit=True)
+    history = HistoricalRecords()
 
     def get_tokens(self):
         return "|".join([p.transcription for p in self.tokens.all()])
