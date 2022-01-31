@@ -1,11 +1,10 @@
-from django.db.models.fields import related
-import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
 from .token import Token
 from .bibliography import BibEntry
 from .source import Source
 from .author import Author
+from .line import Line
 
 
 class CodexCh(models.TextChoices):
@@ -50,35 +49,3 @@ class Codex(Source):
 
     def __str__(self):
         return '{} {}'.format(self.sigle, self.title)
-
-
-class Folio(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    identifier = models.CharField(max_length=100)
-    codex = models.ForeignKey(Codex, on_delete=models.CASCADE, related_name='folio_codex')
-    comment = models.CharField(max_length=255, blank=True)
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return '{}'.format(self.name)
-
-
-class Line(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    number = models.IntegerField()
-    folio = models.ForeignKey(Folio, on_delete=models.DO_NOTHING, related_name='line_folio')
-    comment = models.TextField(blank=True)
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return '{} {}'.format(self.side, self.number)
-
-
-# TODO: write constrain for position
-class CodexToken(Token):
-    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='codex_token_line')
-    position = models.PositiveSmallIntegerField(null=True)
-    history = HistoricalRecords(inherit=True)
-
-    def __str__(self):
-        return self.transcription
