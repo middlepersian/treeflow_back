@@ -81,7 +81,7 @@ class UpdateBibEntry(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, title, year, authors, id):
         # check that bib exists with id
         if BibEntry.objects.filter(id=id).exists():
-            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id[1]))
+            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id)[1])
             bibentry_instance.title = title
             bibentry_instance.year = year
             bibentry_instance.save()
@@ -115,11 +115,12 @@ class DeleteBibEntry(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if BibEntry.objects.filter(pk=from_global_id(id[1])).exists():
-            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id[1]))
+            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id)[1])
             bibentry_instance.delete()
             return cls(success=True)
         else:
             return cls(success=False)
+
 
 class Mutation(ObjectType):
     create_bibentry = CreateBibEntry.Field()

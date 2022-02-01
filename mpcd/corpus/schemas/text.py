@@ -1,14 +1,13 @@
-from app_backend.mpcd.corpus.models.text_sigle import TextSigle
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Text, Author, Resource, Source
+from mpcd.corpus.models import Text, Author, Resource, Source, TextSigle
 from mpcd.corpus.schemas.text_sigle import TextSigleInput
 from mpcd.corpus.schemas.corpus import CorpusNode
 from mpcd.corpus.schemas.author import AuthorInput
 from mpcd.corpus.schemas.source import SourceNode
-from mpcd.corpus.schemas.resource import ResourceNode, ResourceInput
+from mpcd.corpus.schemas.resource import ResourceInput
 
 
 # import the logging library

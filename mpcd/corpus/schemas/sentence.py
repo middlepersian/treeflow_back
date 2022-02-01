@@ -1,9 +1,10 @@
 
-from graphene import relay, Token, String, Field, Boolean, ID, List, ObjectType, InputObjectType
+from graphene import relay, String, Field, Boolean, ID, List, ObjectType, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Sentence, Text
+from mpcd.corpus.models import Sentence, Text, Token
+from mpcd.corpus.schemas.text import TextNode
 
 # import the logging library
 import logging
@@ -14,15 +15,15 @@ logger = logging.getLogger(__name__)
 class SentenceNode(DjangoObjectType):
     class Meta:
         model = Sentence
-        filter_fields = {'text': ['exact', 'icontains', 'istartswith'],
-                         'translation': ['exact', 'icontains', 'istartswith'],
-                         'comment': ['exact', 'icontains', 'istartswith']
-                         }
+        filter_fields = {
+            'translation': ['exact', 'icontains', 'istartswith'],
+            'comment': ['exact', 'icontains', 'istartswith']
+        }
         interfaces = (relay.Node,)
 
 
 class SentenceInput(InputObjectType):
-    text = String()
+    text = TextNode()
     tokens = List(Token)
     translation = String()
     comment = String()
@@ -60,16 +61,17 @@ class CreateSentence(relay.ClientIDMutation):
 
         else:
             if Text.objects.filter(pk=from_global_id(text.id)[1]).exists():
-                sentence_instance = Sentence.objects.create(translation=translation, text=text)
+                sentence_instance = Sentence.objects.create(translation=translation)
+                sentence_instance.text = Text.objects.get(pk=from_global_id(text.id)[1])
+                if tokens:
+                    for token in tokens:
+                        token = Token.objects.get(pk=from_global_id(token.id)[1])
+                        sentence_instance.tokens.add(token)
+                sentence_instance.comment = comment
+                sentence_instance.save()
+                return cls(sentence=sentence_instance, success=True)
             else:
                 return cls(success=False)
-            if tokens:
-                for token in tokens:
-                    token = Token.objects.get(pk=from_global_id(token.id)[1])
-                    sentence_instance.tokens.add(token)
-            sentence_instance.comment = comment
-            sentence_instance.save()
-            return cls(sentence=sentence_instance, success=True)
 
 
 class UpdateSentence(relay.ClientIDMutation):

@@ -6,7 +6,6 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import CodexToken
 
 
-
 class CodexTokenNode(DjangoObjectType):
     class Meta:
         model = CodexToken
@@ -14,3 +13,4 @@ class CodexTokenNode(DjangoObjectType):
                          'transliteration': ['exact', 'icontains', 'istartswith']
                          }
         interfaces = (relay.Node,)
+# TODO CodexTokenInput and also Queries and Mutations
