@@ -29,9 +29,6 @@ class CodexCh(models.TextChoices):
 
 class Codex(Source):
     sigle = models.CharField(max_length=10, unique=True, choices=CodexCh.choices, default="")
-
-    title = models.CharField(max_length=100, default="")
-
     copy_date = models.TextField(null=True, blank=True)
 
     copy_place_name = models.CharField(max_length=100, null=True, blank=True)
