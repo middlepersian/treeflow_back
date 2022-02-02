@@ -38,12 +38,13 @@ class CreateCorpus(relay.ClientIDMutation):
         slug = String(required=True)
 
     corpus = Field(CorpusNode)
+    success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, slug):
         corpus = Corpus.objects.create(name=name, slug=slug)
         corpus.save()
-        return CreateCorpus(corpus=corpus)
+        return cls(success=True, corpus=corpus)
 
 
 class UpdateCorpus(relay.ClientIDMutation):
@@ -57,8 +58,8 @@ class UpdateCorpus(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, name, slug):
-        if Corpus.objects.filter(id=id).exists():
-            corpus = Corpus.objects.get(id=id)
+        if Corpus.objects.filter(pk=from_global_id(id)[1]).exists():
+            corpus = Corpus.objects.get(pk=from_global_id(id)[1])
             corpus.name = name
             corpus.slug = slug
             corpus.save()

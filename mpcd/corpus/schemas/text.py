@@ -2,11 +2,11 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Text, Author, Resource, Source, TextSigle
+from mpcd.corpus.models import Text, Author, Resource, Corpus, TextSigle, Source
 from mpcd.corpus.schemas.text_sigle import TextSigleInput
-from mpcd.corpus.schemas.corpus import CorpusNode
+from mpcd.corpus.schemas.corpus import CorpusInput
 from mpcd.corpus.schemas.author import AuthorInput
-from mpcd.corpus.schemas.source import SourceNode
+from mpcd.corpus.schemas.source import SourceInput
 from mpcd.corpus.schemas.resource import ResourceInput
 
 
@@ -27,15 +27,15 @@ class TextNode(DjangoObjectType):
 
 
 class TextInput(InputObjectType):
-    id = ID()
-    corpus = CorpusNode()
+    # id = ID()
+    corpus = CorpusInput()
     title = String()
     stage = String()
     text_sigle = TextSigleInput()
     editors = List(AuthorInput)
     collaborators = List(AuthorInput)
     resources = List(AuthorInput)
-    sources = List(SourceNode)
+    sources = List(SourceInput)
 
 # Query
 
@@ -49,48 +49,69 @@ class Query(ObjectType):
 
 class CreateText(relay.ClientIDMutation):
     class Input:
-        id = ID()
-        corpus = CorpusNode()
+       # id = ID()
+        corpus = CorpusInput()
         title = String()
         stage = String()
         text_sigle = TextSigleInput()
         editors = List(AuthorInput)
         collaborators = List(AuthorInput)
         resources = List(ResourceInput)
-        sources = List(SourceNode)
+        sources = List(SourceInput)
 
     text = Field(TextNode)
     success = Boolean()
+    error = String()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, id, corpus, title, stage, text_sigle, editors, collaborators, resources, sources):
+    def mutate_and_get_payload(cls, root, info, **input):
 
-        # check that text does not exist same title and year
-        if Text.objects.filter(title=title).exists():
-            return cls(success=False)
+        # check that corpus exists
+        if input.get('corpus', None) is None:
+            return cls(success=False, error="No corpus provided")
 
-        else:
-            text_instance = Text.objects.create(id=id, title=title, stage=stage)
+        # and that there are sources available
+        if input.get('sources', None) is None:
+            return cls(success=False, error="No sources provided")
 
-            if TextSigle.objects.filter(sigle=text_sigle.sigle).exists():
-                text_sigle_instance = TextSigle.objects.get(sigle=text_sigle.sigle)
-            else:
-                text_sigle_instance = TextSigle.objects.create(sigle=text_sigle.sigle, genre=text_sigle.genre)
+        # and that there is title available
+        if input.get('title', None) is None:
+            return cls(success=False, error="No title provided")
+
+        # and that there is a stage available
+        if input.get('stage', None) is None:
+            return cls(success=False, error="No stage provided")
+
+        # create text with title and stage
+        text_instance = Text.objects.create(title=input.get('title'), stage=input.get('stage'))
+
+        # get corpus
+        corpus_instance = Corpus.objects.get(slug=input['corpus']['slug'])
+        text_instance.corpus = corpus_instance
+
+        # get source
+        for source in input['sources']:
+            source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
+            text_instance.sources.add(source_instance)
+
+        if input.get('text_sigle', None) is not None:
+            text_sigle_instance, text_sigle_created = TextSigle.objects.get_or_create(
+                sigle=input.get('text_sigle').get('sigle'), genre=input.get('text_sigle').get('genre'))
             text_instance.text_sigle = text_sigle_instance
-
-            for editor in editors:
+        if input.get('editors', None) is not None:
+            for editor in input.get('editors'):
                 author_instance, author_created = Author.objects.get_or_create(
                     name=editor.name, last_name=editor.last_name)
                 author_instance.save()
                 text_instance.editors.add(author_instance)
-
-            for collaborator in collaborators:
+        if input.get('collaborators', None) is not None:
+            for collaborator in input.get('collaborators'):
                 author_instance, author_created = Author.objects.get_or_create(
                     name=editor.name, last_name=collaborator.last_name)
                 author_instance.save()
                 text_instance.collaborators.add(author_instance)
-
-            for resource in resources:
+        if input.get('resources', None) is not None:
+            for resource in input.get('resources'):
                 resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
                 if resource.get('authors', None) is not None:
                     for author in resource['authors']:
@@ -100,7 +121,9 @@ class CreateText(relay.ClientIDMutation):
                         resource_instance.authors.add(author_instance)
                 text_instance.resources.add(resource_instance)
 
-            for source in sources:
-                if Source.object.filter(id=source.id).exists():
-                    source_instance = Source.objects.get(pk=from_global_id(id[1]))
-                    text_instance.sources.add(source_instance)
+        text_instance.save()
+        return cls(text=text_instance, success=True)
+
+
+class Mutation(ObjectType):
+    create_text = CreateText.Field()

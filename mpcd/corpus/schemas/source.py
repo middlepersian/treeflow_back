@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType
+from graphene import relay, ObjectType, String, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Source
@@ -13,9 +13,16 @@ logger = logging.getLogger(__name__)
 class SourceNode(DjangoObjectType):
     class Meta:
         model = Source
-        filter_fields = {'identifier': ['exact', 'icontains', 'istartswith'],
+        filter_fields = {'title': ['exact', 'icontains', 'istartswith'],
                          'slug': ['exact', 'icontains', 'istartswith'],
                          'description': ['exact', 'icontains', 'istartswith']}
+
+
+class SourceInput(InputObjectType):
+    id = String()
+    #title = String()
+    #slug = String()
+    #description = String()
 
 
 class Query(ObjectType):

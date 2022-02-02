@@ -11,9 +11,11 @@ class SectionTypeNode(DjangoObjectType):
         filter_fields = {
             'identifier': ['exact', 'icontains', 'istartswith']
         }
+        interfaces = (relay.Node,)
 
 
 class SectionTypeInput(InputObjectType):
+ 
     identifier = String()
 
 

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class EditionNode(DjangoObjectType):
     class Meta:
         model = Edition
-        filter_fields = {'name': ['exact', 'icontains', 'istartswith'],
+        filter_fields = {'title': ['exact', 'icontains', 'istartswith'],
                          'slug': ['exact', 'icontains', 'istartswith'],
                          'description': ['exact', 'icontains', 'istartswith'],
                          }
@@ -25,7 +25,7 @@ class EditionNode(DjangoObjectType):
 
 class EditionInput(InputObjectType):
     id = ID()
-    name = String()
+    title = String()
     slug = String()
     description = String()
     authors = List(AuthorInput)
@@ -44,7 +44,7 @@ class EditionQuery(ObjectType):
 class CreateEdition(relay.ClientIDMutation):
     class Input:
         id = ID()
-        name = String()
+        title = String()
         slug = String()
         description = String()
         authors = List(AuthorInput)
@@ -55,10 +55,10 @@ class CreateEdition(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if Edition.get.filter(name=input['name']).exists():
-            return cls(errors=['Edition with this name already exists.'])
+        if Edition.get.filter(name=input['title']).exists():
+            return cls(errors=['Edition with this title already exists.'])
         else:
-            edition = Edition(name=input['name'], slug=input['slug'], description=input['description'])
+            edition = Edition(title=input['title'], slug=input['slug'], description=input['description'])
             edition.save()
             # TODO add authors, references, text_sigle
             return cls(success=True, edition=edition)
@@ -67,7 +67,7 @@ class CreateEdition(relay.ClientIDMutation):
 class UpdateEdition(relay.ClientIDMutation):
     class Input:
         id = ID()
-        name = String()
+        title = String()
         slug = String()
         description = String()
         authors = List(AuthorInput)
@@ -78,15 +78,15 @@ class UpdateEdition(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if Edition.objects.filter(name=input['name']).exists():
+        if Edition.objects.filter(title=input['title']).exists():
             edition = Edition.objects.get(pk=input['id'])
-            edition.name = input['name']
+            edition.title = input['title']
             edition.slug = input['slug']
             edition.description = input['description']
             edition.save()
             return cls(success=True, edition=edition)
         else:
-            return cls(errors=['Edition with this name already exists.'])
+            return cls(errors=['Edition with this title already exists.'])
         # TODO add authors, references, text_sigle
 
 

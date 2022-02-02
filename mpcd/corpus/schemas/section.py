@@ -3,7 +3,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Section, Text, Source, Token, SectionType
-from mpcd.corpus.schemas import TextNode, SourceNode, TokenNode
+from mpcd.corpus.schemas import TextNode, SourceNode, TokenInput, SectionTypeInput
 
 
 # import the logging library
@@ -29,9 +29,9 @@ class SectionInput(InputObjectType):
     id = ID()
     identifier = String(required=True)
     text = TextNode()
-    section_type = SectionNode()
+    section_type = SectionTypeInput()
     source = SourceNode()
-    tokens = List(TokenNode)
+    tokens = List(TokenInput)
     previous = SectionNode()
 
 
@@ -40,9 +40,9 @@ class CreateSection(relay.ClientIDMutation):
     class Input:
         identifier = String()
         text = TextNode()
-        section_type = SectionNode()
+        section_type = SectionTypeInput()
         source = SourceNode()
-        tokens = List(TokenNode)
+        tokens = List(TokenInput)
         previous = SectionNode()
 
     section = Field(SectionNode)
@@ -52,18 +52,22 @@ class CreateSection(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateSection.mutate_and_get_payload()')
 
-        if Section.objects.filter(pk=from_global_id(input['id'])[1]).exists():
-            return cls(success=False)
+        # check if ID available
+        if input.get('id', None) is not None:
+            if Section.objects.filter(pk=from_global_id(input['id'])[1]).exists():
+                logger.error('Section with ID {} already exists.'.format(input['id']))
+                return cls(success=False)
         else:
             section_instance = Section.objects.create(identifier=input['identifier'])
             if input.get('text', None) is not None:
-                text = Text.objects.get(pk=(input['text']['id'])[1])
+                text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
                 section_instance.text = text
             if input.get('section_type', None) is not None:
-                section_type = SectionType.objects.get(pk=(input['section_type']['id'])[1])
+                section_type = SectionType.objects.get(identifier=input['section_type']['identifier'])
+                logger.error('section_type: {}'.format(section_type))
                 section_instance.section_type = section_type
             if input.get('source', None) is not None:
-                source = Source.objects.get(pk=(input['source']['id'])[1])
+                source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
                 section_instance.source = source
             if input.get('tokens', None) is not None:
                 for token in input('tokens'):
@@ -82,9 +86,9 @@ class UpdateSection(relay.ClientIDMutation):
         id = ID()
         identifier = String()
         text = TextNode()
-        section_type = SectionNode()
+        section_type = SectionTypeInput()
         source = SourceNode()
-        tokens = List(TokenNode)
+        tokens = List(TokenInput)
         previous = SectionNode()
 
     section = Field(SectionNode)
@@ -100,10 +104,10 @@ class UpdateSection(relay.ClientIDMutation):
                 text = Text.objects.get(pk=(input['text']['id'])[1])
                 section_instance.text = text
             if input.get('section_type', None) is not None:
-                section_type = SectionType.objects.get(pk=(input['section_type']['id'])[1])
+                section_type = SectionType.objects.get(pk=from_global_id(input['section_type']['id'])[1])
                 section_instance.section_type = section_type
             if input.get('source', None) is not None:
-                source = Source.objects.get(pk=(input['source']['id'])[1])
+                source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
                 section_instance.source = source
             if input.get('tokens', None) is not None:
                 section_instance.tokens.clear()
@@ -111,7 +115,7 @@ class UpdateSection(relay.ClientIDMutation):
                     token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
                     section_instance.tokens.add(token_instance)
             if input.get('previous', None) is not None:
-                previous = Section.objects.get(pk=(input['previous']['id'])[1])
+                previous = Section.objects.get(pk=from_global_id(input['previous']['id'])[1])
                 section_instance.previous = previous
             section_instance.save()
             return cls(section=section_instance, success=True)

@@ -1,3 +1,4 @@
+from calendar import c
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -66,51 +67,47 @@ class CreateCodex(relay.ClientIDMutation):
 
     codex = Field(CodexNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, sigle, title, copy_date, copy_place_name, copy_place_latitude, copy_place_longitude, library, signature, scribes, facsimiles):
-        # check that codex with the same sigle does not exist
-        if not Codex.objects.filter(sigle=sigle).exists():
-            return cls(success=False)
+    def mutate_and_get_payload(cls, root, info, **input):
+        # check sigle is provided and that codex does not already exist with same sigle
+        if input.get('sigle', None) is None:
+            return cls(success=False, errors=["No sigle provided"])
 
         else:
-            codex_instance = Codex.objects.create(sigle=sigle, title=title, copy_date=copy_date, copy_place_name=copy_place_name,
-                                                  copy_place_latitude=copy_place_latitude, copy_place_longitude=copy_place_longitude, library=library, signature=signature)
+            if Codex.objects.filter(sigle=input.get('sigle')).exists():
+                return cls(success=False, errors=[{'message': 'Codex with the same sigle already exists'}])
 
-            for scribe in scribes:
-                # check if author exists
-                if Author.objects.filter(name=scribe.name, last_name=scribe.last_name).exists():
-                    author_instance = Author.objects.get(name=scribe.name, last_name=scribe.last_name)
-                else:
-                    # create it
-                    author_instance = Author.objects.create(name=scribe.name, last_name=scribe.last_name)
+        # check that title is provided
+        if input.get('title', None) is None:
+            return cls(success=False, errors=["No title provided"])
+
+        else:
+
+            codex_instance = Codex.objects.create(sigle=input.get('sigle'), title=input.get('title'))
+
+            if input.get('copy_date', None) is not None:
+                codex_instance.copy_date = input.get('copy_date')
+            if input.get('copy_place_name', None) is not None:
+                codex_instance.copy_place_name = input.get('copy_place_name')
+            if input.get('copy_place_latitude', None) is not None:
+                codex_instance.copy_place_latitude = input.get('copy_place_latitude')
+            if input.get('copy_place_longitude', None) is not None:
+                codex_instance.copy_place_longitude = input.get('copy_place_longitude')
+            if input.get('library', None) is not None:
+                codex_instance.library = input.get('library')
+            if input.get('signature', None) is not None:
+                codex_instance.signature = input.get('signature')
+
+            if input.get('scribes', None) is not None:
+                for scribe in input.get('scribes'):
+                    author_instance, author_created = Author.objects.get_or_create(
+                        name=scribe.name, last_name=scribe.last_name)
                     author_instance.save()
-
                 codex_instance.authors.add(author_instance)
-
-            for facsimile in facsimiles:
-                # check if bibentry exists
-                if BibEntry.objects.filter(pk=from_global_id(facsimile.id)[1]).exists():
-
-                    bibentry_instance = BibEntry.objects.get(pk=from_global_id(facsimile.id)[1])
-                else:
-                    # create it
-                    bibentry_instance = BibEntry.objects.create(title=facsimile.title, year=facsimile.year)
-                    for bib_author in facsimile.authors:
-                        # check if author exists
-                        if Author.objects.filter(name=bib_author.name, last_name=bib_author.last_name).exists():
-                            author_instance = Author.objects.get(name=bib_author.name, last_name=bib_author.last_name)
-                        else:
-                            # create it
-                            author_instance = Author.objects.create(
-                                name=bib_author.name, last_name=bib_author.last_name)
-                            author_instance.save()
-                        bibentry_instance.authors.add(author_instance)
-
-                    bibentry_instance.save()
-
+           # TODO implement facsimiles
             codex_instance.save()
-
             return cls(codex=codex_instance, success=True)
 
 
@@ -159,7 +156,7 @@ class UpdateCodex(relay.ClientIDMutation):
 
                 codex_instance.authors.add(author_instance)
 
-           # clear facsimiles
+            # clear facsimiles
             codex_instance.facsimiles.clear()
             for facsimile in facsimiles:
                 # check if bibentry exists

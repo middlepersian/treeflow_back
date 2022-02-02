@@ -3,7 +3,7 @@ import graphene
 import mpcd.corpus.schemas
 
 
-## TODO check consistency update by id or values
+# TODO check consistency update by id or values
 class Query(
         # Corpus Queries
         mpcd.corpus.schemas.author.Query,
@@ -18,8 +18,11 @@ class Query(
         mpcd.corpus.schemas.morphological_annotation.Query,
         mpcd.corpus.schemas.pos.Query,
         mpcd.corpus.schemas.resource.Query,
+        mpcd.corpus.schemas.section_type.Query,
         mpcd.corpus.schemas.text_sigle.Query,
+        mpcd.corpus.schemas.text.Query,
         mpcd.corpus.schemas.token.Query,
+        mpcd.corpus.schemas.section.Query,
         # Dict Queries
         mpcd.dict.schemas.category.Query,
         mpcd.dict.schemas.definition.Query,
@@ -48,7 +51,10 @@ class Mutation(
         mpcd.corpus.schemas.morphological_annotation.Mutation,
         mpcd.corpus.schemas.pos.Mutation,
         mpcd.corpus.schemas.resource.Mutation,
+        mpcd.corpus.schemas.section.Mutation,
+        mpcd.corpus.schemas.section_type.Mutation,
         mpcd.corpus.schemas.text_sigle.Mutation,
+        mpcd.corpus.schemas.text.Mutation,
         mpcd.corpus.schemas.token.Mutation,
         # Dict Mutations
         mpcd.dict.schemas.category.Mutation,
