@@ -1,5 +1,4 @@
-from calendar import c
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -45,20 +44,34 @@ class CreateFolio(relay.ClientIDMutation):
 
     folio = Field(FolioNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, identifier, codex, comment):
+    def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateFolio.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
-        if Folio.objects.filter(identifier=identifier).exists():
-            return cls(success=False)
+
+        if input.get('identifier', None) is not None:
+            identifier = input.get('identifier')
         else:
-            folio_instance = Folio.objects.create()
-            folio_instance.identifier = identifier
-            folio_instance.codex = codex
-            folio_instance.comment = comment
-            folio_instance.save()
-            return cls(folio=folio_instance, success=True)
+            return cls(success=False, errors=['identifier is required'])
+
+        if input.get('codex', None) is not None:
+            codex_instance = Codex.objects.get(pk=from_global_id(input.get('codex').get('id'))[1])
+        else:
+            return cls(success=False, errors=['codex is required'])
+
+        if Folio.objects.filter(identifier=identifier).exists():
+            return cls(success=False, errors=['Folio already exists'])
+
+        folio = Folio.objects.create(identifier=identifier, codex=codex_instance)
+
+        if input.get('comment', None) is not None:
+            folio.comment = input.get('comment')
+    
+        folio.save()
+
+        return cls(folio=folio, success=True)
 
 
 class UpdateFolio(relay.ClientIDMutation):
@@ -71,7 +84,7 @@ class UpdateFolio(relay.ClientIDMutation):
     folio = Field(FolioNode)
     success = Boolean()
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, id, identifier, codex, comment):
         logger.debug('UpdateFolio.mutate_and_get_payload()')
         if Folio.objects.filter(pk=from_global_id(id)[1]).exists() and Codex.objects.filter(pk=from_global_id(codex.id)[1]).exists():
@@ -92,7 +105,7 @@ class DeleteFolio(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteFolio.mutate_and_get_payload()')
         if Folio.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -104,6 +117,6 @@ class DeleteFolio(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
-    create_author = CreateFolio.Field()
-    update_author = UpdateFolio.Field()
-    delete_author = DeleteFolio.Field()
+    create_folio = CreateFolio.Field()
+    update_folio = UpdateFolio.Field()
+    delete_folio = DeleteFolio.Field()

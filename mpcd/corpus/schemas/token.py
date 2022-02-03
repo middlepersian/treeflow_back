@@ -4,10 +4,11 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.dict.models import Entry, Lemma, Language, Translation
-from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency
+from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import POSInput
 from mpcd.corpus.schemas import DependencyInput
+from mpcd.corpus.schemas import TextInput
 from mpcd.dict.schemas import EntryInput
 # import the logging library
 import logging
@@ -28,6 +29,7 @@ class TokenInput(InputObjectType):
     id = ID()
     transcription = String()
     transliteration = String()
+    text = TextInput()
     lemma = EntryInput()
     pos = POSInput()
     morphological_annotation = List(MorphologicalAnnotationInput)
@@ -50,6 +52,7 @@ class CreateToken(relay.ClientIDMutation):
     class Input:
         transcription = String()
         transliteration = String()
+        text = TextInput()
         lemma = EntryInput()
         pos = POSInput()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -70,6 +73,13 @@ class CreateToken(relay.ClientIDMutation):
             # add transcription and transliteration
             token = Token.objects.create(transcription=input['transcription'], transliteration=input['transliteration'])
             logger.error("TOKEN: {}".format(token))
+
+            if input.get('text', None) is not None:
+                if Text.objects.filter(pk=from_global_id(input['text']['id'])[1]).exists():
+                    text = Text.objects.get(id=input['text']['id'])
+                    token.text = text
+                else:
+                    return cls(token=None, success=False)
 
             # check if lemma available
             if input.get('lemma', None) is not None:
