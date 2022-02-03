@@ -68,7 +68,7 @@ class CreateFolio(relay.ClientIDMutation):
 
         if input.get('comment', None) is not None:
             folio.comment = input.get('comment')
-    
+
         folio.save()
 
         return cls(folio=folio, success=True)
