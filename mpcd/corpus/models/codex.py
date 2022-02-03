@@ -1,8 +1,8 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
-from .bibliography import BibEntry
 from .source import Source
 from .author import Author
+from .bibliography import BibEntry
 
 
 class CodexCh(models.TextChoices):
@@ -38,7 +38,8 @@ class Codex(Source):
     library = models.CharField(max_length=100,  blank=True)
     signature = models.CharField(max_length=100,  blank=True)
     scribes = models.ManyToManyField(Author, blank=True, related_name='codex_scribes')
-    facsimiles = models.ManyToManyField(BibEntry,  blank=True, related_name='codex_facsimiles')
+    facsimiles = models.ManyToManyField(BibEntry,
+                                        blank=True, related_name='codex_facsimiles')
 
     history = HistoricalRecords()
 
