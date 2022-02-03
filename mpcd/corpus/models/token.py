@@ -1,15 +1,19 @@
 import uuid as uuid_lib
 from django.db import models
-from mpcd.dict.models import Entry
 from simple_history.models import HistoricalRecords
 from django.contrib import admin
+from mpcd.dict.models import Entry
+from .author import Author
+from .bibliography import BibEntry
+from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .pos import POS
-from .dependency import Dependency
+from .text import Text
 
 
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True, related_name='token_lemma')
