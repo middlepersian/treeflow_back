@@ -1,7 +1,3 @@
-from .resource import Resource
-from .source import Source
-from .text_sigle import TextSigle
-from .token import Token
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
@@ -22,5 +18,3 @@ class Corpus(models.Model):
 
     def __str__(self):
         return self.slug
-
-
