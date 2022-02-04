@@ -9,6 +9,12 @@ class Line(models.Model):
     number = models.IntegerField()
     folio = models.ForeignKey(Folio, on_delete=models.CASCADE, related_name='line_folio')
     comment = models.TextField(blank=True)
+    previous = models.OneToOneField('self',
+                                    related_name='next',
+                                    blank=True,
+                                    null=True,
+                                    on_delete=models.DO_NOTHING)
+
     history = HistoricalRecords()
 
     def __str__(self):

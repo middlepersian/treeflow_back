@@ -23,8 +23,9 @@ class Token(models.Model):
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
     comment = models.TextField(blank=True)
     avestan = models.URLField(max_length=100, null=True, blank=True)
+
     previous = models.OneToOneField('self',
-                                    related_name='token_previous',
+                                    related_name='next',
                                     blank=True,
                                     null=True,
                                     on_delete=models.DO_NOTHING)

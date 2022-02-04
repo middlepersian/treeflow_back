@@ -17,7 +17,7 @@ class Section(models.Model):
     source = models.ForeignKey(Source, on_delete=models.CASCADE, related_name='section_source', null=True, blank=True)
     tokens = models.ManyToManyField(Token, related_name='section_tokens')
     previous = models.OneToOneField('self', on_delete=models.DO_NOTHING, null=True,
-                                    blank=True, related_name='section_previous')
+                                    blank=True, related_name='next')
 
     history = HistoricalRecords()
 
