@@ -76,7 +76,7 @@ class CreateToken(relay.ClientIDMutation):
 
             if input.get('text', None) is not None:
                 if Text.objects.filter(pk=from_global_id(input['text']['id'])[1]).exists():
-                    text = Text.objects.get(id=input['text']['id'])
+                    text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
                     token.text = text
                 else:
                     return cls(token=None, success=False)
@@ -170,9 +170,10 @@ class CreateToken(relay.ClientIDMutation):
                 token.avestan = input['avestan']
             # check if previous token available
             if input.get('previous', None) is not None:
-                # check if previous token with assigned id already exists
-                if Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                    token.previous = Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
+                # check if previous token with assigned id does not exist
+                if not Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    # assign previous token
+                    token.previous = Token.objects.get(pk=from_global_id(input['previous']['id'])[1])
             # save token
             token.save()
             return cls(token=token, success=True)
@@ -301,11 +302,12 @@ class UpdateToken(relay.ClientIDMutation):
             # check if avestan available
             if input.get('avestan', None) is not None:
                 token.avestan = input['avestan']
-            # check if previous token available
+           # check if previous token available
             if input.get('previous', None) is not None:
-                # check if previous token with assigned id already exists
-                if Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                    token.previous = Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
+                # check if previous token with assigned id does not exist
+                if not Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    # assign previous token
+                    token.previous = Token.objects.get(pk=from_global_id(input['previous']['id'])[1])
             # save token
             token.save()
             return cls(token=token, success=True)

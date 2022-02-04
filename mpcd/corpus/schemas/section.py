@@ -115,8 +115,9 @@ class UpdateSection(relay.ClientIDMutation):
                     token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
                     section_instance.tokens.add(token_instance)
             if input.get('previous', None) is not None:
-                previous = Section.objects.get(pk=from_global_id(input['previous']['id'])[1])
-                section_instance.previous = previous
+                if not Section.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    previous = Section.objects.get(pk=from_global_id(input['previous']['id'])[1])
+                    section_instance.previous = previous
             section_instance.save()
             return cls(section=section_instance, success=True)
         else:

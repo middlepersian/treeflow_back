@@ -31,6 +31,7 @@ class CodexNode(DjangoObjectType):
 
 
 class CodexInput(InputObjectType):
+    id= ID()
     sigle = String()
     title = String()
     copy_date = String()

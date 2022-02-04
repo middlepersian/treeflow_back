@@ -24,9 +24,10 @@ class FolioNode(DjangoObjectType):
 
 class FolioInput(InputObjectType):
     id = ID()
-    identifier = String(required=True)
-    codex = CodexInput(required=True)
+    identifier = String()
+    codex = CodexInput()
     comment = String(required=False)
+    previous = FolioNode()
 
 
 class Query(ObjectType):
@@ -41,6 +42,7 @@ class CreateFolio(relay.ClientIDMutation):
         identifier = String(required=True)
         codex = CodexInput()
         comment = String(required=False)
+        previous = FolioInput()
 
     folio = Field(FolioNode)
     success = Boolean()
@@ -69,6 +71,10 @@ class CreateFolio(relay.ClientIDMutation):
         if input.get('comment', None) is not None:
             folio.comment = input.get('comment')
 
+        if input.get('previous', None) is not None:
+            if not Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                folio.previous = Folio.get(pk=from_global_id(input['previous']['id'])[1])
+
         folio.save()
 
         return cls(folio=folio, success=True)
@@ -80,6 +86,7 @@ class UpdateFolio(relay.ClientIDMutation):
         identifier = String(required=True)
         codex = CodexInput()
         comment = String(required=False)
+        previous = FolioInput()
 
     folio = Field(FolioNode)
     success = Boolean()
@@ -91,8 +98,11 @@ class UpdateFolio(relay.ClientIDMutation):
             folio_instance = Folio.objects.get(id=id)
             folio_instance.identifier = identifier
             folio_instance.comment = comment
-            folio_instance.codex = Codex.objects.get(id=codex.id)
+            folio_instance.codex = Codex.objects.get(pk=from_global_id(codex.id)[1])
             folio_instance.comment = comment
+            if input.get('previous', None) is not None:
+                if not Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    folio_instance.previous = Folio.get(pk=from_global_id(input['previous']['id'])[1])
             folio_instance.save()
             return cls(folio=folio_instance, success=True)
         else:
