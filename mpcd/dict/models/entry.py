@@ -20,6 +20,7 @@ class Entry(models.Model):
     definitions = models.ManyToManyField(Definition, blank=True, related_name='entry_definitions')
     categories = models.ManyToManyField(Category, blank=True, related_name='entry_categories')
     references = models.ManyToManyField(Reference, blank=True, related_name='entry_references')
+    related_entries = models.ManyToManyField('self', blank=True, related_name='entry_related_entries')
     comment = models.TextField(null=True, blank=True)
 
     history = HistoricalRecords()
