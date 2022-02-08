@@ -45,6 +45,7 @@ class CreateEntry(relay.ClientIDMutation):
         definitions = List(DefinitionInput)
         categories = List(CategoryInput)
         references = List(ReferenceInput)
+        related_entries = List(String)
         comment = String()
 
     entry = Field(EntryNode)
@@ -146,6 +147,12 @@ class CreateEntry(relay.ClientIDMutation):
                         reference_obj = Reference.objects.create(reference=reference['reference'])
                     entry.references.add(reference_obj)
 
+            if input['related_entries']:
+                for related_entry in input['related_entries']:
+                    if Entry.objects.filter(pk=from_global_id(related_entry.id)[1]).exists():
+                        related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
+                        entry.related_entries.add(related_entry_obj)
+
             if input['comment']:
                 entry.comment = input['comment']
 
@@ -187,6 +194,7 @@ class UpdateEntry(relay.ClientIDMutation):
                 entry.lemma = lemma
 
             if input['loanwords']:
+                entry.loanwords.clear()
                 for loanword in input['loanwords']:
                     if LoanWord.objects.filter(word=loanword['word']).exists():
                         loanword_obj = LoanWord.objects.get(word=loanword['word'])
@@ -199,6 +207,7 @@ class UpdateEntry(relay.ClientIDMutation):
                     entry.loanwords.add(loanword_obj)
 
             if input['translations']:
+                entry.translations.clear()
                 for translation in input['translations']:
                     if Translation.objects.filter(word=translation['word']).exists():
                         translation_obj = Translation.objects.get(word=translation['word'])
@@ -212,6 +221,7 @@ class UpdateEntry(relay.ClientIDMutation):
                     entry.translations.add(translation_obj)
 
             if input['definitions']:
+                entry.definitions.clear()
                 for definition in input['definitions']:
                     if Definition.objects.filter(definition=definition['definition']).exists():
                         definition_obj = Definition.objects.get(definition=definition['definition'])
@@ -225,6 +235,7 @@ class UpdateEntry(relay.ClientIDMutation):
                     entry.definitions.add(definition_obj)
 
             if input['categories']:
+                entry.categories.clear()
                 for category in input['categories']:
                     if Category.objects.filter(category=category['category']).exists():
                         category_obj = Category.objects.get(category=category['category'])
@@ -233,12 +244,20 @@ class UpdateEntry(relay.ClientIDMutation):
                     entry.categories.add(category_obj)
 
             if input['references']:
+                entry.references.clear()
                 for reference in input['references']:
                     if Reference.objects.filter(reference=reference['reference']).exists():
                         reference_obj = Reference.objects.get(reference=reference['reference'])
                     else:
                         reference_obj = Reference.objects.create(reference=reference['reference'])
                     entry.references.add(reference_obj)
+
+            if input['related_entries']:
+                entry.related_entries.clear()
+                for related_entry in input['related_entries']:
+                    if Entry.objects.filter(pk=from_global_id(related_entry.id)[1]).exists():
+                        related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
+                        entry.related_entries.add(related_entry_obj)
 
             if input['comment']:
                 entry.comment = input['comment']
