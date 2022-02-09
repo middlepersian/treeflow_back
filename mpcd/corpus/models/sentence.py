@@ -16,6 +16,15 @@ class Sentence(models.Model):
     translation = models.TextField(null=True, blank=True)
     comment = models.CharField(max_length=255, blank=True)
 
+    number = models.PositiveIntegerField(null=True, blank=True)
+    previous = models.OneToOneField('self',
+                                    related_name='next',
+                                    blank=True,
+                                    null=True,
+                                    on_delete=models.DO_NOTHING)
+
+
+
     history = HistoricalRecords()
 
     def get_tokens(self):
