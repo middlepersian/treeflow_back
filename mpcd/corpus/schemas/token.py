@@ -52,7 +52,7 @@ class CreateToken(relay.ClientIDMutation):
     class Input:
         transcription = String()
         transliteration = String()
-        text = TextInput()
+        text = ID()
         lemma = EntryInput()
         pos = POSInput()
         morphological_annotation = List(MorphologicalAnnotationInput)

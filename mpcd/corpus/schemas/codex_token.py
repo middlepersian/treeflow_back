@@ -32,7 +32,7 @@ class CodexTokenNode(DjangoObjectType):
 class CodexTokenInput(InputObjectType):
     # from Token
     id = ID()
-    text = TextInput()
+    text = ID()
     transcription = String()
     transliteration = String()
     lemma = EntryInput()
@@ -56,11 +56,11 @@ class Query(ObjectType):
 # Mutations
 
 
-class CreateToken(relay.ClientIDMutation):
+class CreateCodexToken(relay.ClientIDMutation):
     class Input:
         transcription = String()
         transliteration = String()
-        text = TextInput()
+        text = ID()
         lemma = EntryInput()
         pos = POSInput()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -213,7 +213,7 @@ class CreateToken(relay.ClientIDMutation):
             return cls(token=None, success=False, errors=["ID {} available".format(input['id'])])
 
 
-class UpdateToken(relay.ClientIDMutation):
+class UpdateCodexToken(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         transcription = String(required=False)
@@ -284,8 +284,6 @@ class UpdateToken(relay.ClientIDMutation):
                                         # create the translation
                                         translation_obj = Translation.objects.create(
                                             word=translation['word'], language=lang)
-
-                                # create the translation
                                 if translation_obj:
                                     entry.translations.add(translation_obj)
 
@@ -346,7 +344,7 @@ class UpdateToken(relay.ClientIDMutation):
             return cls(token=None, success=False)
 
 
-class DeleteToken(relay.ClientIDMutation):
+class DeleteCodexToken(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
 
@@ -363,7 +361,7 @@ class DeleteToken(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class JoinTokens(relay.ClientIDMutation):
+class JoinCodexTokens(relay.ClientIDMutation):
     class Input():
         token = ID()
         previous = ID()
@@ -383,3 +381,9 @@ class JoinTokens(relay.ClientIDMutation):
         previous.save()
         token.save()
         return cls(success=True)
+
+
+class Mutation(ObjectType):
+    create_codex_token = CreateCodexToken.Field()
+    delete_codex_token = DeleteCodexToken.Field()
+    join_codex_tokens = JoinCodexTokens.Field()

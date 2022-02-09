@@ -44,7 +44,7 @@ class CreateSentence(relay.ClientIDMutation):
 
     class Input:
         id = ID()
-        text = String()
+        text = ID()
         tokens = List(Token)
         translation = String()
         comment = String()

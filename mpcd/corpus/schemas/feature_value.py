@@ -26,8 +26,6 @@ class Query(ObjectType):
     all_featurevalue = DjangoFilterConnectionField(FeatureValueNode)
 
 # Mutations
-
-
 class CreateFeatureValue(relay.ClientIDMutation):
     class Input:
         identifier = String()
