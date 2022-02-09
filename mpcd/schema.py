@@ -42,6 +42,7 @@ class Mutation(
         mpcd.corpus.schemas.author.Mutation,
         mpcd.corpus.schemas.bibliography.Mutation,
         mpcd.corpus.schemas.codex.Mutation,
+        mpcd.corpus.schemas.codex_token.Mutation,
         mpcd.corpus.schemas.corpus.Mutation,
         mpcd.corpus.schemas.dependency.Mutation,
         mpcd.corpus.schemas.feature.Mutation,
