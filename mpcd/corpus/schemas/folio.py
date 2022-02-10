@@ -23,16 +23,16 @@ class FolioNode(DjangoObjectType):
 
 
 class FolioInput(InputObjectType):
-    id = ID()
     identifier = String()
-    codex = CodexInput()
-    comment = String(required=False)
-    previous = FolioNode()
+    codex = ID()
 
+
+# Queries
 
 class Query(ObjectType):
     folio = relay.Node.Field(FolioNode)
     all_folios = DjangoFilterConnectionField(FolioNode)
+
 
 # Mutations
 
@@ -40,9 +40,9 @@ class Query(ObjectType):
 class CreateFolio(relay.ClientIDMutation):
     class Input:
         identifier = String(required=True)
-        codex = CodexInput()
+        codex = ID()
         comment = String(required=False)
-        previous = FolioInput()
+        previous = ID()
 
     folio = Field(FolioNode)
     success = Boolean()
@@ -59,7 +59,7 @@ class CreateFolio(relay.ClientIDMutation):
             return cls(success=False, errors=['identifier is required'])
 
         if input.get('codex', None) is not None:
-            codex_instance = Codex.objects.get(pk=from_global_id(input.get('codex').get('id'))[1])
+            codex_instance = Codex.objects.get(pk=from_global_id(input.get('codex'))[1])
         else:
             return cls(success=False, errors=['codex is required'])
 
@@ -72,8 +72,8 @@ class CreateFolio(relay.ClientIDMutation):
             folio.comment = input.get('comment')
 
         if input.get('previous', None) is not None:
-            if not Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                folio.previous = Folio.get(pk=from_global_id(input['previous']['id'])[1])
+            if Folio.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                folio.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
 
         folio.save()
 
@@ -101,8 +101,8 @@ class UpdateFolio(relay.ClientIDMutation):
             folio_instance.codex = Codex.objects.get(pk=from_global_id(codex.id)[1])
             folio_instance.comment = comment
             if input.get('previous', None) is not None:
-                if not Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                    folio_instance.previous = Folio.get(pk=from_global_id(input['previous']['id'])[1])
+                if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous']['id'])[1])
             folio_instance.save()
             return cls(folio=folio_instance, success=True)
         else:

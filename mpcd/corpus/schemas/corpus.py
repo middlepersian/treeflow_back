@@ -28,6 +28,14 @@ class CorpusInput(InputObjectType):
 class Query(ObjectType):
     corpus = relay.Node.Field(CorpusNode)
     all_corpus = DjangoFilterConnectionField(CorpusNode)
+    # not a relay-comform query
+    corpus_slug = Field(
+        CorpusNode,
+        slug=String(),
+    )
+
+    def resolve_corpus_slug(root, info, slug):
+        return Corpus.objects.filter(slug=slug).first()
 
 
 # Mutations

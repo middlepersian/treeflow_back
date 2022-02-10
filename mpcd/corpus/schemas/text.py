@@ -50,7 +50,7 @@ class Query(ObjectType):
 class CreateText(relay.ClientIDMutation):
     class Input:
        # id = ID()
-        corpus = CorpusInput()
+        corpus = String()
         title = String()
         stage = String()
         text_sigle = TextSigleInput()
@@ -61,38 +61,35 @@ class CreateText(relay.ClientIDMutation):
 
     text = Field(TextNode)
     success = Boolean()
-    error = String()
+    errors = String()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check that corpus exists
-        if input.get('corpus', None) is None:
-            return cls(success=False, error="No corpus provided")
-
-        # and that there are sources available
-        if input.get('sources', None) is None:
-            return cls(success=False, error="No sources provided")
+        if input.get('corpus_slug', None) is None:
+            return cls(success=False, errors="No corpus slug provided")
 
         # and that there is title available
         if input.get('title', None) is None:
-            return cls(success=False, error="No title provided")
+            return cls(success=False, errors="No title provided")
 
         # and that there is a stage available
         if input.get('stage', None) is None:
-            return cls(success=False, error="No stage provided")
+            return cls(success=False, errors="No stage provided")
 
         # create text with title and stage
         text_instance = Text.objects.create(title=input.get('title'), stage=input.get('stage'))
 
         # get corpus
-        corpus_instance = Corpus.objects.get(slug=input['corpus']['slug'])
+        corpus_instance = Corpus.objects.get(slug=input['corpus_slug'])
         text_instance.corpus = corpus_instance
 
         # get source
-        for source in input['sources']:
-            source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
-            text_instance.sources.add(source_instance)
+        if input.get('sources', None) is not None:
+            for source in input['sources']:
+                source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
+                text_instance.sources.add(source_instance)
 
         if input.get('text_sigle', None) is not None:
             text_sigle_instance, text_sigle_created = TextSigle.objects.get_or_create(

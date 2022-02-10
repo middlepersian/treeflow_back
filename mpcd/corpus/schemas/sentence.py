@@ -43,7 +43,6 @@ class CreateSentence(relay.ClientIDMutation):
     success = Boolean()
 
     class Input:
-        id = ID()
         text = ID()
         tokens = List(Token)
         translation = String()
@@ -53,25 +52,42 @@ class CreateSentence(relay.ClientIDMutation):
     success = Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, id, text, tokens, translation, comment):
+    def mutate_and_get_payload(cls, root, info, **input):
+
         logger.error('ROOT: {}'.format(root))
-        # check that sentence does not exist same text and translation
-        if Sentence.objects.filter(pk=from_global_id(id)[1]).exists():
-            return cls(success=False)
+        if input.get('text', None) is not None:
+            if Text.objects.filter(pk=from_global_id('text')[1]).exists():
+                text = Text.objects.get(pk=from_global_id(input.get('text'))[1])
+                sentence_instance = Sentence.objects.create(text=text)
+            else:
+                return cls(success=False, errors=['Wrong Text ID'])
 
         else:
-            if Text.objects.filter(pk=from_global_id(text.id)[1]).exists():
-                sentence_instance = Sentence.objects.create(translation=translation)
-                sentence_instance.text = Text.objects.get(pk=from_global_id(text.id)[1])
-                if tokens:
-                    for token in tokens:
-                        token = Token.objects.get(pk=from_global_id(token.id)[1])
-                        sentence_instance.tokens.add(token)
-                sentence_instance.comment = comment
-                sentence_instance.save()
-                return cls(sentence=sentence_instance, success=True)
+            return cls(success=False, errors=['Text ID is required'])
+
+        if input.get('comment', None) is not None:
+            sentence_instance.comment = input.get('comment')
+
+        if input.get('translation', None) is not None:
+            sentence_instance.translation = input.get('translation')
+
+        # add tokens
+        if input.get('tokens', None) is not None:
+            for token in input.get('tokens'):
+                if Token.objects.filter(pk=from_global_id(token)[1]).exists():
+                    sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token)[1]))
+                else:
+                    return cls(success=False, errors=['Wrong Token ID'])
+
+        # check if previous is valid
+        if input.get('previous', None) is not None:
+            if not Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
-                return cls(success=False)
+                return cls(success=False, errors=['Wrong Previous ID'])
+
+        sentence_instance.save()
+        return cls(sentence=sentence_instance, success=True)
 
 
 class UpdateSentence(relay.ClientIDMutation):
