@@ -16,7 +16,7 @@ class Token(models.Model):
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemma = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True, related_name='token_lemma')
+    lemma = models.ForeignKey(Entry, on_delete=models.SET_NULL, null=True, blank=True, related_name='token_lemma')
     pos = models.ForeignKey(POS, on_delete=models.CASCADE, null=True)
     morphological_annotation = models.ManyToManyField(
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
@@ -28,7 +28,7 @@ class Token(models.Model):
                                     related_name='next',
                                     blank=True,
                                     null=True,
-                                    on_delete=models.DO_NOTHING)
+                                    on_delete=models.SET_NULL)
 
     history = HistoricalRecords()
 
