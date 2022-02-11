@@ -14,10 +14,12 @@ class Section(models.Model):
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='section_text')
     section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE,
                                      related_name='section_section_type', null=True)
-    source = models.ForeignKey(Source, on_delete=models.CASCADE, related_name='section_source', null=True, blank=True)
+    source = models.ForeignKey(Source, on_delete=models.SET_NULL, related_name='section_source', null=True, blank=True)
     tokens = models.ManyToManyField(Token, related_name='section_tokens')
-    previous = models.OneToOneField('self', on_delete=models.DO_NOTHING, null=True,
+    previous = models.OneToOneField('self', on_delete=models.SET_NULL, null=True,
                                     blank=True, related_name='next')
+    # this is the case if a section "paragraph" has a "chapter" container
+    container = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='section_container')
 
     history = HistoricalRecords()
 
