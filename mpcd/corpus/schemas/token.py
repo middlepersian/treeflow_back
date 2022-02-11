@@ -30,6 +30,7 @@ class TokenInput(InputObjectType):
     transcription = String()
     transliteration = String()
     text = TextInput()
+    language = String()
     lemma = EntryInput()
     pos = POSInput()
     morphological_annotation = List(MorphologicalAnnotationInput)
@@ -53,6 +54,7 @@ class CreateToken(relay.ClientIDMutation):
         transcription = String()
         transliteration = String()
         text = ID()
+        language = ID()
         lemma = EntryInput()
         pos = POSInput()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -75,11 +77,17 @@ class CreateToken(relay.ClientIDMutation):
             logger.error("TOKEN: {}".format(token))
 
             if input.get('text', None) is not None:
-                if Text.objects.filter(pk=from_global_id(input['text']['id'])[1]).exists():
-                    text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
+                if Text.objects.filter(pk=from_global_id(input['text'])[1]).exists():
+                    text = Text.objects.get(pk=from_global_id(input['text'])[1])
                     token.text = text
                 else:
                     return cls(token=None, success=False)
+
+            # check if language available
+            if input.get('language', None) is not None:
+                if Language.objects.filter(pk=from_global_id(input['language'])[1]).exists():
+                    language = Language.objects.get(pk=from_global_id(input['language'])[1])
+                    token.language = language
 
             # check if lemma available
             if input.get('lemma', None) is not None:
@@ -260,6 +268,13 @@ class UpdateToken(relay.ClientIDMutation):
 
                     # add the entry to the token
                     token.lemma = entry
+
+            # check if language available
+            if input.get('language', None) is not None:
+                if Language.objects.filter(pk=from_global_id(input['language'])[1]).exists():
+                    language = Language.objects.get(pk=from_global_id(input['language'])[1])
+                    token.language = language
+
              # check if pos available
             if input.get('pos', None) is not None:
                 # check if pos with same name already exists

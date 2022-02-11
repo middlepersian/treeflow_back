@@ -32,6 +32,7 @@ class CodexTokenInput(InputObjectType):
     text = ID()
     transcription = String()
     transliteration = String()
+    language = ID()
     lemma = EntryInput()
     pos = POSInput()
     morphological_annotation = List(MorphologicalAnnotationInput)
@@ -57,6 +58,7 @@ class CreateCodexToken(relay.ClientIDMutation):
     class Input:
         transcription = String(required=True)
         transliteration = String(required=True)
+        language = ID()
         text = ID(required=True)
         lemma = EntryInput()
         pos = POSInput()
@@ -80,8 +82,8 @@ class CreateCodexToken(relay.ClientIDMutation):
         if input.get('transcription', None) is None and input.get('transliteration', None) is None:
             return cls(token=None, success=False, errors=["No transcription or transliteration provided"])
         else:
-            token = CodexToken.objects.create(transcription=input['transcription'], transliteration=input['transliteration'])
-
+            token = CodexToken.objects.create(
+                transcription=input['transcription'], transliteration=input['transliteration'])
 
         # check if text available
         if input.get('text', None) is not None:
@@ -90,6 +92,12 @@ class CreateCodexToken(relay.ClientIDMutation):
                 token.text = text
             else:
                 return cls(token=None, success=False, errors=["Text with ID {} not found".format(input['text'])])
+
+        # check if language available
+        if input.get('language', None) is not None:
+            if Language.objects.filter(pk=from_global_id(input['language'])[1]).exists():
+                language = Language.objects.get(pk=from_global_id(input['language'])[1])
+                token.language = language
 
         # check if lemma available
         if input.get('lemma', None) is not None:
@@ -283,6 +291,13 @@ class UpdateCodexToken(relay.ClientIDMutation):
 
                     # add the entry to the token
                     token.lemma = entry
+
+            # check if language available
+            if input.get('language', None) is not None:
+                if Language.objects.filter(pk=from_global_id(input['language'])[1]).exists():
+                    language = Language.objects.get(pk=from_global_id(input['language'])[1])
+                    token.language = language
+
              # check if pos available
             if input.get('pos', None) is not None:
                 # check if pos with same name already exists
