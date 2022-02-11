@@ -9,11 +9,12 @@ from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .pos import POS
 from .text import Text
-
+from mpcd.dict.models import Language
 
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True, related_name='token_language')
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
     lemma = models.ForeignKey(Entry, on_delete=models.SET_NULL, null=True, blank=True, related_name='token_lemma')
