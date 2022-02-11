@@ -9,6 +9,7 @@ class Query(
         mpcd.corpus.schemas.author.Query,
         mpcd.corpus.schemas.bibliography.Query,
         mpcd.corpus.schemas.codex.Query,
+        mpcd.corpus.schemas.codex_token.Query,
         mpcd.corpus.schemas.corpus.Query,
         mpcd.corpus.schemas.dependency.Query,
         mpcd.corpus.schemas.feature.Query,
