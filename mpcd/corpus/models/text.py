@@ -20,7 +20,7 @@ class Text(models.Model):
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
 
     title = models.CharField(max_length=100)
-    text_sigle = models.ForeignKey(TextSigle, on_delete=models.CASCADE, null=True, related_name='text_text_sigle')
+    text_sigle = models.ForeignKey(TextSigle, on_delete=models.SET_NULL, null=True, related_name='text_text_sigle')
 
     editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")

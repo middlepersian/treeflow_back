@@ -21,7 +21,7 @@ class Sentence(models.Model):
                                     related_name='next',
                                     blank=True,
                                     null=True,
-                                    on_delete=models.DO_NOTHING)
+                                    on_delete=models.SET_NULL)
 
 
 
