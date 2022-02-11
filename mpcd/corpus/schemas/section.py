@@ -33,6 +33,7 @@ class SectionInput(InputObjectType):
     source = SourceNode()
     tokens = List(TokenInput)
     previous = SectionNode()
+    container = SectionNode()
 
 
 class CreateSection(relay.ClientIDMutation):
@@ -43,7 +44,8 @@ class CreateSection(relay.ClientIDMutation):
         section_type = SectionTypeInput()
         source = SourceNode()
         tokens = List(TokenInput)
-        previous = SectionNode()
+        previous = ID()
+        container = ID()
 
     section = Field(SectionNode)
     success = Boolean()
@@ -51,33 +53,29 @@ class CreateSection(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateSection.mutate_and_get_payload()')
-
-        # check if ID available
-        if input.get('id', None) is not None:
-            if Section.objects.filter(pk=from_global_id(input['id'])[1]).exists():
-                logger.error('Section with ID {} already exists.'.format(input['id']))
-                return cls(success=False)
-        else:
-            section_instance = Section.objects.create(identifier=input['identifier'])
-            if input.get('text', None) is not None:
-                text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
-                section_instance.text = text
-            if input.get('section_type', None) is not None:
-                section_type = SectionType.objects.get(identifier=input['section_type']['identifier'])
-                logger.error('section_type: {}'.format(section_type))
-                section_instance.section_type = section_type
-            if input.get('source', None) is not None:
-                source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
-                section_instance.source = source
-            if input.get('tokens', None) is not None:
-                for token in input('tokens'):
-                    token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
-                    section_instance.tokens.add(token_instance)
-            if input.get('previous', None) is not None:
-                previous = Section.objects.get(pk=(input['previous']['id'])[1])
-                section_instance.previous = previous
-            section_instance.save()
-            return cls(section=section_instance, success=True)
+        section_instance = Section.objects.create(identifier=input['identifier'])
+        if input.get('text', None) is not None:
+            text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
+            section_instance.text = text
+        if input.get('section_type', None) is not None:
+            section_type = SectionType.objects.get(identifier=input['section_type']['identifier'])
+            logger.error('section_type: {}'.format(section_type))
+            section_instance.section_type = section_type
+        if input.get('source', None) is not None:
+            source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
+            section_instance.source = source
+        if input.get('tokens', None) is not None:
+            for token in input('tokens'):
+                token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
+                section_instance.tokens.add(token_instance)
+        if input.get('previous', None) is not None:
+            previous = Section.objects.get(pk=(input['previous'])[1])
+            section_instance.previous = previous
+        if input.get('container', None) is not None:
+            container = Section.objects.get(pk=(input['container'])[1])
+            section_instance.container = container
+        section_instance.save()
+        return cls(section=section_instance, success=True)
 
 
 class UpdateSection(relay.ClientIDMutation):
@@ -89,7 +87,8 @@ class UpdateSection(relay.ClientIDMutation):
         section_type = SectionTypeInput()
         source = SourceNode()
         tokens = List(TokenInput)
-        previous = SectionNode()
+        previous = ID()
+        container = ID()
 
     section = Field(SectionNode)
     success = Boolean()
@@ -115,9 +114,13 @@ class UpdateSection(relay.ClientIDMutation):
                     token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
                     section_instance.tokens.add(token_instance)
             if input.get('previous', None) is not None:
-                if not Section.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                    previous = Section.objects.get(pk=from_global_id(input['previous']['id'])[1])
+                if not Section.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                    previous = Section.objects.get(pk=from_global_id(input['previous'])[1])
                     section_instance.previous = previous
+            if input.get('container', None) is not None:
+                if not Section.objects.filter(pk=from_global_id(input['container'])[1]).exists():
+                    container = Section.objects.get(pk=from_global_id(input['container'])[1])
+                    section_instance.container = container
             section_instance.save()
             return cls(section=section_instance, success=True)
         else:

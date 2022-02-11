@@ -4,7 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import CodexToken
 from mpcd.dict.models import Entry, Lemma, Language, Translation
-from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text, Line
+from mpcd.corpus.models import CodexToken, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import POSInput
 from mpcd.corpus.schemas import DependencyInput
@@ -80,7 +80,7 @@ class CreateCodexToken(relay.ClientIDMutation):
         if input.get('transcription', None) is None and input.get('transliteration', None) is None:
             return cls(token=None, success=False, errors=["No transcription or transliteration provided"])
         else:
-            token = Token.objects.create(transcription=input['transcription'], transliteration=input['transliteration'])
+            token = CodexToken.objects.create(transcription=input['transcription'], transliteration=input['transliteration'])
 
 
         # check if text available
@@ -181,8 +181,8 @@ class CreateCodexToken(relay.ClientIDMutation):
         # check if previous token available
         if input.get('previous', None) is not None:
             # check if previous token with assigned id already exists
-            if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
-                token.previous = Token.objects.filter(pk=from_global_id(input['previous'])[1]).first()
+            if CodexToken.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                token.previous = CodexToken.objects.filter(pk=from_global_id(input['previous'])[1]).first()
             else:
                 return cls(token=None, success=False, errors=["Previous token with ID {} not found".format(input['previous'])])
 
@@ -193,7 +193,7 @@ class CreateCodexToken(relay.ClientIDMutation):
                 line = Line.objects.filter(pk=from_global_id(input['line'])[1]).first()
                 token.line = line
             else:
-                return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line']['id'])])
+                return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line'])])
         else:
             return cls(token=None, success=False, errors=["Line not provided"])
 
@@ -230,7 +230,7 @@ class UpdateCodexToken(relay.ClientIDMutation):
 
         if input.get('id', None) is not None:
             # get the token
-            token = Token.objects.get(pk=from_global_id(input['id'])[1])
+            token = CodexToken.objects.get(pk=from_global_id(input['id'])[1])
             # check if transcription available
             if input.get('transcription', None) is not None:
                 token.transcription = input['transcription']
@@ -328,8 +328,8 @@ class UpdateCodexToken(relay.ClientIDMutation):
             # check if previous token available
             if input.get('previous', None) is not None:
                 # check if previous token with assigned id already exists
-                if Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                    token.previous = Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
+                if CodexToken.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    token.previous = CodexToken.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
             # save token
             token.save()
             return cls(token=token, success=True)
@@ -346,8 +346,8 @@ class DeleteCodexToken(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
-        if Token.objects.filter(pk=from_global_id(id)[1]).exists():
-            token_instance = Token.objects.get(pk=from_global_id(id)[1])
+        if CodexToken.objects.filter(pk=from_global_id(id)[1]).exists():
+            token_instance = CodexToken.objects.get(pk=from_global_id(id)[1])
             token_instance.delete()
             return cls(success=True)
 
@@ -365,10 +365,10 @@ class JoinCodexTokens(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
-        token = Token.objects.get(pk=from_global_id(input['token'])[1])
+        token = CodexToken.objects.get(pk=from_global_id(input['token'])[1])
         logger.error("TOKEN_ID: {}".format(token))
         # get previous token
-        previous = Token.objects.get(pk=from_global_id(input['previous'])[1])
+        previous = CodexToken.objects.get(pk=from_global_id(input['previous'])[1])
         logger.error("PREVIOUS_TOKEN_ID: {}".format(previous))
         # join tokens
         token.previous = previous
