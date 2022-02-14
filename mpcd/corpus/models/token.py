@@ -11,6 +11,8 @@ from .pos import POS
 from .text import Text
 from mpcd.dict.models import Language
 
+
+# TODO add gloss
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
@@ -30,6 +32,8 @@ class Token(models.Model):
                                     blank=True,
                                     null=True,
                                     on_delete=models.SET_NULL)
+
+    gloss = models.TextField(blank=True, null=True)                              
 
     history = HistoricalRecords()
 
