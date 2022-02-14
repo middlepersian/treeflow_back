@@ -3,8 +3,9 @@ import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .text import Text
 from .token import Token
+from .text import Text
+from mpcd.dict.models import Translation
 
 
 class Sentence(models.Model):
@@ -13,7 +14,7 @@ class Sentence(models.Model):
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='sentence_text')
     tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
 
-    translation = models.TextField(null=True, blank=True)
+    translations = models.ManyToManyField(Translation, related_name='sentence_translations')
     comment = models.CharField(max_length=255, blank=True)
 
     number = models.PositiveIntegerField(null=True, blank=True)
@@ -22,8 +23,6 @@ class Sentence(models.Model):
                                     blank=True,
                                     null=True,
                                     on_delete=models.SET_NULL)
-
-
 
     history = HistoricalRecords()
 
