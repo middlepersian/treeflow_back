@@ -78,17 +78,17 @@ class LoanWordHistoryAdmin(SimpleHistoryAdmin):
         return queryset
 
     def _translations(self, obj):
-        return " |\n".join([p.meaning for p in obj.translations.all()])
+        return " |\n".join([p.text for p in obj.translations.all()])
 
 
 class TranslationHistoryAdmin(SimpleHistoryAdmin):
-    fields = ["meaning", "language"]
-    list_display = ["meaning", "language"]
-    history_list_display = ["meaning", "language"]
-    search_fields = ["meaning"]
+    fields = ["text", "language"]
+    list_display = ["text", "language"]
+    history_list_display = ["text", "language"]
+    search_fields = ["text"]
 
     def get_ordering(self, request):
-        return ['meaning']
+        return ['text']
 
 
 class DefinitionHistoryAdmin(SimpleHistoryAdmin):
