@@ -5,11 +5,11 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.dict.models import Entry, Lemma, Language, Translation
 from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text
-from mpcd.corpus.schemas import MorphologicalAnnotationInput
-from mpcd.corpus.schemas import POSInput
-from mpcd.corpus.schemas import DependencyInput
-from mpcd.corpus.schemas import TextInput
-from mpcd.dict.schemas import EntryInput
+from mpcd.corpus.schemas.morphological_annotation import MorphologicalAnnotationInput
+from mpcd.corpus.schemas.pos import POSInput
+from mpcd.corpus.schemas.dependency import DependencyInput
+from mpcd.corpus.schemas.text import TextInput
+from mpcd.dict.schemas.entry import EntryInput
 # import the logging library
 import logging
 # Get an instance of a logger
