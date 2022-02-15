@@ -28,6 +28,7 @@ class SentenceInput(InputObjectType):
     tokens = List(TokenInput)
     translation = List(TranslationInput)
     comment = String()
+    previous = ID()
 
 # Query
 
@@ -48,6 +49,7 @@ class CreateSentence(relay.ClientIDMutation):
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
+        previous = ID()
 
     errors = List(String)
     sentence = Field(SentenceNode)
@@ -97,7 +99,7 @@ class CreateSentence(relay.ClientIDMutation):
 
         # check if previous is valid
         if input.get('previous', None) is not None:
-            if not Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+            if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
                 return cls(success=False, errors=['Wrong Previous ID'])
@@ -115,6 +117,7 @@ class UpdateSentence(relay.ClientIDMutation):
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
+        previous = ID()
 
     sentence = Field(SentenceNode)
     errors = List(String)
@@ -152,6 +155,12 @@ class UpdateSentence(relay.ClientIDMutation):
 
             if input.get('comment', None) is not None:
                 sentence_instance.comment = input.get('comment')
+              # check if previous is valid
+            if input.get('previous', None) is not None:
+                if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                    sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
+            else:
+                return cls(success=False, errors=['Wrong Previous ID'])
 
             sentence_instance.save()
             return cls(sentence=sentence_instance, success=True)
