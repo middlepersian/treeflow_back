@@ -40,4 +40,4 @@ class Text(models.Model):
             )]
 
     def __str__(self):
-        return '{} {}'.format(self.title, self.text_sigle.sigle)
+        return '{}'.format(self.title)

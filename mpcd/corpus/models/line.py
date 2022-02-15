@@ -18,4 +18,4 @@ class Line(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{} {}'.format(self.side, self.number)
+        return '{}'.format(self.number)
