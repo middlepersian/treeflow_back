@@ -4,7 +4,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Sentence, Text, Token
-from mpcd.corpus.schemas.token import TokenNode
+from mpcd.corpus.schemas.token import TokenInput
 from mpcd.dict.models import Language, Translation
 from mpcd.dict.schemas.translation import TranslationInput
 
@@ -25,7 +25,7 @@ class SentenceNode(DjangoObjectType):
 
 class SentenceInput(InputObjectType):
     text = String()
-    tokens = List(TokenNode)
+    tokens = List(TokenInput)
     translation = List(TranslationInput)
     comment = String()
 
@@ -45,10 +45,11 @@ class CreateSentence(relay.ClientIDMutation):
 
     class Input:
         text = ID()
-        tokens = List(TokenNode)
+        tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
 
+    errors = List(String)
     sentence = Field(SentenceNode)
     success = Boolean()
 
@@ -57,7 +58,7 @@ class CreateSentence(relay.ClientIDMutation):
 
         logger.error('ROOT: {}'.format(root))
         if input.get('text', None) is not None:
-            if Text.objects.filter(pk=from_global_id('text')[1]).exists():
+            if Text.objects.filter(pk=from_global_id(input.get('text'))[1]).exists():
                 text = Text.objects.get(pk=from_global_id(input.get('text'))[1])
                 sentence_instance = Sentence.objects.create(text=text)
             else:
@@ -84,7 +85,7 @@ class CreateSentence(relay.ClientIDMutation):
                     sentence_instance.translations.add(translation_instance)
 
                 else:
-                    return cls(success=False, errors=['Wrong Language ID'])
+                    return cls(success=False, errors=['Wrong Language identifier'])
 
         # add tokens
         if input.get('tokens', None) is not None:
@@ -111,7 +112,7 @@ class UpdateSentence(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         text = ID()
-        tokens = List(TokenNode)
+        tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
 
@@ -125,7 +126,7 @@ class UpdateSentence(relay.ClientIDMutation):
         if Sentence.objects.filter(pk=from_global_id(input.get('id', None))[1]).exists():
             sentence_instance = Sentence.objects.get(pk=from_global_id(id)[1])
             if Text.objects.filter(pk=from_global_id(input.get('text', None))[1]).exists():
-                sentence_instance.text = Text.objects.get(pk=from_global_id(text.id)[1])
+                sentence_instance.text = Text.objects.get(pk=from_global_id(input.get('text', None))[1])
             if input.get('tokens', None) is not None:
                 sentence_instance.tokens.clear()
                 for token in input.get('tokens', None):
@@ -160,11 +161,11 @@ class UpdateSentence(relay.ClientIDMutation):
 
 
 class DeleteSentence(relay.ClientIDMutation):
-    success = Boolean()
 
     class Input:
         id = ID(required=True)
 
+    success = Boolean()
     sentence = Field(SentenceNode)
 
     @classmethod
@@ -178,7 +179,40 @@ class DeleteSentence(relay.ClientIDMutation):
             return cls(success=False)
 
 
+class AddTokensToSentence(relay.ClientIDMutation):
+
+    class Input:
+        id = ID()
+        tokens = List(TokenInput)
+
+    success = Boolean()
+    errors = List(String)
+    sentence = Field(SentenceNode)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        if input.get('id', None) is not None:
+            logger.error('input: {}'.format(input))
+            if Sentence.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+                sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
+                if input.get('tokens', None) is not None:
+                    # clear up existing tokens
+                    sentence_instance.tokens.clear()
+                    for token in input.get('tokens', None):
+                        if Token.objects.filter(pk=from_global_id(token.get('id'))[1]).exists():
+                            sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token.get('id'))[1]))
+                        else:
+                            return cls(success=False, errors=['Wrong Token ID {}'.format(token)])
+                    sentence_instance.save()
+                    return cls(sentence=sentence_instance, success=True)
+            else:
+                return cls(success=False, errors=['Wrong Sentence ID'])
+        else:
+            return cls(success=False, errors=['No ID available'])
+
+
 class Mutation(ObjectType):
     create_sentence = CreateSentence.Field()
     update_sentence = UpdateSentence.Field()
     delete_sentence = DeleteSentence.Field()
+    add_tokens_to_sentence = AddTokensToSentence.Field()
