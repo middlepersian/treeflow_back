@@ -7,7 +7,7 @@ from mpcd.corpus.models.codex_part import CodexPart
 
 class Facsimile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    reference = models.ForeignKey(BibEntry, on_delete=models.CASCADE, related_name='facsimile_reference')
+    bib_entry = models.OneToOneField(BibEntry, on_delete=models.CASCADE, related_name='facsimile_reference')
     codex_part = models.ForeignKey(CodexPart, on_delete=models.CASCADE, null=True,
                                    blank=True, related_name='facsimile_codex_part')
     history = HistoricalRecords()

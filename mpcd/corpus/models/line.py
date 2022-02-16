@@ -6,7 +6,7 @@ from .folio import Folio
 
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    number = models.IntegerField()
+    number = models.PositiveSmallIntegerField()
     folio = models.ForeignKey(Folio, on_delete=models.CASCADE, related_name='line_folio')
     comment = models.TextField(blank=True)
     previous = models.OneToOneField('self',
