@@ -1,6 +1,7 @@
 
 import graphene
 import mpcd.corpus.schemas
+import mpcd.dict.schemas
 
 
 class Query(
