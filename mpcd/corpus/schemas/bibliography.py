@@ -24,7 +24,7 @@ class BibEntryNode(DjangoObjectType):
 
 class BibEntryInput(InputObjectType):
     title = String()
-    year = String()
+    year = Int()
     authors = List(AuthorInput)
 
 
@@ -38,71 +38,79 @@ class Query(ObjectType):
 # Mutations
 class CreateBibEntry(relay.ClientIDMutation):
     class Input:
-        title = String(required=True)
-        year = Int(required=True)
+        title = String()
+        year = Int()
         authors = List(AuthorInput)
 
     bibentry = Field(BibEntryNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # check that bybentry does not exist same title and year
-        if BibEntry.objects.filter(title=title, year=year).exists():
-            return cls(success=False)
+        logger.error("input: {}".format(input))
 
+        if input.get('title', None) is not None:
+            title = input.get('title')
+            bibentry_instance = BibEntry.objects.create(title=title)
         else:
-            bibentry_instance = BibEntry.objects.create(title=title, year=year)
+            return cls(success=False, errors=['title is required'])
 
+        if input.get('year', None) is not None:
+            year = input.get('year')
+            logger.error("year: {}".format(year))
+            bibentry_instance.year = year
+
+        if input.get('authors', None) is not None:
+            authors = input.get('authors', None)
             for author in authors:
-                # check if author exists
-                if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
-                    author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
-                else:
-                    # create it
-                    author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
-                    author_instance.save()
+                author_instance, author_created = Author.objects.get_or_create(
+                    name=author.get('name', None),
+                    last_name=author.get('last_name', None))
                 bibentry_instance.authors.add(author_instance)
-
-            bibentry_instance.save()
-            return cls(bibentry=bibentry_instance, success=True)
+        bibentry_instance.save()
+        return cls(bibentry=bibentry_instance, success=True)
 
 
 class UpdateBibEntry(relay.ClientIDMutation):
     class Input:
         id = ID()
-        title = String(required=True)
-        year = Int(required=True)
+        title = String()
+        year = Int()
         authors = List(AuthorInput)
 
     bibentry = Field(BibEntryNode)
+    success = Boolean()
+    errors = List(String)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, title, year, authors, id):
-        # check that bib exists with id
-        if BibEntry.objects.filter(id=id).exists():
-            bibentry_instance = BibEntry.objects.get(pk=from_global_id(id)[1])
-            bibentry_instance.title = title
-            bibentry_instance.year = year
-            bibentry_instance.save()
+    def mutate_and_get_payload(cls, root, info, **input):
 
-            # delete all authors
-            bibentry_instance.authors.clear()
+        if input.get('id', None) is not None:
+            if BibEntry.objects.filter(pk=from_global_id(id)[1]).exists():
+                bibentry_instance = BibEntry.objects.get(pk=from_global_id(id)[1])
+            else:
+                return cls(success=False, errors=['bibentry does not exist'])
 
-            for author in authors:
-                # check if author exists
-                if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
-                    author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
-                else:
-                    # create it
-                    author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
-                    author_instance.save()
-                bibentry_instance.authors.add(author_instance)
+            if input.get('title', None) is not None:
+                title = input.get('title', None)
+                bibentry_instance.title = title
+
+            if input.get('authors', None) is not None:
+                bibentry_instance.authors.clear()
+                authors = input.get('authors', None)
+                for author in authors:
+                    author_instance, author_created = Author.objects.get_or_create(
+                        first_name=author.get('first_name', None),
+                        last_name=author.get('last_name', None))
+                    bibentry_instance.authors.add(author_instance)
 
             bibentry_instance.save()
             return cls(bibentry=bibentry_instance, success=True)
+
         else:
-            return cls(success=False)
+            return cls(success=False, errors=['id is required'])
 
 
 class DeleteBibEntry(relay.ClientIDMutation):

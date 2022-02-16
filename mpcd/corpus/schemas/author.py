@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -35,20 +35,20 @@ class Query(ObjectType):
 # Mutations
 class CreateAuthor(relay.ClientIDMutation):
 
-    success = Boolean()
-
     class Input:
         name = String(required=True)
         last_name = String(required=True)
 
     author = Field(AuthorNode)
+    success = Boolean()
+    errors = List(String)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, last_name):
         logger.error('ROOT: {}'.format(root))
         # check that author does not exist same name and last name
         if Author.objects.filter(name=name, last_name=last_name).exists():
-            return cls(success=False)
+            return cls(success=False, errors=['Author already exists'])
 
         else:
             author_instance = Author.objects.create(name=name, last_name=last_name)

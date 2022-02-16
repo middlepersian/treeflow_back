@@ -23,7 +23,6 @@ class LineNode(DjangoObjectType):
 
 
 class LineInput(InputObjectType):
-    id = ID()
     number = String(required=True)
     folio = FolioInput()
     comment = String(required=False)
