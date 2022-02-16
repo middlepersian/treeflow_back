@@ -2,7 +2,7 @@ import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
 
-
+## TODO place language where required in order to reduce db calls
 class LanguageChoices(models.TextChoices):
     # iso 639-3
     akk = 'akk', 'Akkadian'
