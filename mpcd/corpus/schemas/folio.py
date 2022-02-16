@@ -2,8 +2,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectT
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Codex, Folio
-from mpcd.corpus.schemas.codex import CodexInput, CodexNode
+from mpcd.corpus.models import Folio, Facsimile
 
 
 # import the logging library
@@ -24,11 +23,10 @@ class FolioNode(DjangoObjectType):
 
 class FolioInput(InputObjectType):
     identifier = String()
-    codex = ID()
+    facsimile = ID()
 
 
 # Queries
-
 class Query(ObjectType):
     folio = relay.Node.Field(FolioNode)
     all_folios = DjangoFilterConnectionField(FolioNode)
@@ -40,8 +38,8 @@ class Query(ObjectType):
 class CreateFolio(relay.ClientIDMutation):
     class Input:
         identifier = String(required=True)
-        codex = ID()
-        comment = String(required=False)
+        facisimile = ID()
+        comment = String()
         previous = ID()
 
     folio = Field(FolioNode)
@@ -58,8 +56,8 @@ class CreateFolio(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['identifier is required'])
 
-        if input.get('codex', None) is not None:
-            codex_instance = Codex.objects.get(pk=from_global_id(input.get('codex'))[1])
+        if input.get('facsimile', None) is not None:
+            codex_instance = Facsimile.objects.gte(pk=from_global_id(input.get('facsimile'))[1])
         else:
             return cls(success=False, errors=['codex is required'])
 
@@ -83,30 +81,44 @@ class CreateFolio(relay.ClientIDMutation):
 class UpdateFolio(relay.ClientIDMutation):
     class Input:
         id = ID()
-        identifier = String(required=True)
-        codex = CodexInput()
-        comment = String(required=False)
+        identifier = String()
+        facsimile = ID()
+        comment = String()
         previous = FolioInput()
 
     folio = Field(FolioNode)
     success = Boolean()
+    errors = List(String)
 
     @ classmethod
-    def mutate_and_get_payload(cls, root, info, id, identifier, codex, comment):
-        logger.debug('UpdateFolio.mutate_and_get_payload()')
-        if Folio.objects.filter(pk=from_global_id(id)[1]).exists() and Codex.objects.filter(pk=from_global_id(codex.id)[1]).exists():
-            folio_instance = Folio.objects.get(id=id)
-            folio_instance.identifier = identifier
-            folio_instance.comment = comment
-            folio_instance.codex = Codex.objects.get(pk=from_global_id(codex.id)[1])
-            folio_instance.comment = comment
+    def mutate_and_get_payload(cls, root, info, **input):
+
+        if input.get('id', None) is not None:
+            if Folio.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+                folio_instance = Folio.objects.get(pk=from_global_id(input.get('id'))[1])
+            else:
+                return cls(success=False, errors=['folio ID does not exist'])
+
+            if input.get('identifier', None) is not None:
+                folio_instance.identifier = input.get('identifier')
+
+            if input.get('facsimile', None) is not None:
+                if Facsimile.objects.filter(pk=from_global_id(input.get('facsimile'))[1]).exists():
+                    folio_instance.facsimile = Facsimile.objects.get(pk=from_global_id(input.get('facsimile'))[1])
+                else:
+                    return cls(success=False, errors=['facsimile does not exist'])
+
+            if input.get('comment', None) is not None:
+                folio_instance.comment = input.get('comment')
+
             if input.get('previous', None) is not None:
                 if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
                     folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous']['id'])[1])
+
             folio_instance.save()
             return cls(folio=folio_instance, success=True)
         else:
-            return cls(success=False)
+            return cls(success=False, errors=['folio ID not provided'])
 
 
 class DeleteFolio(relay.ClientIDMutation):

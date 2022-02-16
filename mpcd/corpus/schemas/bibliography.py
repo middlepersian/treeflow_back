@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 class BibEntryNode(DjangoObjectType):
     class Meta:
         model = BibEntry
-        filter_fields = {'authors': ['exact', 'icontains', 'istartswith'],
-                         'title': ['exact', 'icontains', 'istartswith'],
-                         'year': ['exact', 'icontains', 'istartswith'],
-                         }
+        filter_fields = {
+            'title': ['exact', 'icontains', 'istartswith'],
+            'year': ['exact', 'icontains', 'istartswith'],
+        }
         interfaces = (relay.Node,)
 
 
@@ -46,7 +46,7 @@ class CreateBibEntry(relay.ClientIDMutation):
     success = Boolean()
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, title, year, authors):
+    def mutate_and_get_payload(cls, root, info, **input):
         # check that bybentry does not exist same title and year
         if BibEntry.objects.filter(title=title, year=year).exists():
             return cls(success=False)

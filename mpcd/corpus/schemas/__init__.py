@@ -1,8 +1,10 @@
 from .author import AuthorInput, AuthorNode
-from .bibliography import BibEntryNode
+from .bibliography import BibEntryNode, BibEntryInput
 from .codex import CodexNode, CodexInput
+from .codex_part import CodexPartNode, CodexPartInput
 from .corpus import CorpusNode, CorpusInput
 from .dependency import DependencyNode, DependencyInput
+from .facsimile import FacsimileNode, FacsimileInput
 from .feature_value import FeatureValueNode, FeatureValueInput
 from .feature import FeatureNode, FeatureInput
 from .folio import FolioNode, FolioInput
@@ -20,4 +22,3 @@ from .token import TokenNode, TokenInput
 from .codex_token import CodexTokenNode
 from .section import SectionNode, SectionInput
 
-# TODO add section and section type here
