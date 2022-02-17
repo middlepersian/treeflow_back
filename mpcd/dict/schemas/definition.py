@@ -1,7 +1,7 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.dict.models import Definition, Language
+from mpcd.dict.models import Definition
 from graphql_relay import from_global_id
 from mpcd.dict.schemas import LanguageInput
 
@@ -15,7 +15,7 @@ class DefinitionNode(DjangoObjectType):
 
 class DefinitionInput(InputObjectType):
     definition = String()
-    language = LanguageInput()
+    language = String()
 
 # Queries
 
@@ -29,25 +29,31 @@ class Query(ObjectType):
 
 class CreateDefinition(relay.ClientIDMutation):
     class Input:
-        definition = DefinitionInput()
-        language = LanguageInput()
+        definition = String()
+        language = String()
 
     definition = Field(DefinitionNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, definition, id, language):
-        # check that Definition  does not exist
-        if Definition.objects.filter(pk=from_global_id(id)[1]).exists():
-            return cls(success=False)
+    def mutate_and_get_payload(cls, root, info, **input):
+
+        if input.get('definition', None) is not None:
+            definition_input = input.get('definition')
+            if input.get('language', None) is not None:
+                language_input = input.get('language')
+
+                definition_instance, definition_created = Definition.objects.get_or_create(
+                    definition=definition_input, language=language_input)
+                definition_instance.save()
+                return cls(definition=definition_instance, success=True)
+
+            else:
+                return cls(definition=None, success=False, errors=['language is required'])
 
         else:
-            definition_instance = Definition.objects.create(definition=definition)
-            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
-                language_instance = Language.objects.get(pk=from_global_id(id)[1])
-                definition_instance.language = language_instance
-            definition_instance.save()
-            return cls(definition=definition_instance, success=True)
+            return cls(definition=None, success=False, errors=['No definition input'])
 
 
 class UpdateDefinition(relay.ClientIDMutation):
@@ -58,20 +64,27 @@ class UpdateDefinition(relay.ClientIDMutation):
 
     definition = Field(DefinitionNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, id, definition, language):
+    def mutate_and_get_payload(cls, root, info, **input):
         # check that Definition  does not exist
-        if Definition.objects.filter(id=id).exists():
-            definition_instance = Definition.objects.get(pk=from_global_id(id)[1])
-            if Language.objects.filter(pk=from_global_id(language.id)[1]).exists():
-                language_instance = Language.objects.get(pk=from_global_id(language.id)[1])
-                definition_instance.language = language_instance
-            definition_instance.definition = definition
-            definition_instance.save()
-            return cls(definition=definition_instance, success=True)
-        else:
-            return cls(success=False)
+
+        if input.get('id', None) is not None:
+
+            if Definition.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+                if input.get('definition', None) is not None:
+                    definition_input = input.get('definition')
+                    if input.get('language', None) is not None:
+                        language_input = input.get('language')
+                        definition_instance, definition_created = Definition.objects.get_or_create(
+                            definition=definition_input, language=language_input)
+                        definition_instance.save()
+                        return cls(definition=definition_instance, success=True)
+                    else:
+                        return cls(definition=None, success=False, errors=['language is required'])
+                else:
+                    return cls(definition=None, success=False, errors=['No definition input'])
 
 
 class DeleteDefinition(relay.ClientIDMutation):
@@ -80,10 +93,10 @@ class DeleteDefinition(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
-        if Definition.objects.filter(id=id).exists():
+        if Definition.objects.filter(pk=from_global_id('id')[1]).exists():
             definition_instance = Definition.objects.get(pk=from_global_id(id)[1])
             definition_instance.delete()
             return cls(success=True)

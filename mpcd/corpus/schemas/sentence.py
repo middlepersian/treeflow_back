@@ -5,7 +5,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Sentence, Text, Token
 from mpcd.corpus.schemas.token import TokenInput
-from mpcd.dict.models import Language, Translation
+from mpcd.dict.models import Translation
 from mpcd.dict.schemas.translation import TranslationInput
 
 # import the logging library
@@ -74,20 +74,13 @@ class CreateSentence(relay.ClientIDMutation):
 
         if input.get('translations', None) is not None:
             for translation_input in input.get('translations'):
-                # check if language exists
-                if Language.objects.filter(identifier=translation_input.get('language').get('identifier')).exists():
-                    language_instance = Language.objects.get(
-                        identifier=translation_input.get('language').get('identifier'))
 
-                    # check if translation exists, if not create it
-                    translation_instance, translation_created = Translation.objects.get_or_create(
-                        text=translation_input.get('text'), language=language_instance)
+                # check if translation exists, if not create it
+                translation_instance, translation_created = Translation.objects.get_or_create(
+                    text=translation_input.get('text'), language=translation_input.get('language'))
 
-                    # add translation to sentence
-                    sentence_instance.translations.add(translation_instance)
-
-                else:
-                    return cls(success=False, errors=['Wrong Language identifier'])
+                # add translation to sentence
+                sentence_instance.translations.add(translation_instance)
 
         # add tokens
         if input.get('tokens', None) is not None:
@@ -138,20 +131,11 @@ class UpdateSentence(relay.ClientIDMutation):
             if input.get('translations', None) is not None:
                 sentence_instance.translations.clear()
                 for translation_input in input.get('translations'):
-                    # check if language exists
-                    if Language.objects.filter(identifier=translation_input.get('language').get('identifier')).exists():
-                        language_instance = Language.objects.get(
-                            identifier=translation_input.get('language').get('identifier'))
-
-                        # check if translation exists, if not create it
-                        translation_instance, translation_created = Translation.objects.get_or_create(
-                            text=translation_input.get('text'), language=language_instance)
-
-                        # add translation to sentence
-                        sentence_instance.translations.add(translation_instance)
-
-                else:
-                    return cls(success=False, errors=['Wrong Language ID'])
+                    # check if translation exists, if not create it
+                    translation_instance, translation_created = Translation.objects.get_or_create(
+                        text=translation_input.get('text'), language=translation_input.get('language'))
+                    # add translation to sentence
+                    sentence_instance.translations.add(translation_instance)
 
             if input.get('comment', None) is not None:
                 sentence_instance.comment = input.get('comment')

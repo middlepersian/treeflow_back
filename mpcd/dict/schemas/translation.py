@@ -3,7 +3,7 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Bool
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.dict.models import Translation, Language
+from mpcd.dict.models import Translation
 from mpcd.dict.schemas import LanguageInput
 
 
@@ -41,16 +41,18 @@ class CreateTranslation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
 
         if input.get('text', None) is not None:
-            translation_instance = Translation.objects.create(text=input.get('text'))
+            translation_text = input.get('text')
+            if input.get('language', None) is not None:
+                translation_lang = input.get('language')
+                # check if translation exists, if not create it
+                translation_instance, translation_created = Translation.objects.get_or_create(
+                    text=translation_text, language=translation_lang)
+                if not translation_created:
+                    return cls(translation=None, success=False, errors=['translation already exists'])
+                translation_instance.save()
+                return cls(translation=translation_instance, success=True, errors=None)
         else:
-            return cls(errors=['No text provided'], success=False)
-
-        if input.get('language', None) is not None:
-            if Language.objects.filter(identifier=input.get('language').get('identifier')).exists():
-                language_instance = Language.objects.get(identifier=input.get('language').get('identifier'))
-                translation_instance.language = language_instance
-            translation_instance.save()
-            return cls(translation=translation_instance, success=True)
+            return cls(translation=None, errors=['No text provided'], success=False)
 
 
 class UpdateTranslation(relay.ClientIDMutation):
@@ -74,9 +76,7 @@ class UpdateTranslation(relay.ClientIDMutation):
                     translation_instance.text = input.get('text')
                 # update language
                 if input.get('language', None) is not None:
-                    if Language.objects.filter(identifier=input.get('language').get('identifier')).exists():
-                        language_instance = Language.objects.get(identifier=input.get('language').get('identifier'))
-                        translation_instance.language = language_instance
+                    translation_instance.text = input.get('language')
                 translation_instance.save()
                 return cls(translation=translation_instance, success=True)
             else:

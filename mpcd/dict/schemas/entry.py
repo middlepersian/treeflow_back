@@ -1,3 +1,4 @@
+from distutils import errors
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -50,114 +51,108 @@ class CreateEntry(relay.ClientIDMutation):
 
     entry = Field(EntryNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
-            return cls(success=False)
+
+        # check if dict exists
+        if Dictionary.objects.filter(slug=input['dict']['slug']).exists():
+            dict = Dictionary.objects.get(slug=input['dict']['slug'])
         else:
-            # check if dict exists
-            if Dictionary.objects.filter(slug=input['dict']['slug']).exists():
-                dict = Dictionary.objects.get(slug=input['dict']['slug'])
+            return cls(success=False, entry=None, errors=["Dictionary does not exist"])
+
+        # check if lemma exists
+        if input.get('lemma', None) is not None:
+            if input.get('lemma', None).get('word', None) is not None:
+                lemma_word = input.get('lemma', None).get('word')
+                if input.get('language') is not None:
+                    lemma_lang = input.get('lemma', None).get('language')
+                    lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
+                    lemma.save()
+                    return cls(word=lemma, success=True)
+                else:
+                    return cls(entry=None, success=False, errors=["No language provided"])
             else:
-                return cls(success=False)
-            # check if word exists
-            if Lemma.objects.filter(word=input['lemma']['word']).exists():
-                lemma = Lemma.objects.get(word=input['lemma']['word'])
-            else:
-                lemma = Lemma.objects.create(word=input['lemma']['word'])
+                return cls(entry=None, success=False, errors=["No word provided"])
 
-            # create entry
-            entry = Entry.objects.create(dict=dict, lemma=lemma)
+        # create entry
+        entry = Entry.objects.create(dict=dict, lemma=lemma)
 
-            # check if loanwords exist
-            if input['loanwords']:
-                for loanword in input['loanwords']:
-                    if LoanWord.objects.filter(word=loanword['word']).exists():
-                        loanword_obj = LoanWord.objects.get(word=loanword['word'])
-                    else:
-                        loanword_obj = LoanWord.objects.create(word=loanword['word'])
-                        if loanword['language']:
-                            if Language.objects.filter(language=loanword['language']['identifier']).exists():
-                                language_obj = Language.objects.get(language=loanword['language']['identifier'])
-                                loanword_obj.language = language_obj
-                             # check if there are translations for the loanword
-                            if loanword['translations']:
-                                for translation in loanword['translations']:
-                                    if Translation.objects.filter(translation=translation['translation']).exists():
-                                        translation_obj = Translation.objects.get(
-                                            translation=translation['translation'])
-                                    else:
-                                        translation_obj = Translation.objects.create(
-                                            translation=translation['translation'])
-                                        if translation['language']:
-                                            if Language.objects.filter(language=translation['language']['identifier']).exists():
-                                                language_obj = Language.objects.get(
-                                                    language=translation['language']['identifier'])
-                                                translation_obj.language = language_obj
-                                            else:
-                                                return cls(success=False)
-                                    loanword_obj.translations.add(translation_obj)
+        # check if loanwords exist
+        if input.get('loanwords', None) is not None:
 
-                            loanword_obj.save()
+            for loanword in input.get('loanwords'):
+                if loanword.get('word') is not None:
+                    lemma_word = input.get('word')
 
-                    entry.loanwords.add(loanword_obj)
+                if loanword.get('language') is not None:
+                    lemma_lang = loanword.get('language')
+                    loanword_instance, loanword_created = LoanWord.objects.get_or_create(
+                        word=lemma_word, language=lemma_lang)
+                    loanword_instance.save()
 
-            # check if translations exist
-            if input['translations']:
-                for translation in input['translations']:
-                    if Translation.objects.filter(word=translation['word']).exists():
-                        translation_obj = Translation.objects.get(word=translation['word'])
-                    else:
-                        translation_obj = Translation.objects.create(word=translation['word'])
-                        if translation['language']:
-                            if Language.objects.filter(language=translation['language']['identifier']).exists():
-                                language_obj = Language.objects.get(language=translation['language']['identifier'])
-                                translation_obj.language = language_obj
-                            translation_obj.save()
-                    entry.translations.add(translation_obj)
+                if loanword.get('translations', None) is not None:
+                    for translation in loanword.get('translations'):
+                        # check if translation exists, if not create it
+                        translation_instance, translation_created = Translation.objects.get_or_create(
+                            text=translation.get('text'), language=translation.get('language'))
+                        # add translation
+                        loanword_instance.translations.add(translation_instance)
+                        loanword_instance.save()
 
-            # check if definitions exist
-            if input['definitions']:
-                for definition in input['definitions']:
-                    if Definition.objects.filter(definition=definition['definition']).exists():
-                        definition_obj = Definition.objects.get(definition=definition['definition'])
-                    else:
-                        definition_obj = Definition.objects.create(definition=definition['definition'])
-                        # check if there is a language assocaited with the definition
-                        if definition['language']:
-                            if Language.objects.filter(language=definition['language']['identifier']).exists():
-                                language_obj = Language.objects.get(language=definition['language']['identifier'])
-                                definition_obj.language = language_obj
-                            definition_obj.save()
-                    entry.definitions.add(definition_obj)
+                entry.loanwords.add(loanword_instance)
 
-            if input['categories']:
-                for category in input['categories']:
-                    if Category.objects.filter(category=category['category']).exists():
-                        category_obj = Category.objects.get(category=category['category'])
-                    else:
-                        category_obj = Category.objects.create(category=category['category'])
-                    entry.categories.add(category_obj)
-            if input['references']:
-                for reference in input['references']:
-                    if Reference.objects.filter(reference=reference['reference']).exists():
-                        reference_obj = Reference.objects.get(reference=reference['reference'])
-                    else:
-                        reference_obj = Reference.objects.create(reference=reference['reference'])
-                    entry.references.add(reference_obj)
+        # check if translations exist
+        if input.get('translations', None) is not None:
+            for translation in input.get('translations', None):
+                # check if translation exists, if not create it
+                translation_instance, translation_created = Translation.objects.get_or_create(
+                    text=translation.get('text'), language=translation.get('language'))
+                entry.translations.add(translation_instance)
 
-            if input['related_entries']:
-                for related_entry in input['related_entries']:
-                    if Entry.objects.filter(pk=from_global_id(related_entry.id)[1]).exists():
-                        related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
-                        entry.related_entries.add(related_entry_obj)
+        # check if definitions exist
+        if input.get('definitions', None) is not None:
+            for definition in input['definitions']:
 
-            if input['comment']:
-                entry.comment = input['comment']
+                if input.get('definition', None) is not None:
+                    definition_input = definition.get('definition')
 
-            entry.save()
-            return cls(entry=entry, success=True)
+                if definition.get('language', None) is not None:
+                    language_input = definition.get('language')
+                    definition_instance, definition_created = Definition.objects.get_or_create(
+                        definition=definition_input, language=language_input)
+                    entry.definitions.add(definition_instance)
+
+                else:
+                    return cls(entry=None, success=False, errors=['language for definition is required'])
+
+        if input['categories']:
+            for category in input['categories']:
+                if Category.objects.filter(category=category['category']).exists():
+                    category_obj = Category.objects.get(category=category['category'])
+                else:
+                    category_obj = Category.objects.create(category=category['category'])
+                entry.categories.add(category_obj)
+        if input['references']:
+            for reference in input['references']:
+                if Reference.objects.filter(reference=reference['reference']).exists():
+                    reference_obj = Reference.objects.get(reference=reference['reference'])
+                else:
+                    reference_obj = Reference.objects.create(reference=reference['reference'])
+                entry.references.add(reference_obj)
+
+        if input['related_entries']:
+            for related_entry in input['related_entries']:
+                if Entry.objects.filter(pk=from_global_id(related_entry.id)[1]).exists():
+                    related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
+                    entry.related_entries.add(related_entry_obj)
+
+        if input['comment']:
+            entry.comment = input['comment']
+
+        entry.save()
+        return cls(entry=entry, success=True)
 
 
 class UpdateEntry(relay.ClientIDMutation):
@@ -174,65 +169,77 @@ class UpdateEntry(relay.ClientIDMutation):
 
     entry = Field(EntryNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
+
         if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
             entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
-            if input['dict']:
+
+            if input.get('dict', None) is not None:
                 if Dictionary.objects.filter(slug=input['dict']['slug']).exists():
                     dict = Dictionary.objects.get(slug=input['dict']['slug'])
                 else:
                     return cls(success=False)
                 entry.dict = dict
 
-            if input['lemma']:
-                if Lemma.objects.filter(word=input['lemma']['word']).exists():
-                    lemma = Lemma.objects.get(word=input['lemma']['word'])
+            # update lemma
+            if input.get('lemma', None) is not None:
+                if input.get('lemma', None).get('word', None) is not None:
+                    lemma_word = input.get('lemma', None).get('word')
+                    if input.get('language') is not None:
+                        lemma_lang = input.get('lemma', None).get('language')
+                        lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
+                        lemma.save()
+                        entry.lemma = lemma
+                        return cls(word=lemma, success=True)
                 else:
-                    lemma = Lemma.objects.create(word=input['lemma']['word'])
-                entry.lemma = lemma
+                    return cls(entry=None, success=False, errors=["No word provided"])
 
-            if input['loanwords']:
+            if input.get('loanwords', None) is not None:
                 entry.loanwords.clear()
-                for loanword in input['loanwords']:
-                    if LoanWord.objects.filter(word=loanword['word']).exists():
-                        loanword_obj = LoanWord.objects.get(word=loanword['word'])
-                    else:
-                        loanword_obj = LoanWord.objects.create(word=loanword['word'])
-                        if loanword['language']:
-                            if Language.objects.filter(language=loanword['language']['identifier']).exists():
-                                language_obj = Language.objects.get(language=loanword[' language']['identifier'])
-                                loanword_obj.language = language_obj
-                    entry.loanwords.add(loanword_obj)
-
-            if input['translations']:
+                for loanword in input.get('loanwords'):
+                    if loanword.get('word') is not None:
+                        lemma_word = input.get('word')
+                    if loanword.get('language') is not None:
+                        lemma_lang = loanword.get('language')
+                        loanword_instance, loanword_created = LoanWord.objects.get_or_create(
+                            word=lemma_word, language=lemma_lang)
+                        loanword_instance.save()
+                    if loanword.get('translations', None) is not None:
+                        for translation in loanword.get('translations'):
+                            # check if translation exists, if not create it
+                            translation_instance, translation_created = Translation.objects.get_or_create(
+                                text=translation.get('text'), language=translation.get('language'))
+                            # add translation
+                            loanword_instance.translations.add(translation_instance)
+                            loanword_instance.save()
+                    entry.loanwords.add(loanword_instance)
+            if input.get('translations', None) is not None:
                 entry.translations.clear()
-                for translation in input['translations']:
-                    if Translation.objects.filter(word=translation['word']).exists():
-                        translation_obj = Translation.objects.get(word=translation['word'])
-                    else:
-                        translation_obj = Translation.objects.create(word=translation['word'])
-                        if translation['language']:
-                            if Language.objects.filter(language=translation['language']['identifier']).exists():
-                                language_obj = Language.objects.get(language=translation['language']['identifier'])
-                                translation_obj.language = language_obj
-                            translation_obj.save()
-                    entry.translations.add(translation_obj)
+                for translation in input.get('translations', None):
+                    # check if translation exists, if not create it
+                    translation_instance, translation_created = Translation.objects.get_or_create(
+                        text=translation.get('text'), language=translation.get('language'))
+                    entry.translations.add(translation_instance)
 
-            if input['definitions']:
+            # check if definitions exist
+            if input.get('definitions', None) is not None:
                 entry.definitions.clear()
                 for definition in input['definitions']:
-                    if Definition.objects.filter(definition=definition['definition']).exists():
-                        definition_obj = Definition.objects.get(definition=definition['definition'])
+
+                    if input.get('definition', None) is not None:
+                        definition_input = definition.get('definition')
+
+                    if definition.get('language', None) is not None:
+                        language_input = definition.get('language')
+                        definition_instance, definition_created = Definition.objects.get_or_create(
+                            definition=definition_input, language=language_input)
+                        entry.definitions.add(definition_instance)
+
                     else:
-                        definition_obj = Definition.objects.create(definition=definition['definition'])
-                        if definition['language']:
-                            if Language.objects.filter(language=definition['language']['identifier']).exists():
-                                language_obj = Language.objects.get(language=definition['language']['identifier'])
-                                definition_obj.language = language_obj
-                            definition_obj.save()
-                    entry.definitions.add(definition_obj)
+                        return cls(entry=None, success=False, errors=['language for definition is required'])
 
             if input['categories']:
                 entry.categories.clear()
