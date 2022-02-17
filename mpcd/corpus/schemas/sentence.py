@@ -98,7 +98,7 @@ class CreateSentence(relay.ClientIDMutation):
                     return cls(success=False, errors=['Wrong Token ID'])
 
         # check if previous is valid
-        if input.get('previous', None) is not None and input.get('previous', None) != "":
+        if input.get('previous', None) is not None:
             if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
