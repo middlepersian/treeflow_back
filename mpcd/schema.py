@@ -3,6 +3,7 @@ import graphene
 import mpcd.corpus.schemas
 import mpcd.dict.schemas
 
+## TODO check fields "!"
 
 class Query(
         # Corpus Queries
