@@ -6,4 +6,4 @@ from .loanword import LoanWord
 from .reference import Reference
 from .translation import Translation
 from .lemma import Lemma
-from .language import Language
+from .language import LanguageChoices, Language
