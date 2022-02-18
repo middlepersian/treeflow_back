@@ -16,7 +16,7 @@ class TranslationNode(DjangoObjectType):
 
 class TranslationInput(InputObjectType):
     text = String()
-    language = LanguageInput()
+    language = String()
 
 
 # Queries
