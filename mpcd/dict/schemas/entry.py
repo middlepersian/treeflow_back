@@ -64,9 +64,9 @@ class CreateEntry(relay.ClientIDMutation):
 
         # check if lemma exists
         if input.get('lemma', None) is not None:
-            if input.get('lemma', None).get('word', None) is not None:
-                lemma_word = input.get('lemma', None).get('word')
-                if input.get('language') is not None:
+            if input.get('lemma').get('word', None) is not None:
+                lemma_word = input.get('lemma').get('word')
+                if input.get('lemma').get('language') is not None:
                     lemma_lang = input.get('lemma', None).get('language')
                     lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
                     lemma.save()

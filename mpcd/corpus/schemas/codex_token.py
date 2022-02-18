@@ -3,7 +3,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import CodexToken
-from mpcd.dict.models import Entry, Lemma, Translation
+from mpcd.dict.models import Entry, Lemma, Translation, Dictionary
 from mpcd.corpus.models import CodexToken, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import POSInput
@@ -100,10 +100,10 @@ class CreateCodexToken(relay.ClientIDMutation):
         if input.get('lemma', None) is not None:
 
             # get lemmas word
-            if input.get('lemma').get('word', None) is not None:
+            if input.get('lemma').get('lemma').get('word', None) is not None:
                 lemma_word = input.get('lemma').get('word')
-                if input.get('lemma').get('language') is not None:
-                    lemma_lang = input.get('lemma').get('language')
+                if input.get('lemma').get('lemma').get('language') is not None:
+                    lemma_lang = input.get('lemma').get('lemma').get('language')
 
                     lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
 
@@ -114,7 +114,12 @@ class CreateCodexToken(relay.ClientIDMutation):
                 return cls(token=None, success=False, errors=["No lemma word provided"])
 
             if lemma:
-                entry = Entry.objects.create(lemma=lemma)
+                # check dict
+                if input.get('lemma').get('dict').get('slug') is not None:
+                    dict = Dictionary.objects.get(slug=input.get('lemma').get('dict').get('slug'))
+                    entry = Entry.objects.create(lemma=lemma, dict=dict)
+                else:
+                    return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
 
             # check if translations available
             if input.get('lemma').get('translations') is not None:
@@ -222,7 +227,8 @@ class UpdateCodexToken(relay.ClientIDMutation):
             if CodexToken.objects.filter(pk=from_global_id(input['id'])[1]).exists():
                 # get the token
                 token = CodexToken.objects.get(pk=from_global_id(input['id'])[1])
-            else: return cls(token=None, success=False, errors=["Token with ID {} not found".format(input['id'])])
+            else:
+                return cls(token=None, success=False, errors=["Token with ID {} not found".format(input['id'])])
 
             # check if transcription available
             if input.get('transcription', None) is not None:
@@ -272,7 +278,7 @@ class UpdateCodexToken(relay.ClientIDMutation):
 
             # check if pos available
         if input.get('pos', None) is not None:
-            # check if pos with same name already exists
+            # check if pos with same name already exists or create it
             pos, pos_created = POS.objects.get_or_create(identifier=input['pos']['identifier'])
             token.pos = pos
         # check if morphological annotation available
@@ -317,7 +323,7 @@ class UpdateCodexToken(relay.ClientIDMutation):
             # check if previous token with assigned id already exists
             if CodexToken.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
                 token.previous = CodexToken.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
-        
+
            # check if line available
         if input.get('line', None) is not None:
             # check if line with assigned id already exists
@@ -327,14 +333,11 @@ class UpdateCodexToken(relay.ClientIDMutation):
             else:
                 return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line'])])
 
-
         # check if position available
         if input.get('position', None) is not None:
             position = input['position']
             token.position = position
-    
 
-        
         # save token
         token.save()
         return cls(token=token, success=True)

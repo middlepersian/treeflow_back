@@ -1,15 +1,17 @@
 
+import re
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.dict.models import Entry, Lemma, Language, Translation
+from mpcd.dict.models import Entry, Lemma, Dictionary, Translation
 from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text
 from mpcd.corpus.schemas.morphological_annotation import MorphologicalAnnotationInput
 from mpcd.corpus.schemas.pos import POSInput
 from mpcd.corpus.schemas.dependency import DependencyInput
 from mpcd.corpus.schemas.text import TextInput
 from mpcd.dict.schemas.entry import EntryInput
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -65,6 +67,7 @@ class CreateToken(relay.ClientIDMutation):
 
     token = Field(TokenNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
@@ -89,12 +92,14 @@ class CreateToken(relay.ClientIDMutation):
         # check if lemma available
         # TODO complex version of entry here
         if input.get('lemma', None) is not None:
+            # get lemmas word
+            logger.error('lemma_word 1 {}'.format(input.get('lemma').get('lemma').get('word')))
 
             # get lemmas word
-            if input.get('lemma').get('word', None) is not None:
-                lemma_word = input.get('lemma').get('word')
-                if input.get('lemma').get('language') is not None:
-                    lemma_lang = input.get('lemma').get('language')
+            if input.get('lemma').get('lemma').get('word', None) is not None:
+                lemma_word = input.get('lemma').get('lemma').get('word')
+                if input.get('lemma').get('lemma').get('language') is not None:
+                    lemma_lang = input.get('lemma').get('lemma').get('language')
 
                     lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
 
@@ -105,8 +110,13 @@ class CreateToken(relay.ClientIDMutation):
                 return cls(token=None, success=False, errors=["No lemma word provided"])
 
             if lemma:
-                entry = Entry.objects.create(lemma=lemma)
-
+                # check dict
+                if input.get('lemma').get('dict').get('slug') is not None:
+                    logger.error('dict slug 1 {}'.format(input.get('lemma').get('dict').get('slug')))
+                    dict = Dictionary.objects.get(slug=input.get('lemma').get('dict').get('slug'))
+                    entry = Entry.objects.create(lemma=lemma, dict=dict)
+                else:
+                    return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
             # check if translations available
             if input.get('lemma').get('translations') is not None:
                 for translation in input['lemma']['translations']:
@@ -160,11 +170,16 @@ class CreateToken(relay.ClientIDMutation):
             token.avestan = input['avestan']
         # check if previous token available
         if input.get('previous', None) is not None:
+            logger.error('previous 1 {}'.format(input.get('previous')))
             # check if previous token with assigned id already exists
             if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 token.previous = Token.objects.filter(pk=from_global_id(input['previous'])[1]).first()
             else:
                 return cls(token=None, success=False, errors=["Previous token with ID {} not found".format(input['previous'])])
+
+        # save token
+        token.save()
+        return cls(token=token, success=True)
 
 
 class UpdateToken(relay.ClientIDMutation):
@@ -182,6 +197,7 @@ class UpdateToken(relay.ClientIDMutation):
 
     token = Field(TokenNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
@@ -208,10 +224,12 @@ class UpdateToken(relay.ClientIDMutation):
         if input.get('lemma', None) is not None:
 
             # get lemmas word
-            if input.get('lemma').get('word', None) is not None:
-                lemma_word = input.get('lemma').get('word')
-                if input.get('lemma').get('language') is not None:
-                    lemma_lang = input.get('lemma').get('language')
+
+            if input.get('lemma').get('lemma').get('word', None) is not None:
+                lemma_word = input.get('lemma').get('lemma').get('word')
+                logger.error('lemma_word {}'.format(lemma_word))
+                if input.get('lemma').get('lemma').get('language') is not None:
+                    lemma_lang = input.get('lemma').get('lemma').get('language')
 
                     lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
 
@@ -222,8 +240,12 @@ class UpdateToken(relay.ClientIDMutation):
                 return cls(token=None, success=False, errors=["No lemma word provided"])
 
             if lemma:
-                entry = Entry.objects.create(lemma=lemma)
-
+                # check dict
+                if input.get('lemma').get('dict').get('slug') is not None:
+                    dict = Dictionary.objects.get(slug=input.get('lemma').get('dict').get('slug'))
+                    entry = Entry.objects.create(lemma=lemma, dict=dict)
+                else:
+                    return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
             # check if translations available
             if input.get('lemma').get('translations') is not None:
                 for translation in input['lemma']['translations']:

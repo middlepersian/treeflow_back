@@ -15,7 +15,7 @@ class LemmaNode(DjangoObjectType):
 
 class LemmaInput(InputObjectType):
     word = String()
-    language = LanguageInput()
+    language = String()
 
 
 # Queries
