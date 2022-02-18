@@ -38,7 +38,7 @@ class Query(ObjectType):
 class CreateFolio(relay.ClientIDMutation):
     class Input:
         identifier = String(required=True)
-        facisimile = ID()
+        facsimile = ID()
         comment = String()
         previous = ID()
 
@@ -57,14 +57,14 @@ class CreateFolio(relay.ClientIDMutation):
             return cls(success=False, errors=['identifier is required'])
 
         if input.get('facsimile', None) is not None:
-            codex_instance = Facsimile.objects.gte(pk=from_global_id(input.get('facsimile'))[1])
+            facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('facsimile'))[1])
         else:
-            return cls(success=False, errors=['codex is required'])
+            return cls(success=False, errors=['facsimile ID is required'])
 
         if Folio.objects.filter(identifier=identifier).exists():
             return cls(success=False, errors=['Folio already exists'])
 
-        folio = Folio.objects.create(identifier=identifier, codex=codex_instance)
+        folio = Folio.objects.create(identifier=identifier, facsimile=facsimile_instance)
 
         if input.get('comment', None) is not None:
             folio.comment = input.get('comment')

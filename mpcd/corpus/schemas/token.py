@@ -185,15 +185,17 @@ class CreateToken(relay.ClientIDMutation):
 class UpdateToken(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        transcription = String(required=False)
-        transliteration = String(required=False)
-        lemma = String(required=False)
-        pos = String(required=False)
-        morphological_annotation = List(String, required=False)
-        syntactic_annotation = List(String, required=False)
-        comment = String(required=False)
-        avestan = String(required=False)
-        previous = String(required=False)
+        transcription = String()
+        transliteration = String()
+        text = ID()
+        language = ID()
+        lemma = EntryInput()
+        pos = POSInput()
+        morphological_annotation = List(MorphologicalAnnotationInput)
+        syntactic_annotation = List(DependencyInput)
+        comment = String()
+        avestan = String()
+        previous = ID()
 
     token = Field(TokenNode)
     success = Boolean()
@@ -306,8 +308,8 @@ class UpdateToken(relay.ClientIDMutation):
         # check if previous token available
         if input.get('previous', None) is not None:
             # check if previous token with assigned id already exists
-            if Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                token.previous = Token.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
+            if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                token.previous = Token.objects.filter(pk=from_global_id(input['previous'])[1]).first()
         # save token
         token.save()
         return cls(token=token, success=True)

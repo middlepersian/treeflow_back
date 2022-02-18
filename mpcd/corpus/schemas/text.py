@@ -67,7 +67,7 @@ class CreateText(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check that corpus exists
-        if input.get('corpus_slug', None) is None:
+        if input.get('corpus', None) is None:
             return cls(success=False, errors="No corpus slug provided")
 
         # and that there is title available
@@ -82,7 +82,7 @@ class CreateText(relay.ClientIDMutation):
         text_instance = Text.objects.create(title=input.get('title'), stage=input.get('stage'))
 
         # get corpus
-        corpus_instance = Corpus.objects.get(slug=input['corpus_slug'])
+        corpus_instance = Corpus.objects.get(slug=input['corpus'])
         text_instance.corpus = corpus_instance
 
         # get source

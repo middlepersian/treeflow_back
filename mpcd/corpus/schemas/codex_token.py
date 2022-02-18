@@ -2,7 +2,6 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import CodexToken
 from mpcd.dict.models import Entry, Lemma, Translation, Dictionary
 from mpcd.corpus.models import CodexToken, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
@@ -206,15 +205,20 @@ class CreateCodexToken(relay.ClientIDMutation):
 class UpdateCodexToken(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        transcription = String(required=False)
-        transliteration = String(required=False)
-        lemma = String(required=False)
-        pos = String(required=False)
-        morphological_annotation = List(String, required=False)
-        syntactic_annotation = List(String, required=False)
-        comment = String(required=False)
-        avestan = String(required=False)
-        previous = String(required=False)
+        transcription = String(required=True)
+        transliteration = String(required=True)
+        language = String()
+        text = ID(required=True)
+        lemma = EntryInput()
+        pos = POSInput()
+        morphological_annotation = List(MorphologicalAnnotationInput)
+        syntactic_annotation = List(DependencyInput)
+        comment = String()
+        avestan = String()
+        previous = ID()
+        # from CodexToken
+        line = ID()
+        position = Int()
 
     token = Field(CodexTokenNode)
     success = Boolean()
@@ -321,8 +325,8 @@ class UpdateCodexToken(relay.ClientIDMutation):
         # check if previous token available
         if input.get('previous', None) is not None:
             # check if previous token with assigned id already exists
-            if CodexToken.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                token.previous = CodexToken.objects.filter(pk=from_global_id(input['previous']['id'])[1]).first()
+            if CodexToken.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                token.previous = CodexToken.objects.filter(pk=from_global_id(input['previous'])[1]).first()
 
            # check if line available
         if input.get('line', None) is not None:
