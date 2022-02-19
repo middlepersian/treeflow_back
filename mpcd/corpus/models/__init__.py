@@ -20,4 +20,4 @@ from .text import Text
 from .edition import Edition
 from .section_type import SectionType
 from .section import Section
-from .codex_token import CodexToken
+#from .codex_token import CodexToken

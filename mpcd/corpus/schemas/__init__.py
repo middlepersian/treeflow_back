@@ -19,6 +19,5 @@ from .source import SourceNode
 from .section_type import SectionTypeNode, SectionTypeInput
 from .text import TextNode, TextInput
 from .token import TokenNode, TokenInput
-from .codex_token import CodexTokenNode
 from .section import SectionNode, SectionInput
 
