@@ -1,22 +1,23 @@
 from dataclasses import fields
-from graphene import relay, InputObjectType, Field, ObjectType, ID, Boolean
+from graphene import relay, InputObjectType, Field, ObjectType, ID, Boolean, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import MorphologicalAnnotation
-from mpcd.corpus.schemas import FeatureValueInput, FeatureInput, FeatureNode, FeatureValueNode
 
 
 class MorphologicalAnnotationNode(DjangoObjectType):
     class Meta:
         model = MorphologicalAnnotation
-        filter_fields = {'id': ['exact', 'icontains', 'istartswith']}
+        filter_fields = {'id': ['exact', 'icontains', 'istartswith'],
+                         'feature': ['exact', 'icontains', 'istartswith'],
+                         'feature_value': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
 
 class MorphologicalAnnotationInput(InputObjectType):
-    feature = FeatureInput()
-    feature_value = FeatureValueInput()
+    feature = String()
+    feature_value = String()
 
 # Queries
 
@@ -30,15 +31,14 @@ class Query(ObjectType):
 
 class CreateMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
-        feature = FeatureInput()
-        feature_value = FeatureValueInput()
+        feature = String()
+        feature_value = String()
 
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, feature, feature_value):
-        # check that bybentry does not exist same title and year
         if MorphologicalAnnotation.objects.filter(feature=feature, feature_value=feature_value).exists():
             return cls(success=False)
 
@@ -52,8 +52,8 @@ class CreateMorphologicalAnnotation(relay.ClientIDMutation):
 class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
         id = ID()
-        feature = FeatureInput()
-        feature_value = FeatureValueInput()
+        feature = String()
+        feature_value = String()
 
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()

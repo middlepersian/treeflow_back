@@ -7,10 +7,8 @@ from .feature_value import FeatureValue
 
 class MorphologicalAnnotation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    feature = models.ForeignKey(Feature, on_delete=models.CASCADE, null=True, blank=True,
-                                related_name='morphological_annotation_feature')
-    feature_value = models.ForeignKey(FeatureValue, on_delete=models.CASCADE, null=True,
-                                      blank=True, related_name='morphological_annotation_feature_value')
+    feature = models.CharField(max_length=10, null=True, blank=True)
+    feature_value = models.CharField(max_length=10, null=True, blank=True)
 
     class Meta:
         constraints = [
