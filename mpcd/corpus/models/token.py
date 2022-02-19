@@ -3,12 +3,11 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from django.contrib import admin
 from mpcd.dict.models import Entry
-from .author import Author
-from .bibliography import BibEntry
 from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .pos import POS
 from .text import Text
+from .line import Line
 from mpcd.dict.models.language import LanguageChoices
 
 
@@ -26,13 +25,16 @@ class Token(models.Model):
     comment = models.TextField(blank=True)
     avestan = models.URLField(max_length=100, null=True, blank=True)
 
+    line = models.ForeignKey(Line, on_delete=models.SET_NULL, null=True, related_name='token_line')
+    position_in_line = models.PositiveSmallIntegerField(null=True)
+
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,
                                     null=True,
                                     on_delete=models.SET_NULL)
 
-    gloss = models.TextField(blank=True, null=True)                              
+    gloss = models.TextField(blank=True, null=True)
 
     history = HistoricalRecords()
 
@@ -41,6 +43,13 @@ class Token(models.Model):
 
     def __str__(self):
         return '{}'.format(self.transcription)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['line', 'position_in_line'], name='line_position'
+            )
+        ]
 
 
 class TokenAdmin(admin.ModelAdmin):
