@@ -347,6 +347,7 @@ class JoinTokens(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
-    create_codex_token = CreateToken.Field()
-    delete_codex_token = DeleteToken.Field()
+    create_token = CreateToken.Field()
+    delete_token = DeleteToken.Field()
+    update_token = UpdateToken.Field()
     join_codex_tokens = JoinTokens.Field()
