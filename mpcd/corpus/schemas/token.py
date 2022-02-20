@@ -166,15 +166,13 @@ class CreateToken(relay.ClientIDMutation):
                 token.line = line
             else:
                 return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line'])])
-        else:
-            return cls(token=None, success=False, errors=["Line not provided"])
+       
 
         # check if position_in_line available
         if input.get('position_in_line', None) is not None:
             position_in_line = input['position_in_line']
             token.position_in_line = position_in_line
-        else:
-            return cls(token=None, success=False, errors=["Position not provided"])
+     
 
         token.save()
 
