@@ -61,9 +61,6 @@ class CreateFolio(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['facsimile ID is required'])
 
-        if Folio.objects.filter(identifier=identifier).exists():
-            return cls(success=False, errors=['Folio already exists'])
-
         folio = Folio.objects.create(identifier=identifier, facsimile=facsimile_instance)
 
         if input.get('comment', None) is not None:

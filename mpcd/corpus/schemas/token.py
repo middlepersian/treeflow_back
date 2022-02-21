@@ -31,7 +31,7 @@ class TokenInput(InputObjectType):
     transliteration = String()
     language = String()
     lemma = EntryInput()
-    pos = POSInput()
+    pos = String()
     morphological_annotation = List(MorphologicalAnnotationInput)
     syntactic_annotation = List(DependencyInput)
     comment = String()
@@ -57,7 +57,7 @@ class CreateToken(relay.ClientIDMutation):
         language = String()
         text = ID(required=True)
         lemma = EntryInput()
-        pos = POSInput()
+        pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
         comment = String()
@@ -126,13 +126,10 @@ class CreateToken(relay.ClientIDMutation):
                     entry.translations.add(translation_obj)
 
             # add the entry to the token
-            token.lemma = entry
-
         # check if pos available
         if input.get('pos', None) is not None:
-            # check if pos with same name already exists
-            pos, pos_created = POS.objects.get_or_create(identifier=input['pos']['identifier'])
-            token.pos = pos
+            token.pos = input.get('pos')
+            
        # check if morphological annotation available
         if input.get('morphological_annotation', None) is not None:
             for annotation in input['morphological_annotation']:
@@ -184,7 +181,7 @@ class UpdateToken(relay.ClientIDMutation):
         language = String()
         text = ID(required=True)
         lemma = EntryInput()
-        pos = POSInput()
+        pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
         comment = String()
@@ -253,11 +250,10 @@ class UpdateToken(relay.ClientIDMutation):
         if input.get('language', None) is not None:
             token.language = input.get('language', None)
 
-            # check if pos available
+        # check if pos available
         if input.get('pos', None) is not None:
-            # check if pos with same name already exists or create it
-            pos, pos_created = POS.objects.get_or_create(identifier=input['pos']['identifier'])
-            token.pos = pos
+            token.pos = input.get('pos')
+
         # check if morphological annotation available
         if input.get('morphological_annotation', None) is not None:
             token.morphological_annotations.clear()
