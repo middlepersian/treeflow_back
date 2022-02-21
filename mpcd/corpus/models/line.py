@@ -17,5 +17,13 @@ class Line(models.Model):
 
     history = HistoricalRecords()
 
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['number', 'folio'], name='number_folio'
+            )
+        ]
+
     def __str__(self):
         return '{}'.format(self.number)

@@ -18,5 +18,12 @@ class Folio(models.Model):
 
     history = HistoricalRecords()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['identifier', 'facsimile'], name='identifier_facsimile'
+            )
+        ]
+
     def __str__(self):
         return '{}'.format(self.identifier)
