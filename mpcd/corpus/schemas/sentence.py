@@ -176,7 +176,7 @@ class AddTokensToSentence(relay.ClientIDMutation):
 
     class Input:
         id = ID()
-        tokens = List(TokenInput)
+        tokens = List(ID)
 
     success = Boolean()
     errors = List(String)
@@ -197,7 +197,7 @@ class AddTokensToSentence(relay.ClientIDMutation):
                         else:
                             return cls(success=False, errors=['Wrong Token ID {}'.format(token)])
                     sentence_instance.save()
-                    return cls(sentence=sentence_instance, success=True)
+                    return cls(sentence=sentence_instance, success=True, errors=None)
             else:
                 return cls(success=False, errors=['Wrong Sentence ID'])
         else:

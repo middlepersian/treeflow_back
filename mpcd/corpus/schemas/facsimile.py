@@ -119,9 +119,8 @@ class UpdateFacsimile(relay.ClientIDMutation):
 
 class DeleteFacsimile(relay.ClientIDMutation):
     class Input:
-        facsimile = ID()
+        id = ID()
 
-    facsimile = Field(FacsimileNode)
     success = Boolean()
     errors = List(String)
 
@@ -130,15 +129,15 @@ class DeleteFacsimile(relay.ClientIDMutation):
         logger.debug('DeleteFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
 
-        if input.get('facsimile', None) is not None:
+        if input.get('id', None) is not None:
 
-            if Facsimile.objects.filter(pk=from_global_id(input.get('facsimile'))[1]).exists():
-                facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('facsimile'))[1])
+            if Facsimile.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+                facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('id'))[1])
                 facsimile_instance.delete()
-                return cls(facsimile=facsimile_instance, success=True)
+                return cls(success=True)
 
             else:
-                return cls(success=False, errors=['facsimile does not exist'])
+                return cls(success=False, errors=['facsimile ID does not exist'])
 
         else:
             return cls(success=False, errors=['facsimile ID is required'])
