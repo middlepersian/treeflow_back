@@ -19,4 +19,4 @@ class Folio(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.name)
+        return '{}'.format(self.identifier)
