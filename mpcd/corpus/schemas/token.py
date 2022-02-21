@@ -20,7 +20,8 @@ class TokenNode(DjangoObjectType):
     class Meta:
         model = Token
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
-                         'transliteration': ['exact', 'icontains', 'istartswith']
+                         'transliteration': ['exact', 'icontains', 'istartswith'],
+                         'line': ['exact'],
                          }
         interfaces = (relay.Node,)
 
@@ -37,7 +38,7 @@ class TokenInput(InputObjectType):
     comment = String()
     avestan = String()
     previous = TokenNode()
-    line = LineInput()
+    line = ID()
     position_in_line = Int()
 
 # Queries
@@ -129,7 +130,7 @@ class CreateToken(relay.ClientIDMutation):
         # check if pos available
         if input.get('pos', None) is not None:
             token.pos = input.get('pos')
-            
+
        # check if morphological annotation available
         if input.get('morphological_annotation', None) is not None:
             for annotation in input['morphological_annotation']:
