@@ -16,7 +16,7 @@ class POSChoices(models.TextChoices):
     PRON = "PRON", "PRON"
     PROPN = "PROPN", "PROPN"
     PUNCT = "PUNCT", "PUNCT"
-    SCONJO = "SCONJO", "SCONJO"
+    SCONJ = "SCONJ", "SCONJ"
     SYM = "SYM", "SYM"
     VERB = "VERB", "VERB"
     X = "X", "X"

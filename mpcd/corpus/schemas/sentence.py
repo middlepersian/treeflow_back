@@ -191,11 +191,11 @@ class AddTokensToSentence(relay.ClientIDMutation):
                 if input.get('tokens', None) is not None:
                     # clear up existing tokens
                     sentence_instance.tokens.clear()
-                    for token in input.get('tokens', None):
-                        if Token.objects.filter(pk=from_global_id(token.get('id'))[1]).exists():
-                            sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token.get('id'))[1]))
+                    for token_id in input.get('tokens', None):
+                        if Token.objects.filter(pk=from_global_id(token_id)[1]).exists():
+                            sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token_id)[1]))
                         else:
-                            return cls(success=False, errors=['Wrong Token ID {}'.format(token)])
+                            return cls(success=False, errors=['Wrong Token ID {}'.format(token_id)])
                     sentence_instance.save()
                     return cls(sentence=sentence_instance, success=True, errors=None)
             else:
