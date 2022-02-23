@@ -1,5 +1,5 @@
 
-from graphene import relay, String, Field, Boolean, ID, List, ObjectType, InputObjectType
+from graphene import relay, String, Field, Boolean, ID, List, ObjectType, InputObjectType, Int
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -25,6 +25,7 @@ class SentenceNode(DjangoObjectType):
 
 class SentenceInput(InputObjectType):
     text = String()
+    number = Int()
     tokens = List(TokenInput)
     translation = List(TranslationInput)
     comment = String()
@@ -46,6 +47,7 @@ class CreateSentence(relay.ClientIDMutation):
 
     class Input:
         text = ID()
+        number = Int()
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
@@ -68,6 +70,9 @@ class CreateSentence(relay.ClientIDMutation):
 
         else:
             return cls(success=False, errors=['Text ID is required'])
+
+        if input.get('number', None) is not None:
+            sentence_instance.number = input.get('number')
 
         if input.get('comment', None) is not None:
             sentence_instance.comment = input.get('comment')
@@ -107,6 +112,7 @@ class UpdateSentence(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         text = ID()
+        number = Int()
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
@@ -136,6 +142,9 @@ class UpdateSentence(relay.ClientIDMutation):
                         text=translation_input.get('text'), language=translation_input.get('language'))
                     # add translation to sentence
                     sentence_instance.translations.add(translation_instance)
+
+            if input.get('number', None) is not None:
+                sentence_instance.number = input.get('number')
 
             if input.get('comment', None) is not None:
                 sentence_instance.comment = input.get('comment')
