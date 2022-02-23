@@ -98,11 +98,12 @@ class CreateToken(relay.ClientIDMutation):
 
             # get lemmas word
             if input.get('lemma').get('lemma').get('word', None) is not None:
-                lemma_word = input.get('lemma').get('word')
-                if input.get('lemma').get('lemma').get('language') is not None:
+                lemma_word = input.get('lemma').get('lemma').get('word')
+                if input.get('lemma').get('lemma').get('language', None) is not None:
                     lemma_lang = input.get('lemma').get('lemma').get('language')
 
                     lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
+                    lemma.save()
 
                 else:
                     return cls(token=None, success=False, errors=["No language provided for lemma"])
@@ -110,23 +111,26 @@ class CreateToken(relay.ClientIDMutation):
             else:
                 return cls(token=None, success=False, errors=["No lemma word provided"])
 
-            if lemma:
-                # check dict
-                if input.get('lemma').get('dict').get('slug') is not None:
-                    dict = Dictionary.objects.get(slug=input.get('lemma').get('dict').get('slug'))
-                    entry = Entry.objects.create(lemma=lemma, dict=dict)
-                else:
-                    return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
+          # check dict
+            if input.get('lemma').get('dict', None) is not None:
+                dict = Dictionary.objects.get(pk=from_global_id(input['lemma']['dict'])[1])
+                entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
+            else:
+                return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
 
             # check if translations available
             if input.get('lemma').get('translations') is not None:
                 for translation in input['lemma']['translations']:
                     # check if language in mutation input is available
                     translation_obj, translation_obj_created = Translation.objects.get_or_create(
-                        word=translation['word'], language=translation['language'])
+                        text=translation['text'], language=translation['language'])
                     entry.translations.add(translation_obj)
 
+            entry.save()
+
             # add the entry to the token
+            token.lemma = entry
+
         # check if pos available
         if input.get('pos', None) is not None:
             token.pos = input.get('pos')
@@ -136,12 +140,12 @@ class CreateToken(relay.ClientIDMutation):
             for annotation in input['morphological_annotation']:
                 annotation_obj, annotation_obj_created = MorphologicalAnnotation.objects.get_or_create(
                     feature=annotation['feature'], feature_value=annotation['feature_value'])
-                token.morphological_annotations.add(annotation_obj)
+                token.morphological_annotation.add(annotation_obj)
         # check if syntactic annotation available
         if input.get('syntactic_annotation') is not None:
             for annotation in input['syntactic_annotation']:
                 dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
-                token.syntactic_annotations.add(dep_obj)
+                token.syntactic_annotation.add(dep_obj)
         # check if comment available
         if input.get('comment', None) is not None:
             token.comment = input['comment']
@@ -220,12 +224,13 @@ class UpdateToken(relay.ClientIDMutation):
         if input.get('lemma', None) is not None:
 
             # get lemmas word
-            if input.get('lemma').get('word', None) is not None:
-                lemma_word = input.get('lemma').get('word')
-                if input.get('lemma').get('language') is not None:
-                    lemma_lang = input.get('lemma').get('language')
+            if input.get('lemma').get('lemma').get('word', None) is not None:
+                lemma_word = input.get('lemma').get('lemma').get('word')
+                if input.get('lemma').get('lemma').get('language', None) is not None:
+                    lemma_lang = input.get('lemma').get('lemma').get('language')
 
                     lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
+                    lemma.save()
 
                 else:
                     return cls(token=None, success=False, errors=["No language provided for lemma"])
@@ -233,16 +238,23 @@ class UpdateToken(relay.ClientIDMutation):
             else:
                 return cls(token=None, success=False, errors=["No lemma word provided"])
 
-            if lemma:
-                entry = Entry.objects.create(lemma=lemma)
+          # check dict
+            if input.get('lemma').get('dict', None) is not None:
+                dict = Dictionary.objects.get(pk=from_global_id(input['lemma']['dict'])[1])
+                entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
+            else:
+                return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
 
             # check if translations available
             if input.get('lemma').get('translations') is not None:
+                entry.translations.clear()
                 for translation in input['lemma']['translations']:
                     # check if language in mutation input is available
                     translation_obj, translation_obj_created = Translation.objects.get_or_create(
-                        word=translation['word'], language=translation['language'])
+                        word=translation['text'], language=translation['language'])
                     entry.translations.add(translation_obj)
+
+            entry.save()
 
             # add the entry to the token
             token.lemma = entry
@@ -257,17 +269,17 @@ class UpdateToken(relay.ClientIDMutation):
 
         # check if morphological annotation available
         if input.get('morphological_annotation', None) is not None:
-            token.morphological_annotations.clear()
+            token.morphological_annotation.clear()
             for annotation in input['morphological_annotation']:
                 annotation_obj, annotation_obj_created = MorphologicalAnnotation.objects.get_or_create(
                     feature=annotation['feature'], feature_value=annotation['feature_value'])
-                token.morphological_annotations.add(annotation_obj)
+                token.morphological_annotation.add(annotation_obj)
         # check if syntactic annotation available
         if input.get('syntactic_annotation') is not None:
-            token.syntactic_annotations.clear()
+            token.syntactic_annotation.clear()
             for annotation in input['syntactic_annotation']:
                 dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
-                token.syntactic_annotations.add(dep_obj)
+                token.syntactic_annotation.add(dep_obj)
         # check if comment available
         if input.get('comment', None) is not None:
             token.comment = input['comment']

@@ -1,5 +1,5 @@
 from distutils import errors
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, List, Boolean, ID
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -18,7 +18,7 @@ class EntryNode(DjangoObjectType):
 
 
 class EntryInput(InputObjectType):
-    dict = DictionaryInput()
+    dict = ID()
     lemma = LemmaInput()
     loanwords = List(LoanWordInput)
     translations = List(TranslationInput)
@@ -39,7 +39,7 @@ class Query(ObjectType):
 
 class CreateEntry(relay.ClientIDMutation):
     class Input:
-        dict = DictionaryInput()
+        dict = ID()
         lemma = LemmaInput()
         loanwords = List(LoanWordInput)
         translations = List(TranslationInput)
@@ -157,8 +157,8 @@ class CreateEntry(relay.ClientIDMutation):
 
 class UpdateEntry(relay.ClientIDMutation):
     class Input:
-        id = String()
-        dict = DictionaryInput()
+        id = ID()
+        dict = ID()
         lemma = LemmaInput()
         loanwords = List(LoanWordInput)
         translations = List(TranslationInput)
@@ -178,8 +178,8 @@ class UpdateEntry(relay.ClientIDMutation):
             entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
 
             if input.get('dict', None) is not None:
-                if Dictionary.objects.filter(slug=input['dict']['slug']).exists():
-                    dict = Dictionary.objects.get(slug=input['dict']['slug'])
+                if Dictionary.objects.filter(pk=from_global_id(input['id'])[1]).exists():
+                    dict = Dictionary.objects.get(pk=from_global_id(input['id'])[1])
                 else:
                     return cls(success=False)
                 entry.dict = dict
