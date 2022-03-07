@@ -42,7 +42,7 @@ class Query(ObjectType):
     sentence = relay.Node.Field(SentenceNode)
     all_sentences = DjangoFilterConnectionField(SentenceNode)
 
-    def resolve_all_sentences(root, info):
+    def resolve_all_sentences(self, info, **kwargs):
         return gql_optimizer.query(Sentence.objects.all(), info)
 
 
