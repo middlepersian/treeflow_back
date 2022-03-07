@@ -5,6 +5,8 @@ from graphql_relay import from_global_id
 
 from mpcd.corpus.models import TextSigle
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -19,14 +21,18 @@ class TextSigleNode(DjangoObjectType):
                          'genre': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
+
 class TextSigleInput(InputObjectType):
     sigle = String()
     genre = String()
 
 
 class Query(ObjectType):
-    sigle = relay.Node.Field(TextSigleNode)
-    all_sigle = DjangoFilterConnectionField(TextSigleNode)
+    text_sigle = relay.Node.Field(TextSigleNode)
+    all_text_sigles = DjangoFilterConnectionField(TextSigleNode)
+
+    def resolve_all_text_sigles(self, info, **kwargs):
+        return gql_optimizer.query(TextSigle.objects.all(), info)
 
 
 # Mutations

@@ -4,6 +4,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import BibEntry, Facsimile, CodexPart
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -29,6 +31,9 @@ class FacsimileInput(InputObjectType):
 class Query(ObjectType):
     facsimile = relay.Node.Field(FacsimileNode)
     all_facsimiles = DjangoFilterConnectionField(FacsimileNode)
+
+    def resolve_all_facsimiles(self, info, **kwargs):
+        return gql_optimizer.query(Facsimile.objects.all(), info)
 
 
 # Mutations

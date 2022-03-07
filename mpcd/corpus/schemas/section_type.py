@@ -4,6 +4,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import SectionType
 
+import graphene_django_optimizer as gql_optimizer
+
 
 class SectionTypeNode(DjangoObjectType):
     class Meta:
@@ -15,7 +17,7 @@ class SectionTypeNode(DjangoObjectType):
 
 
 class SectionTypeInput(InputObjectType):
- 
+
     identifier = String()
 
 
@@ -24,6 +26,9 @@ class SectionTypeInput(InputObjectType):
 class Query(ObjectType):
     section_type = relay.Node.Field(SectionTypeNode)
     all_section_types = DjangoFilterConnectionField(SectionTypeNode)
+
+    def resolve_all_section_types(self, info, **kwargs):
+        return gql_optimizer.query(SectionType.objects.all(), info)
 
 
 # Mutations

@@ -4,6 +4,10 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Codex, CodexPart
 
+
+import graphene_django_optimizer as gql_optimizer
+
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -32,6 +36,9 @@ class CodexPartInput(InputObjectType):
 class Query(ObjectType):
     codex_part = relay.Node.Field(CodexPartNode)
     all_codex_parts = DjangoFilterConnectionField(CodexPartNode)
+
+    def resolve_all_codex_parts(self, info, **kwargs):
+        return gql_optimizer.query(CodexPart.objects.all(), info)
 
 # Mutations
 

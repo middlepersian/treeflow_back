@@ -5,6 +5,8 @@ from graphql_relay import from_global_id
 
 from mpcd.corpus.models import Corpus
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -36,6 +38,10 @@ class Query(ObjectType):
 
     def resolve_corpus_slug(root, info, slug):
         return Corpus.objects.filter(slug=slug).first()
+
+   
+    def resolve_all_corpus(self, info, **kwargs):
+        return gql_optimizer.query(Corpus.objects.all(), info)     
 
 
 # Mutations

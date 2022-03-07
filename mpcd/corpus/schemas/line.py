@@ -5,6 +5,8 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Folio, Line
 from .folio import FolioInput
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -32,6 +34,8 @@ class LineInput(InputObjectType):
 class Query(ObjectType):
     line = relay.Node.Field(LineNode)
     all_lines = DjangoFilterConnectionField(LineNode)
+    def resolve_all_lines(self, info, **kwargs):
+        return gql_optimizer.query(Line.objects.all(), info)
 
 # Mutations
 

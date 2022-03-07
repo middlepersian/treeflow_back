@@ -8,6 +8,9 @@ from mpcd.corpus.schemas.token import TokenInput
 from mpcd.dict.models import Translation
 from mpcd.dict.schemas.translation import TranslationInput
 
+import graphene_django_optimizer as gql_optimizer
+
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -38,6 +41,10 @@ class SentenceInput(InputObjectType):
 class Query(ObjectType):
     sentence = relay.Node.Field(SentenceNode)
     all_sentences = DjangoFilterConnectionField(SentenceNode)
+
+    def resolve_all_sentences(root, info):
+        return gql_optimizer.query(Sentence.objects.all(), info)
+
 
 # Mutations
 

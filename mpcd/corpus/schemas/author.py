@@ -4,6 +4,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Author
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -30,6 +32,9 @@ class AuthorInput(InputObjectType):
 class Query(ObjectType):
     author = relay.Node.Field(AuthorNode)
     all_authors = DjangoFilterConnectionField(AuthorNode)
+
+    def resolve_all_authors(self, info, **kwargs):
+        return gql_optimizer.query(Author.objects.all(), info)
 
 
 # Mutations

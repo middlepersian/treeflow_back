@@ -7,6 +7,9 @@ from mpcd.corpus.schemas.author import AuthorInput
 from mpcd.corpus.schemas.text_sigle import TextSigleNode
 from mpcd.corpus.schemas.bibliography import BibEntryInput
 
+
+import graphene_django_optimizer as gql_optimizer
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -37,6 +40,9 @@ class EditionInput(InputObjectType):
 class EditionQuery(ObjectType):
     edition = relay.Node.Field(EditionNode)
     all_editions = DjangoFilterConnectionField(EditionNode)
+
+    def resolve_all_editions(self, info, **kwargs):
+        return gql_optimizer.query(Edition.objects.all(), info)
 
 # Mutation
 

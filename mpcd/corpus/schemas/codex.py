@@ -7,6 +7,9 @@ from .author import AuthorInput
 from .bibliography import BibEntry, BibEntryInput
 from graphql_relay import from_global_id
 
+
+import graphene_django_optimizer as gql_optimizer
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -46,6 +49,9 @@ class CodexInput(InputObjectType):
 class Query(ObjectType):
     codex = relay.Node.Field(CodexNode)
     all_codex = DjangoFilterConnectionField(CodexNode)
+
+    def resolve_all_codex(self, info, **kwargs):
+        return gql_optimizer.query(Codex.objects.all(), info)
 
 # Mutations
 

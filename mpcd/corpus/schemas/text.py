@@ -9,6 +9,8 @@ from mpcd.corpus.schemas.author import AuthorInput
 from mpcd.corpus.schemas.source import SourceInput
 from mpcd.corpus.schemas.resource import ResourceInput
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -43,6 +45,10 @@ class TextInput(InputObjectType):
 class Query(ObjectType):
     text = relay.Node.Field(TextNode)
     all_texts = DjangoFilterConnectionField(TextNode)
+
+    def resolve_all_texts(self, info, **kwargs):
+        return gql_optimizer.query(Text.objects.all(), info)
+
 
 # Mutations
 
@@ -134,6 +140,7 @@ class DeleteText(relay.ClientIDMutation):
         text_instance = Text.objects.get(pk=from_global_id(input['id'])[1])
         text_instance.delete()
         return cls(success=True)
+
 
 class Mutation(ObjectType):
     create_text = CreateText.Field()

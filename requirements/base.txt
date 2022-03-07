@@ -23,3 +23,6 @@ django-simple-history==3.0.0 #https://django-simple-history.readthedocs.io/en/3.
 #graphene
 graphene-django==2.15.0
 django-filter==21.1
+graphene-django-optimizer==0.6.2
+#
+

@@ -5,6 +5,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import MorphologicalAnnotation
 
+import graphene_django_optimizer as gql_optimizer
+
 
 class MorphologicalAnnotationNode(DjangoObjectType):
     class Meta:
@@ -25,6 +27,9 @@ class MorphologicalAnnotationInput(InputObjectType):
 class Query(ObjectType):
     morphological_annotation = relay.Node.Field(MorphologicalAnnotationNode)
     all_morphological_annotations = DjangoFilterConnectionField(MorphologicalAnnotationNode)
+
+    def resolve_all_morphological_annotations(self, info, **kwargs):
+        return gql_optimizer.query(MorphologicalAnnotation.objects.all(), info)
 
 
 # Mutations

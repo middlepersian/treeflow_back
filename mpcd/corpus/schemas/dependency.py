@@ -5,6 +5,9 @@ from graphql_relay import from_global_id
 
 from mpcd.corpus.models import Dependency
 
+
+import graphene_django_optimizer as gql_optimizer
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -32,6 +35,9 @@ class DependencyInput(InputObjectType):
 class Query(ObjectType):
     dependency = relay.Node.Field(DependencyNode)
     all_dependencies = DjangoFilterConnectionField(DependencyNode)
+
+    def resolve_all_dependencies(self, info, **kwargs):
+        return gql_optimizer.query(Dependency.objects.all(), info)
 
 
 # Mutations

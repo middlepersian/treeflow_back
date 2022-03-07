@@ -8,6 +8,10 @@ from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import EntryInput
 
+#
+import graphene_django_optimizer as gql_optimizer
+
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -45,6 +49,10 @@ class TokenInput(InputObjectType):
 class Query(ObjectType):
     token = relay.Node.Field(TokenNode)
     all_tokens = DjangoFilterConnectionField(TokenNode)
+    #all_tokens = List(TokenNode)
+
+    def resolve_all_tokens(self, info, **kwargs):
+        return gql_optimizer.query(Token.objects.all(), info)
 
 # Mutations
 

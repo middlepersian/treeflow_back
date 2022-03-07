@@ -5,6 +5,8 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Author, BibEntry
 from mpcd.corpus.schemas.author import AuthorInput
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -34,6 +36,8 @@ class Query(ObjectType):
     bibentry = relay.Node.Field(BibEntryNode)
     all_bibentries = DjangoFilterConnectionField(BibEntryNode)
 
+    def resolve_all_bibentries(self, info, **kwargs):
+        return gql_optimizer.query(BibEntry.objects.all(), info)
 
 # Mutations
 class CreateBibEntry(relay.ClientIDMutation):

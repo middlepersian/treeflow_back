@@ -5,6 +5,8 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Section, Text, Source, Token, SectionType
 from mpcd.corpus.schemas import TextNode, SourceNode, TokenInput, SectionTypeInput
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -24,6 +26,8 @@ class Query(ObjectType):
     section = relay.Node.Field(SectionNode)
     all_sections = DjangoFilterConnectionField(SectionNode)
 
+    def resolve_all_sections(self, info, **kwargs):
+        return gql_optimizer.query(Section.objects.all(), info)
 
 class SectionInput(InputObjectType):
     id = ID()

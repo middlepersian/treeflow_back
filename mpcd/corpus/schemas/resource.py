@@ -5,6 +5,8 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Resource, Author
 from mpcd.corpus.schemas.author import AuthorInput
 
+import graphene_django_optimizer as gql_optimizer
+
 
 # import the logging library
 import logging
@@ -31,7 +33,10 @@ class ResourceInput(InputObjectType):
 
 class Query(ObjectType):
     resource = relay.Node.Field(ResourceNode)
-    all_resource = DjangoFilterConnectionField(ResourceNode)
+    all_resources = DjangoFilterConnectionField(ResourceNode)
+
+    def resolve_all_resources(self, info, **kwargs):
+        return gql_optimizer.query(Resource.objects.all(), info)
 
 
 # Mutations
