@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .. models import FeatureValue, Feature, MorphologicalAnnotation, Dependency, POS, Token
+from .. models import MorphologicalAnnotation, Dependency, Token
 from mpcd.dict.serializers import EntrySerializer
 
 # import the logging library
@@ -9,22 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class FeatureValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FeatureValue
-        fields = ['name']
-
-
-class FeatureSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Feature
-        fields = ['name']
-
-
 class MorphologicalAnnotationSerializer(serializers.ModelSerializer):
-
-    feature = FeatureSerializer()
-    feature_value = FeatureValueSerializer()
 
     class Meta:
         model = MorphologicalAnnotation
@@ -55,16 +40,9 @@ class DependencySerializer(serializers.ModelSerializer):
         fields = ['head', 'rel']
 
 
-class POSSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = POS
-        fields = ['identifier']
-
-
 class TokenSerializer(serializers.ModelSerializer):
 
     lemma = EntrySerializer(required=False)
-    pos = POSSerializer(required=False)
     morphological_annotation = MorphologicalAnnotationSerializer(many=True, required=False)
     syntactic_annotation = DependencySerializer(many=True, required=False)
     previous = serializers.PrimaryKeyRelatedField(queryset=Token.objects.all(), required=False, allow_null=True)
@@ -84,7 +62,7 @@ class TokenSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
 
         instance.lemma = validated_data.get('lemma', instance.lemma)
-        instance.pos = validated_data.get('pos', instance.feature_value)
+        instance.pos = validated_data.get('pos', instance.pos)
         instance.syntactic_annotation = validated_data.get('syntactic_annotation', instance.syntactic_annotation)
         instance.morphological_annotation = validated_data.get(
             'morphological_annotation', instance.morphological_annotation)

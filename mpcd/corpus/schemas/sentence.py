@@ -18,6 +18,7 @@ class SentenceNode(DjangoObjectType):
     class Meta:
         model = Sentence
         filter_fields = {
+            'number': ['exact', 'lt', 'lte', 'gt', 'gte'],
             'comment': ['exact', 'icontains', 'istartswith']
         }
         interfaces = (relay.Node,)

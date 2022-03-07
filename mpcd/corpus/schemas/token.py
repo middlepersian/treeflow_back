@@ -3,11 +3,9 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.dict.models import Entry, Lemma, Translation, Dictionary
-from mpcd.corpus.models import Token, Feature, FeatureValue, MorphologicalAnnotation, POS, Dependency, Text, Line
+from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
-from mpcd.corpus.schemas import POSInput
 from mpcd.corpus.schemas import DependencyInput
-from mpcd.corpus.schemas import LineInput
 from mpcd.dict.schemas import EntryInput
 
 # import the logging library

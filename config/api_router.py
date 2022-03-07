@@ -12,8 +12,7 @@ from mpcd.corpus.views import CodexViewSet, FolioViewSet, LineViewSet
 from mpcd.corpus.views import CorpusViewSet, ResourceViewSet, TextViewSet, SentenceViewSet
 from mpcd.corpus.views import EditionViewSet
 from mpcd.corpus.views import TextSigleViewSet
-from mpcd.corpus.views import FeatureValueViewSet, FeatureViewSet, \
-    MorphologicalAnnotationViewSet, DependencyViewSet, POSViewSet, TokenViewSet
+from mpcd.corpus.views import  MorphologicalAnnotationViewSet, DependencyViewSet, TokenViewSet
 
 
 if settings.DEBUG:
@@ -41,11 +40,8 @@ router.register("text", TextViewSet)
 router.register("sentence", SentenceViewSet)
 router.register("edition", EditionViewSet)
 router.register("sigle", TextSigleViewSet)
-router.register("feature_value", FeatureValueViewSet)
-router.register("feature", FeatureViewSet)
 router.register("morphological_annotation", MorphologicalAnnotationViewSet)
 router.register("dependency", DependencyViewSet)
-router.register("pos", POSViewSet)
 router.register("token", TokenViewSet, basename="token")
 
 

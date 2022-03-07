@@ -16,7 +16,7 @@ class LineNode(DjangoObjectType):
 
     class Meta:
         model = Line
-        filter_fields = {'number': ['exact', 'icontains', 'istartswith'],
+        filter_fields = {'number': ['exact', 'lt', 'lte', 'gt', 'gte'],
                          'comment': ['exact', 'icontains', 'istartswith']}
 
         interfaces = (relay.Node, )

@@ -5,12 +5,9 @@ from .codex_part import CodexPartNode, CodexPartInput
 from .corpus import CorpusNode, CorpusInput
 from .dependency import DependencyNode, DependencyInput
 from .facsimile import FacsimileNode, FacsimileInput
-from .feature_value import FeatureValueNode, FeatureValueInput
-from .feature import FeatureNode, FeatureInput
 from .folio import FolioNode, FolioInput
 from .line import LineNode, LineInput
 from .morphological_annotation import MorphologicalAnnotationNode, MorphologicalAnnotationInput
-from .pos import POSNode, POSInput
 from .resource import ResourceNode, ResourceInput
 from .sentence import SentenceNode, SentenceInput
 from .text_sigle import TextSigleNode, TextSigleInput

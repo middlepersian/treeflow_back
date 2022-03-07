@@ -21,17 +21,3 @@ class POSChoices(models.TextChoices):
     VERB = "VERB", "VERB"
     X = "X", "X"
 
-
-class POS(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    identifier = models.CharField(max_length=6, choices=POSChoices.choices, unique=True)
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                name="valid_pos",
-                check=models.Q(pos__in=POSChoices.values),
-            )]
-
-    def __str__(self):
-        return '{}'.format(self.identifier)
