@@ -35,7 +35,7 @@ class DependencyManager(models.Manager):
 
 class Dependency(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-
+    # head == token
     head = models.PositiveSmallIntegerField()
     rel = models.CharField(max_length=9, choices=DependencyRelation.choices)
 

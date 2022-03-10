@@ -8,10 +8,12 @@ from .morphological_annotation import MorphologicalAnnotation
 from .pos import POSChoices
 from .text import Text
 from .line import Line
+from ordered_model.models import OrderedModel
+
 from mpcd.dict.models.language import LanguageChoices
 
-
-class Token(models.Model):
+## TODO add number
+class Token(OrderedModel):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
     language = models.CharField(max_length=3, choices=LanguageChoices.choices, null=True, blank=True)
@@ -26,7 +28,6 @@ class Token(models.Model):
     avestan = models.URLField(max_length=100, null=True, blank=True)
 
     line = models.ForeignKey(Line, on_delete=models.SET_NULL, null=True, related_name='token_line')
-    position_in_line = models.PositiveSmallIntegerField(null=True)
 
     previous = models.OneToOneField('self',
                                     related_name='next',
@@ -37,19 +38,13 @@ class Token(models.Model):
     gloss = models.TextField(blank=True, null=True)
 
     history = HistoricalRecords()
+    #order_with_respect_to = 'previous__id'
 
-    def ms_features(self):
-        return "|\n".join([p.feature.name + '=' + p.feature_value.name for p in self.morphological_annotation.all()])
 
     def __str__(self):
         return '{}'.format(self.transcription)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['line', 'position_in_line'], name='line_position'
-            )
-        ]
+
 
 
 class TokenAdmin(admin.ModelAdmin):

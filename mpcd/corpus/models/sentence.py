@@ -1,14 +1,16 @@
+from mpcd.dict.models import Translation
+from .text import Text
+from .token import Token
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
+from ordered_model.models import OrderedModel
+
 User = get_user_model()
-from .token import Token
-from .text import Text
-from mpcd.dict.models import Translation
 
 
-class Sentence(models.Model):
+class Sentence(OrderedModel):
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='sentence_text')
@@ -25,6 +27,10 @@ class Sentence(models.Model):
                                     on_delete=models.SET_NULL)
 
     history = HistoricalRecords()
+
+
+    #class Meta:
+    #    ordering = ['number']
 
     def get_tokens(self):
         return "|".join([p.transcription for p in self.tokens.all()])

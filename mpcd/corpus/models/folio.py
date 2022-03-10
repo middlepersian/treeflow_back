@@ -1,10 +1,11 @@
 import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
+from ordered_model.models import OrderedModel
 from .facsimile import Facsimile
 
 
-class Folio(models.Model):
+class Folio(OrderedModel):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     identifier = models.CharField(max_length=100)
     facsimile = models.ForeignKey(Facsimile, on_delete=models.CASCADE, null=True,
