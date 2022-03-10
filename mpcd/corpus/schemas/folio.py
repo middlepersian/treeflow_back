@@ -1,4 +1,5 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List
+import re
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List, Float
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -26,6 +27,7 @@ class FolioNode(DjangoObjectType):
 class FolioInput(InputObjectType):
     identifier = String()
     facsimile = ID()
+    number = Float()
 
 
 # Queries
@@ -44,6 +46,7 @@ class CreateFolio(relay.ClientIDMutation):
     class Input:
         identifier = String(required=True)
         facsimile = ID()
+        number = Float()
         comment = String()
         previous = ID()
 
@@ -71,6 +74,11 @@ class CreateFolio(relay.ClientIDMutation):
         if input.get('comment', None) is not None:
             folio.comment = input.get('comment')
 
+        if input.get('number', None) is not None:
+            folio.number = input.get('number')
+        else:
+            return cls(success=False, errors=['number is required'])
+
         if input.get('previous', None) is not None:
             if Folio.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 folio.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
@@ -84,6 +92,7 @@ class UpdateFolio(relay.ClientIDMutation):
     class Input:
         id = ID()
         identifier = String()
+        number = Float()
         facsimile = ID()
         comment = String()
         previous = FolioInput()
@@ -112,6 +121,9 @@ class UpdateFolio(relay.ClientIDMutation):
 
             if input.get('comment', None) is not None:
                 folio_instance.comment = input.get('comment')
+
+            if input.get('number', None) is not None:
+                folio_instance.number = input.get('number')
 
             if input.get('previous', None) is not None:
                 if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():

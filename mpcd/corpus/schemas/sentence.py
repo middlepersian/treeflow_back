@@ -1,5 +1,5 @@
 
-from graphene import relay, String, Field, Boolean, ID, List, ObjectType, InputObjectType, Int
+from graphene import relay, String, Field, Boolean, ID, List, ObjectType, InputObjectType, Float
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -29,7 +29,7 @@ class SentenceNode(DjangoObjectType):
 
 class SentenceInput(InputObjectType):
     text = String()
-    number = Int()
+    number = Float()
     tokens = List(TokenInput)
     translation = List(TranslationInput)
     comment = String()
@@ -55,7 +55,7 @@ class CreateSentence(relay.ClientIDMutation):
 
     class Input:
         text = ID()
-        number = Int()
+        number = Float()
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
@@ -81,6 +81,8 @@ class CreateSentence(relay.ClientIDMutation):
 
         if input.get('number', None) is not None:
             sentence_instance.number = input.get('number')
+        else:
+            return cls(success=False, errors=['number is required'])
 
         if input.get('comment', None) is not None:
             sentence_instance.comment = input.get('comment')
@@ -120,7 +122,7 @@ class UpdateSentence(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         text = ID()
-        number = Int()
+        number = Float()
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()

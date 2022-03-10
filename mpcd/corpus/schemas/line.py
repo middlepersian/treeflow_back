@@ -48,7 +48,7 @@ class CreateLine(relay.ClientIDMutation):
     class Input:
         number = Int(required=True)
         folio = ID()
-        comment = String(required=False)
+        comment = String()
         previous = ID()
 
     line = Field(LineNode)
@@ -96,7 +96,7 @@ class UpdateLine(relay.ClientIDMutation):
         id = ID()
         number = String(required=True)
         folio = FolioInput()
-        comment = String(required=False)
+        comment = String()
 
     line = Field(LineNode)
     success = Boolean()

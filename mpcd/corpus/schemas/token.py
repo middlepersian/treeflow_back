@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType, Int
+from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType, Int, Float
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from django.db.models import F
@@ -8,9 +8,7 @@ from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text,
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import EntryInput
-from django.db.models.expressions import RawSQL
 import graphene_django_optimizer as gql_optimizer
-from django.db.models.expressions import RawSQL
 
 # import the logging library
 import logging
@@ -64,6 +62,7 @@ class CreateToken(relay.ClientIDMutation):
         transliteration = String(required=True)
         language = String()
         text = ID(required=True)
+        number = Float()
         lemma = EntryInput()
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -138,6 +137,12 @@ class CreateToken(relay.ClientIDMutation):
             # add the entry to the token
             token.lemma = entry
 
+        # check if number available
+        if input.get('number', None) is not None:
+            token.number = input['number']
+        else:
+            return cls(token=None, success=False, errors=["No number provided"])
+
         # check if pos available
         if input.get('pos', None) is not None:
             token.pos = input.get('pos')
@@ -192,6 +197,7 @@ class UpdateToken(relay.ClientIDMutation):
         transliteration = String(required=True)
         language = String()
         text = ID(required=True)
+        number = Float()
         lemma = EntryInput()
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -265,6 +271,12 @@ class UpdateToken(relay.ClientIDMutation):
 
             # add the entry to the token
             token.lemma = entry
+
+        # check if number available
+        if input.get('number', None) is not None:
+            token.number = input['number']
+        else:
+            return cls(token=None, success=False, errors=["No number provided"])
 
         # check if language available
         if input.get('language', None) is not None:
