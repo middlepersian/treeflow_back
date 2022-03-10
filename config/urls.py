@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 from rest_framework.authtoken.views import obtain_auth_token
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
+from graphql_ws.django_channels import GraphQLSubscriptionConsumer
 from mpcd.schema import schema
 
 urlpatterns = [
@@ -20,7 +21,7 @@ urlpatterns = [
     path("users/", include("mpcd.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # graphql
-    path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema)))
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema)))
 
 
     # Your stuff: custom urls includes go here
@@ -60,3 +61,4 @@ if settings.DEBUG:
         import debug_toolbar
 
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+

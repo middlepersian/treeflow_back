@@ -49,7 +49,7 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 ROOT_URLCONF = "config.urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = "config.wsgi.application"
-
+ASGI_APPLICATION = "config.asgi.application"
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
@@ -74,6 +74,12 @@ THIRD_PARTY_APPS = [
     "simple_history",
     # graphene
     "graphene_django",
+    # channels
+    "channels",
+    # "graphql_ws.django"
+    "graphql_ws.django",
+    # ordered_model
+    "ordered_model"
 ]
 
 LOCAL_APPS = [
@@ -96,6 +102,9 @@ MIGRATION_MODULES = {"sites": "mpcd.contrib.sites.migrations"}
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
+    # https://django-graphql-jwt.domake.io/quickstart.html
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend"
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
@@ -139,7 +148,9 @@ MIDDLEWARE = [
     "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # https://django-simple-history.readthedocs.io/en/latest/
     "simple_history.middleware.HistoryRequestMiddleware"
+
 ]
 
 # STATIC
@@ -287,12 +298,51 @@ REST_FRAMEWORK = {
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
-CORS_URLS_REGEX = r"^/api/.*$"
+#CORS_URLS_REGEX = r"^/api/.*$"
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4000",
+    "https://localhost:4000",
+    "http://localhost:4001",
+    "https://localhost:4001",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 
 GRAPHENE = {
     'SCHEMA': 'mpcd.schema.schema',
-    "ATOMIC_MUTATIONS": True
+    "ATOMIC_MUTATIONS": True,
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ]
+}
+
+
+GRAPHQL_JWT = {
+    "JWT_ALLOW_ARGUMENT": True,
+    "JWT_ARGUMENT_NAME": "token"
+}
+
+
+CHANNELS_WS_PROTOCOLS = [
+    "graphql-ws",
+]
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "ROUTING": "django_subscriptions.urls.channel_routing",
+    },
 }

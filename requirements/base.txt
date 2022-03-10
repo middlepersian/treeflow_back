@@ -20,9 +20,19 @@ django-cors-headers==3.7.0 # https://github.com/adamchainz/django-cors-headers
 django-simple-history==3.0.0 #https://django-simple-history.readthedocs.io/en/3.0.0/index.html
 
 
+#channels
+channels==3.0.4 
+
 #graphene
 graphene-django==2.15.0
 django-filter==21.1
 graphene-django-optimizer==0.6.2
-#
 
+# django-graphql-jwt
+django-graphql-jwt==0.3.4
+
+#graphql-ws
+graphql-ws==0.4.4 
+
+#django-ordered-model
+django-ordered-model==3.5
