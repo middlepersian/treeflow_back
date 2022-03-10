@@ -1,13 +1,12 @@
 import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
-from ordered_model.models import OrderedModel
 from .folio import Folio
 
 
-class Line(OrderedModel):
+class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    number = models.PositiveSmallIntegerField()
+    number = models.FloatField(null=True, blank=True)
     folio = models.ForeignKey(Folio, on_delete=models.CASCADE, related_name='line_folio')
     comment = models.TextField(blank=True)
     previous = models.OneToOneField('self',
@@ -24,7 +23,7 @@ class Line(OrderedModel):
                 fields=['number', 'folio'], name='number_folio'
             )
         ]
-        #order_with_respect_to = 'previous'
+        ordering = ['number']
 
     def __str__(self):
         return '{}'.format(self.number)

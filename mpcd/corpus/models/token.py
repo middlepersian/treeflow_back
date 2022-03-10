@@ -8,13 +8,15 @@ from .morphological_annotation import MorphologicalAnnotation
 from .pos import POSChoices
 from .text import Text
 from .line import Line
-from ordered_model.models import OrderedModel
 
 from mpcd.dict.models.language import LanguageChoices
 
-## TODO add number
-class Token(OrderedModel):
+# TODO add numer
+
+
+class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    number = models.FloatField(null=True, blank=True)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
     language = models.CharField(max_length=3, choices=LanguageChoices.choices, null=True, blank=True)
     transcription = models.CharField(max_length=50)
@@ -38,13 +40,12 @@ class Token(OrderedModel):
     gloss = models.TextField(blank=True, null=True)
 
     history = HistoricalRecords()
-    #order_with_respect_to = 'previous__id'
 
+    class Meta:
+        ordering = ['number']
 
     def __str__(self):
         return '{}'.format(self.transcription)
-
-
 
 
 class TokenAdmin(admin.ModelAdmin):
