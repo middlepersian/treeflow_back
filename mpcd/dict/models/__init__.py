@@ -7,3 +7,6 @@ from .reference import Reference
 from .translation import Translation
 from .lemma import Lemma
 from .language import LanguageChoices, Language
+
+
+##TODO sort lemmas and entries 
