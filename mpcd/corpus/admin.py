@@ -8,8 +8,7 @@ from .models import Codex, Folio, Line, Edition, TextSigle, \
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
     raw_id_fields = ['lemma']
-    list_display = ["transcription", "transliteration", "pos",
-                    "ms_features", "comment", "previous"]
+    list_display = ["transcription", "transliteration", "pos","comment", "previous"]
     history_list_display = ["pos"]
     search_fields = ['transcription', 'comment']
 
