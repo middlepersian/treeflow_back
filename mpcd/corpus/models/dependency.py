@@ -1,6 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-
+from .token import Token
 
 class DependencyRelation(models.TextChoices):
     acl = 'acl', 'clausal modifier of noun (adnominal clause)'
@@ -36,7 +36,7 @@ class DependencyManager(models.Manager):
 class Dependency(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     # head == token
-    head = models.PositiveSmallIntegerField()
+    head = models.ForeignKey(Token, on_delete=models.SET_NULL, related_name='dependency_head', null=True)
     rel = models.CharField(max_length=9, choices=DependencyRelation.choices)
 
     objects = DependencyManager()
