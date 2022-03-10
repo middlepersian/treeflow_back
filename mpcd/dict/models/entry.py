@@ -25,5 +25,8 @@ class Entry(models.Model):
 
     history = HistoricalRecords()
 
+    class Meta:
+        ordering = ['lemma__word']
+
     def __str__(self):
         return '{}'.format(self.lemma)

@@ -8,5 +8,8 @@ class Reference(models.Model):
     reference = models.CharField(unique=True, max_length=350, null=True, blank=True)
     url = models.URLField(null=True, blank=True)
 
+    class Meta:
+        ordering = ['reference']
+
     def __str__(self):
         return '{}'.format(self.reference)

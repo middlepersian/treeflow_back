@@ -12,9 +12,10 @@ class Lemma(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['word', 'language'], name='word_language'
+                fields=['word', 'language'], name='word_language_lemma'
             )
         ]
+        ordering = ['word']
 
     history = HistoricalRecords()
 

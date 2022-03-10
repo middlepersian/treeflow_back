@@ -11,5 +11,9 @@ class Definition(models.Model):
 
     history = HistoricalRecords()
 
+
+    class Meta:
+        ordering = ['definition']
+
     def __str__(self):
         return '{}'.format(self.definition)

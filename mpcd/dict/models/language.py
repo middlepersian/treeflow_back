@@ -16,12 +16,3 @@ class LanguageChoices(models.TextChoices):
     pal = 'pal', 'Pahlavi'
     spa = 'spa', 'Spanish'
     xpr = 'xpr', 'Parthian'
-
-
-class Language(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    identifier = models.CharField(max_length=3, choices=LanguageChoices.choices, unique=True)
-    history = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return '{}'.format(self.identifier)

@@ -13,5 +13,8 @@ class Translation(models.Model):
 
     history = HistoricalRecords()
 
+    class Meta:
+        ordering = ['text']
+
     def __str__(self):
         return self.text
