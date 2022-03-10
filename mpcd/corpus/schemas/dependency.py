@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, Int, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -26,7 +26,7 @@ class DependencyNode(DjangoObjectType):
 
 
 class DependencyInput(InputObjectType):
-    head = Int()
+    head = ID()
     rel = String()
 
 # Queries
@@ -43,7 +43,7 @@ class Query(ObjectType):
 # Mutations
 class CreateDependency(relay.ClientIDMutation):
     class Input:
-        head = Int(required=True)
+        head = ID(required=True)
         rel = String(required=True)
 
     dependency = Field(DependencyNode)
@@ -65,7 +65,7 @@ class CreateDependency(relay.ClientIDMutation):
 class UpdateDependency(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        head = Int()
+        head = ID()
         rel = String()
 
     dependency = Field(DependencyNode)
