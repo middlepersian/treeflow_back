@@ -2,6 +2,7 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
 
 from mpcd.dict.models import Reference
 
@@ -11,6 +12,7 @@ class ReferenceNode(DjangoObjectType):
         model = Reference
         filter_fields = {'reference': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
+
 
 class ReferenceInput(InputObjectType):
     reference = String()
@@ -22,7 +24,12 @@ class Query(ObjectType):
     reference = relay.Node.Field(ReferenceNode)
     all_references = DjangoFilterConnectionField(ReferenceNode)
 
+    def resolve_all_references(self, info, **kwargs):
+        return gql_optimizer.query(Reference.objects.all(), info)
+
 # Mutations
+
+
 class CreateReference(relay.ClientIDMutation):
     class Input:
         reference = ReferenceInput()
@@ -65,6 +72,7 @@ class UpdateReference(relay.ClientIDMutation):
         else:
             return cls(success=False)
 
+
 class DeleteReference(relay.ClientIDMutation):
     class Input:
         reference = ReferenceInput()
@@ -81,6 +89,7 @@ class DeleteReference(relay.ClientIDMutation):
 
         else:
             return cls(success=False)
+
 
 class Mutation(ObjectType):
     create_reference = CreateReference.Field()

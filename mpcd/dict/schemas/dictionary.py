@@ -2,6 +2,7 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Bool
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
 
 from mpcd.dict.models import Dictionary
 
@@ -25,8 +26,11 @@ class Query(ObjectType):
     dictionary = relay.Node.Field(DictionaryNode)
     all_dictionaries = DjangoFilterConnectionField(DictionaryNode)
 
+    def resolve_all_dictionaries(self, info, **kwargs):
+        return gql_optimizer.query(Dictionary.objects.all(), info)
 
 # Mutations
+
 
 class CreateDictionary(relay.ClientIDMutation):
     class Input:

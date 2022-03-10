@@ -2,9 +2,10 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectT
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
+
 from mpcd.corpus.models import Author
 
-import graphene_django_optimizer as gql_optimizer
 
 
 # import the logging library

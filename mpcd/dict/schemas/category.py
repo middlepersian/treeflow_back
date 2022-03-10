@@ -1,8 +1,10 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.dict.models import Category
+
+import graphene_django_optimizer as gql_optimizer
 
 
 class CategoryNode(DjangoObjectType):
@@ -21,6 +23,10 @@ class CategoryInput(InputObjectType):
 class Query(ObjectType):
     category = relay.Node.Field(CategoryNode)
     all_categories = DjangoFilterConnectionField(CategoryNode)
+
+    def resolve_all_categories(self, info, **kwargs):
+        return gql_optimizer.query(Category.objects.all(), info)
+
 
 # Mutations
 

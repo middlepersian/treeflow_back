@@ -2,6 +2,8 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
+
 from mpcd.dict.models import LoanWord, Translation
 from mpcd.dict.schemas import TranslationInput
 
@@ -27,9 +29,10 @@ class Query(ObjectType):
     loanword = relay.Node.Field(LoanWordNode)
     all_loanwords = DjangoFilterConnectionField(LoanWordNode)
 
+    def resolve_all_loanwords(self, info, **kwargs):
+        return gql_optimizer.query(LoanWord.objects.all(), info)
+
 # Mutations
-
-
 class CreateLoanWord(relay.ClientIDMutation):
     class Input:
         word = String(required=True)

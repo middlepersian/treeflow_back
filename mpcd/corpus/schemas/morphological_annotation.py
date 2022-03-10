@@ -1,4 +1,3 @@
-from dataclasses import fields
 from graphene import relay, InputObjectType, Field, ObjectType, ID, Boolean, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField

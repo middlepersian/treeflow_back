@@ -2,8 +2,9 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Bool
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
+
 from mpcd.dict.models import Lemma
-from mpcd.dict.schemas import LanguageInput
 
 
 class LemmaNode(DjangoObjectType):
@@ -22,6 +23,8 @@ class LemmaInput(InputObjectType):
 class Query(ObjectType):
     lemma = relay.Node.Field(LemmaNode)
     all_lemmas = DjangoFilterConnectionField(LemmaNode)
+    def resolve_all_lemmas(self, info, **kwargs):
+        return gql_optimizer.query(Lemma.objects.all(), info)    
 
 # Mutations
 

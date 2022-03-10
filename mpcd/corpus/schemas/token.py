@@ -1,16 +1,16 @@
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType, Int
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from django.db.models import F
 from graphql_relay import from_global_id
 from mpcd.dict.models import Entry, Lemma, Translation, Dictionary
 from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import EntryInput
-
-#
+from django.db.models.expressions import RawSQL
 import graphene_django_optimizer as gql_optimizer
-
+from django.db.models.expressions import RawSQL
 
 # import the logging library
 import logging
@@ -52,7 +52,8 @@ class Query(ObjectType):
     #all_tokens = List(TokenNode)
 
     def resolve_all_tokens(self, info, **kwargs):
-        return gql_optimizer.query(Token.objects.all(), info)
+        qs = Token.objects.all()
+        return gql_optimizer.query(qs, info)
 
 # Mutations
 
@@ -336,7 +337,7 @@ class DeleteToken(relay.ClientIDMutation):
 
 class JoinTokens(relay.ClientIDMutation):
     class Input():
-        token = ID()
+        current = ID()
         previous = ID()
 
     success = Boolean()
@@ -344,15 +345,21 @@ class JoinTokens(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
-        token = Token.objects.get(pk=from_global_id(input['token'])[1])
-        logger.error("TOKEN_ID: {}".format(token))
-        # get previous token
-        previous = Token.objects.get(pk=from_global_id(input['previous'])[1])
-        logger.error("PREVIOUS_TOKEN_ID: {}".format(previous))
-        # join tokens
-        token.previous = previous
-        previous.save()
-        token.save()
+        if input.get('current', None) is not None:
+            if Token.objects.filter(pk=from_global_id(input['current'])[1]).exists():
+                current_token = Token.objects.get(pk=from_global_id(input['current'])[1])
+            else:
+                return cls(success=False, errors=["Token with ID {} not found".format(input['current'])])
+            logger.error("TOKEN_ID: {}".format(current_token.id))
+        if input.get('previous', None) is not None:
+            # get previous token
+            if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
+                previous_token = Token.objects.get(pk=from_global_id(input['previous'])[1])
+                current_token.previous = previous_token
+                previous_token.save()
+            else:
+                return cls(success=False, errors=["Token with ID {} not found".format(input['previous'])])
+
         return cls(success=True)
 
 
@@ -360,4 +367,4 @@ class Mutation(ObjectType):
     create_token = CreateToken.Field()
     delete_token = DeleteToken.Field()
     update_token = UpdateToken.Field()
-    join_codex_tokens = JoinTokens.Field()
+    join_tokens = JoinTokens.Field()

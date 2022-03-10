@@ -3,9 +3,10 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, List, Bo
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
 
-from mpcd.dict.models import Dictionary, Lemma, Entry, Translation, Definition, Language, Category, Reference, LoanWord
-from mpcd.dict.schemas import DictionaryInput, LemmaInput, LoanWordInput, TranslationInput, DefinitionInput, CategoryInput, ReferenceInput
+from mpcd.dict.models import Dictionary, Lemma, Entry, Translation, Definition, Category, Reference, LoanWord
+from mpcd.dict.schemas import LemmaInput, LoanWordInput, TranslationInput, DefinitionInput, CategoryInput, ReferenceInput
 
 
 class EntryNode(DjangoObjectType):
@@ -34,8 +35,11 @@ class Query(ObjectType):
     entry = relay.Node.Field(EntryNode)
     all_entries = DjangoFilterConnectionField(EntryNode)
 
-# Mutations
+    def resolve_all_entries(self, info, **kwargs):
+        return gql_optimizer.query(Entry.objects.all(), info)
 
+
+# Mutations
 
 class CreateEntry(relay.ClientIDMutation):
     class Input:

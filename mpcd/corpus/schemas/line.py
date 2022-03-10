@@ -4,6 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Folio, Line
 from .folio import FolioInput
+from graphql_jwt.decorators import login_required
 
 import graphene_django_optimizer as gql_optimizer
 
@@ -34,6 +35,9 @@ class LineInput(InputObjectType):
 class Query(ObjectType):
     line = relay.Node.Field(LineNode)
     all_lines = DjangoFilterConnectionField(LineNode)
+    #all_lines = DjangoFilterConnectionField(LineNode,token=String(required=True))
+    
+    #@login_required
     def resolve_all_lines(self, info, **kwargs):
         return gql_optimizer.query(Line.objects.all(), info)
 

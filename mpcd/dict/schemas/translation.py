@@ -3,8 +3,9 @@ from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Bool
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
+import graphene_django_optimizer as gql_optimizer
+
 from mpcd.dict.models import Translation
-from mpcd.dict.schemas import LanguageInput
 
 
 class TranslationNode(DjangoObjectType):
@@ -24,6 +25,10 @@ class TranslationInput(InputObjectType):
 class Query(ObjectType):
     translation = relay.Node.Field(TranslationNode)
     all_translations = DjangoFilterConnectionField(TranslationNode)
+
+    def resolve_all_translations(self, info, **kwargs):
+        return gql_optimizer.query(Translation.objects.all(), info)
+
 
 # Mutations
 

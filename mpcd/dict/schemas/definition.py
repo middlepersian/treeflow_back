@@ -1,9 +1,10 @@
 from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.dict.models import Definition
 from graphql_relay import from_global_id
-from mpcd.dict.schemas import LanguageInput
+import graphene_django_optimizer as gql_optimizer
+
+from mpcd.dict.models import Definition
 
 
 class DefinitionNode(DjangoObjectType):
@@ -23,6 +24,10 @@ class DefinitionInput(InputObjectType):
 class Query(ObjectType):
     definition = relay.Node.Field(DefinitionNode)
     all_definitions = DjangoFilterConnectionField(DefinitionNode)
+
+    def resolve_all_definitions(self, info, **kwargs):
+        return gql_optimizer.query(Definition.objects.all(), info)
+
 
 # Mutations
 
@@ -60,7 +65,7 @@ class UpdateDefinition(relay.ClientIDMutation):
     class Input:
         id = ID()
         definition = DefinitionInput()
-        language = LanguageInput()
+        language = String()
 
     definition = Field(DefinitionNode)
     success = Boolean()
