@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, Int, List
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, Float, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -26,7 +26,7 @@ class LineNode(DjangoObjectType):
 
 
 class LineInput(InputObjectType):
-    number = String(required=True)
+    number = Float(required=True)
     folio = FolioInput()
     comment = String(required=False)
     previous = LineNode()
@@ -46,7 +46,7 @@ class Query(ObjectType):
 
 class CreateLine(relay.ClientIDMutation):
     class Input:
-        number = Int(required=True)
+        number = Float(required=True)
         folio = ID()
         comment = String()
         previous = ID()
@@ -94,7 +94,7 @@ class CreateLine(relay.ClientIDMutation):
 class UpdateLine(relay.ClientIDMutation):
     class Input:
         id = ID()
-        number = String(required=True)
+        number = Float(required=True)
         folio = FolioInput()
         comment = String()
 
