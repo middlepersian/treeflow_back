@@ -36,3 +36,6 @@ graphql-ws==0.4.4
 
 #django-ordered-model
 django-ordered-model==3.5
+
+pyparsing==3.0.7 
+pydot==1.4.2
