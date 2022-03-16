@@ -84,24 +84,7 @@ class UpdateCorpus(relay.ClientIDMutation):
             return cls(success=success)
 
 
-class DeleteCorpus(relay.ClientIDMutation):
-    class Input:
-        id = ID()
-
-    success = Boolean()
-
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, id):
-        if Corpus.objects.filter(pk=from_global_id(id)[1]).exists():
-            Corpus.objects.get(pk=from_global_id(id)[1]).delete()
-            success = True
-            return cls(success=success)
-        else:
-            success = False
-            return cls(success=success)
-
 
 class Mutation(ObjectType):
     create_corpus = CreateCorpus.Field()
     update_corpus = UpdateCorpus.Field()
-    delete_corpus = DeleteCorpus.Field()

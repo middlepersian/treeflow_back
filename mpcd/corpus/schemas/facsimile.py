@@ -151,4 +151,4 @@ class DeleteFacsimile(relay.ClientIDMutation):
 class Mutation(ObjectType):
     create_facsimile = CreateFacsimile.Field()
     update_facsimile = UpdateFacsimile.Field()
-    delete_facsimile = DeleteFacsimile.Field()
+    #delete_facsimile = DeleteFacsimile.Field()

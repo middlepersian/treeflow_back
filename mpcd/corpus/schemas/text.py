@@ -127,21 +127,11 @@ class CreateText(relay.ClientIDMutation):
         text_instance.save()
         return cls(text=text_instance, success=True)
 
+# TODO update text
 
-class DeleteText(relay.ClientIDMutation):
-    class Input:
-        id = ID()
 
-    success = Boolean()
-    errors = String()
 
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, **input):
-        text_instance = Text.objects.get(pk=from_global_id(input['id'])[1])
-        text_instance.delete()
-        return cls(success=True)
 
 
 class Mutation(ObjectType):
     create_text = CreateText.Field()
-    delete_text = DeleteText.Field()
