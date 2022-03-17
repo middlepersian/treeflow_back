@@ -130,8 +130,5 @@ class CreateText(relay.ClientIDMutation):
 # TODO update text
 
 
-
-
-
 class Mutation(ObjectType):
     create_text = CreateText.Field()
