@@ -3,7 +3,6 @@ import graphene
 import graphql_jwt
 import mpcd.corpus.schemas
 import mpcd.dict.schemas
-from rx import Observable
 
 
 class Query(
@@ -69,7 +68,7 @@ class Mutation(
         graphene.ObjectType):
     pass
 
-    '''    # https://django-graphql-jwt.domake.io/relay.html
+    # https://django-graphql-jwt.domake.io/relay.html
     token_auth = graphql_jwt.relay.ObtainJSONWebToken.Field()
     verify_token = graphql_jwt.relay.Verify.Field()
     refresh_token = graphql_jwt.relay.Refresh.Field()
@@ -78,19 +77,7 @@ class Mutation(
     # Long running refresh tokens
     revoke_token = graphql_jwt.relay.Revoke.Field()
     delete_refresh_token_cookie = \
+        graphql_jwt.relay.DeleteRefreshTokenCookie.Field()
 
 
-
-
-class Subscription(graphene.ObjectType):
-    count_seconds = graphene.Float(up_to=graphene.Int())
-
-    async def resolve_count_seconds(root, info, up_to=5):
-        return Observable.interval(1000)\
-                         .map(lambda i: "{0}".format(i))\
-                         .take_while(lambda i: int(i) <= up_to)
-'''
-
-
-#schema = graphene.Schema(query=Query, mutation=Mutation, subscription=Subscription)
 schema = graphene.Schema(query=Query, mutation=Mutation)
