@@ -10,6 +10,11 @@ class Reference(models.Model):
 
     class Meta:
         ordering = ['reference']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['reference', 'url'], name='reference_url'
+            )
+        ]
 
     def __str__(self):
         return '{}'.format(self.reference)
