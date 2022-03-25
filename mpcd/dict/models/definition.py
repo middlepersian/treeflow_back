@@ -14,6 +14,11 @@ class Definition(models.Model):
 
     class Meta:
         ordering = ['definition']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['definition', 'language'], name='definition_language'
+            )
+        ]
 
     def __str__(self):
         return '{}'.format(self.definition)
