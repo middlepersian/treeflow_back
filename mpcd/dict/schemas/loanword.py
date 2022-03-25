@@ -6,6 +6,7 @@ import graphene_django_optimizer as gql_optimizer
 
 from mpcd.dict.models import LoanWord, Translation
 from mpcd.dict.schemas import TranslationInput
+from mpcd.utils.normalize import to_nfc
 
 
 # TODO check if language IDs inside trnalsation are valid
@@ -19,8 +20,8 @@ class LoanWordNode(DjangoObjectType):
 
 
 class LoanWordInput(InputObjectType):
-    word = String()
-    language = String()
+    word = String(required=True)
+    language = String(required=True)
     translations = List(TranslationInput)
 
 
@@ -33,6 +34,8 @@ class Query(ObjectType):
         return gql_optimizer.query(LoanWord.objects.all(), info)
 
 # Mutations
+
+
 class CreateLoanWord(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
@@ -45,23 +48,14 @@ class CreateLoanWord(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        if input.get('word') is not None:
-            lemma_word = input.get('word')
-        if input.get('language') is not None:
-            lemma_lang = input.get('language')
-            loanword_instance, loanword_created = LoanWord.objects.get_or_create(
-                word=lemma_word, language=lemma_lang)
-            # if false, then the object already exists
-            if not loanword_created:
-                return cls(loanword=None, success=False, errors=['loanword already exists'])
-        else:
-            return cls(loanword=None, success=False, errors=["No language provided"])
+        loanword_instance, loanword_created = LoanWord.objects.get_or_create(
+            word=to_nfc(input.get('word')), language=to_nfc(input.get('language')))
 
         if input.get('translations', None) is not None:
             for translation_input in input.get('translations'):
                 # check if translation exists, if not create it
                 translation_instance, translation_created = Translation.objects.get_or_create(
-                    text=translation_input.get('text'), language=translation_input.get('language'))
+                    text=to_nfc(input.get('text')), language=to_nfc(input.get('language')))
                 # add translation to sentence
                 loanword_instance.translations.add(translation_instance)
         loanword_instance.save()
@@ -72,7 +66,7 @@ class UpdateLoanWord(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         word = String(required=True)
-        language = String()
+        language = String(required=True)
         translations = List(TranslationInput)
 
     loanword = Field(LoanWordNode)
@@ -85,20 +79,15 @@ class UpdateLoanWord(relay.ClientIDMutation):
 
             if LoanWord.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
                 loanword_instance = LoanWord.objects.get(pk=from_global_id(input.get('id'))[1])
-
-                if input.get('word') is not None:
-                    lemma_word = input.get('word')
-                    loanword_instance.word = lemma_word
-                if input.get('language') is not None:
-                    lemma_lang = input.get('language')
-                    loanword_instance.language = lemma_lang
+                loanword_instance.word = to_nfc(input.get('word'))
+                loanword_instance.language = to_nfc(input.get('language'))
 
                 if input.get('translations', None) is not None:
                     loanword_instance.translations.clear()
                     for translation_input in input.get('translations'):
                         # check if translation exists, if not create it
                         translation_instance, translation_created = Translation.objects.get_or_create(
-                            text=translation_input.get('text'), language=translation_input.get('language'))
+                            text=to_nfc(input.get('text')), language=to_nfc(input.get('language')))
                         # add translation to sentence
                         loanword_instance.translations.add(translation_instance)
                 loanword_instance.save()

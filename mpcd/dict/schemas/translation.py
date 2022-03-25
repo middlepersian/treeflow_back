@@ -1,4 +1,5 @@
 from cgitb import text
+from importlib.metadata import requires
 from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -6,6 +7,7 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 
 from mpcd.dict.models import Translation
+from mpcd.utils.normalize import to_nfc
 
 
 class TranslationNode(DjangoObjectType):
@@ -16,8 +18,8 @@ class TranslationNode(DjangoObjectType):
 
 
 class TranslationInput(InputObjectType):
-    text = String()
-    language = String()
+    text = String(required=True)
+    language = String(required=True)
 
 
 # Queries
@@ -36,7 +38,7 @@ class Query(ObjectType):
 class CreateTranslation(relay.ClientIDMutation):
     class Input:
         text = String(required=True)
-        language = ID()
+        language = String(required=True)
 
     translation = Field(TranslationNode)
     success = Boolean()
@@ -45,43 +47,34 @@ class CreateTranslation(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        if input.get('text', None) is not None:
-            translation_text = input.get('text')
-            if input.get('language', None) is not None:
-                translation_lang = input.get('language')
-                # check if translation exists, if not create it
-                translation_instance, translation_created = Translation.objects.get_or_create(
-                    text=translation_text, language=translation_lang)
-                if not translation_created:
-                    return cls(translation=translation_instance, success=False, errors=['Translation already exists'])
-                translation_instance.save()
-                return cls(translation=translation_instance, success=True, errors=None)
-        else:
-            return cls(translation=None, errors=['No text provided'], success=False)
+        # check if translation exists, if not create it
+        translation_instance, translation_created = Translation.objects.get_or_create(
+            text=to_nfc(input.get('text')), language=to_nfc(input.get('language')))
+
+        return cls(translation=translation_instance, success=True, errors=None)
 
 
 class UpdateTranslation(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         text = String(required=True)
-        language = ID()
+        language = String(required=True)
 
     translation = Field(TranslationNode)
     success = Boolean()
     errors = List(String)
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # check that translation does exist
         if input.get('id', None) is not None:
             if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
                 translation_instance = Translation.objects.get(pk=from_global_id(id)[1])
                 # update text
-                if input.get('text', None) is not None:
-                    translation_instance.text = input.get('text')
+                translation_instance.text = to_nfc(input.get('text'))
                 # update language
-                if input.get('language', None) is not None:
-                    translation_instance.text = input.get('language')
+                translation_instance.lang = to_nfc(input.get('language'))
+                # save
                 translation_instance.save()
                 return cls(translation=translation_instance, success=True)
             else:
@@ -97,7 +90,7 @@ class DeleteTranslation(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Translation.objects.filter(pk=from_global_id(id)[1]).exists():

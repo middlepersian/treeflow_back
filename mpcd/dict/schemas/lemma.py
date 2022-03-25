@@ -5,6 +5,7 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 
 from mpcd.dict.models import Lemma
+from mpcd.utils.normalize import to_nfc
 
 
 class LemmaNode(DjangoObjectType):
@@ -15,16 +16,17 @@ class LemmaNode(DjangoObjectType):
 
 
 class LemmaInput(InputObjectType):
-    word = String()
-    language = String()
+    word = String(required=True)
+    language = String(required=True)
 
 
 # Queries
 class Query(ObjectType):
     lemma = relay.Node.Field(LemmaNode)
     all_lemmas = DjangoFilterConnectionField(LemmaNode)
+
     def resolve_all_lemmas(self, info, **kwargs):
-        return gql_optimizer.query(Lemma.objects.all(), info)    
+        return gql_optimizer.query(Lemma.objects.all(), info)
 
 # Mutations
 
@@ -32,34 +34,24 @@ class Query(ObjectType):
 class CreateLemma(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
-        language = String()
+        language = String(required=True)
 
     word = Field(LemmaNode)
     success = Boolean()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if input.get('word') is not None:
-            lemma_word = input.get('word')
-            if input.get('language') is not None:
-                lemma_lang = input.get('language')
-                lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
-                if lemma_created:
-                    lemma.save()
-                    return cls(word=lemma, success=True)
-                else:
-                    return cls(word=None, success=False, errors=['Lemma already exists'])
-            else:
-                return cls(token=None, success=False, errors=["No language provided"])
-        else:
-            return cls(token=None, success=False, errors=["No word provided"])
+
+        lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
+            input.get('word')), language=to_nfc(input.get('language')))
+        return cls(word=lemma, success=True)
 
 
 class UpdateLemma(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        word = String()
-        language = String()
+        word = String(required=True)
+        language = String(required=True)
 
     errors = List(String)
     word = Field(LemmaNode)
@@ -70,12 +62,8 @@ class UpdateLemma(relay.ClientIDMutation):
 
         if input.get('id') is not None:
             lemma = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
-            if input.get('word') is not None:
-                lemma_word = input.get('word')
-                lemma.word = lemma_word
-            if input.get('language') is not None:
-                lemma_lang = input.get('language')
-                lemma.language = lemma_lang
+            lemma.word = to_nfc(input.get('word'))
+            lemma.language = to_nfc(input.get('language'))
             lemma.save()
             return cls(word=lemma, success=True)
         else:

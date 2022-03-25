@@ -5,6 +5,7 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 
 from mpcd.dict.models import Dictionary
+from mpcd.utils.normalize import to_nfc
 
 
 class DictionaryNode(DjangoObjectType):
@@ -42,21 +43,17 @@ class CreateDictionary(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, slug):
-        # check that Dictionary does not exist same slug
-        if Dictionary.objects.filter(slug=slug).exists():
-            return cls(success=False)
-
-        else:
-            dictionary_instance = Dictionary.objects.create(name=name, slug=slug)
-            dictionary_instance.save()
-            return cls(dictionary=dictionary_instance, success=True)
+        name = to_nfc(name)
+        slug = to_nfc(slug)
+        dictionary_instance, dictionary_created = Dictionary.objects.get_or_create(name=name, slug=slug)
+        return cls(dictionary=dictionary_instance, success=True)
 
 
 class UpdateDictionary(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        name = String()
-        slug = String()
+        name = String(required=True)
+        slug = String(required=True)
 
     dictionary = Field(DictionaryNode)
     success = Boolean()
@@ -73,7 +70,7 @@ class UpdateDictionary(relay.ClientIDMutation):
 
             return cls(dictionary=dictionary_instance, success=True)
         else:
-            return cls(success=False)
+            return cls(dictionary=None, success=False)
 
 
 class DeleteDictionary(relay.ClientIDMutation):
