@@ -8,12 +8,16 @@ from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text,
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import EntryInput
+
 import graphene_django_optimizer as gql_optimizer
+from mpcd.utils.normalize import to_nfc
 
 # import the logging library
 import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+# TODO update schemas and normalize
 
 
 class TokenNode(DjangoObjectType):
@@ -47,7 +51,7 @@ class TokenInput(InputObjectType):
 class Query(ObjectType):
     token = relay.Node.Field(TokenNode)
     all_tokens = DjangoFilterConnectionField(TokenNode)
-    #all_tokens = List(TokenNode)
+    # all_tokens = List(TokenNode)
 
     def resolve_all_tokens(self, info, **kwargs):
         qs = Token.objects.all()
@@ -60,9 +64,9 @@ class CreateToken(relay.ClientIDMutation):
     class Input:
         transcription = String(required=True)
         transliteration = String(required=True)
-        language = String()
+        language = String(required=True)
         text = ID(required=True)
-        number = Float()
+        number = Float(required=True)
         lemma = EntryInput()
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -81,67 +85,45 @@ class CreateToken(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("INPUT: {}".format(input))
 
-        if input.get('transcription', None) is None and input.get('transliteration', None) is None:
-            return cls(token=None, success=False, errors=["No transcription or transliteration provided"])
-        else:
-            token = Token.objects.create(
-                transcription=input['transcription'], transliteration=input['transliteration'])
-
         # check if text available
         if input.get('text', None) is not None:
             if Text.objects.filter(pk=from_global_id(input['text'])[1]).exists():
                 text = Text.objects.get(pk=from_global_id(input['text'])[1])
-                token.text = text
             else:
                 return cls(token=None, success=False, errors=["Text with ID {} not found".format(input['text'])])
 
-        # check if language available
-        if input.get('language', None) is not None:
-            token.language = input.get('language', None)
+        # create Token with transcription, transliteration, text, number and language
+        token = Token.objects.create(
+            transcription=to_nfc(input['transcription']), transliteration=to_nfc(input['transliteration']), text=text, number=float(input['number']), language=input['language'])
 
         # check if lemma available
         if input.get('lemma', None) is not None:
 
-            # get lemmas word
-            if input.get('lemma').get('lemma').get('word', None) is not None:
-                lemma_word = input.get('lemma').get('lemma').get('word')
-                if input.get('lemma').get('lemma').get('language', None) is not None:
-                    lemma_lang = input.get('lemma').get('lemma').get('language')
-
-                    lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
-                    lemma.save()
-
-                else:
-                    return cls(token=None, success=False, errors=["No language provided for lemma"])
-
-            else:
-                return cls(token=None, success=False, errors=["No lemma word provided"])
-
-          # check dict
-            if input.get('lemma').get('dict', None) is not None:
+            # check if dict exists
+            if Dictionary.objects.filter(pk=from_global_id(input['lemma']['dict'])[1]).exists():
                 dict = Dictionary.objects.get(pk=from_global_id(input['lemma']['dict'])[1])
-                entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
             else:
-                return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
+                return cls(token=None, success=False, errors=["Dictionary with ID {} not found".format(input['lemma']['dict'])])
+
+            lemma_word = to_nfc(input.get('lemma').get('lemma').get('word'))
+            lemma_lang = to_nfc(input.get('lemma').get('lemma').get('language'))
+
+            lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
+
+            entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
 
             # check if translations available
             if input.get('lemma').get('translations') is not None:
                 for translation in input['lemma']['translations']:
                     # check if language in mutation input is available
                     translation_obj, translation_obj_created = Translation.objects.get_or_create(
-                        text=translation['text'], language=translation['language'])
+                        text=to_nfc(translation['text']), language=to_nfc(translation['language']))
                     entry.translations.add(translation_obj)
 
             entry.save()
 
             # add the entry to the token
             token.lemma = entry
-
-        # check if number available
-        if input.get('number', None) is not None:
-            token.number = input['number']
-        else:
-            return cls(token=None, success=False, errors=["No number provided"])
 
         # check if pos available
         if input.get('pos', None) is not None:
@@ -195,7 +177,7 @@ class UpdateToken(relay.ClientIDMutation):
         id = ID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
-        language = String()
+        language = String(required=True)
         text = ID(required=True)
         number = Float()
         lemma = EntryInput()
@@ -214,69 +196,51 @@ class UpdateToken(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        if input.get('id', None) is not None:
-            # check if token with assigned id already exists
-            if Token.objects.filter(pk=from_global_id(input['id'])[1]).exists():
-                # get the token
-                token = Token.objects.get(pk=from_global_id(input['id'])[1])
-            else:
-                return cls(token=None, success=False, errors=["Token with ID {} not found".format(input['id'])])
+        # check if token with assigned id already exists
+        if Token.objects.filter(pk=from_global_id(input['id'])[1]).exists():
+            # get the token
+            token = Token.objects.get(pk=from_global_id(input['id'])[1])
+        else:
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input['id'])])
 
-            # check if transcription available
-            if input.get('transcription', None) is not None:
-                token.transcription = input['transcription']
-            # check if transliteration available
-            if input.get('transliteration', None) is not None:
-                token.transliteration = input['transliteration']
-            # check if lemma available
-             # check if language available
-        if input.get('language', None) is not None:
-            token.language = input.get('language', None)
+        # update transcription
+        token.transcription = to_nfc(input['transcription'])
+        # update transliteration
+        token.transliteration = to_nfc(input['transliteration'])
+        # update language
+        token.language = input.get('language', None)
+        # update number
+        token.number = float(input.get('number', None))
 
         # check if lemma available
         if input.get('lemma', None) is not None:
 
-            # get lemmas word
-            if input.get('lemma').get('lemma').get('word', None) is not None:
-                lemma_word = input.get('lemma').get('lemma').get('word')
-                if input.get('lemma').get('lemma').get('language', None) is not None:
-                    lemma_lang = input.get('lemma').get('lemma').get('language')
-
-                    lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
-                    lemma.save()
-
-                else:
-                    return cls(token=None, success=False, errors=["No language provided for lemma"])
-
-            else:
-                return cls(token=None, success=False, errors=["No lemma word provided"])
-
-          # check dict
-            if input.get('lemma').get('dict', None) is not None:
+            # check if dict exists
+            if Dictionary.objects.filter(pk=from_global_id(input['lemma']['dict'])[1]).exists():
                 dict = Dictionary.objects.get(pk=from_global_id(input['lemma']['dict'])[1])
-                entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
             else:
-                return cls(token=None, success=False, errors=["No dictionary provided for lemma"])
+                return cls(token=None, success=False, errors=["Dictionary with ID {} not found".format(input['lemma']['dict'])])
+
+            lemma_word = to_nfc(input.get('lemma').get('lemma').get('word'))
+            lemma_lang = to_nfc(input.get('lemma').get('lemma').get('language'))
+
+            lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
+
+            entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
 
             # check if translations available
             if input.get('lemma').get('translations') is not None:
-                entry.translations.clear()
                 for translation in input['lemma']['translations']:
                     # check if language in mutation input is available
                     translation_obj, translation_obj_created = Translation.objects.get_or_create(
-                        word=translation['text'], language=translation['language'])
+                        text=to_nfc(translation['text']), language=to_nfc(translation['language']))
                     entry.translations.add(translation_obj)
+
 
             entry.save()
 
             # add the entry to the token
             token.lemma = entry
-
-        # check if number available
-        if input.get('number', None) is not None:
-            token.number = input['number']
-        else:
-            return cls(token=None, success=False, errors=["No number provided"])
 
         # check if language available
         if input.get('language', None) is not None:
