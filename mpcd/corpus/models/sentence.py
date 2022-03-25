@@ -29,6 +29,11 @@ class Sentence(models.Model):
 
     class Meta:
         ordering = ['number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['number', 'text'], name='number_text'
+            )
+        ]
 
     def get_tokens(self):
         return "|".join([p.transcription for p in self.tokens.all()])
