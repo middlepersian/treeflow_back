@@ -11,9 +11,6 @@ from .line import Line
 
 from mpcd.dict.models.language import LanguageChoices
 
-# TODO add numer
-
-
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
