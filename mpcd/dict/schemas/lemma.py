@@ -60,14 +60,14 @@ class UpdateLemma(relay.ClientIDMutation):
     @ classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        if input.get('id') is not None:
+        if Lemma.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
             lemma = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
             lemma.word = to_nfc(input.get('word'))
             lemma.language = to_nfc(input.get('language'))
             lemma.save()
             return cls(word=lemma, success=True)
         else:
-            return cls(token=None, success=False, errors=["No id provided"])
+            return cls(token=None, success=False, errors=["Lemma ID does not exists"])
 
 
 class DeleteLemma(relay.ClientIDMutation):

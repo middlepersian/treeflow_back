@@ -77,6 +77,8 @@ class UpdateDefinition(relay.ClientIDMutation):
             definition_instance.language = language_input
             definition_instance.save()
             return cls(definition=definition_instance, success=True)
+        else:
+            return cls(errors=['Definition ID does not exist'], success=False)
 
 
 class DeleteDefinition(relay.ClientIDMutation):

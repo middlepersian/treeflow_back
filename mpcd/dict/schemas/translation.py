@@ -67,21 +67,18 @@ class UpdateTranslation(relay.ClientIDMutation):
     @ classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # check that translation does exist
-        if input.get('id', None) is not None:
-            if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
-                translation_instance = Translation.objects.get(pk=from_global_id(id)[1])
-                # update text
-                translation_instance.text = to_nfc(input.get('text'))
-                # update language
-                translation_instance.lang = to_nfc(input.get('language'))
-                # save
-                translation_instance.save()
-                return cls(translation=translation_instance, success=True)
-            else:
-                return cls(errors=['Translation ID does not exist'], success=False)
 
+        if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
+            translation_instance = Translation.objects.get(pk=from_global_id(id)[1])
+            # update text
+            translation_instance.text = to_nfc(input.get('text'))
+            # update language
+            translation_instance.lang = to_nfc(input.get('language'))
+            # save
+            translation_instance.save()
+            return cls(translation=translation_instance, success=True)
         else:
-            return cls(success=False, errors=['No ID provided'])
+            return cls(errors=['Translation ID does not exist'], success=False)
 
 
 class DeleteTranslation(relay.ClientIDMutation):
