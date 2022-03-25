@@ -37,7 +37,11 @@ class Text(models.Model):
             models.CheckConstraint(
                 name="valid_stage",
                 check=models.Q(stage__in=StageCh.values),
-            )]
+            ),
+            models.UniqueConstraint(
+                fields=['corpus', 'title'], name='corpus_title'
+            )
+        ]
 
     def __str__(self):
         return '{}'.format(self.title)
