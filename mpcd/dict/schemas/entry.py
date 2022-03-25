@@ -21,7 +21,7 @@ class EntryNode(DjangoObjectType):
 
 
 class EntryInput(InputObjectType):
-    dict = ID()
+    dict = ID(required=True)
     lemma = LemmaInput(required=True)
     loanwords = List(LoanWordInput)
     translations = List(TranslationInput)
