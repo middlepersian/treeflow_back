@@ -53,7 +53,7 @@ class CreateTranslation(relay.ClientIDMutation):
                 translation_instance, translation_created = Translation.objects.get_or_create(
                     text=translation_text, language=translation_lang)
                 if not translation_created:
-                    return cls(translation=None, success=False, errors=['translation already exists'])
+                    return cls(translation=translation_instance, success=False, errors=['Translation already exists'])
                 translation_instance.save()
                 return cls(translation=translation_instance, success=True, errors=None)
         else:
