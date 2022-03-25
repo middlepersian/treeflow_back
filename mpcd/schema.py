@@ -66,7 +66,6 @@ class Mutation(
         mpcd.dict.schemas.reference.Mutation,
         mpcd.dict.schemas.translation.Mutation,
         graphene.ObjectType):
-    pass
 
     # https://django-graphql-jwt.domake.io/relay.html
     token_auth = graphql_jwt.relay.ObtainJSONWebToken.Field()
