@@ -31,7 +31,7 @@ class Sentence(models.Model):
         ordering = ['number']
         constraints = [
             models.UniqueConstraint(
-                fields=['number', 'text'], name='number_text'
+                fields=['number', 'text'], name='sentence_number_text'
             )
         ]
 
