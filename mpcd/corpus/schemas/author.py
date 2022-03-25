@@ -5,7 +5,7 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 
 from mpcd.corpus.models import Author
-
+from mpcd.utils.normalize import to_nfc
 
 
 # import the logging library
@@ -24,8 +24,8 @@ class AuthorNode(DjangoObjectType):
 
 
 class AuthorInput(InputObjectType):
-    name = String()
-    last_name = String()
+    name = String(required=True)
+    last_name = String(required=True)
 
 # Queries
 
@@ -50,33 +50,34 @@ class CreateAuthor(relay.ClientIDMutation):
     errors = List(String)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, name, last_name):
-        logger.error('ROOT: {}'.format(root))
-        # check that author does not exist same name and last name
-        if Author.objects.filter(name=name, last_name=last_name).exists():
-            return cls(success=False, errors=['Author already exists'])
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error('author_inpuut: {}'.format(input))
 
-        else:
-            author_instance = Author.objects.create(name=name, last_name=last_name)
-            author_instance.save()
-            return cls(author=author_instance, success=True)
+        # check if author exists, if not create it
+        author_instance, author_created = Author.objects.get_or_create(
+            name=to_nfc(input.get('name')), last_name=to_nfc(input.get('last_name')))
+
+        return cls(author=author_instance, success=True, errors=None)
 
 
 class UpdateAuthor(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
         name = String(required=True)
         last_name = String(required=True)
 
     author = Field(AuthorNode)
 
     @ classmethod
-    def mutate_and_get_payload(cls, root, info, name, last_name, id):
-        author = Author.objects.get(pk=from_global_id(id)[1])
-        author.name = name
-        author.last_name = last_name
-        author.save()
-        return cls(author=author)
+    def mutate_and_get_payload(cls, root, info, **input):
+        if Author.objects.filter(pk=from_global_id(id)[1]).exists():
+            author_instance = Author.objects.get(pk=from_global_id(id)[1])
+            author_instance.name = to_nfc(input.get('name'))
+            author_instance.last_name = to_nfc(input.get('last_name'))
+            author_instance.save()
+            return cls(author=author_instance, success=True)
+        else:
+            return cls(errors=['Author ID does not exist'], success=False)
 
 
 class DeleteAuthor(relay.ClientIDMutation):
