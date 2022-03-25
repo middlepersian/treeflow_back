@@ -9,5 +9,13 @@ class Dictionary(models.Model):
     slug = models.SlugField(max_length=10, unique=True)
     history = HistoricalRecords()
 
+    class Meta:
+        ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'slug'], name='dictionary_name_slug'
+            )
+        ]
+
     def __str__(self):
         return self.name
