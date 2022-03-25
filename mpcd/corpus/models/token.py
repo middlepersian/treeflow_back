@@ -11,6 +11,7 @@ from .line import Line
 
 from mpcd.dict.models.language import LanguageChoices
 
+
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
@@ -40,6 +41,11 @@ class Token(models.Model):
 
     class Meta:
         ordering = ['number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['number', 'text'], name='token_number_text'
+            )
+        ]
 
     def __str__(self):
         return '{}'.format(self.transcription)
