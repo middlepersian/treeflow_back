@@ -1,10 +1,10 @@
+
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Text, Author, Resource, Corpus, TextSigle, Source
 from mpcd.corpus.schemas.text_sigle import TextSigleInput
-from mpcd.corpus.schemas.corpus import CorpusInput
 from mpcd.corpus.schemas.author import AuthorInput
 from mpcd.corpus.schemas.source import SourceInput
 from mpcd.corpus.schemas.resource import ResourceInput
@@ -30,8 +30,8 @@ class TextNode(DjangoObjectType):
 
 class TextInput(InputObjectType):
     # id = ID()
-    corpus = CorpusInput()
-    title = String()
+    corpus = String(required=True)
+    title = String(required=True)
     stage = String()
     text_sigle = TextSigleInput()
     editors = List(AuthorInput)
@@ -56,8 +56,8 @@ class Query(ObjectType):
 class CreateText(relay.ClientIDMutation):
     class Input:
        # id = ID()
-        corpus = String()
-        title = String()
+        corpus = ID(required=True)
+        title = String(required=True)
         stage = String()
         text_sigle = TextSigleInput()
         editors = List(AuthorInput)
@@ -72,24 +72,17 @@ class CreateText(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        # check that corpus exists
-        if input.get('corpus', None) is None:
-            return cls(success=False, errors="No corpus slug provided")
-
         # and that there is title available
         if input.get('title', None) is None:
             return cls(success=False, errors="No title provided")
 
-        # and that there is a stage available
-        if input.get('stage', None) is None:
-            return cls(success=False, errors="No stage provided")
-
         # create text with title and stage
-        text_instance = Text.objects.create(title=input.get('title'), stage=input.get('stage'))
+        text_instance = Text.objects.create(title=input.get('title'))
 
-        # get corpus
-        corpus_instance = Corpus.objects.get(slug=input['corpus'])
-        text_instance.corpus = corpus_instance
+        # check if corpus exists
+        if Corpus.objects.filter(pk=from_global_id(input.get('corpus'))[1]).exists():
+            corpus_instance = Corpus.objects.get(pk=from_global_id(input.get('corpus'))[1])
+            text_instance.corpus = corpus_instance
 
         # get source
         if input.get('sources', None) is not None:

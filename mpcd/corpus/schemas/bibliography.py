@@ -57,7 +57,7 @@ class CreateBibEntry(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("input: {}".format(input))
         bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(
-            title=to_nfc(input.get('title')), year=to_nfc(input.get('year')))
+            title=to_nfc(input.get('title')), year=input.get('year'))
 
         authors = input.get('authors', None)
         for author in authors:
@@ -89,7 +89,7 @@ class UpdateBibEntry(relay.ClientIDMutation):
             return cls(success=False, errors=['BibEntry does not exist'])
 
         bibentry_instance.title = to_nfc(input.get('title'))
-        bibentry_instance.year = to_nfc(input.get('year'))
+        bibentry_instance.year = input.get('year')
 
         if input.get('authors', None) is not None:
             bibentry_instance.authors.clear()

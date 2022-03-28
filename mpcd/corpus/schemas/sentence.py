@@ -194,7 +194,7 @@ class DeleteSentence(relay.ClientIDMutation):
 class AddTokensToSentence(relay.ClientIDMutation):
 
     class Input:
-        id = ID()
+        id = ID(required=True)
         tokens = List(ID)
 
     success = Boolean()
@@ -203,24 +203,21 @@ class AddTokensToSentence(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        if input.get('id', None) is not None:
-            logger.error('input: {}'.format(input))
-            if Sentence.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
-                sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
-                if input.get('tokens', None) is not None:
-                    # clear up existing tokens
-                    sentence_instance.tokens.clear()
-                    for token_id in input.get('tokens', None):
-                        if Token.objects.filter(pk=from_global_id(token_id)[1]).exists():
-                            sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token_id)[1]))
-                        else:
-                            return cls(success=False, errors=['Wrong Token ID {}'.format(token_id)])
-                    sentence_instance.save()
-                    return cls(sentence=sentence_instance, success=True, errors=None)
-            else:
-                return cls(success=False, errors=['Wrong Sentence ID'])
+
+        if Sentence.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
+            if input.get('tokens', None) is not None:
+                # clear up existing tokens
+                sentence_instance.tokens.clear()
+                for token_id in input.get('tokens', None):
+                    if Token.objects.filter(pk=from_global_id(token_id)[1]).exists():
+                        sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token_id)[1]))
+                    else:
+                        return cls(success=False, errors=['Wrong Token ID {}'.format(token_id)])
+                sentence_instance.save()
+                return cls(sentence=sentence_instance, success=True, errors=None)
         else:
-            return cls(success=False, errors=['No ID available'])
+            return cls(success=False, errors=['Wrong Sentence ID'])
 
 
 class Mutation(ObjectType):

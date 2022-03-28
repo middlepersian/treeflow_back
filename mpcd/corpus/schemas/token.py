@@ -26,6 +26,7 @@ class TokenNode(DjangoObjectType):
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
                          'transliteration': ['exact', 'icontains', 'istartswith'],
                          'line': ['exact'],
+                         'lemma': ['exact'],
                          }
         interfaces = (relay.Node,)
 
@@ -235,7 +236,6 @@ class UpdateToken(relay.ClientIDMutation):
                     translation_obj, translation_obj_created = Translation.objects.get_or_create(
                         text=to_nfc(translation['text']), language=to_nfc(translation['language']))
                     entry.translations.add(translation_obj)
-
 
             entry.save()
 

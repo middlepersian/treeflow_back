@@ -24,24 +24,15 @@ class CorpusNode(DjangoObjectType):
 
 class CorpusInput(InputObjectType):
     name = String()
-    slug = String()
+    slug = String(required=True)
 
 
 class Query(ObjectType):
     corpus = relay.Node.Field(CorpusNode)
     all_corpus = DjangoFilterConnectionField(CorpusNode)
-    # not a relay-comform query
-    corpus_slug = Field(
-        CorpusNode,
-        slug=String(),
-    )
 
-    def resolve_corpus_slug(root, info, slug):
-        return Corpus.objects.filter(slug=slug).first()
-
-   
     def resolve_all_corpus(self, info, **kwargs):
-        return gql_optimizer.query(Corpus.objects.all(), info)     
+        return gql_optimizer.query(Corpus.objects.all(), info)
 
 
 # Mutations
@@ -56,9 +47,8 @@ class CreateCorpus(relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, slug):
-        corpus = Corpus.objects.create(name=name, slug=slug)
-        corpus.save()
-        return cls(success=True, corpus=corpus)
+        corpus_obj, corpus_created = Corpus.objects.get_or_create(name=name, slug=slug)
+        return cls(success=True, corpus=corpus_obj)
 
 
 class UpdateCorpus(relay.ClientIDMutation):
@@ -82,7 +72,6 @@ class UpdateCorpus(relay.ClientIDMutation):
         else:
             success = False
             return cls(success=success)
-
 
 
 class Mutation(ObjectType):
