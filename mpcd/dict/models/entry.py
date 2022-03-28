@@ -27,6 +27,11 @@ class Entry(models.Model):
 
     class Meta:
         ordering = ['lemma__word']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['dict', 'lemma'], name='entry_dict_lemma'
+            )
+        ]
 
     def __str__(self):
         return '{}'.format(self.lemma)
