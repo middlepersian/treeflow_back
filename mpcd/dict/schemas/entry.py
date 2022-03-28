@@ -28,6 +28,7 @@ class EntryInput(InputObjectType):
     definitions = List(DefinitionInput)
     categories = List(CategoryInput)
     references = List(ReferenceInput)
+    related_entries = List(ID)
     comment = String()
 
 # Queries
@@ -52,7 +53,7 @@ class CreateEntry(relay.ClientIDMutation):
         definitions = List(DefinitionInput)
         categories = List(CategoryInput)
         references = List(ReferenceInput)
-        related_entries = List(String)
+        related_entries = List(ID)
         comment = String()
 
     entry = Field(EntryNode)
@@ -74,7 +75,7 @@ class CreateEntry(relay.ClientIDMutation):
         lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
 
         # create entry
-        entry = Entry.objects.create(dict=dict, lemma=lemma)
+        entry, entry_created = Entry.objects.get_or_create(dict=dict, lemma=lemma)
 
         # check if loanwords exist
         if input.get('loanwords', None) is not None:
@@ -121,13 +122,14 @@ class CreateEntry(relay.ClientIDMutation):
                 reference_obj = Reference.objects.get_or_create(reference=reference['reference'])
                 if reference_obj:
                     entry.references.add(reference_obj)
-
+        '''
         if input.get('related_entries', None) is not None:
             for related_entry in input['related_entries']:
                 if Entry.objects.filter(pk=from_global_id(related_entry.id)[1]).exists():
                     related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
                     entry.related_entries.add(related_entry_obj)
 
+        '''
         if input['comment']:
             entry.comment = input['comment']
 
@@ -249,7 +251,33 @@ class DeleteEntry(relay.ClientIDMutation):
             return cls(success=False)
 
 
+class AddRelatedEntry(relay.ClientIDMutation):
+
+    class Input:
+        entry_id = ID(required=True)
+        related_entry_id = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+    entry = Field(EntryNode)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        if Entry.objects.filter(pk=from_global_id(input['entry_id'])[1]).exists():
+            entry = Entry.objects.get(pk=from_global_id(input['entry_id'])[1])
+            if Entry.objects.filter(pk=from_global_id(input['related_entry_id'])[1]).exists():
+                related_entry = Entry.objects.get(pk=from_global_id(input['related_entry_id'])[1])
+                entry.related_entries.add(related_entry)
+                entry.save()
+                return cls(entry=entry, success=True, errors=None)
+            else:
+                return cls(entry=None, success=False, errors=['related entry does not exist'])
+        else:
+            return cls(entry=None, success=False, errors=['entry does not exist'])
+
+
 class Mutation(object):
     create_entry = CreateEntry.Field()
     update_entry = UpdateEntry.Field()
     delete_entry = DeleteEntry.Field()
+    add_related_entry = AddRelatedEntry.Field()
