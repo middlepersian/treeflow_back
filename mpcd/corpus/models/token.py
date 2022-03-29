@@ -19,7 +19,7 @@ class Token(models.Model):
     language = models.CharField(max_length=3, choices=LanguageChoices.choices, null=True, blank=True)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemma = models.ForeignKey(Entry, on_delete=models.SET_NULL, null=True, blank=True, related_name='token_lemma')
+    entries = models.ManyToManyField(Entry, blank=True, related_name='token_entries')
     pos = models.CharField(max_length=8, choices=POSChoices.choices, null=True, blank=True)
     morphological_annotation = models.ManyToManyField(
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
@@ -49,7 +49,3 @@ class Token(models.Model):
 
     def __str__(self):
         return '{}'.format(self.transcription)
-
-
-class TokenAdmin(admin.ModelAdmin):
-    raw_id_fields = ['lemma']
