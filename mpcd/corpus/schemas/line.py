@@ -36,8 +36,8 @@ class Query(ObjectType):
     line = relay.Node.Field(LineNode)
     all_lines = DjangoFilterConnectionField(LineNode)
     #all_lines = DjangoFilterConnectionField(LineNode,token=String(required=True))
-    
-    #@login_required
+
+    # @login_required
     def resolve_all_lines(self, info, **kwargs):
         return gql_optimizer.query(Line.objects.all(), info)
 
@@ -47,7 +47,7 @@ class Query(ObjectType):
 class CreateLine(relay.ClientIDMutation):
     class Input:
         number = Float(required=True)
-        folio = ID()
+        folio = ID(required=True)
         comment = String()
         previous = ID()
 
@@ -59,36 +59,26 @@ class CreateLine(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateLine.mutate_and_get_payload()')
 
-        if input.get('folio', None) is None:
-            return cls(success=False, errors=['folio ID is required'])
+        if Folio.objects.filter(pk=from_global_id(input.get('folio'))[1]).exists():
+            folio_instance = Folio.objects.get(pk=from_global_id(input.get('folio'))[1])
         else:
-            logger.error('folio ID {}'.format(input.get('folio')))
-            if Folio.objects.filter(pk=from_global_id(input.get('folio'))[1]).exists():
-                folio_instance = Folio.objects.get(pk=from_global_id(input.get('folio'))[1])
-            else:
-                return cls(success=False, errors=['folio does not exist'])
+            return cls(success=False, errors=['folio does not exist'])
 
-        if input.get('number', None) is not None:
-            if Line.objects.filter(number=input.get('number'), folio=folio_instance).exists():
-                return cls(success=False, errors=['line number {} already exists in this folio'.format(input.get('number'))])
-            else:
-                line = Line(folio=folio_instance, number=input.get('number'))
-        else:
-            return cls(success=False, errors=['number is required'])
+        line_instance, line_object = Line.objects.get_or_create(folio=folio_instance, number=input.get('number'))
 
        # check if previous token available
         if input.get('previous', None) is not None:
             # check if previous token with assigned id does not exist
             if Line.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 # assign previous token to line
-                line.previous = Line.objects.get(pk=from_global_id(input['previous'])[1])
+                line_instance.previous = Line.objects.get(pk=from_global_id(input['previous'])[1])
+                line_instance.save()
 
         if input.get('comment', None) is not None:
-            line.comment = input.get('comment')
+            line_instance.comment = input.get('comment')
+            line_instance.save()
 
-        line.save()
-
-        return cls(line=line, success=True)
+        return cls(line=line_instance, success=True, errors=None)
 
 
 class UpdateLine(relay.ClientIDMutation):

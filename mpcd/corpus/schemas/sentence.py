@@ -54,8 +54,8 @@ class CreateSentence(relay.ClientIDMutation):
     success = Boolean()
 
     class Input:
-        text = ID()
-        number = Float()
+        text = ID(required=True)
+        number = Float(required=True)
         tokens = List(ID)
         translations = List(TranslationInput)
         comment = String()
@@ -68,21 +68,11 @@ class CreateSentence(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        logger.error('ROOT: {}'.format(root))
-        if input.get('text', None) is not None:
-            if Text.objects.filter(pk=from_global_id(input.get('text'))[1]).exists():
-                text = Text.objects.get(pk=from_global_id(input.get('text'))[1])
-                sentence_instance = Sentence.objects.create(text=text)
-            else:
-                return cls(success=False, errors=['Wrong Text ID'])
-
+        if Text.objects.filter(pk=from_global_id(input.get('text'))[1]).exists():
+            text = Text.objects.get(pk=from_global_id(input.get('text'))[1])
+            sentence_instance, sentence_created = Sentence.objects.get_or_create(text=text, number=input.get('number'))
         else:
-            return cls(success=False, errors=['Text ID is required'])
-
-        if input.get('number', None) is not None:
-            sentence_instance.number = input.get('number')
-        else:
-            return cls(success=False, errors=['number is required'])
+            return cls(success=False, errors=['Wrong Text ID'])
 
         if input.get('comment', None) is not None:
             sentence_instance.comment = input.get('comment')

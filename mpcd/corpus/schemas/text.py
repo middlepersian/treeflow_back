@@ -72,17 +72,17 @@ class CreateText(relay.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
-        # and that there is title available
-        if input.get('title', None) is None:
-            return cls(success=False, errors="No title provided")
-
-        # create text with title and stage
-        text_instance = Text.objects.create(title=input.get('title'))
-
         # check if corpus exists
         if Corpus.objects.filter(pk=from_global_id(input.get('corpus'))[1]).exists():
             corpus_instance = Corpus.objects.get(pk=from_global_id(input.get('corpus'))[1])
-            text_instance.corpus = corpus_instance
+        else:
+            return cls(success=False, errors="Wrong corpus ID", text=None)
+
+          # create text with title and stage (default=untouched)
+        text_instance, text_created = Text.objects.get_or_create(title=input.get('title'), corpus=corpus_instance)
+
+        if input.get('stage', None) is not None:
+            text_instance.stage = input.get('stage')
 
         # get source
         if input.get('sources', None) is not None:

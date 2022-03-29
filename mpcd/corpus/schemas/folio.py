@@ -45,8 +45,8 @@ class Query(ObjectType):
 class CreateFolio(relay.ClientIDMutation):
     class Input:
         identifier = String(required=True)
-        facsimile = ID()
-        number = Float()
+        facsimile = ID(required=True)
+        number = Float(required=True)
         comment = String()
         previous = ID()
 
@@ -59,33 +59,24 @@ class CreateFolio(relay.ClientIDMutation):
         logger.debug('CreateFolio.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
 
-        if input.get('identifier', None) is not None:
-            identifier = input.get('identifier')
-        else:
-            return cls(success=False, errors=['identifier is required'])
-
-        if input.get('facsimile', None) is not None:
+        if Facsimile.objects.filter(pk=from_global_id(input['facsimile'])[1]).exists():
             facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('facsimile'))[1])
         else:
-            return cls(success=False, errors=['facsimile ID is required'])
+            return cls(success=False, errors=['Wrong facsimile ID'])
 
-        folio = Folio.objects.create(identifier=identifier, facsimile=facsimile_instance)
+        folio_instance, folio_created = Folio.objects.get_or_create(identifier=input.get(
+            'identifier'), facsimile=facsimile_instance, number=input.get('number'))
 
         if input.get('comment', None) is not None:
-            folio.comment = input.get('comment')
-
-        if input.get('number', None) is not None:
-            folio.number = input.get('number')
-        else:
-            return cls(success=False, errors=['number is required'])
+            folio_instance.comment = input.get('comment')
+            folio_instance.save()
 
         if input.get('previous', None) is not None:
             if Folio.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
-                folio.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
+                folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
+                folio_instance.save()
 
-        folio.save()
-
-        return cls(folio=folio, success=True)
+        return cls(folio=folio_instance, success=True, errors=None)
 
 
 class UpdateFolio(relay.ClientIDMutation):
