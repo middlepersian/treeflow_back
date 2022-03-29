@@ -64,15 +64,15 @@ class CreateEntry(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if dict exists
-        if Dictionary.objects.filter(slug=input['dict']['slug']).exists():
-            dict = Dictionary.objects.get(slug=input['dict']['slug'])
+        if Dictionary.objects.filter(pk=from_global_id(input['dict'])[1]).exists():
+            dict = Dictionary.objects.get(pk=from_global_id(input['dict'])[1])
         else:
             return cls(success=False, entry=None, errors=["Dictionary does not exist"])
 
         # get or create Lemma
         lemma_word = input.get('lemma', None).get('word', None)
         lemma_lang = input.get('lemma', None).get('language', None)
-        lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
+        lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(lemma_word), language=lemma_lang)
 
         # create entry
         entry, entry_created = Entry.objects.get_or_create(dict=dict, lemma=lemma)
@@ -84,44 +84,51 @@ class CreateEntry(relay.ClientIDMutation):
                 lemma_word = input.get('word')
                 lemma_lang = loanword.get('language')
                 loanword_instance, loanword_created = LoanWord.objects.get_or_create(
-                    word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
+                    word=to_nfc(lemma_word), language=lemma_lang)
 
                 if loanword.get('translations', None) is not None:
                     for translation in loanword.get('translations'):
                         # check if translation exists, if not create it
                         translation_instance, translation_created = Translation.objects.get_or_create(
-                            text=to_nfc(translation.get('text')), language=to_nfc(translation.get('language')))
+                            text=to_nfc(translation.get('text')), language=translation.get('language'))
                         # add translation
                         loanword_instance.translations.add(translation_instance)
                         loanword_instance.save()
 
                 entry.loanwords.add(loanword_instance)
+            entry.save()
 
         # check if translations exist
         if input.get('translations', None) is not None:
             for translation in input.get('translations', None):
                 # check if translation exists, if not create it
                 translation_instance, translation_created = Translation.objects.get_or_create(
-                    text=to_nfc(translation.get('text')), language=to_nfc(translation.get('language')))
+                    text=to_nfc(translation.get('text')), language=translation.get('language'))
                 entry.translations.add(translation_instance)
+            entry.save()
 
         # check if definitions exist
         if input.get('definitions', None) is not None:
             for definition in input['definitions']:
                 definition_instance, definition_created = Definition.objects.get_or_create(
-                    definition=to_nfc(definition.get('definition')), language=to_nfc(definition.get('language')))
+                    definition=to_nfc(definition.get('definition')), language=translation.get('language'))
                 entry.definitions.add(definition_instance)
+            entry.save()
 
         if input.get('categories', None) is not None:
             for category in input['categories']:
                 category_obj, category_created = Category.objects.get_or_create(category=category['category'])
                 if category_obj:
                     entry.categories.add(category_obj)
+            entry.save()
+
         if input.get('references', None) is not None:
             for reference in input['references']:
                 reference_obj = Reference.objects.get_or_create(reference=reference['reference'])
                 if reference_obj:
                     entry.references.add(reference_obj)
+            entry.save()
+
         '''
         if input.get('related_entries', None) is not None:
             for related_entry in input['related_entries']:
@@ -130,10 +137,11 @@ class CreateEntry(relay.ClientIDMutation):
                     entry.related_entries.add(related_entry_obj)
 
         '''
-        if input['comment']:
+        if input.get('comment', None) is not None:
+            entry.comment = to_nfc(input.get('comment'))
             entry.comment = input['comment']
+            entry.save()
 
-        entry.save()
         return cls(entry=entry, success=True)
 
 
@@ -170,7 +178,7 @@ class UpdateEntry(relay.ClientIDMutation):
             # update lemma
             lemma_word = input.get('lemma', None).get('word', None)
             lemma_lang = input.get('lemma', None).get('language', None)
-            lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
+            lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(lemma_word), language=lemma_lang)
             entry.lemma = lemma
 
             # check if loanwords exist
@@ -186,7 +194,7 @@ class UpdateEntry(relay.ClientIDMutation):
                         for translation in loanword.get('translations'):
                             # check if translation exists, if not create it
                             translation_instance, translation_created = Translation.objects.get_or_create(
-                                text=to_nfc(translation.get('text')), language=to_nfc(translation.get('language')))
+                                text=to_nfc(translation.get('text')), language=translation.get('language'))
                             # add translation
                             loanword_instance.translations.add(translation_instance)
                             loanword_instance.save()
@@ -198,14 +206,14 @@ class UpdateEntry(relay.ClientIDMutation):
                 for translation in input.get('translations', None):
                     # check if translation exists, if not create it
                     translation_instance, translation_created = Translation.objects.get_or_create(
-                        text=to_nfc(translation.get('text')), language=to_nfc(translation.get('language')))
+                        text=to_nfc(translation.get('text')), language=translation.get('language'))
                     entry.translations.add(translation_instance)
 
             # check if definitions exist
             if input.get('definitions', None) is not None:
                 for definition in input['definitions']:
                     definition_instance, definition_created = Definition.objects.get_or_create(
-                        definition=to_nfc(definition.get('definition')), language=to_nfc(definition.get('language')))
+                        definition=to_nfc(definition.get('definition')), language=translation.get('language'))
                     entry.definitions.add(definition_instance)
 
             if input.get('categories', None) is not None:
@@ -225,7 +233,7 @@ class UpdateEntry(relay.ClientIDMutation):
                         related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
                         entry.related_entries.add(related_entry_obj)
 
-            if input['comment']:
+            if input.get('comment', None) is not None:
                 entry.comment = input['comment']
 
             entry.save()
