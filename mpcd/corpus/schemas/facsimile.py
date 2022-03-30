@@ -5,6 +5,7 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import BibEntry, Facsimile, CodexPart
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required, superuser_required
 
 
 # import the logging library
@@ -32,6 +33,7 @@ class Query(ObjectType):
     facsimile = relay.Node.Field(FacsimileNode)
     all_facsimiles = DjangoFilterConnectionField(FacsimileNode)
 
+    @login_required
     def resolve_all_facsimiles(self, info, **kwargs):
         return gql_optimizer.query(Facsimile.objects.all(), info)
 
@@ -47,6 +49,7 @@ class CreateFacsimile(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateFacsimile.mutate_and_get_payload()')
@@ -81,6 +84,7 @@ class UpdateFacsimile(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateFacsimile.mutate_and_get_payload()')
@@ -124,6 +128,7 @@ class DeleteFacsimile(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @superuser_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('DeleteFacsimile.mutate_and_get_payload()')

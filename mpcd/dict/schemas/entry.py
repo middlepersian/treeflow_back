@@ -4,6 +4,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
+
 
 from mpcd.dict.models import Dictionary, Lemma, Entry, Translation, Definition, Category, Reference, LoanWord
 from mpcd.dict.schemas import LemmaInput, LoanWordInput, TranslationInput, DefinitionInput, CategoryInput, ReferenceInput
@@ -38,6 +40,7 @@ class Query(ObjectType):
     entry = relay.Node.Field(EntryNode)
     all_entries = DjangoFilterConnectionField(EntryNode)
 
+    @login_required
     def resolve_all_entries(self, info, **kwargs):
         return gql_optimizer.query(Entry.objects.all(), info)
 
@@ -60,6 +63,7 @@ class CreateEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -161,6 +165,7 @@ class UpdateEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -249,7 +254,8 @@ class DeleteEntry(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
             entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
@@ -269,6 +275,7 @@ class AddRelatedEntry(relay.ClientIDMutation):
     errors = List(String)
     entry = Field(EntryNode)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         if Entry.objects.filter(pk=from_global_id(input['entry_id'])[1]).exists():

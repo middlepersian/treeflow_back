@@ -6,6 +6,7 @@ from mpcd.corpus.models import Resource, Author
 from mpcd.corpus.schemas.author import AuthorInput
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -35,6 +36,7 @@ class Query(ObjectType):
     resource = relay.Node.Field(ResourceNode)
     all_resources = DjangoFilterConnectionField(ResourceNode)
 
+    @login_required
     def resolve_all_resources(self, info, **kwargs):
         return gql_optimizer.query(Resource.objects.all(), info)
 
@@ -51,6 +53,7 @@ class CreateResource(relay.ClientIDMutation):
     resource = Field(ResourceNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, authors, description, project, reference):
 
@@ -82,6 +85,7 @@ class UpdateResource(relay.ClientIDMutation):
     resource = Field(ResourceNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, authors, description, project, reference):
         resource = Resource.objects.get(pk=from_global_id(id)[1])
@@ -112,6 +116,7 @@ class DeleteResource(relay.ClientIDMutation):
     resource = Field(ResourceNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if Resource.objects.filter(pk=from_global_id(id)[1]).exists():

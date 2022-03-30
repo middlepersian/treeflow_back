@@ -3,6 +3,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
+
 
 from mpcd.dict.models import LoanWord, Translation
 from mpcd.dict.schemas import TranslationInput
@@ -30,6 +32,7 @@ class Query(ObjectType):
     loanword = relay.Node.Field(LoanWordNode)
     all_loanwords = DjangoFilterConnectionField(LoanWordNode)
 
+    @login_required
     def resolve_all_loanwords(self, info, **kwargs):
         return gql_optimizer.query(LoanWord.objects.all(), info)
 
@@ -45,6 +48,7 @@ class CreateLoanWord(relay.ClientIDMutation):
     loanword = Field(LoanWordNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -72,6 +76,7 @@ class UpdateLoanWord(relay.ClientIDMutation):
     loanword = Field(LoanWordNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -103,6 +108,7 @@ class DeleteLoanWord(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist

@@ -6,6 +6,7 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import TextSigle
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -31,6 +32,7 @@ class Query(ObjectType):
     text_sigle = relay.Node.Field(TextSigleNode)
     all_text_sigles = DjangoFilterConnectionField(TextSigleNode)
 
+    @login_required
     def resolve_all_text_sigles(self, info, **kwargs):
         return gql_optimizer.query(TextSigle.objects.all(), info)
 
@@ -45,6 +47,7 @@ class CreateTextSigle(relay.ClientIDMutation):
     sigle = Field(TextSigleNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, sigle, genre):
 
@@ -64,6 +67,7 @@ class UpdateTextSigle(relay.ClientIDMutation):
     sigle = Field(TextSigleNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, sigle, genre):
 
@@ -84,6 +88,7 @@ class DeleteTextSigle(relay.ClientIDMutation):
     sigle = Field(TextSigleNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 

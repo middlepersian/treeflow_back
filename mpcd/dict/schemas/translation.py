@@ -5,6 +5,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
+
 
 from mpcd.dict.models import Translation
 from mpcd.utils.normalize import to_nfc
@@ -28,6 +30,7 @@ class Query(ObjectType):
     translation = relay.Node.Field(TranslationNode)
     all_translations = DjangoFilterConnectionField(TranslationNode)
 
+    @login_required
     def resolve_all_translations(self, info, **kwargs):
         return gql_optimizer.query(Translation.objects.all(), info)
 
@@ -44,6 +47,7 @@ class CreateTranslation(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -64,7 +68,8 @@ class UpdateTranslation(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # check that translation does exist
 
@@ -87,7 +92,8 @@ class DeleteTranslation(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Translation.objects.filter(pk=from_global_id(id)[1]).exists():

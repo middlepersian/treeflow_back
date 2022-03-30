@@ -4,6 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Source
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -31,5 +32,6 @@ class Query(ObjectType):
     source = relay.Node.Field(SourceNode)
     all_source = DjangoFilterConnectionField(SourceNode)
 
+    @login_required
     def resolve_all_sources(self, info, **kwargs):
         return gql_optimizer.query(Source.objects.all(), info)

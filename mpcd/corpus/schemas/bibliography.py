@@ -6,6 +6,8 @@ from mpcd.corpus.models import Author, BibEntry
 from mpcd.corpus.schemas.author import AuthorInput
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
+
 from mpcd.utils.normalize import to_nfc
 
 
@@ -37,6 +39,7 @@ class Query(ObjectType):
     bibentry = relay.Node.Field(BibEntryNode)
     all_bibentries = DjangoFilterConnectionField(BibEntryNode)
 
+    @login_required
     def resolve_all_bibentries(self, info, **kwargs):
         return gql_optimizer.query(BibEntry.objects.all(), info)
 
@@ -53,6 +56,7 @@ class CreateBibEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("input: {}".format(input))
@@ -80,6 +84,7 @@ class UpdateBibEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -107,10 +112,10 @@ class UpdateBibEntry(relay.ClientIDMutation):
 class DeleteBibEntry(relay.ClientIDMutation):
 
     success = Boolean()
-
     class Input:
         id = ID(required=True)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if BibEntry.objects.filter(pk=from_global_id(id[1])).exists():

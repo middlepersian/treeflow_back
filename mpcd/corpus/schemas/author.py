@@ -3,6 +3,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 from mpcd.corpus.models import Author
 from mpcd.utils.normalize import to_nfc
@@ -34,6 +35,7 @@ class Query(ObjectType):
     author = relay.Node.Field(AuthorNode)
     all_authors = DjangoFilterConnectionField(AuthorNode)
 
+    @login_required
     def resolve_all_authors(self, info, **kwargs):
         return gql_optimizer.query(Author.objects.all(), info)
 
@@ -49,6 +51,7 @@ class CreateAuthor(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error('author_inpuut: {}'.format(input))
@@ -68,7 +71,8 @@ class UpdateAuthor(relay.ClientIDMutation):
 
     author = Field(AuthorNode)
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         if Author.objects.filter(pk=from_global_id(id)[1]).exists():
             author_instance = Author.objects.get(pk=from_global_id(id)[1])
@@ -90,7 +94,8 @@ class DeleteAuthor(relay.ClientIDMutation):
     id = ID()
     message = String()
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         author = Author.objects.get(pk=from_global_id(id)[1])
         author.delete()

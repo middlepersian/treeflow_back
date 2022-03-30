@@ -5,6 +5,7 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import MorphologicalAnnotation
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 class MorphologicalAnnotationNode(DjangoObjectType):
@@ -27,6 +28,7 @@ class Query(ObjectType):
     morphological_annotation = relay.Node.Field(MorphologicalAnnotationNode)
     all_morphological_annotations = DjangoFilterConnectionField(MorphologicalAnnotationNode)
 
+    @login_required
     def resolve_all_morphological_annotations(self, info, **kwargs):
         return gql_optimizer.query(MorphologicalAnnotation.objects.all(), info)
 
@@ -41,6 +43,7 @@ class CreateMorphologicalAnnotation(relay.ClientIDMutation):
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, feature, feature_value):
         if MorphologicalAnnotation.objects.filter(feature=feature, feature_value=feature_value).exists():
@@ -62,6 +65,7 @@ class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, feature, feature_value):
 
@@ -82,6 +86,7 @@ class DeleteMorphologicalAnnotation(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if MorphologicalAnnotation.objects.filter(id=id).exists():

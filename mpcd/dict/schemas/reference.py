@@ -3,6 +3,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
+
 
 from mpcd.dict.models import Reference
 
@@ -24,6 +26,7 @@ class Query(ObjectType):
     reference = relay.Node.Field(ReferenceNode)
     all_references = DjangoFilterConnectionField(ReferenceNode)
 
+    @login_required
     def resolve_all_references(self, info, **kwargs):
         return gql_optimizer.query(Reference.objects.all(), info)
 
@@ -38,6 +41,7 @@ class CreateReference(relay.ClientIDMutation):
     reference = Field(ReferenceNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, reference, id, url):
         # check that Reference  does not exist
@@ -59,6 +63,7 @@ class UpdateReference(relay.ClientIDMutation):
     reference = Field(ReferenceNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, reference, id, url):
         # check that Reference  does not exist
@@ -79,6 +84,7 @@ class DeleteReference(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, reference, id):
         # check that Reference  does not exist

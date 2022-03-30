@@ -10,6 +10,7 @@ from mpcd.corpus.schemas.source import SourceInput
 from mpcd.corpus.schemas.resource import ResourceInput
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -46,6 +47,7 @@ class Query(ObjectType):
     text = relay.Node.Field(TextNode)
     all_texts = DjangoFilterConnectionField(TextNode)
 
+    @login_required
     def resolve_all_texts(self, info, **kwargs):
         return gql_optimizer.query(Text.objects.all(), info)
 
@@ -55,7 +57,6 @@ class Query(ObjectType):
 
 class CreateText(relay.ClientIDMutation):
     class Input:
-       # id = ID()
         corpus = ID(required=True)
         title = String(required=True)
         stage = String()
@@ -69,6 +70,7 @@ class CreateText(relay.ClientIDMutation):
     success = Boolean()
     errors = String()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 

@@ -3,6 +3,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required, superuser_required
+
 
 from mpcd.dict.models import Dictionary
 from mpcd.utils.normalize import to_nfc
@@ -27,6 +29,7 @@ class Query(ObjectType):
     dictionary = relay.Node.Field(DictionaryNode)
     all_dictionaries = DjangoFilterConnectionField(DictionaryNode)
 
+    @login_required
     def resolve_all_dictionaries(self, info, **kwargs):
         return gql_optimizer.query(Dictionary.objects.all(), info)
 
@@ -41,6 +44,7 @@ class CreateDictionary(relay.ClientIDMutation):
     dictionary = Field(DictionaryNode)
     success = Boolean()
 
+    @superuser_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, slug):
         name = to_nfc(name)
@@ -58,6 +62,7 @@ class UpdateDictionary(relay.ClientIDMutation):
     dictionary = Field(DictionaryNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, name, slug):
 
@@ -79,6 +84,7 @@ class DeleteDictionary(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @superuser_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 

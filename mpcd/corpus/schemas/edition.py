@@ -9,6 +9,7 @@ from mpcd.corpus.schemas.bibliography import BibEntryInput
 
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 # import the logging library
 import logging
@@ -41,6 +42,7 @@ class EditionQuery(ObjectType):
     edition = relay.Node.Field(EditionNode)
     all_editions = DjangoFilterConnectionField(EditionNode)
 
+    @login_required
     def resolve_all_editions(self, info, **kwargs):
         return gql_optimizer.query(Edition.objects.all(), info)
 
@@ -59,6 +61,7 @@ class CreateEdition(relay.ClientIDMutation):
 
     edition = Field(EditionNode)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.get.filter(name=input['title']).exists():
@@ -82,6 +85,7 @@ class UpdateEdition(relay.ClientIDMutation):
 
     edition = Field(EditionNode)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.objects.filter(title=input['title']).exists():
@@ -102,6 +106,7 @@ class DeleteEdition(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.objects.filter(pk=input['id']).exists():

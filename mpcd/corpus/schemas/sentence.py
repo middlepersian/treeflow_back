@@ -9,6 +9,7 @@ from mpcd.dict.models import Translation
 from mpcd.dict.schemas.translation import TranslationInput
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -28,7 +29,7 @@ class SentenceNode(DjangoObjectType):
 
 
 class SentenceInput(InputObjectType):
-    text = String()
+    text = ID()
     number = Float()
     tokens = List(TokenInput)
     translation = List(TranslationInput)
@@ -42,6 +43,7 @@ class Query(ObjectType):
     sentence = relay.Node.Field(SentenceNode)
     all_sentences = DjangoFilterConnectionField(SentenceNode)
 
+    @login_required
     def resolve_all_sentences(self, info, **kwargs):
         return gql_optimizer.query(Sentence.objects.all(), info)
 
@@ -65,6 +67,7 @@ class CreateSentence(relay.ClientIDMutation):
     sentence = Field(SentenceNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -122,6 +125,7 @@ class UpdateSentence(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # check if id is valid
@@ -170,6 +174,7 @@ class DeleteSentence(relay.ClientIDMutation):
     success = Boolean()
     sentence = Field(SentenceNode)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if Sentence.objects.filter(pk=from_global_id(id)[1]).exists():

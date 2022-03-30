@@ -35,9 +35,8 @@ class LineInput(InputObjectType):
 class Query(ObjectType):
     line = relay.Node.Field(LineNode)
     all_lines = DjangoFilterConnectionField(LineNode)
-    #all_lines = DjangoFilterConnectionField(LineNode,token=String(required=True))
 
-    # @login_required
+    @login_required
     def resolve_all_lines(self, info, **kwargs):
         return gql_optimizer.query(Line.objects.all(), info)
 
@@ -55,6 +54,7 @@ class CreateLine(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateLine.mutate_and_get_payload()')
@@ -91,7 +91,8 @@ class UpdateLine(relay.ClientIDMutation):
     line = Field(LineNode)
     success = Boolean()
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, id, number, folio, comment):
         logger.debug('UpdateLine.mutate_and_get_payload()')
         if Line.objects.filter(pk=from_global_id(id)[1]).exists() and Folio.objects.filter(pk=from_global_id(folio.id)[1]).exists():
@@ -118,7 +119,8 @@ class DeleteLine(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteLine.mutate_and_get_payload()')
         if Line.objects.filter(pk=from_global_id(id)[1]).exists():

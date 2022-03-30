@@ -9,6 +9,8 @@ from graphql_relay import from_global_id
 
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required, superuser_required
+
 
 # import the logging library
 import logging
@@ -50,6 +52,7 @@ class Query(ObjectType):
     codex = relay.Node.Field(CodexNode)
     all_codex = DjangoFilterConnectionField(CodexNode)
 
+    @login_required
     def resolve_all_codex(self, info, **kwargs):
         return gql_optimizer.query(Codex.objects.all(), info)
 
@@ -75,6 +78,7 @@ class CreateCodex(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # check sigle is provided and that codex does not already exist with same sigle
@@ -135,6 +139,7 @@ class UpdateCodex(relay.ClientIDMutation):
     codex = Field(CodexNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, sigle, title, copy_date, copy_place_name, copy_place_latitude, copy_place_longitude, library, signature, scribes, facsimiles):
         # check that bib exists with id
@@ -198,6 +203,7 @@ class DeleteCodex(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @superuser_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that codex exists with id

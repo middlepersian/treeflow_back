@@ -6,6 +6,7 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Corpus
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required, superuser_required
 
 
 # import the logging library
@@ -37,6 +38,7 @@ class Query(ObjectType):
 
 # Mutations
 
+
 class CreateCorpus(relay.ClientIDMutation):
     class Input:
         name = String(required=True)
@@ -45,6 +47,7 @@ class CreateCorpus(relay.ClientIDMutation):
     corpus = Field(CorpusNode)
     success = Boolean()
 
+    @superuser_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, name, slug):
         corpus_obj, corpus_created = Corpus.objects.get_or_create(name=name, slug=slug)
@@ -60,6 +63,7 @@ class UpdateCorpus(relay.ClientIDMutation):
     corpus = Field(CorpusNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, name, slug):
         if Corpus.objects.filter(pk=from_global_id(id)[1]).exists():

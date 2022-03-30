@@ -6,6 +6,7 @@ from mpcd.corpus.models import Codex, CodexPart
 
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -34,9 +35,11 @@ class CodexPartInput(InputObjectType):
 
 
 class Query(ObjectType):
+    
     codex_part = relay.Node.Field(CodexPartNode)
     all_codex_parts = DjangoFilterConnectionField(CodexPartNode)
 
+    @login_required
     def resolve_all_codex_parts(self, info, **kwargs):
         return gql_optimizer.query(CodexPart.objects.all(), info)
 
@@ -54,6 +57,7 @@ class CreateCodexPart(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateCodexPart.mutate_and_get_payload()')
@@ -96,6 +100,7 @@ class UpdateCodexPart(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateCodexPart.mutate_and_get_payload()')

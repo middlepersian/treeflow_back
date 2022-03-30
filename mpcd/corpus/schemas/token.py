@@ -9,6 +9,8 @@ from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import EntryInput
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
+
 from mpcd.utils.normalize import to_nfc
 
 # import the logging library
@@ -51,8 +53,8 @@ class TokenInput(InputObjectType):
 class Query(ObjectType):
     token = relay.Node.Field(TokenNode)
     all_tokens = DjangoFilterConnectionField(TokenNode)
-    # all_tokens = List(TokenNode)
 
+    @login_required
     def resolve_all_tokens(self, info, **kwargs):
         qs = Token.objects.all()
         return gql_optimizer.query(qs, info)
@@ -81,6 +83,7 @@ class CreateToken(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("INPUT: {}".format(input))
@@ -194,6 +197,7 @@ class UpdateToken(relay.ClientIDMutation):
     token = Field(TokenNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
@@ -302,6 +306,7 @@ class DeleteToken(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         if Token.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -320,6 +325,7 @@ class JoinTokens(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
@@ -350,6 +356,7 @@ class AddEntryToToken(relay.ClientIDMutation):
     token = Field(TokenNode)
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         # get token

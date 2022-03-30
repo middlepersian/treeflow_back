@@ -5,6 +5,7 @@ from graphql_relay import from_global_id
 from mpcd.dict.models import Category
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 class CategoryNode(DjangoObjectType):
@@ -24,6 +25,7 @@ class Query(ObjectType):
     category = relay.Node.Field(CategoryNode)
     all_categories = DjangoFilterConnectionField(CategoryNode)
 
+    @login_required
     def resolve_all_categories(self, info, **kwargs):
         return gql_optimizer.query(Category.objects.all(), info)
 
@@ -38,6 +40,7 @@ class CreateCategory(relay.ClientIDMutation):
     category = Field(CategoryNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, category):
         # check that bybentry does not exist same title and year
@@ -58,6 +61,7 @@ class UpdateCategory(relay.ClientIDMutation):
     category = Field(CategoryNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, category):
 
@@ -79,6 +83,7 @@ class DeleteCategory(relay.ClientIDMutation):
 
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
 

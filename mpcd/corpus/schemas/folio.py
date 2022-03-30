@@ -6,6 +6,7 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Folio, Facsimile
 
 import graphene_django_optimizer as gql_optimizer
+from graphql_jwt.decorators import login_required
 
 
 # import the logging library
@@ -54,6 +55,7 @@ class CreateFolio(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateFolio.mutate_and_get_payload()')
@@ -92,7 +94,8 @@ class UpdateFolio(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
 
         if input.get('id', None) is not None:
@@ -132,7 +135,8 @@ class DeleteFolio(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @ classmethod
+    @login_required
+    @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteFolio.mutate_and_get_payload()')
         if Folio.objects.filter(pk=from_global_id(id)[1]).exists():

@@ -4,6 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 
 from mpcd.corpus.models import Dependency
+from graphql_jwt.decorators import login_required
 
 
 import graphene_django_optimizer as gql_optimizer
@@ -36,6 +37,7 @@ class Query(ObjectType):
     dependency = relay.Node.Field(DependencyNode)
     all_dependencies = DjangoFilterConnectionField(DependencyNode)
 
+    @login_required
     def resolve_all_dependencies(self, info, **kwargs):
         return gql_optimizer.query(Dependency.objects.all(), info)
 
@@ -49,6 +51,7 @@ class CreateDependency(relay.ClientIDMutation):
     dependency = Field(DependencyNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, head, rel):
         # check that dependency does not exist
@@ -71,6 +74,7 @@ class UpdateDependency(relay.ClientIDMutation):
     dependency = Field(DependencyNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, head, rel):
         # check that dependency does not exist
@@ -92,6 +96,7 @@ class DeleteDependency(relay.ClientIDMutation):
     dependency = Field(DependencyNode)
     success = Boolean()
 
+    @login_required
     @classmethod
     def mutate_and_get_payload(cls, root, info, id):
         # check that dependency does not exist
