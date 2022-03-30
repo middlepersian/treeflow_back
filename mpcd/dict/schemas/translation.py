@@ -47,8 +47,9 @@ class CreateTranslation(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if translation exists, if not create it
@@ -68,8 +69,9 @@ class UpdateTranslation(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         # check that translation does exist
 
@@ -92,8 +94,9 @@ class DeleteTranslation(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Translation.objects.filter(pk=from_global_id(id)[1]).exists():

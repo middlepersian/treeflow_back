@@ -42,8 +42,9 @@ class CreateSectionType(relay.ClientIDMutation):
     success = Boolean()
     section_type = Field(SectionTypeNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, identifier):
         if SectionType.objects.filter(identifier=identifier).exists():
             return cls(success=False)
@@ -61,8 +62,9 @@ class UpdateSectionType(relay.ClientIDMutation):
     success = Boolean()
     section_type = Field(SectionTypeNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, identifier):
         if SectionType.objects.filter(pk=from_global_id(id[1])).exists():
             section_type_instance = SectionType.objects.get(pk=from_global_id(id[1]))
@@ -79,8 +81,9 @@ class DeleteSectionType(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @superuser_required
     @classmethod
+    @superuser_required
+
     def mutate_and_get_payload(cls, root, info, id):
         if SectionType.objects.filter(pk=from_global_id(id[1])).exists():
             section_type_instance = SectionType.objects.get(pk=from_global_id(id[1]))

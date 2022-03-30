@@ -70,8 +70,9 @@ class CreateText(relay.ClientIDMutation):
     success = Boolean()
     errors = String()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if corpus exists

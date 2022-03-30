@@ -54,8 +54,9 @@ class CreateLine(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateLine.mutate_and_get_payload()')
 
@@ -91,8 +92,9 @@ class UpdateLine(relay.ClientIDMutation):
     line = Field(LineNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, number, folio, comment):
         logger.debug('UpdateLine.mutate_and_get_payload()')
         if Line.objects.filter(pk=from_global_id(id)[1]).exists() and Folio.objects.filter(pk=from_global_id(folio.id)[1]).exists():
@@ -119,8 +121,9 @@ class DeleteLine(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteLine.mutate_and_get_payload()')
         if Line.objects.filter(pk=from_global_id(id)[1]).exists():

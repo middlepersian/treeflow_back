@@ -47,8 +47,9 @@ class CreateTextSigle(relay.ClientIDMutation):
     sigle = Field(TextSigleNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, sigle, genre):
 
         if TextSigle.objects.filter(sigle=sigle, genre=genre).exists():
@@ -67,8 +68,9 @@ class UpdateTextSigle(relay.ClientIDMutation):
     sigle = Field(TextSigleNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, sigle, genre):
 
         if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -88,8 +90,9 @@ class DeleteTextSigle(relay.ClientIDMutation):
     sigle = Field(TextSigleNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
 
         if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():

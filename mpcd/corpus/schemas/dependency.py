@@ -51,8 +51,9 @@ class CreateDependency(relay.ClientIDMutation):
     dependency = Field(DependencyNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, head, rel):
         # check that dependency does not exist
         if Dependency.objects.filter(head=head, rel=rel).exists():
@@ -74,8 +75,9 @@ class UpdateDependency(relay.ClientIDMutation):
     dependency = Field(DependencyNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, head, rel):
         # check that dependency does not exist
         if Dependency.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -96,8 +98,9 @@ class DeleteDependency(relay.ClientIDMutation):
     dependency = Field(DependencyNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         # check that dependency does not exist
         if Dependency.objects.filter(pk=from_global_id(id)[1]).exists():

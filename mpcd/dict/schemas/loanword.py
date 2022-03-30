@@ -48,8 +48,9 @@ class CreateLoanWord(relay.ClientIDMutation):
     loanword = Field(LoanWordNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         loanword_instance, loanword_created = LoanWord.objects.get_or_create(
@@ -76,8 +77,9 @@ class UpdateLoanWord(relay.ClientIDMutation):
     loanword = Field(LoanWordNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         if input.get('id', None) is not None:
@@ -108,8 +110,9 @@ class DeleteLoanWord(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if LoanWord.objects.filter(pk=from_global_id(id)[1]).exists():

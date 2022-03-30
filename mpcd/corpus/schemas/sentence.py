@@ -67,8 +67,9 @@ class CreateSentence(relay.ClientIDMutation):
     sentence = Field(SentenceNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Text.objects.filter(pk=from_global_id(input.get('text'))[1]).exists():
@@ -125,8 +126,9 @@ class UpdateSentence(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         # check if id is valid
         if Sentence.objects.filter(pk=from_global_id(input.get('id', None))[1]).exists():
@@ -174,8 +176,9 @@ class DeleteSentence(relay.ClientIDMutation):
     success = Boolean()
     sentence = Field(SentenceNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         if Sentence.objects.filter(pk=from_global_id(id)[1]).exists():
             sentence_instance = Sentence.objects.get(pk=from_global_id(id)[1])

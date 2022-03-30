@@ -43,8 +43,9 @@ class CreateMorphologicalAnnotation(relay.ClientIDMutation):
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, feature, feature_value):
         if MorphologicalAnnotation.objects.filter(feature=feature, feature_value=feature_value).exists():
             return cls(success=False)
@@ -65,8 +66,9 @@ class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, feature, feature_value):
 
         if MorphologicalAnnotation.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -86,8 +88,9 @@ class DeleteMorphologicalAnnotation(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         if MorphologicalAnnotation.objects.filter(id=id).exists():
             morphological_annotation_instance = MorphologicalAnnotation.objects.get(pk=from_global_id(id)[1])

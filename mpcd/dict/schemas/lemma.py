@@ -42,8 +42,9 @@ class CreateLemma(relay.ClientIDMutation):
     word = Field(LemmaNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
@@ -61,8 +62,9 @@ class UpdateLemma(relay.ClientIDMutation):
     word = Field(LemmaNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Lemma.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
@@ -81,8 +83,9 @@ class DeleteLemma(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Lemma.objects.filter(pk=from_global_id(id)[1]).exists():

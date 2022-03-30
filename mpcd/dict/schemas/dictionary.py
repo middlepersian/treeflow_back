@@ -44,8 +44,9 @@ class CreateDictionary(relay.ClientIDMutation):
     dictionary = Field(DictionaryNode)
     success = Boolean()
 
-    @superuser_required
     @classmethod
+    @superuser_required
+
     def mutate_and_get_payload(cls, root, info, name, slug):
         name = to_nfc(name)
         slug = to_nfc(slug)
@@ -62,8 +63,9 @@ class UpdateDictionary(relay.ClientIDMutation):
     dictionary = Field(DictionaryNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, name, slug):
 
         if Dictionary.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -84,8 +86,9 @@ class DeleteDictionary(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @superuser_required
     @classmethod
+    @superuser_required
+
     def mutate_and_get_payload(cls, root, info, id):
 
         if Dictionary.objects.filter(pk=from_global_id(id)[1]).exists():

@@ -63,8 +63,9 @@ class CreateEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if dict exists
@@ -165,8 +166,9 @@ class UpdateEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
@@ -254,8 +256,9 @@ class DeleteEntry(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
             entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
@@ -275,8 +278,9 @@ class AddRelatedEntry(relay.ClientIDMutation):
     errors = List(String)
     entry = Field(EntryNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         if Entry.objects.filter(pk=from_global_id(input['entry_id'])[1]).exists():
             entry = Entry.objects.get(pk=from_global_id(input['entry_id'])[1])

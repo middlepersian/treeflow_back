@@ -57,8 +57,9 @@ class CreateCodexPart(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateCodexPart.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
@@ -100,8 +101,9 @@ class UpdateCodexPart(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateCodexPart.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))

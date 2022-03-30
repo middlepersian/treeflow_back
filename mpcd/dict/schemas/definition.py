@@ -45,8 +45,9 @@ class CreateDefinition(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         # normalize input
@@ -67,8 +68,9 @@ class UpdateDefinition(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         # check that Definition  does not exist
 
@@ -91,8 +93,9 @@ class DeleteDefinition(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Definition.objects.filter(pk=from_global_id('id')[1]).exists():

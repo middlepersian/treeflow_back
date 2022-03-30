@@ -41,8 +41,9 @@ class CreateReference(relay.ClientIDMutation):
     reference = Field(ReferenceNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, reference, id, url):
         # check that Reference  does not exist
         if Reference.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -63,8 +64,9 @@ class UpdateReference(relay.ClientIDMutation):
     reference = Field(ReferenceNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, reference, id, url):
         # check that Reference  does not exist
         if Reference.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -84,8 +86,9 @@ class DeleteReference(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, reference, id):
         # check that Reference  does not exist
         if Reference.objects.filter(pk=from_global_id(id)[1]).exists():

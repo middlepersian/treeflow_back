@@ -83,8 +83,9 @@ class CreateToken(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("INPUT: {}".format(input))
 
@@ -197,8 +198,9 @@ class UpdateToken(relay.ClientIDMutation):
     token = Field(TokenNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if token with assigned id already exists
@@ -306,8 +308,9 @@ class DeleteToken(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         if Token.objects.filter(pk=from_global_id(id)[1]).exists():
             token_instance = Token.objects.get(pk=from_global_id(id)[1])
@@ -325,8 +328,9 @@ class JoinTokens(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
         if input.get('current', None) is not None:
@@ -356,8 +360,9 @@ class AddEntryToToken(relay.ClientIDMutation):
     token = Field(TokenNode)
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
         if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():

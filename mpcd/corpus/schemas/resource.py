@@ -53,8 +53,9 @@ class CreateResource(relay.ClientIDMutation):
     resource = Field(ResourceNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, authors, description, project, reference):
 
         if Resource.objects.filter(project=project, description=description).exists():
@@ -85,8 +86,9 @@ class UpdateResource(relay.ClientIDMutation):
     resource = Field(ResourceNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, authors, description, project, reference):
         resource = Resource.objects.get(pk=from_global_id(id)[1])
         if Resource.objects.filter(project=project, description=description).exists():
@@ -116,8 +118,9 @@ class DeleteResource(relay.ClientIDMutation):
     resource = Field(ResourceNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         if Resource.objects.filter(pk=from_global_id(id)[1]).exists():
             resource = Resource.objects.get(pk=from_global_id(id)[1])

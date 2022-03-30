@@ -56,8 +56,9 @@ class CreateBibEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("input: {}".format(input))
         bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(
@@ -84,8 +85,9 @@ class UpdateBibEntry(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
 
         if BibEntry.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -115,8 +117,9 @@ class DeleteBibEntry(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         if BibEntry.objects.filter(pk=from_global_id(id[1])).exists():
             bibentry_instance = BibEntry.objects.get(pk=from_global_id(id)[1])

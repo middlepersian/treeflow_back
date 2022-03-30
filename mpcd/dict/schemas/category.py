@@ -40,8 +40,9 @@ class CreateCategory(relay.ClientIDMutation):
     category = Field(CategoryNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, category):
         # check that bybentry does not exist same title and year
         if Category.objects.filter(category=category).exists():
@@ -61,8 +62,9 @@ class UpdateCategory(relay.ClientIDMutation):
     category = Field(CategoryNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id, category):
 
         if Category.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -83,8 +85,9 @@ class DeleteCategory(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
 
         if Category.objects.filter(pk=from_global_id(id)[1]).exists():

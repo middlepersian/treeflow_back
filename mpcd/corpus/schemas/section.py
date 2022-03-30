@@ -56,8 +56,9 @@ class CreateSection(relay.ClientIDMutation):
     section = Field(SectionNode)
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateSection.mutate_and_get_payload()')
         section_instance = Section.objects.create(identifier=input['identifier'])
@@ -100,8 +101,9 @@ class UpdateSection(relay.ClientIDMutation):
     section = Field(SectionNode)
     success = Boolean()
     
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateSection.mutate_and_get_payload()')
         if Section.objects.filter(pk=from_global_id(input['id'])[1]).exists():

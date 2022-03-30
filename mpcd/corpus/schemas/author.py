@@ -51,8 +51,9 @@ class CreateAuthor(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error('author_inpuut: {}'.format(input))
 
@@ -71,8 +72,9 @@ class UpdateAuthor(relay.ClientIDMutation):
 
     author = Field(AuthorNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         if Author.objects.filter(pk=from_global_id(id)[1]).exists():
             author_instance = Author.objects.get(pk=from_global_id(id)[1])
@@ -94,8 +96,9 @@ class DeleteAuthor(relay.ClientIDMutation):
     id = ID()
     message = String()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, id):
         author = Author.objects.get(pk=from_global_id(id)[1])
         author.delete()

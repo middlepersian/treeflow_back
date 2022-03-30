@@ -61,8 +61,9 @@ class CreateEdition(relay.ClientIDMutation):
 
     edition = Field(EditionNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.get.filter(name=input['title']).exists():
             return cls(errors=['Edition with this title already exists.'])
@@ -85,8 +86,9 @@ class UpdateEdition(relay.ClientIDMutation):
 
     edition = Field(EditionNode)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.objects.filter(title=input['title']).exists():
             edition = Edition.objects.get(pk=input['id'])
@@ -106,8 +108,9 @@ class DeleteEdition(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.objects.filter(pk=input['id']).exists():
             edition = Edition.objects.get(pk=input['id'])

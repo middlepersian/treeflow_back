@@ -49,8 +49,9 @@ class CreateFacsimile(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
@@ -84,8 +85,9 @@ class UpdateFacsimile(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @login_required
     @classmethod
+    @login_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
@@ -128,8 +130,9 @@ class DeleteFacsimile(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
-    @superuser_required
     @classmethod
+    @superuser_required
+
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('DeleteFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
