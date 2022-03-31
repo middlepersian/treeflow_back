@@ -8,6 +8,7 @@ from .morphological_annotation import MorphologicalAnnotation
 from .pos import POSChoices
 from .text import Text
 from .line import Line
+from .comment_category import CommentCategory
 
 from mpcd.dict.models.language import LanguageChoices
 
@@ -25,6 +26,11 @@ class Token(models.Model):
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
     comment = models.TextField(blank=True)
+    comment_uncertain = models.ManyToManyField(CommentCategory, blank=True, related_name='token_comment_uncertain')
+    comment_to_discuss = models.ManyToManyField(CommentCategory, blank=True, related_name='token_comment_to_discuss')
+    comment_new_suggestion = models.ManyToManyField(
+        CommentCategory, blank=True, related_name='token_comment_new_suggestion')
+
     avestan = models.URLField(max_length=100, null=True, blank=True)
 
     line = models.ForeignKey(Line, on_delete=models.SET_NULL, null=True, related_name='token_line')
