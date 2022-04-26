@@ -1,0 +1,2092 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+input AddEntryToTokenInput {
+  tokenId: ID!
+  entryId: ID!
+  clientMutationId: String
+}
+
+type AddEntryToTokenPayload {
+  success: Boolean
+  token: TokenNode
+  errors: [String]
+  clientMutationId: String
+}
+
+input AddRelatedEntryInput {
+  entryId: ID!
+  relatedEntryId: ID!
+  clientMutationId: String
+}
+
+type AddRelatedEntryPayload {
+  success: Boolean
+  errors: [String]
+  entry: EntryNode
+  clientMutationId: String
+}
+
+input AddTokensToSentenceInput {
+  id: ID!
+  tokens: [ID]
+  clientMutationId: String
+}
+
+type AddTokensToSentencePayload {
+  success: Boolean
+  errors: [String]
+  sentence: SentenceNode
+  clientMutationId: String
+}
+
+input AuthorInput {
+  name: String!
+  lastName: String!
+}
+
+type AuthorNode implements Node {
+  id: ID!
+  name: String!
+  lastName: String!
+  bibEntryAuthors(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, year: Int, year_Icontains: Int, year_Istartswith: Int): BibEntryNodeConnection!
+  codexScribes(offset: Int, before: String, after: String, first: Int, last: Int, sigle: String, sigle_Icontains: String, sigle_Istartswith: String, title: String, title_Icontains: String, title_Istartswith: String, copyDate: String, copyDate_Icontains: String, copyDate_Istartswith: String, copyPlaceName: String, copyPlaceName_Icontains: String, copyPlaceName_Istartswith: String, copyPlaceLatitude: Float, copyPlaceLatitude_Icontains: Float, copyPlaceLatitude_Istartswith: Float, copyPlaceLongitude: Float, copyPlaceLongitude_Icontains: Float, copyPlaceLongitude_Istartswith: Float, library: String, library_Icontains: String, library_Istartswith: String, signature: String, signature_Icontains: String, signature_Istartswith: String): CodexNodeConnection!
+  resourceAuthors(offset: Int, before: String, after: String, first: Int, last: Int, authors: [ID], authors_Icontains: [ID], authors_Istartswith: [ID], description: String, description_Icontains: String, description_Istartswith: String, project: String, project_Icontains: String, project_Istartswith: String, reference: String, reference_Icontains: String, reference_Istartswith: String): ResourceNodeConnection!
+  editionAuthors(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, slug: String, slug_Icontains: String, slug_Istartswith: String, description: String, description_Icontains: String, description_Istartswith: String): EditionNodeConnection!
+}
+
+type AuthorNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AuthorNodeEdge]!
+}
+
+type AuthorNodeEdge {
+  node: AuthorNode
+  cursor: String!
+}
+
+input BibEntryInput {
+  title: String
+  year: Int
+  authors: [AuthorInput]
+}
+
+type BibEntryNode implements Node {
+  id: ID!
+  authors(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, lastName: String, lastName_Icontains: String, lastName_Istartswith: String): AuthorNodeConnection!
+  title: String!
+  year: Int
+  url: String
+  facsimileReference: FacsimileNode
+  editionReferences(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, slug: String, slug_Icontains: String, slug_Istartswith: String, description: String, description_Icontains: String, description_Istartswith: String): EditionNodeConnection!
+}
+
+type BibEntryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [BibEntryNodeEdge]!
+}
+
+type BibEntryNodeEdge {
+  node: BibEntryNode
+  cursor: String!
+}
+
+enum CategoryCategory {
+  ASTR
+  BOT
+  ECONOM
+  GEOGR
+  LEGAL
+  MEASURE
+  MED
+  MYTH
+  PHILOS
+  POL
+  PURITY
+  RITUAL
+  THEOL
+  ZOOL
+}
+
+input CategoryInput {
+  category: String
+}
+
+type CategoryNode implements Node {
+  id: ID!
+  category: CategoryCategory!
+  entryCategories(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+}
+
+type CategoryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CategoryNodeEdge]!
+}
+
+type CategoryNodeEdge {
+  node: CategoryNode
+  cursor: String!
+}
+
+type CodexNode implements Node {
+  sourcePtr: SourceNode!
+  id: ID!
+  title: String!
+  slug: String!
+  description: String!
+  sigle: CodexSigle!
+  copyDate: String
+  copyPlaceName: String
+  copyPlaceLatitude: Decimal
+  copyPlaceLongitude: Decimal
+  library: String!
+  signature: String!
+  scribes(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, lastName: String, lastName_Icontains: String, lastName_Istartswith: String): AuthorNodeConnection!
+  codexPartCodex(offset: Int, before: String, after: String, first: Int, last: Int, partType: String, partType_Icontains: String, partType_Istartswith: String, partNumber: String, partNumber_Icontains: String, partNumber_Istartswith: String, description: String, description_Icontains: String, description_Istartswith: String): CodexPartNodeConnection!
+}
+
+type CodexNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CodexNodeEdge]!
+}
+
+type CodexNodeEdge {
+  node: CodexNode
+  cursor: String!
+}
+
+type CodexPartNode implements Node {
+  id: ID!
+  codex: CodexNode!
+  partType: String
+  partNumber: String
+  description: String!
+  facsimileCodexPart(offset: Int, before: String, after: String, first: Int, last: Int, bibEntry: ID): FacsimileNodeConnection!
+}
+
+type CodexPartNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CodexPartNodeEdge]!
+}
+
+type CodexPartNodeEdge {
+  node: CodexPartNode
+  cursor: String!
+}
+
+enum CodexSigle {
+  MK
+  TD1
+  TD4A
+  DH6
+  BK
+  TD2
+  MJ
+  IOL
+  B
+  P
+  M51
+  K20
+  K20B
+  K27
+  K35
+  K43A
+  K43B
+  K26
+  MSMHD
+}
+
+type CorpusNode implements Node {
+  id: ID!
+  name: String!
+  slug: String!
+  textCorpus(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, stage: String, stage_Icontains: String, stage_Istartswith: String): TextNodeConnection!
+}
+
+type CorpusNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CorpusNodeEdge]!
+}
+
+type CorpusNodeEdge {
+  node: CorpusNode
+  cursor: String!
+}
+
+input CreateAuthorInput {
+  name: String!
+  lastName: String!
+  clientMutationId: String
+}
+
+type CreateAuthorPayload {
+  author: AuthorNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateBibEntryInput {
+  title: String!
+  year: Int!
+  authors: [AuthorInput]
+  clientMutationId: String
+}
+
+type CreateBibEntryPayload {
+  bibentry: BibEntryNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateCategoryInput {
+  category: CategoryInput
+  clientMutationId: String
+}
+
+type CreateCategoryPayload {
+  category: CategoryNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateCodexInput {
+  sigle: String!
+  title: String!
+  copyDate: String
+  copyPlaceName: String
+  copyPlaceLatitude: String
+  copyPlaceLongitude: String
+  library: String
+  signature: String
+  scribes: [AuthorInput]
+  facsimiles: [BibEntryInput]
+  clientMutationId: String
+}
+
+input CreateCodexPartInput {
+  codex: ID
+  partType: String
+  partNumber: String
+  description: String
+  clientMutationId: String
+}
+
+type CreateCodexPartPayload {
+  codexPart: CodexPartNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+type CreateCodexPayload {
+  codex: CodexNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateCorpusInput {
+  name: String!
+  slug: String!
+  clientMutationId: String
+}
+
+type CreateCorpusPayload {
+  corpus: CorpusNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateDefinitionInput {
+  definition: String!
+  language: String!
+  clientMutationId: String
+}
+
+type CreateDefinitionPayload {
+  definition: DefinitionNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateDependencyInput {
+  head: ID!
+  rel: String!
+  clientMutationId: String
+}
+
+type CreateDependencyPayload {
+  dependency: DependencyNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateDictionaryInput {
+  name: String!
+  slug: String!
+  clientMutationId: String
+}
+
+type CreateDictionaryPayload {
+  dictionary: DictionaryNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateEntryInput {
+  dict: ID
+  lemma: LemmaInput!
+  loanwords: [LoanWordInput]
+  translations: [TranslationInput]
+  definitions: [DefinitionInput]
+  categories: [CategoryInput]
+  references: [ReferenceInput]
+  relatedEntries: [ID]
+  comment: String
+  clientMutationId: String
+}
+
+type CreateEntryPayload {
+  entry: EntryNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateFacsimileInput {
+  bibEntry: ID!
+  codexPart: ID
+  clientMutationId: String
+}
+
+type CreateFacsimilePayload {
+  facsimile: FacsimileNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateFolioInput {
+  identifier: String!
+  facsimile: ID!
+  number: Float!
+  comment: String
+  previous: ID
+  clientMutationId: String
+}
+
+type CreateFolioPayload {
+  folio: FolioNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateLemmaInput {
+  word: String!
+  language: String!
+  clientMutationId: String
+}
+
+type CreateLemmaPayload {
+  word: LemmaNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateLineInput {
+  number: Float!
+  folio: ID!
+  comment: String
+  previous: ID
+  clientMutationId: String
+}
+
+type CreateLinePayload {
+  line: LineNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input CreateLoanWordInput {
+  word: String!
+  language: String!
+  translations: [TranslationInput]
+  clientMutationId: String
+}
+
+type CreateLoanWordPayload {
+  loanword: LoanWordNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateMorphologicalAnnotationInput {
+  feature: String
+  featureValue: String
+  clientMutationId: String
+}
+
+type CreateMorphologicalAnnotationPayload {
+  morphologicalAnnotation: MorphologicalAnnotationNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateReferenceInput {
+  reference: ReferenceInput
+  url: String
+  clientMutationId: String
+}
+
+type CreateReferencePayload {
+  reference: ReferenceNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateResourceInput {
+  authors: [AuthorInput]
+  description: String
+  project: String
+  reference: String
+  clientMutationId: String
+}
+
+type CreateResourcePayload {
+  resource: ResourceNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateSectionInput {
+  identifier: String
+  sectionType: SectionTypeInput
+  tokens: [TokenInput]
+  previous: ID
+  container: ID
+  clientMutationId: String
+}
+
+type CreateSectionPayload {
+  section: SectionNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateSectionTypeInput {
+  identifier: String!
+  clientMutationId: String
+}
+
+type CreateSectionTypePayload {
+  success: Boolean
+  sectionType: SectionTypeNode
+  clientMutationId: String
+}
+
+input CreateSentenceInput {
+  text: ID!
+  number: Float!
+  tokens: [ID]
+  translations: [TranslationInput]
+  comment: String
+  previous: ID
+  clientMutationId: String
+}
+
+type CreateSentencePayload {
+  errors: [String]
+  sentence: SentenceNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateTextInput {
+  corpus: ID!
+  title: String!
+  stage: String
+  textSigle: TextSigleInput
+  editors: [AuthorInput]
+  collaborators: [AuthorInput]
+  resources: [ResourceInput]
+  sources: [SourceInput]
+  clientMutationId: String
+}
+
+type CreateTextPayload {
+  text: TextNode
+  success: Boolean
+  errors: String
+  clientMutationId: String
+}
+
+input CreateTextSigleInput {
+  sigle: String
+  genre: String
+  clientMutationId: String
+}
+
+type CreateTextSiglePayload {
+  sigle: TextSigleNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateTokenInput {
+  transcription: String!
+  transliteration: String!
+  language: String!
+  text: ID!
+  number: Float!
+  entries: [EntryInput]
+  pos: String
+  morphologicalAnnotation: [MorphologicalAnnotationInput]
+  syntacticAnnotation: [DependencyInput]
+  comment: String
+  avestan: String
+  previous: ID
+  line: ID
+  positionInLine: Int
+  clientMutationId: String
+}
+
+type CreateTokenPayload {
+  token: TokenNode
+  errors: [String]
+  success: Boolean
+  clientMutationId: String
+}
+
+input CreateTranslationInput {
+  text: String!
+  language: String!
+  clientMutationId: String
+}
+
+type CreateTranslationPayload {
+  translation: TranslationNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+scalar Decimal
+
+input DefinitionInput {
+  definition: String!
+  language: String!
+}
+
+enum DefinitionLanguage {
+  AKK
+  ARA
+  ARC
+  AVE
+  ENG
+  DEU
+  GUJ
+  FRA
+  GRC
+  ITA
+  PAL
+  SAN
+  SPA
+  XPR
+}
+
+type DefinitionNode implements Node {
+  id: ID!
+  definition: String
+  language: DefinitionLanguage
+  entryDefinitions(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+}
+
+type DefinitionNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DefinitionNodeEdge]!
+}
+
+type DefinitionNodeEdge {
+  node: DefinitionNode
+  cursor: String!
+}
+
+input DeleteAuthorInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteAuthorPayload {
+  author: AuthorNode
+  id: ID
+  message: String
+  clientMutationId: String
+}
+
+input DeleteBibEntryInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteBibEntryPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteCategoryInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteCategoryPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteCodexInput {
+  id: ID!
+  clientMutationId: String
+}
+
+input DeleteCodexPartInput {
+  codexPart: ID
+  clientMutationId: String
+}
+
+type DeleteCodexPartPayload {
+  codexPart: CodexPartNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+type DeleteCodexPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteDefinitionInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteDefinitionPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteDependencyInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteDependencyPayload {
+  dependency: DependencyNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteDictionaryInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteDictionaryPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteEntryInput {
+  id: String
+  clientMutationId: String
+}
+
+type DeleteEntryPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteFolioInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteFolioPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteJSONWebTokenCookieInput {
+  clientMutationId: String
+}
+
+type DeleteJSONWebTokenCookiePayload {
+  deleted: Boolean!
+  clientMutationId: String
+}
+
+input DeleteLemmaInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteLemmaPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteLineInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteLinePayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteLoanWordInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteLoanWordPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteMorphologicalAnnotationInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteMorphologicalAnnotationPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteReferenceInput {
+  reference: ReferenceInput
+  clientMutationId: String
+}
+
+type DeleteReferencePayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteRefreshTokenCookieInput {
+  clientMutationId: String
+}
+
+type DeleteRefreshTokenCookiePayload {
+  deleted: Boolean!
+  clientMutationId: String
+}
+
+input DeleteResourceInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteResourcePayload {
+  resource: ResourceNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteSectionInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteSectionPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteSectionTypeInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteSectionTypePayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteSentenceInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteSentencePayload {
+  success: Boolean
+  sentence: SentenceNode
+  clientMutationId: String
+}
+
+input DeleteTextSigleInput {
+  id: ID
+  clientMutationId: String
+}
+
+type DeleteTextSiglePayload {
+  sigle: TextSigleNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteTokenInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteTokenPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DeleteTranslationInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type DeleteTranslationPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input DependencyInput {
+  head: ID
+  rel: String
+}
+
+type DependencyNode implements Node {
+  id: ID!
+  head: TokenNode
+  rel: DependencyRel!
+  tokenSyntacticAnnotation(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+}
+
+type DependencyNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DependencyNodeEdge]!
+}
+
+type DependencyNodeEdge {
+  node: DependencyNode
+  cursor: String!
+}
+
+enum DependencyRel {
+  ACL
+  ADVCL
+  ADVMOD
+  AMOD
+  APPOS
+  AUX
+  CASE
+  CC
+  CCOMP
+  COMPOUND
+  CONJ
+  COP
+  DET
+  DISCOURSE
+  FIXED
+  IOBJ
+  MARK
+  NMOD
+  NSUBJ
+  NUMMOD
+  OBJ
+  OBL
+  ROOT
+}
+
+type DictionaryNode implements Node {
+  id: ID!
+  name: String!
+  slug: String!
+  entryDict(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+}
+
+type DictionaryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DictionaryNodeEdge]!
+}
+
+type DictionaryNodeEdge {
+  node: DictionaryNode
+  cursor: String!
+}
+
+type EditionNode implements Node {
+  id: ID!
+  title: String!
+  slug: String!
+  description: String!
+  sourcePtr: SourceNode!
+  authors(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, lastName: String, lastName_Icontains: String, lastName_Istartswith: String): AuthorNodeConnection!
+  references(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, year: Int, year_Icontains: Int, year_Istartswith: Int): BibEntryNodeConnection!
+  textSigle(offset: Int, before: String, after: String, first: Int, last: Int, sigle: String, sigle_Icontains: String, sigle_Istartswith: String, genre: String, genre_Icontains: String, genre_Istartswith: String): TextSigleNodeConnection!
+}
+
+type EditionNodeConnection {
+  pageInfo: PageInfo!
+  edges: [EditionNodeEdge]!
+}
+
+type EditionNodeEdge {
+  node: EditionNode
+  cursor: String!
+}
+
+input EntryInput {
+  dict: ID!
+  lemma: LemmaInput!
+  loanwords: [LoanWordInput]
+  translations: [TranslationInput]
+  definitions: [DefinitionInput]
+  categories: [CategoryInput]
+  references: [ReferenceInput]
+  relatedEntries: [ID]
+  comment: String
+}
+
+type EntryNode implements Node {
+  id: ID!
+  dict: DictionaryNode!
+  lemma: LemmaNode!
+  loanwords(offset: Int, before: String, after: String, first: Int, last: Int, word: String, word_Icontains: String, word_Istartswith: String, translations: [ID], translations_Icontains: [ID], translations_Istartswith: [ID]): LoanWordNodeConnection!
+  translations(offset: Int, before: String, after: String, first: Int, last: Int, text: String, text_Icontains: String, text_Istartswith: String): TranslationNodeConnection!
+  definitions(offset: Int, before: String, after: String, first: Int, last: Int, definition: String, definition_Icontains: String, definition_Istartswith: String): DefinitionNodeConnection!
+  categories(offset: Int, before: String, after: String, first: Int, last: Int, category: String, category_Icontains: String, category_Istartswith: String): CategoryNodeConnection!
+  references(offset: Int, before: String, after: String, first: Int, last: Int, reference: String, reference_Icontains: String, reference_Istartswith: String): ReferenceNodeConnection!
+  relatedEntries(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+  comment: String
+  tokenEntries(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+}
+
+type EntryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [EntryNodeEdge]!
+}
+
+type EntryNodeEdge {
+  node: EntryNode
+  cursor: String!
+}
+
+type FacsimileNode implements Node {
+  id: ID!
+  bibEntry: BibEntryNode!
+  codexPart: CodexPartNode
+  folioFacsimile(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String, comment: String, comment_Icontains: String, comment_Istartswith: String): FolioNodeConnection!
+}
+
+type FacsimileNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FacsimileNodeEdge]!
+}
+
+type FacsimileNodeEdge {
+  node: FacsimileNode
+  cursor: String!
+}
+
+input FolioInput {
+  identifier: String
+  facsimile: ID
+  number: Float
+}
+
+type FolioNode implements Node {
+  id: ID!
+  identifier: String!
+  number: Float
+  facsimile: FacsimileNode
+  comment: String!
+  previous: FolioNode
+  next: FolioNode
+  lineFolio(offset: Int, before: String, after: String, first: Int, last: Int, number: Float, number_Lt: Float, number_Lte: Float, number_Gt: Float, number_Gte: Float, comment: String, comment_Icontains: String, comment_Istartswith: String): LineNodeConnection!
+}
+
+type FolioNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FolioNodeEdge]!
+}
+
+type FolioNodeEdge {
+  node: FolioNode
+  cursor: String!
+}
+
+scalar GenericScalar
+
+input JoinTokensInput {
+  current: ID
+  previous: ID
+  clientMutationId: String
+}
+
+type JoinTokensPayload {
+  success: Boolean
+  clientMutationId: String
+}
+
+input LemmaInput {
+  word: String!
+  language: String!
+}
+
+enum LemmaLanguage {
+  AKK
+  ARA
+  ARC
+  AVE
+  ENG
+  DEU
+  GUJ
+  FRA
+  GRC
+  ITA
+  PAL
+  SAN
+  SPA
+  XPR
+}
+
+type LemmaNode implements Node {
+  id: ID!
+  word: String!
+  language: LemmaLanguage
+  entryLemma: EntryNode
+}
+
+type LemmaNodeConnection {
+  pageInfo: PageInfo!
+  edges: [LemmaNodeEdge]!
+}
+
+type LemmaNodeEdge {
+  node: LemmaNode
+  cursor: String!
+}
+
+type LineNode implements Node {
+  id: ID!
+  number: Float
+  folio: FolioNode!
+  comment: String!
+  previous: LineNode
+  next: LineNode
+  tokenLine(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+}
+
+type LineNodeConnection {
+  pageInfo: PageInfo!
+  edges: [LineNodeEdge]!
+}
+
+type LineNodeEdge {
+  node: LineNode
+  cursor: String!
+}
+
+input LoanWordInput {
+  word: String!
+  language: String!
+  translations: [TranslationInput]
+}
+
+enum LoanWordLanguage {
+  AKK
+  ARA
+  ARC
+  AVE
+  ENG
+  DEU
+  GUJ
+  FRA
+  GRC
+  ITA
+  PAL
+  SAN
+  SPA
+  XPR
+}
+
+type LoanWordNode implements Node {
+  id: ID!
+  word: String!
+  language: LoanWordLanguage
+  translations(offset: Int, before: String, after: String, first: Int, last: Int, text: String, text_Icontains: String, text_Istartswith: String): TranslationNodeConnection!
+  entryLoanwords(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+}
+
+type LoanWordNodeConnection {
+  pageInfo: PageInfo!
+  edges: [LoanWordNodeEdge]!
+}
+
+type LoanWordNodeEdge {
+  node: LoanWordNode
+  cursor: String!
+}
+
+input MorphologicalAnnotationInput {
+  feature: String
+  featureValue: String
+}
+
+type MorphologicalAnnotationNode implements Node {
+  id: ID!
+  feature: String
+  featureValue: String
+  tokenMorphologicalAnnotation(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+}
+
+type MorphologicalAnnotationNodeConnection {
+  pageInfo: PageInfo!
+  edges: [MorphologicalAnnotationNodeEdge]!
+}
+
+type MorphologicalAnnotationNodeEdge {
+  node: MorphologicalAnnotationNode
+  cursor: String!
+}
+
+type Mutation {
+  createTranslation(input: CreateTranslationInput!): CreateTranslationPayload
+  updateTranslation(input: UpdateTranslationInput!): UpdateTranslationPayload
+  deleteTranslation(input: DeleteTranslationInput!): DeleteTranslationPayload
+  createReference(input: CreateReferenceInput!): CreateReferencePayload
+  updateReference(input: UpdateReferenceInput!): UpdateReferencePayload
+  deleteReference(input: DeleteReferenceInput!): DeleteReferencePayload
+  createLoanword(input: CreateLoanWordInput!): CreateLoanWordPayload
+  updateLoanword(input: UpdateLoanWordInput!): UpdateLoanWordPayload
+  deleteLoanword(input: DeleteLoanWordInput!): DeleteLoanWordPayload
+  createLemma(input: CreateLemmaInput!): CreateLemmaPayload
+  updateLemma(input: UpdateLemmaInput!): UpdateLemmaPayload
+  deleteLemma(input: DeleteLemmaInput!): DeleteLemmaPayload
+  createEntry(input: CreateEntryInput!): CreateEntryPayload
+  updateEntry(input: UpdateEntryInput!): UpdateEntryPayload
+  deleteEntry(input: DeleteEntryInput!): DeleteEntryPayload
+  addRelatedEntry(input: AddRelatedEntryInput!): AddRelatedEntryPayload
+  createDictionary(input: CreateDictionaryInput!): CreateDictionaryPayload
+  updateDictionary(input: UpdateDictionaryInput!): UpdateDictionaryPayload
+  deleteDictionary(input: DeleteDictionaryInput!): DeleteDictionaryPayload
+  createDefinition(input: CreateDefinitionInput!): CreateDefinitionPayload
+  updateDefinition(input: UpdateDefinitionInput!): UpdateDefinitionPayload
+  deleteDefinition(input: DeleteDefinitionInput!): DeleteDefinitionPayload
+  createCategory(input: CreateCategoryInput!): CreateCategoryPayload
+  updateCategory(input: UpdateCategoryInput!): UpdateCategoryPayload
+  deleteCategory(input: DeleteCategoryInput!): DeleteCategoryPayload
+  createToken(input: CreateTokenInput!): CreateTokenPayload
+  deleteToken(input: DeleteTokenInput!): DeleteTokenPayload
+  updateToken(input: UpdateTokenInput!): UpdateTokenPayload
+  addEntryToToken(input: AddEntryToTokenInput!): AddEntryToTokenPayload
+  joinTokens(input: JoinTokensInput!): JoinTokensPayload
+  createText(input: CreateTextInput!): CreateTextPayload
+  createTextSigle(input: CreateTextSigleInput!): CreateTextSiglePayload
+  updateTextSigle(input: UpdateTextSigleInput!): UpdateTextSiglePayload
+  deleteTextSigle(input: DeleteTextSigleInput!): DeleteTextSiglePayload
+  createSectionType(input: CreateSectionTypeInput!): CreateSectionTypePayload
+  deleteSectionType(input: DeleteSectionTypeInput!): DeleteSectionTypePayload
+  updateSectionType(input: UpdateSectionTypeInput!): UpdateSectionTypePayload
+  createSection(input: CreateSectionInput!): CreateSectionPayload
+  updateSection(input: UpdateSectionInput!): UpdateSectionPayload
+  deleteSection(input: DeleteSectionInput!): DeleteSectionPayload
+  createSentence(input: CreateSentenceInput!): CreateSentencePayload
+  updateSentence(input: UpdateSentenceInput!): UpdateSentencePayload
+  deleteSentence(input: DeleteSentenceInput!): DeleteSentencePayload
+  addTokensToSentence(input: AddTokensToSentenceInput!): AddTokensToSentencePayload
+  createResource(input: CreateResourceInput!): CreateResourcePayload
+  updateResource(input: UpdateResourceInput!): UpdateResourcePayload
+  deleteResource(input: DeleteResourceInput!): DeleteResourcePayload
+  createMorphologicalAnnotation(input: CreateMorphologicalAnnotationInput!): CreateMorphologicalAnnotationPayload
+  updateMorphologicalAnnotation(input: UpdateMorphologicalAnnotationInput!): UpdateMorphologicalAnnotationPayload
+  deleteMorphologicalAnnotation(input: DeleteMorphologicalAnnotationInput!): DeleteMorphologicalAnnotationPayload
+  createLine(input: CreateLineInput!): CreateLinePayload
+  updateLine(input: UpdateLineInput!): UpdateLinePayload
+  deleteLine(input: DeleteLineInput!): DeleteLinePayload
+  createFolio(input: CreateFolioInput!): CreateFolioPayload
+  updateFolio(input: UpdateFolioInput!): UpdateFolioPayload
+  deleteFolio(input: DeleteFolioInput!): DeleteFolioPayload
+  createFacsimile(input: CreateFacsimileInput!): CreateFacsimilePayload
+  updateFacsimile(input: UpdateFacsimileInput!): UpdateFacsimilePayload
+  createDependency(input: CreateDependencyInput!): CreateDependencyPayload
+  updateDependency(input: UpdateDependencyInput!): UpdateDependencyPayload
+  deleteDependency(input: DeleteDependencyInput!): DeleteDependencyPayload
+  createCorpus(input: CreateCorpusInput!): CreateCorpusPayload
+  updateCorpus(input: UpdateCorpusInput!): UpdateCorpusPayload
+  createCodexPart(input: CreateCodexPartInput!): CreateCodexPartPayload
+  updateCodexPart(input: UpdateCodexPartInput!): UpdateCodexPartPayload
+  deleteCodexPart(input: DeleteCodexPartInput!): DeleteCodexPartPayload
+  createCodex(input: CreateCodexInput!): CreateCodexPayload
+  deleteCodex(input: DeleteCodexInput!): DeleteCodexPayload
+  updateCodex(input: UpdateCodexInput!): UpdateCodexPayload
+  createBibentry(input: CreateBibEntryInput!): CreateBibEntryPayload
+  deleteBibentry(input: DeleteBibEntryInput!): DeleteBibEntryPayload
+  updateBibentry(input: UpdateBibEntryInput!): UpdateBibEntryPayload
+  createAuthor(input: CreateAuthorInput!): CreateAuthorPayload
+  updateAuthor(input: UpdateAuthorInput!): UpdateAuthorPayload
+  deleteAuthor(input: DeleteAuthorInput!): DeleteAuthorPayload
+  tokenAuth(input: ObtainJSONWebTokenInput!): ObtainJSONWebTokenPayload
+  verifyToken(input: VerifyInput!): VerifyPayload
+  refreshToken(input: RefreshInput!): RefreshPayload
+  deleteTokenCookie(input: DeleteJSONWebTokenCookieInput!): DeleteJSONWebTokenCookiePayload
+  revokeToken(input: RevokeInput!): RevokePayload
+  deleteRefreshTokenCookie(input: DeleteRefreshTokenCookieInput!): DeleteRefreshTokenCookiePayload
+}
+
+interface Node {
+  id: ID!
+}
+
+input ObtainJSONWebTokenInput {
+  clientMutationId: String
+  username: String!
+  password: String!
+}
+
+type ObtainJSONWebTokenPayload {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  clientMutationId: String
+  token: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Query {
+  translation(id: ID!): TranslationNode
+  allTranslations(offset: Int, before: String, after: String, first: Int, last: Int, text: String, text_Icontains: String, text_Istartswith: String): TranslationNodeConnection
+  reference(id: ID!): ReferenceNode
+  allReferences(offset: Int, before: String, after: String, first: Int, last: Int, reference: String, reference_Icontains: String, reference_Istartswith: String): ReferenceNodeConnection
+  loanword(id: ID!): LoanWordNode
+  allLoanwords(offset: Int, before: String, after: String, first: Int, last: Int, word: String, word_Icontains: String, word_Istartswith: String, translations: [ID], translations_Icontains: [ID], translations_Istartswith: [ID]): LoanWordNodeConnection
+  lemma(id: ID!): LemmaNode
+  allLemmas(offset: Int, before: String, after: String, first: Int, last: Int, word: String, word_Icontains: String, word_Istartswith: String): LemmaNodeConnection
+  entry(id: ID!): EntryNode
+  allEntries(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection
+  dictionary(id: ID!): DictionaryNode
+  allDictionaries(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, slug: String, slug_Icontains: String, slug_Istartswith: String): DictionaryNodeConnection
+  definition(id: ID!): DefinitionNode
+  allDefinitions(offset: Int, before: String, after: String, first: Int, last: Int, definition: String, definition_Icontains: String, definition_Istartswith: String): DefinitionNodeConnection
+  category(id: ID!): CategoryNode
+  allCategories(offset: Int, before: String, after: String, first: Int, last: Int, category: String, category_Icontains: String, category_Istartswith: String): CategoryNodeConnection
+  sentence(id: ID!): SentenceNode
+  allSentences(offset: Int, before: String, after: String, first: Int, last: Int, number: Float, number_Lt: Float, number_Lte: Float, number_Gt: Float, number_Gte: Float, comment: String, comment_Icontains: String, comment_Istartswith: String): SentenceNodeConnection
+  section(id: ID!): SectionNode
+  allSections(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionNodeConnection
+  token(id: ID!): TokenNode
+  allTokens(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection
+  text(id: ID!): TextNode
+  allTexts(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, stage: String, stage_Icontains: String, stage_Istartswith: String): TextNodeConnection
+  textSigle(id: ID!): TextSigleNode
+  allTextSigles(offset: Int, before: String, after: String, first: Int, last: Int, sigle: String, sigle_Icontains: String, sigle_Istartswith: String, genre: String, genre_Icontains: String, genre_Istartswith: String): TextSigleNodeConnection
+  sectionType(id: ID!): SectionTypeNode
+  allSectionTypes(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionTypeNodeConnection
+  resource(id: ID!): ResourceNode
+  allResources(offset: Int, before: String, after: String, first: Int, last: Int, authors: [ID], authors_Icontains: [ID], authors_Istartswith: [ID], description: String, description_Icontains: String, description_Istartswith: String, project: String, project_Icontains: String, project_Istartswith: String, reference: String, reference_Icontains: String, reference_Istartswith: String): ResourceNodeConnection
+  morphologicalAnnotation(id: ID!): MorphologicalAnnotationNode
+  allMorphologicalAnnotations(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, feature: String, feature_Icontains: String, feature_Istartswith: String, featureValue: String, featureValue_Icontains: String, featureValue_Istartswith: String): MorphologicalAnnotationNodeConnection
+  line(id: ID!): LineNode
+  allLines(offset: Int, before: String, after: String, first: Int, last: Int, number: Float, number_Lt: Float, number_Lte: Float, number_Gt: Float, number_Gte: Float, comment: String, comment_Icontains: String, comment_Istartswith: String): LineNodeConnection
+  folio(id: ID!): FolioNode
+  allFolios(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String, comment: String, comment_Icontains: String, comment_Istartswith: String): FolioNodeConnection
+  facsimile(id: ID!): FacsimileNode
+  allFacsimiles(offset: Int, before: String, after: String, first: Int, last: Int, bibEntry: ID): FacsimileNodeConnection
+  dependency(id: ID!): DependencyNode
+  allDependencies(offset: Int, before: String, after: String, first: Int, last: Int, head: ID, rel: String, rel_Icontains: String, rel_Istartswith: String): DependencyNodeConnection
+  corpus(id: ID!): CorpusNode
+  allCorpus(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, slug: String, slug_Icontains: String, slug_Istartswith: String): CorpusNodeConnection
+  codexPart(id: ID!): CodexPartNode
+  allCodexParts(offset: Int, before: String, after: String, first: Int, last: Int, partType: String, partType_Icontains: String, partType_Istartswith: String, partNumber: String, partNumber_Icontains: String, partNumber_Istartswith: String, description: String, description_Icontains: String, description_Istartswith: String): CodexPartNodeConnection
+  codex(id: ID!): CodexNode
+  allCodex(offset: Int, before: String, after: String, first: Int, last: Int, sigle: String, sigle_Icontains: String, sigle_Istartswith: String, title: String, title_Icontains: String, title_Istartswith: String, copyDate: String, copyDate_Icontains: String, copyDate_Istartswith: String, copyPlaceName: String, copyPlaceName_Icontains: String, copyPlaceName_Istartswith: String, copyPlaceLatitude: Float, copyPlaceLatitude_Icontains: Float, copyPlaceLatitude_Istartswith: Float, copyPlaceLongitude: Float, copyPlaceLongitude_Icontains: Float, copyPlaceLongitude_Istartswith: Float, library: String, library_Icontains: String, library_Istartswith: String, signature: String, signature_Icontains: String, signature_Istartswith: String): CodexNodeConnection
+  bibentry(id: ID!): BibEntryNode
+  allBibentries(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, year: Int, year_Icontains: Int, year_Istartswith: Int): BibEntryNodeConnection
+  author(id: ID!): AuthorNode
+  allAuthors(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, lastName: String, lastName_Icontains: String, lastName_Istartswith: String): AuthorNodeConnection
+}
+
+input ReferenceInput {
+  reference: String
+  url: String
+}
+
+type ReferenceNode implements Node {
+  id: ID!
+  reference: String
+  url: String
+  entryReferences(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+}
+
+type ReferenceNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ReferenceNodeEdge]!
+}
+
+type ReferenceNodeEdge {
+  node: ReferenceNode
+  cursor: String!
+}
+
+input RefreshInput {
+  token: String
+  clientMutationId: String
+}
+
+type RefreshPayload {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  clientMutationId: String
+  token: String!
+}
+
+input ResourceInput {
+  authors: [AuthorInput]
+  description: String
+  project: String
+  reference: String
+}
+
+type ResourceNode implements Node {
+  id: ID!
+  authors(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, lastName: String, lastName_Icontains: String, lastName_Istartswith: String): AuthorNodeConnection!
+  description: String
+  project: String
+  reference: String
+  textResources(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, stage: String, stage_Icontains: String, stage_Istartswith: String): TextNodeConnection!
+}
+
+type ResourceNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ResourceNodeEdge]!
+}
+
+type ResourceNodeEdge {
+  node: ResourceNode
+  cursor: String!
+}
+
+input RevokeInput {
+  refreshToken: String
+  clientMutationId: String
+}
+
+type RevokePayload {
+  revoked: Int!
+  clientMutationId: String
+}
+
+type SectionNode implements Node {
+  order: Int!
+  id: ID!
+  identifier: String
+  text: TextNode
+  sectionType: SectionTypeNode
+  source: SourceNode
+  tokens(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+  previous: SectionNode
+  container: SectionNode
+  next: SectionNode
+  sectionContainer(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionNodeConnection!
+}
+
+type SectionNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SectionNodeEdge]!
+}
+
+type SectionNodeEdge {
+  node: SectionNode
+  cursor: String!
+}
+
+input SectionTypeInput {
+  identifier: String
+}
+
+type SectionTypeNode implements Node {
+  id: ID!
+  identifier: String!
+  sectionSectionType(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionNodeConnection!
+}
+
+type SectionTypeNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SectionTypeNodeEdge]!
+}
+
+type SectionTypeNodeEdge {
+  node: SectionTypeNode
+  cursor: String!
+}
+
+type SentenceNode implements Node {
+  id: ID!
+  text: TextNode
+  tokens(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+  translations(offset: Int, before: String, after: String, first: Int, last: Int, text: String, text_Icontains: String, text_Istartswith: String): TranslationNodeConnection!
+  comment: String!
+  number: Float
+  previous: SentenceNode
+  next: SentenceNode
+}
+
+type SentenceNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SentenceNodeEdge]!
+}
+
+type SentenceNodeEdge {
+  node: SentenceNode
+  cursor: String!
+}
+
+input SourceInput {
+  id: String
+}
+
+type SourceNode {
+  id: UUID!
+  title: String!
+  slug: String!
+  description: String!
+  codex: CodexNode
+  textSources(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, stage: String, stage_Icontains: String, stage_Istartswith: String): TextNodeConnection!
+  edition: EditionNode
+  sectionSource(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionNodeConnection!
+}
+
+type TextNode implements Node {
+  id: ID!
+  corpus: CorpusNode
+  title: String!
+  textSigle: TextSigleNode
+  resources(offset: Int, before: String, after: String, first: Int, last: Int, authors: [ID], authors_Icontains: [ID], authors_Istartswith: [ID], description: String, description_Icontains: String, description_Istartswith: String, project: String, project_Icontains: String, project_Istartswith: String, reference: String, reference_Icontains: String, reference_Istartswith: String): ResourceNodeConnection!
+  stage: TextStage
+  sources: [SourceNode!]!
+  tokenText(offset: Int, before: String, after: String, first: Int, last: Int, transcription: String, transcription_Icontains: String, transcription_Istartswith: String, transliteration: String, transliteration_Icontains: String, transliteration_Istartswith: String, line: ID, entries: [ID]): TokenNodeConnection!
+  sentenceText(offset: Int, before: String, after: String, first: Int, last: Int, number: Float, number_Lt: Float, number_Lte: Float, number_Gt: Float, number_Gte: Float, comment: String, comment_Icontains: String, comment_Istartswith: String): SentenceNodeConnection!
+  sectionText(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionNodeConnection!
+}
+
+type TextNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TextNodeEdge]!
+}
+
+type TextNodeEdge {
+  node: TextNode
+  cursor: String!
+}
+
+enum TextSigleGenre {
+  ZAN
+  PTE
+  PTR
+  TEO
+  AUT
+  JUR
+  AND
+  NAR
+}
+
+input TextSigleInput {
+  sigle: String
+  genre: String
+}
+
+type TextSigleNode implements Node {
+  id: ID!
+  sigle: TextSigleSigle!
+  genre: TextSigleGenre!
+  textTextSigle(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, stage: String, stage_Icontains: String, stage_Istartswith: String): TextNodeConnection!
+  editionTextSigles(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, title_Istartswith: String, slug: String, slug_Icontains: String, slug_Istartswith: String, description: String, description_Icontains: String, description_Istartswith: String): EditionNodeConnection!
+}
+
+type TextSigleNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TextSigleNodeEdge]!
+}
+
+type TextSigleNodeEdge {
+  node: TextSigleNode
+  cursor: String!
+}
+
+enum TextSigleSigle {
+  AM
+  AOD
+  AOG
+  ASS
+  AWM
+  AWN
+  AZ
+  CHP
+  DA
+  DD
+  DK3
+  DK4
+  DK5
+  DK6
+  DK7
+  DK8
+  DK9
+  DKC
+  DMX
+  ENN
+  GA
+  GBD
+  HER
+  HKR
+  HN
+  INDBD
+  KAP
+  MFRH
+  MHD
+  MK_ANDARZ
+  MYFR
+  N
+  NM
+  OHD
+  P
+  PAHLRIVDD
+  PT
+  PV
+  PY
+  RAF
+  REA
+  SGW
+  SIE
+  SNS
+  VR
+  VYT
+  WCNA
+  WD
+  WDWM
+  WZ
+  XD
+  XAV
+  ZFJ
+  ZWY
+}
+
+enum TextStage {
+  UNT
+  PRO
+  FIN
+}
+
+input TokenInput {
+  text: ID
+  transcription: String
+  transliteration: String
+  language: String
+  entries: [EntryInput]
+  pos: String
+  morphologicalAnnotation: [MorphologicalAnnotationInput]
+  syntacticAnnotation: [DependencyInput]
+  comment: String
+  avestan: String
+  line: ID
+  positionInLine: Int
+}
+
+enum TokenLanguage {
+  AKK
+  ARA
+  ARC
+  AVE
+  ENG
+  DEU
+  GUJ
+  FRA
+  GRC
+  ITA
+  PAL
+  SAN
+  SPA
+  XPR
+}
+
+type TokenNode implements Node {
+  id: ID!
+  number: Float
+  text: TextNode
+  language: TokenLanguage
+  transcription: String!
+  transliteration: String!
+  entries(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+  pos: TokenPos
+  morphologicalAnnotation(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, feature: String, feature_Icontains: String, feature_Istartswith: String, featureValue: String, featureValue_Icontains: String, featureValue_Istartswith: String): MorphologicalAnnotationNodeConnection!
+  syntacticAnnotation(offset: Int, before: String, after: String, first: Int, last: Int, head: ID, rel: String, rel_Icontains: String, rel_Istartswith: String): DependencyNodeConnection!
+  comment: String!
+  avestan: String
+  line: LineNode
+  previous: TokenNode
+  gloss: String
+  dependencyHead(offset: Int, before: String, after: String, first: Int, last: Int, head: ID, rel: String, rel_Icontains: String, rel_Istartswith: String): DependencyNodeConnection!
+  next: TokenNode
+  sentenceTokens(offset: Int, before: String, after: String, first: Int, last: Int, number: Float, number_Lt: Float, number_Lte: Float, number_Gt: Float, number_Gte: Float, comment: String, comment_Icontains: String, comment_Istartswith: String): SentenceNodeConnection!
+  sectionTokens(offset: Int, before: String, after: String, first: Int, last: Int, identifier: String, identifier_Icontains: String, identifier_Istartswith: String): SectionNodeConnection!
+}
+
+type TokenNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TokenNodeEdge]!
+}
+
+type TokenNodeEdge {
+  node: TokenNode
+  cursor: String!
+}
+
+enum TokenPos {
+  ADJ
+  ADP
+  ADV
+  AUX
+  CCONJ
+  DET
+  INTJ
+  NOUN
+  NUM
+  PART
+  PRON
+  PROPN
+  PUNCT
+  SCONJ
+  SYM
+  VERB
+  X
+}
+
+input TranslationInput {
+  text: String!
+  language: String!
+}
+
+enum TranslationLanguage {
+  AKK
+  ARA
+  ARC
+  AVE
+  ENG
+  DEU
+  GUJ
+  FRA
+  GRC
+  ITA
+  PAL
+  SAN
+  SPA
+  XPR
+}
+
+type TranslationNode implements Node {
+  id: ID!
+  language: TranslationLanguage
+  text: String!
+  loanwordTranslations(offset: Int, before: String, after: String, first: Int, last: Int, word: String, word_Icontains: String, word_Istartswith: String, translations: [ID], translations_Icontains: [ID], translations_Istartswith: [ID]): LoanWordNodeConnection!
+  entryTranslations(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, id_Istartswith: UUID, dict_Slug: String, dict_Slug_Icontains: String, dict_Slug_Istartswith: String, lemma_Word: String, lemma_Word_Icontains: String, lemma_Word_Istartswith: String): EntryNodeConnection!
+  sentenceTranslations(offset: Int, before: String, after: String, first: Int, last: Int, number: Float, number_Lt: Float, number_Lte: Float, number_Gt: Float, number_Gte: Float, comment: String, comment_Icontains: String, comment_Istartswith: String): SentenceNodeConnection!
+}
+
+type TranslationNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TranslationNodeEdge]!
+}
+
+type TranslationNodeEdge {
+  node: TranslationNode
+  cursor: String!
+}
+
+scalar UUID
+
+input UpdateAuthorInput {
+  id: ID!
+  name: String!
+  lastName: String!
+  clientMutationId: String
+}
+
+type UpdateAuthorPayload {
+  author: AuthorNode
+  clientMutationId: String
+}
+
+input UpdateBibEntryInput {
+  id: ID!
+  title: String!
+  year: Int!
+  authors: [AuthorInput]
+  clientMutationId: String
+}
+
+type UpdateBibEntryPayload {
+  bibentry: BibEntryNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input UpdateCategoryInput {
+  id: ID
+  category: CategoryInput
+  clientMutationId: String
+}
+
+type UpdateCategoryPayload {
+  category: CategoryNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateCodexInput {
+  sigle: String!
+  title: String!
+  copyDate: String
+  copyPlaceName: String
+  copyPlaceLatitude: String
+  copyPlaceLongitude: String
+  library: String
+  signature: String
+  scribes: [AuthorInput]
+  facsimiles: [BibEntryInput]
+  clientMutationId: String
+}
+
+input UpdateCodexPartInput {
+  codexPart: ID
+  codex: ID
+  partType: String
+  partNumber: String
+  description: String
+  clientMutationId: String
+}
+
+type UpdateCodexPartPayload {
+  codexPart: CodexPartNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+type UpdateCodexPayload {
+  codex: CodexNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateCorpusInput {
+  id: ID
+  name: String
+  slug: String
+  clientMutationId: String
+}
+
+type UpdateCorpusPayload {
+  corpus: CorpusNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateDefinitionInput {
+  id: ID!
+  definition: DefinitionInput!
+  language: String!
+  clientMutationId: String
+}
+
+type UpdateDefinitionPayload {
+  definition: DefinitionNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input UpdateDependencyInput {
+  id: ID!
+  head: ID
+  rel: String
+  clientMutationId: String
+}
+
+type UpdateDependencyPayload {
+  dependency: DependencyNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateDictionaryInput {
+  id: ID!
+  name: String!
+  slug: String!
+  clientMutationId: String
+}
+
+type UpdateDictionaryPayload {
+  dictionary: DictionaryNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateEntryInput {
+  id: ID
+  dict: ID
+  lemma: LemmaInput!
+  loanwords: [LoanWordInput]
+  translations: [TranslationInput]
+  definitions: [DefinitionInput]
+  categories: [CategoryInput]
+  references: [ReferenceInput]
+  comment: String
+  clientMutationId: String
+}
+
+type UpdateEntryPayload {
+  entry: EntryNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input UpdateFacsimileInput {
+  facsimile: ID
+  bibEntry: ID
+  codexPart: ID
+  clientMutationId: String
+}
+
+type UpdateFacsimilePayload {
+  facsimile: FacsimileNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input UpdateFolioInput {
+  id: ID
+  identifier: String
+  number: Float
+  facsimile: ID
+  comment: String
+  previous: FolioInput
+  clientMutationId: String
+}
+
+type UpdateFolioPayload {
+  folio: FolioNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input UpdateLemmaInput {
+  id: ID!
+  word: String!
+  language: String!
+  clientMutationId: String
+}
+
+type UpdateLemmaPayload {
+  errors: [String]
+  word: LemmaNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateLineInput {
+  id: ID
+  number: Float!
+  folio: FolioInput
+  comment: String
+  clientMutationId: String
+}
+
+type UpdateLinePayload {
+  line: LineNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateLoanWordInput {
+  id: ID!
+  word: String!
+  language: String!
+  translations: [TranslationInput]
+  clientMutationId: String
+}
+
+type UpdateLoanWordPayload {
+  loanword: LoanWordNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateMorphologicalAnnotationInput {
+  id: ID
+  feature: String
+  featureValue: String
+  clientMutationId: String
+}
+
+type UpdateMorphologicalAnnotationPayload {
+  morphologicalAnnotation: MorphologicalAnnotationNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateReferenceInput {
+  reference: ReferenceInput
+  url: String
+  clientMutationId: String
+}
+
+type UpdateReferencePayload {
+  reference: ReferenceNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateResourceInput {
+  id: ID
+  authors: [AuthorInput]
+  description: String
+  project: String
+  reference: String
+  clientMutationId: String
+}
+
+type UpdateResourcePayload {
+  resource: ResourceNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateSectionInput {
+  id: ID
+  identifier: String
+  sectionType: SectionTypeInput
+  tokens: [TokenInput]
+  previous: ID
+  container: ID
+  clientMutationId: String
+}
+
+type UpdateSectionPayload {
+  section: SectionNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateSectionTypeInput {
+  identifier: String!
+  clientMutationId: String
+}
+
+type UpdateSectionTypePayload {
+  success: Boolean
+  sectionType: SectionTypeNode
+  clientMutationId: String
+}
+
+input UpdateSentenceInput {
+  id: ID!
+  text: ID
+  number: Float
+  tokens: [ID]
+  translations: [TranslationInput]
+  comment: String
+  previous: ID
+  clientMutationId: String
+}
+
+type UpdateSentencePayload {
+  sentence: SentenceNode
+  errors: [String]
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateTextSigleInput {
+  id: ID
+  sigle: String
+  genre: String
+  clientMutationId: String
+}
+
+type UpdateTextSiglePayload {
+  sigle: TextSigleNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateTokenInput {
+  id: ID!
+  transcription: String!
+  transliteration: String!
+  language: String!
+  text: ID!
+  number: Float
+  entries: [EntryInput]
+  pos: String
+  morphologicalAnnotation: [MorphologicalAnnotationInput]
+  syntacticAnnotation: [DependencyInput]
+  comment: String
+  avestan: String
+  previous: ID
+  line: ID
+  positionInLine: Int
+  clientMutationId: String
+}
+
+type UpdateTokenPayload {
+  token: TokenNode
+  success: Boolean
+  clientMutationId: String
+}
+
+input UpdateTranslationInput {
+  id: ID!
+  text: String!
+  language: String!
+  clientMutationId: String
+}
+
+type UpdateTranslationPayload {
+  translation: TranslationNode
+  success: Boolean
+  errors: [String]
+  clientMutationId: String
+}
+
+input VerifyInput {
+  token: String
+  clientMutationId: String
+}
+
+type VerifyPayload {
+  payload: GenericScalar!
+  clientMutationId: String
+}

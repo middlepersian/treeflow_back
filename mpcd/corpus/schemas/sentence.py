@@ -140,7 +140,7 @@ class UpdateSentence(relay.ClientIDMutation):
                     token = Token.objects.get(pk=from_global_id(token.id)[1])
                     sentence_instance.tokens.add(token)
 
-            if input.get('translations', None):
+            if input.get('translations') == [] or input.get('translations', None):
                 sentence_instance.translations.clear()
                 for translation_input in input.get('translations'):
                     # check if translation exists, if not create it
@@ -148,7 +148,6 @@ class UpdateSentence(relay.ClientIDMutation):
                         text=translation_input.get('text'), language=translation_input.get('language'))
                     # add translation to sentence
                     sentence_instance.translations.add(translation_instance)
-
             if input.get('number', None):
                 sentence_instance.number = input.get('number')
 
