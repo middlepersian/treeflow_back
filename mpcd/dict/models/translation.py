@@ -8,7 +8,7 @@ from .language import LanguageChoices
 class Translation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     language = models.CharField(max_length=3, choices=LanguageChoices.choices, null=True, blank=True)
-    text = models.TextField()
+    text = models.TextField(null=True, blank=True)
 
     history = HistoricalRecords()
 
