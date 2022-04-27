@@ -69,7 +69,6 @@ class CreateSentence(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Text.objects.filter(pk=from_global_id(input.get('text'))[1]).exists():
@@ -128,19 +127,20 @@ class UpdateSentence(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         # check if id is valid
         if Sentence.objects.filter(pk=from_global_id(input.get('id', None))[1]).exists():
-            sentence_instance = Sentence.objects.get(pk=from_global_id(id)[1])
-            if Text.objects.filter(pk=from_global_id(input.get('text', None))[1]).exists():
+            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
+            if input.get('text', None) and Text.objects.filter(pk=from_global_id(input.get('text', None))[1]).exists():
                 sentence_instance.text = Text.objects.get(pk=from_global_id(input.get('text', None))[1])
-            if input.get('tokens', None) is not None:
+
+            if input.get('tokens', None):
                 sentence_instance.tokens.clear()
                 for token in input.get('tokens', None):
                     token = Token.objects.get(pk=from_global_id(token.id)[1])
                     sentence_instance.tokens.add(token)
-            if input.get('translations', None) is not None:
+
+            if input.get('translations') == [] or input.get('translations', None):
                 sentence_instance.translations.clear()
                 for translation_input in input.get('translations'):
                     # check if translation exists, if not create it
@@ -148,17 +148,17 @@ class UpdateSentence(relay.ClientIDMutation):
                         text=translation_input.get('text'), language=translation_input.get('language'))
                     # add translation to sentence
                     sentence_instance.translations.add(translation_instance)
-
-            if input.get('number', None) is not None:
+            if input.get('number', None):
                 sentence_instance.number = input.get('number')
 
-            if input.get('comment', None) is not None:
+            if input.get('comment', None):
                 sentence_instance.comment = input.get('comment')
               # check if previous is valid
-            if input.get('previous', None) is not None:
+
+            if input.get('previous', None):
                 if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                     sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
-            else:
+            elif not sentence_instance.previous and sentence_instance.number > 1.0:
                 return cls(success=False, errors=['Wrong Previous ID'])
 
             sentence_instance.save()
@@ -178,7 +178,6 @@ class DeleteSentence(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         if Sentence.objects.filter(pk=from_global_id(id)[1]).exists():
             sentence_instance = Sentence.objects.get(pk=from_global_id(id)[1])

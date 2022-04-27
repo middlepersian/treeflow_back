@@ -215,9 +215,9 @@ class UpdateToken(relay.ClientIDMutation):
         # update transliteration
         token.transliteration = to_nfc(input['transliteration'])
         # update language
-        token.language = input.get('language', None)
+        token.language = input.get('language')
         # update number
-        token.number = float(input.get('number', None))
+        token.number = float(input.get('number'))
 
         # check entries available
         if input.get('entries', None) is not None:
@@ -249,10 +249,6 @@ class UpdateToken(relay.ClientIDMutation):
 
                 # add the entry to the token
                 token.entries.add(entry)
-
-        # check if language available
-        if input.get('language', None) is not None:
-            token.language = input.get('language', None)
 
         # check if pos available
         if input.get('pos', None) is not None:

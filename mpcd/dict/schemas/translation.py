@@ -49,7 +49,6 @@ class CreateTranslation(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if translation exists, if not create it
@@ -71,12 +70,11 @@ class UpdateTranslation(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         # check that translation does exist
 
-        if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
-            translation_instance = Translation.objects.get(pk=from_global_id(id)[1])
+        if Translation.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            translation_instance = Translation.objects.get(pk=from_global_id(input.get('id'))[1]) 
             # update text
             translation_instance.text = to_nfc(input.get('text'))
             # update language
@@ -96,7 +94,6 @@ class DeleteTranslation(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Translation.objects.filter(pk=from_global_id(id)[1]).exists():
