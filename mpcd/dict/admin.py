@@ -1,12 +1,11 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from django.db.models.functions import Lower
-from .models import Dictionary, Entry, Lemma, LoanWord, Translation, Category, Reference, Definition
+from .models import Dictionary, Entry, Lemma, LoanWord, Reference
 
 
 class EntryHistoryAdmin(SimpleHistoryAdmin):
-    fields = ["dict", "lemma", "loanwords",  "translations", "definitions", "categories", "references", "comment"]
-    list_display = ["lemma", "_loanwords",  "_translations", "_definitions", "_categories", "_references", "comment"]
+    fields = ["dict", "lemma", "loanwords", "references", "comment"]
+    list_display = ["lemma", "_loanwords",  "_references", "comment"]
     history_list_display = ["lemma"]
     search_fields = ["lemma__word", "translations__meaning"]
 
@@ -19,9 +18,6 @@ class EntryHistoryAdmin(SimpleHistoryAdmin):
         queryset = queryset.select_related('dict')
         queryset = queryset.select_related('lemma')
         queryset = queryset.prefetch_related('loanwords', 'loanwords__translations')
-        queryset = queryset.prefetch_related('translations')
-        queryset = queryset.prefetch_related('definitions')
-        queryset = queryset.prefetch_related('categories')
         queryset = queryset.prefetch_related('references')
         return queryset
 
@@ -39,15 +35,6 @@ class EntryHistoryAdmin(SimpleHistoryAdmin):
                 loans.append(trans)
 
         return " |\n".join([p for p in loans])
-
-    def _translations(self, obj):
-        return " |\n".join([p.meaning for p in obj.translations.all()])
-
-    def _definitions(self, obj):
-        return " |\n".join([p.definition for p in obj.definitions.all()])
-
-    def _categories(self, obj):
-        return " |\n".join([p.category for p in obj.categories.all()])
 
     def _references(self, obj):
         return " |\n".join([p.reference for p in obj.references.all()])
@@ -81,26 +68,6 @@ class LoanWordHistoryAdmin(SimpleHistoryAdmin):
         return " |\n".join([p.text for p in obj.translations.all()])
 
 
-class TranslationHistoryAdmin(SimpleHistoryAdmin):
-    fields = ["text", "language"]
-    list_display = ["text", "language"]
-    history_list_display = ["text", "language"]
-    search_fields = ["text"]
-
-    def get_ordering(self, request):
-        return ['text']
-
-
-class DefinitionHistoryAdmin(SimpleHistoryAdmin):
-    fields = ["definition", "language"]
-    list_display = ["definition", "language"]
-    history_list_display = ["definition", "language"]
-    search_fields = ["definition"]
-
-    def get_ordering(self, request):
-        return ['definition']
-
-
 class ReferenceHistoryAdmin(SimpleHistoryAdmin):
     fields = ["reference"]
     list_display = ["reference"]
@@ -115,7 +82,4 @@ admin.site.register(Dictionary)
 admin.site.register(Entry, EntryHistoryAdmin)
 admin.site.register(Lemma, WordHistoryAdmin)
 admin.site.register(LoanWord, LoanWordHistoryAdmin)
-admin.site.register(Translation, TranslationHistoryAdmin)
-admin.site.register(Definition, DefinitionHistoryAdmin)
-admin.site.register(Category)
 admin.site.register(Reference, ReferenceHistoryAdmin)
