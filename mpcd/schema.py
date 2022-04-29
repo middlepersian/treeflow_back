@@ -25,7 +25,6 @@ class Query(
         mpcd.corpus.schemas.section.Query,
         mpcd.corpus.schemas.sentence.Query,
         # Dict Queries
-        mpcd.dict.schemas.category.Query,
         mpcd.dict.schemas.definition.Query,
         mpcd.dict.schemas.dictionary.Query,
         mpcd.dict.schemas.entry.Query,
@@ -57,7 +56,6 @@ class Mutation(
         mpcd.corpus.schemas.text.Mutation,
         mpcd.corpus.schemas.token.Mutation,
         # Dict Mutations
-        mpcd.dict.schemas.category.Mutation,
         mpcd.dict.schemas.definition.Mutation,
         mpcd.dict.schemas.dictionary.Mutation,
         mpcd.dict.schemas.entry.Mutation,

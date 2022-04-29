@@ -7,8 +7,8 @@ import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
 
-from mpcd.dict.models import Dictionary, Lemma, Entry, Translation, Definition, Category, Reference, LoanWord
-from mpcd.dict.schemas import LemmaInput, LoanWordInput, TranslationInput, DefinitionInput, CategoryInput, ReferenceInput
+from mpcd.dict.models import Dictionary, Lemma, Entry, Reference, LoanWord
+from mpcd.dict.schemas import LemmaInput, LoanWordInput, ReferenceInput
 
 from mpcd.utils.normalize import to_nfc
 
@@ -26,9 +26,6 @@ class EntryInput(InputObjectType):
     dict = ID(required=True)
     lemma = LemmaInput(required=True)
     loanwords = List(LoanWordInput)
-    translations = List(TranslationInput)
-    definitions = List(DefinitionInput)
-    categories = List(CategoryInput)
     references = List(ReferenceInput)
     related_entries = List(ID)
     comment = String()
@@ -52,9 +49,6 @@ class CreateEntry(relay.ClientIDMutation):
         dict = ID()
         lemma = LemmaInput(required=True)
         loanwords = List(LoanWordInput)
-        translations = List(TranslationInput)
-        definitions = List(DefinitionInput)
-        categories = List(CategoryInput)
         references = List(ReferenceInput)
         related_entries = List(ID)
         comment = String()
@@ -65,7 +59,6 @@ class CreateEntry(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if dict exists
@@ -91,40 +84,7 @@ class CreateEntry(relay.ClientIDMutation):
                 loanword_instance, loanword_created = LoanWord.objects.get_or_create(
                     word=to_nfc(lemma_word), language=lemma_lang)
 
-                if loanword.get('translations', None) is not None:
-                    for translation in loanword.get('translations'):
-                        # check if translation exists, if not create it
-                        translation_instance, translation_created = Translation.objects.get_or_create(
-                            text=to_nfc(translation.get('text')), language=translation.get('language'))
-                        # add translation
-                        loanword_instance.translations.add(translation_instance)
-                        loanword_instance.save()
-
                 entry.loanwords.add(loanword_instance)
-            entry.save()
-
-        # check if translations exist
-        if input.get('translations', None) is not None:
-            for translation in input.get('translations', None):
-                # check if translation exists, if not create it
-                translation_instance, translation_created = Translation.objects.get_or_create(
-                    text=to_nfc(translation.get('text')), language=translation.get('language'))
-                entry.translations.add(translation_instance)
-            entry.save()
-
-        # check if definitions exist
-        if input.get('definitions', None) is not None:
-            for definition in input['definitions']:
-                definition_instance, definition_created = Definition.objects.get_or_create(
-                    definition=to_nfc(definition.get('definition')), language=translation.get('language'))
-                entry.definitions.add(definition_instance)
-            entry.save()
-
-        if input.get('categories', None) is not None:
-            for category in input['categories']:
-                category_obj, category_created = Category.objects.get_or_create(category=category['category'])
-                if category_obj:
-                    entry.categories.add(category_obj)
             entry.save()
 
         if input.get('references', None) is not None:
@@ -156,9 +116,6 @@ class UpdateEntry(relay.ClientIDMutation):
         dict = ID()
         lemma = LemmaInput(required=True)
         loanwords = List(LoanWordInput)
-        translations = List(TranslationInput)
-        definitions = List(DefinitionInput)
-        categories = List(CategoryInput)
         references = List(ReferenceInput)
         comment = String()
 
@@ -168,7 +125,6 @@ class UpdateEntry(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
@@ -208,26 +164,6 @@ class UpdateEntry(relay.ClientIDMutation):
 
                     entry.loanwords.add(loanword_instance)
 
-            # check if translations exist
-            if input.get('translations', None) is not None:
-                for translation in input.get('translations', None):
-                    # check if translation exists, if not create it
-                    translation_instance, translation_created = Translation.objects.get_or_create(
-                        text=to_nfc(translation.get('text')), language=translation.get('language'))
-                    entry.translations.add(translation_instance)
-
-            # check if definitions exist
-            if input.get('definitions', None) is not None:
-                for definition in input['definitions']:
-                    definition_instance, definition_created = Definition.objects.get_or_create(
-                        definition=to_nfc(definition.get('definition')), language=translation.get('language'))
-                    entry.definitions.add(definition_instance)
-
-            if input.get('categories', None) is not None:
-                for category in input['categories']:
-                    category_obj, category_created = Category.objects.get_or_create(category=category['category'])
-                    if category_obj:
-                        entry.categories.add(category_obj)
             if input.get('references', None) is not None:
                 for reference in input['references']:
                     reference_obj = Reference.objects.get_or_create(reference=reference['reference'])
@@ -258,7 +194,6 @@ class DeleteEntry(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         if Entry.objects.filter(pk=from_global_id(input['id'])[1]).exists():
             entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
@@ -280,7 +215,6 @@ class AddRelatedEntry(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         if Entry.objects.filter(pk=from_global_id(input['entry_id'])[1]).exists():
             entry = Entry.objects.get(pk=from_global_id(input['entry_id'])[1])
