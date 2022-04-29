@@ -1,4 +1,3 @@
-from platform import release
 import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
