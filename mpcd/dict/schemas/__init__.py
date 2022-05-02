@@ -5,3 +5,5 @@ from .loanword import LoanWordNode, LoanWordInput
 from .reference import ReferenceNode, ReferenceInput
 from .lemma import LemmaNode, LemmaInput
 from .entry import EntryNode, EntryInput
+from .meaning import MeaningNode, MeaningInput
+from .term_tech import TermTechNode, TermTechInput
