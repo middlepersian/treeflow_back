@@ -1,5 +1,3 @@
-from cgitb import text
-from importlib.metadata import requires
 from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField

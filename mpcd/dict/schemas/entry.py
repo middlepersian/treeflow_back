@@ -1,4 +1,3 @@
-from distutils import errors
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, Boolean, ID
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -7,7 +6,7 @@ import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
 
-from mpcd.dict.models import Dictionary, Lemma, Entry, Reference, LoanWord
+from mpcd.dict.models import Dictionary, Lemma, Entry, Reference, LoanWord, Translation
 from mpcd.dict.schemas import LemmaInput, LoanWordInput, ReferenceInput
 
 from mpcd.utils.normalize import to_nfc
@@ -76,7 +75,7 @@ class CreateEntry(relay.ClientIDMutation):
         entry, entry_created = Entry.objects.get_or_create(dict=dict, lemma=lemma)
 
         # check if loanwords exist
-        if input.get('loanwords', None) is not None:
+        if input.get('loanwords', None):
 
             for loanword in input.get('loanwords'):
                 lemma_word = input.get('word')
@@ -87,9 +86,9 @@ class CreateEntry(relay.ClientIDMutation):
                 entry.loanwords.add(loanword_instance)
             entry.save()
 
-        if input.get('references', None) is not None:
+        if input.get('references', None):
             for reference in input['references']:
-                reference_obj = Reference.objects.get_or_create(reference=reference['reference'])
+                reference_obj, reference_created = Reference.objects.get_or_create(reference=reference['reference'])
                 if reference_obj:
                     entry.references.add(reference_obj)
             entry.save()
@@ -102,7 +101,7 @@ class CreateEntry(relay.ClientIDMutation):
                     entry.related_entries.add(related_entry_obj)
 
         '''
-        if input.get('comment', None) is not None:
+        if input.get('comment', None):
             entry.comment = to_nfc(input.get('comment'))
             entry.comment = input['comment']
             entry.save()
@@ -131,7 +130,7 @@ class UpdateEntry(relay.ClientIDMutation):
             entry = Entry.objects.get(pk=from_global_id(input['id'])[1])
 
             # update dict
-            if input.get('dict', None) is not None:
+            if input.get('dict', None):
                 if Dictionary.objects.filter(pk=from_global_id(input['id'])[1]).exists():
                     dict = Dictionary.objects.get(pk=from_global_id(input['id'])[1])
                 else:
@@ -145,7 +144,9 @@ class UpdateEntry(relay.ClientIDMutation):
             entry.lemma = lemma
 
             # check if loanwords exist
-            if input.get('loanwords', None) is not None:
+            if input.get('loanwords', None):
+                # clear up
+                entry.loanwords.clear()
 
                 for loanword in input.get('loanwords'):
                     lemma_word = input.get('word')
@@ -153,7 +154,10 @@ class UpdateEntry(relay.ClientIDMutation):
                     loanword_instance, loanword_created = LoanWord.objects.get_or_create(
                         word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
 
-                    if loanword.get('translations', None) is not None:
+                    if loanword.get('translations', None):
+                        # clear up
+                        loanword_instance.translations.clear()
+
                         for translation in loanword.get('translations'):
                             # check if translation exists, if not create it
                             translation_instance, translation_created = Translation.objects.get_or_create(
@@ -164,19 +168,19 @@ class UpdateEntry(relay.ClientIDMutation):
 
                     entry.loanwords.add(loanword_instance)
 
-            if input.get('references', None) is not None:
+            if input.get('references', None):
                 for reference in input['references']:
                     reference_obj = Reference.objects.get_or_create(reference=reference['reference'])
                     if reference_obj:
                         entry.references.add(reference_obj)
 
-            if input.get('related_entries', None) is not None:
+            if input.get('related_entries', None):
                 for related_entry in input['related_entries']:
                     if Entry.objects.filter(pk=from_global_id(related_entry.id)[1]).exists():
                         related_entry_obj = Entry.objects.get(pk=from_global_id(related_entry.id)[1])
                         entry.related_entries.add(related_entry_obj)
 
-            if input.get('comment', None) is not None:
+            if input.get('comment', None):
                 entry.comment = input['comment']
 
             entry.save()
