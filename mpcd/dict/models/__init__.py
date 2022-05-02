@@ -5,6 +5,7 @@ from .loanword import LoanWord
 from .reference import Reference
 from .translation import Translation
 from .lemma import Lemma
+from .meaning import Meaning
 from .language import LanguageChoices
 from .semantic import Semantic
 from .term_tech import TermTech
