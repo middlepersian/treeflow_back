@@ -1,8 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
-from django.contrib import admin
-from mpcd.dict.models import Entry
+from mpcd.dict.models import Semantic
 from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .pos import POSChoices
@@ -20,7 +19,7 @@ class Token(models.Model):
     language = models.CharField(max_length=3, choices=LanguageChoices.choices, null=True, blank=True)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    entries = models.ManyToManyField(Entry, blank=True, related_name='token_entries')
+    semantics = models.ManyToManyField(Semantic, blank=True, related_name='token_semantics')
     pos = models.CharField(max_length=8, choices=POSChoices.choices, null=True, blank=True)
     morphological_annotation = models.ManyToManyField(
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
