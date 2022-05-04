@@ -6,7 +6,7 @@ from mpcd.dict.models import Entry, Lemma, Translation, Dictionary
 from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
-from mpcd.dict.schemas import EntryInput
+from mpcd.dict.schemas import SemanticInput
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -37,7 +37,7 @@ class TokenInput(InputObjectType):
     transcription = String()
     transliteration = String()
     language = String()
-    entries = List(EntryInput)
+    semantics = List(SemanticInput)
     pos = String()
     morphological_annotation = List(MorphologicalAnnotationInput)
     syntactic_annotation = List(DependencyInput)
@@ -69,7 +69,7 @@ class CreateToken(relay.ClientIDMutation):
         language = String(required=True)
         text = ID(required=True)
         number = Float(required=True)
-        entries = List(EntryInput)
+        semantics = List(SemanticInput)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
@@ -85,7 +85,6 @@ class CreateToken(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("INPUT: {}".format(input))
 
@@ -185,7 +184,7 @@ class UpdateToken(relay.ClientIDMutation):
         language = String(required=True)
         text = ID(required=True)
         number = Float()
-        entries = List(EntryInput)
+        semantics = List(SemanticInput)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
@@ -200,7 +199,6 @@ class UpdateToken(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if token with assigned id already exists
@@ -306,7 +304,6 @@ class DeleteToken(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         if Token.objects.filter(pk=from_global_id(id)[1]).exists():
             token_instance = Token.objects.get(pk=from_global_id(id)[1])
@@ -326,7 +323,6 @@ class JoinTokens(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
         if input.get('current', None) is not None:
@@ -358,7 +354,6 @@ class AddEntryToToken(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
         if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
