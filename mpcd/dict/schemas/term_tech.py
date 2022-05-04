@@ -1,5 +1,3 @@
-from sre_constants import SUCCESS
-from app_backend.mpcd.dict.models import term_tech
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, Boolean, ID
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -7,7 +5,6 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
-from mpcd.utils.normalize import to_nfc
 from mpcd.dict.models import TermTech
 
 
@@ -63,17 +60,17 @@ class UpdateTermTech(relay.ClientIDMutation):
         id = ID(required=True)
         category = String(required=True)
 
-        @classmethod
-        @login_required
-        def mutate_and_get_payload(cls, root, info, **input):
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
 
-            if TermTech.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
-                term_tech = TermTech.objects.get(pk=from_global_id(input.get('id'))[1])
-                term_tech.category = input['category']
-                term_tech.save()
-                return cls(term_tech=term_tech, success=True, errors=None)
-            else:
-                return cls(term_tech=None, success=False, errors=['TermTech ID does not exist'])
+        if TermTech.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            term_tech = TermTech.objects.get(pk=from_global_id(input.get('id'))[1])
+            term_tech.category = input['category']
+            term_tech.save()
+            return cls(term_tech=term_tech, success=True, errors=None)
+        else:
+            return cls(term_tech=None, success=False, errors=['TermTech ID does not exist'])
 
 class DeleteTermTech(relay.ClientIDMutation):
     class Input:

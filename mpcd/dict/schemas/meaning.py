@@ -1,4 +1,3 @@
-from app_backend.mpcd.dict.models import meaning
 from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
