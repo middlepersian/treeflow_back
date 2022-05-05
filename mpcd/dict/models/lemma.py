@@ -13,7 +13,6 @@ class Lemma(models.Model):
     related_meanings = models.ManyToManyField(Meaning, blank=True, related_name='lemma_related_meanings')
     comment = models.TextField(null=True, blank=True)
 
-
     class Meta:
         constraints = [
             models.UniqueConstraint(
