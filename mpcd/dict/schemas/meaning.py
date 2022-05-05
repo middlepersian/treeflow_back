@@ -1,3 +1,4 @@
+from click import command
 from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -13,13 +14,16 @@ class MeaningNode(DjangoObjectType):
     class Meta:
         model = Meaning
         filter_fields = {'meaning': ['exact', 'icontains', 'istartswith'],
-                         'language': ['exact', 'icontains', 'istartswith']}
+                         'language': ['exact', 'icontains', 'istartswith'],
+                         'comment': ['icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
 
 class MeaningInput(InputObjectType):
     meaning = String(required=True)
     language = String(required=True)
+    related_meanings = List(ID)
+    comment = String()
 
 
 # Queries
@@ -36,6 +40,8 @@ class CreateMeaning(relay.ClientIDMutation):
     class Input:
         meaning = String(required=True)
         language = String(required=True)
+        related_meanings = List(ID)
+        comment = String()
 
     meaning = Field(MeaningNode)
     success = Boolean()
@@ -45,6 +51,17 @@ class CreateMeaning(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         meaning, meaning_created = Meaning.objects.get_or_create(
             meaning=to_nfc(input.get('meaning')), language=to_nfc(input.get('language')))
+
+        if input.get('related_meanings', None):
+            for related_meaning in input.get('related_meanings'):
+                meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+                meaning.related_meanings.add(meaning_rel)
+
+        if input.get('comment', None):
+            meaning.comment = input.get('comment')
+
+        meaning.save()
+
         return cls(meaning=meaning, success=True)
 
 
@@ -65,6 +82,12 @@ class UpdateMeaning(relay.ClientIDMutation):
             meaning = Meaning.objects.get(id=from_global_id(input.get('id'))[1])
             meaning.meaning = to_nfc(input.get('meaning'))
             meaning.language = to_nfc(input.get('language'))
+            meaning.comment = input.get('comment')
+            if input.get('related_meanings', None):
+                meaning.related_meanings.clear()
+                for related_meaning in input.get('related_meanings'):
+                    meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+                    meaning.related_meanings.add(meaning_rel)
             meaning.save()
             return cls(meaning=meaning, success=True)
         else:
