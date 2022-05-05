@@ -9,7 +9,6 @@ from graphql_jwt.decorators import login_required
 from mpcd.dict.models import Semantic
 from mpcd.dict.models import Meaning
 from mpcd.dict.models import TermTech
-from mpcd.dict.models import Entry
 from mpcd.dict.models import Lemma
 from mpcd.dict.schemas import MeaningInput
 from mpcd.dict.schemas import LemmaInput
@@ -61,32 +60,31 @@ class CreateSemantic(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        # Lemmas
-        local_lemmas = []
-        local_meanings = []
+
+
+        # create semantic
+        semantic = Semantic()
+
         # Lemmas
         if input.get('lemmas', None):
             for lemma in input['lemmas']:
                 lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
                     input.get('word')), language=to_nfc(input.get('language')))
-                local_lemmas.append(lemma)
+                semantic.lemmas.add(lemma)
 
         # Meanings
         if input('meanings', None):
             for meaning_input in input['meanings']:
                 meaning_obj, meaning_created = Meaning.objects.get_or_create(
                     meaning=to_nfc(meaning_input['meaning']), language=meaning_input['language'])
-                local_meanings.append(meaning_obj)
-
-        # get or create Semantic
-        semantic, semantic_created = Semantic.objects.get_or_create(lemmas=local_lemmas, meanings=local_meanings)
+                semantic.meanings.add(lemma)
 
         # TermTechs
         if input('term_techs', None):
             for term_tech_input in input['term_techs']:
                 term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
-                if term_tech_obj:
-                    semantic.term_techs.add(term_tech_obj)
+                semantic.term_techs.add(term_tech_obj)
+
         # Comment
         if input('comment', None):
             semantic.comment = input['comment']
@@ -114,13 +112,6 @@ class UpdateSemantic(relay.ClientIDMutation):
             semantic_obj = Semantic.objects.get(pk=from_global_id(input['id'])[1])
         else:
             return cls(success=False, errors=['Semantic ID does not exist'])
-
-        if Entry.objects.filter(pk=from_global_id(input['entry'])[1]).exists():
-            entry = Entry.objects.get(pk=from_global_id(input['entry'])[1])
-            semantic_obj.entry = entry
-        else:
-            return cls(success=False, errors=['Entry ID does not exist'])
-
         # Lemmas
         if input.get('lemmas', None):
             semantic_obj.lemmas.clear()

@@ -2,11 +2,11 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.dict.models import Entry, Lemma, Translation, Dictionary
 from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import SemanticInput
+from mpcd.dict.schemas import MeaningInput
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -26,8 +26,7 @@ class TokenNode(DjangoObjectType):
         model = Token
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
                          'transliteration': ['exact', 'icontains', 'istartswith'],
-                         'line': ['exact'],
-                         'entries': ['exact'],
+                         'line': ['exact']
                          }
         interfaces = (relay.Node,)
 
@@ -37,7 +36,7 @@ class TokenInput(InputObjectType):
     transcription = String()
     transliteration = String()
     language = String()
-    semantics = List(SemanticInput)
+    meanings = List(MeaningInput)
     pos = String()
     morphological_annotation = List(MorphologicalAnnotationInput)
     syntactic_annotation = List(DependencyInput)
@@ -69,7 +68,7 @@ class CreateToken(relay.ClientIDMutation):
         language = String(required=True)
         text = ID(required=True)
         number = Float(required=True)
-        semantics = List(SemanticInput)
+        meanings = List(MeaningInput)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
@@ -99,36 +98,8 @@ class CreateToken(relay.ClientIDMutation):
         token, token_obj = Token.objects.get_or_create(
             transcription=to_nfc(input['transcription']), transliteration=to_nfc(input['transliteration']), text=text, number=float(input['number']), language=input['language'])
 
-        # check entries available
-        if input.get('entries', None) is not None:
+       # TODO add lemma and meaning
 
-            for local_entry in input.get('entries'):
-
-                # check if dict exists
-                if Dictionary.objects.filter(pk=from_global_id(local_entry['dict'])[1]).exists():
-                    dict = Dictionary.objects.get(pk=from_global_id(local_entry['dict'])[1])
-                else:
-                    return cls(token=None, success=False, errors=["Dictionary with ID {} not found".format(local_entry['dict'])])
-
-                lemma_word = to_nfc(local_entry.get('lemma').get('word'))
-                lemma_lang = to_nfc(local_entry.get('lemma').get('language'))
-
-                lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
-
-                entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
-
-                # check if translations available
-                if local_entry.get('translations') is not None:
-                    for translation in local_entry['translations']:
-                        # check if language in mutation input is available
-                        translation_obj, translation_obj_created = Translation.objects.get_or_create(
-                            text=to_nfc(translation['text']), language=to_nfc(translation['language']))
-                        entry.translations.add(translation_obj)
-
-                entry.save()
-
-                # add the entry to the token
-                token.entries.add(entry)
         # check if pos available
         if input.get('pos', None) is not None:
             token.pos = input.get('pos')
@@ -184,7 +155,7 @@ class UpdateToken(relay.ClientIDMutation):
         language = String(required=True)
         text = ID(required=True)
         number = Float()
-        semantics = List(SemanticInput)
+        meanings = List(MeaningInput)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
@@ -217,36 +188,7 @@ class UpdateToken(relay.ClientIDMutation):
         # update number
         token.number = float(input.get('number'))
 
-        # check entries available
-        if input.get('entries', None) is not None:
-
-            for local_entry in input.get('entries'):
-
-                # check if dict exists
-                if Dictionary.objects.filter(pk=from_global_id(local_entry['dict'])[1]).exists():
-                    dict = Dictionary.objects.get(pk=from_global_id(local_entry['dict'])[1])
-                else:
-                    return cls(token=None, success=False, errors=["Dictionary with ID {} not found".format(local_entry['dict'])])
-
-                lemma_word = to_nfc(local_entry.get('lemma').get('word'))
-                lemma_lang = to_nfc(local_entry.get('lemma').get('language'))
-
-                lemma, lemma_created = Lemma.objects.get_or_create(word=lemma_word, language=lemma_lang)
-
-                entry, entry_created = Entry.objects.get_or_create(lemma=lemma, dict=dict)
-
-                # check if translations available
-                if local_entry.get('translations') is not None:
-                    for translation in local_entry['translations']:
-                        # check if language in mutation input is available
-                        translation_obj, translation_obj_created = Translation.objects.get_or_create(
-                            text=to_nfc(translation['text']), language=to_nfc(translation['language']))
-                        entry.translations.add(translation_obj)
-
-                entry.save()
-
-                # add the entry to the token
-                token.entries.add(entry)
+        # TODO add lemma and meaning
 
         # check if pos available
         if input.get('pos', None) is not None:
@@ -343,42 +285,8 @@ class JoinTokens(relay.ClientIDMutation):
         return cls(success=True)
 
 
-class AddEntryToToken(relay.ClientIDMutation):
-    class Input:
-        token_id = ID(required=True)
-        entry_id = ID(required=True)
-
-    success = Boolean()
-    token = Field(TokenNode)
-    errors = List(String)
-
-    @classmethod
-    @login_required
-    def mutate_and_get_payload(cls, root, info, **input):
-        # get token
-        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
-            token = Token.objects.get(pk=from_global_id(input['token_id'])[1])
-        else:
-            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input['token_id'])])
-
-        # get entry
-        if Entry.objects.filter(pk=from_global_id(input['entry_id'])[1]).exists():
-            entry = Entry.objects.get(pk=from_global_id(input['entry_id'])[1])
-        else:
-            return cls(token=None, success=False, errors=["Entry with ID {} not found".format(input['entry_id'])])
-
-        # add entry to token
-        token.entries.add(entry)
-
-        # save token
-        token.save()
-
-        return cls(token=token, success=True)
-
-
 class Mutation(ObjectType):
     create_token = CreateToken.Field()
     delete_token = DeleteToken.Field()
     update_token = UpdateToken.Field()
-    add_entry_to_token = AddEntryToToken.Field()
     join_tokens = JoinTokens.Field()

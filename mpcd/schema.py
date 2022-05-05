@@ -27,14 +27,11 @@ class Query(
         # Dict Queries
         mpcd.dict.schemas.definition.Query,
         mpcd.dict.schemas.dictionary.Query,
-        mpcd.dict.schemas.entry.Query,
         mpcd.dict.schemas.lemma.Query,
-        mpcd.dict.schemas.loanword.Query,
         mpcd.dict.schemas.meaning.Query,
         mpcd.dict.schemas.reference.Query,
         mpcd.dict.schemas.semantic.Query,
         mpcd.dict.schemas.term_tech.Query,
-        mpcd.dict.schemas.translation.Query,
         graphene.ObjectType):
     pass
 
@@ -61,14 +58,11 @@ class Mutation(
         # Dict Mutations
         mpcd.dict.schemas.definition.Mutation,
         mpcd.dict.schemas.dictionary.Mutation,
-        mpcd.dict.schemas.entry.Mutation,
         mpcd.dict.schemas.lemma.Mutation,
-        mpcd.dict.schemas.loanword.Mutation,
         mpcd.dict.schemas.meaning.Mutation,
         mpcd.dict.schemas.reference.Mutation,
         mpcd.dict.schemas.semantic.Mutation,
         mpcd.dict.schemas.term_tech.Mutation,
-        mpcd.dict.schemas.translation.Mutation,
         graphene.ObjectType):
 
     # https://django-graphql-jwt.domake.io/relay.html

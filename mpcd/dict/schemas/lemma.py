@@ -1,5 +1,3 @@
-from app_backend.mpcd.dict.models import loanword
-from app_backend.mpcd.dict.schemas.loanword import LoanWordInput
 from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -8,8 +6,7 @@ import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
 
-from mpcd.dict.models import Lemma, LoanWord, Translation
-from mpcd.dict.schemas import LoanWordInput
+from mpcd.dict.models import Lemma
 from mpcd.utils.normalize import to_nfc
 
 
@@ -23,8 +20,7 @@ class LemmaNode(DjangoObjectType):
 class LemmaInput(InputObjectType):
     word = String(required=True)
     language = String(required=True)
-    loanwords = List(LoanWordInput)
-    related_lemmas = List(LemmaNode)
+    related_lemmas = List(ID)
     comment = String()
 
 
@@ -44,8 +40,7 @@ class CreateLemma(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
         language = String(required=True)
-        loanwords = List(LoanWordInput)
-        related_lemmas = List(LemmaNode)
+        related_lemmas = List(ID)
 
     word = Field(LemmaNode)
     success = Boolean()
@@ -57,33 +52,10 @@ class CreateLemma(relay.ClientIDMutation):
         lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
             input.get('word')), language=to_nfc(input.get('language')))
 
-        # loanwords
-        if input.get('loanwords', None):
-            for loanword in input.get('loanwords'):
-                lemma_word = loanword.get('word')
-                lemma_lang = loanword.get('language')
-                loanword_instance, loanword_created = LoanWord.objects.get_or_create(
-                    word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
-
-                if loanword.get('translations', None):
-                    # clear up
-                    loanword_instance.translations.clear()
-
-                    for translation in loanword.get('translations'):
-                        # check if translation exists, if not create it
-                        translation_instance, translation_created = Translation.objects.get_or_create(
-                            text=to_nfc(translation.get('text')), language=translation.get('language'))
-                        # add translation
-                        loanword_instance.translations.add(translation_instance)
-                        loanword_instance.save()
-
-                lemma.loanwords.add(loanword_instance)
-
         # related_lemmas
         if input.get('related_lemmas', None):
             for related_lemma in input.get('related_lemmas'):
-                lemma_rel, lemma_rel_created = Lemma.objects.get_or_create(word=to_nfc(
-                    related_lemma.get('word')), language=to_nfc(related_lemma.get('language')))
+                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
                 lemma.related_lemmas.add(lemma_rel)
 
         # comment
@@ -100,7 +72,7 @@ class UpdateLemma(relay.ClientIDMutation):
         id = ID(required=True)
         word = String(required=True)
         language = String(required=True)
-        related_lemmas = List(LemmaNode)
+        related_lemmas = List(ID)
 
     errors = List(String)
     word = Field(LemmaNode)
@@ -115,37 +87,12 @@ class UpdateLemma(relay.ClientIDMutation):
             lemma.word = to_nfc(input.get('word'))
             lemma.language = to_nfc(input.get('language'))
 
-            # loanwords
-            if input.get('loanwords', None):
-                # clear up
-                lemma.loanwords.clear()
-                for loanword in input.get('loanwords'):
-                    lemma_word = loanword.get('word')
-                    lemma_lang = loanword.get('language')
-                    loanword_instance, loanword_created = LoanWord.objects.get_or_create(
-                        word=to_nfc(lemma_word), language=to_nfc(lemma_lang))
-
-                    if loanword.get('translations', None):
-                        # clear up
-                        loanword_instance.translations.clear()
-
-                        for translation in loanword.get('translations'):
-                            # check if translation exists, if not create it
-                            translation_instance, translation_created = Translation.objects.get_or_create(
-                                text=to_nfc(translation.get('text')), language=translation.get('language'))
-                            # add translation
-                            loanword_instance.translations.add(translation_instance)
-                            loanword_instance.save()
-
-                    lemma.loanwords.add(loanword_instance)
-
             # related_lemmas
             if input.get('related_lemmas', None):
                 # clear up
                 lemma.related_lemmas.clear()
                 for related_lemma in input.get('related_lemmas'):
-                    lemma_rel, lemma_rel_created = Lemma.objects.get_or_create(word=to_nfc(
-                        related_lemma.get('word')), language=to_nfc(related_lemma.get('language')))
+                    lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
                     lemma.related_lemmas.add(lemma_rel)
 
             # comment

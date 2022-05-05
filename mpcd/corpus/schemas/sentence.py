@@ -5,8 +5,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Sentence, Text, Token
 from mpcd.corpus.schemas.token import TokenInput
-from mpcd.dict.models import Translation
-from mpcd.dict.schemas.translation import TranslationInput
+from mpcd.dict.models import Meaning
+from mpcd.dict.schemas import MeaningInput
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -32,7 +32,7 @@ class SentenceInput(InputObjectType):
     text = ID()
     number = Float()
     tokens = List(TokenInput)
-    translation = List(TranslationInput)
+    translations = List(MeaningInput)
     comment = String()
     previous = ID()
 
@@ -59,7 +59,7 @@ class CreateSentence(relay.ClientIDMutation):
         text = ID(required=True)
         number = Float(required=True)
         tokens = List(ID)
-        translations = List(TranslationInput)
+        translations = List(MeaningInput)
         comment = String()
         previous = ID()
 
@@ -84,8 +84,8 @@ class CreateSentence(relay.ClientIDMutation):
             for translation_input in input.get('translations'):
 
                 # check if translation exists, if not create it
-                translation_instance, translation_created = Translation.objects.get_or_create(
-                    text=translation_input.get('text'), language=translation_input.get('language'))
+                translation_instance, translation_created = Meaning.objects.get_or_create(
+                    meaning=translation_input.get('meaning'), language=translation_input.get('language'))
 
                 # add translation to sentence
                 sentence_instance.translations.add(translation_instance)
@@ -117,7 +117,7 @@ class UpdateSentence(relay.ClientIDMutation):
         text = ID()
         number = Float()
         tokens = List(ID)
-        translations = List(TranslationInput)
+        translations = List(MeaningInput)
         comment = String()
         previous = ID()
 
@@ -144,8 +144,8 @@ class UpdateSentence(relay.ClientIDMutation):
                 sentence_instance.translations.clear()
                 for translation_input in input.get('translations'):
                     # check if translation exists, if not create it
-                    translation_instance, translation_created = Translation.objects.get_or_create(
-                        text=translation_input.get('text'), language=translation_input.get('language'))
+                    translation_instance, translation_created = Meaning.objects.get_or_create(
+                        meaning=translation_input.get('meaning'), language=translation_input.get('language'))
                     # add translation to sentence
                     sentence_instance.translations.add(translation_instance)
             if input.get('number', None):
