@@ -86,7 +86,8 @@ class UpdateMeaning(relay.ClientIDMutation):
             if input.get('related_meanings', None):
                 meaning.related_meanings.clear()
                 for related_meaning in input.get('related_meanings'):
-                    meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+                    meaning_rel, meaning_rel_created = Meaning.objects.get(
+                        id=from_global_id(related_meaning.get('id'))[1])
                     meaning.related_meanings.add(meaning_rel)
             meaning.save()
             return cls(meaning=meaning, success=True)
