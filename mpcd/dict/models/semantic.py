@@ -4,7 +4,7 @@ from simple_history.models import HistoricalRecords
 
 from .meaning import Meaning
 from .term_tech import TermTech
-from mpcd.corpus.models import Lemma
+from mpcd.dict.models import Lemma
 
 
 class Semantic(models.Model):

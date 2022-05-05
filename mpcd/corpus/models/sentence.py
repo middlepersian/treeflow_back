@@ -1,4 +1,4 @@
-from mpcd.dict.models import Translation
+from mpcd.dict.models import Meaning
 from .text import Text
 from .token import Token
 from django.db import models
@@ -15,7 +15,7 @@ class Sentence(models.Model):
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='sentence_text')
     tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
 
-    translations = models.ManyToManyField(Translation, related_name='sentence_translations')
+    translations = models.ManyToManyField(Meaning, related_name='sentence_translations')
     comment = models.CharField(max_length=255, blank=True)
 
     number = models.FloatField(null=True, blank=True)
