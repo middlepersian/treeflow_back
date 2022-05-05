@@ -1,43 +1,7 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Dictionary, Entry, Lemma, LoanWord, Reference
+from .models import Dictionary, Lemma, Reference
 
-
-class EntryHistoryAdmin(SimpleHistoryAdmin):
-    fields = ["dict", "lemma", "loanwords", "references", "comment"]
-    list_display = ["lemma", "_loanwords",  "_references", "comment"]
-    history_list_display = ["lemma"]
-    search_fields = ["lemma__word", "translations__meaning"]
-
-    def get_ordering(self, request):
-        return ['lemma__word']
-
-    def get_queryset(self, request):
-
-        queryset = Entry.objects.all()
-        queryset = queryset.select_related('dict')
-        queryset = queryset.select_related('lemma')
-        queryset = queryset.prefetch_related('loanwords', 'loanwords__translations')
-        queryset = queryset.prefetch_related('references')
-        return queryset
-
-    def _loanwords(self, obj):
-        loans = []
-        for p in obj.loanwords.all():
-            if p.language:
-                lang = p.language
-                loans.append(lang)
-            if p.word:
-                loanword = p.word
-                loans.append(loanword)
-            if p.translations:
-                trans = " - \n".join([t.meaning for t in p.translations.all()])
-                loans.append(trans)
-
-        return " |\n".join([p for p in loans])
-
-    def _references(self, obj):
-        return " |\n".join([p.reference for p in obj.references.all()])
 
 
 class WordHistoryAdmin(SimpleHistoryAdmin):
@@ -48,24 +12,6 @@ class WordHistoryAdmin(SimpleHistoryAdmin):
 
     def get_ordering(self, request):
         return ['word']
-
-
-class LoanWordHistoryAdmin(SimpleHistoryAdmin):
-    fields = ["language", "word", "translations"]
-    list_display = [ "word", "_translations", "language",]
-    history_list_display = ["language", "word", ]
-    search_fields = ["word", "translations__meaning"]
-
-    def get_ordering(self, request):
-        return ['word']
-
-    def get_queryset(self, request):
-        queryset = LoanWord.objects.all()
-        queryset = queryset.prefetch_related('translations')
-        return queryset
-
-    def _translations(self, obj):
-        return " |\n".join([p.text for p in obj.translations.all()])
 
 
 class ReferenceHistoryAdmin(SimpleHistoryAdmin):
@@ -79,7 +25,5 @@ class ReferenceHistoryAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(Dictionary)
-admin.site.register(Entry, EntryHistoryAdmin)
 admin.site.register(Lemma, WordHistoryAdmin)
-admin.site.register(LoanWord, LoanWordHistoryAdmin)
 admin.site.register(Reference, ReferenceHistoryAdmin)
