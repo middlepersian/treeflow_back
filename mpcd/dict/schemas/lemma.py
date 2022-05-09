@@ -6,7 +6,7 @@ import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
 
-from mpcd.dict.models import Lemma
+from mpcd.dict.models import Lemma, Meaning
 from mpcd.utils.normalize import to_nfc
 
 
@@ -21,6 +21,7 @@ class LemmaInput(InputObjectType):
     word = String(required=True)
     language = String(required=True)
     related_lemmas = List(ID)
+    related_meanings = List(ID)
     comment = String()
 
 
@@ -55,8 +56,14 @@ class CreateLemma(relay.ClientIDMutation):
         # related_lemmas
         if input.get('related_lemmas', None):
             for related_lemma in input.get('related_lemmas'):
-                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
+                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
                 lemma.related_lemmas.add(lemma_rel)
+
+        # related_meanings
+        if input.get('related_meanings', None):
+            for related_meaning in input.get('related_meanings'):
+                meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+                lemma.related_meanings.add(meaning_rel)
 
         # comment
         if input.get('comment', None):
@@ -92,8 +99,17 @@ class UpdateLemma(relay.ClientIDMutation):
                 # clear up
                 lemma.related_lemmas.clear()
                 for related_lemma in input.get('related_lemmas'):
-                    lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
+                    lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
                     lemma.related_lemmas.add(lemma_rel)
+
+            # related_meanings
+            if input.get('related_meanings', None):
+                # clear up
+                lemma.related_lemmas.clear()
+                for related_meaning in input.get('related_meanings'):
+                    meaning_rel, meaning_rel_created = Meaning.objects.get(
+                        id=from_global_id(related_meaning.get('id'))[1])
+                    lemma.related_meanings.add(meaning_rel)
 
             # comment
             if input.get('comment', None):

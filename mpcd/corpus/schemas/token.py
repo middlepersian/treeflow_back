@@ -3,9 +3,10 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line
+from mpcd.dict.models import Lemma, Meaning
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
-from mpcd.dict.schemas import SemanticInput
+from mpcd.dict.schemas import LemmaInput
 from mpcd.dict.schemas import MeaningInput
 
 import graphene_django_optimizer as gql_optimizer
@@ -36,6 +37,7 @@ class TokenInput(InputObjectType):
     transcription = String()
     transliteration = String()
     language = String()
+    lemma = LemmaInput()
     meanings = List(MeaningInput)
     pos = String()
     morphological_annotation = List(MorphologicalAnnotationInput)
@@ -68,6 +70,7 @@ class CreateToken(relay.ClientIDMutation):
         language = String(required=True)
         text = ID(required=True)
         number = Float(required=True)
+        lemma = LemmaInput()
         meanings = List(MeaningInput)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
@@ -88,7 +91,7 @@ class CreateToken(relay.ClientIDMutation):
         logger.error("INPUT: {}".format(input))
 
         # check if text available
-        if input.get('text', None) is not None:
+        if input.get('text', None):
             if Text.objects.filter(pk=from_global_id(input['text'])[1]).exists():
                 text = Text.objects.get(pk=from_global_id(input['text'])[1])
             else:
@@ -98,31 +101,51 @@ class CreateToken(relay.ClientIDMutation):
         token, token_obj = Token.objects.get_or_create(
             transcription=to_nfc(input['transcription']), transliteration=to_nfc(input['transliteration']), text=text, number=float(input['number']), language=input['language'])
 
-       # TODO add lemma and meaning
+       # First, get or create meanings in order to add them to lemma as related_meanings
+        local_related_meanings = []
 
-        # check if pos available
-        if input.get('pos', None) is not None:
+       # get or create the meanings
+        if input.get('meanings', None):
+            for meaning in input['meanings']:
+                meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(
+                    meaning=meaning['meaning'], language=meaning['language'])
+                local_related_meanings.append(meaning_obj)
+
+            token.meanings.set(local_related_meanings)
+
+        # get or create the lemma
+        if input.get('lemma', None):
+            lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
+                lemma=input['lemma']['word'], language=input['lemma']['language'])
+            # add the related meanings to the lemma
+            if local_related_meanings:
+                lemma_obj.related_meanings.set(local_related_meanings)
+                lemma_obj.save()
+            token.lemma = lemma_obj
+
+            # check if pos available
+        if input.get('pos', None):
             token.pos = input.get('pos')
 
        # check if morphological annotation available
-        if input.get('morphological_annotation', None) is not None:
+        if input.get('morphological_annotation', None):
             for annotation in input['morphological_annotation']:
                 annotation_obj, annotation_obj_created = MorphologicalAnnotation.objects.get_or_create(
                     feature=annotation['feature'], feature_value=annotation['feature_value'])
                 token.morphological_annotation.add(annotation_obj)
         # check if syntactic annotation available
-        if input.get('syntactic_annotation') is not None:
+        if input.get('syntactic_annotation'):
             for annotation in input['syntactic_annotation']:
                 dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
                 token.syntactic_annotation.add(dep_obj)
         # check if comment available
-        if input.get('comment', None) is not None:
+        if input.get('comment', None):
             token.comment = input['comment']
         # check if avestan available
-        if input.get('avestan', None) is not None:
+        if input.get('avestan', None):
             token.avestan = input['avestan']
         # check if previous token available
-        if input.get('previous', None) is not None:
+        if input.get('previous', None):
             # check if previous token with assigned id already exists
             if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 token.previous = Token.objects.filter(pk=from_global_id(input['previous'])[1]).first()
@@ -130,7 +153,7 @@ class CreateToken(relay.ClientIDMutation):
                 return cls(token=None, success=False, errors=["Previous token with ID {} not found".format(input['previous'])])
 
         # check if line available
-        if input.get('line', None) is not None:
+        if input.get('line', None):
             # check if line with assigned id already exists
             if Line.objects.filter(pk=from_global_id(input['line'])[1]).exists():
                 line = Line.objects.filter(pk=from_global_id(input['line'])[1]).first()
@@ -138,7 +161,7 @@ class CreateToken(relay.ClientIDMutation):
             else:
                 return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line'])])
         # check if position_in_line available
-        if input.get('position_in_line', None) is not None:
+        if input.get('position_in_line', None):
             position_in_line = input['position_in_line']
             token.position_in_line = position_in_line
 
@@ -188,39 +211,61 @@ class UpdateToken(relay.ClientIDMutation):
         # update number
         token.number = float(input.get('number'))
 
-        # TODO add lemma and meaning
+       # First, get or create meanings in order to add them to lemma as related_meanings
+        local_related_meanings = []
+
+       # get or create the meanings
+        if input.get('meanings', None):
+            # clear the current meanings
+            token.meanings.clear()
+            for meaning in input['meanings']:
+                meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(
+                    meaning=meaning['meaning'], language=meaning['language'])
+                local_related_meanings.append(meaning_obj)
+
+            token.meanings.set(local_related_meanings)
+
+        # get or create the lemma
+        if input.get('lemma', None):
+            lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
+                lemma=input['lemma']['word'], language=input['lemma']['language'])
+            # add the related meanings to the lemma
+            if local_related_meanings:
+                lemma_obj.related_meanings.set(local_related_meanings)
+                lemma_obj.save()
+            token.lemma = lemma_obj
 
         # check if pos available
-        if input.get('pos', None) is not None:
+        if input.get('pos', None):
             token.pos = input.get('pos')
 
         # check if morphological annotation available
-        if input.get('morphological_annotation', None) is not None:
+        if input.get('morphological_annotation', None):
             token.morphological_annotation.clear()
             for annotation in input['morphological_annotation']:
                 annotation_obj, annotation_obj_created = MorphologicalAnnotation.objects.get_or_create(
                     feature=annotation['feature'], feature_value=annotation['feature_value'])
                 token.morphological_annotation.add(annotation_obj)
         # check if syntactic annotation available
-        if input.get('syntactic_annotation') is not None:
+        if input.get('syntactic_annotation'):
             token.syntactic_annotation.clear()
             for annotation in input['syntactic_annotation']:
                 dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
                 token.syntactic_annotation.add(dep_obj)
         # check if comment available
-        if input.get('comment', None) is not None:
+        if input.get('comment', None):
             token.comment = input['comment']
         # check if avestan available
-        if input.get('avestan', None) is not None:
+        if input.get('avestan', None):
             token.avestan = input['avestan']
         # check if previous token available
-        if input.get('previous', None) is not None:
+        if input.get('previous', None):
             # check if previous token with assigned id already exists
             if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 token.previous = Token.objects.filter(pk=from_global_id(input['previous'])[1]).first()
 
            # check if line available
-        if input.get('line', None) is not None:
+        if input.get('line', None):
             # check if line with assigned id already exists
             if Line.objects.filter(pk=from_global_id(input['line'])[1]).exists():
                 line = Line.objects.get(pk=from_global_id(input['line'])[1])
@@ -229,7 +274,7 @@ class UpdateToken(relay.ClientIDMutation):
                 return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line'])])
 
         # check if position_in_line available
-        if input.get('position_in_line', None) is not None:
+        if input.get('position_in_line', None):
             position_in_line = input['position_in_line']
             token.position_in_line = position_in_line
 
@@ -267,13 +312,13 @@ class JoinTokens(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         # get token
-        if input.get('current', None) is not None:
+        if input.get('current', None):
             if Token.objects.filter(pk=from_global_id(input['current'])[1]).exists():
                 current_token = Token.objects.get(pk=from_global_id(input['current'])[1])
             else:
                 return cls(success=False, errors=["Token with ID {} not found".format(input['current'])])
             logger.error("TOKEN_ID: {}".format(current_token.id))
-        if input.get('previous', None) is not None:
+        if input.get('previous', None):
             # get previous token
             if Token.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 previous_token = Token.objects.get(pk=from_global_id(input['previous'])[1])
