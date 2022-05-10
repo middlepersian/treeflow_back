@@ -23,8 +23,8 @@ class FacsimileNode(DjangoObjectType):
 
 
 class FacsimileInput(InputObjectType):
-    bib_entry = ID()
-    codex_part = ID()
+    bib_entry = ID(required=True)
+    codex_part = ID(required=True)
 
 # Queries
 
@@ -43,7 +43,7 @@ class Query(ObjectType):
 class CreateFacsimile(relay.ClientIDMutation):
     class Input:
         bib_entry = ID(required=True)
-        codex_part = ID()
+        codex_part = ID(required=True)
 
     facsimile = Field(FacsimileNode)
     success = Boolean()
@@ -51,7 +51,6 @@ class CreateFacsimile(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
@@ -62,24 +61,22 @@ class CreateFacsimile(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['bib_entry ID does not exist'])
 
-        if input.get('codex_part', None) is not None:
+        if CodexPart.objects.filter(pk=from_global_id(input.get('codex_part'))[1]).exists():
+            codex_part = CodexPart.objects.get(pk=from_global_id(input.get('codex_part'))[1])
+            facsimile_instance.codex_part = codex_part
+            facsimile_instance.save()
 
-            if CodexPart.objects.filter(pk=from_global_id(input.get('codex_part'))[1]).exists():
-                codex_part = CodexPart.objects.get(pk=from_global_id(input.get('codex_part'))[1])
-                facsimile_instance.codex_part = codex_part
-                facsimile_instance.save()
-
-            else:
-                return cls(success=False, errors=['codex_part does not exist'])
+        else:
+            return cls(success=False, errors=['codex_part ID does not exist'])
 
         return cls(facsimile=facsimile_instance, success=True)
 
 
 class UpdateFacsimile(relay.ClientIDMutation):
     class Input:
-        facsimile = ID()
-        bib_entry = ID()
-        codex_part = ID()
+        id = ID(required=True)
+        bib_entry = ID(required=True)
+        codex_part = ID(required=True)
 
     facsimile = Field(FacsimileNode)
     success = Boolean()
@@ -87,36 +84,26 @@ class UpdateFacsimile(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
 
-        if input.get('facsimile', None) is not None:
-
-            if Facsimile.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
-                facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('id'))[1])
-            else:
-                return cls(success=False, errors=['facsimile does not exist'])
-
+        if Facsimile.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('id'))[1])
         else:
-            return cls(success=False, errors=['facsimile ID is required'])
+            return cls(success=False, errors=['facsimile ID does not exist'])
 
-        if input.get('bib_entry', None) is not None:
+        if BibEntry.objects.filter(pk=from_global_id(input.get('bib_entry'))[1]).exists():
+            bib_entry = BibEntry.objects.get(pk=from_global_id(input.get('bib_entry'))[1])
+            facsimile_instance.bib_entry = bib_entry
+        else:
+            return cls(success=False, errors=['bib_entry does not exist'])
 
-            if BibEntry.objects.filter(pk=from_global_id(input.get('bib_entry'))[1]).exists():
-                bib_entry = BibEntry.objects.get(pk=from_global_id(input.get('bib_entry'))[1])
-                facsimile_instance.bib_entry = bib_entry
-            else:
-                return cls(success=False, errors=['bib_entry does not exist'])
-
-        if input.get('codex_part', None) is not None:
-
-            if CodexPart.objects.filter(pk=from_global_id(input.get('codex_part'))[1]).exists():
-                codex_part = CodexPart.objects.get(pk=from_global_id(input.get('codex_part'))[1])
-                facsimile_instance.codex_part = codex_part
-            else:
-                return cls(success=False, errors=['codex_part does not exist'])
+        if CodexPart.objects.filter(pk=from_global_id(input.get('codex_part'))[1]).exists():
+            codex_part = CodexPart.objects.get(pk=from_global_id(input.get('codex_part'))[1])
+            facsimile_instance.codex_part = codex_part
+        else:
+            return cls(success=False, errors=['codex_part ID does not exist'])
 
         facsimile_instance.save()
 
@@ -132,12 +119,11 @@ class DeleteFacsimile(relay.ClientIDMutation):
 
     @classmethod
     @superuser_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('DeleteFacsimile.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
 
-        if input.get('id', None) is not None:
+        if input.get('id'):
 
             if Facsimile.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
                 facsimile_instance = Facsimile.objects.get(pk=from_global_id(input.get('id'))[1])

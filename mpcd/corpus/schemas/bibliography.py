@@ -1,3 +1,4 @@
+from numpy import require
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -28,9 +29,9 @@ class BibEntryNode(DjangoObjectType):
 
 
 class BibEntryInput(InputObjectType):
-    title = String()
-    year = Int()
-    authors = List(AuthorInput)
+    title = String(required=True)
+    year = Int(required=True)
+    authors = List(AuthorInput, required=True)
 
 
 # Queries
@@ -50,7 +51,7 @@ class CreateBibEntry(relay.ClientIDMutation):
     class Input:
         title = String(required=True)
         year = Int(required=True)
-        authors = List(AuthorInput)
+        authors = List(AuthorInput, required=True)
 
     bibentry = Field(BibEntryNode)
     success = Boolean()
@@ -58,17 +59,16 @@ class CreateBibEntry(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("input: {}".format(input))
         bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(
             title=to_nfc(input.get('title')), year=input.get('year'))
 
-        authors = input.get('authors', None)
+        authors = input.get('authors')
         for author in authors:
             author_instance, author_created = Author.objects.get_or_create(
-                name=to_nfc(author.get('name', None)),
-                last_name=to_nfc(author.get('last_name', None)))
+                name=to_nfc(author.get('name')),
+                last_name=to_nfc(author.get('last_name')))
             bibentry_instance.authors.add(author_instance)
         bibentry_instance.save()
         return cls(bibentry=bibentry_instance, success=True)
@@ -79,7 +79,7 @@ class UpdateBibEntry(relay.ClientIDMutation):
         id = ID(required=True)
         title = String(required=True)
         year = Int(required=True)
-        authors = List(AuthorInput)
+        authors = List(AuthorInput, required=True)
 
     bibentry = Field(BibEntryNode)
     success = Boolean()
@@ -87,7 +87,6 @@ class UpdateBibEntry(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         if BibEntry.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -98,14 +97,14 @@ class UpdateBibEntry(relay.ClientIDMutation):
         bibentry_instance.title = to_nfc(input.get('title'))
         bibentry_instance.year = input.get('year')
 
-        if input.get('authors', None) is not None:
-            bibentry_instance.authors.clear()
-            authors = input.get('authors', None)
-            for author in authors:
-                author_instance, author_created = Author.objects.get_or_create(
-                    first_name=to_nfc(author.get('first_name', None)),
-                    last_name=to_nfc(author.get('last_name', None)))
-                bibentry_instance.authors.add(author_instance)
+        # clear all authors
+        bibentry_instance.authors.clear()
+        # update authors
+        for author in input.get('authors'):
+            author_instance, author_created = Author.objects.get_or_create(
+                first_name=to_nfc(author.get('first_name')),
+                last_name=to_nfc(author.get('last_name')))
+            bibentry_instance.authors.add(author_instance)
 
         bibentry_instance.save()
         return cls(bibentry=bibentry_instance, success=True)
@@ -114,12 +113,12 @@ class UpdateBibEntry(relay.ClientIDMutation):
 class DeleteBibEntry(relay.ClientIDMutation):
 
     success = Boolean()
+
     class Input:
         id = ID(required=True)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         if BibEntry.objects.filter(pk=from_global_id(id[1])).exists():
             bibentry_instance = BibEntry.objects.get(pk=from_global_id(id)[1])

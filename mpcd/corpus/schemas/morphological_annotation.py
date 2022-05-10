@@ -1,3 +1,4 @@
+from app_backend.mpcd.corpus.models import morphological_annotation
 from graphene import relay, InputObjectType, Field, ObjectType, ID, Boolean, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -37,38 +38,33 @@ class Query(ObjectType):
 
 class CreateMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
-        feature = String()
-        feature_value = String()
+        feature = String(required=True)
+        feature_value = String(required=True)
 
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, feature, feature_value):
-        if MorphologicalAnnotation.objects.filter(feature=feature, feature_value=feature_value).exists():
-            return cls(success=False)
 
-        else:
-            morphological_annotation_instance = MorphologicalAnnotation.objects.create(
-                feature=feature, feature_value=feature_value)
-            morphological_annotation_instance.save()
-            return cls(morphological_annotation=morphological_annotation_instance, success=True)
+        morphological_annotation_instance = MorphologicalAnnotation.objects.get_or_create(
+            feature=feature, feature_value=feature_value)
+        morphological_annotation_instance.save()
+        return cls(morphological_annotation=morphological_annotation_instance, success=True)
 
 
 class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
-        id = ID()
-        feature = String()
-        feature_value = String()
+        id = ID(required=True)
+        feature = String(required=True)
+        feature_value = String(required=True)
 
     morphological_annotation = Field(MorphologicalAnnotationNode)
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id, feature, feature_value):
 
         if MorphologicalAnnotation.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -79,18 +75,17 @@ class UpdateMorphologicalAnnotation(relay.ClientIDMutation):
             return cls(morphological_annotation=morphological_annotation_instance, success=True)
 
         else:
-            return cls(success=False)
+            return cls(success=False, morphological_annotation=None)
 
 
 class DeleteMorphologicalAnnotation(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
 
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         if MorphologicalAnnotation.objects.filter(id=id).exists():
             morphological_annotation_instance = MorphologicalAnnotation.objects.get(pk=from_global_id(id)[1])

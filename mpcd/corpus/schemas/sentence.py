@@ -154,7 +154,7 @@ class UpdateSentence(relay.ClientIDMutation):
             # update sentence number
             sentence_instance.number = input.get('number')
 
-            if input.get('comment', None):
+            if input.get('comment'):
                 sentence_instance.comment = input.get('comment')
               # check if previous is valid
 

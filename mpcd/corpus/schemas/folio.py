@@ -48,8 +48,8 @@ class CreateFolio(relay.ClientIDMutation):
         identifier = String(required=True)
         facsimile = ID(required=True)
         number = Float(required=True)
-        comment = String()
-        previous = ID()
+        comment = String(required=False)
+        previous = ID(required=False)
 
     folio = Field(FolioNode)
     success = Boolean()
@@ -57,7 +57,6 @@ class CreateFolio(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateFolio.mutate_and_get_payload()')
         logger.debug('input: {}'.format(input))
@@ -70,11 +69,11 @@ class CreateFolio(relay.ClientIDMutation):
         folio_instance, folio_created = Folio.objects.get_or_create(identifier=input.get(
             'identifier'), facsimile=facsimile_instance, number=input.get('number'))
 
-        if input.get('comment', None) is not None:
+        if input.get('comment'):
             folio_instance.comment = input.get('comment')
             folio_instance.save()
 
-        if input.get('previous', None) is not None:
+        if input.get('previous'):
             if Folio.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
                 folio_instance.save()
@@ -84,12 +83,12 @@ class CreateFolio(relay.ClientIDMutation):
 
 class UpdateFolio(relay.ClientIDMutation):
     class Input:
-        id = ID()
-        identifier = String()
-        number = Float()
-        facsimile = ID()
-        comment = String()
-        previous = FolioInput()
+        id = ID(required=True)
+        identifier = String(required=True)
+        facsimile = ID(required=True)
+        number = Float(required=True)
+        comment = String(required=False)
+        previous = ID(required=False)
 
     folio = Field(FolioNode)
     success = Boolean()
@@ -97,38 +96,33 @@ class UpdateFolio(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
-        if input.get('id', None) is not None:
-            if Folio.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
-                folio_instance = Folio.objects.get(pk=from_global_id(input.get('id'))[1])
-            else:
-                return cls(success=False, errors=['folio ID does not exist'])
-
-            if input.get('identifier', None) is not None:
-                folio_instance.identifier = input.get('identifier')
-
-            if input.get('facsimile', None) is not None:
-                if Facsimile.objects.filter(pk=from_global_id(input.get('facsimile'))[1]).exists():
-                    folio_instance.facsimile = Facsimile.objects.get(pk=from_global_id(input.get('facsimile'))[1])
-                else:
-                    return cls(success=False, errors=['facsimile does not exist'])
-
-            if input.get('comment', None) is not None:
-                folio_instance.comment = input.get('comment')
-
-            if input.get('number', None) is not None:
-                folio_instance.number = input.get('number')
-
-            if input.get('previous', None) is not None:
-                if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                    folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous']['id'])[1])
-
-            folio_instance.save()
-            return cls(folio=folio_instance, success=True)
+        if Folio.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            folio_instance = Folio.objects.get(pk=from_global_id(input.get('id'))[1])
         else:
-            return cls(success=False, errors=['folio ID not provided'])
+            return cls(success=False, errors=['folio ID does not exist'])
+
+        folio_instance.identifier = input.get('identifier')
+
+        if Facsimile.objects.filter(pk=from_global_id(input.get('facsimile'))[1]).exists():
+            folio_instance.facsimile = Facsimile.objects.get(pk=from_global_id(input.get('facsimile'))[1])
+        else:
+            return cls(success=False, errors=['facsimile ID does not exist'])
+
+        if input.get('comment'):
+            folio_instance.comment = input.get('comment')
+
+        if input.get('number'):
+            folio_instance.number = input.get('number')
+
+        if input.get('previous'):
+            if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous']['id'])[1])
+            else: return cls (success=False, errors=['previous folio ID does not exist'])    
+
+        folio_instance.save()
+        return cls(folio=folio_instance, success=True)
 
 
 class DeleteFolio(relay.ClientIDMutation):
@@ -139,7 +133,6 @@ class DeleteFolio(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteFolio.mutate_and_get_payload()')
         if Folio.objects.filter(pk=from_global_id(id)[1]).exists():

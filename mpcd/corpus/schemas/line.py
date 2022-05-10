@@ -27,9 +27,9 @@ class LineNode(DjangoObjectType):
 
 class LineInput(InputObjectType):
     number = Float(required=True)
-    folio = FolioInput()
+    folio = ID(required=True)
     comment = String(required=False)
-    previous = LineNode()
+    previous = ID(required=False)
 
 
 class Query(ObjectType):
@@ -47,8 +47,8 @@ class CreateLine(relay.ClientIDMutation):
     class Input:
         number = Float(required=True)
         folio = ID(required=True)
-        comment = String()
-        previous = ID()
+        comment = String(required=False)
+        previous = ID(required=False)
 
     line = Field(LineNode)
     success = Boolean()
@@ -56,7 +56,6 @@ class CreateLine(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateLine.mutate_and_get_payload()')
 
@@ -68,14 +67,14 @@ class CreateLine(relay.ClientIDMutation):
         line_instance, line_object = Line.objects.get_or_create(folio=folio_instance, number=input.get('number'))
 
        # check if previous token available
-        if input.get('previous', None) is not None:
+        if input.get('previous'):
             # check if previous token with assigned id does not exist
             if Line.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 # assign previous token to line
                 line_instance.previous = Line.objects.get(pk=from_global_id(input['previous'])[1])
                 line_instance.save()
 
-        if input.get('comment', None) is not None:
+        if input.get('comment'):
             line_instance.comment = input.get('comment')
             line_instance.save()
 
@@ -84,17 +83,17 @@ class CreateLine(relay.ClientIDMutation):
 
 class UpdateLine(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
         number = Float(required=True)
-        folio = FolioInput()
-        comment = String()
+        folio = ID(required=True)
+        comment = String(required=False)
+        previous = ID(required=False)
 
     line = Field(LineNode)
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id, number, folio, comment):
         logger.debug('UpdateLine.mutate_and_get_payload()')
         if Line.objects.filter(pk=from_global_id(id)[1]).exists() and Folio.objects.filter(pk=from_global_id(folio.id)[1]).exists():
@@ -103,7 +102,7 @@ class UpdateLine(relay.ClientIDMutation):
             line_instance.folio = Folio.objects.get(pk=from_global_id(folio.id)[1])
             line_instance.comment = comment
             # check if previous token available
-        if input.get('previous', None) is not None:
+        if input.get('previous'):
             # check if previous token with assigned id does not exist
             if Line.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
                 # assign previous token to line
@@ -117,13 +116,12 @@ class UpdateLine(relay.ClientIDMutation):
 
 class DeleteLine(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
 
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         logger.debug('DeleteLine.mutate_and_get_payload()')
         if Line.objects.filter(pk=from_global_id(id)[1]).exists():

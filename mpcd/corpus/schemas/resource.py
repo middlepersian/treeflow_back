@@ -1,3 +1,4 @@
+from distutils import errors
 from graphene import relay, InputObjectType, String, Field, ObjectType, List, ID, Boolean
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -26,10 +27,10 @@ class ResourceNode(DjangoObjectType):
 
 
 class ResourceInput(InputObjectType):
-    authors = List(AuthorInput)
-    description = String()
-    project = String()
-    reference = String()
+    project = String(required=True)
+    authors = List(AuthorInput, required=True)
+    description = String(required=False)
+    reference = String(required=False)
 
 
 class Query(ObjectType):
@@ -45,70 +46,72 @@ class Query(ObjectType):
 
 class CreateResource(relay.ClientIDMutation):
     class Input:
-        authors = List(AuthorInput)
-        description = String()
-        project = String()
-        reference = String()
+        project = String(required=True)
+        authors = List(AuthorInput, required=True)
+        description = String(required=False)
+        reference = String(required=False)
 
     resource = Field(ResourceNode)
     success = Boolean()
 
     @classmethod
     @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
 
-    def mutate_and_get_payload(cls, root, info, authors, description, project, reference):
+        resource_obj, resource_created = Resource.objects.get_or_create(project=input.get('project'))
 
-        if Resource.objects.filter(project=project, description=description).exists():
-            return cls(success=False)
-        else:
-            resource = Resource.objects.create(description=description, project=project, reference=reference)
-            for author in authors:
-                # check if author exists
-                if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
-                    author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
-                else:
-                    # create it
-                    author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
-                    author_instance.save()
-                resource.authors.add(author_instance)
-            resource.save()
-            return cls(resource=resource, success=True)
+        if input.get('description'):
+            resource_obj.description = input.get('description')
+
+        if input.get('reference'):
+            resource_obj.reference = input.get('reference')
+
+        for author in input.get('authors'):
+            author_obj, author_created = Author.objects.get_or_create(
+                name=author.get('name'), last_name=author.get('last_name'))
+            resource_obj.authors.add(author_obj)
+
+        resource_obj.save()
+        return cls(resource=resource_obj, success=True)
 
 
 class UpdateResource(relay.ClientIDMutation):
     class Input:
         id = ID()
-        authors = List(AuthorInput)
-        description = String()
-        project = String()
-        reference = String()
+        project = String(required=True)
+        authors = List(AuthorInput, required=True)
+        description = String(required=False)
+        reference = String(required=False)
 
     resource = Field(ResourceNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
 
-    def mutate_and_get_payload(cls, root, info, id, authors, description, project, reference):
-        resource = Resource.objects.get(pk=from_global_id(id)[1])
-        if Resource.objects.filter(project=project, description=description).exists():
-            return cls(success=False)
-        else:
-            resource.description = description
-            resource.project = project
-            resource.reference = reference
+        if Resource.Resource.objects.get(pk=from_global_id(id)[1]).exists():
+            resource = Resource.objects.get(pk=from_global_id(id)[1])
+            resource.project = input.get('project')
+
+            if input.get('description'):
+                resource.description = input.get('description')
+            if input.get('reference'):
+                resource.reference = input.get('reference')
+
+            # clear all authors
             resource.authors.clear()
-            for author in authors:
-                # check if author exists
-                if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
-                    author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
-                else:
-                    # create it
-                    author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
-                    author_instance.save()
-                resource.authors.add(author_instance)
+            for author in input.get('authors'):
+                author_obj, author_created = Author.objects.get_or_create(
+                    name=author.get('name'), last_name=author.get('last_name'))
+                resource.authors.add(author_obj)
+
             resource.save()
-            return cls(resource=resource, success=True)
+            return cls(resource=resource, success=True, errors=None)
+
+        else:
+            return cls(resource=None, success=False, errors=['Resource ID not valid'])
 
 
 class DeleteResource(relay.ClientIDMutation):
@@ -120,7 +123,6 @@ class DeleteResource(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         if Resource.objects.filter(pk=from_global_id(id)[1]).exists():
             resource = Resource.objects.get(pk=from_global_id(id)[1])

@@ -27,14 +27,15 @@ class EditionNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
+## TODO update both create and update Edition methods
+
 class EditionInput(InputObjectType):
-    id = ID()
-    title = String()
-    slug = String()
-    description = String()
-    authors = List(AuthorInput)
-    references = List(BibEntryInput)
-    text_sigle = List(TextSigleNode)
+    title = String(required=True)
+    slug = String(required=True)
+    description = String(required=False)
+    authors = List(AuthorInput, required=True)
+    references = List(BibEntryInput, required=True)
+    text_sigle = List(TextSigleNode, required=True)
 
 
 # Queries
@@ -51,19 +52,17 @@ class EditionQuery(ObjectType):
 
 class CreateEdition(relay.ClientIDMutation):
     class Input:
-        id = ID()
-        title = String()
-        slug = String()
-        description = String()
-        authors = List(AuthorInput)
-        references = List(BibEntryInput)
-        text_sigle = List(TextSigleNode)
+        title = String(required=True)
+        slug = String(required=True)
+        description = String(required=False)
+        authors = List(AuthorInput, required=True)
+        references = List(BibEntryInput, required=True)
+        text_sigle = List(TextSigleNode, required=True)
 
     edition = Field(EditionNode)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.get.filter(name=input['title']).exists():
             return cls(errors=['Edition with this title already exists.'])
@@ -77,18 +76,17 @@ class CreateEdition(relay.ClientIDMutation):
 class UpdateEdition(relay.ClientIDMutation):
     class Input:
         id = ID()
-        title = String()
-        slug = String()
-        description = String()
-        authors = List(AuthorInput)
-        references = List(BibEntryInput)
-        text_sigle = List(TextSigleNode)
+        title = String(required=True)
+        slug = String(required=True)
+        description = String(required=False)
+        authors = List(AuthorInput, required=True)
+        references = List(BibEntryInput, required=True)
+        text_sigle = List(TextSigleNode, required=True)
 
     edition = Field(EditionNode)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.objects.filter(title=input['title']).exists():
             edition = Edition.objects.get(pk=input['id'])
@@ -110,7 +108,6 @@ class DeleteEdition(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         if Edition.objects.filter(pk=input['id']).exists():
             edition = Edition.objects.get(pk=input['id'])
