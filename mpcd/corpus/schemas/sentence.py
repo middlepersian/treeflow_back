@@ -29,10 +29,11 @@ class SentenceNode(DjangoObjectType):
 
 
 class SentenceInput(InputObjectType):
-    text = ID()
-    number = Float()
-    tokens = List(TokenInput)
-    translations = List(MeaningInput)
+    id = ID(required=True)
+    text = ID(required=True)
+    number = Float(required=True)
+    tokens = List(ID, required=True)
+    translations = List(MeaningInput, required=True)
     comment = String()
     previous = ID()
 
@@ -56,10 +57,11 @@ class CreateSentence(relay.ClientIDMutation):
     success = Boolean()
 
     class Input:
+        id = ID(required=True)
         text = ID(required=True)
         number = Float(required=True)
-        tokens = List(ID)
-        translations = List(MeaningInput)
+        tokens = List(ID, required=True)
+        translations = List(MeaningInput, required=True)
         comment = String()
         previous = ID()
 
@@ -77,33 +79,32 @@ class CreateSentence(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['Wrong Text ID'])
 
-        if input.get('comment', None) is not None:
-            sentence_instance.comment = input.get('comment')
+        # add translations
+        for translation_input in input.get('translations'):
 
-        if input.get('translations', None) is not None:
-            for translation_input in input.get('translations'):
+            # check if translation exists, if not create it
+            translation_instance, translation_created = Meaning.objects.get_or_create(
+                meaning=translation_input.get('meaning'), language=translation_input.get('language'))
 
-                # check if translation exists, if not create it
-                translation_instance, translation_created = Meaning.objects.get_or_create(
-                    meaning=translation_input.get('meaning'), language=translation_input.get('language'))
-
-                # add translation to sentence
-                sentence_instance.translations.add(translation_instance)
+            # add translation to sentence
+            sentence_instance.translations.add(translation_instance)
 
         # add tokens
-        if input.get('tokens', None) is not None:
-            for token in input.get('tokens'):
-                if Token.objects.filter(pk=from_global_id(token)[1]).exists():
-                    sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token)[1]))
-                else:
-                    return cls(success=False, errors=['Wrong Token ID'])
+        for token in input.get('tokens'):
+            if Token.objects.filter(pk=from_global_id(token)[1]).exists():
+                sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token)[1]))
+            else:
+                return cls(success=False, errors=['Wrong Token ID'])
 
         # check if previous is valid
-        if input.get('previous', None) is not None:
+        if input.get('previous', None):
             if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
                 return cls(success=False, errors=['Wrong Previous ID'])
+
+        if input.get('comment', None):
+            sentence_instance.comment = input.get('comment')
 
         sentence_instance.save()
         return cls(sentence=sentence_instance, success=True)
@@ -114,10 +115,10 @@ class UpdateSentence(relay.ClientIDMutation):
 
     class Input:
         id = ID(required=True)
-        text = ID()
-        number = Float()
-        tokens = List(ID)
-        translations = List(MeaningInput)
+        text = ID(required=True)
+        number = Float(required=True)
+        tokens = List(ID, required=True)
+        translations = List(MeaningInput, required=True)
         comment = String()
         previous = ID()
 
@@ -131,25 +132,27 @@ class UpdateSentence(relay.ClientIDMutation):
         # check if id is valid
         if Sentence.objects.filter(pk=from_global_id(input.get('id', None))[1]).exists():
             sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
-            if input.get('text', None) and Text.objects.filter(pk=from_global_id(input.get('text', None))[1]).exists():
+            if Text.objects.filter(pk=from_global_id(input.get('text', None))[1]).exists():
                 sentence_instance.text = Text.objects.get(pk=from_global_id(input.get('text', None))[1])
 
-            if input.get('tokens', None):
-                sentence_instance.tokens.clear()
-                for token in input.get('tokens', None):
-                    token = Token.objects.get(pk=from_global_id(token.id)[1])
-                    sentence_instance.tokens.add(token)
+            # clear tokens
+            sentence_instance.tokens.clear()
+            # update tokens
+            for token in input.get('tokens'):
+                token = Token.objects.get(pk=from_global_id(token.id)[1])
+                sentence_instance.tokens.add(token)
 
-            if input.get('translations') == [] or input.get('translations', None):
-                sentence_instance.translations.clear()
-                for translation_input in input.get('translations'):
-                    # check if translation exists, if not create it
-                    translation_instance, translation_created = Meaning.objects.get_or_create(
-                        meaning=translation_input.get('meaning'), language=translation_input.get('language'))
-                    # add translation to sentence
-                    sentence_instance.translations.add(translation_instance)
-            if input.get('number', None):
-                sentence_instance.number = input.get('number')
+            # clear translations
+            sentence_instance.translations.clear()
+            for translation_input in input.get('translations'):
+                # check if translation exists, if not create it
+                translation_instance, translation_created = Meaning.objects.get_or_create(
+                    meaning=translation_input.get('meaning'), language=translation_input.get('language'))
+                # add translation to sentence
+                sentence_instance.translations.add(translation_instance)
+
+            # update sentence number
+            sentence_instance.number = input.get('number')
 
             if input.get('comment', None):
                 sentence_instance.comment = input.get('comment')
