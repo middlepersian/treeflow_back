@@ -119,8 +119,11 @@ class CreateToken(relay.ClientIDMutation):
                 lemma=input['lemma']['word'], language=input['lemma']['language'])
             # add the related meanings to the lemma
             if local_related_meanings:
-                lemma_obj.related_meanings.set(local_related_meanings)
-                lemma_obj.save()
+               # see if local_related_meanings are already related to lemma
+                for local_related_meaning in local_related_meanings:
+                    if lemma_obj.related_meanings.filter(pk=local_related_meaning.pk).exists():
+                        lemma_obj.related_meanings.add(local_related_meaning)
+                        lemma_obj.save()
             token.lemma = lemma_obj
 
             # check if pos available
@@ -231,8 +234,11 @@ class UpdateToken(relay.ClientIDMutation):
                 lemma=input['lemma']['word'], language=input['lemma']['language'])
             # add the related meanings to the lemma
             if local_related_meanings:
-                lemma_obj.related_meanings.set(local_related_meanings)
-                lemma_obj.save()
+               # see if local_related_meanings are already related to lemma
+                for local_related_meaning in local_related_meanings:
+                    if lemma_obj.related_meanings.filter(pk=local_related_meaning.pk).exists():
+                        lemma_obj.related_meanings.add(local_related_meaning)
+                        lemma_obj.save()
             token.lemma = lemma_obj
 
         # check if pos available
