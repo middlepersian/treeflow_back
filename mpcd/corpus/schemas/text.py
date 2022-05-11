@@ -5,11 +5,6 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Text, Author, Resource, Corpus, TextSigle, Source
 from django.contrib.auth.models import User
-from mpcd.corpus.schemas.text_sigle import TextSigleInput
-from mpcd.corpus.schemas.author import AuthorInput
-from mpcd.corpus.schemas.source import SourceInput
-from mpcd.corpus.schemas.resource import ResourceInput
-
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
@@ -125,8 +120,78 @@ class CreateText(relay.ClientIDMutation):
         text_instance.save()
         return cls(text=text_instance, success=True)
 
-# TODO update text
+
+class UpdateText(relay.ClientIDMutation):
+    class Input:
+        id = ID(required=True)
+        title = String(required=True)
+        stage = String(required=True)
+        text_sigle = ID(required=True)
+        editors = List(ID, required=False)
+        collaborators = List(ID, required=False)
+        resources = List(ID, required=False)
+        sources = List(ID, required=False)
+
+    text = Field(TextNode)
+    success = Boolean()
+    errors = List(String)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+
+        # check if text exists
+        if Text.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            text_instance = Text.objects.get(pk=from_global_id(input.get('id'))[1])
+        else:
+            return cls(success=False, errors="Wrong text ID", text=None)
+
+        # set title
+        text_instance.title = input.get('title')
+
+        # set stage
+        text_instance.stage = input.get('stage')
+
+        # set text sigle
+        if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():
+            text_sigle_instance = TextSigle.objects.get(pk=from_global_id(input.get('text_sigle'))[1])
+        else:
+            return cls(success=False, errors="Wrong text sigle ID", text=None)
+
+        # get source
+        if input.get('sources'):
+            for source in input['sources']:
+                source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
+                text_instance.sources.add(source_instance)
+
+        # TODO check how to properly do this with graphql
+        # add editors
+        if input.get('editors'):
+            for editor in input.get('editors'):
+                editor_instance = User.objects.get(username=editor.get('username'))
+                text_instance.editors.add(editor_instance)
+
+        # add collaborators
+        if input.get('collaborators'):
+            for collaborator in input.get('collaborators'):
+                collaborator_instance = User.objects.get(username=collaborator.get('username'))
+                text_instance.collaborators.add(collaborator_instance)
+
+        if input.get('resources'):
+            for resource in input.get('resources'):
+                resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
+                if resource.get('authors'):
+                    for author in resource['authors']:
+                        author_instance, author_created = Author.objects.get_or_create(
+                            name=author.name, last_name=author.last_name)
+                        author_instance.save()
+                        resource_instance.authors.add(author_instance)
+                text_instance.resources.add(resource_instance)
+
+        text_instance.save()
+        return text_instance
 
 
 class Mutation(ObjectType):
     create_text = CreateText.Field()
+    update_text = UpdateText.Field()

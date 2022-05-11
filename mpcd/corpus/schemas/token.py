@@ -44,7 +44,7 @@ class TokenInput(InputObjectType):
     syntactic_annotation = List(DependencyInput)
     comment = String()
     avestan = String()
-    previous = TokenNode()
+    previous = ID()
     line = ID()
     position_in_line = Int()
 
@@ -126,7 +126,7 @@ class CreateToken(relay.ClientIDMutation):
                         lemma_obj.save()
             token.lemma = lemma_obj
 
-            # check if pos available
+        # check if pos available
         if input.get('pos', None):
             token.pos = input.get('pos')
 
