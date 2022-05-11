@@ -34,8 +34,8 @@ class SentenceInput(InputObjectType):
     number = Float(required=True)
     tokens = List(ID, required=True)
     translations = List(MeaningInput, required=True)
-    comment = String()
-    previous = ID()
+    comment = String(required=False)
+    previous = ID(required=False)
 
 # Query
 
@@ -62,8 +62,8 @@ class CreateSentence(relay.ClientIDMutation):
         number = Float(required=True)
         tokens = List(ID, required=True)
         translations = List(MeaningInput, required=True)
-        comment = String()
-        previous = ID()
+        comment = String(required=False)
+        previous = ID(required=False)
 
     errors = List(String)
     sentence = Field(SentenceNode)
@@ -97,13 +97,13 @@ class CreateSentence(relay.ClientIDMutation):
                 return cls(success=False, errors=['Wrong Token ID'])
 
         # check if previous is valid
-        if input.get('previous', None):
+        if input.get('previous'):
             if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
                 return cls(success=False, errors=['Wrong Previous ID'])
 
-        if input.get('comment', None):
+        if input.get('comment'):
             sentence_instance.comment = input.get('comment')
 
         sentence_instance.save()
@@ -119,8 +119,8 @@ class UpdateSentence(relay.ClientIDMutation):
         number = Float(required=True)
         tokens = List(ID, required=True)
         translations = List(MeaningInput, required=True)
-        comment = String()
-        previous = ID()
+        comment = String(required=False)
+        previous = ID(required=False)
 
     sentence = Field(SentenceNode)
     errors = List(String)
@@ -130,10 +130,10 @@ class UpdateSentence(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         # check if id is valid
-        if Sentence.objects.filter(pk=from_global_id(input.get('id', None))[1]).exists():
-            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
-            if Text.objects.filter(pk=from_global_id(input.get('text', None))[1]).exists():
-                sentence_instance.text = Text.objects.get(pk=from_global_id(input.get('text', None))[1])
+        if Sentence.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id'))[1])
+            if Text.objects.filter(pk=from_global_id(input.get('text'))[1]).exists():
+                sentence_instance.text = Text.objects.get(pk=from_global_id(input.get('text'))[1])
 
             # clear tokens
             sentence_instance.tokens.clear()
@@ -158,7 +158,7 @@ class UpdateSentence(relay.ClientIDMutation):
                 sentence_instance.comment = input.get('comment')
               # check if previous is valid
 
-            if input.get('previous', None):
+            if input.get('previous'):
                 if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                     sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             elif not sentence_instance.previous and sentence_instance.number > 1.0:
@@ -205,11 +205,11 @@ class AddTokensToSentence(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Sentence.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
-            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id', None))[1])
-            if input.get('tokens', None) is not None:
+            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('id'))[1])
+            if input.get('tokens'):
                 # clear up existing tokens
                 sentence_instance.tokens.clear()
-                for token_id in input.get('tokens', None):
+                for token_id in input.get('tokens'):
                     if Token.objects.filter(pk=from_global_id(token_id)[1]).exists():
                         sentence_instance.tokens.add(Token.objects.get(pk=from_global_id(token_id)[1]))
                     else:

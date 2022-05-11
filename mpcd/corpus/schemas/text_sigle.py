@@ -1,4 +1,4 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -24,8 +24,8 @@ class TextSigleNode(DjangoObjectType):
 
 
 class TextSigleInput(InputObjectType):
-    sigle = String()
-    genre = String()
+    sigle = String(required=True)
+    genre = String(required=True)
 
 
 class Query(ObjectType):
@@ -41,36 +41,33 @@ class Query(ObjectType):
 
 class CreateTextSigle(relay.ClientIDMutation):
     class Input:
-        sigle = String()
-        genre = String()
+        sigle = String(required=True)
+        genre = String(required=True)
 
     sigle = Field(TextSigleNode)
     success = Boolean()
 
     @classmethod
     @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
 
-    def mutate_and_get_payload(cls, root, info, sigle, genre):
+        text_sigle, text_sigle_created = TextSigle.objects.get_or_create(sigle=input['sigle'], genre=input['genre'])
 
-        if TextSigle.objects.filter(sigle=sigle, genre=genre).exists():
-            return cls(success=False)
-        else:
-            sigle = TextSigle.objects.create(sigle=sigle, genre=genre)
-            return cls(sigle=sigle, success=True)
+        return cls(sigle=text_sigle, success=True)
 
 
 class UpdateTextSigle(relay.ClientIDMutation):
     class Input:
-        id = ID()
-        sigle = String()
-        genre = String()
+        id = ID(required=True)
+        sigle = String(required=True)
+        genre = String(required=True)
 
     sigle = Field(TextSigleNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id, sigle, genre):
 
         if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():
@@ -78,9 +75,9 @@ class UpdateTextSigle(relay.ClientIDMutation):
             sigle.sigle = sigle
             sigle.genre = genre
             sigle.save()
-            return cls(sigle=sigle, success=True)
+            return cls(sigle=sigle, success=True, errors=None)
         else:
-            return cls(success=False)
+            return cls(success=False, errors=['Text sigle ID does not exist'], sigle=None)
 
 
 class DeleteTextSigle(relay.ClientIDMutation):
@@ -92,7 +89,6 @@ class DeleteTextSigle(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
 
         if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():

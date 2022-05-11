@@ -1,4 +1,3 @@
-from numpy import require
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -61,6 +60,7 @@ class CreateBibEntry(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("input: {}".format(input))
+
         bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(
             title=to_nfc(input.get('title')), year=input.get('year'))
 

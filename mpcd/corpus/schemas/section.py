@@ -31,57 +31,74 @@ class Query(ObjectType):
     def resolve_all_sections(self, info, **kwargs):
         return gql_optimizer.query(Section.objects.all(), info)
 
+
 class SectionInput(InputObjectType):
-    id = ID()
     identifier = String(required=True)
-    text = TextNode()
-    section_type = SectionTypeInput()
-    source = SourceNode()
-    tokens = List(TokenInput)
-    previous = SectionNode()
-    container = SectionNode()
+    text = ID(required=True)
+    section_type = ID(required=True)
+    source = ID(required=False)
+    tokens = List(ID, required=True)
+    previous = ID(required=False)
+    container = ID(required=False)
 
 
 class CreateSection(relay.ClientIDMutation):
 
     class Input:
-        identifier = String()
-        text = TextNode()
-        section_type = SectionTypeInput()
-        source = SourceNode()
-        tokens = List(TokenInput)
-        previous = ID()
-        container = ID()
+        identifier = String(required=True)
+        text = ID(required=True)
+        section_type = ID(required=True)
+        source = ID(required=False)
+        tokens = List(ID, required=True)
+        previous = ID(required=False)
+        container = ID(required=False)
 
     section = Field(SectionNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateSection.mutate_and_get_payload()')
+
         section_instance = Section.objects.create(identifier=input['identifier'])
-        if input.get('text', None) is not None:
-            text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
-            section_instance.text = text
-        if input.get('section_type', None) is not None:
-            section_type = SectionType.objects.get(identifier=input['section_type']['identifier'])
-            logger.error('section_type: {}'.format(section_type))
-            section_instance.section_type = section_type
-        if input.get('source', None) is not None:
-            source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
-            section_instance.source = source
-        if input.get('tokens', None) is not None:
-            for token in input('tokens'):
-                token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
-                section_instance.tokens.add(token_instance)
-        if input.get('previous', None) is not None:
-            previous = Section.objects.get(pk=(input['previous'])[1])
-            section_instance.previous = previous
-        if input.get('container', None) is not None:
-            container = Section.objects.get(pk=(input['container'])[1])
-            section_instance.container = container
+
+        if Text.objects.get(pk=from_global_id(input['text'])[1]).exists():
+            section_instance.text = Text.objects.get(pk=from_global_id(input['text'])[1])
+
+        else:
+            return cls(errors=['Text ID not found'], success=False, section=None)
+
+        if SectionType.objects.get(pk=from_global_id(input['section_type'])[1]).exists():
+            section_instance.section_type = SectionType.objects.get(pk=from_global_id(input['section_type'])[1])
+        else:
+            return cls(errors=['Section Type ID not found'], success=False, section=None)
+
+        if input.get('source'):
+            if Source.objects.get(pk=from_global_id(input['source'])[1]).exists():
+                section_instance.source = Source.objects.get(pk=from_global_id(input['source'])[1])
+            else:
+                return cls(errors=['Source ID not found'], success=False, section=None)
+
+        for token in input['tokens']:
+            if Token.objects.get(pk=from_global_id(token)[1]).exists():
+                section_instance.tokens.add(Token.objects.get(pk=from_global_id(token)[1]))
+            else:
+                return cls(errors=['Token ID not found'], success=False, section=None)
+
+        if input.get('previous'):
+            if Section.objects.get(pk=from_global_id(input['previous'])[1]).exists():
+                section_instance.previous = Section.objects.get(pk=from_global_id(input['previous'])[1])
+            else:
+                return cls(errors=['Previous Section ID not found'], success=False, section=None)
+
+        if input.get('container'):
+            if Section.objects.get(pk=from_global_id(input['container'])[1]).exists():
+                section_instance.container = Section.objects.get(pk=from_global_id(input['container'])[1])
+            else:
+                return cls(errors=['Container Section ID not found'], success=False, section=None)
+
         section_instance.save()
         return cls(section=section_instance, success=True)
 
@@ -89,52 +106,68 @@ class CreateSection(relay.ClientIDMutation):
 class UpdateSection(relay.ClientIDMutation):
 
     class Input:
-        id = ID()
-        identifier = String()
-        text = TextNode()
-        section_type = SectionTypeInput()
-        source = SourceNode()
-        tokens = List(TokenInput)
-        previous = ID()
-        container = ID()
+        id = ID(required=True)
+        identifier = String(required=True)
+        text = ID(required=True)
+        section_type = ID(required=True)
+        source = ID(required=False)
+        tokens = List(ID, required=True)
+        previous = ID(required=False)
+        container = ID(required=False)
 
     section = Field(SectionNode)
     success = Boolean()
-    
-    @classmethod
-    @login_required
+    errors = List(String)
 
+    @ classmethod
+    @ login_required
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('UpdateSection.mutate_and_get_payload()')
         if Section.objects.filter(pk=from_global_id(input['id'])[1]).exists():
             section_instance = Section.objects.get(pk=from_global_id(input['id'])[1])
+
             section_instance.identifier = input['identifier']
-            if input.get('text', None) is not None:
-                text = Text.objects.get(pk=(input['text']['id'])[1])
-                section_instance.text = text
-            if input.get('section_type', None) is not None:
-                section_type = SectionType.objects.get(pk=from_global_id(input['section_type']['id'])[1])
-                section_instance.section_type = section_type
-            if input.get('source', None) is not None:
-                source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
-                section_instance.source = source
-            if input.get('tokens', None) is not None:
-                section_instance.tokens.clear()
-                for token in input('tokens'):
-                    token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
-                    section_instance.tokens.add(token_instance)
-            if input.get('previous', None) is not None:
-                if not Section.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
-                    previous = Section.objects.get(pk=from_global_id(input['previous'])[1])
-                    section_instance.previous = previous
-            if input.get('container', None) is not None:
-                if not Section.objects.filter(pk=from_global_id(input['container'])[1]).exists():
-                    container = Section.objects.get(pk=from_global_id(input['container'])[1])
-                    section_instance.container = container
+
+            if Text.objects.get(pk=from_global_id(input['text'])[1]).exists():
+                section_instance.text = Text.objects.get(pk=from_global_id(input['text'])[1])
+
+            else:
+                return cls(errors=['Text ID not found'], success=False, section=None)
+
+            if SectionType.objects.get(pk=from_global_id(input['section_type'])[1]).exists():
+                section_instance.section_type = SectionType.objects.get(pk=from_global_id(input['section_type'])[1])
+            else:
+                return cls(errors=['Section Type ID not found'], success=False, section=None)
+
+            if input.get('source'):
+                if Source.objects.get(pk=from_global_id(input['source'])[1]).exists():
+                    section_instance.source = Source.objects.get(pk=from_global_id(input['source'])[1])
+                else:
+                    return cls(errors=['Source ID not found'], success=False, section=None)
+
+            for token in input['tokens']:
+                if Token.objects.get(pk=from_global_id(token)[1]).exists():
+                    section_instance.tokens.add(Token.objects.get(pk=from_global_id(token)[1]))
+                else:
+                    return cls(errors=['Token ID not found'], success=False, section=None)
+
+            if input.get('previous'):
+                if Section.objects.get(pk=from_global_id(input['previous'])[1]).exists():
+                    section_instance.previous = Section.objects.get(pk=from_global_id(input['previous'])[1])
+                else:
+                    return cls(errors=['Previous Section ID not found'], success=False, section=None)
+
+            if input.get('container'):
+                if Section.objects.get(pk=from_global_id(input['container'])[1]).exists():
+                    section_instance.container = Section.objects.get(pk=from_global_id(input['container'])[1])
+                else:
+                    return cls(errors=['Container Section ID not found'], success=False, section=None)
+
             section_instance.save()
-            return cls(section=section_instance, success=True)
+
+            return cls(section=section_instance, success=True, errors=None)
         else:
-            return cls(success=False)
+            return cls(success=False, errors=['Section ID not found'], section=None)
 
 
 class DeleteSection(relay.ClientIDMutation):
@@ -144,7 +177,7 @@ class DeleteSection(relay.ClientIDMutation):
 
     success = Boolean()
 
-    @classmethod
+    @ classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('DeleteSection.mutate_and_get_payload()')
         if Section.objects.filter(pk=from_global_id(input['id'])[1]).exists():
