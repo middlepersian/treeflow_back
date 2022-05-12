@@ -1,6 +1,4 @@
-from typing import List
-from numpy import require
-from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id

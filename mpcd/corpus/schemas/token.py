@@ -33,20 +33,20 @@ class TokenNode(DjangoObjectType):
 
 
 class TokenInput(InputObjectType):
-    text = ID()
-    transcription = String()
-    transliteration = String()
-    language = String()
-    lemma = LemmaInput()
-    meanings = List(MeaningInput)
-    pos = String()
-    morphological_annotation = List(MorphologicalAnnotationInput)
-    syntactic_annotation = List(DependencyInput)
-    comment = String()
-    avestan = String()
-    previous = ID()
-    line = ID()
-    position_in_line = Int()
+    text = ID(required=True)
+    transcription = String(required=True)
+    transliteration = String(required=True)
+    language = String(required=True)
+    lemma = LemmaInput(required=True)
+    meanings = List(MeaningInput, required=True)
+    pos = String(required=True)
+    morphological_annotation = List(MorphologicalAnnotationInput, required=True)
+    syntactic_annotation = List(DependencyInput, required=True)
+    comment = String(required=False)
+    avestan = String(required=False)
+    previous = ID(required=True)
+    line = ID(required=True)
+    position_in_line = Int(required=False)
 
 # Queries
 
@@ -70,8 +70,8 @@ class CreateToken(relay.ClientIDMutation):
         language = String(required=True)
         text = ID(required=True)
         number = Float(required=True)
-        lemma = LemmaInput()
-        meanings = List(MeaningInput)
+        lemma = LemmaInput(required=True)
+        meanings = List(MeaningInput, required=True)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
@@ -180,8 +180,8 @@ class UpdateToken(relay.ClientIDMutation):
         transliteration = String(required=True)
         language = String(required=True)
         text = ID(required=True)
-        number = Float()
-        meanings = List(MeaningInput)
+        number = Float(required=True)
+        meanings = List(MeaningInput, required=True)
         pos = String()
         morphological_annotation = List(MorphologicalAnnotationInput)
         syntactic_annotation = List(DependencyInput)
@@ -309,8 +309,8 @@ class DeleteToken(relay.ClientIDMutation):
 
 class JoinTokens(relay.ClientIDMutation):
     class Input():
-        current = ID()
-        previous = ID()
+        current = ID(required=True)
+        previous = ID(required=True)
 
     success = Boolean()
 
