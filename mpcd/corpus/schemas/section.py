@@ -37,7 +37,7 @@ class SectionInput(InputObjectType):
     text = TextNode()
     section_type = SectionTypeInput()
     source = SourceNode()
-    tokens = List(TokenInput)
+    tokens = List(ID, required=True)
     previous = SectionNode()
     container = SectionNode()
 
@@ -49,7 +49,7 @@ class CreateSection(relay.ClientIDMutation):
         text = TextNode()
         section_type = SectionTypeInput()
         source = SourceNode()
-        tokens = List(TokenInput)
+        tokens = List(ID, required=True)
         previous = ID()
         container = ID()
 
@@ -94,7 +94,7 @@ class UpdateSection(relay.ClientIDMutation):
         text = TextNode()
         section_type = SectionTypeInput()
         source = SourceNode()
-        tokens = List(TokenInput)
+        tokens = List(ID, required=True)
         previous = ID()
         container = ID()
 
