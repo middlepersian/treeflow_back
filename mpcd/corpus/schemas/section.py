@@ -1,3 +1,4 @@
+from typing_extensions import Required
 from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -45,7 +46,7 @@ class SectionInput(InputObjectType):
 class CreateSection(relay.ClientIDMutation):
 
     class Input:
-        identifier = String()
+        identifier = String(Required=True)
         text = TextNode()
         section_type = SectionTypeInput()
         source = SourceNode()
@@ -62,7 +63,7 @@ class CreateSection(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         logger.debug('CreateSection.mutate_and_get_payload()')
         section_instance = Section.objects.create(identifier=input['identifier'])
-        if input.get('text', None) is not None:
+        if input.get('text', None):
             text = Text.objects.get(pk=from_global_id(input['text']['id'])[1])
             section_instance.text = text
         if input.get('section_type', None) is not None:
@@ -72,10 +73,14 @@ class CreateSection(relay.ClientIDMutation):
         if input.get('source', None) is not None:
             source = Source.objects.get(pk=from_global_id(input['source']['id'])[1])
             section_instance.source = source
-        if input.get('tokens', None) is not None:
-            for token in input('tokens'):
-                token_instance = Token.objects.get(pk=from_global_id(token['id'])[1])
+
+        if input.get('tokens', None):
+            # if there is an input for tokens, it is a List of ID
+            # Fix: token is already ID 
+            for token in input.get('tokens'):
+                token_instance = Token.objects.get(pk=from_global_id(token)[1])
                 section_instance.tokens.add(token_instance)
+
         if input.get('previous', None) is not None:
             previous = Section.objects.get(pk=(input['previous'])[1])
             section_instance.previous = previous
