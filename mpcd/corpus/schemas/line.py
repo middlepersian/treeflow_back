@@ -67,14 +67,14 @@ class CreateLine(relay.ClientIDMutation):
         line_instance, line_object = Line.objects.get_or_create(folio=folio_instance, number=input.get('number'))
 
        # check if previous token available
-        if input.get('previous'):
+        if input.get('previous', None):
             # check if previous token with assigned id does not exist
             if Line.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 # assign previous token to line
                 line_instance.previous = Line.objects.get(pk=from_global_id(input['previous'])[1])
                 line_instance.save()
 
-        if input.get('comment'):
+        if input.get('comment', None):
             line_instance.comment = input.get('comment')
             line_instance.save()
 
@@ -100,15 +100,17 @@ class UpdateLine(relay.ClientIDMutation):
             line_instance = Line.objects.get(pk=from_global_id(id)[1])
             line_instance.number = number
             line_instance.folio = Folio.objects.get(pk=from_global_id(folio.id)[1])
-            line_instance.comment = comment
+            # check if comment is available
+            if input.get('comment', None):
+                line_instance.comment = comment
             # check if previous token available
-        if input.get('previous'):
-            # check if previous token with assigned id does not exist
-            if Line.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
-                # assign previous token to line
-                line_instance.previous = Line.objects.get(pk=from_global_id(input['previous']['id'])[1])
+            if input.get('previous', None):
+                # check if previous token with assigned id does not exist
+                if Line.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
+                    # assign previous token to line
+                    line_instance.previous = Line.objects.get(pk=from_global_id(input['previous']['id'])[1])
 
-            line_instance.save()
+                line_instance.save()
             return cls(line=line_instance, success=True)
         else:
             return cls(success=False)

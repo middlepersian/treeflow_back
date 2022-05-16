@@ -60,10 +60,10 @@ class CreateResource(relay.ClientIDMutation):
 
         resource_obj, resource_created = Resource.objects.get_or_create(project=input.get('project'))
 
-        if input.get('description'):
+        if input.get('description', None):
             resource_obj.description = input.get('description')
 
-        if input.get('reference'):
+        if input.get('reference', None):
             resource_obj.reference = input.get('reference')
 
         for author in input.get('authors'):
@@ -95,9 +95,9 @@ class UpdateResource(relay.ClientIDMutation):
             resource = Resource.objects.get(pk=from_global_id(id)[1])
             resource.project = input.get('project')
 
-            if input.get('description'):
+            if input.get('description', None):
                 resource.description = input.get('description')
-            if input.get('reference'):
+            if input.get('reference', None):
                 resource.reference = input.get('reference')
 
             # clear all authors
@@ -116,7 +116,7 @@ class UpdateResource(relay.ClientIDMutation):
 
 class DeleteResource(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
 
     resource = Field(ResourceNode)
     success = Boolean()

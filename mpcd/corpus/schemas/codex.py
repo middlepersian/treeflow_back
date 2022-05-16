@@ -82,24 +82,23 @@ class CreateCodex(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         codex_instance = Codex.objects.create(sigle=input.get('sigle'), title=input.get('title'))
-        if input.get('copy_date'):
+        if input.get('copy_date', None):
             codex_instance.copy_date = input.get('copy_date')
-        if input.get('copy_place_name'):
+        if input.get('copy_place_name', None):
             codex_instance.copy_place_name = input.get('copy_place_name')
-        if input.get('copy_place_latitude'):
+        if input.get('copy_place_latitude', None):
             codex_instance.copy_place_latitude = input.get('copy_place_latitude')
-        if input.get('copy_place_longitude'):
+        if input.get('copy_place_longitude', None):
             codex_instance.copy_place_longitude = input.get('copy_place_longitude')
-        if input.get('library'):
+        if input.get('library', None):
             codex_instance.library = input.get('library')
-        if input.get('signature'):
+        if input.get('signature', None):
             codex_instance.signature = input.get('signature')
 
-        if input.get('scribes'):
-            for scribe in input.get('scribes'):
-                author_instance, author_created = Author.objects.get_or_create(
-                    name=scribe.name, last_name=scribe.last_name)
-                author_instance.save()
+        for scribe in input.get('scribes'):
+            author_instance, author_created = Author.objects.get_or_create(
+                name=scribe.name, last_name=scribe.last_name)
+            author_instance.save()
             codex_instance.authors.add(author_instance)
 
         codex_instance.save()
@@ -118,7 +117,7 @@ class UpdateCodex(relay.ClientIDMutation):
 
         library = String(required=False)
         signature = String(required=False)
-        scribes = List(AuthorInput)
+        scribes = List(AuthorInput, required=True)
 
     codex = Field(CodexNode)
     success = Boolean()
@@ -138,16 +137,13 @@ class UpdateCodex(relay.ClientIDMutation):
             codex_instance.library = library
             codex_instance.signature = signature
 
-            # clear authors
-            codex_instance.authors.clear()
-            for author in scribes:
-                # check if author exists
-                if Author.objects.filter(name=author.name, last_name=author.last_name).exists():
-                    author_instance = Author.objects.get(name=author.name, last_name=author.last_name)
-                else:
-                    # create it
-                    author_instance = Author.objects.create(name=author.name, last_name=author.last_name)
-                    author_instance.save()
+            # clear scribes
+            codex_instance.scribes.clear()
+            for scribe in scribes:
+                author_instance, author_created = Author.objects.get_or_create(
+                    name=scribe.name, last_name=scribe.last_name)
+                author_instance.save()
+                codex_instance.authors.add(author_instance)
 
                 codex_instance.authors.add(author_instance)
 

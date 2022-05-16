@@ -32,9 +32,8 @@ class TextInput(InputObjectType):
     text_sigle = ID(required=True)
     editors = List(User, required=False)
     collaborators = List(User, required=False)
-    resources = List(ID, required=False)
-    sources = List(ID, required=False)
-
+    resources = List(ID, required=True)
+    sources = List(ID, required=True)
 # Query
 
 
@@ -56,10 +55,10 @@ class CreateText(relay.ClientIDMutation):
         title = String(required=True)
         stage = String(required=True)
         text_sigle = ID(required=True)
-        editors = List(ID, required=False)
-        collaborators = List(ID, required=False)
-        resources = List(ID, required=False)
-        sources = List(ID, required=False)
+        editors = List(User, required=False)
+        collaborators = List(User, required=False)
+        resources = List(ID, required=True)
+        sources = List(ID, required=True)
 
     text = Field(TextNode)
     success = Boolean()
@@ -87,21 +86,19 @@ class CreateText(relay.ClientIDMutation):
         else:
             return cls(success=False, errors="Wrong text sigle ID", text=None)
 
-        # get source
-        if input.get('sources'):
-            for source in input['sources']:
-                source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
-                text_instance.sources.add(source_instance)
+        # get sources
+        for source in input['sources']:
+            source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
+            text_instance.sources.add(source_instance)
 
-        # TODO check how to properly do this with graphql
-        # add editors
-        if input.get('editors'):
+        # get editors
+        if input.get('editors', None):
             for editor in input.get('editors'):
                 editor_instance = User.objects.get(username=editor.get('username'))
                 text_instance.editors.add(editor_instance)
 
         # add collaborators
-        if input.get('collaborators'):
+        if input.get('collaborators', None):
             for collaborator in input.get('collaborators'):
                 collaborator_instance = User.objects.get(username=collaborator.get('username'))
                 text_instance.collaborators.add(collaborator_instance)
@@ -127,10 +124,10 @@ class UpdateText(relay.ClientIDMutation):
         title = String(required=True)
         stage = String(required=True)
         text_sigle = ID(required=True)
-        editors = List(ID, required=False)
-        collaborators = List(ID, required=False)
-        resources = List(ID, required=False)
-        sources = List(ID, required=False)
+        editors = List(User, required=False)
+        collaborators = List(User, required=False)
+        resources = List(ID, required=True)
+        sources = List(ID, required=True)
 
     text = Field(TextNode)
     success = Boolean()
@@ -158,35 +155,34 @@ class UpdateText(relay.ClientIDMutation):
         else:
             return cls(success=False, errors="Wrong text sigle ID", text=None)
 
-        # get source
-        if input.get('sources'):
-            for source in input['sources']:
-                source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
-                text_instance.sources.add(source_instance)
-
         # TODO check how to properly do this with graphql
         # add editors
-        if input.get('editors'):
+        if input.get('editors', None):
             for editor in input.get('editors'):
                 editor_instance = User.objects.get(username=editor.get('username'))
                 text_instance.editors.add(editor_instance)
 
         # add collaborators
-        if input.get('collaborators'):
+        if input.get('collaborators', None):
             for collaborator in input.get('collaborators'):
                 collaborator_instance = User.objects.get(username=collaborator.get('username'))
                 text_instance.collaborators.add(collaborator_instance)
 
-        if input.get('resources'):
-            for resource in input.get('resources'):
-                resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
-                if resource.get('authors'):
-                    for author in resource['authors']:
-                        author_instance, author_created = Author.objects.get_or_create(
-                            name=author.name, last_name=author.last_name)
-                        author_instance.save()
-                        resource_instance.authors.add(author_instance)
-                text_instance.resources.add(resource_instance)
+        # get resources
+        for resource in input.get('resources'):
+            resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
+            if resource.get('authors'):
+                for author in resource['authors']:
+                    author_instance, author_created = Author.objects.get_or_create(
+                        name=author.name, last_name=author.last_name)
+                    author_instance.save()
+                    resource_instance.authors.add(author_instance)
+            text_instance.resources.add(resource_instance)
+
+        # get sources
+        for source in input['sources']:
+            source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
+            text_instance.sources.add(source_instance)
 
         text_instance.save()
         return text_instance

@@ -4,7 +4,6 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Sentence, Text, Token
-from mpcd.corpus.schemas.token import TokenInput
 from mpcd.dict.models import Meaning
 from mpcd.dict.schemas import MeaningInput
 
@@ -97,13 +96,13 @@ class CreateSentence(relay.ClientIDMutation):
                 return cls(success=False, errors=['Wrong Token ID'])
 
         # check if previous is valid
-        if input.get('previous'):
+        if input.get('previous', None):
             if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
                 return cls(success=False, errors=['Wrong Previous ID'])
 
-        if input.get('comment'):
+        if input.get('comment', None):
             sentence_instance.comment = input.get('comment')
 
         sentence_instance.save()
@@ -154,15 +153,15 @@ class UpdateSentence(relay.ClientIDMutation):
             # update sentence number
             sentence_instance.number = input.get('number')
 
-            if input.get('comment'):
+            if input.get('comment', None):
                 sentence_instance.comment = input.get('comment')
               # check if previous is valid
 
-            if input.get('previous'):
+            if input.get('previous', None):
                 if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                     sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
-            elif not sentence_instance.previous and sentence_instance.number > 1.0:
-                return cls(success=False, errors=['Wrong Previous ID'])
+                else:
+                    return cls(success=False, errors=['Wrong Previous ID'])
 
             sentence_instance.save()
             return cls(sentence=sentence_instance, success=True)

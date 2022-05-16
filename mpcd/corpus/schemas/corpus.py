@@ -24,7 +24,7 @@ class CorpusNode(DjangoObjectType):
 
 
 class CorpusInput(InputObjectType):
-    name = String()
+    name = String(required=True)
     slug = String(required=True)
 
 

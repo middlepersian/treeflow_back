@@ -68,12 +68,12 @@ class UpdateTextSigle(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-    def mutate_and_get_payload(cls, root, info, id, sigle, genre):
+    def mutate_and_get_payload(cls, root, info, **input):
 
         if TextSigle.objects.filter(pk=from_global_id(id)[1]).exists():
             sigle = TextSigle.objects.get(pk=from_global_id(id)[1])
-            sigle.sigle = sigle
-            sigle.genre = genre
+            sigle.sigle = input.get('sigle')
+            sigle.genre = input.get('genre')
             sigle.save()
             return cls(sigle=sigle, success=True, errors=None)
         else:
@@ -82,7 +82,7 @@ class UpdateTextSigle(relay.ClientIDMutation):
 
 class DeleteTextSigle(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
 
     sigle = Field(TextSigleNode)
     success = Boolean()

@@ -29,7 +29,7 @@ class CodexPartInput(InputObjectType):
     codex = ID(required=True)
     part_type = String(required=True)
     part_number = String(required=True)
-    description = String()
+    description = String(required=False)
 
 # Queries
 
@@ -74,7 +74,7 @@ class CreateCodexPart(relay.ClientIDMutation):
         codex_part_instance.part_type = input.get('part_type')
         codex_part_instance.part_number = input.get('part_number')
 
-        if input.get('description'):
+        if input.get('description', None):
             codex_part_instance.description = input.get('description')
 
         codex_part_instance.save()
@@ -84,7 +84,7 @@ class CreateCodexPart(relay.ClientIDMutation):
 
 class UpdateCodexPart(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
         codex = ID(required=True)
         part_type = String(required=True)
         part_number = String(required=True)
@@ -114,7 +114,7 @@ class UpdateCodexPart(relay.ClientIDMutation):
         codex_part.part_type = input.get('part_type')
         codex_part.part_number = input.get('part_number')
 
-        if input.get('description'):
+        if input.get('description', None):
             codex_part.description = input.get('description')
 
         codex_part.save()
@@ -123,7 +123,7 @@ class UpdateCodexPart(relay.ClientIDMutation):
 
 class DeleteCodexPart(relay.ClientIDMutation):
     class Input:
-        codex_part = ID()
+        codex_part = ID(required=True)
 
     codex_part = Field(CodexPartNode)
     success = Boolean()

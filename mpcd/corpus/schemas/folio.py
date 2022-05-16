@@ -26,9 +26,11 @@ class FolioNode(DjangoObjectType):
 
 
 class FolioInput(InputObjectType):
-    identifier = String()
-    facsimile = ID()
-    number = Float()
+    identifier = String(required=True)
+    facsimile = ID(required=True)
+    number = Float(required=True)
+    comment = String(required=False)
+    previous = ID(required=False)
 
 
 # Queries
@@ -69,11 +71,11 @@ class CreateFolio(relay.ClientIDMutation):
         folio_instance, folio_created = Folio.objects.get_or_create(identifier=input.get(
             'identifier'), facsimile=facsimile_instance, number=input.get('number'))
 
-        if input.get('comment'):
+        if input.get('comment', None):
             folio_instance.comment = input.get('comment')
             folio_instance.save()
 
-        if input.get('previous'):
+        if input.get('previous', None):
             if Folio.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
                 folio_instance.save()
@@ -110,24 +112,27 @@ class UpdateFolio(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['facsimile ID does not exist'])
 
-        if input.get('comment'):
+        # update number
+
+        folio_instance.number = input.get('number')
+
+        if input.get('comment', None):
             folio_instance.comment = input.get('comment')
 
-        if input.get('number'):
-            folio_instance.number = input.get('number')
-
-        if input.get('previous'):
+        if input.get('previous', None):
             if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():
                 folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous']['id'])[1])
-            else: return cls (success=False, errors=['previous folio ID does not exist'])    
+            else:
+                return cls(success=False, errors=['previous folio ID does not exist'])
 
         folio_instance.save()
+
         return cls(folio=folio_instance, success=True)
 
 
 class DeleteFolio(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
 
     success = Boolean()
 

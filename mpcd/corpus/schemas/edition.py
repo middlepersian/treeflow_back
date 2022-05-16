@@ -27,7 +27,7 @@ class EditionNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-## TODO update both create and update Edition methods
+# TODO update both create and update Edition methods
 
 class EditionInput(InputObjectType):
     title = String(required=True)
@@ -67,7 +67,9 @@ class CreateEdition(relay.ClientIDMutation):
         if Edition.get.filter(name=input['title']).exists():
             return cls(errors=['Edition with this title already exists.'])
         else:
-            edition = Edition(title=input['title'], slug=input['slug'], description=input['description'])
+            edition = Edition(title=input['title'], slug=input['slug'])
+            if input.get('description', None):
+                edition.description = input['description']
             edition.save()
             # TODO add authors, references, text_sigle
             return cls(success=True, edition=edition)
@@ -92,7 +94,8 @@ class UpdateEdition(relay.ClientIDMutation):
             edition = Edition.objects.get(pk=input['id'])
             edition.title = input['title']
             edition.slug = input['slug']
-            edition.description = input['description']
+            if input.get('description', None):
+                edition.description = input['description']
             edition.save()
             return cls(success=True, edition=edition)
         else:

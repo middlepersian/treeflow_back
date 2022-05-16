@@ -75,7 +75,7 @@ class CreateSection(relay.ClientIDMutation):
         else:
             return cls(errors=['Section Type ID not found'], success=False, section=None)
 
-        if input.get('source'):
+        if input.get('source', None):
             if Source.objects.get(pk=from_global_id(input['source'])[1]).exists():
                 section_instance.source = Source.objects.get(pk=from_global_id(input['source'])[1])
             else:
@@ -87,13 +87,13 @@ class CreateSection(relay.ClientIDMutation):
             else:
                 return cls(errors=['Token ID not found'], success=False, section=None)
 
-        if input.get('previous'):
+        if input.get('previous', None):
             if Section.objects.get(pk=from_global_id(input['previous'])[1]).exists():
                 section_instance.previous = Section.objects.get(pk=from_global_id(input['previous'])[1])
             else:
                 return cls(errors=['Previous Section ID not found'], success=False, section=None)
 
-        if input.get('container'):
+        if input.get('container', None):
             if Section.objects.get(pk=from_global_id(input['container'])[1]).exists():
                 section_instance.container = Section.objects.get(pk=from_global_id(input['container'])[1])
             else:
@@ -139,7 +139,7 @@ class UpdateSection(relay.ClientIDMutation):
             else:
                 return cls(errors=['Section Type ID not found'], success=False, section=None)
 
-            if input.get('source'):
+            if input.get('source', None):
                 if Source.objects.get(pk=from_global_id(input['source'])[1]).exists():
                     section_instance.source = Source.objects.get(pk=from_global_id(input['source'])[1])
                 else:
@@ -151,13 +151,13 @@ class UpdateSection(relay.ClientIDMutation):
                 else:
                     return cls(errors=['Token ID not found'], success=False, section=None)
 
-            if input.get('previous'):
+            if input.get('previous', None):
                 if Section.objects.get(pk=from_global_id(input['previous'])[1]).exists():
                     section_instance.previous = Section.objects.get(pk=from_global_id(input['previous'])[1])
                 else:
                     return cls(errors=['Previous Section ID not found'], success=False, section=None)
 
-            if input.get('container'):
+            if input.get('container', None):
                 if Section.objects.get(pk=from_global_id(input['container'])[1]).exists():
                     section_instance.container = Section.objects.get(pk=from_global_id(input['container'])[1])
                 else:
