@@ -20,9 +20,9 @@ class LemmaNode(DjangoObjectType):
 class LemmaInput(InputObjectType):
     word = String(required=True)
     language = String(required=True)
-    related_lemmas = List(ID)
-    related_meanings = List(ID)
-    comment = String()
+    related_lemmas = List(ID, required=True)
+    related_meanings = List(ID, required=True)
+    comment = String(required=False)
 
 
 # Queries
@@ -41,7 +41,9 @@ class CreateLemma(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
         language = String(required=True)
-        related_lemmas = List(ID)
+        related_lemmas = List(ID, required=True)
+        related_meanings = List(ID, required=True)
+        comment = String(required=False)
 
     word = Field(LemmaNode)
     success = Boolean()
@@ -54,16 +56,16 @@ class CreateLemma(relay.ClientIDMutation):
             input.get('word')), language=to_nfc(input.get('language')))
 
         # related_lemmas
-        if input.get('related_lemmas', None):
-            for related_lemma in input.get('related_lemmas'):
-                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
-                lemma.related_lemmas.add(lemma_rel)
+
+        for related_lemma in input.get('related_lemmas'):
+            lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
+            lemma.related_lemmas.add(lemma_rel)
 
         # related_meanings
-        if input.get('related_meanings', None):
-            for related_meaning in input.get('related_meanings'):
-                meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
-                lemma.related_meanings.add(meaning_rel)
+
+        for related_meaning in input.get('related_meanings'):
+            meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+            lemma.related_meanings.add(meaning_rel)
 
         # comment
         if input.get('comment', None):
@@ -76,10 +78,11 @@ class CreateLemma(relay.ClientIDMutation):
 
 class UpdateLemma(relay.ClientIDMutation):
     class Input:
-        id = ID(required=True)
         word = String(required=True)
         language = String(required=True)
-        related_lemmas = List(ID)
+        related_lemmas = List(ID, required=True)
+        related_meanings = List(ID, required=True)
+        comment = String(required=False)
 
     errors = List(String)
     word = Field(LemmaNode)
@@ -95,21 +98,19 @@ class UpdateLemma(relay.ClientIDMutation):
             lemma.language = to_nfc(input.get('language'))
 
             # related_lemmas
-            if input.get('related_lemmas', None):
-                # clear up
-                lemma.related_lemmas.clear()
-                for related_lemma in input.get('related_lemmas'):
-                    lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
-                    lemma.related_lemmas.add(lemma_rel)
+            # clear up
+            lemma.related_lemmas.clear()
+            for related_lemma in input.get('related_lemmas'):
+                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
+                lemma.related_lemmas.add(lemma_rel)
 
             # related_meanings
-            if input.get('related_meanings', None):
-                # clear up
-                lemma.related_lemmas.clear()
-                for related_meaning in input.get('related_meanings'):
-                    meaning_rel, meaning_rel_created = Meaning.objects.get(
-                        id=from_global_id(related_meaning.get('id'))[1])
-                    lemma.related_meanings.add(meaning_rel)
+            # clear up
+            lemma.related_lemmas.clear()
+            for related_meaning in input.get('related_meanings'):
+                meaning_rel, meaning_rel_created = Meaning.objects.get(
+                    id=from_global_id(related_meaning.get('id'))[1])
+                lemma.related_meanings.add(meaning_rel)
 
             # comment
             if input.get('comment', None):

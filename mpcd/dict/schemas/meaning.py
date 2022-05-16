@@ -22,8 +22,8 @@ class MeaningNode(DjangoObjectType):
 class MeaningInput(InputObjectType):
     meaning = String(required=True)
     language = String(required=True)
-    related_meanings = List(ID)
-    comment = String()
+    related_meanings = List(ID, required=True)
+    comment = String(required=False)
 
 
 # Queries
@@ -40,8 +40,8 @@ class CreateMeaning(relay.ClientIDMutation):
     class Input:
         meaning = String(required=True)
         language = String(required=True)
-        related_meanings = List(ID)
-        comment = String()
+        related_meanings = List(ID, required=True)
+        comment = String(required=False)
 
     meaning = Field(MeaningNode)
     success = Boolean()
@@ -52,12 +52,11 @@ class CreateMeaning(relay.ClientIDMutation):
         meaning, meaning_created = Meaning.objects.get_or_create(
             meaning=to_nfc(input.get('meaning')), language=to_nfc(input.get('language')))
 
-        if input.get('related_meanings', None):
-            for related_meaning in input.get('related_meanings'):
-                meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
-                meaning.related_meanings.add(meaning_rel)
+        for related_meaning in input.get('related_meanings'):
+            meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+            meaning.related_meanings.add(meaning_rel)
 
-        if input.get('comment', None):
+        if input.get('comment'):
             meaning.comment = input.get('comment')
 
         meaning.save()
@@ -83,7 +82,7 @@ class UpdateMeaning(relay.ClientIDMutation):
             meaning.meaning = to_nfc(input.get('meaning'))
             meaning.language = to_nfc(input.get('language'))
             meaning.comment = input.get('comment')
-            if input.get('related_meanings', None):
+            if input.get('related_meanings'):
                 meaning.related_meanings.clear()
                 for related_meaning in input.get('related_meanings'):
                     meaning_rel, meaning_rel_created = Meaning.objects.get(

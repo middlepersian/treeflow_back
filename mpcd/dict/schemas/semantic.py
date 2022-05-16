@@ -29,8 +29,8 @@ class SemanticNode(DjangoObjectType):
 class SemanticInput(InputObjectType):
     lemmas = List(LemmaInput, required=True)
     meanings = List(MeaningInput, required=True)
-    term_techs = List(TermTechInput)
-    comment = String()
+    term_techs = List(TermTechInput, required=True)
+    comment = String(required=False)
 
 # Queries
 
@@ -50,8 +50,8 @@ class CreateSemantic(relay.ClientIDMutation):
     class Input:
         lemmas = List(LemmaInput, required=True)
         meanings = List(MeaningInput, required=True)
-        term_techs = List(TermTechInput)
-        comment = String()
+        term_techs = List(TermTechInput, required=True)
+        comment = String(required=False)
 
     semantic = Field(SemanticNode)
     success = Boolean()
@@ -61,29 +61,25 @@ class CreateSemantic(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
 
-
         # create semantic
         semantic = Semantic()
 
         # Lemmas
-        if input.get('lemmas', None):
-            for lemma in input['lemmas']:
-                lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
-                    input.get('word')), language=to_nfc(input.get('language')))
-                semantic.lemmas.add(lemma)
+        for lemma in input['lemmas']:
+            lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
+                input.get('word')), language=to_nfc(input.get('language')))
+            semantic.lemmas.add(lemma)
 
         # Meanings
-        if input('meanings', None):
-            for meaning_input in input['meanings']:
-                meaning_obj, meaning_created = Meaning.objects.get_or_create(
-                    meaning=to_nfc(meaning_input['meaning']), language=meaning_input['language'])
-                semantic.meanings.add(lemma)
+        for meaning_input in input['meanings']:
+            meaning_obj, meaning_created = Meaning.objects.get_or_create(
+                meaning=to_nfc(meaning_input['meaning']), language=meaning_input['language'])
+            semantic.meanings.add(lemma)
 
         # TermTechs
-        if input('term_techs', None):
-            for term_tech_input in input['term_techs']:
-                term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
-                semantic.term_techs.add(term_tech_obj)
+        for term_tech_input in input['term_techs']:
+            term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
+            semantic.term_techs.add(term_tech_obj)
 
         # Comment
         if input('comment', None):
@@ -96,10 +92,10 @@ class CreateSemantic(relay.ClientIDMutation):
 class UpdateSemantic(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        entry = ID(required=True)
+        lemmas = List(LemmaInput, required=True)
         meanings = List(MeaningInput, required=True)
         term_techs = List(TermTechInput, required=True)
-        comment = String()
+        comment = String(required=False)
 
     semantic = Field(SemanticNode)
     success = Boolean()
@@ -113,28 +109,28 @@ class UpdateSemantic(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['Semantic ID does not exist'])
         # Lemmas
-        if input.get('lemmas', None):
-            semantic_obj.lemmas.clear()
-            for lemma in input['lemmas']:
-                lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
-                    input.get('word')), language=to_nfc(input.get('language')))
-                semantic_obj.lemmas.add(lemma)
+        # clear all lemmas
+        semantic_obj.lemmas.clear()
+        for lemma in input['lemmas']:
+            lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
+                input.get('word')), language=to_nfc(input.get('language')))
+            semantic_obj.lemmas.add(lemma)
 
         # Meanings
-        if input('meanings', None):
-            semantic_obj.meanings.clear()
-            for meaning_input in input['meanings']:
-                meaning_obj, meaning_created = Meaning.objects.get_or_create(
-                    meaning=to_nfc(meaning_input['meaning']), language=meaning_input['language'])
-                if meaning_obj:
-                    semantic_obj.meanings.add(meaning_obj)
+        # clear all meanings
+        semantic_obj.meanings.clear()
+        for meaning_input in input['meanings']:
+            meaning_obj, meaning_created = Meaning.objects.get_or_create(
+                meaning=to_nfc(meaning_input['meaning']), language=meaning_input['language'])
+            if meaning_obj:
+                semantic_obj.meanings.add(meaning_obj)
         # TermTechs
-        if input('term_techs', None):
-            semantic_obj.term_techs.clear()
-            for term_tech_input in input['term_techs']:
-                term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
-                if term_tech_obj:
-                    semantic_obj.term_techs.add(term_tech_obj)
+        # clear all term_techs
+        semantic_obj.term_techs.clear()
+        for term_tech_input in input['term_techs']:
+            term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
+            if term_tech_obj:
+                semantic_obj.term_techs.add(term_tech_obj)
         # Comment
         if input('comment', None):
             semantic_obj.comment = input['comment']
