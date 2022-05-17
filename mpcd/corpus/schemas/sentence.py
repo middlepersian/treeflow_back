@@ -10,6 +10,8 @@ from mpcd.dict.schemas import MeaningInput
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
+from mpcd.utils.normalize import to_nfc
+
 
 # import the logging library
 import logging
@@ -83,7 +85,7 @@ class CreateSentence(relay.ClientIDMutation):
 
             # check if translation exists, if not create it
             translation_instance, translation_created = Meaning.objects.get_or_create(
-                meaning=translation_input.get('meaning'), language=translation_input.get('language'))
+                meaning=to_nfc(translation_input.get('meaning')), language=translation_input.get('language'))
 
             # add translation to sentence
             sentence_instance.translations.add(translation_instance)
@@ -146,7 +148,7 @@ class UpdateSentence(relay.ClientIDMutation):
             for translation_input in input.get('translations'):
                 # check if translation exists, if not create it
                 translation_instance, translation_created = Meaning.objects.get_or_create(
-                    meaning=translation_input.get('meaning'), language=translation_input.get('language'))
+                    meaning=to_nfc(translation_input.get('meaning')), language=translation_input.get('language'))
                 # add translation to sentence
                 sentence_instance.translations.add(translation_instance)
 

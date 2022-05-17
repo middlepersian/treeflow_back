@@ -2,7 +2,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line
+from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line, CommentCategory
 from mpcd.dict.models import Lemma, Meaning
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
@@ -36,6 +36,7 @@ class TokenInput(InputObjectType):
     text = ID(required=True)
     transcription = String(required=True)
     transliteration = String(required=True)
+    number = Float(required=True)
     language = String(required=True)
     lemma = LemmaInput(required=True)
     meanings = List(MeaningInput, required=True)
@@ -43,6 +44,9 @@ class TokenInput(InputObjectType):
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
     comment = String(required=False)
+    comment_uncertain = List(String, required=True)
+    comment_to_discuss = List(String, required=True)
+    comment_new_suggestion = List(String, required=True)
     avestan = String(required=False)
     previous = ID(required=False)
     line = ID(required=True)
@@ -68,6 +72,7 @@ class CreateToken(relay.ClientIDMutation):
         text = ID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
+        number = Float(required=True)
         language = String(required=True)
         lemma = LemmaInput(required=True)
         meanings = List(MeaningInput, required=True)
@@ -75,6 +80,9 @@ class CreateToken(relay.ClientIDMutation):
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
+        comment_uncertain = List(String, required=True)
+        comment_to_discuss = List(String, required=True)
+        comment_new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=False)
@@ -106,14 +114,14 @@ class CreateToken(relay.ClientIDMutation):
        # get or create the meanings
         for meaning in input['meanings']:
             meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(
-                meaning=meaning['meaning'], language=meaning['language'])
+                meaning=to_nfc(meaning['meaning']), language=meaning['language'])
             local_related_meanings.append(meaning_obj)
 
         token.meanings.set(local_related_meanings)
 
         # get or create the lemma
         lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
-            lemma=input['lemma']['word'], language=input['lemma']['language'])
+            lemma=to_nfc(input['lemma']['word']), language=input['lemma']['language'])
         # add the related meanings to the lemma
         if local_related_meanings:
             # see if local_related_meanings are already related to lemma
@@ -138,12 +146,33 @@ class CreateToken(relay.ClientIDMutation):
         for annotation in input['syntactic_annotation']:
             dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
             token.syntactic_annotation.add(dep_obj)
+
         # check if comment available
         if input.get('comment', None):
-            token.comment = input['comment']
+            token.comment = to_nfc(input['comment'])
+
+        # get or create comment_uncertain
+        for comment_uncertain in input['comment_uncertain']:
+            comment_uncertain_obj, comment_uncertain_obj_created = CommentCategory.objects.get_or_create(
+                comment=comment_uncertain)
+            token.comment_uncertain.add(comment_uncertain_obj)
+
+        # get or create comment_to_discuss
+        for comment_to_discuss in input['comment_to_discuss']:
+            comment_to_discuss_obj, comment_to_discuss_obj_created = CommentCategory.objects.get_or_create(
+                comment=comment_to_discuss)
+            token.comment_to_discuss.add(comment_to_discuss_obj)
+
+        # get or create comment_new_suggestion
+        for comment_new_suggestion in input['comment_new_suggestion']:
+            comment_new_suggestion_obj, comment_new_suggestion_obj_created = CommentCategory.objects.get_or_create(
+                comment=comment_new_suggestion)
+            token.comment_new_suggestion.add(comment_new_suggestion_obj)
+
         # check if avestan available
         if input.get('avestan', None):
-            token.avestan = input['avestan']
+            token.avestan = to_nfc(input['avestan'])
+
         # check if previous token available
         if input.get('previous', None):
             # check if previous token with assigned id already exists
@@ -160,6 +189,7 @@ class CreateToken(relay.ClientIDMutation):
                 token.line = line
             else:
                 return cls(token=None, success=False, errors=["Line with ID {} not found".format(input['line'])])
+
         # check if position_in_line available
         if input.get('position_in_line', None):
             position_in_line = input['position_in_line']
@@ -176,6 +206,7 @@ class UpdateToken(relay.ClientIDMutation):
         text = ID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
+        number = Float(required=True)
         language = String(required=True)
         lemma = LemmaInput(required=True)
         meanings = List(MeaningInput, required=True)
@@ -183,6 +214,9 @@ class UpdateToken(relay.ClientIDMutation):
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
+        comment_uncertain = List(String, required=True)
+        comment_to_discuss = List(String, required=True)
+        comment_new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=False)
@@ -219,13 +253,13 @@ class UpdateToken(relay.ClientIDMutation):
         token.meanings.clear()
         for meaning in input['meanings']:
             meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(
-                meaning=meaning['meaning'], language=meaning['language'])
+                meaning=to_nfc(meaning['meaning']), language=meaning['language'])
             local_related_meanings.append(meaning_obj)
             token.meanings.set(local_related_meanings)
 
         # get or create the lemma
         lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
-            lemma=input['lemma']['word'], language=input['lemma']['language'])
+            lemma=to_nfc(input['lemma']['word']), language=input['lemma']['language'])
         # add the related meanings to the lemma
         if local_related_meanings:
             # see if local_related_meanings are already related to lemma
@@ -255,11 +289,35 @@ class UpdateToken(relay.ClientIDMutation):
 
         # check if comment available
         if input.get('comment', None):
-            token.comment = input['comment']
+            token.comment = to_nfc(input['comment'])
+
+        # clear comment_uncertain
+        token.comment_uncertain.clear()
+        # get or create comment_uncertain
+        for comment_uncertain in input['comment_uncertain']:
+            comment_uncertain_obj, comment_uncertain_obj_created = CommentCategory.objects.get_or_create(
+                comment=comment_uncertain)
+            token.comment_uncertain.add(comment_uncertain_obj)
+
+        # clear comment_to_discuss
+        token.comment_to_discuss.clear()
+        # get or create comment_to_discuss
+        for comment_to_discuss in input['comment_to_discuss']:
+            comment_to_discuss_obj, comment_to_discuss_obj_created = CommentCategory.objects.get_or_create(
+                comment=comment_to_discuss)
+            token.comment_to_discuss.add(comment_to_discuss_obj)
+
+        # clear comment_new_suggestion
+        token.comment_new_suggestion.clear()
+        # get or create comment_new_suggestion
+        for comment_new_suggestion in input['comment_new_suggestion']:
+            comment_new_suggestion_obj, comment_new_suggestion_obj_created = CommentCategory.objects.get_or_create(
+                comment=comment_new_suggestion)
+            token.comment_new_suggestion.add(comment_new_suggestion_obj)
 
         # check if avestan available
         if input.get('avestan', None):
-            token.avestan = input['avestan']
+            token.avestan = to_nfc(input['avestan'])
 
         # check if previous token available
         if input.get('previous', None):

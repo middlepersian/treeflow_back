@@ -9,6 +9,8 @@ import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
 
+from mpcd.utils.normalize import to_nfc
+
 # import the logging library
 import logging
 # Get an instance of a logger
@@ -71,11 +73,11 @@ class CreateCodexPart(relay.ClientIDMutation):
             else:
                 return cls(success=False, errors=['Codex ID does not exist'])
 
-        codex_part_instance.part_type = input.get('part_type')
-        codex_part_instance.part_number = input.get('part_number')
+        codex_part_instance.part_type = to_nfc(input.get('part_type'))
+        codex_part_instance.part_number = to_nfc(input.get('part_number'))
 
         if input.get('description', None):
-            codex_part_instance.description = input.get('description')
+            codex_part_instance.description = to_nfc(input.get('description'))
 
         codex_part_instance.save()
 
@@ -111,11 +113,11 @@ class UpdateCodexPart(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['Codex ID does not exist'])
 
-        codex_part.part_type = input.get('part_type')
-        codex_part.part_number = input.get('part_number')
+        codex_part.part_type = to_nfc(input.get('part_type'))
+        codex_part.part_number = to_nfc(input.get('part_number'))
 
         if input.get('description', None):
-            codex_part.description = input.get('description')
+            codex_part.description = to_nfc(input.get('description'))
 
         codex_part.save()
         return cls(codex_part=codex_part, success=True)

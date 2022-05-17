@@ -30,8 +30,8 @@ class TextInput(InputObjectType):
     title = String(required=True)
     stage = String(required=True)
     text_sigle = ID(required=True)
-    editors = List(User, required=False)
-    collaborators = List(User, required=False)
+    # editors = List(User, required=False)
+    # collaborators = List(User, required=False)
     resources = List(ID, required=True)
     sources = List(ID, required=True)
 # Query
@@ -55,8 +55,8 @@ class CreateText(relay.ClientIDMutation):
         title = String(required=True)
         stage = String(required=True)
         text_sigle = ID(required=True)
-        editors = List(User, required=False)
-        collaborators = List(User, required=False)
+        # editors = List(User, required=False)
+        # collaborators = List(User, required=False)
         resources = List(ID, required=True)
         sources = List(ID, required=True)
 
@@ -88,9 +88,11 @@ class CreateText(relay.ClientIDMutation):
 
         # get sources
         for source in input['sources']:
-            source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
-            text_instance.sources.add(source_instance)
+            if Source.objects.filter(pk=from_global_id(source)[1]).exists():
+                source_instance = Source.objects.get(pk=from_global_id(source)[1])
+                text_instance.sources.add(source_instance)
 
+        '''
         # get editors
         if input.get('editors', None):
             for editor in input.get('editors'):
@@ -102,6 +104,7 @@ class CreateText(relay.ClientIDMutation):
             for collaborator in input.get('collaborators'):
                 collaborator_instance = User.objects.get(username=collaborator.get('username'))
                 text_instance.collaborators.add(collaborator_instance)
+        '''
 
         if input.get('resources'):
             for resource in input.get('resources'):
@@ -124,8 +127,8 @@ class UpdateText(relay.ClientIDMutation):
         title = String(required=True)
         stage = String(required=True)
         text_sigle = ID(required=True)
-        editors = List(User, required=False)
-        collaborators = List(User, required=False)
+        # editors = List(User, required=False)
+        # collaborators = List(User, required=False)
         resources = List(ID, required=True)
         sources = List(ID, required=True)
 
@@ -152,9 +155,10 @@ class UpdateText(relay.ClientIDMutation):
         # set text sigle
         if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():
             text_sigle_instance = TextSigle.objects.get(pk=from_global_id(input.get('text_sigle'))[1])
+            text_instance.text_sigle = text_sigle_instance
         else:
             return cls(success=False, errors="Wrong text sigle ID", text=None)
-
+        '''
         # TODO check how to properly do this with graphql
         # add editors
         if input.get('editors', None):
@@ -168,6 +172,7 @@ class UpdateText(relay.ClientIDMutation):
                 collaborator_instance = User.objects.get(username=collaborator.get('username'))
                 text_instance.collaborators.add(collaborator_instance)
 
+        '''
         # get resources
         for resource in input.get('resources'):
             resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
@@ -181,8 +186,9 @@ class UpdateText(relay.ClientIDMutation):
 
         # get sources
         for source in input['sources']:
-            source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
-            text_instance.sources.add(source_instance)
+            if Source.objects.filter(pk=from_global_id(source)[1]).exists():
+                source_instance = Source.objects.get(pk=from_global_id(source)[1])
+                text_instance.sources.add(source_instance)
 
         text_instance.save()
         return text_instance
