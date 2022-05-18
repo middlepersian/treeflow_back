@@ -25,14 +25,13 @@ class Query(
         mpcd.corpus.schemas.section.Query,
         mpcd.corpus.schemas.sentence.Query,
         # Dict Queries
-        mpcd.dict.schemas.category.Query,
         mpcd.dict.schemas.definition.Query,
         mpcd.dict.schemas.dictionary.Query,
-        mpcd.dict.schemas.entry.Query,
         mpcd.dict.schemas.lemma.Query,
-        mpcd.dict.schemas.loanword.Query,
+        mpcd.dict.schemas.meaning.Query,
         mpcd.dict.schemas.reference.Query,
-        mpcd.dict.schemas.translation.Query,
+        mpcd.dict.schemas.semantic.Query,
+        mpcd.dict.schemas.term_tech.Query,
         graphene.ObjectType):
     pass
 
@@ -57,14 +56,13 @@ class Mutation(
         mpcd.corpus.schemas.text.Mutation,
         mpcd.corpus.schemas.token.Mutation,
         # Dict Mutations
-        mpcd.dict.schemas.category.Mutation,
         mpcd.dict.schemas.definition.Mutation,
         mpcd.dict.schemas.dictionary.Mutation,
-        mpcd.dict.schemas.entry.Mutation,
         mpcd.dict.schemas.lemma.Mutation,
-        mpcd.dict.schemas.loanword.Mutation,
+        mpcd.dict.schemas.meaning.Mutation,
         mpcd.dict.schemas.reference.Mutation,
-        mpcd.dict.schemas.translation.Mutation,
+        mpcd.dict.schemas.semantic.Mutation,
+        mpcd.dict.schemas.term_tech.Mutation,
         graphene.ObjectType):
 
     # https://django-graphql-jwt.domake.io/relay.html

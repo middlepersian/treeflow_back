@@ -3,21 +3,20 @@ from django.db import models
 
 
 class POSChoices(models.TextChoices):
-    ADJ = 'ADJ', 'ADJ'
-    ADP = 'ADP', 'ADP'
-    ADV = "ADV", "ADV"
-    AUX = "AUX", "AUX"
-    CCONJ = "CCONJ", "CCONJ"
-    DET = "DET", "DET"
-    INTJ = "INTJ", "INTJ"
-    NOUN = "NOUN", "NOUN"
-    NUM = "NUM", "NUM"
-    PART = "PART", "PART"
-    PRON = "PRON", "PRON"
-    PROPN = "PROPN", "PROPN"
-    PUNCT = "PUNCT", "PUNCT"
-    SCONJ = "SCONJ", "SCONJ"
-    SYM = "SYM", "SYM"
-    VERB = "VERB", "VERB"
-    X = "X", "X"
-
+    ADJ = 'ADJ', 'adjective'
+    ADP = 'ADP', 'adposition'
+    ADV = "ADV", "adverb"
+    AUX = "AUX", "auxiliary"
+    CCONJ = "CCONJ", "coordinating conjunction"
+    DET = "DET", "determiner"
+    INTJ = "INTJ", "interjection"
+    NOUN = "NOUN", "noun"
+    NUM = "NUM", "numeral"
+    PART = "PART", "particle"
+    PRON = "PRON", "pronoun"
+    PROPN = "PROPN", "proper noun"
+    PUNCT = "PUNCT", "punctuation"
+    SCONJ = "SCONJ", "subordinating conjunction"
+    SYM = "SYM", "symbol"
+    VERB = "VERB", "verb"
+    X = "X", "other"

@@ -20,7 +20,7 @@ class CatCh(models.TextChoices):
     zool = "zool",  "zoology"
 
 
-class Category(models.Model):
+class TermTech(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     category = models.CharField(max_length=10, choices=CatCh.choices, unique=True)
 

@@ -1,4 +1,4 @@
-from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean
+from graphene import relay, InputObjectType, String, Field, ObjectType, ID, Boolean, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -24,7 +24,7 @@ class CorpusNode(DjangoObjectType):
 
 
 class CorpusInput(InputObjectType):
-    name = String()
+    name = String(required=True)
     slug = String(required=True)
 
 
@@ -49,7 +49,6 @@ class CreateCorpus(relay.ClientIDMutation):
 
     @classmethod
     @superuser_required
-
     def mutate_and_get_payload(cls, root, info, name, slug):
         corpus_obj, corpus_created = Corpus.objects.get_or_create(name=name, slug=slug)
         return cls(success=True, corpus=corpus_obj)
@@ -57,27 +56,25 @@ class CreateCorpus(relay.ClientIDMutation):
 
 class UpdateCorpus(relay.ClientIDMutation):
     class Input:
-        id = ID()
-        name = String()
-        slug = String()
+        id = ID(required=True)
+        name = String(required=True)
+        slug = String(required=True)
 
     corpus = Field(CorpusNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id, name, slug):
         if Corpus.objects.filter(pk=from_global_id(id)[1]).exists():
             corpus = Corpus.objects.get(pk=from_global_id(id)[1])
             corpus.name = name
             corpus.slug = slug
             corpus.save()
-            success = True
-            return cls(corpus=corpus, success=success)
+            return cls(corpus=corpus, success=True)
         else:
-            success = False
-            return cls(success=success)
+            return cls(success=True, errors=['Corpus ID does not exist'], corpus=None)
 
 
 class Mutation(ObjectType):

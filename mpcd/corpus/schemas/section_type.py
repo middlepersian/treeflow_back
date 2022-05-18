@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -19,7 +19,7 @@ class SectionTypeNode(DjangoObjectType):
 
 class SectionTypeInput(InputObjectType):
 
-    identifier = String()
+    identifier = String(required=True)
 
 
 # Queries
@@ -44,15 +44,11 @@ class CreateSectionType(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, identifier):
-        if SectionType.objects.filter(identifier=identifier).exists():
-            return cls(success=False)
 
-        else:
-            section_type_instance = SectionType.objects.create(identifier=identifier)
-            section_type_instance.save()
-            return cls(section_type=section_type_instance, success=True)
+        section_type_instance = SectionType.objects.get_or_create(identifier=identifier)
+        section_type_instance.save()
+        return cls(section_type=section_type_instance, success=True)
 
 
 class UpdateSectionType(relay.ClientIDMutation):
@@ -61,10 +57,10 @@ class UpdateSectionType(relay.ClientIDMutation):
 
     success = Boolean()
     section_type = Field(SectionTypeNode)
+    errors = List(String)
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id, identifier):
         if SectionType.objects.filter(pk=from_global_id(id[1])).exists():
             section_type_instance = SectionType.objects.get(pk=from_global_id(id[1]))
@@ -72,18 +68,17 @@ class UpdateSectionType(relay.ClientIDMutation):
             section_type_instance.save()
             return cls(section_type=section_type_instance, success=True)
         else:
-            return cls(sucess=False)
+            return cls(section_type=None, success=False, errors=['SectionType ID does not exist'])
 
 
 class DeleteSectionType(relay.ClientIDMutation):
     class Input:
-        id = ID()
+        id = ID(required=True)
 
     success = Boolean()
 
     @classmethod
     @superuser_required
-
     def mutate_and_get_payload(cls, root, info, id):
         if SectionType.objects.filter(pk=from_global_id(id[1])).exists():
             section_type_instance = SectionType.objects.get(pk=from_global_id(id[1]))

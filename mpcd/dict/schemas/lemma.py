@@ -6,7 +6,7 @@ import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
 
-from mpcd.dict.models import Lemma
+from mpcd.dict.models import Lemma, Meaning
 from mpcd.utils.normalize import to_nfc
 
 
@@ -20,6 +20,9 @@ class LemmaNode(DjangoObjectType):
 class LemmaInput(InputObjectType):
     word = String(required=True)
     language = String(required=True)
+    related_lemmas = List(ID, required=True)
+    related_meanings = List(ID, required=True)
+    comment = String(required=False)
 
 
 # Queries
@@ -38,25 +41,48 @@ class CreateLemma(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
         language = String(required=True)
+        related_lemmas = List(ID, required=True)
+        related_meanings = List(ID, required=True)
+        comment = String(required=False)
 
     word = Field(LemmaNode)
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
             input.get('word')), language=to_nfc(input.get('language')))
+
+        # related_lemmas
+
+        for related_lemma in input.get('related_lemmas'):
+            lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
+            lemma.related_lemmas.add(lemma_rel)
+
+        # related_meanings
+
+        for related_meaning in input.get('related_meanings'):
+            meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+            lemma.related_meanings.add(meaning_rel)
+
+        # comment
+        if input.get('comment', None):
+            lemma.comment = input.get('comment')
+
+        lemma.save()
+
         return cls(word=lemma, success=True)
 
 
 class UpdateLemma(relay.ClientIDMutation):
     class Input:
-        id = ID(required=True)
         word = String(required=True)
         language = String(required=True)
+        related_lemmas = List(ID, required=True)
+        related_meanings = List(ID, required=True)
+        comment = String(required=False)
 
     errors = List(String)
     word = Field(LemmaNode)
@@ -64,14 +90,34 @@ class UpdateLemma(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         if Lemma.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
             lemma = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
             lemma.word = to_nfc(input.get('word'))
             lemma.language = to_nfc(input.get('language'))
+
+            # related_lemmas
+            # clear up
+            lemma.related_lemmas.clear()
+            for related_lemma in input.get('related_lemmas'):
+                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
+                lemma.related_lemmas.add(lemma_rel)
+
+            # related_meanings
+            # clear up
+            lemma.related_lemmas.clear()
+            for related_meaning in input.get('related_meanings'):
+                meaning_rel, meaning_rel_created = Meaning.objects.get(
+                    id=from_global_id(related_meaning.get('id'))[1])
+                lemma.related_meanings.add(meaning_rel)
+
+            # comment
+            if input.get('comment', None):
+                lemma.comment = input.get('comment')
+
             lemma.save()
+
             return cls(word=lemma, success=True)
         else:
             return cls(token=None, success=False, errors=["Lemma ID does not exists"])
@@ -85,7 +131,6 @@ class DeleteLemma(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
         # check that Definition  does not exist
         if Lemma.objects.filter(pk=from_global_id(id)[1]).exists():

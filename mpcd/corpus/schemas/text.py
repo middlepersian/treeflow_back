@@ -4,11 +4,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Text, Author, Resource, Corpus, TextSigle, Source
-from mpcd.corpus.schemas.text_sigle import TextSigleInput
-from mpcd.corpus.schemas.author import AuthorInput
-from mpcd.corpus.schemas.source import SourceInput
-from mpcd.corpus.schemas.resource import ResourceInput
-
+from django.contrib.auth.models import User
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
@@ -30,16 +26,14 @@ class TextNode(DjangoObjectType):
 
 
 class TextInput(InputObjectType):
-    # id = ID()
-    corpus = String(required=True)
+    corpus = ID(required=True)
     title = String(required=True)
-    stage = String()
-    text_sigle = TextSigleInput()
-    editors = List(AuthorInput)
-    collaborators = List(AuthorInput)
-    resources = List(AuthorInput)
-    sources = List(SourceInput)
-
+    stage = String(required=True)
+    text_sigle = ID(required=True)
+    # editors = List(User, required=False)
+    # collaborators = List(User, required=False)
+    resources = List(ID, required=True)
+    sources = List(ID, required=True)
 # Query
 
 
@@ -59,12 +53,12 @@ class CreateText(relay.ClientIDMutation):
     class Input:
         corpus = ID(required=True)
         title = String(required=True)
-        stage = String()
-        text_sigle = TextSigleInput()
-        editors = List(AuthorInput)
-        collaborators = List(AuthorInput)
-        resources = List(ResourceInput)
-        sources = List(SourceInput)
+        stage = String(required=True)
+        text_sigle = ID(required=True)
+        # editors = List(User, required=False)
+        # collaborators = List(User, required=False)
+        resources = List(ID, required=True)
+        sources = List(ID, required=True)
 
     text = Field(TextNode)
     success = Boolean()
@@ -72,7 +66,6 @@ class CreateText(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, **input):
 
         # check if corpus exists
@@ -81,38 +74,42 @@ class CreateText(relay.ClientIDMutation):
         else:
             return cls(success=False, errors="Wrong corpus ID", text=None)
 
-          # create text with title and stage (default=untouched)
+        # create text with title and stage (default=untouched)
         text_instance, text_created = Text.objects.get_or_create(title=input.get('title'), corpus=corpus_instance)
 
-        if input.get('stage', None) is not None:
-            text_instance.stage = input.get('stage')
+        # set stage
+        text_instance.stage = input.get('stage')
 
-        # get source
-        if input.get('sources', None) is not None:
-            for source in input['sources']:
-                source_instance = Source.objects.get(pk=from_global_id(source.id)[1])
+        # set text sigle
+        if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():
+            text_sigle_instance = TextSigle.objects.get(pk=from_global_id(input.get('text_sigle'))[1])
+        else:
+            return cls(success=False, errors="Wrong text sigle ID", text=None)
+
+        # get sources
+        for source in input['sources']:
+            if Source.objects.filter(pk=from_global_id(source)[1]).exists():
+                source_instance = Source.objects.get(pk=from_global_id(source)[1])
                 text_instance.sources.add(source_instance)
 
-        if input.get('text_sigle', None) is not None:
-            text_sigle_instance, text_sigle_created = TextSigle.objects.get_or_create(
-                sigle=input.get('text_sigle').get('sigle'), genre=input.get('text_sigle').get('genre'))
-            text_instance.text_sigle = text_sigle_instance
-        if input.get('editors', None) is not None:
+        '''
+        # get editors
+        if input.get('editors', None):
             for editor in input.get('editors'):
-                author_instance, author_created = Author.objects.get_or_create(
-                    name=editor.name, last_name=editor.last_name)
-                author_instance.save()
-                text_instance.editors.add(author_instance)
-        if input.get('collaborators', None) is not None:
+                editor_instance = User.objects.get(username=editor.get('username'))
+                text_instance.editors.add(editor_instance)
+
+        # add collaborators
+        if input.get('collaborators', None):
             for collaborator in input.get('collaborators'):
-                author_instance, author_created = Author.objects.get_or_create(
-                    name=editor.name, last_name=collaborator.last_name)
-                author_instance.save()
-                text_instance.collaborators.add(author_instance)
-        if input.get('resources', None) is not None:
+                collaborator_instance = User.objects.get(username=collaborator.get('username'))
+                text_instance.collaborators.add(collaborator_instance)
+        '''
+
+        if input.get('resources'):
             for resource in input.get('resources'):
                 resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
-                if resource.get('authors', None) is not None:
+                if resource.get('authors'):
                     for author in resource['authors']:
                         author_instance, author_created = Author.objects.get_or_create(
                             name=author.name, last_name=author.last_name)
@@ -123,8 +120,80 @@ class CreateText(relay.ClientIDMutation):
         text_instance.save()
         return cls(text=text_instance, success=True)
 
-# TODO update text
+
+class UpdateText(relay.ClientIDMutation):
+    class Input:
+        id = ID(required=True)
+        title = String(required=True)
+        stage = String(required=True)
+        text_sigle = ID(required=True)
+        # editors = List(User, required=False)
+        # collaborators = List(User, required=False)
+        resources = List(ID, required=True)
+        sources = List(ID, required=True)
+
+    text = Field(TextNode)
+    success = Boolean()
+    errors = List(String)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+
+        # check if text exists
+        if Text.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            text_instance = Text.objects.get(pk=from_global_id(input.get('id'))[1])
+        else:
+            return cls(success=False, errors="Wrong text ID", text=None)
+
+        # set title
+        text_instance.title = input.get('title')
+
+        # set stage
+        text_instance.stage = input.get('stage')
+
+        # set text sigle
+        if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():
+            text_sigle_instance = TextSigle.objects.get(pk=from_global_id(input.get('text_sigle'))[1])
+            text_instance.text_sigle = text_sigle_instance
+        else:
+            return cls(success=False, errors="Wrong text sigle ID", text=None)
+        '''
+        # TODO check how to properly do this with graphql
+        # add editors
+        if input.get('editors', None):
+            for editor in input.get('editors'):
+                editor_instance = User.objects.get(username=editor.get('username'))
+                text_instance.editors.add(editor_instance)
+
+        # add collaborators
+        if input.get('collaborators', None):
+            for collaborator in input.get('collaborators'):
+                collaborator_instance = User.objects.get(username=collaborator.get('username'))
+                text_instance.collaborators.add(collaborator_instance)
+
+        '''
+        # get resources
+        for resource in input.get('resources'):
+            resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
+            if resource.get('authors'):
+                for author in resource['authors']:
+                    author_instance, author_created = Author.objects.get_or_create(
+                        name=author.name, last_name=author.last_name)
+                    author_instance.save()
+                    resource_instance.authors.add(author_instance)
+            text_instance.resources.add(resource_instance)
+
+        # get sources
+        for source in input['sources']:
+            if Source.objects.filter(pk=from_global_id(source)[1]).exists():
+                source_instance = Source.objects.get(pk=from_global_id(source)[1])
+                text_instance.sources.add(source_instance)
+
+        text_instance.save()
+        return text_instance
 
 
 class Mutation(ObjectType):
     create_text = CreateText.Field()
+    update_text = UpdateText.Field()

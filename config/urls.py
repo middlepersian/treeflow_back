@@ -29,12 +29,12 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # API URLS
-urlpatterns += [
+#urlpatterns += [
     # API base url
-    path("api/", include("config.api_router")),
+    #path("api/", include("config.api_router")),
     # DRF auth token
-    path("auth-token/", obtain_auth_token),
-]
+    #path("auth-token/", obtain_auth_token),
+#]
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

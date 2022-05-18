@@ -3,7 +3,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 
-from mpcd.corpus.models import Dependency
+from mpcd.corpus.models import Dependency, Token
 from graphql_jwt.decorators import login_required
 
 
@@ -27,8 +27,8 @@ class DependencyNode(DjangoObjectType):
 
 
 class DependencyInput(InputObjectType):
-    head = ID()
-    rel = String()
+    head = ID(required=True)
+    rel = String(required=True)
 
 # Queries
 
@@ -50,39 +50,41 @@ class CreateDependency(relay.ClientIDMutation):
 
     dependency = Field(DependencyNode)
     success = Boolean()
+    errors = True
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, head, rel):
         # check that dependency does not exist
         if Dependency.objects.filter(head=head, rel=rel).exists():
-            return cls(success=False)
+            return cls(success=False, errors=True, dependency=None)
 
         else:
-            dependency_instance = Dependency.objects.create(head=head, rel=rel)
+            local_head = Token.objects.get(id=from_global_id(head)[1])
+            dependency_instance = Dependency.objects.get_or_create(head=local_head, rel=rel)
             dependency_instance.save()
 
-            return cls(dependency=dependency_instance, success=True)
+            return cls(dependency=dependency_instance, success=True, errors=False)
 
 
 class UpdateDependency(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        head = ID()
-        rel = String()
+        head = ID(required=True)
+        rel = String(required=True)
 
     dependency = Field(DependencyNode)
     success = Boolean()
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id, head, rel):
         # check that dependency does not exist
         if Dependency.objects.filter(pk=from_global_id(id)[1]).exists():
             dependency_instance = Dependency.objects.get(pk=from_global_id(id)[1])
-            dependency_instance.head = head
+            # get head
+            local_head = Token.objects.get(pk=from_global_id(head)[1])
+            dependency_instance.head = local_head
             dependency_instance.rel = rel
             dependency_instance.save()
             return cls(dependency=dependency_instance, success=True)
@@ -100,9 +102,8 @@ class DeleteDependency(relay.ClientIDMutation):
 
     @classmethod
     @login_required
-
     def mutate_and_get_payload(cls, root, info, id):
-        # check that dependency does not exist
+        # check that dependency does exist
         if Dependency.objects.filter(pk=from_global_id(id)[1]).exists():
             dependency_instance = Dependency.objects.get(pk=from_global_id(id)[1])
             dependency_instance.delete()
