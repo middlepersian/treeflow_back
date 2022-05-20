@@ -9,7 +9,7 @@ class Source(models.Model):
 
     title = models.CharField(max_length=100, blank=True, null=True)
     slug = models.SlugField(max_length=10, unique=True)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(null=True, blank=True)
 
     history = HistoricalRecords()
 
