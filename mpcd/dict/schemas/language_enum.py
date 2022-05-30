@@ -25,7 +25,7 @@ class Language(Enum):
 
 # Query
 class Query(ObjectType):
-    language = Field(Language)
+    language = Field(Language, description='Language in ISO 639-3 format')
 
     def resolve_language(root, info, language):
         return language

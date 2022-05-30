@@ -7,6 +7,7 @@ from graphql_jwt.decorators import login_required
 
 
 from mpcd.dict.models import Lemma, Meaning
+from mpcd.dict.schemas.language_enum import Language
 from mpcd.utils.normalize import to_nfc
 
 
@@ -19,7 +20,7 @@ class LemmaNode(DjangoObjectType):
 
 class LemmaInput(InputObjectType):
     word = String(required=True)
-    language = String(required=True)
+    language = Language(required=True)
     related_lemmas = List(ID, required=True)
     related_meanings = List(ID, required=True)
     comment = String(required=False)
@@ -40,7 +41,7 @@ class Query(ObjectType):
 class CreateLemma(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
-        language = String(required=True)
+        language = Language(required=True)
         related_lemmas = List(ID, required=True)
         related_meanings = List(ID, required=True)
         comment = String(required=False)
@@ -79,7 +80,7 @@ class CreateLemma(relay.ClientIDMutation):
 class UpdateLemma(relay.ClientIDMutation):
     class Input:
         word = String(required=True)
-        language = String(required=True)
+        language = Language(required=True)
         related_lemmas = List(ID, required=True)
         related_meanings = List(ID, required=True)
         comment = String(required=False)

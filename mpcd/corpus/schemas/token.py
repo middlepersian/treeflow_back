@@ -8,6 +8,9 @@ from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.dict.schemas import LemmaInput
 from mpcd.dict.schemas import MeaningInput
+from mpcd.corpus.schemas.pos_enum import POS
+from mpcd.dict.schemas.language_enum import Language
+
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -37,10 +40,10 @@ class TokenInput(InputObjectType):
     transcription = String(required=True)
     transliteration = String(required=True)
     number = Float(required=True)
-    language = String(required=True)
+    language = Language(required=True)
     lemma = LemmaInput(required=True)
     meanings = List(MeaningInput, required=True)
-    pos = String(required=True)
+    pos = POS(required=True)
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
     comment = String(required=False)
@@ -73,10 +76,10 @@ class CreateToken(relay.ClientIDMutation):
         transcription = String(required=True)
         transliteration = String(required=True)
         number = Float(required=True)
-        language = String(required=True)
+        language = Language(required=True)
         lemma = LemmaInput(required=True)
         meanings = List(MeaningInput, required=True)
-        pos = String(required=True)
+        pos = POS(required=True)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
@@ -85,9 +88,9 @@ class CreateToken(relay.ClientIDMutation):
         comment_new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
-        line = ID(required=False)
+        line = ID(required=True)
         position_in_line = Int(required=False)
-
+        
     token = Field(TokenNode)
     errors = List(String)
     success = Boolean()
@@ -207,10 +210,10 @@ class UpdateToken(relay.ClientIDMutation):
         transcription = String(required=True)
         transliteration = String(required=True)
         number = Float(required=True)
-        language = String(required=True)
+        language = Language(required=True)
         lemma = LemmaInput(required=True)
         meanings = List(MeaningInput, required=True)
-        pos = String(required=True)
+        pos = POS(required=True)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
@@ -219,7 +222,7 @@ class UpdateToken(relay.ClientIDMutation):
         comment_new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
-        line = ID(required=False)
+        line = ID(required=True)
         position_in_line = Int(required=False)
 
     token = Field(TokenNode)

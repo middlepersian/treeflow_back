@@ -310,6 +310,10 @@ class DET(Enum):
     Poss = "Poss"
     Number = "Number"
 
+    @property
+    def description(self):
+        return self.value
+
 
 class DETPronType(Enum):
     Dem = 'Dem'
@@ -371,6 +375,10 @@ class NOUN(Enum):
     Voice = 'Voice'
     Polarity = 'Polarity'
     Animacy = 'Animacy'
+
+    @property
+    def description(self):
+        return self.value
 
 
 class NOUNNumber(Enum):
@@ -457,6 +465,10 @@ class NUM(Enum):
     NumType = 'NumType'
     Number = 'Number'
 
+    @property
+    def description(self):
+        return self.value
+
 
 class NUMPronType(Enum):
     Dem = 'Dem'
@@ -493,6 +505,10 @@ class NUMNumber(Enum):
 class PART(Enum):
     PartType = 'PartType'
 
+    @property
+    def description(self):
+        return self.value
+
 
 class PARTPartType(Enum):
     Verbal = 'Verbal'
@@ -513,6 +529,10 @@ class PRON(Enum):
     Number = 'Number'
     Person = 'Person'
     Polite = 'Polite'
+
+    @property
+    def description(self):
+        return self.value
 
 
 class PRONPronType(Enum):

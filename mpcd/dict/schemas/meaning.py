@@ -8,6 +8,7 @@ from graphql_jwt.decorators import login_required
 
 from mpcd.dict.models import Meaning
 from mpcd.utils.normalize import to_nfc
+from mpcd.dict.schemas.language_enum import Language
 
 
 class MeaningNode(DjangoObjectType):
@@ -21,7 +22,7 @@ class MeaningNode(DjangoObjectType):
 
 class MeaningInput(InputObjectType):
     meaning = String(required=True)
-    language = String(required=True)
+    language = Language(required=True)
     related_meanings = List(ID, required=True)
     comment = String(required=False)
 
@@ -39,7 +40,7 @@ class Query(ObjectType):
 class CreateMeaning(relay.ClientIDMutation):
     class Input:
         meaning = String(required=True)
-        language = String(required=True)
+        language = Language(required=True)
         related_meanings = List(ID, required=True)
         comment = String(required=False)
 
@@ -68,7 +69,7 @@ class UpdateMeaning(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         meaning = String(required=True)
-        language = String(required=True)
+        language = Language(required=True)
 
     errors = List(String)
     word = Field(MeaningNode)
