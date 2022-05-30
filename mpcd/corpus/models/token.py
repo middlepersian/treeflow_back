@@ -4,7 +4,6 @@ from simple_history.models import HistoricalRecords
 from mpcd.dict.models import Lemma, Meaning
 from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
-from .pos import POSChoices
 from .text import Text
 from .line import Line
 from .comment_category import CommentCategory
