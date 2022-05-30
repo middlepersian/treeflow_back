@@ -8,7 +8,6 @@ from .text import Text
 from .line import Line
 from .comment_category import CommentCategory
 
-from mpcd.dict.models.language import LanguageChoices
 
 
 class Token(models.Model):

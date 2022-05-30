@@ -2,7 +2,6 @@ import uuid as uuid_lib
 from xml.etree.ElementTree import Comment
 from django.db import models
 from simple_history.models import HistoricalRecords
-from .language import LanguageChoices
 
 
 class Meaning(models.Model):

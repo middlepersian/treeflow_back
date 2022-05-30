@@ -7,6 +7,7 @@ from graphql_jwt.decorators import login_required
 
 
 from mpcd.dict.models import Definition
+from mpcd.dict.schemas.language_enum import Language
 from mpcd.utils.normalize import to_nfc
 
 
@@ -18,7 +19,7 @@ class DefinitionNode(DjangoObjectType):
 
 
 class DefinitionInput(InputObjectType):
-    definition = String(required=True)
+    definition = Language(required=True)
     language = String(required=True)
 
 # Queries
@@ -39,7 +40,7 @@ class Query(ObjectType):
 class CreateDefinition(relay.ClientIDMutation):
     class Input:
         definition = String(required=True)
-        language = String(required=True)
+        language = Language(required=True)
 
     definition = Field(DefinitionNode)
     success = Boolean()
@@ -61,7 +62,7 @@ class CreateDefinition(relay.ClientIDMutation):
 class UpdateDefinition(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        definition = DefinitionInput(required=True)
+        definition = Language(required=True)
         language = String(required=True)
 
     definition = Field(DefinitionNode)

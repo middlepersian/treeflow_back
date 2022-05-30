@@ -1,7 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
-from .language import LanguageChoices
 
 
 class Definition(models.Model):
