@@ -30,7 +30,8 @@ class TokenNode(DjangoObjectType):
         model = Token
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
                          'transliteration': ['exact', 'icontains', 'istartswith'],
-                         'line': ['exact']
+                         'line': ['exact'],
+                         'text__title': ['exact', 'icontains', 'istartswith']
                          }
         interfaces = (relay.Node,)
 
@@ -90,7 +91,7 @@ class CreateToken(relay.ClientIDMutation):
         previous = ID(required=False)
         line = ID(required=True)
         position_in_line = Int(required=False)
-        
+
     token = Field(TokenNode)
     errors = List(String)
     success = Boolean()
