@@ -31,7 +31,7 @@ class TokenNode(DjangoObjectType):
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
                          'transliteration': ['exact', 'icontains', 'istartswith'],
                          'line': ['exact'],
-                         'text__title': ['exact', 'icontains', 'istartswith']
+                         'text__id': ['exact']
                          }
         interfaces = (relay.Node,)
 

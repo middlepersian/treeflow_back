@@ -1,3 +1,4 @@
+from mpcd.corpus.schemas.dependency_enum import DependencyEnum
 from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -28,7 +29,7 @@ class DependencyNode(DjangoObjectType):
 
 class DependencyInput(InputObjectType):
     head = ID(required=True)
-    rel = String(required=True)
+    rel = DependencyEnum(required=True)
 
 # Queries
 
@@ -46,7 +47,7 @@ class Query(ObjectType):
 class CreateDependency(relay.ClientIDMutation):
     class Input:
         head = ID(required=True)
-        rel = String(required=True)
+        rel = DependencyEnum(required=True)
 
     dependency = Field(DependencyNode)
     success = Boolean()
@@ -71,7 +72,7 @@ class UpdateDependency(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         head = ID(required=True)
-        rel = String(required=True)
+        rel = DependencyEnum(required=True)
 
     dependency = Field(DependencyNode)
     success = Boolean()

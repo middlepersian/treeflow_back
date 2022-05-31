@@ -29,3 +29,4 @@ from .morphological_annotation_enums import PUNCT, PUNCTPunctSide, PUNCTHyph
 from .morphological_annotation_enums import VERB, VERBNumber, VERBVerbForm, VERBMood, VERBTense, VERBVoice, VERBPerson, VERBPolite
 from .morphological_annotation_enums import X, XForeign
 from .pos_enum import POS
+from .dependency_enum import DependencyEnum, Producer
