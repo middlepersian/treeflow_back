@@ -1,10 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-
-
-class DependencyManager(models.Manager):
-    def get_by_natural_key(self, head, rel):
-        return self.get(head=head, rel=rel)
+from simple_history.models import HistoricalRecords
 
 
 class Dependency(models.Model):
@@ -13,8 +9,8 @@ class Dependency(models.Model):
     rel = models.CharField(max_length=9)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py
     producer = models.SmallIntegerField(null=True, blank=True)
+    history = HistoricalRecords()
 
-    objects = DependencyManager()
 
     def __str__(self):
         return '{} {}'.format(str(self.head), self.rel)
