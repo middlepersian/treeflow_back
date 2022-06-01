@@ -6,13 +6,8 @@ from mpcd.corpus.models.codex import Codex
 
 class CodexPart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    codex = models.ForeignKey(Codex, on_delete=models.CASCADE, related_name='codex_part_codex')
-    # e.g "volume"
-    part_type = models.CharField(max_length=50, blank=True, null=True)
-    # e.g. "1"  or "1-2"
-    part_number = models.CharField(max_length=10,
-                                   blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True)
+    codex = models.ForeignKey(Codex, on_delete=models.SET_NULL, related_name='codex_part_codex', null=True)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
 
     history = HistoricalRecords()
 
