@@ -1,10 +1,8 @@
-from calendar import c
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import Codex, Author
-from .author import AuthorInput
-from .bibliography import BibEntry, BibEntryInput
+from mpcd.corpus.models import Codex, BibEntry
+
 from graphql_relay import from_global_id
 
 
@@ -21,32 +19,12 @@ logger = logging.getLogger(__name__)
 class CodexNode(DjangoObjectType):
     class Meta:
         model = Codex
-        filter_fields = {'sigle': ['exact', 'icontains', 'istartswith'],
-                         'title': ['exact', 'icontains', 'istartswith'],
-
-                         'copy_date': ['exact', 'icontains', 'istartswith'],
-                         'copy_place_name': ['exact', 'icontains', 'istartswith'],
-                         'copy_place_latitude': ['exact', 'icontains', 'istartswith'],
-                         'copy_place_longitude': ['exact', 'icontains', 'istartswith'],
-
-                         'library': ['exact', 'icontains', 'istartswith'],
-                         'signature': ['exact', 'icontains', 'istartswith']
-                         }
+        filter_fields = {'sigle': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
 
 class CodexInput(InputObjectType):
     sigle = String(required=True)
-    title = String(required=True)
-
-    copy_date = String(required=False)
-    copy_place_name = String(required=False)
-    copy_place_latitude = String(required=False)
-    copy_place_longitude = String(required=False)
-
-    library = String(required=False)
-    signature = String(required=False)
-    scribes = List(AuthorInput, required=True)
 
 
 class Query(ObjectType):
@@ -63,16 +41,7 @@ class Query(ObjectType):
 class CreateCodex(relay.ClientIDMutation):
     class Input:
         sigle = String(required=True)
-        title = String(required=True)
-
-        copy_date = String(required=False)
-        copy_place_name = String(required=False)
-        copy_place_latitude = String(required=False)
-        copy_place_longitude = String(required=False)
-
-        library = String(required=False)
-        signature = String(required=False)
-        scribes = List(AuthorInput, required=True)
+        bib_entry = ID(required=True)
 
     codex = Field(CodexNode)
     success = Boolean()
@@ -81,76 +50,45 @@ class CreateCodex(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        codex_instance = Codex.objects.create(sigle=input.get('sigle'), title=input.get('title'))
-        if input.get('copy_date', None):
-            codex_instance.copy_date = input.get('copy_date')
-        if input.get('copy_place_name', None):
-            codex_instance.copy_place_name = input.get('copy_place_name')
-        if input.get('copy_place_latitude', None):
-            codex_instance.copy_place_latitude = input.get('copy_place_latitude')
-        if input.get('copy_place_longitude', None):
-            codex_instance.copy_place_longitude = input.get('copy_place_longitude')
-        if input.get('library', None):
-            codex_instance.library = input.get('library')
-        if input.get('signature', None):
-            codex_instance.signature = input.get('signature')
+        codex_instance, codex_created = Codex.objects.get_or_create(sigle=input.get('sigle'))
+        if BibEntry.objects.filter(id=input.get('bib_entry')).exists():
+            bib_entry_instance = BibEntry.objects.get(id=input.get('bib_entry'))
+            codex_instance.bib_entry = bib_entry_instance
+            codex_instance.save()
 
-        for scribe in input.get('scribes'):
-            author_instance, author_created = Author.objects.get_or_create(
-                name=scribe.name, last_name=scribe.last_name)
-            author_instance.save()
-            codex_instance.authors.add(author_instance)
+        else:
+            return cls(errors=['BibEntry does not exist'])
 
-        codex_instance.save()
         return cls(codex=codex_instance, success=True)
 
 
 class UpdateCodex(relay.ClientIDMutation):
     class Input:
+        id = ID(required=True)
         sigle = String(required=True)
-        title = String(required=True)
-
-        copy_date = String(required=False)
-        copy_place_name = String(required=False)
-        copy_place_latitude = String(required=False)
-        copy_place_longitude = String(required=False)
-
-        library = String(required=False)
-        signature = String(required=False)
-        scribes = List(AuthorInput, required=True)
+        bib_entry = ID(required=True)
 
     codex = Field(CodexNode)
     success = Boolean()
 
     @classmethod
     @login_required
-    def mutate_and_get_payload(cls, root, info, sigle, title, copy_date, copy_place_name, copy_place_latitude, copy_place_longitude, library, signature, scribes, facsimiles):
+    def mutate_and_get_payload(cls, root, info, **input):
         # check that bib exists with id
         if Codex.objects.filter(pk=from_global_id(id)[1]).exists():
             codex_instance = Codex.objects.get(id=id)
-            codex_instance.sigle = sigle
-            codex_instance.title = title
-            codex_instance.copy_date = copy_date
-            codex_instance.copy_place_name = copy_place_name
-            codex_instance.copy_place_latitude = copy_place_latitude
-            codex_instance.copy_place_longitude = copy_place_longitude
-            codex_instance.library = library
-            codex_instance.signature = signature
-
-            # clear scribes
-            codex_instance.scribes.clear()
-            for scribe in scribes:
-                author_instance, author_created = Author.objects.get_or_create(
-                    name=scribe.name, last_name=scribe.last_name)
-                author_instance.save()
-                codex_instance.authors.add(author_instance)
-
-                codex_instance.authors.add(author_instance)
+            # udpate sigle
+            codex_instance.sigle = input.get('sigle')
+            # update bib_entry
+            if BibEntry.objects.filter(id=input.get('bib_entry')).exists():
+                bib_entry_instance = BibEntry.objects.get(id=input.get('bib_entry'))
+                codex_instance.bib_entry = bib_entry_instance
+            else:
+                return cls(success=False, errors=['BibEntry ID does not exist'])
 
             codex_instance.save()
-            return cls(codex=codex_instance, success=True)
-        else:
-            return cls(success=False)
+
+        return cls(codex=codex_instance, success=True)
 
 
 class DeleteCodex(relay.ClientIDMutation):

@@ -18,7 +18,7 @@ class FacsimileNode(DjangoObjectType):
 
     class Meta:
         model = Facsimile
-        filter_fields = {'bib_entry': ['exact'], }
+        filter_fields = {'bib_entry__id': ['exact'], 'codex_part__id': ['exact']}
         interfaces = (relay.Node, )
 
 

@@ -1,7 +1,6 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
 from .source import Source
-from .author import Author
 
 
 class CodexCh(models.TextChoices):
@@ -28,15 +27,6 @@ class CodexCh(models.TextChoices):
 
 class Codex(Source):
     sigle = models.CharField(max_length=10, unique=True, choices=CodexCh.choices, default="")
-    copy_date = models.TextField(null=True, blank=True)
-
-    copy_place_name = models.CharField(max_length=100, null=True, blank=True)
-    copy_place_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-    copy_place_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-
-    library = models.CharField(max_length=100,  blank=True)
-    signature = models.CharField(max_length=100,  blank=True)
-    scribes = models.ManyToManyField(Author, blank=True, related_name='codex_scribes')
 
     history = HistoricalRecords()
 

@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 class SourceNode(DjangoObjectType):
     class Meta:
         model = Source
-        filter_fields = {'title': ['exact', 'icontains', 'istartswith'],
-                         'slug': ['exact', 'icontains', 'istartswith'],
-                         'description': ['exact', 'icontains', 'istartswith']}
+        filter_fields = {
+            'slug': ['exact', 'icontains', 'istartswith'],
+            'description': ['exact', 'icontains', 'istartswith'], 'bib_entry__id': ['exact']}
 
 
 class SourceInput(InputObjectType):
