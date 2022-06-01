@@ -1,4 +1,4 @@
-from .resource import Resource
+from .bibliography import BibEntry
 from .source import Source
 from .text_sigle import TextSigle
 from .corpus import Corpus
@@ -25,10 +25,13 @@ class Text(models.Model):
     editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
 
-    resources = models.ManyToManyField(Resource, blank=True, related_name='text_resources')
     stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
 
+    # a Source can be a "Codex" or an "Edition"
     sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
+
+    # a Resource can be any Zotero reference
+    resources = models.ManyToManyField(BibEntry, blank=True, related_name='text_resources')
 
     history = HistoricalRecords(inherit=True)
 

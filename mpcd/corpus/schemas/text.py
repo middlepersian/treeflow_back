@@ -3,7 +3,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Text, Author, Resource, Corpus, TextSigle, Source
+from mpcd.corpus.models import Text, Author, Corpus, TextSigle, Source, BibEntry
 from django.contrib.auth.models import User
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -106,15 +106,9 @@ class CreateText(relay.ClientIDMutation):
                 text_instance.collaborators.add(collaborator_instance)
         '''
 
-        if input.get('resources'):
-            for resource in input.get('resources'):
-                resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
-                if resource.get('authors'):
-                    for author in resource['authors']:
-                        author_instance, author_created = Author.objects.get_or_create(
-                            name=author.name, last_name=author.last_name)
-                        author_instance.save()
-                        resource_instance.authors.add(author_instance)
+        for resource in input.get('resources'):
+            if BibEntry.objects.filter(pk=from_global_id(resource)[1]).exists():
+                resource_instance = BibEntry.objects.get(pk=from_global_id(resource)[1])
                 text_instance.resources.add(resource_instance)
 
         text_instance.save()
@@ -175,14 +169,9 @@ class UpdateText(relay.ClientIDMutation):
         '''
         # get resources
         for resource in input.get('resources'):
-            resource_instance, resource_created = Resource.objects.get_or_create(resource.id)
-            if resource.get('authors'):
-                for author in resource['authors']:
-                    author_instance, author_created = Author.objects.get_or_create(
-                        name=author.name, last_name=author.last_name)
-                    author_instance.save()
-                    resource_instance.authors.add(author_instance)
-            text_instance.resources.add(resource_instance)
+            if BibEntry.objects.filter(pk=from_global_id(resource)[1]).exists():
+                resource_instance = BibEntry.objects.get(pk=from_global_id(resource)[1])
+                text_instance.resources.add(resource_instance)
 
         # get sources
         for source in input['sources']:
