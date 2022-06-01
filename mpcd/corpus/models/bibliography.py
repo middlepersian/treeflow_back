@@ -5,8 +5,8 @@ from simple_history.models import HistoricalRecords
 
 class BibEntry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    # Zotero URL
-    url = models.URLField(blank=True, null=True)
+    # Zotero key
+    key = models.CharField(blank=True, null=True, max_length=100)
     history = HistoricalRecords()
 
     def __str__(self):

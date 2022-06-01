@@ -62,8 +62,9 @@ class CreateCodexPart(relay.ClientIDMutation):
 
         if Codex.objects.filter(pk=from_global_id(input.get('codex'))[1]).exists():
             codex = Codex.objects.get(pk=from_global_id(input.get('codex'))[1])
-            codex_part_instance = CodexPart.objects.get_or_create(codex=codex)
+            codex_part_instance, codex_part_created = CodexPart.objects.get_or_create(codex=codex)
             codex_part_instance.slug = to_nfc(input.get('slug'))
+            codex_part_instance.save()
         else:
             return cls(success=False, errors=['Codex ID does not exist'])
 

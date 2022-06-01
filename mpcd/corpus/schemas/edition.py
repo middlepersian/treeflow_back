@@ -60,6 +60,8 @@ class CreateEdition(relay.ClientIDMutation):
     success = Boolean()
     errors = List(String)
 
+    ## TODO remove get_node_from_global_id
+
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):

@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, Int, InputObjectType
+from graphene import relay, ObjectType, Field, ID, Boolean, List, InputObjectType, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -18,13 +18,13 @@ class BibEntryNode(DjangoObjectType):
     class Meta:
         model = BibEntry
         filter_fields = {
-            'url': ['exact', 'icontains', 'istartswith']
+            'key': ['exact', 'icontains', 'istartswith']
         }
         interfaces = (relay.Node,)
 
 
 class BibEntryInput(InputObjectType):
-    url = String(required=True)
+    key = String(required=True)
 
 
 # Queries
@@ -42,7 +42,7 @@ class Query(ObjectType):
 
 class CreateBibEntry(relay.ClientIDMutation):
     class Input:
-        url = String(required=True)
+        key = String(required=True)
 
     bibentry = Field(BibEntryNode)
     success = Boolean()
@@ -53,7 +53,7 @@ class CreateBibEntry(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         logger.error("input: {}".format(input))
 
-        bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(url=input['url'])
+        bibentry_instance, bibentry_created = BibEntry.objects.get_or_create(key=input['key'])
 
         return cls(bibentry=bibentry_instance, success=True)
 
@@ -61,7 +61,7 @@ class CreateBibEntry(relay.ClientIDMutation):
 class UpdateBibEntry(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        url = String(required=True)
+        key = String(required=True)
 
     bibentry = Field(BibEntryNode)
     success = Boolean()
@@ -76,7 +76,7 @@ class UpdateBibEntry(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['BibEntry does not exist'])
 
-        bibentry_instance.url = input['url']
+        bibentry_instance.key = input['key']
 
         bibentry_instance.save()
         return cls(bibentry=bibentry_instance, success=True)

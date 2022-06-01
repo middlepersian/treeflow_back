@@ -2,7 +2,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Codex, BibEntry
-
+from mpcd.corpus.schemas.bibliography import BibEntryNode
 from graphql_relay import from_global_id
 
 
@@ -51,8 +51,8 @@ class CreateCodex(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         codex_instance, codex_created = Codex.objects.get_or_create(sigle=input.get('sigle'))
-        if BibEntry.objects.filter(id=input.get('bib_entry')).exists():
-            bib_entry_instance = BibEntry.objects.get(id=input.get('bib_entry'))
+        if BibEntry.objects.filter(pk=from_global_id(input.get('bib_entry'))[1]).exists():
+            bib_entry_instance = BibEntry.objects.get(pk=from_global_id(input.get('bib_entry'))[1])
             codex_instance.bib_entry = bib_entry_instance
             codex_instance.save()
 
@@ -75,13 +75,13 @@ class UpdateCodex(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         # check that bib exists with id
-        if Codex.objects.filter(pk=from_global_id(id)[1]).exists():
-            codex_instance = Codex.objects.get(id=id)
+        if Codex.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            codex_instance = Codex.objects.get(pk=from_global_id(input.get('id'))[1])
             # udpate sigle
             codex_instance.sigle = input.get('sigle')
             # update bib_entry
-            if BibEntry.objects.filter(id=input.get('bib_entry')).exists():
-                bib_entry_instance = BibEntry.objects.get(id=input.get('bib_entry'))
+            if BibEntry.objects.filter(pk=from_global_id(input.get('bib_entry'))[1]).exists():
+                bib_entry_instance = BibEntry.objects.get(pk=from_global_id(input.get('bib_entry'))[1])
                 codex_instance.bib_entry = bib_entry_instance
             else:
                 return cls(success=False, errors=['BibEntry ID does not exist'])
