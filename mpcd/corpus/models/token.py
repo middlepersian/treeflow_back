@@ -17,7 +17,7 @@ class Token(models.Model):
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemma = models.ForeignKey(Lemma, blank=True, null=True, on_delete=models.SET_NULL, related_name='token_lemma')
+    lemmas = models.ManyToManyField(Lemma, blank=True, related_name='token_lemma')
     meanings = models.ManyToManyField(Meaning, blank=True, related_name='token_meanings')
     pos = models.CharField(max_length=8, null=True, blank=True)
     morphological_annotation = models.ManyToManyField(
