@@ -42,8 +42,8 @@ class TokenInput(InputObjectType):
     transliteration = String(required=True)
     number = Float(required=True)
     language = Language(required=True)
-    lemma = LemmaInput(required=True)
-    meanings = List(MeaningInput, required=True)
+    lemmas = List(ID, required=True)
+    meanings = List(ID, required=True)
     pos = POS(required=True)
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
@@ -78,8 +78,8 @@ class CreateToken(relay.ClientIDMutation):
         transliteration = String(required=True)
         number = Float(required=True)
         language = Language(required=True)
-        lemma = LemmaInput(required=True)
-        meanings = List(MeaningInput, required=True)
+        lemmas = List(ID, required=True)
+        meanings = List(ID, required=True)
         pos = POS(required=True)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
@@ -112,30 +112,15 @@ class CreateToken(relay.ClientIDMutation):
         token, token_obj = Token.objects.get_or_create(
             transcription=to_nfc(input['transcription']), transliteration=to_nfc(input['transliteration']), text=text, number=float(input['number']), language=input['language'])
 
-       # First, get or create meanings in order to add them to lemma as related_meanings
-        local_related_meanings = []
+        # get and add the lemmas
+        for lemma in input['lemmas']:
+            if Lemma.objects.filter(pk=from_global_id(lemma)[1]).exists():
+                token.lemmas.append(Lemma.objects.get(pk=from_global_id(lemma)[1]))
 
-       # get or create the meanings
+       # get get and add the meanings
         for meaning in input['meanings']:
-            meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(
-                meaning=to_nfc(meaning['meaning']), language=meaning['language'])
-            local_related_meanings.append(meaning_obj)
-
-        token.meanings.set(local_related_meanings)
-
-        # get or create the lemma
-        lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
-            lemma=to_nfc(input['lemma']['word']), language=input['lemma']['language'])
-        # add the related meanings to the lemma
-        if local_related_meanings:
-            # see if local_related_meanings are already related to lemma
-            for local_related_meaning in local_related_meanings:
-                if lemma_obj.related_meanings.filter(pk=local_related_meaning.pk).exists():
-                    lemma_obj.related_meanings.add(local_related_meaning)
-                    lemma_obj.save()
-
-        # set lemma
-        token.lemma = lemma_obj
+            if Meaning.objects.filter(pk=from_global_id(meaning)[1]).exists():
+                token.meanings.append(Meaning.objects.get(pk=from_global_id(meaning)[1]))
 
         # get POS
         token.pos = input.get('pos')
@@ -212,8 +197,8 @@ class UpdateToken(relay.ClientIDMutation):
         transliteration = String(required=True)
         number = Float(required=True)
         language = Language(required=True)
-        lemma = LemmaInput(required=True)
-        meanings = List(MeaningInput, required=True)
+        lemmas = List(ID, required=True)
+        meanings = List(ID, required=True)
         pos = POS(required=True)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
@@ -249,30 +234,15 @@ class UpdateToken(relay.ClientIDMutation):
         # update number
         token.number = float(input.get('number'))
 
-       # First, get or create meanings in order to add them to lemma as related_meanings
-        local_related_meanings = []
+        # get and add the lemmas
+        for lemma in input['lemmas']:
+            if Lemma.objects.filter(pk=from_global_id(lemma)[1]).exists():
+                token.lemmas.append(Lemma.objects.get(pk=from_global_id(lemma)[1]))
 
-       # get or create the meanings
-        # clear the current meanings
-        token.meanings.clear()
+       # get get and add the meanings
         for meaning in input['meanings']:
-            meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(
-                meaning=to_nfc(meaning['meaning']), language=meaning['language'])
-            local_related_meanings.append(meaning_obj)
-            token.meanings.set(local_related_meanings)
-
-        # get or create the lemma
-        lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
-            lemma=to_nfc(input['lemma']['word']), language=input['lemma']['language'])
-        # add the related meanings to the lemma
-        if local_related_meanings:
-            # see if local_related_meanings are already related to lemma
-            for local_related_meaning in local_related_meanings:
-                if lemma_obj.related_meanings.filter(pk=local_related_meaning.pk).exists():
-                    lemma_obj.related_meanings.add(local_related_meaning)
-                    lemma_obj.save()
-        # set lemma
-        token.lemma = lemma_obj
+            if Meaning.objects.filter(pk=from_global_id(meaning)[1]).exists():
+                token.meanings.append(Meaning.objects.get(pk=from_global_id(meaning)[1]))
 
         # set POS
         token.pos = input.get('pos')
@@ -366,6 +336,30 @@ class DeleteToken(relay.ClientIDMutation):
 
         else:
             return cls(success=False)
+
+
+class AddLemmaToToken(relay.ClientIDMutation):
+    class Input:
+        token = ID(required=True)
+        lemma = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, token, lemma):
+        if Token.objects.filter(pk=from_global_id(token)[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(token)[1])
+            if Lemma.objects.filter(pk=from_global_id(lemma)[1]).exists():
+                lemma_instance = Lemma.objects.get(pk=from_global_id(lemma)[1])
+                token_instance.lemmas.append(lemma_instance)
+                token_instance.save()
+                return cls(token=token_instance, lemma=lemma_instance)
+            else: 
+                return cls(success=False, errors=["Lemma with ID {} not found".format(lemma)])    
+        else:
+            return cls (token=None, success=False, errors=["Token with ID {} not found".format(token)])
 
 
 class JoinTokens(relay.ClientIDMutation):
