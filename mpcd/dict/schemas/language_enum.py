@@ -2,21 +2,21 @@ from graphene import Enum, ObjectType, Field
 
 
 class Language(Enum):
-    Akkadian = 'akk'
-    Arabic = 'ara'
-    Imperial_Aramaic = 'arc'
-    Avestan = 'ave'
-    English = 'eng'
-    German = 'deu'
-    French = 'guj'
-    French = 'fra'
-    Ancient_Greek = 'grc'
-    Italian = 'ita'
-    Pahlavi = 'pal'
-    Sanskrit = 'san'
-    Spanish = 'spa'
-    Parsi = 'prp'
-    Parthian = 'xpr'
+    akk = 'akk'
+    ara = 'ara'
+    arc = 'arc'
+    ave = 'ave'
+    eng = 'eng'
+    deu = 'deu'
+    guj = 'guj'
+    fra = 'fra'
+    grc = 'grc'
+    ita = 'ita'
+    pal = 'pal'
+    san = 'san'
+    spa = 'spa'
+    prp = 'prp'
+    xpr = 'xpr'
 
     @property
     def description(self):
