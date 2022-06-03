@@ -46,7 +46,7 @@ class CreateLemma(relay.ClientIDMutation):
         related_meanings = List(ID, required=True)
         comment = String(required=False)
 
-    word = Field(LemmaNode)
+    lemma = Field(LemmaNode)
     success = Boolean()
 
     @classmethod
@@ -74,7 +74,7 @@ class CreateLemma(relay.ClientIDMutation):
 
         lemma.save()
 
-        return cls(word=lemma, success=True)
+        return cls(lemma=lemma, success=True)
 
 
 class UpdateLemma(relay.ClientIDMutation):
@@ -86,7 +86,7 @@ class UpdateLemma(relay.ClientIDMutation):
         comment = String(required=False)
 
     errors = List(String)
-    word = Field(LemmaNode)
+    lemma = Field(LemmaNode)
     success = Boolean()
 
     @classmethod
@@ -119,7 +119,7 @@ class UpdateLemma(relay.ClientIDMutation):
 
             lemma.save()
 
-            return cls(word=lemma, success=True)
+            return cls(lemma=lemma, success=True)
         else:
             return cls(token=None, success=False, errors=["Lemma ID does not exists"])
 
@@ -143,7 +143,38 @@ class DeleteLemma(relay.ClientIDMutation):
             return cls(success=False)
 
 
+class AddRelatedLemma(relay.ClientIDMutation):
+    class Input:
+        source = ID(required=True)
+        related = ID(required=True)
+
+    succcess = Boolean()
+    errors = List(String)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, source_lemma, related_lemma):
+
+        if Lemma.objects.filter(pk=from_global_id(source_lemma)[1]).exists():
+            source_lemma_instance = Lemma.objects.get(pk=from_global_id(source_lemma)[1])
+
+        else:
+            return cls(success=False, errors=["Source Lemma ID does not exists"])
+
+        if Lemma.objects.filter(pk=from_global_id(related_lemma)[1]).exists():
+            related_lemma_instance = Lemma.objects.get(pk=from_global_id(related_lemma)[1])
+
+            source_lemma_instance.related_lemmas.add(related_lemma_instance)
+            source_lemma_instance.save()
+
+            return cls(success=True, errors=None, source_lemma=source_lemma_instance, related_lemma=related_lemma_instance)
+
+        else:
+            return cls(success=False, errors=["Lemma ID does not exists"])
+
+
 class Mutation(ObjectType):
+    add_related_lemma = AddRelatedLemma.Field()
     create_lemma = CreateLemma.Field()
     update_lemma = UpdateLemma.Field()
     delete_lemma = DeleteLemma.Field()
