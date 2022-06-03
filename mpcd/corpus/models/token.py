@@ -9,7 +9,6 @@ from .line import Line
 from .comment_category import CommentCategory
 
 
-
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
@@ -23,11 +22,11 @@ class Token(models.Model):
     morphological_annotation = models.ManyToManyField(
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
-    comment = models.TextField(blank=True)
-    comment_uncertain = models.ManyToManyField(CommentCategory, blank=True, related_name='token_comment_uncertain')
-    comment_to_discuss = models.ManyToManyField(CommentCategory, blank=True, related_name='token_comment_to_discuss')
-    comment_new_suggestion = models.ManyToManyField(
-        CommentCategory, blank=True, related_name='token_comment_new_suggestion')
+    comment = models.TextField(null=True, blank=True)
+    uncertain = models.ManyToManyField(CommentCategory, blank=True, related_name='token_uncertain')
+    to_discuss = models.ManyToManyField(CommentCategory, blank=True, related_name='token_to_discuss')
+    new_suggestion = models.ManyToManyField(
+        CommentCategory, blank=True, related_name='token_new_suggestion')
 
     avestan = models.URLField(max_length=100, null=True, blank=True)
 

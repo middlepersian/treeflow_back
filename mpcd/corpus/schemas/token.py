@@ -6,8 +6,6 @@ from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text,
 from mpcd.dict.models import Lemma, Meaning
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
-from mpcd.dict.schemas import LemmaInput
-from mpcd.dict.schemas import MeaningInput
 from mpcd.corpus.schemas.pos_enum import POS
 from mpcd.dict.schemas.language_enum import Language
 
@@ -48,9 +46,9 @@ class TokenInput(InputObjectType):
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
     comment = String(required=False)
-    comment_uncertain = List(String, required=True)
-    comment_to_discuss = List(String, required=True)
-    comment_new_suggestion = List(String, required=True)
+    uncertain = List(String, required=True)
+    to_discuss = List(String, required=True)
+    new_suggestion = List(String, required=True)
     avestan = String(required=False)
     previous = ID(required=False)
     line = ID(required=True)
@@ -84,9 +82,9 @@ class CreateToken(relay.ClientIDMutation):
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
-        comment_uncertain = List(String, required=True)
-        comment_to_discuss = List(String, required=True)
-        comment_new_suggestion = List(String, required=True)
+        uncertain = List(String, required=True)
+        to_discuss = List(String, required=True)
+        new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=True)
@@ -115,12 +113,12 @@ class CreateToken(relay.ClientIDMutation):
         # get and add the lemmas
         for lemma in input['lemmas']:
             if Lemma.objects.filter(pk=from_global_id(lemma)[1]).exists():
-                token.lemmas.append(Lemma.objects.get(pk=from_global_id(lemma)[1]))
+                token.lemmas.add(Lemma.objects.get(pk=from_global_id(lemma)[1]))
 
        # get get and add the meanings
         for meaning in input['meanings']:
             if Meaning.objects.filter(pk=from_global_id(meaning)[1]).exists():
-                token.meanings.append(Meaning.objects.get(pk=from_global_id(meaning)[1]))
+                token.meanings.add(Meaning.objects.get(pk=from_global_id(meaning)[1]))
 
         # get POS
         token.pos = input.get('pos')
@@ -140,23 +138,23 @@ class CreateToken(relay.ClientIDMutation):
         if input.get('comment', None):
             token.comment = to_nfc(input['comment'])
 
-        # get or create comment_uncertain
-        for comment_uncertain in input['comment_uncertain']:
-            comment_uncertain_obj, comment_uncertain_obj_created = CommentCategory.objects.get_or_create(
-                comment=comment_uncertain)
-            token.comment_uncertain.add(comment_uncertain_obj)
+        # get or create uncertain
+        for uncertain in input['uncertain']:
+            uncertain_obj, uncertain_obj_created = CommentCategory.objects.get_or_create(
+                category=uncertain)
+            token.uncertain.add(uncertain_obj)
 
-        # get or create comment_to_discuss
-        for comment_to_discuss in input['comment_to_discuss']:
-            comment_to_discuss_obj, comment_to_discuss_obj_created = CommentCategory.objects.get_or_create(
-                comment=comment_to_discuss)
-            token.comment_to_discuss.add(comment_to_discuss_obj)
+        # get or create to_discuss
+        for to_discuss in input['to_discuss']:
+            to_discuss_obj, to_discuss_obj_created = CommentCategory.objects.get_or_create(
+                category=to_discuss)
+            token.to_discuss.add(to_discuss_obj)
 
-        # get or create comment_new_suggestion
-        for comment_new_suggestion in input['comment_new_suggestion']:
-            comment_new_suggestion_obj, comment_new_suggestion_obj_created = CommentCategory.objects.get_or_create(
-                comment=comment_new_suggestion)
-            token.comment_new_suggestion.add(comment_new_suggestion_obj)
+        # get or create new_suggestion
+        for new_suggestion in input['new_suggestion']:
+            new_suggestion_obj, new_suggestion_obj_created = CommentCategory.objects.get_or_create(
+                category=new_suggestion)
+            token.new_suggestion.add(new_suggestion_obj)
 
         # check if avestan available
         if input.get('avestan', None):
@@ -203,9 +201,9 @@ class UpdateToken(relay.ClientIDMutation):
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
-        comment_uncertain = List(String, required=True)
-        comment_to_discuss = List(String, required=True)
-        comment_new_suggestion = List(String, required=True)
+        uncertain = List(String, required=True)
+        to_discuss = List(String, required=True)
+        new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=True)
@@ -237,12 +235,12 @@ class UpdateToken(relay.ClientIDMutation):
         # get and add the lemmas
         for lemma in input['lemmas']:
             if Lemma.objects.filter(pk=from_global_id(lemma)[1]).exists():
-                token.lemmas.append(Lemma.objects.get(pk=from_global_id(lemma)[1]))
+                token.lemmas.add(Lemma.objects.get(pk=from_global_id(lemma)[1]))
 
        # get get and add the meanings
         for meaning in input['meanings']:
             if Meaning.objects.filter(pk=from_global_id(meaning)[1]).exists():
-                token.meanings.append(Meaning.objects.get(pk=from_global_id(meaning)[1]))
+                token.meanings.add(Meaning.objects.get(pk=from_global_id(meaning)[1]))
 
         # set POS
         token.pos = input.get('pos')
@@ -265,29 +263,29 @@ class UpdateToken(relay.ClientIDMutation):
         if input.get('comment', None):
             token.comment = to_nfc(input['comment'])
 
-        # clear comment_uncertain
-        token.comment_uncertain.clear()
-        # get or create comment_uncertain
-        for comment_uncertain in input['comment_uncertain']:
-            comment_uncertain_obj, comment_uncertain_obj_created = CommentCategory.objects.get_or_create(
-                comment=comment_uncertain)
-            token.comment_uncertain.add(comment_uncertain_obj)
+        # clear uncertain
+        token.uncertain.clear()
+        # get or create uncertain
+        for uncertain in input['uncertain']:
+            uncertain_obj, uncertain_obj_created = CommentCategory.objects.get_or_create(
+                category=uncertain)
+            token.uncertain.add(uncertain_obj)
 
-        # clear comment_to_discuss
-        token.comment_to_discuss.clear()
-        # get or create comment_to_discuss
-        for comment_to_discuss in input['comment_to_discuss']:
-            comment_to_discuss_obj, comment_to_discuss_obj_created = CommentCategory.objects.get_or_create(
-                comment=comment_to_discuss)
-            token.comment_to_discuss.add(comment_to_discuss_obj)
+        # clear to_discuss
+        token.to_discuss.clear()
+        # get or create to_discuss
+        for to_discuss in input['to_discuss']:
+            to_discuss_obj, to_discuss_obj_created = CommentCategory.objects.get_or_create(
+                category=to_discuss)
+            token.to_discuss.add(to_discuss_obj)
 
-        # clear comment_new_suggestion
-        token.comment_new_suggestion.clear()
-        # get or create comment_new_suggestion
-        for comment_new_suggestion in input['comment_new_suggestion']:
-            comment_new_suggestion_obj, comment_new_suggestion_obj_created = CommentCategory.objects.get_or_create(
-                comment=comment_new_suggestion)
-            token.comment_new_suggestion.add(comment_new_suggestion_obj)
+        # clear new_suggestion
+        token.new_suggestion.clear()
+        # get or create new_suggestion
+        for new_suggestion in input['new_suggestion']:
+            new_suggestion_obj, new_suggestion_obj_created = CommentCategory.objects.get_or_create(
+                category=new_suggestion)
+            token.new_suggestion.add(new_suggestion_obj)
 
         # check if avestan available
         if input.get('avestan', None):
@@ -356,10 +354,10 @@ class AddLemmaToToken(relay.ClientIDMutation):
                 token_instance.lemmas.append(lemma_instance)
                 token_instance.save()
                 return cls(token=token_instance, lemma=lemma_instance)
-            else: 
-                return cls(success=False, errors=["Lemma with ID {} not found".format(lemma)])    
+            else:
+                return cls(success=False, errors=["Lemma with ID {} not found".format(lemma)])
         else:
-            return cls (token=None, success=False, errors=["Token with ID {} not found".format(token)])
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(token)])
 
 
 class JoinTokens(relay.ClientIDMutation):
@@ -392,6 +390,7 @@ class JoinTokens(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
+    add_lemma_to_token = AddLemmaToToken.Field()
     create_token = CreateToken.Field()
     delete_token = DeleteToken.Field()
     update_token = UpdateToken.Field()
