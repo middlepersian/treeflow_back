@@ -30,7 +30,6 @@ class SentenceNode(DjangoObjectType):
 
 
 class SentenceInput(InputObjectType):
-    id = ID(required=True)
     text = ID(required=True)
     number = Float(required=True)
     tokens = List(ID, required=True)
@@ -58,7 +57,6 @@ class CreateSentence(relay.ClientIDMutation):
     success = Boolean()
 
     class Input:
-        id = ID(required=True)
         text = ID(required=True)
         number = Float(required=True)
         tokens = List(ID, required=True)
@@ -98,13 +96,13 @@ class CreateSentence(relay.ClientIDMutation):
                 return cls(success=False, errors=['Wrong Token ID'])
 
         # check if previous is valid
-        if input.get('previous', None):
+        if input.get('previous'):
             if Sentence.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 sentence_instance.previous = Sentence.objects.get(pk=from_global_id(input['previous'])[1])
             else:
                 return cls(success=False, errors=['Wrong Previous ID'])
 
-        if input.get('comment', None):
+        if input.get('comment'):
             sentence_instance.comment = input.get('comment')
 
         sentence_instance.save()
