@@ -59,13 +59,13 @@ class CreateLemma(relay.ClientIDMutation):
         # related_lemmas
 
         for related_lemma in input.get('related_lemmas'):
-            lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
+            lemma_rel = Lemma.objects.get(id=from_global_id(related_lemma)[1])
             lemma.related_lemmas.add(lemma_rel)
 
         # related_meanings
 
         for related_meaning in input.get('related_meanings'):
-            meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
+            meaning_rel = Meaning.objects.get(id=from_global_id(related_meaning)[1])
             lemma.related_meanings.add(meaning_rel)
 
         # comment
@@ -102,15 +102,15 @@ class UpdateLemma(relay.ClientIDMutation):
             # clear up
             lemma.related_lemmas.clear()
             for related_lemma in input.get('related_lemmas'):
-                lemma_rel, lemma_rel_created = Lemma.objects.get(id=from_global_id(related_lemma.get('id'))[1])
+                lemma_rel = Lemma.objects.get(id=from_global_id(related_lemma)[1])
                 lemma.related_lemmas.add(lemma_rel)
 
             # related_meanings
             # clear up
             lemma.related_lemmas.clear()
             for related_meaning in input.get('related_meanings'):
-                meaning_rel, meaning_rel_created = Meaning.objects.get(
-                    id=from_global_id(related_meaning.get('id'))[1])
+                meaning_rel = Meaning.objects.get(
+                    id=from_global_id(related_meaning)[1])
                 lemma.related_meanings.add(meaning_rel)
 
             # comment
@@ -145,32 +145,35 @@ class DeleteLemma(relay.ClientIDMutation):
 
 class AddRelatedLemma(relay.ClientIDMutation):
     class Input:
-        source = ID(required=True)
-        related = ID(required=True)
+        source_id = ID(required=True)
+        related_id = ID(required=True)
 
-    succcess = Boolean()
+    success = Boolean()
     errors = List(String)
+
+    source = Field(LemmaNode)
+    related = Field(LemmaNode)
 
     @classmethod
     @login_required
-    def mutate_and_get_payload(cls, root, info, source_lemma, related_lemma):
+    def mutate_and_get_payload(cls, root, info, source_id, related_id):
 
-        if Lemma.objects.filter(pk=from_global_id(source_lemma)[1]).exists():
-            source_lemma_instance = Lemma.objects.get(pk=from_global_id(source_lemma)[1])
+        if Lemma.objects.filter(pk=from_global_id(source_id)[1]).exists():
+            source_lemma_instance = Lemma.objects.get(pk=from_global_id(source_id)[1])
 
         else:
-            return cls(success=False, errors=["Source Lemma ID does not exists"])
+            return cls(success=False, errors=["Source Lemma ID does not exists"], source=None, related=None)
 
-        if Lemma.objects.filter(pk=from_global_id(related_lemma)[1]).exists():
-            related_lemma_instance = Lemma.objects.get(pk=from_global_id(related_lemma)[1])
+        if Lemma.objects.filter(pk=from_global_id(related_id)[1]).exists():
+            related_lemma_instance = Lemma.objects.get(pk=from_global_id(related_id)[1])
 
             source_lemma_instance.related_lemmas.add(related_lemma_instance)
             source_lemma_instance.save()
 
-            return cls(success=True, errors=None, source_lemma=source_lemma_instance, related_lemma=related_lemma_instance)
+            return cls(success=True, errors=None, source=source_lemma_instance, related=related_lemma_instance)
 
         else:
-            return cls(success=False, errors=["Lemma ID does not exists"])
+            return cls(success=False, errors=["Lemma ID does not exists"], source=None, related=None)
 
 
 class Mutation(ObjectType):

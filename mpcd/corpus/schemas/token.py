@@ -8,6 +8,7 @@ from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
 from mpcd.corpus.schemas.pos_enum import POS
 from mpcd.dict.schemas.language_enum import Language
+from mpcd.dict.schemas.lemma import LemmaNode
 
 
 import graphene_django_optimizer as gql_optimizer
@@ -42,7 +43,7 @@ class TokenInput(InputObjectType):
     language = Language(required=True)
     lemmas = List(ID, required=True)
     meanings = List(ID, required=True)
-    pos = POS(required=True)
+    pos = POS(required=False)
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
     comment = String(required=False)
@@ -78,7 +79,7 @@ class CreateToken(relay.ClientIDMutation):
         language = Language(required=True)
         lemmas = List(ID, required=True)
         meanings = List(ID, required=True)
-        pos = POS(required=True)
+        pos = POS(required=False)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
@@ -197,7 +198,7 @@ class UpdateToken(relay.ClientIDMutation):
         language = Language(required=True)
         lemmas = List(ID, required=True)
         meanings = List(ID, required=True)
-        pos = POS(required=True)
+        pos = POS(required=False)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
@@ -338,26 +339,30 @@ class DeleteToken(relay.ClientIDMutation):
 
 class AddLemmaToToken(relay.ClientIDMutation):
     class Input:
-        token = ID(required=True)
-        lemma = ID(required=True)
+        token_id = ID(required=True)
+        lemma_id = ID(required=True)
 
     success = Boolean()
     errors = List(String)
+    token = Field(TokenNode)
+    lemma = Field(LemmaNode)
 
     @classmethod
     @login_required
-    def mutate_and_get_payload(cls, root, info, token, lemma):
-        if Token.objects.filter(pk=from_global_id(token)[1]).exists():
-            token_instance = Token.objects.get(pk=from_global_id(token)[1])
-            if Lemma.objects.filter(pk=from_global_id(lemma)[1]).exists():
-                lemma_instance = Lemma.objects.get(pk=from_global_id(lemma)[1])
-                token_instance.lemmas.append(lemma_instance)
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error("TOKEN_ID: {}, LEMMA_ID: {}".format(input.get('token'), input.get('lemma')))
+
+        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
+            if Lemma.objects.filter(pk=from_global_id(input.get('lemma_id'))[1]).exists():
+                lemma_instance = Lemma.objects.get(pk=from_global_id(input.get('lemma_id'))[1])
+                token_instance.lemmas.add(lemma_instance)
                 token_instance.save()
-                return cls(token=token_instance, lemma=lemma_instance)
+                return cls(token=token_instance, lemma=lemma_instance, success=True, errors=None)
             else:
-                return cls(success=False, errors=["Lemma with ID {} not found".format(lemma)])
+                return cls(success=False, errors=["Lemma with ID {} not found".format(input.get('lemma_id'))], token=None, lemma=None)
         else:
-            return cls(token=None, success=False, errors=["Token with ID {} not found".format(token)])
+            return cls(token=None, lemma=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
 
 
 class JoinTokens(relay.ClientIDMutation):
