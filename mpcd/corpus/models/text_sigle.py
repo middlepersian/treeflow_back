@@ -72,8 +72,8 @@ class Genre(models.TextChoices):
 
 class TextSigle(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    sigle = models.CharField(max_length=10, unique=True, choices=SigleID.choices)
-    genre = models.CharField(max_length=3, unique=True, choices=Genre.choices)
+    sigle = models.CharField(max_length=10, choices=SigleID.choices)
+    genre = models.CharField(max_length=3, choices=Genre.choices)
 
     class Meta:
         constraints = [
