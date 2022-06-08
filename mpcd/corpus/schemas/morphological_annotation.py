@@ -49,7 +49,7 @@ class CreateMorphologicalAnnotation(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, feature, feature_value):
 
-        morphological_annotation_instance = MorphologicalAnnotation.objects.get_or_create(
+        morphological_annotation_instance, morphological_annotation_created = MorphologicalAnnotation.objects.get_or_create(
             feature=feature, feature_value=feature_value)
         morphological_annotation_instance.save()
         return cls(morphological_annotation=morphological_annotation_instance, success=True)
