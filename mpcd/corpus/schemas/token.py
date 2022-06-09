@@ -9,7 +9,7 @@ from mpcd.corpus.schemas import DependencyInput
 from mpcd.corpus.schemas.pos_enum import POS
 from mpcd.dict.schemas.language_enum import Language
 from mpcd.dict.schemas.lemma import LemmaNode
-
+from mpcd.corpus.schemas.comment_category_enum import CommentCategories
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -47,9 +47,9 @@ class TokenInput(InputObjectType):
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
     comment = String(required=False)
-    uncertain = List(String, required=True)
-    to_discuss = List(String, required=True)
-    new_suggestion = List(String, required=True)
+    uncertain = List(CommentCategories, required=True)
+    to_discuss = List(CommentCategories, required=True)
+    new_suggestion = List(CommentCategories, required=True)
     avestan = String(required=False)
     previous = ID(required=False)
     line = ID(required=True)
@@ -83,9 +83,9 @@ class CreateToken(relay.ClientIDMutation):
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
         comment = String(required=False)
-        uncertain = List(String, required=True)
-        to_discuss = List(String, required=True)
-        new_suggestion = List(String, required=True)
+        uncertain = List(CommentCategories, required=True)
+        to_discuss = List(CommentCategories, required=True)
+        new_suggestion = List(CommentCategories, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=True)
@@ -344,6 +344,7 @@ class AddLemmaToToken(relay.ClientIDMutation):
 
     success = Boolean()
     errors = List(String)
+
     token = Field(TokenNode)
     lemma = Field(LemmaNode)
 

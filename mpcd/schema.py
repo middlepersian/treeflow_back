@@ -11,6 +11,8 @@ class Query(
         mpcd.corpus.schemas.bibliography.Query,
         mpcd.corpus.schemas.codex.Query,
         mpcd.corpus.schemas.codex_part.Query,
+        mpcd.corpus.schemas.comment_category_enum.Query,
+        mpcd.corpus.schemas.comment_category.Query,
         mpcd.corpus.schemas.corpus.Query,
         mpcd.corpus.schemas.dependency.Query,
         mpcd.corpus.schemas.dependency_enum.Query,
