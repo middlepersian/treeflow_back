@@ -3,10 +3,12 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 
-from mpcd.corpus.models import TextSigle
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
+
+from mpcd.corpus.models import TextSigle
+from mpcd.corpus.schemas.text_sigle_enum import SigleID, Genre
 
 
 # import the logging library
@@ -24,8 +26,8 @@ class TextSigleNode(DjangoObjectType):
 
 
 class TextSigleInput(InputObjectType):
-    sigle = String(required=True)
-    genre = String(required=True)
+    sigle = SigleID(required=True)
+    genre = Genre(required=True)
 
 
 class Query(ObjectType):
@@ -41,8 +43,8 @@ class Query(ObjectType):
 
 class CreateTextSigle(relay.ClientIDMutation):
     class Input:
-        sigle = String(required=True)
-        genre = String(required=True)
+        sigle = SigleID(required=True)
+        genre = Genre(required=True)
 
     sigle = Field(TextSigleNode)
     success = Boolean()
@@ -59,8 +61,8 @@ class CreateTextSigle(relay.ClientIDMutation):
 class UpdateTextSigle(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        sigle = String(required=True)
-        genre = String(required=True)
+        sigle = SigleID(required=True)
+        genre = Genre(required=True)
 
     sigle = Field(TextSigleNode)
     success = Boolean()

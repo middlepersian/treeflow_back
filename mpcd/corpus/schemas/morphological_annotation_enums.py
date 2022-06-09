@@ -11,44 +11,21 @@ class ADJ(Enum):
     Voice = "Voice"
     Polarity = "Polarity"
 
-    @property
-    def description(self):
-        return self.value
-
 
 class ADJNumType(Enum):
     Ord = 'Ord'
     Mult = 'Mult'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class ADJPoss(Enum):
     Yes = 'Yes'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class ADJNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class ADJCase(Enum):
     Nom = 'Nom'
     Acc = 'Acc'
-
-    @property
-    def description(self):
-        return self.value
 
 
 class ADJDegree(Enum):
@@ -56,65 +33,27 @@ class ADJDegree(Enum):
     Pos = 'Pos'
     Sup = 'Sup'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class ADJVerbForm(Enum):
     Part = 'Part'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class ADJTense(Enum):
     Past = 'Past'
     Pres = 'Pres'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class ADJVoice(Enum):
     Act = 'Act'
     Pass = 'Pass'
     Cau = 'Cau'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class ADJPolarity(Enum):
     Neg = 'Neg'
 
-    @property
-    def description(self):
-        return self.value
-
 # Adposition features
-
 
 class ADP(Enum):
     Pos = 'Pos'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class ADPPos(Enum):
     Pre = 'Pre'
     Post = 'Post'
     Circum = 'Circum'
-
-    @property
-    def description(self):
-        return self.value
-
 
 # Adverbial features
 
@@ -126,12 +65,6 @@ class ADV(Enum):
     Tense = 'Tense'
     Voice = 'Voice'
     Polarity = 'Polarity'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class ADVPronType(Enum):
 
     Dem = 'Dem'
@@ -140,64 +73,29 @@ class ADVPronType(Enum):
     Neg = 'Neg'
     Rel = 'Rel'
     Tot = 'Tot'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class ADVNumType(Enum):
     Ord = 'Ord'
     Mult = 'Mult'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class ADVDegree(Enum):
     Cmp = 'Cmp'
     Pos = 'Pos'
     Sup = 'Sup'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class ADVVerbForm(Enum):
     Part = 'Part'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class ADVTense(Enum):
     Past = 'Past'
     Pres = 'Pres'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class ADVVoice(Enum):
     Act = 'Act'
     Pass = 'Pass'
     Cau = 'Cau'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class ADVPolarity(Enum):
     Neg = 'Neg'
 
-    @property
-    def description(self):
-        return self.value
 
 # Auxiliary verb features
 
@@ -213,37 +111,18 @@ class AUX(Enum):
     Person = 'Person'
     Polite = 'Polite'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class AUXCopula(Enum):
     Yes = 'Yes'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class AUXNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class AUXVerbForm(Enum):
     Fin = 'Fin'
     Inf = 'Inf'
     Part = 'Part'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class AUXMood(Enum):
     Ind = 'Ind'
@@ -251,55 +130,24 @@ class AUXMood(Enum):
     Sub = 'Sub'
     Cnd = 'Cnd'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class AUXTense(Enum):
     Past = 'Past'
     Pres = 'Pres'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class AUXVoice(Enum):
     Act = 'Act'
     Pass = 'Pass'
     Cau = 'Cau'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class AUXPolarity(Enum):
     Neg = 'Neg'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class AUXPerson(Enum):
     First = '1'
     Second = '2'
     Third = '3'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class AUXPolite(Enum):
     Form = 'Form'
-
-    @property
-    def description(self):
-        return self.value
-
 
 # Deteminative features
 
@@ -309,10 +157,6 @@ class DET(Enum):
     Reflex = 'Reflex'
     Poss = "Poss"
     Number = "Number"
-
-    @property
-    def description(self):
-        return self.value
 
 
 class DETPronType(Enum):
@@ -325,43 +169,20 @@ class DETPronType(Enum):
     Rel = 'Rel'
     Tot = 'Tot'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class DETNumType(Enum):
     Ord = 'Ord'
     Mult = 'Mult'
-
-    @property
-    def description(self):
-        return self.value
 
 
 class DETReflex(Enum):
     Yes = 'Yes'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class DETPoss(Enum):
     Yes = 'Yes'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class DETNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
-
-    @property
-    def description(self):
-        return self.value
 
 # Noun features
 
@@ -376,86 +197,41 @@ class NOUN(Enum):
     Polarity = 'Polarity'
     Animacy = 'Animacy'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NOUNNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NOUNCase(Enum):
     Nom = 'Nom'
     Acc = 'Acc'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class NOUNDefinite(Enum):
     Ind = 'Ind'
     Spec = 'Spec'
     Def = 'Def'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NOUNVerbForm(Enum):
 
     Part = 'Part'
     Inf = 'Inf'
     Vnoun = 'Vnoun'
-
-    @property
-    def description(self):
-        return self.value
-
-
 class NOUNTense(Enum):
     Past = 'Past'
     Pres = 'Pres'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class NOUNVoice(Enum):
     Act = 'Act'
     Pass = 'Pass'
     Cau = 'Cau'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NOUNPolarity(Enum):
     Neg = 'Neg'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class NOUNAnimacy(Enum):
     Hum = 'Hum'
     Nhum = 'Nhum'
     Anim = 'Anim'
     Inan = 'Inan'
-
-    @property
-    def description(self):
-        return self.value
 
 # Numeral features
 
@@ -465,39 +241,20 @@ class NUM(Enum):
     NumType = 'NumType'
     Number = 'Number'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NUMPronType(Enum):
     Dem = 'Dem'
     Ind = 'Ind'
     Int = 'Int'
     Rel = 'Rel'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NUMNumType(Enum):
     Card = 'Card'
     Frac = 'Frac'
     Sets = 'Sets'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class NUMNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
-
-    @property
-    def description(self):
-        return self.value
 
 # Particle features
 
@@ -505,19 +262,10 @@ class NUMNumber(Enum):
 class PART(Enum):
     PartType = 'PartType'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class PARTPartType(Enum):
     Verbal = 'Verbal'
     Poss = 'Poss'
     Neg = 'Neg'
-
-    @property
-    def description(self):
-        return self.value
 
 # Pronoun features
 
@@ -530,10 +278,6 @@ class PRON(Enum):
     Person = 'Person'
     Polite = 'Polite'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class PRONPronType(Enum):
     Dem = 'Dem'
@@ -544,11 +288,6 @@ class PRONPronType(Enum):
     Neg = 'Neg'
     Rel = 'Rel'
     Tot = 'Tot'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class PRONPoss(Enum):
     Yes = 'Yes'
@@ -561,36 +300,19 @@ class PRONPoss(Enum):
 class PRONReflex(Enum):
     Yes = 'Yes'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class PRONNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class PRONPerson(Enum):
     First = '1'
     Second = '2'
     Third = '3'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class PRONPolite(Enum):
     Form = 'Form'
 
-    @property
-    def description(self):
-        return self.value
 
 # Punctuation features
 
@@ -604,17 +326,10 @@ class PUNCTPunctSide(Enum):
     Ini = 'Ini'
     Fin = 'Fin'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class PUNCTHyph(Enum):
     Yes = 'Yes'
 
-    @property
-    def description(self):
-        return self.value
 
 # Verb features
 
@@ -632,19 +347,11 @@ class VERBNumber(Enum):
     Sing = 'Sing'
     Plur = 'Plur'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class VERBVerbForm(Enum):
     Fin = 'Fin'
     Inf = 'Inf'
     Part = 'Part'
-
-    @property
-    def description(self):
-        return self.value
 
 
 class VERBMood(Enum):
@@ -653,28 +360,15 @@ class VERBMood(Enum):
     Sub = 'Sub'
     Opt = 'Opt'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class VERBTense(Enum):
     Past = 'Past'
     Pres = 'Pres'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class VERBVoice(Enum):
     Act = 'Act'
     Pass = 'Pass'
     Cau = 'Cau'
-
-    @property
-    def description(self):
-        return self.value
 
 
 class VERBPerson(Enum):
@@ -682,33 +376,15 @@ class VERBPerson(Enum):
     Second = '2'
     Third = '3'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class VERBPolite(Enum):
     Form = 'Form'
-
-    @property
-    def description(self):
-        return self.value
-
 
 class X(Enum):
     Foreign = 'Foreign'
 
-    @property
-    def description(self):
-        return self.value
-
-
 class XForeign(Enum):
     Yes = 'Yes'
 
-    @property
-    def description(self):
-        return self.value
 
 
 class Query(ObjectType):

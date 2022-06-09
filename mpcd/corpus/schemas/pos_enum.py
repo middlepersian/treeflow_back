@@ -20,10 +20,6 @@ class POS(Enum):
     VERB = 'VERB'
     X = 'X'
 
-    @property
-    def description(self):
-        return self.value
-
 
 class Query(ObjectType):
     pos = Field(POS, description='Part of speech')

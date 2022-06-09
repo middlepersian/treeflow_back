@@ -3,8 +3,9 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Text, Author, Corpus, TextSigle, Source, BibEntry
-from django.contrib.auth.models import User
+from mpcd.corpus.models import Text, Corpus, TextSigle, Source, BibEntry
+from mpcd.corpus.schemas.stage_enum import Stage
+
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
@@ -28,7 +29,7 @@ class TextNode(DjangoObjectType):
 class TextInput(InputObjectType):
     corpus = ID(required=True)
     title = String(required=True)
-    stage = String(required=True)
+    stage = Stage(required=True)
     text_sigle = ID(required=True)
     # editors = List(User, required=False)
     # collaborators = List(User, required=False)
@@ -53,7 +54,7 @@ class CreateText(relay.ClientIDMutation):
     class Input:
         corpus = ID(required=True)
         title = String(required=True)
-        stage = String(required=True)
+        stage = Stage(required=True)
         text_sigle = ID(required=True)
         # editors = List(User, required=False)
         # collaborators = List(User, required=False)
@@ -119,7 +120,7 @@ class UpdateText(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         title = String(required=True)
-        stage = String(required=True)
+        stage = Stage(required=True)
         text_sigle = ID(required=True)
         # editors = List(User, required=False)
         # collaborators = List(User, required=False)

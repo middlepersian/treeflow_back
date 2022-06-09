@@ -2,7 +2,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from mpcd.corpus.models import Codex, BibEntry
-from mpcd.corpus.schemas.bibliography import BibEntryNode
+from mpcd.corpus.schemas.codex_enum import Codices
 from graphql_relay import from_global_id
 
 
@@ -24,7 +24,7 @@ class CodexNode(DjangoObjectType):
 
 
 class CodexInput(InputObjectType):
-    sigle = String(required=True)
+    sigle = Codices(required=True)
 
 
 class Query(ObjectType):
@@ -40,7 +40,7 @@ class Query(ObjectType):
 
 class CreateCodex(relay.ClientIDMutation):
     class Input:
-        sigle = String(required=True)
+        sigle = Codices(required=True)
         bib_entry = ID(required=True)
 
     codex = Field(CodexNode)
@@ -65,7 +65,7 @@ class CreateCodex(relay.ClientIDMutation):
 class UpdateCodex(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        sigle = String(required=True)
+        sigle = Codices(required=True)
         bib_entry = ID(required=True)
 
     codex = Field(CodexNode)

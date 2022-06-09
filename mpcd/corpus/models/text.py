@@ -9,12 +9,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class StageCh(models.TextChoices):
-    untouched = 'UNT', 'untouched'
-    in_progess = 'PRO', 'in_progress'
-    finished = 'FIN', 'finished'
-
-
 class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
@@ -25,7 +19,7 @@ class Text(models.Model):
     editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
 
-    stage = models.CharField(max_length=3, blank=True, choices=StageCh.choices, default=StageCh.untouched)
+    stage = models.CharField(max_length=3, blank=True)
 
     # a Source can be a "Codex" or an "Edition"
     sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
@@ -37,10 +31,7 @@ class Text(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(
-                name="valid_stage",
-                check=models.Q(stage__in=StageCh.values),
-            ),
+
             models.UniqueConstraint(
                 fields=['corpus', 'title'], name='corpus_title'
             )
