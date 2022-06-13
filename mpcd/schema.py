@@ -62,6 +62,7 @@ class Mutation(
         mpcd.corpus.schemas.sentence.Mutation,
         mpcd.corpus.schemas.section.Mutation,
         mpcd.corpus.schemas.section_type.Mutation,
+        mpcd.corpus.schemas.source.Mutation,
         mpcd.corpus.schemas.text_sigle.Mutation,
         mpcd.corpus.schemas.text.Mutation,
         mpcd.corpus.schemas.token.Mutation,
