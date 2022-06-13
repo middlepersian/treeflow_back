@@ -21,13 +21,6 @@ class SourceNode(DjangoObjectType):
             'description': ['exact', 'icontains', 'istartswith'], 'bib_entry__id': ['exact']}
 
 
-class SourceInput(InputObjectType):
-    id = String()
-    #title = String()
-    #slug = String()
-    #description = String()
-
-
 class Query(ObjectType):
     source = relay.Node.Field(SourceNode)
     all_source = DjangoFilterConnectionField(SourceNode)
