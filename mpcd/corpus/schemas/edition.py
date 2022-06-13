@@ -19,7 +19,7 @@ class EditionNode(DjangoObjectType):
     class Meta:
         model = Edition
         filter_fields = {
-            'slug': ['exact', 'icontains', 'istartswith'],
+            'identifier': ['exact', 'icontains', 'istartswith'],
             'bib_entry__id': ['exact'],
             'description': ['exact', 'icontains', 'istartswith'],
         }
@@ -29,7 +29,7 @@ class EditionNode(DjangoObjectType):
 # TODO update both create and update Edition methods
 
 class EditionInput(InputObjectType):
-    slug = String(required=True)
+    identifier = String(required=True)
     bib_entry = ID(required=True)
     description = String(required=False)
     references = List(ID, required=True)
@@ -50,7 +50,7 @@ class Query(ObjectType):
 
 class CreateEdition(relay.ClientIDMutation):
     class Input:
-        slug = String(required=True)
+        identifier = String(required=True)
         bib_entry = ID(required=True)
         description = String(required=False)
         references = List(ID, required=True)
@@ -65,7 +65,7 @@ class CreateEdition(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        edition_instance, edition_created = Edition.objects.get_or_create(slug=input.get('slug'))
+        edition_instance, edition_created = Edition.objects.get_or_create(identifier=input.get('identifier'))
         if BibEntry.objects.filter(id=input.get('bib_entry')).exists():
             bib_entry_instance = BibEntryNode.objects.get_node_from_global_id(info, input.get('bib_entry'))
             edition_instance.bib_entry = bib_entry_instance
@@ -89,7 +89,7 @@ class CreateEdition(relay.ClientIDMutation):
 class UpdateEdition(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        slug = String(required=True)
+        identifier = String(required=True)
         bib_entry = ID(required=True)
         description = String(required=False)
         references = List(ID, required=True)
@@ -103,7 +103,7 @@ class UpdateEdition(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         edition_instance, edition_created = Edition.objects.get(id=input.get('id'))
-        edition_instance.slug = input.get('slug')
+        edition_instance.identifier = input.get('identifier')
         if BibEntry.objects.filter(id=input.get('bib_entry')).exists():
             bib_entry_instance = BibEntryNode.objects.get_node_from_global_id(info, input.get('bib_entry'))
             edition_instance.bib_entry = bib_entry_instance
