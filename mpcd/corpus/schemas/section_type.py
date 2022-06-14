@@ -46,8 +46,7 @@ class CreateSectionType(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, identifier):
 
-        section_type_instance = SectionType.objects.get_or_create(identifier=identifier)
-        section_type_instance.save()
+        section_type_instance, section_type_created = SectionType.objects.get_or_create(identifier=identifier)
         return cls(section_type=section_type_instance, success=True)
 
 
