@@ -3,15 +3,11 @@ from graphql_jwt.decorators import login_required
 
 
 class CommentCategories(Enum):
-    transcription = 'C'
-    transliteration = 'L'
-    semantics = 'S'
-    morphology = 'M'
-    syntax = 'X'
-
-    @property
-    def description(self):
-        return self.value
+    C = 'C'
+    L = 'L'
+    S = 'S'
+    M = 'M'
+    X = 'X'
 
 
 # Query
