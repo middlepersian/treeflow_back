@@ -84,6 +84,7 @@ class CreateText(relay.ClientIDMutation):
         # set text sigle
         if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():
             text_sigle_instance = TextSigle.objects.get(pk=from_global_id(input.get('text_sigle'))[1])
+            text_instance.text_sigle = text_sigle_instance
         else:
             return cls(success=False, errors="Wrong text sigle ID", text=None)
 
