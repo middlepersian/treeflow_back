@@ -212,6 +212,7 @@ class UpdateToken(relay.ClientIDMutation):
 
     token = Field(TokenNode)
     success = Boolean()
+    errors = List(String)
 
     @classmethod
     @login_required

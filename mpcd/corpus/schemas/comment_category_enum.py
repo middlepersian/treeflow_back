@@ -8,6 +8,7 @@ class CommentCategories(Enum):
     S = 'S'
     M = 'M'
     X = 'X'
+    P = 'P'
 
 
 # Query
