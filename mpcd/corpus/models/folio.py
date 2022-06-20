@@ -22,7 +22,7 @@ class Folio(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['identifier', 'facsimile'], name='identifier_facsimile'
+                fields=['identifier', 'facsimile', 'number'], name='identifier_facsimile_number'
             )
         ]
         ordering = ['number']
