@@ -9,6 +9,7 @@ from graphql_jwt.decorators import login_required
 from mpcd.dict.models import Lemma, Meaning
 from mpcd.dict.schemas.language_enum import Language
 from mpcd.utils.normalize import to_nfc
+from .meaning import MeaningNode
 
 
 class LemmaNode(DjangoObjectType):
@@ -143,7 +144,7 @@ class DeleteLemma(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class AddRelatedLemma(relay.ClientIDMutation):
+class LemmaAddRelatedLemma(relay.ClientIDMutation):
     class Input:
         source_id = ID(required=True)
         related_id = ID(required=True)
@@ -173,11 +174,114 @@ class AddRelatedLemma(relay.ClientIDMutation):
             return cls(success=True, errors=None, source=source_lemma_instance, related=related_lemma_instance)
 
         else:
-            return cls(success=False, errors=["Lemma ID does not exists"], source=None, related=None)
+            return cls(success=False, errors=["Related Lemma ID does not exists"], source=None, related=None)
+
+class LemmaRemoveRelatedLemma(relay.ClientIDMutation):
+    class Input:
+        source_id = ID(required=True)
+        related_id = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    source = Field(LemmaNode)
+    related = Field(LemmaNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, source_id, related_id):
+
+        if Lemma.objects.filter(pk=from_global_id(source_id)[1]).exists():
+            source_lemma_instance = Lemma.objects.get(pk=from_global_id(source_id)[1])
+
+        else:
+            return cls(success=False, errors=["Source Lemma ID does not exists"], source=None, related=None)
+
+        if Lemma.objects.filter(pk=from_global_id(related_id)[1]).exists():
+            related_lemma_instance = Lemma.objects.get(pk=from_global_id(related_id)[1])
+
+            source_lemma_instance.related_lemmas.remove(related_lemma_instance)
+            source_lemma_instance.save()
+
+            return cls(success=True, errors=None, source=source_lemma_instance, related=related_lemma_instance)
+
+        else:
+            return cls(success=False, errors=["Related Lemma ID does not exists"], source=None, related=None)
+
+
+
+class LemmaAddRelatedMeaning(relay.ClientIDMutation):
+    class Input:
+        lemma_id = ID(required=True)
+        meaning_id = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    lemma = Field(LemmaNode)
+    meaning = Field(MeaningNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, lemma_id, meaning_id):
+        if Lemma.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+            lemma_instance = Lemma.objects.get(pk=from_global_id(lemma_id)[1])
+
+        else:
+            return cls(success=False, errors=["Lemma ID does not exists"], lemma=None, meaning=None)
+
+        if Meaning.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+            meaning_instance = Meaning.objects.get(pk=from_global_id(meaning_id)[1])
+        else:
+            return cls(success=False, errors=["Meaning ID does not exists"], lemma=None, meaning=None)
+
+        # add meaning to lemma
+        lemma_instance.related_meanings.add(meaning_instance)
+        lemma_instance.save()
+        return cls(lemma=lemma_instance, meaning=meaning_instance, success=True, errors=None)
+
+
+class LemmaRemoveRelatedMeaning(relay.ClientIDMutation):
+    class Input:
+        lemma_id = ID(required=True)
+        meaning_id = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    lemma = Field(LemmaNode)
+    meaning = Field(MeaningNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, lemma_id, meaning_id):
+        if Lemma.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+            lemma_instance = Lemma.objects.get(pk=from_global_id(lemma_id)[1])
+
+        else:
+            return cls(success=False, errors=["Lemma ID does not exists"], lemma=None, meaning=None)
+
+        if Meaning.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+            meaning_instance = Meaning.objects.get(pk=from_global_id(meaning_id)[1])
+        else:
+            return cls(success=False, errors=["Meaning ID does not exists"], lemma=None, meaning=None)
+
+        # add meaning to lemma
+        lemma_instance.related_meanings.remove(meaning_instance)
+        lemma_instance.save()
+        return cls(lemma=lemma_instance, meaning=meaning_instance, success=True, errors=None)
+
+
+
 
 
 class Mutation(ObjectType):
-    add_related_lemma = AddRelatedLemma.Field()
+    lemma_add_related_lemma = LemmaAddRelatedLemma.Field()
+    lemma_remove_related_lemma = LemmaRemoveRelatedLemma.Field()
+    lemma_add_related_meaning = LemmaAddRelatedMeaning.Field()  
+    lemma_remove_related_meaning = LemmaRemoveRelatedMeaning.Field()
     create_lemma = CreateLemma.Field()
     update_lemma = UpdateLemma.Field()
     delete_lemma = DeleteLemma.Field()
+
+

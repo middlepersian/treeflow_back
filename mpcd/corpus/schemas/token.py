@@ -338,33 +338,128 @@ class DeleteToken(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class AddLemmaToToken(relay.ClientIDMutation):
+class AddLemmasToToken(relay.ClientIDMutation):
     class Input:
         token_id = ID(required=True)
-        lemma_id = ID(required=True)
+        lemmas_ids = List(ID, required=True)
 
     success = Boolean()
     errors = List(String)
 
     token = Field(TokenNode)
-    lemma = Field(LemmaNode)
 
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        logger.error("TOKEN_ID: {}, LEMMA_ID: {}".format(input.get('token'), input.get('lemma')))
+        logger.error("TOKEN_ID: {}, LEMMAS_ID: {}".format(input.get('token_id'), input.get('lemmas_ids')))
 
         if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
             token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
-            if Lemma.objects.filter(pk=from_global_id(input.get('lemma_id'))[1]).exists():
-                lemma_instance = Lemma.objects.get(pk=from_global_id(input.get('lemma_id'))[1])
-                token_instance.lemmas.add(lemma_instance)
-                token_instance.save()
-                return cls(token=token_instance, lemma=lemma_instance, success=True, errors=None)
-            else:
-                return cls(success=False, errors=["Lemma with ID {} not found".format(input.get('lemma_id'))], token=None, lemma=None)
+            for lemma_id in input.get('lemmas_ids'):
+                if Lemma.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+                    lemma_instance = Lemma.objects.get(pk=from_global_id(lemma_id)[1])
+                    token_instance.lemmas.add(lemma_instance)
+
+                else:
+                    return cls(success=False, errors=["Lemma with ID {} not found".format(lemma_id)], token=None)
+
+            token_instance.save()
+            return cls(token=token_instance, success=True, errors=None)
         else:
-            return cls(token=None, lemma=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
+
+
+class AddMeaningsToToken(relay.ClientIDMutation):
+    class Input:
+        token_id = ID(required=True)
+        meanings_ids = List(ID, required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    token = Field(TokenNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error("TOKEN_ID: {}, MEANINGS_ID: {}".format(input.get('token_id'), input.get('meanings_ids')))
+
+        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
+            for meaning_id in input.get('meanings_ids'):
+                if Meaning.objects.filter(pk=from_global_id(meaning_id)[1]).exists():
+                    meaning_instance = Meaning.objects.get(pk=from_global_id(meaning_id)[1])
+                    token_instance.meanings.add(meaning_instance)
+
+                else:
+                    return cls(success=False, errors=["Meaning with ID {} not found".format(meaning_id)], token=None)
+
+            token_instance.save()
+            return cls(token=token_instance, success=True, errors=None)
+        else:
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
+
+
+class RemoveLemmasFromToken(relay.ClientIDMutation):
+    class Input:
+        token_id = ID(required=True)
+        lemmas_ids = List(ID, required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    token = Field(TokenNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error("TOKEN_ID: {}, LEMMAS_ID: {}".format(input.get('token_id'), input.get('lemmas_ids')))
+
+        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
+            for lemma_id in input.get('lemmas_ids'):
+                if Lemma.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+                    lemma_instance = Lemma.objects.get(pk=from_global_id(lemma_id)[1])
+                    token_instance.lemmas.remove(lemma_instance)
+
+                else:
+                    return cls(success=False, errors=["Lemma with ID {} not found".format(lemma_id)], token=None)
+
+            token_instance.save()
+            return cls(token=token_instance, success=True, errors=None)
+        else:
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
+
+
+class RemoveMeaningsFromToken(relay.ClientIDMutation):
+    class Input:
+        token_id = ID(required=True)
+        meanings_ids = List(ID, required=True)
+
+    success = Boolean()
+    errors = List(String)
+
+    token = Field(TokenNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error("TOKEN_ID: {}, MEANINGS_ID: {}".format(input.get('token_id'), input.get('meanings_ids')))
+
+        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
+            for meaning_id in input.get('meanings_ids'):
+                if Meaning.objects.filter(pk=from_global_id(meaning_id)[1]).exists():
+                    meaning_instance = Meaning.objects.get(pk=from_global_id(meaning_id)[1])
+                    token_instance.meanings.remove(meaning_instance)
+
+                else:
+                    return cls(success=False, errors=["Meaning with ID {} not found".format(meaning_id)], token=None)
+
+            token_instance.save()
+            return cls(token=token_instance, success=True, errors=None)
+        else:
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
 
 
 class JoinTokens(relay.ClientIDMutation):
@@ -397,7 +492,10 @@ class JoinTokens(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
-    add_lemma_to_token = AddLemmaToToken.Field()
+    add_lemmas_to_token = AddLemmasToToken.Field()
+    add_meanings_to_token = AddMeaningsToToken.Field()
+    remove_lemmas_from_token = RemoveLemmasFromToken.Field()
+    remove_meanings_from_token = RemoveMeaningsFromToken.Field()
     create_token = CreateToken.Field()
     delete_token = DeleteToken.Field()
     update_token = UpdateToken.Field()
