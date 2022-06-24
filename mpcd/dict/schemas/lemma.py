@@ -144,7 +144,7 @@ class DeleteLemma(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class LemmaAddRelatedLemma(relay.ClientIDMutation):
+class AddRelatedLemmaToLemma (relay.ClientIDMutation):
     class Input:
         source_id = ID(required=True)
         related_id = ID(required=True)
@@ -176,7 +176,7 @@ class LemmaAddRelatedLemma(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=["Related Lemma ID does not exists"], source=None, related=None)
 
-class LemmaRemoveRelatedLemma(relay.ClientIDMutation):
+class RemoveRelatedLemmaFromLemma(relay.ClientIDMutation):
     class Input:
         source_id = ID(required=True)
         related_id = ID(required=True)
@@ -210,7 +210,7 @@ class LemmaRemoveRelatedLemma(relay.ClientIDMutation):
 
 
 
-class LemmaAddRelatedMeaning(relay.ClientIDMutation):
+class AddRelatedMeaningToLemma(relay.ClientIDMutation):
     class Input:
         lemma_id = ID(required=True)
         meaning_id = ID(required=True)
@@ -241,7 +241,7 @@ class LemmaAddRelatedMeaning(relay.ClientIDMutation):
         return cls(lemma=lemma_instance, meaning=meaning_instance, success=True, errors=None)
 
 
-class LemmaRemoveRelatedMeaning(relay.ClientIDMutation):
+class RemoveRelatedMeaningFromLemma(relay.ClientIDMutation):
     class Input:
         lemma_id = ID(required=True)
         meaning_id = ID(required=True)
@@ -276,10 +276,11 @@ class LemmaRemoveRelatedMeaning(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
-    lemma_add_related_lemma = LemmaAddRelatedLemma.Field()
-    lemma_remove_related_lemma = LemmaRemoveRelatedLemma.Field()
-    lemma_add_related_meaning = LemmaAddRelatedMeaning.Field()  
-    lemma_remove_related_meaning = LemmaRemoveRelatedMeaning.Field()
+    ## TODO add_related_lemma_to_lemma
+    add_related_lemma_to_lemma = AddRelatedLemmaToLemma.Field()
+    remove_related_lemma_from_lemma = RemoveRelatedLemmaFromLemma.Field()
+    add_related_meaning_to_lemma = AddRelatedMeaningToLemma.Field()  
+    remove_related_meaning_from = RemoveRelatedMeaningFromLemma.Field()
     create_lemma = CreateLemma.Field()
     update_lemma = UpdateLemma.Field()
     delete_lemma = DeleteLemma.Field()

@@ -197,11 +197,11 @@ class DeleteSection(relay.ClientIDMutation):
             return cls(success=False)
 
 
-class AddTokenToSection(relay.ClientIDMutation):
+class AddTokensToSection(relay.ClientIDMutation):
 
     class Input:
         section_id = ID(required=True)
-        token_id = ID(required=True)
+        tokens_ids = List(ID, required=True)
 
     success = Boolean()
     errors = List(String)
@@ -213,19 +213,83 @@ class AddTokenToSection(relay.ClientIDMutation):
         logger.debug('AddTokenToSection.mutate_and_get_payload()'.format(input))
         if Section.objects.filter(pk=from_global_id(input['section_id'])[1]).exists():
             section_instance = Section.objects.get(pk=from_global_id(input['section_id'])[1])
-            if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
-                token_obj = Token.objects.get(pk=from_global_id(input['token_id'])[1])
-                section_instance.tokens.add(token_obj)
-                section_instance.save()
-                return cls(success=True, errors=None, section=section_instance)
-            else:
-                return cls(success=False, errors=['Token ID not found'], section=None)
+
+            for token in input.get('tokens_ids'):
+                if Token.objects.filter(pk=from_global_id(token)[1]).exists():
+                    token_obj = Token.objects.get(pk=from_global_id(token)[1])
+                    section_instance.tokens.add(token_obj)
+
+                else:
+                    return cls(success=False, errors=['Token ID not found'], section=None)
+
+            section_instance.save()
+            return cls(success=True, errors=None, section=section_instance)
+
         else:
             return cls(success=False, errors=['Section ID not found'], section=None)
+
+
+class SetPreviousSection(relay.ClientIDMutation):
+    class Input:
+        current_section_id = ID(required=True)
+        previous_section_id = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+    current_section = Field(SectionNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.debug('SetPreviousSection.mutate_and_get_payload()'.format(input))
+        if Section.objects.filter(pk=from_global_id(input['current_section_id'])[1]).exists():
+            current_section_instance = Section.objects.get(pk=from_global_id(input['current_section_id'])[1])
+        else:
+            return cls(success=False, errors=['current_section_id not found'], current_section=None)
+
+        if Section.objects.filter(pk=from_global_id(input['previous_section_id'])[1]).exists():
+            previous_section_instance = Section.objects.get(pk=from_global_id(input['previous_section_id'])[1])
+        else:
+            return cls(success=False, errors=['previous_section_id not found'], current_section=None)
+
+        current_section_instance.previous = previous_section_instance
+        current_section_instance.save()
+        return cls(success=True, errors=None, current_section=current_section_instance)
+
+
+class SetContainerForSection(relay.ClientIDMutation):
+    class Input:
+        current_section_id = ID(required=True)
+        container_id = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+    current_section = Field(SectionNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+
+        logger.debug('SetContainerForSection.mutate_and_get_payload()'.format(input))
+        if Section.objects.filter(pk=from_global_id(input['current_section_id'])[1]).exists():
+            current_section_instance = Section.objects.get(pk=from_global_id(input['current_section_id'])[1])
+        else:
+            return cls(success=False, errors=['current_section_id not found'], current_section=None)
+
+        if Section.objects.filter(pk=from_global_id(input['container_id'])[1]).exists():
+            container_instance = Section.objects.get(pk=from_global_id(input['container_id'])[1])
+        else:
+            return cls(success=False, errors=['container_id not found'], current_section=None)
+
+        current_section_instance.container = container_instance
+        current_section_instance.save()
+        return cls(success=True, errors=None, current_section=current_section_instance)
 
 
 class Mutation(ObjectType):
     create_section = CreateSection.Field()
     update_section = UpdateSection.Field()
     delete_section = DeleteSection.Field()
-    add_token_to_section = AddTokenToSection.Field()
+    add_token_to_section = AddTokensToSection.Field()
+    set_previous_section = SetPreviousSection.Field()
+    set_contianer_for_section = SetContainerForSection.Field()
