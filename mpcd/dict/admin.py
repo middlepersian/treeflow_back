@@ -1,6 +1,6 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Dictionary, Lemma, Reference
+from .models import Dictionary, Lemma, Reference, Meaning
 
 
 
@@ -27,3 +27,4 @@ class ReferenceHistoryAdmin(SimpleHistoryAdmin):
 admin.site.register(Dictionary)
 admin.site.register(Lemma, WordHistoryAdmin)
 admin.site.register(Reference, ReferenceHistoryAdmin)
+admin.site.register(Meaning)
