@@ -292,4 +292,4 @@ class Mutation(ObjectType):
     delete_section = DeleteSection.Field()
     add_tokens_to_section = AddTokensToSection.Field()
     set_previous_section = SetPreviousSection.Field()
-    set_contianer_for_section = SetContainerForSection.Field()
+    set_container_for_section = SetContainerForSection.Field()
