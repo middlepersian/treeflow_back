@@ -182,7 +182,7 @@ class UpdateText(relay.ClientIDMutation):
                 text_instance.sources.add(source_instance)
 
         text_instance.save()
-        return text_instance
+        return cls(success=True, errors=None, text=text_instance)
 
 
 class Mutation(ObjectType):
