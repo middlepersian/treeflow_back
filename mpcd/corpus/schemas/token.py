@@ -52,7 +52,7 @@ class TokenInput(InputObjectType):
     new_suggestion = List(CommentCategories, required=True)
     avestan = String(required=False)
     previous = ID(required=False)
-    line = ID(required=True)
+    line = ID(required=False)
     position_in_line = Int(required=False)
 
 # Queries
@@ -88,7 +88,7 @@ class CreateToken(relay.ClientIDMutation):
         new_suggestion = List(CommentCategories, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
-        line = ID(required=True)
+        line = ID(required=False)
         position_in_line = Int(required=False)
 
     token = Field(TokenNode)
@@ -207,7 +207,7 @@ class UpdateToken(relay.ClientIDMutation):
         new_suggestion = List(String, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
-        line = ID(required=True)
+        line = ID(required=False)
         position_in_line = Int(required=False)
 
     token = Field(TokenNode)
