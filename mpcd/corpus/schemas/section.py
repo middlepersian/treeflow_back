@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List, Int
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List, Float
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
