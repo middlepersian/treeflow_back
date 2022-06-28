@@ -10,7 +10,7 @@ from .token import Token
 
 class Section(OrderedModel):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    number = models.SmallIntegerField(null=True, blank=True)
+    number = models.Float(null=True, blank=True)
     identifier = models.CharField(max_length=100, blank=True, null=True, unique=True)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='section_text')
     section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE,
