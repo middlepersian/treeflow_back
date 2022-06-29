@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType, Int, Float
+from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType, Int, Float, UUID
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -36,7 +36,7 @@ class TokenNode(DjangoObjectType):
 
 
 class TokenInput(InputObjectType):
-    text = ID(required=True)
+    text = UUID(required=True)
     transcription = String(required=True)
     transliteration = String(required=True)
     number = Float(required=True)
@@ -72,7 +72,7 @@ class Query(ObjectType):
 
 class CreateToken(relay.ClientIDMutation):
     class Input:
-        text = ID(required=True)
+        text = UUID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
         number = Float(required=True)
@@ -191,7 +191,7 @@ class CreateToken(relay.ClientIDMutation):
 class UpdateToken(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        text = ID(required=True)
+        text = UUID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
         number = Float(required=True)
