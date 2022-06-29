@@ -36,7 +36,7 @@ class TokenNode(DjangoObjectType):
 
 
 class TokenInput(InputObjectType):
-    text = UUID(required=True)
+    text = ID(required=True)
     transcription = String(required=True)
     transliteration = String(required=True)
     number = Float(required=True)
@@ -72,7 +72,7 @@ class Query(ObjectType):
 
 class CreateToken(relay.ClientIDMutation):
     class Input:
-        text = UUID(required=True)
+        text = ID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
         number = Float(required=True)
@@ -191,7 +191,7 @@ class CreateToken(relay.ClientIDMutation):
 class UpdateToken(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
-        text = UUID(required=True)
+        text = ID(required=True)
         transcription = String(required=True)
         transliteration = String(required=True)
         number = Float(required=True)
