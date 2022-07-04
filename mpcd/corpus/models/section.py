@@ -1,16 +1,15 @@
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
-from ordered_model.models import OrderedModel
 from .text import Text
 from .section_type import SectionType
 from .source import Source
 from .token import Token
 
 
-class Section(OrderedModel):
+class Section(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    number = models.SmallIntegerField(null=True, blank=True)
+    number = models.FloatField(null=True, blank=True)
     identifier = models.CharField(max_length=100, blank=True, null=True, unique=True)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='section_text')
     section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE,
@@ -27,7 +26,6 @@ class Section(OrderedModel):
 
     class Meta:
         ordering = ['number']
-       
 
     def __str__(self) -> str:
         return '{}'.format(self.identifier)

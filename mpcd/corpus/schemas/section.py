@@ -1,4 +1,4 @@
-from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List, Int
+from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List, Float
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
@@ -33,7 +33,7 @@ class Query(ObjectType):
 
 class SectionInput(InputObjectType):
     identifier = String(required=True)
-    number = Int(required=False)
+    number = Float(required=False)
     text = ID(required=True)
     section_type = ID(required=True)
     source = ID(required=False)
@@ -46,7 +46,7 @@ class CreateSection(relay.ClientIDMutation):
 
     class Input:
         identifier = String(required=True)
-        number = Int(required=False)
+        number = Float(required=False)
         text = ID(required=True)
         section_type = ID(required=True)
         source = ID(required=False)
@@ -79,7 +79,7 @@ class CreateSection(relay.ClientIDMutation):
         else:
             return cls(errors=['Section Type ID not found'], success=False, section=None)
 
-        if input.get('source', None):
+        if input.get('source'):
             if Source.objects.filter(pk=from_global_id(input['source'])[1]).exists():
                 section_instance.source = Source.objects.get(pk=from_global_id(input['source'])[1])
             else:
@@ -112,7 +112,7 @@ class UpdateSection(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         identifier = String(required=True)
-        number = Int(required=False)
+        number = Float(required=False)
         text = ID(required=True)
         section_type = ID(required=True)
         source = ID(required=False)

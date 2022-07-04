@@ -230,7 +230,7 @@ class AddRelatedMeaningToLemma(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=["Lemma ID does not exists"], lemma=None, meaning=None)
 
-        if Meaning.objects.filter(pk=from_global_id(lemma_id)[1]).exists():
+        if Meaning.objects.filter(pk=from_global_id(meaning_id)[1]).exists():
             meaning_instance = Meaning.objects.get(pk=from_global_id(meaning_id)[1])
         else:
             return cls(success=False, errors=["Meaning ID does not exists"], lemma=None, meaning=None)
