@@ -42,6 +42,8 @@ class Query(
         mpcd.dict.schemas.semantic.Query,
         mpcd.dict.schemas.term_tech.Query,
         graphene.ObjectType):
+
+    node = graphene.relay.Node.Field()
     pass
 
 
