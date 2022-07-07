@@ -71,7 +71,7 @@ class UpdateMeaning(relay.ClientIDMutation):
         language = Language(required=True)
 
     errors = List(String)
-    word = Field(MeaningNode)
+    meaning = Field(MeaningNode)
     success = Boolean()
 
     @classmethod
