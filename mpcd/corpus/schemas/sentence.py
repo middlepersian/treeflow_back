@@ -6,6 +6,7 @@ from graphql_relay import from_global_id
 from mpcd.corpus.models import Sentence, Text, Token
 from mpcd.dict.models import Meaning
 from mpcd.dict.schemas import MeaningInput
+from mpcd.dict.schemas.language_enum import Language
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -272,6 +273,38 @@ class AddTranslationstoSentence(relay.ClientIDMutation):
         else:
             return cls(success=False, errors=['Wrong Sentence ID'], sentence=None)
 
+class AddNewTranslationstoSentence(relay.ClientIDMutation):
+    """
+        Add a new meaning (translation) to a sentence
+    """
+    class Input:
+        sentence_id = ID(required=True)
+        meaning = String(required=True)
+        language = Language(required=True)
+        relatedMeanings = List(ID, required=True)
+
+    success = Boolean()
+    errors = List(String)
+    sentence = Field(SentenceNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+
+        if Sentence.objects.filter(pk=from_global_id(input.get('sentence_id'))[1]).exists():
+            sentence_instance = Sentence.objects.get(pk=from_global_id(input.get('sentence_id'))[1])
+
+            meaning, meaning_created = Meaning.objects.get_or_create(meaning=to_nfc(input.get('meaning')), language=to_nfc(input.get('language')))
+            if meaning_created:
+                sentence_instance.translations.add(meaning)
+            else:
+                return cls(success=False, errors=['Unable to create or get meaning'], sentence=None)
+            sentence_instance.save()
+            return cls(sentence=sentence_instance, success=True, errors=None)
+        else:
+            return cls(success=False, errors=['Wrong Sentence ID'], sentence=None)
+
+
 
 class RemoveTranslationsFromSentence(relay.ClientIDMutation):
     class Input:
@@ -306,4 +339,6 @@ class Mutation(ObjectType):
     add_tokens_to_sentence = AddTokensToSentence.Field()
     remove_tokens_from_sentence = RemoveTokensFromSentence.Field()
     add_translations_to_sentence = AddTranslationstoSentence.Field()
+    add_new_translation_to_sentence = AddNewTranslationstoSentence.Field()
     remove_translations_from_sentence = RemoveTranslationsFromSentence.Field()
+
