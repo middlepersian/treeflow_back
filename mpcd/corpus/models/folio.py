@@ -10,7 +10,7 @@ class Folio(models.Model):
     number = models.FloatField(null=True, blank=True)
     facsimile = models.ForeignKey(Facsimile, on_delete=models.CASCADE, null=True,
                                   blank=True, related_name='folio_facsimile')
-    comment = models.CharField(max_length=255, blank=True)
+    comment = models.ForeignKey('Comment', on_delete=models.SET_NULL, null=True, blank=True)
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,

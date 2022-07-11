@@ -1,7 +1,7 @@
 import uuid as uuid_lib
-from xml.etree.ElementTree import Comment
 from django.db import models
 from simple_history.models import HistoricalRecords
+from mpcd.corpus.models.comment import Comment
 
 
 class Meaning(models.Model):
@@ -9,8 +9,8 @@ class Meaning(models.Model):
     meaning = models.TextField(null=True, blank=True)
     language = models.CharField(max_length=10, blank=True, null=True)
     # relationships
-    related_meanings = models.ManyToManyField('self', blank=True, related_name='meaning_related_meanings')
-    comment = models.TextField(null=True, blank=True)
+    related_meanings = models.ManyToManyField('self', blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, blank=True)
     history = HistoricalRecords()
 
     class Meta:

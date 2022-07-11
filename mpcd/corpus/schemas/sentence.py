@@ -5,6 +5,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 from mpcd.corpus.models import Sentence, Text, Token
 from mpcd.dict.models import Meaning
+from mpcd.corpus.models import Comment
 from mpcd.dict.schemas import MeaningInput
 from mpcd.dict.schemas.language_enum import Language
 
@@ -25,7 +26,7 @@ class SentenceNode(DjangoObjectType):
         model = Sentence
         filter_fields = {
             'number': ['exact', 'lt', 'lte', 'gt', 'gte'],
-            'comment': ['exact', 'icontains', 'istartswith'],
+            'comment__id': ['exact'],
             'text__id': ['exact']
         }
         interfaces = (relay.Node,)
@@ -36,7 +37,7 @@ class SentenceInput(InputObjectType):
     number = Float(required=True)
     tokens = List(ID, required=True)
     translations = List(MeaningInput, required=True)
-    comment = String(required=False)
+    comment = ID(required=False)
     previous = ID(required=False)
 
 # Query
@@ -63,7 +64,7 @@ class CreateSentence(relay.ClientIDMutation):
         number = Float(required=True)
         tokens = List(ID, required=True)
         translations = List(MeaningInput, required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
         previous = ID(required=False)
 
     errors = List(String)
@@ -105,7 +106,8 @@ class CreateSentence(relay.ClientIDMutation):
                 return cls(success=False, errors=['Wrong Previous ID'])
 
         if input.get('comment'):
-            sentence_instance.comment = input.get('comment')
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+            sentence_instance.comment = comment_obj
 
         sentence_instance.save()
         return cls(sentence=sentence_instance, success=True)
@@ -120,7 +122,7 @@ class UpdateSentence(relay.ClientIDMutation):
         number = Float(required=True)
         tokens = List(ID, required=True)
         translations = List(MeaningInput, required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
         previous = ID(required=False)
 
     sentence = Field(SentenceNode)
@@ -155,8 +157,9 @@ class UpdateSentence(relay.ClientIDMutation):
             # update sentence number
             sentence_instance.number = input.get('number')
 
-            if input.get('comment', None):
-                sentence_instance.comment = input.get('comment')
+            if input.get('comment'):
+                comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+                sentence_instance.comment = comment_obj
               # check if previous is valid
 
             if input.get('previous', None):

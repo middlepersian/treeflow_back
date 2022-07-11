@@ -69,10 +69,6 @@ class Genre(Enum):
     andarz = 'AND'
     narrative = 'NAR'
 
-    @property
-    def description(self):
-        return self.value
-
 
 # Query
 class Query(ObjectType):

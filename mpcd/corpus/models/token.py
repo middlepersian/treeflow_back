@@ -1,12 +1,11 @@
 import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
-from mpcd.dict.models import Lemma, Meaning
 from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .text import Text
 from .line import Line
-from .comment_category import CommentCategory
+from .comment import Comment
 
 
 class Token(models.Model):
@@ -16,19 +15,16 @@ class Token(models.Model):
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemmas = models.ManyToManyField(Lemma, blank=True, related_name='token_lemmas')
-    meanings = models.ManyToManyField(Meaning, blank=True, related_name='token_meanings')
+    lemmas = models.ManyToManyField('dict.Lemma', blank=True, related_name='token_lemmas')
+    meanings = models.ManyToManyField('dict.Meaning', blank=True, related_name='token_meanings')
     pos = models.CharField(max_length=8, null=True, blank=True)
     morphological_annotation = models.ManyToManyField(
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
-    comment = models.TextField(null=True, blank=True)
-    uncertain = models.ManyToManyField(CommentCategory, blank=True, related_name='token_uncertain')
-    to_discuss = models.ManyToManyField(CommentCategory, blank=True, related_name='token_to_discuss')
-    new_suggestion = models.ManyToManyField(
-        CommentCategory, blank=True, related_name='token_new_suggestion')
 
-    avestan = models.URLField(max_length=100, null=True, blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, blank=True)
+
+    avestan = models.TextField(null=True, blank=True)
 
     line = models.ForeignKey(Line, on_delete=models.SET_NULL, null=True, related_name='token_line')
 

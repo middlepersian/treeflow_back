@@ -8,7 +8,7 @@ class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
     folio = models.ForeignKey(Folio, on_delete=models.CASCADE, related_name='line_folio')
-    comment = models.TextField(blank=True)
+    comment = models.ForeignKey('Comment', on_delete=models.SET_NULL, null=True, blank=True)
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,

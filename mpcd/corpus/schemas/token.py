@@ -30,7 +30,8 @@ class TokenNode(DjangoObjectType):
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
                          'transliteration': ['exact', 'icontains', 'istartswith'],
                          'line': ['exact'],
-                         'text__id': ['exact']
+                         'text__id': ['exact'],
+                         'comment__id': ['exact'],
                          }
         interfaces = (relay.Node,)
 
@@ -46,10 +47,7 @@ class TokenInput(InputObjectType):
     pos = POS(required=False)
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
-    comment = String(required=False)
-    uncertain = List(CommentCategories, required=True)
-    to_discuss = List(CommentCategories, required=True)
-    new_suggestion = List(CommentCategories, required=True)
+    comment = ID(required=False)
     avestan = String(required=False)
     previous = ID(required=False)
     line = ID(required=False)
@@ -82,10 +80,7 @@ class CreateToken(relay.ClientIDMutation):
         pos = POS(required=False)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
-        comment = String(required=False)
-        uncertain = List(CommentCategories, required=True)
-        to_discuss = List(CommentCategories, required=True)
-        new_suggestion = List(CommentCategories, required=True)
+        comment = ID(required=False)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=False)
@@ -136,26 +131,9 @@ class CreateToken(relay.ClientIDMutation):
             token.syntactic_annotation.add(dep_obj)
 
         # check if comment available
-        if input.get('comment', None):
-            token.comment = to_nfc(input['comment'])
-
-        # get or create uncertain
-        for uncertain in input['uncertain']:
-            uncertain_obj, uncertain_obj_created = CommentCategory.objects.get_or_create(
-                category=uncertain)
-            token.uncertain.add(uncertain_obj)
-
-        # get or create to_discuss
-        for to_discuss in input['to_discuss']:
-            to_discuss_obj, to_discuss_obj_created = CommentCategory.objects.get_or_create(
-                category=to_discuss)
-            token.to_discuss.add(to_discuss_obj)
-
-        # get or create new_suggestion
-        for new_suggestion in input['new_suggestion']:
-            new_suggestion_obj, new_suggestion_obj_created = CommentCategory.objects.get_or_create(
-                category=new_suggestion)
-            token.new_suggestion.add(new_suggestion_obj)
+        if input.get('comment'):
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+            token.comment = comment_obj
 
         # check if avestan available
         if input.get('avestan', None):
@@ -201,7 +179,7 @@ class UpdateToken(relay.ClientIDMutation):
         pos = POS(required=False)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
         uncertain = List(String, required=True)
         to_discuss = List(String, required=True)
         new_suggestion = List(String, required=True)
@@ -262,32 +240,9 @@ class UpdateToken(relay.ClientIDMutation):
                 token.syntactic_annotation.add(dep_obj)
 
         # check if comment available
-        if input.get('comment', None):
-            token.comment = to_nfc(input['comment'])
-
-        # clear uncertain
-        token.uncertain.clear()
-        # get or create uncertain
-        for uncertain in input['uncertain']:
-            uncertain_obj, uncertain_obj_created = CommentCategory.objects.get_or_create(
-                category=uncertain)
-            token.uncertain.add(uncertain_obj)
-
-        # clear to_discuss
-        token.to_discuss.clear()
-        # get or create to_discuss
-        for to_discuss in input['to_discuss']:
-            to_discuss_obj, to_discuss_obj_created = CommentCategory.objects.get_or_create(
-                category=to_discuss)
-            token.to_discuss.add(to_discuss_obj)
-
-        # clear new_suggestion
-        token.new_suggestion.clear()
-        # get or create new_suggestion
-        for new_suggestion in input['new_suggestion']:
-            new_suggestion_obj, new_suggestion_obj_created = CommentCategory.objects.get_or_create(
-                category=new_suggestion)
-            token.new_suggestion.add(new_suggestion_obj)
+        if input.get('comment'):
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+            token.comment = comment_obj
 
         # check if avestan available
         if input.get('avestan', None):

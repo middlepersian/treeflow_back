@@ -72,14 +72,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "simple_history",
-    # graphene
-    "graphene_django",
-    # channels
-    "channels",
-    # "graphql_ws.django"
-    "graphql_ws.django",
-    # ordered_model
-    "ordered_model"
+    "graphene_django"
 ]
 
 LOCAL_APPS = [

@@ -10,6 +10,7 @@ from mpcd.dict.models import Semantic
 from mpcd.dict.models import Meaning
 from mpcd.dict.models import TermTech
 from mpcd.dict.models import Lemma
+from mpcd.corpus.models import Comment
 from mpcd.dict.schemas import MeaningInput
 from mpcd.dict.schemas import LemmaInput
 from mpcd.dict.schemas import TermTechInput
@@ -22,7 +23,7 @@ class SemanticNode(DjangoObjectType):
     class Meta:
         model = Semantic
         filter_fields = {
-            'comment': ['exact', 'icontains', 'istartswith']}
+            'comment__id': ['exact']}
         interfaces = (relay.Node,)
 
 
@@ -30,7 +31,7 @@ class SemanticInput(InputObjectType):
     lemmas = List(LemmaInput, required=True)
     meanings = List(MeaningInput, required=True)
     term_techs = List(TermTechInput, required=True)
-    comment = String(required=False)
+    comment = ID(required=False)
 
 # Queries
 
@@ -51,7 +52,7 @@ class CreateSemantic(relay.ClientIDMutation):
         lemmas = List(LemmaInput, required=True)
         meanings = List(MeaningInput, required=True)
         term_techs = List(TermTechInput, required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
 
     semantic = Field(SemanticNode)
     success = Boolean()
@@ -82,8 +83,11 @@ class CreateSemantic(relay.ClientIDMutation):
             semantic.term_techs.add(term_tech_obj)
 
         # Comment
-        if input('comment', None):
-            semantic.comment = input['comment']
+
+        # check if comment available
+        if input.get('comment'):
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+            semantic.comment = comment_obj
 
         semantic.save()
         return cls(semantic=semantic, success=True, errors=None)
@@ -95,7 +99,7 @@ class UpdateSemantic(relay.ClientIDMutation):
         lemmas = List(LemmaInput, required=True)
         meanings = List(MeaningInput, required=True)
         term_techs = List(TermTechInput, required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
 
     semantic = Field(SemanticNode)
     success = Boolean()
@@ -132,8 +136,10 @@ class UpdateSemantic(relay.ClientIDMutation):
             if term_tech_obj:
                 semantic_obj.term_techs.add(term_tech_obj)
         # Comment
-        if input('comment', None):
-            semantic_obj.comment = input['comment']
+        # check if comment available
+        if input.get('comment'):
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+            semantic.comment = comment_obj
 
         semantic_obj.save()
         return cls(semantic=semantic_obj, success=True, errors=None)

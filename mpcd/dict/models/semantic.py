@@ -3,6 +3,8 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from .meaning import Meaning
+from mpcd.corpus.models.comment import Comment
+
 from .term_tech import TermTech
 from mpcd.dict.models import Lemma
 
@@ -14,7 +16,7 @@ class Semantic(models.Model):
     # Multimlingual setup: there are multiple meanings in different languages for the same semantic
     meanings = models.ManyToManyField(Meaning, blank=True, related_name='semantic_meanings')
     term_techs = models.ManyToManyField(TermTech, blank=True, related_name='semantic_term_techs')
-    comment = models.TextField(null=True, blank=True)
-    related_semantics = models.ManyToManyField('self', blank=True, related_name='semantic_related_semantics')
+    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, blank=True)
+    related_semantics = models.ManyToManyField('self', blank=True)
     history = HistoricalRecords()
     # TODO add pointers to taxonomy

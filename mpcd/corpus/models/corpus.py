@@ -5,11 +5,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class CorpusManager(models.Manager):
-    def get_by_natural_key(self, slug):
-        return self.get(slug=slug)
-
-
 class Corpus(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100)

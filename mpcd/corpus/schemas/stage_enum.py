@@ -8,7 +8,7 @@ class Stage(Enum):
 
 
 class Query(ObjectType):
-    stage = Field(Stage, description='Text stage')
+    stage = Field(Stage, description="Text stage")
 
     def resolve_stage(root, info, stage):
         return stage

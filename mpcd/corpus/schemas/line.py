@@ -2,7 +2,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectT
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Folio, Line
+from mpcd.corpus.models import Folio, Line, Comment
 from .folio import FolioInput
 from graphql_jwt.decorators import login_required
 
@@ -20,7 +20,8 @@ class LineNode(DjangoObjectType):
     class Meta:
         model = Line
         filter_fields = {'number': ['exact', 'lt', 'lte', 'gt', 'gte'],
-                         'comment': ['exact', 'icontains', 'istartswith']}
+                         'folio__id': ['exact'],
+                         'comment__id': ['exact']}
 
         interfaces = (relay.Node, )
 
@@ -28,7 +29,7 @@ class LineNode(DjangoObjectType):
 class LineInput(InputObjectType):
     number = Float(required=True)
     folio = ID(required=True)
-    comment = String(required=False)
+    comment = ID(required=False)
     previous = ID(required=False)
 
 
@@ -47,7 +48,7 @@ class CreateLine(relay.ClientIDMutation):
     class Input:
         number = Float(required=True)
         folio = ID(required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
         previous = ID(required=False)
 
     line = Field(LineNode)
@@ -72,11 +73,12 @@ class CreateLine(relay.ClientIDMutation):
             if Line.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 # assign previous token to line
                 line_instance.previous = Line.objects.get(pk=from_global_id(input['previous'])[1])
-                line_instance.save()
 
-        if input.get('comment', None):
-            line_instance.comment = input.get('comment')
-            line_instance.save()
+        if input.get('comment'):
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+            line_instance.comment = comment_obj
+
+        line_instance.save()
 
         return cls(line=line_instance, success=True, errors=None)
 
@@ -86,7 +88,7 @@ class UpdateLine(relay.ClientIDMutation):
         id = ID(required=True)
         number = Float(required=True)
         folio = ID(required=True)
-        comment = String(required=False)
+        comment = ID(required=False)
         previous = ID(required=False)
 
     line = Field(LineNode)
@@ -101,8 +103,10 @@ class UpdateLine(relay.ClientIDMutation):
             line_instance.number = number
             line_instance.folio = Folio.objects.get(pk=from_global_id(folio.id)[1])
             # check if comment is available
-            if input.get('comment', None):
-                line_instance.comment = comment
+
+            if input.get('comment'):
+                comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
+                line_instance.comment = comment_obj
             # check if previous token available
             if input.get('previous', None):
                 # check if previous token with assigned id does not exist
@@ -110,7 +114,7 @@ class UpdateLine(relay.ClientIDMutation):
                     # assign previous token to line
                     line_instance.previous = Line.objects.get(pk=from_global_id(input['previous']['id'])[1])
 
-                line_instance.save()
+            line_instance.save()
             return cls(line=line_instance, success=True)
         else:
             return cls(success=False)

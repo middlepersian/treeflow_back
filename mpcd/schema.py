@@ -33,7 +33,6 @@ class Query(
         mpcd.corpus.schemas.section.Query,
         mpcd.corpus.schemas.sentence.Query,
         # Dict Queries
-        mpcd.dict.schemas.definition.Query,
         mpcd.dict.schemas.dictionary.Query,
         mpcd.dict.schemas.lemma.Query,
         mpcd.dict.schemas.language_enum.Query,
@@ -69,7 +68,6 @@ class Mutation(
         mpcd.corpus.schemas.text.Mutation,
         mpcd.corpus.schemas.token.Mutation,
         # Dict Mutations
-        mpcd.dict.schemas.definition.Mutation,
         mpcd.dict.schemas.dictionary.Mutation,
         mpcd.dict.schemas.lemma.Mutation,
         mpcd.dict.schemas.meaning.Mutation,

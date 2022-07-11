@@ -25,10 +25,6 @@ class Codices(Enum):
     TD2 = 'TD2'
     TD4a = 'TD4a'
 
-    @property
-    def description(self):
-        return self.value
-
 
 # Query
 class Query(ObjectType):

@@ -26,20 +26,10 @@ class DependencyEnum(Enum):
     oblique_nominal = 'obl'
     root = 'root'
 
-    @property
-    def description(self):
-        return self.value
-
-
 
 class Producer(Enum):
     manual = 1
     computational = 2
-
-    @property
-    def description(self):
-        return self.value
-
 
 
 class Query(ObjectType):

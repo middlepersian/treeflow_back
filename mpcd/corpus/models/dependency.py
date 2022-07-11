@@ -9,6 +9,8 @@ class Dependency(models.Model):
     rel = models.CharField(max_length=9)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py
     producer = models.SmallIntegerField(null=True, blank=True)
+    comment = models.ForeignKey('Comment', on_delete=models.SET_NULL, null=True, blank=True)
+
     history = HistoricalRecords()
 
 

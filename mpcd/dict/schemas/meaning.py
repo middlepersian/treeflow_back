@@ -14,8 +14,7 @@ class MeaningNode(DjangoObjectType):
     class Meta:
         model = Meaning
         filter_fields = {'meaning': ['exact', 'icontains', 'istartswith'],
-                         'language': ['exact', 'icontains', 'istartswith'],
-                         'comment': ['icontains', 'istartswith']}
+                         'language': ['exact', 'icontains', 'istartswith']}
         interfaces = (relay.Node,)
 
 
@@ -23,7 +22,6 @@ class MeaningInput(InputObjectType):
     meaning = String(required=True)
     language = Language(required=True)
     related_meanings = List(ID, required=True)
-    comment = String(required=False)
 
 
 # Queries
@@ -41,7 +39,6 @@ class CreateMeaning(relay.ClientIDMutation):
         meaning = String(required=True)
         language = Language(required=True)
         related_meanings = List(ID, required=True)
-        comment = String(required=False)
 
     meaning = Field(MeaningNode)
     success = Boolean()
