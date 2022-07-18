@@ -22,7 +22,7 @@ class Token(models.Model):
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
 
-    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, blank=True)
+    comments = models.ManyToManyField(Comment, blank=True, related_name="token_comments")
 
     avestan = models.TextField(null=True, blank=True)
 

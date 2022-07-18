@@ -2,6 +2,7 @@ from .author import Author
 from .bibliography import BibEntry
 from .codex import Codex
 from .codex_part import CodexPart
+from .comment_classification import CommentClassification
 from .comment_category import CommentCategory
 from .comment import Comment
 from .folio import Folio
@@ -19,6 +20,7 @@ from .text import Text
 from .edition import Edition
 from .section_type import SectionType
 from .section import Section
+from .token_comment import TokenComment
 #from .codex_token import CodexToken
 
 # TODO add create date for all models

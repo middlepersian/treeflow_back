@@ -24,7 +24,6 @@ class LemmaInput(InputObjectType):
     language = Language(required=True)
     related_lemmas = List(ID, required=True)
     related_meanings = List(ID, required=True)
-    comment = String(required=False)
 
 
 # Queries
@@ -45,7 +44,6 @@ class CreateLemma(relay.ClientIDMutation):
         language = Language(required=True)
         related_lemmas = List(ID, required=True)
         related_meanings = List(ID, required=True)
-        comment = String(required=False)
 
     lemma = Field(LemmaNode)
     success = Boolean()
@@ -69,10 +67,6 @@ class CreateLemma(relay.ClientIDMutation):
             meaning_rel = Meaning.objects.get(id=from_global_id(related_meaning)[1])
             lemma.related_meanings.add(meaning_rel)
 
-        # comment
-        if input.get('comment', None):
-            lemma.comment = input.get('comment')
-
         lemma.save()
 
         return cls(lemma=lemma, success=True)
@@ -84,7 +78,7 @@ class UpdateLemma(relay.ClientIDMutation):
         language = Language(required=True)
         related_lemmas = List(ID, required=True)
         related_meanings = List(ID, required=True)
-        comment = String(required=False)
+        comments = List(ID, required=True)
 
     errors = List(String)
     lemma = Field(LemmaNode)
@@ -114,9 +108,12 @@ class UpdateLemma(relay.ClientIDMutation):
                     id=from_global_id(related_meaning)[1])
                 lemma.related_meanings.add(meaning_rel)
 
-            # comment
-            if input.get('comment', None):
-                lemma.comment = input.get('comment')
+            # comments
+            # clear up
+            lemma.comments.clear()
+            for comment in input.get('comments'):
+                comment_rel = Comment.objects.get(id=from_global_id(comment)[1])
+                lemma.comments.add(comment_rel)
 
             lemma.save()
 
@@ -176,6 +173,7 @@ class AddRelatedLemmaToLemma (relay.ClientIDMutation):
         else:
             return cls(success=False, errors=["Related Lemma ID does not exists"], source=None, related=None)
 
+
 class RemoveRelatedLemmaFromLemma(relay.ClientIDMutation):
     class Input:
         source_id = ID(required=True)
@@ -207,7 +205,6 @@ class RemoveRelatedLemmaFromLemma(relay.ClientIDMutation):
 
         else:
             return cls(success=False, errors=["Related Lemma ID does not exists"], source=None, related=None)
-
 
 
 class AddRelatedMeaningToLemma(relay.ClientIDMutation):
@@ -272,17 +269,12 @@ class RemoveRelatedMeaningFromLemma(relay.ClientIDMutation):
         return cls(lemma=lemma_instance, meaning=meaning_instance, success=True, errors=None)
 
 
-
-
-
 class Mutation(ObjectType):
-    ## TODO add_related_lemma_to_lemma
+    # TODO add_related_lemma_to_lemma
     add_related_lemma_to_lemma = AddRelatedLemmaToLemma.Field()
     remove_related_lemma_from_lemma = RemoveRelatedLemmaFromLemma.Field()
-    add_related_meaning_to_lemma = AddRelatedMeaningToLemma.Field()  
+    add_related_meaning_to_lemma = AddRelatedMeaningToLemma.Field()
     remove_related_meaning_from = RemoveRelatedMeaningFromLemma.Field()
     create_lemma = CreateLemma.Field()
     update_lemma = UpdateLemma.Field()
     delete_lemma = DeleteLemma.Field()
-
-

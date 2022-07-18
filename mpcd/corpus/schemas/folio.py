@@ -1,4 +1,3 @@
-import re
 from graphene import relay, ObjectType, String, Field, ID, Boolean, InputObjectType, List, Float
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -19,8 +18,7 @@ class FolioNode(DjangoObjectType):
 
     class Meta:
         model = Folio
-        filter_fields = {'identifier': ['exact', 'icontains', 'istartswith'],
-                         'comment__id': ['exact']}
+        filter_fields = {'identifier': ['exact', 'icontains', 'istartswith']}
 
         interfaces = (relay.Node, )
 
@@ -29,7 +27,6 @@ class FolioInput(InputObjectType):
     identifier = String(required=True)
     facsimile = ID(required=True)
     number = Float(required=True)
-    comment = ID(required=False)
     previous = ID(required=False)
 
 
@@ -50,7 +47,6 @@ class CreateFolio(relay.ClientIDMutation):
         identifier = String(required=True)
         facsimile = ID(required=True)
         number = Float(required=True)
-        comment = ID(required=False)
         previous = ID(required=False)
 
     folio = Field(FolioNode)
@@ -71,10 +67,6 @@ class CreateFolio(relay.ClientIDMutation):
         folio_instance, folio_created = Folio.objects.get_or_create(identifier=input.get(
             'identifier'), facsimile=facsimile_instance, number=input.get('number'))
 
-        if input.get('comment'):
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
-            folio_instance.comment = comment_obj
-
         if input.get('previous', None):
             if Folio.objects.filter(pk=from_global_id(input['previous'])[1]).exists():
                 folio_instance.previous = Folio.objects.get(pk=from_global_id(input['previous'])[1])
@@ -90,7 +82,7 @@ class UpdateFolio(relay.ClientIDMutation):
         identifier = String(required=True)
         facsimile = ID(required=True)
         number = Float(required=True)
-        comment = String(required=False)
+        comments = List(ID, required=True)
         previous = ID(required=False)
 
     folio = Field(FolioNode)
@@ -117,9 +109,11 @@ class UpdateFolio(relay.ClientIDMutation):
 
         folio_instance.number = input.get('number')
 
-        if input.get('comment'):
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
-            folio_instance.comment = comment_obj
+        # update comments
+        folio_instance.comments.clear()
+        for comment_id in input.get('comments'):
+            if Comment.objects.filter(pk=from_global_id(comment_id)[1]).exists():
+                folio_instance.comments.add(Comment.objects.get(pk=from_global_id(comment_id)[1]))
 
         if input.get('previous', None):
             if Folio.objects.filter(pk=from_global_id(input['previous']['id'])[1]).exists():

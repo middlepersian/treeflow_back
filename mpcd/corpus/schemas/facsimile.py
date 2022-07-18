@@ -77,6 +77,7 @@ class UpdateFacsimile(relay.ClientIDMutation):
         id = ID(required=True)
         bib_entry = ID(required=True)
         codex_part = ID(required=True)
+        comments = List(ID, required=True)
 
     facsimile = Field(FacsimileNode)
     success = Boolean()
@@ -104,6 +105,12 @@ class UpdateFacsimile(relay.ClientIDMutation):
             facsimile_instance.codex_part = codex_part
         else:
             return cls(success=False, errors=['codex_part ID does not exist'])
+
+        # update comments
+        facsimile_instance.comments.clear()
+        for comment in input.get('comments'):
+            local_comment = Comment.objects.get(pk=from_global_id(comment)[1])
+            facsimile_instance.comments.add(local_comment)
 
         facsimile_instance.save()
 

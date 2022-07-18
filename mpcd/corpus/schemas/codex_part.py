@@ -62,8 +62,9 @@ class CreateCodexPart(relay.ClientIDMutation):
 
         if Codex.objects.filter(pk=from_global_id(input.get('codex'))[1]).exists():
             codex = Codex.objects.get(pk=from_global_id(input.get('codex'))[1])
-            codex_part_instance, codex_part_created = CodexPart.objects.get_or_create(codex=codex, slug=to_nfc(input.get('slug')))
-        
+            codex_part_instance, codex_part_created = CodexPart.objects.get_or_create(
+                codex=codex, slug=to_nfc(input.get('slug')))
+
         else:
             return cls(success=False, errors=['Codex ID does not exist'])
 
@@ -74,6 +75,7 @@ class UpdateCodexPart(relay.ClientIDMutation):
     class Input:
         id = ID(required=True)
         codex = ID(required=True)
+        comments = List(ID, required=True)
         slug = String(required=True)
 
     codex_part = Field(CodexPartNode)
@@ -101,6 +103,12 @@ class UpdateCodexPart(relay.ClientIDMutation):
        # update slug
         codex_part.slug = to_nfc(input.get('slug'))
 
+        # update comments
+        codex_part.comments.clear()
+        for comment in input.get('comments'):
+            if Comment.objects.filter(pk=from_global_id(comment)[1]).exists():
+                codex_part.comments.add(Comment.objects.get(pk=from_global_id(comment)[1]))
+
         codex_part.save()
         return cls(codex_part=codex_part, success=True)
 
@@ -122,6 +130,7 @@ class DeleteCodexPart(relay.ClientIDMutation):
             codex_part = CodexPart.objects.get(pk=from_global_id(input.get('codex_part'))[1])
         else:
             return cls(success=False, errors=['codex_part does not exist'])
+    
 
         codex_part.delete()
         return cls(codex_part=codex_part, success=True)

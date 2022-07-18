@@ -3,6 +3,7 @@ from .bibliography import BibEntryNode, BibEntryInput
 from .codex import CodexNode, CodexInput
 from .codex_enum import Codices
 from .codex_part import CodexPartNode, CodexPartInput
+from .comment import CommentNode, CommentInput
 from .corpus import CorpusNode, CorpusInput
 from .dependency import DependencyNode, DependencyInput
 from .facsimile import FacsimileNode, FacsimileInput

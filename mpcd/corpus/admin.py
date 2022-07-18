@@ -8,9 +8,9 @@ from .models import Codex, Folio, Line, Edition, TextSigle, \
 
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ["transcription", "transliteration", "pos", "comment", "previous"]
+    list_display = ["transcription", "transliteration", "pos", "previous"]
     history_list_display = ["pos"]
-    search_fields = ['transcription', 'comment']
+    search_fields = ['transcription']
 
 
 admin.site.register(Author)

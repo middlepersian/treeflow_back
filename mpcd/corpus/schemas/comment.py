@@ -4,9 +4,8 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
-
+from django.contrib.auth.models import User
 from mpcd.corpus.models import Comment
-from mpcd.corpus.schemas.comment_category_enum import CommentCategories
 
 # import the logging library
 import logging
@@ -17,13 +16,15 @@ logger = logging.getLogger(__name__)
 class CommentNode(DjangoObjectType):
     class Meta:
         model = Comment
-        filter_fields = ['text']
+        filter_fields = {
+            'user__id': ['exact'],
+            'text': ['icontains']
+        }
         interfaces = (relay.Node, )
 
 
 class CommentInput(InputObjectType):
-    user = ID
-    categories = List(CommentCategories, required=false)
+    user = ID(required=False)
     text = String(required=True)
 
 
@@ -46,8 +47,30 @@ class Query(ObjectType):
 
 class CreateComment(relay.ClientIDMutation):
     class Input:
-        user = ID
-        categories = List(CommentCategories, required=false)
+        user = ID(required=False)
+        text = String(required=True)
+
+    comment = Field(Comment)
+    errors = List(String)
+    success = Boolean()
+
+    @login_required
+    def mutate_and_get_payload(root, info, **input):
+        comment_obj = Comment.objects.create(text=input.get('text'))
+        if input.get('user', None):
+            user_id = from_global_id(input.get('user'))[1]
+            if User.objects.filter(pk=user_id).exists():
+                comment_obj.user = User.objects.get(pk=user_id)
+
+        comment_obj.save()
+        return cls(comment=comment_obj, success=True, errors=None)
+
+
+class UpdateComment(relay.ClientIDMutation):
+
+    class Input:
+        id = ID(required=True)
+        user = ID(required=True)
         text = String(required=True)
 
     comment = Field(CommentNode)
@@ -55,6 +78,41 @@ class CreateComment(relay.ClientIDMutation):
     success = Boolean()
 
     @login_required
-    def mutate_and_get_payload(root, info, user, categories, text):
-        comment_obj, comment_created = Comment.objects.getr_ot_create(user=user, categories=categories, text=text)
-        return cls(comment=comment_obj, success=True, errors=None)
+    def mutate_and_get_payload(root, info, **input):
+        if Comment.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
+            comment_obj = Comment.objects.get(pk=from_global_id(input.get('id'))[1])
+
+            comment_obj.text = text
+
+            if User.objects.filter(pk=from_global_id(input.get('user'))[1]).exists():
+                comment_obj.user = User.objects.get(pk=from_global_id(input.get('user'))[1])
+
+            comment_obj.save()
+            return cls(comment=comment_obj, success=True, errors=None)
+        else:
+            return cls(comment=None, success=False, errors=['Comment ID not found'])
+
+
+class DeleteComment(relay.ClientIDMutation):
+
+    class Input:
+        id = ID
+
+    comment = Field(CommentNode)
+    errors = List(String)
+    success = Boolean()
+
+    @login_required
+    def mutate_and_get_payload(root, info, id):
+        if Comment.objects.filter(pk=from_global_id(id)[1]).exists():
+            comment_obj = Comment.objects.get(pk=from_global_id(id)[1])
+            comment_obj.delete()
+            return cls(comment=comment_obj, success=True, errors=None)
+        else:
+            return cls(comment=None, success=False, errors=['Comment ID not found'])
+
+
+class Mutation:
+    create_comment = CreateComment.Field()
+    update_comment = UpdateComment.Field()
+    delete_comment = DeleteComment.Field()

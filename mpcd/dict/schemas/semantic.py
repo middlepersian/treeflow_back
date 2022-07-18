@@ -23,7 +23,7 @@ class SemanticNode(DjangoObjectType):
     class Meta:
         model = Semantic
         filter_fields = {
-            'comment__id': ['exact']}
+            'comments__id': ['exact']}
         interfaces = (relay.Node,)
 
 
@@ -31,7 +31,7 @@ class SemanticInput(InputObjectType):
     lemmas = List(LemmaInput, required=True)
     meanings = List(MeaningInput, required=True)
     term_techs = List(TermTechInput, required=True)
-    comment = ID(required=False)
+    
 
 # Queries
 
@@ -52,7 +52,6 @@ class CreateSemantic(relay.ClientIDMutation):
         lemmas = List(LemmaInput, required=True)
         meanings = List(MeaningInput, required=True)
         term_techs = List(TermTechInput, required=True)
-        comment = ID(required=False)
 
     semantic = Field(SemanticNode)
     success = Boolean()
@@ -82,13 +81,6 @@ class CreateSemantic(relay.ClientIDMutation):
             term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
             semantic.term_techs.add(term_tech_obj)
 
-        # Comment
-
-        # check if comment available
-        if input.get('comment'):
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
-            semantic.comment = comment_obj
-
         semantic.save()
         return cls(semantic=semantic, success=True, errors=None)
 
@@ -99,7 +91,7 @@ class UpdateSemantic(relay.ClientIDMutation):
         lemmas = List(LemmaInput, required=True)
         meanings = List(MeaningInput, required=True)
         term_techs = List(TermTechInput, required=True)
-        comment = ID(required=False)
+        comment = List(ID, required=True)
 
     semantic = Field(SemanticNode)
     success = Boolean()
@@ -135,11 +127,14 @@ class UpdateSemantic(relay.ClientIDMutation):
             term_tech_obj, term_tech_created = TermTech.objects.get_or_create(category=term_tech_input['category'])
             if term_tech_obj:
                 semantic_obj.term_techs.add(term_tech_obj)
-        # Comment
-        # check if comment available
-        if input.get('comment'):
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
-            semantic.comment = comment_obj
+
+        # Comments
+        # clear all comments
+        semantic_obj.comments.clear()
+        for comment_id in input['comment']:
+            comment_obj = Comment.objects.get(pk=from_global_id(comment_id)[1])
+            if comment_obj:
+                semantic_obj.comments.add(comment_obj)
 
         semantic_obj.save()
         return cls(semantic=semantic_obj, success=True, errors=None)

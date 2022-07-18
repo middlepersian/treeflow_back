@@ -1,10 +1,10 @@
 from mpcd.corpus.schemas.dependency_enum import DependencyEnum
-from graphene import relay, ObjectType, Field, ID, Boolean, InputObjectType
+from graphene import relay, ObjectType, Field, ID, Boolean, InputObjectType, List
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
 
-from mpcd.corpus.models import Dependency, Token
+from mpcd.corpus.models import Dependency, Token, Comment
 from graphql_jwt.decorators import login_required
 
 
@@ -73,6 +73,7 @@ class UpdateDependency(relay.ClientIDMutation):
         id = ID(required=True)
         head = ID(required=True)
         rel = DependencyEnum(required=True)
+        comments = List(ID, required=True)
 
     dependency = Field(DependencyNode)
     success = Boolean()
@@ -87,6 +88,13 @@ class UpdateDependency(relay.ClientIDMutation):
             local_head = Token.objects.get(pk=from_global_id(head)[1])
             dependency_instance.head = local_head
             dependency_instance.rel = rel
+
+            #update comments
+            dependency_instance.comments.clear()
+            for comment in comments:
+                local_comment = Comment.objects.get(pk=from_global_id(comment)[1])
+                dependency_instance.comments.add(local_comment)
+
             dependency_instance.save()
             return cls(dependency=dependency_instance, success=True)
 

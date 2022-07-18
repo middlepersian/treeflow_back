@@ -53,9 +53,6 @@ class CreateMeaning(relay.ClientIDMutation):
             meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
             meaning.related_meanings.add(meaning_rel)
 
-        if input.get('comment'):
-            meaning.comment = input.get('comment')
-
         meaning.save()
 
         return cls(meaning=meaning, success=True)
@@ -66,6 +63,8 @@ class UpdateMeaning(relay.ClientIDMutation):
         id = ID(required=True)
         meaning = String(required=True)
         language = Language(required=True)
+        comments = List(ID, required=True)
+        related_meanings = List(ID, required=True)
 
     errors = List(String)
     meaning = Field(MeaningNode)
@@ -78,13 +77,18 @@ class UpdateMeaning(relay.ClientIDMutation):
             meaning = Meaning.objects.get(id=from_global_id(input.get('id'))[1])
             meaning.meaning = to_nfc(input.get('meaning'))
             meaning.language = to_nfc(input.get('language'))
-            meaning.comment = input.get('comment')
-            if input.get('related_meanings'):
-                meaning.related_meanings.clear()
-                for related_meaning in input.get('related_meanings'):
-                    meaning_rel, meaning_rel_created = Meaning.objects.get(
-                        id=from_global_id(related_meaning.get('id'))[1])
-                    meaning.related_meanings.add(meaning_rel)
+            # related_meanings
+            meaning.related_meanings.clear()
+            for related_meaning in input.get('related_meanings'):
+                meaning_rel, meaning_rel_created = Meaning.objects.get(
+                    id=from_global_id(related_meaning.get('id'))[1])
+                meaning.related_meanings.add(meaning_rel)
+            # comments
+            meaning.comments.clear()
+            for comment in input.get('comments'):
+                comment_rel, comment_rel_created = Comment.objects.get(id=from_global_id(comment)[1])
+                meaning.comments.add(comment_rel)
+
             meaning.save()
             return cls(meaning=meaning, success=True)
         else:

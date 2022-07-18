@@ -10,7 +10,7 @@ class Meaning(models.Model):
     language = models.CharField(max_length=10, blank=True, null=True)
     # relationships
     related_meanings = models.ManyToManyField('self', blank=True)
-    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, blank=True)
+    comments = models.ManyToManyField(Comment, blank=True, related_name='meaning_comments')
     history = HistoricalRecords()
 
     class Meta:

@@ -16,7 +16,7 @@ class Sentence(models.Model):
     tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
 
     translations = models.ManyToManyField('dict.Meaning', related_name='sentence_translations')
-    comment = models.ForeignKey('corpus.Comment', on_delete=models.SET_NULL, null=True, blank=True)
+    comments = models.ManyToManyField('Comment', blank=True, related_name = 'sentence_comments')
 
     number = models.FloatField(null=True, blank=True)
     previous = models.OneToOneField('self',

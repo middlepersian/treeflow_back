@@ -30,9 +30,7 @@ class TokenNode(DjangoObjectType):
         filter_fields = {'transcription': ['exact', 'icontains', 'istartswith'],
                          'transliteration': ['exact', 'icontains', 'istartswith'],
                          'line': ['exact'],
-                         'text__id': ['exact'],
-                         'comment__id': ['exact'],
-                         }
+                         'text__id': ['exact']}
         interfaces = (relay.Node,)
 
 
@@ -47,7 +45,7 @@ class TokenInput(InputObjectType):
     pos = POS(required=False)
     morphological_annotation = List(MorphologicalAnnotationInput, required=True)
     syntactic_annotation = List(DependencyInput, required=True)
-    comment = ID(required=False)
+    comments = List(ID, required=True)
     avestan = String(required=False)
     previous = ID(required=False)
     line = ID(required=False)
@@ -80,7 +78,7 @@ class CreateToken(relay.ClientIDMutation):
         pos = POS(required=False)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
-        comment = ID(required=False)
+        comments = List(ID, required=True)
         avestan = String(required=False)
         previous = ID(required=False)
         line = ID(required=False)
@@ -130,10 +128,10 @@ class CreateToken(relay.ClientIDMutation):
             dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
             token.syntactic_annotation.add(dep_obj)
 
-        # check if comment available
-        if input.get('comment'):
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
-            token.comment = comment_obj
+        # comments
+        for comment in input['comments']:
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(comment)[1])
+            token.comments.add(comment_obj)
 
         # check if avestan available
         if input.get('avestan', None):
@@ -179,7 +177,7 @@ class UpdateToken(relay.ClientIDMutation):
         pos = POS(required=False)
         morphological_annotation = List(MorphologicalAnnotationInput, required=True)
         syntactic_annotation = List(DependencyInput, required=True)
-        comment = ID(required=False)
+        comments = List(ID, required=True)
         uncertain = List(String, required=True)
         to_discuss = List(String, required=True)
         new_suggestion = List(String, required=True)
@@ -239,10 +237,10 @@ class UpdateToken(relay.ClientIDMutation):
                 dep_obj, dep_created = Dependency.objects.get_or_create(head=annotation['head'], rel=annotation['rel'])
                 token.syntactic_annotation.add(dep_obj)
 
-        # check if comment available
-        if input.get('comment'):
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(input['comment'])[1])
-            token.comment = comment_obj
+        # comments
+        for comment in input['comments']:
+            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(comment)[1])
+            token.comments.add(comment_obj)
 
         # check if avestan available
         if input.get('avestan', None):

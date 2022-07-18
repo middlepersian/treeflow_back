@@ -1,7 +1,7 @@
 from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputObjectType
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from mpcd.corpus.models import Codex, BibEntry
+from mpcd.corpus.models import Codex, BibEntry, Comment
 from mpcd.corpus.schemas.codex_enum import Codices
 from graphql_relay import from_global_id
 
@@ -67,6 +67,7 @@ class UpdateCodex(relay.ClientIDMutation):
         id = ID(required=True)
         sigle = Codices(required=True)
         bib_entry = ID(required=True)
+        comments = List(ID, required=True)
 
     codex = Field(CodexNode)
     success = Boolean()
@@ -85,6 +86,12 @@ class UpdateCodex(relay.ClientIDMutation):
                 codex_instance.bib_entry = bib_entry_instance
             else:
                 return cls(success=False, errors=['BibEntry ID does not exist'])
+
+            # update comments
+            codex_instance.comments.clear()
+            for comment in input.get('comments'):
+                if Comment.objects.filter(pk=from_global_id(comment)[1]).exists():
+                    codex_instance.comments.add(Comment.objects.get(pk=from_global_id(comment)[1]))
 
             codex_instance.save()
 

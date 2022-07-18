@@ -5,7 +5,7 @@ from .source import Source
 
 class Codex(Source):
     sigle = models.CharField(max_length=5, unique=True)
-    comment = models.ForeignKey('Comment', on_delete=models.SET_NULL, null=True, blank=True)
+    comments = models.ManyToManyField('Comment', blank=True, related_name = 'codex_comments')
 
     history = HistoricalRecords()
 

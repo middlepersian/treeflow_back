@@ -6,11 +6,6 @@ from mpcd.corpus.models import CommentCategory
 from .comment_category_enum import CommentCategories
 from graphql_jwt.decorators import login_required
 
-# import the logging library
-import logging
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
-
 
 class CommentCategoryNode(DjangoObjectType):
     class Meta:
@@ -35,3 +30,21 @@ class Query(ObjectType):
     def resolve_comment_category(self, info, id):
         id = from_global_id(id)[1]
         return CommentCategory.objects.get(pk=id)
+
+
+class CreateCommentCategory(relay.ClientIDMutation):
+    class Input:
+        category = CommentCategories(required=True)
+
+    comment_category = Field(CommentCategoryNode)
+    success = Boolean()
+    errors = List(String)
+
+    @login_required
+    def mutate_and_get_payload(root, info, **input):
+        comment_category_obj, comment_category_created = CommentCategory.get_or_create(category=input.get('category'))
+        return cls(comment_category=comment_category_obj, success=True, errors=None)
+
+
+class Mutation(ObjectType):
+    create_comment_category = CreateCommentCategory.Field()

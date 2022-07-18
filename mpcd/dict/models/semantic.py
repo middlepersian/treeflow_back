@@ -16,7 +16,7 @@ class Semantic(models.Model):
     # Multimlingual setup: there are multiple meanings in different languages for the same semantic
     meanings = models.ManyToManyField(Meaning, blank=True, related_name='semantic_meanings')
     term_techs = models.ManyToManyField(TermTech, blank=True, related_name='semantic_term_techs')
-    comment = models.ForeignKey(Comment, on_delete=models.SET_NULL, null=True, blank=True)
+    comments = models.ManyToManyField(Comment, blank=True, related_name='semantic_comments')
     related_semantics = models.ManyToManyField('self', blank=True)
     history = HistoricalRecords()
     # TODO add pointers to taxonomy
