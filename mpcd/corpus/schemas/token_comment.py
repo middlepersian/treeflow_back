@@ -8,12 +8,6 @@ from graphql_jwt.decorators import login_required
 from mpcd.corpus.models import TokenComment
 from mpcd.corpus.schemas.comment_category_enum import CommentCategories
 
-# import the logging library
-import logging
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
-
-
 class TokenCommentNode(DjangoObjectType):
     class Meta:
         model = TokenComment
@@ -36,16 +30,16 @@ class TokenCommentInput(InputObjectType):
 
 
 class Query(ObjectType):
-    comment = relay.Node.Field(TokenCommentNode)
-    comments = DjangoFilterConnectionField(TokenCommentNode)
+    token_comment = relay.Node.Field(TokenCommentNode)
+    all_token_comments = DjangoFilterConnectionField(TokenCommentNode)
 
     @login_required
-    def resolve_comments(self, info, **kwargs):
+    def resolve_all_token_comments(self, info, **kwargs):
         qs = TokenComment.objects.all()
         return gql_optimizer.query(qs, info)
 
     @login_required
-    def resolve_comment(self, info, id):
+    def resolve_token_comment(self, info, id):
         id = from_global_id(id)[1]
         return TokenComment.objects.get(pk=id)
 
@@ -55,27 +49,26 @@ class Query(ObjectType):
 class CreateTokenComment(relay.ClientIDMutation):
     class Input:
         user = ID
-        uncertain = List(ID, required=True)
-        to_discuss = List(ID, required=True)
-        new_suggestion = List(ID, required=True)
-        text = String(required=True)
+        uncertain = List(String, required=True)
+        to_discuss = List(String, required=True)
+        new_suggestion = List(String, required=True)
+        text = String(required=False)
 
-    comment = Field(TokenComment)
+    comment = Field(TokenCommentNode)
     errors = List(String)
     success = Boolean()
 
+    @classmethod
     @login_required
-    def mutate_and_get_payload(root, info, **input):
-        comment_obj, comment_created = TokenComment.objects.create(user=input.get('user'), text=input.get('text'))
-        for unc in input.get('uncertain'):
-            if CommentCategory.objects.filter(pk=from_global_id(unc)[1]).exists():
-                comment_obj.uncertain.add(CommentCategory.objects.get(pk=from_global_id(unc)[1]))
-        for td in input.get('to_discuss'):
-            if CommentCategory.objects.filter(pk=from_global_id(td)[1]).exists():
-                comment_obj.to_discuss.add(CommentCategory.objects.get(pk=from_global_id(td)[1]))
-        for ns in input.get('new_suggestion'):
-            if CommentCategory.objects.filter(pk=from_global_id(ns)[1]).exists():
-                comment_obj.new_suggestion.add(CommentCategory.objects.get(pk=from_global_id(ns)[1]))
+    def mutate_and_get_payload(cls, root, info, **input):
+        comment_obj = TokenComment.objects.create(user=input.get('user'), text=input.get('text',  None))
+
+        if input.get('uncertain'):
+            comment_obj.uncertain = input.get('uncertain')
+        if input.get('to_discuss'):
+            comment_obj.to_discuss = input.get('to_discuss')
+        if input.get('new_suggestion'):
+            comment_obj.new_suggestion = input.get('new_suggestion')
 
         comment_obj.save()
         return cls(comment=comment_obj, success=True, errors=None)
@@ -86,30 +79,31 @@ class UpdateTokenComment(relay.ClientIDMutation):
     class Input:
         id = ID
         user = ID
-        uncertain = List(ID, required=True)
-        to_discuss = List(ID, required=True)
-        new_suggestion = List(ID, required=True)
+        uncertain = List(String, required=True)
+        to_discuss = List(String, required=True)
+        new_suggestion = List(String, required=True)
         text = String(required=True)
 
-    comment = Field(CommentNode)
+    comment = Field(TokenCommentNode)
     errors = List(String)
     success = Boolean()
 
+    @classmethod
     @login_required
-    def mutate_and_get_payload(root, info, **input):
+    def mutate_and_get_payload(cls, root, info, **input):
         if TokenComment.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
             comment_obj = TokenComment.objects.get(pk=from_global_id(input.get('id'))[1])
             comment_obj.user = user
             comment_obj.text = text
-            for unc in input.get('uncertain'):
-                if CommentCategory.objects.filter(pk=from_global_id(unc)[1]).exists():
-                    comment_obj.uncertain.add(CommentCategory.objects.get(pk=from_global_id(unc)[1]))
-            for td in input.get('to_discuss'):
-                if CommentCategory.objects.filter(pk=from_global_id(td)[1]).exists():
-                    comment_obj.to_discuss.add(CommentCategory.objects.get(pk=from_global_id(td)[1]))
-            for ns in input.get('new_suggestion'):
-                if CommentCategory.objects.filter(pk=from_global_id(ns)[1]).exists():
-                    comment_obj.new_suggestion.add(CommentCategory.objects.get(pk=from_global_id(ns)[1]))
+
+            # Update the comment categories
+            if input.get('uncertain'):
+                comment_obj.uncertain = input.get('uncertain')
+            if input.get('to_discuss'):
+                comment_obj.to_discuss = input.get('to_discuss')
+            if input.get('new_suggestion'):
+                comment_obj.new_suggestion = input.get('new_suggestion')
+
             comment_obj.save()
             return cls(comment=comment_obj, success=True, errors=None)
         else:
@@ -125,8 +119,9 @@ class DeleteTokenComment(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
+    @classmethod
     @login_required
-    def mutate_and_get_payload(root, info, id):
+    def mutate_and_get_payload(cls, root, info, id):
         if TokenComment.objects.filter(pk=from_global_id(id)[1]).exists():
             comment_obj = TokenComment.objects.get(pk=from_global_id(id)[1])
             comment_obj.delete()

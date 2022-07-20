@@ -2,7 +2,7 @@ from graphene import relay, ObjectType, String, Field, ID, Boolean, List, InputO
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_relay import from_global_id
-from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line, CommentCategory
+from mpcd.corpus.models import Token, MorphologicalAnnotation, Dependency, Text, Line, TokenComment
 from mpcd.dict.models import Lemma, Meaning
 from mpcd.corpus.schemas import MorphologicalAnnotationInput
 from mpcd.corpus.schemas import DependencyInput
@@ -102,7 +102,7 @@ class CreateToken(relay.ClientIDMutation):
 
         # create Token with transcription, transliteration, text, number and language
         token, token_obj = Token.objects.get_or_create(
-            transcription=to_nfc(input['transcription']), transliteration=to_nfc(input['transliteration']), text=text, number=float(input['number']), language=input['language'])
+            transcription=to_nfc(input['transcription']), transliteration=to_nfc(input['transliteration']), text=text, number=float(input['number']), language=input['language'].value)
 
         # get and add the lemmas
         for lemma in input['lemmas']:
@@ -115,7 +115,8 @@ class CreateToken(relay.ClientIDMutation):
                 token.meanings.add(Meaning.objects.get(pk=from_global_id(meaning)[1]))
 
         # get POS
-        token.pos = input.get('pos')
+        if input.get('pos', None):
+            token.pos = input['pos'].value
 
        # morphological annotations
         for annotation in input['morphological_annotation']:
@@ -130,7 +131,7 @@ class CreateToken(relay.ClientIDMutation):
 
         # comments
         for comment in input['comments']:
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(comment)[1])
+            comment_obj = TokenComment.objects.get(pk=from_global_id(comment)[1])
             token.comments.add(comment_obj)
 
         # check if avestan available
@@ -206,7 +207,7 @@ class UpdateToken(relay.ClientIDMutation):
         # update transliteration
         token.transliteration = to_nfc(input['transliteration'])
         # update language
-        token.language = input.get('language')
+        token.language = input.get('language').value
         # update number
         token.number = float(input.get('number'))
 
@@ -221,7 +222,8 @@ class UpdateToken(relay.ClientIDMutation):
                 token.meanings.add(Meaning.objects.get(pk=from_global_id(meaning)[1]))
 
         # set POS
-        token.pos = input.get('pos')
+        if input.get('pos', None):
+            token.pos = input['pos'].value
 
        # morphological annotations
         token.morphological_annotation.clear()
@@ -239,7 +241,7 @@ class UpdateToken(relay.ClientIDMutation):
 
         # comments
         for comment in input['comments']:
-            comment_obj, comment_created = Comment.objects.get_or_create(pk=from_global_id(comment)[1])
+            comment_obj = TokenComment.objects.get(pk=from_global_id(comment)[1])
             token.comments.add(comment_obj)
 
         # check if avestan available

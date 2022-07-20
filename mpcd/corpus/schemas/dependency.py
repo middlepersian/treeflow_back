@@ -62,7 +62,7 @@ class CreateDependency(relay.ClientIDMutation):
 
         else:
             local_head = Token.objects.get(id=from_global_id(head)[1])
-            dependency_instance = Dependency.objects.get_or_create(head=local_head, rel=rel)
+            dependency_instance = Dependency.objects.get_or_create(head=local_head, rel=rel.value)
             dependency_instance.save()
 
             return cls(dependency=dependency_instance, success=True, errors=False)
@@ -87,7 +87,7 @@ class UpdateDependency(relay.ClientIDMutation):
             # get head
             local_head = Token.objects.get(pk=from_global_id(head)[1])
             dependency_instance.head = local_head
-            dependency_instance.rel = rel
+            dependency_instance.rel = rel.value
 
             #update comments
             dependency_instance.comments.clear()

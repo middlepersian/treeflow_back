@@ -2,8 +2,6 @@ from .author import Author
 from .bibliography import BibEntry
 from .codex import Codex
 from .codex_part import CodexPart
-from .comment_classification import CommentClassification
-from .comment_category import CommentCategory
 from .comment import Comment
 from .folio import Folio
 from .facsimile import Facsimile

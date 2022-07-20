@@ -7,11 +7,6 @@ from graphql_jwt.decorators import login_required
 from django.contrib.auth.models import User
 from mpcd.corpus.models import Comment
 
-# import the logging library
-import logging
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
-
 
 class CommentNode(DjangoObjectType):
     class Meta:
@@ -30,10 +25,10 @@ class CommentInput(InputObjectType):
 
 class Query(ObjectType):
     comment = relay.Node.Field(CommentNode)
-    comments = DjangoFilterConnectionField(CommentNode)
+    all_comments = DjangoFilterConnectionField(CommentNode)
 
     @login_required
-    def resolve_comments(self, info, **kwargs):
+    def resolve_all_comments(self, info, **kwargs):
         qs = Comment.objects.all()
         return gql_optimizer.query(qs, info)
 
@@ -50,12 +45,13 @@ class CreateComment(relay.ClientIDMutation):
         user = ID(required=False)
         text = String(required=True)
 
-    comment = Field(Comment)
+    comment = Field(CommentNode)
     errors = List(String)
     success = Boolean()
 
+    @classmethod
     @login_required
-    def mutate_and_get_payload(root, info, **input):
+    def mutate_and_get_payload(cls, root, info, **input):
         comment_obj = Comment.objects.create(text=input.get('text'))
         if input.get('user', None):
             user_id = from_global_id(input.get('user'))[1]
@@ -77,8 +73,9 @@ class UpdateComment(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
+    @classmethod
     @login_required
-    def mutate_and_get_payload(root, info, **input):
+    def mutate_and_get_payload(cls, root, info, **input):
         if Comment.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
             comment_obj = Comment.objects.get(pk=from_global_id(input.get('id'))[1])
 
@@ -102,8 +99,9 @@ class DeleteComment(relay.ClientIDMutation):
     errors = List(String)
     success = Boolean()
 
+    @classmethod
     @login_required
-    def mutate_and_get_payload(root, info, id):
+    def mutate_and_get_payload(cls, root, info, id):
         if Comment.objects.filter(pk=from_global_id(id)[1]).exists():
             comment_obj = Comment.objects.get(pk=from_global_id(id)[1])
             comment_obj.delete()

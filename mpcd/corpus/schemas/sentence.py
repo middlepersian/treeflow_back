@@ -84,7 +84,7 @@ class CreateSentence(relay.ClientIDMutation):
 
             # check if translation exists, if not create it
             translation_instance, translation_created = Meaning.objects.get_or_create(
-                meaning=to_nfc(translation_input.get('meaning')), language=translation_input.get('language'))
+                meaning=to_nfc(translation_input.get('meaning')), language=translation_input.get('language').value)
 
             # add translation to sentence
             sentence_instance.translations.add(translation_instance)
@@ -150,7 +150,7 @@ class UpdateSentence(relay.ClientIDMutation):
             for translation_input in input.get('translations'):
                 # check if translation exists, if not create it
                 translation_instance, translation_created = Meaning.objects.get_or_create(
-                    meaning=to_nfc(translation_input.get('meaning')), language=translation_input.get('language'))
+                    meaning=to_nfc(translation_input.get('meaning')), language=translation_input.get('language').value)
                 # add translation to sentence
                 sentence_instance.translations.add(translation_instance)
 

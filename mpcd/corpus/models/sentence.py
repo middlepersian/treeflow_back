@@ -1,6 +1,7 @@
 #from mpcd.dict.models import Meaning
 from .text import Text
 from .token import Token
+from .comment import Comment
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
@@ -16,7 +17,7 @@ class Sentence(models.Model):
     tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
 
     translations = models.ManyToManyField('dict.Meaning', related_name='sentence_translations')
-    comments = models.ManyToManyField('Comment', blank=True, related_name = 'sentence_comments')
+    comments = models.ManyToManyField(Comment, blank=True, related_name = 'sentence_comments')
 
     number = models.FloatField(null=True, blank=True)
     previous = models.OneToOneField('self',

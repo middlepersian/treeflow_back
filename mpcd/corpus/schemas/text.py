@@ -79,7 +79,7 @@ class CreateText(relay.ClientIDMutation):
         text_instance, text_created = Text.objects.get_or_create(title=input.get('title'), corpus=corpus_instance)
 
         # set stage
-        text_instance.stage = input.get('stage')
+        text_instance.stage = input.get('stage').value
 
         # set text sigle
         if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():
@@ -146,7 +146,7 @@ class UpdateText(relay.ClientIDMutation):
         text_instance.title = input.get('title')
 
         # set stage
-        text_instance.stage = input.get('stage')
+        text_instance.stage = input.get('stage').value
 
         # set text sigle
         if TextSigle.objects.filter(pk=from_global_id(input.get('text_sigle'))[1]).exists():

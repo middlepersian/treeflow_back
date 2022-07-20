@@ -13,7 +13,6 @@ class Query(
         mpcd.corpus.schemas.codex_part.Query,
         mpcd.corpus.schemas.comment.Query,
         mpcd.corpus.schemas.comment_category_enum.Query,
-        mpcd.corpus.schemas.comment_category.Query,
         mpcd.corpus.schemas.corpus.Query,
         mpcd.corpus.schemas.dependency.Query,
         mpcd.corpus.schemas.dependency_enum.Query,
@@ -31,6 +30,7 @@ class Query(
         mpcd.corpus.schemas.text_sigle_enum.Query,
         mpcd.corpus.schemas.text.Query,
         mpcd.corpus.schemas.token.Query,
+        mpcd.corpus.schemas.token_comment.Query,
         mpcd.corpus.schemas.section.Query,
         mpcd.corpus.schemas.sentence.Query,
         # Dict Queries
@@ -53,6 +53,7 @@ class Mutation(
         mpcd.corpus.schemas.bibliography.Mutation,
         mpcd.corpus.schemas.codex.Mutation,
         mpcd.corpus.schemas.codex_part.Mutation,
+        mpcd.corpus.schemas.comment.Mutation,
         mpcd.corpus.schemas.corpus.Mutation,
         mpcd.corpus.schemas.dependency.Mutation,
         mpcd.corpus.schemas.edition.Mutation,
@@ -68,6 +69,7 @@ class Mutation(
         mpcd.corpus.schemas.text_sigle.Mutation,
         mpcd.corpus.schemas.text.Mutation,
         mpcd.corpus.schemas.token.Mutation,
+        mpcd.corpus.schemas.token_comment.Mutation,
         # Dict Mutations
         mpcd.dict.schemas.dictionary.Mutation,
         mpcd.dict.schemas.lemma.Mutation,

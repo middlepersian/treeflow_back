@@ -72,12 +72,12 @@ class Genre(Enum):
 
 # Query
 class Query(ObjectType):
-    sigle_id = Field(SigleID, description='List of Text Sigles')
+    sigle_id = SigleID()
 
-    def resolve_sigle_ids(root, info, sigle_id):
-        return sigle_id
+    def resolve_sigle_id(root, info):
+        return self['sigle_id']
 
-    genre = Field(Genre, description='List of Genres')
+    genre = Genre()
 
-    def resolve_genre(root, info, genre):
-        return genre
+    def resolve_genre(root, info):
+        return self['genre']

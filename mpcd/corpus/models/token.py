@@ -5,7 +5,7 @@ from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .text import Text
 from .line import Line
-from .comment import Comment
+from .token_comment import TokenComment
 
 
 class Token(models.Model):
@@ -22,7 +22,7 @@ class Token(models.Model):
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
 
-    comments = models.ManyToManyField(Comment, blank=True, related_name="token_comments")
+    comments = models.ManyToManyField(TokenComment, blank=True, related_name="token_comments")
 
     avestan = models.TextField(null=True, blank=True)
 

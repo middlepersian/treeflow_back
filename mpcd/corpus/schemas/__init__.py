@@ -20,6 +20,7 @@ from .section_type import SectionTypeNode, SectionTypeInput
 from .text import TextNode, TextInput
 from .stage_enum import Stage
 from .token import TokenNode, TokenInput
+from .token_comment import TokenCommentNode, TokenCommentInput
 from .section import SectionNode, SectionInput
 from .morphological_annotation_enums import ADJ, ADJNumType, ADJPoss, ADJNumber, ADJCase, ADJDegree, ADJVerbForm, ADJTense, ADJVoice, ADJPolarity
 from .morphological_annotation_enums import ADP, ADPPos
@@ -35,4 +36,3 @@ from .morphological_annotation_enums import X, XForeign
 from .pos_enum import POS
 from .dependency_enum import DependencyEnum, Producer
 from .comment_category_enum import CommentCategories
-from .comment_category import CommentCategoryNode, CommentCategoryInput

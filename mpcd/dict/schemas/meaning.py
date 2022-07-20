@@ -47,7 +47,7 @@ class CreateMeaning(relay.ClientIDMutation):
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
         meaning, meaning_created = Meaning.objects.get_or_create(
-            meaning=to_nfc(input.get('meaning')), language=to_nfc(input.get('language')))
+            meaning=to_nfc(input.get('meaning')), language=to_nfc(input.get('language').value))
 
         for related_meaning in input.get('related_meanings'):
             meaning_rel, meaning_rel_created = Meaning.objects.get(id=from_global_id(related_meaning.get('id'))[1])
@@ -76,7 +76,7 @@ class UpdateMeaning(relay.ClientIDMutation):
         if Meaning.objects.filter(id=from_global_id(input.get('id'))[1]).exists():
             meaning = Meaning.objects.get(id=from_global_id(input.get('id'))[1])
             meaning.meaning = to_nfc(input.get('meaning'))
-            meaning.language = to_nfc(input.get('language'))
+            meaning.language = to_nfc(input.get('language').value)
             # related_meanings
             meaning.related_meanings.clear()
             for related_meaning in input.get('related_meanings'):

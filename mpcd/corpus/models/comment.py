@@ -2,8 +2,6 @@ import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
 from django.conf import settings
-from .comment_category import CommentCategory
-from .comment_classification import CommentClassification
 
 
 class Comment(models.Model):

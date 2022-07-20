@@ -50,7 +50,7 @@ class CreateCodex(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        codex_instance, codex_created = Codex.objects.get_or_create(sigle=input.get('sigle'))
+        codex_instance, codex_created = Codex.objects.get_or_create(sigle=input.get('sigle').value)
         if BibEntry.objects.filter(pk=from_global_id(input.get('bib_entry'))[1]).exists():
             bib_entry_instance = BibEntry.objects.get(pk=from_global_id(input.get('bib_entry'))[1])
             codex_instance.bib_entry = bib_entry_instance
@@ -79,7 +79,7 @@ class UpdateCodex(relay.ClientIDMutation):
         if Codex.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
             codex_instance = Codex.objects.get(pk=from_global_id(input.get('id'))[1])
             # udpate sigle
-            codex_instance.sigle = input.get('sigle')
+            codex_instance.sigle = input.get('sigle').value
             # update bib_entry
             if BibEntry.objects.filter(pk=from_global_id(input.get('bib_entry'))[1]).exists():
                 bib_entry_instance = BibEntry.objects.get(pk=from_global_id(input.get('bib_entry'))[1])

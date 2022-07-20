@@ -53,7 +53,7 @@ class CreateLemma(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
 
         lemma, lemma_created = Lemma.objects.get_or_create(word=to_nfc(
-            input.get('word')), language=to_nfc(input.get('language')))
+            input.get('word')), language=to_nfc(input.get('language').value))
 
         # related_lemmas
 
@@ -91,7 +91,7 @@ class UpdateLemma(relay.ClientIDMutation):
         if Lemma.objects.filter(pk=from_global_id(input.get('id'))[1]).exists():
             lemma = Lemma.objects.get(id=from_global_id(input.get('id'))[1])
             lemma.word = to_nfc(input.get('word'))
-            lemma.language = to_nfc(input.get('language'))
+            lemma.language = to_nfc(input.get('language').value)
 
             # related_lemmas
             # clear up
