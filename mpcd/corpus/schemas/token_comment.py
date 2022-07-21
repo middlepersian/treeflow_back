@@ -8,6 +8,7 @@ from graphql_jwt.decorators import login_required
 from mpcd.corpus.models import TokenComment
 from mpcd.corpus.schemas.comment_category_enum import CommentCategories
 
+
 class TokenCommentNode(DjangoObjectType):
     class Meta:
         model = TokenComment
@@ -22,7 +23,7 @@ class TokenCommentNode(DjangoObjectType):
 
 
 class TokenCommentInput(InputObjectType):
-    user = ID
+    user = ID(required=False)
     uncertain = List(ID, required=True)
     to_discuss = List(ID, required=True)
     new_suggestion = List(ID, required=True)
@@ -48,7 +49,7 @@ class Query(ObjectType):
 
 class CreateTokenComment(relay.ClientIDMutation):
     class Input:
-        user = ID
+        user = ID(required=False)
         uncertain = List(String, required=True)
         to_discuss = List(String, required=True)
         new_suggestion = List(String, required=True)
@@ -61,7 +62,11 @@ class CreateTokenComment(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        comment_obj = TokenComment.objects.create(user=input.get('user'), text=input.get('text',  None))
+        comment_obj = TokenComment.objects.create(text=input.get('text',  None))
+        if input.get('user', None):
+            user_id = from_global_id(input.get('user'))[1]
+            if User.objects.filter(pk=user_id).exists():
+                comment_obj.user = User.objects.get(pk=user_id)
 
         if input.get('uncertain'):
             comment_obj.uncertain = input.get('uncertain')
@@ -77,8 +82,8 @@ class CreateTokenComment(relay.ClientIDMutation):
 class UpdateTokenComment(relay.ClientIDMutation):
 
     class Input:
-        id = ID
-        user = ID
+        id = ID(required=True)
+        user = ID(required=False)
         uncertain = List(String, required=True)
         to_discuss = List(String, required=True)
         new_suggestion = List(String, required=True)
@@ -113,7 +118,7 @@ class UpdateTokenComment(relay.ClientIDMutation):
 class DeleteTokenComment(relay.ClientIDMutation):
 
     class Input:
-        id = ID
+        id = ID(required=True)
 
     comment = Field(TokenCommentNode)
     errors = List(String)
