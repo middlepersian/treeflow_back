@@ -1,3 +1,5 @@
+from mpcd.corpus.schemas.comment_category_enum import CommentCategories
+from mpcd.corpus.models import TokenComment
 from graphene import relay, ObjectType, Field, ID, Boolean, List, InputObjectType, String
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -5,20 +7,19 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 
-from mpcd.corpus.models import TokenComment
-from mpcd.corpus.schemas.comment_category_enum import CommentCategories
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class TokenCommentNode(DjangoObjectType):
+
     class Meta:
         model = TokenComment
         filter_fields = {
             'user__id': ['exact'],
-            'uncertain__id': ['exact'],
-            'to_discuss__id': ['exact'],
-            'new_suggestion__id': ['exact'],
             'text': ['icontains']
         }
+        fields = "__all__"
         interfaces = (relay.Node, )
 
 

@@ -33,6 +33,7 @@ class Query(
         mpcd.corpus.schemas.token_comment.Query,
         mpcd.corpus.schemas.section.Query,
         mpcd.corpus.schemas.sentence.Query,
+        mpcd.corpus.schemas.user.Query,
         # Dict Queries
         mpcd.dict.schemas.dictionary.Query,
         mpcd.dict.schemas.lemma.Query,

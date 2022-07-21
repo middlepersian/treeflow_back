@@ -36,3 +36,4 @@ from .morphological_annotation_enums import X, XForeign
 from .pos_enum import POS
 from .dependency_enum import DependencyEnum, Producer
 from .comment_category_enum import CommentCategories
+from .user import UserNode
