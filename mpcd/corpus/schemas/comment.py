@@ -5,8 +5,10 @@ from graphql_relay import from_global_id
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from mpcd.corpus.models import Comment
 
+User = get_user_model()
 
 class CommentNode(DjangoObjectType):
     class Meta:
@@ -52,12 +54,15 @@ class CreateComment(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
+
         comment_obj = Comment.objects.create(text=input.get('text'))
         if input.get('user', None):
             user_id = from_global_id(input.get('user'))[1]
             if User.objects.filter(pk=user_id).exists():
                 comment_obj.user = User.objects.get(pk=user_id)
-
+        elif info.context.user.id:
+            if User.objects.filter(pk=info.context.user.id).exists():
+                comment_obj.user = User.objects.get(pk=info.context.user.id)
         comment_obj.save()
         return cls(comment=comment_obj, success=True, errors=None)
 
