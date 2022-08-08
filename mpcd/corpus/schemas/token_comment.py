@@ -68,7 +68,10 @@ class CreateTokenComment(relay.ClientIDMutation):
             user_id = from_global_id(input.get('user'))[1]
             if User.objects.filter(pk=user_id).exists():
                 comment_obj.user = User.objects.get(pk=user_id)
-
+        elif info.context.user.id:
+            if User.objects.filter(pk=info.context.user.id).exists():
+                comment_obj.user = User.objects.get(pk=info.context.user.id)
+                
         if input.get('uncertain'):
             comment_obj.uncertain = input.get('uncertain')
         if input.get('to_discuss'):
