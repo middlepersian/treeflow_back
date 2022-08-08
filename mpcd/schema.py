@@ -3,9 +3,11 @@ import graphene
 import graphql_jwt
 import mpcd.corpus.schemas
 import mpcd.dict.schemas
+from graphene_django.debug import DjangoDebug
 
 
 class Query(
+
         # Corpus Queries
         mpcd.corpus.schemas.author.Query,
         mpcd.corpus.schemas.bibliography.Query,
@@ -45,6 +47,10 @@ class Query(
         graphene.ObjectType):
 
     node = graphene.relay.Node.Field()
+
+    # Debug
+    debug = graphene.Field(DjangoDebug, name='_debug')
+
     pass
 
 
@@ -79,6 +85,9 @@ class Mutation(
         mpcd.dict.schemas.semantic.Mutation,
         mpcd.dict.schemas.term_tech.Mutation,
         graphene.ObjectType):
+
+    # Debug
+    debug = graphene.Field(DjangoDebug, name='_debug')
 
     # https://django-graphql-jwt.domake.io/relay.html
     token_auth = graphql_jwt.relay.ObtainJSONWebToken.Field()
