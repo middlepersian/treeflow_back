@@ -456,11 +456,12 @@ class AddTokenComment(relay.ClientIDMutation):
     @classmethod
     @login_required
     def mutate_and_get_payload(cls, root, info, **input):
-        logger.error("TOKEN_ID: {}, COMMENT_ID: {}".format(input.get('token_id'), input.get('comment_id')))
+        logger.error("TOKEN_ID: {}, COMMENT_ID: {}".format(input.get('token_id'), input.get('comment')))
 
         if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
             token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
             tk_object = TokenComment.objects.create(**input.get('comment'))
+            tk_object.save()
             token_instance.comments.add(tk_object)
             token_instance.save()
             return cls(token=token_instance, success=True, errors=None)
