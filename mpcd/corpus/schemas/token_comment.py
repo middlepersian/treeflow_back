@@ -25,9 +25,9 @@ class TokenCommentNode(DjangoObjectType):
 
 class TokenCommentInput(InputObjectType):
     user = ID(required=False)
-    uncertain = List(ID, required=True)
-    to_discuss = List(ID, required=True)
-    new_suggestion = List(ID, required=True)
+    uncertain = List(String, required=True)
+    to_discuss = List(String, required=True)
+    new_suggestion = List(String, required=True)
     text = String(required=True)
 
 

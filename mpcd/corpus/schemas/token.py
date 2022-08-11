@@ -10,6 +10,7 @@ from mpcd.corpus.schemas.pos_enum import POS
 from mpcd.dict.schemas.language_enum import Language
 from mpcd.dict.schemas.lemma import LemmaNode
 from mpcd.corpus.schemas.comment_category_enum import CommentCategories
+from mpcd.corpus.schemas.token_comment import TokenCommentInput
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -446,7 +447,7 @@ class JoinTokens(relay.ClientIDMutation):
 class AddTokenComment(relay.ClientIDMutation):
     class Input():
         token_id = ID(required=True)
-        comment_id = ID(required=True)
+        comment = TokenCommentInput(required=True)
 
     success = Boolean()
     errors = List(String)
@@ -459,7 +460,8 @@ class AddTokenComment(relay.ClientIDMutation):
 
         if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
             token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
-            token_instance.comments.add(pk=from_global_id(input.get('comment_id'))[1])
+            tk_object = TokenComment(**input.get('comment'))
+            token_instance.comments.add(tk_object)
             token_instance.save()
             return cls(token=token_instance, success=True, errors=None)
         else:
@@ -468,7 +470,7 @@ class AddTokenComment(relay.ClientIDMutation):
 class RemoveTokenComment(relay.ClientIDMutation):
     class Input():
         token_id = ID(required=True)
-        comment_id = ID(required=True)
+        comment = ID(required=True)
 
     success = Boolean()
     errors = List(String)
