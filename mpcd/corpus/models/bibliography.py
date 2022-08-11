@@ -10,4 +10,4 @@ class BibEntry(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.url)
+        return '{}'.format(self.key)

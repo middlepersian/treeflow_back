@@ -15,4 +15,4 @@ class Source(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.identifier)
+        return '{}'.format(self.bib_entry)

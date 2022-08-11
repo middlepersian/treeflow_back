@@ -13,6 +13,13 @@ class Lemma(models.Model):
     related_meanings = models.ManyToManyField(Meaning, blank=True, related_name='lemma_related_meanings')
     comments = models.ManyToManyField(Comment, blank=True, related_name='lemma_comments')
 
+    def get_related_lemmas(self):
+        return " | ".join([p.word for p in self.related_lemmas.all()])
+
+    
+    def get_related_meanings(self):
+        return " | ".join([p.meaning for p in self.related_meanings.all()])    
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -24,4 +31,4 @@ class Lemma(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.word)
+        return '{} {} - {} {}'.format(self.word, self.language, self.get_related_lemmas(), self.get_related_meanings())

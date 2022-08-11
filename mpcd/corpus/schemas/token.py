@@ -10,6 +10,7 @@ from mpcd.corpus.schemas.pos_enum import POS
 from mpcd.dict.schemas.language_enum import Language
 from mpcd.dict.schemas.lemma import LemmaNode
 from mpcd.corpus.schemas.comment_category_enum import CommentCategories
+from mpcd.corpus.schemas.token_comment import TokenCommentInput
 
 import graphene_django_optimizer as gql_optimizer
 from graphql_jwt.decorators import login_required
@@ -443,6 +444,53 @@ class JoinTokens(relay.ClientIDMutation):
         return cls(success=True)
 
 
+class AddTokenComment(relay.ClientIDMutation):
+    class Input():
+        token_id = ID(required=True)
+        comment = TokenCommentInput(required=True)
+
+    success = Boolean()
+    errors = List(String)
+    token = Field(TokenNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error("TOKEN_ID: {}, COMMENT_ID: {}".format(input.get('token_id'), input.get('comment')))
+
+        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
+            tk_object = TokenComment.objects.create(**input.get('comment'))
+            tk_object.save()
+            token_instance.comments.add(tk_object)
+            token_instance.save()
+            return cls(token=token_instance, success=True, errors=None)
+        else:
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])   
+
+class RemoveTokenComment(relay.ClientIDMutation):
+    class Input():
+        token_id = ID(required=True)
+        comment = ID(required=True)
+
+    success = Boolean()
+    errors = List(String)
+    token = Field(TokenNode)
+
+    @classmethod
+    @login_required
+    def mutate_and_get_payload(cls, root, info, **input):
+        logger.error("TOKEN_ID: {}, COMMENT_ID: {}".format(input.get('token_id'), input.get('comment_id')))
+
+        if Token.objects.filter(pk=from_global_id(input['token_id'])[1]).exists():
+            token_instance = Token.objects.get(pk=from_global_id(input.get('token_id'))[1])
+            token_instance.comments.remove(pk=from_global_id(input.get('comment_id'))[1])
+            token_instance.save()
+            return cls(token=token_instance, success=True, errors=None)
+        else:
+            return cls(token=None, success=False, errors=["Token with ID {} not found".format(input.get('token_id'))])
+
+
 class Mutation(ObjectType):
     add_lemmas_to_token = AddLemmasToToken.Field()
     add_meanings_to_token = AddMeaningsToToken.Field()
@@ -452,3 +500,5 @@ class Mutation(ObjectType):
     delete_token = DeleteToken.Field()
     update_token = UpdateToken.Field()
     join_tokens = JoinTokens.Field()
+    add_token_comment = AddTokenComment.Field()
+    remove_token_comment = RemoveTokenComment.Field()

@@ -26,4 +26,4 @@ class Line(models.Model):
         ordering = ['number']
 
     def __str__(self):
-        return '{}'.format(self.number)
+        return '{} - {}'.format(self.folio, self.number)

@@ -6,6 +6,7 @@ import mpcd.dict.schemas
 
 
 class Query(
+
         # Corpus Queries
         mpcd.corpus.schemas.author.Query,
         mpcd.corpus.schemas.bibliography.Query,
@@ -45,6 +46,7 @@ class Query(
         graphene.ObjectType):
 
     node = graphene.relay.Node.Field()
+
     pass
 
 

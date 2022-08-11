@@ -1,9 +1,9 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Codex, Folio, Line, Edition, TextSigle, \
+from .models import Codex, CodexPart,  Facsimile, Folio, Line, Edition, TextSigle, \
     Corpus, Resource, Text, Sentence,\
     MorphologicalAnnotation, Dependency,\
-    Token, Source, Author, BibEntry, Comment
+    Token, Source, Author, BibEntry, Comment, TokenComment
 4
 
 
@@ -17,6 +17,9 @@ admin.site.register(Author)
 admin.site.register(BibEntry)
 
 admin.site.register(Codex)
+admin.site.register(CodexPart)
+admin.site.register(Facsimile)
+
 admin.site.register(Folio)
 admin.site.register(Line)
 admin.site.register(Resource)
@@ -34,3 +37,4 @@ admin.site.register(MorphologicalAnnotation)
 admin.site.register(Dependency)
 
 admin.site.register(Comment)
+admin.site.register(TokenComment)
