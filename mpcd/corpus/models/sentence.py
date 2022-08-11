@@ -37,4 +37,8 @@ class Sentence(models.Model):
         ]
 
     def get_tokens(self):
-        return "|".join([p.transcription for p in self.tokens.all()])
+        return " | ".join([p.transcription for p in self.tokens.all()])
+
+    def __str__(self):
+        return '{} - {} - {}'.format(self.text, self.number, self.get_tokens())
+    

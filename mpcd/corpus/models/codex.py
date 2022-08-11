@@ -10,4 +10,4 @@ class Codex(Source):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{} {}'.format(self.sigle)
+        return '{}'.format(self.sigle)

@@ -10,9 +10,9 @@ class Facsimile(models.Model):
     bib_entry = models.OneToOneField(BibEntry, on_delete=models.SET_NULL, related_name='facsimile_reference', null=True)
     codex_part = models.ForeignKey(CodexPart, on_delete=models.SET_NULL, null=True,
                                    blank=True, related_name='facsimile_codex_part')
-    comments = models.ManyToManyField('Comment', blank=True, related_name = 'facsimile_comments')
-                               
+    comments = models.ManyToManyField('Comment', blank=True, related_name='facsimile_comments')
+
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.slug)
+        return '{}'.format(self.bib_entry)

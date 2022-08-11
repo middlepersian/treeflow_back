@@ -14,4 +14,4 @@ class CodexPart(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.part_number)
+        return '{}'.format(self.slug)
