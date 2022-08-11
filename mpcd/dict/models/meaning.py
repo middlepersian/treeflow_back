@@ -21,4 +21,4 @@ class Meaning(models.Model):
         ordering = ['meaning']
 
     def __str__(self):
-        return '{}'.format(self.meaning)
+        return '{} {}'.format(self.meaning, self.language)
