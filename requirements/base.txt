@@ -25,13 +25,13 @@ django-simple-history==3.0.0 #https://django-simple-history.readthedocs.io/en/3.
 channels==3.0.4 
 
 #graphene
-graphql-core==3.1.7
-graphene-django==3.0.0b7
-django-filter==22.1
-graphene-django-optimizer==0.9.0
+#graphql-core==3.1.7
+#graphene-django==3.0.0b7
+#django-filter==22.1
+#graphene-django-optimizer==0.9.0
 
 # django-graphql-jwt
-django-graphql-jwt==0.3.4
+#django-graphql-jwt==0.3.4
 
 #graphql-ws
 #graphql-ws==0.4.4 
@@ -41,3 +41,9 @@ django-ordered-model==3.5
 
 pyparsing==3.0.7 
 pydot==1.4.2
+
+#strawberry
+strawberry-django-plus==1.24.1
+
+# strawberry-django-jwt
+strawberry-django-jwt==0.2.2

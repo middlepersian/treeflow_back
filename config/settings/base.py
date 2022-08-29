@@ -72,7 +72,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "simple_history",
-    "graphene_django"
+    "strawberry_django_jwt.refresh_token"
 ]
 
 LOCAL_APPS = [
@@ -95,8 +95,9 @@ MIGRATION_MODULES = {"sites": "mpcd.contrib.sites.migrations"}
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
-    # https://django-graphql-jwt.domake.io/quickstart.html
-    "graphql_jwt.backends.JSONWebTokenBackend",
+    # https://django-graphql-jwt.domake.io/quickstart.html,
+    "strawberry_django_jwt.backends.JSONWebTokenBackend",
+    #"graphql_jwt.backends.JSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend"
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
@@ -315,15 +316,6 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
-
-
-GRAPHENE = {
-    'SCHEMA': 'mpcd.schema.schema',
-    "ATOMIC_MUTATIONS": True,
-    "MIDDLEWARE": [
-        "graphql_jwt.middleware.JSONWebTokenMiddleware",
-    ]
-}
 
 
 GRAPHQL_JWT = {
