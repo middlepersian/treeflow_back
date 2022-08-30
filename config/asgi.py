@@ -16,4 +16,5 @@ application = ProtocolTypeRouter({
     # Just HTTP for now. (We can add other protocols later.)
 })
 '''
+application = get_asgi_application()
 channel_layer = get_channel_layer()

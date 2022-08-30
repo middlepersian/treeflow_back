@@ -68,8 +68,6 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "rest_framework",
-    "rest_framework.authtoken",
     "corsheaders",
     "simple_history",
     "strawberry_django_jwt.refresh_token"
@@ -280,16 +278,7 @@ ACCOUNT_ADAPTER = "mpcd.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "mpcd.users.adapters.SocialAccountAdapter"
 
-# django-rest-framework
-# -------------------------------------------------------------------------------
-# django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-}
+
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 #CORS_URLS_REGEX = r"^/api/.*$"
