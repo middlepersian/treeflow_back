@@ -41,7 +41,7 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {"default": env.db("DATABASE_URL")}
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
+DATABASES["default"]["ATOMIC_REQUESTS"] = False
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -70,6 +70,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "corsheaders",
     "simple_history",
+    "strawberry.django",
     "strawberry_django_jwt.refresh_token"
 ]
 
@@ -307,10 +308,6 @@ CORS_ALLOW_HEADERS = [
 ]
 
 
-GRAPHQL_JWT = {
-    "JWT_ALLOW_ARGUMENT": True,
-    "JWT_ARGUMENT_NAME": "token"
-}
 
 
 CHANNELS_WS_PROTOCOLS = [
@@ -321,4 +318,11 @@ CHANNEL_LAYERS = {
         "BACKEND": "asgiref.inmemory.ChannelLayer",
         "ROUTING": "django_subscriptions.urls.channel_routing",
     },
+}
+
+
+GRAPHQL_JWT = {
+    "JWT_ALLOW_ARGUMENT": True,
+    "JWT_ARGUMENT_NAME": "token",
+    "JWT_AUTHENTICATE_INTROSPECTION" : False
 }

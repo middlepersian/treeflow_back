@@ -19,7 +19,6 @@ django-redis==5.0.0  # https://github.com/jazzband/django-redis
 # simple history
 django-simple-history==3.1.1 
 
-
 #django-cors-headers
 django-cors-headers==3.13.0
 
