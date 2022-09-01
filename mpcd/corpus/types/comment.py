@@ -1,29 +1,39 @@
+from asgiref.sync import sync_to_async
 from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
+from typing import List
 from mpcd.corpus.models import Comment
 
+
+async def get_all_posts(root, info) -> List[Comment]:
+    get_comments = sync_to_async(lambda: Comment.objects.all())
+    return await get_comments()
+
+
 @gql.django.type(Comment)
-class AssetNode(relay.Node):
+class CommentType(gql.Node):
     text: gql.auto
-    user: UserNode
+
+
+@gql.django.input(Comment)
+class CommentInput:
+    text: gql.auto
 
 
 @gql.django.partial(Comment)
-class UpdateCommentInput(gql.NodeInput):
+class CommentInputPartial(gql.NodeInput):
     text: gql.auto
 
 
 @gql.type
-class ModelMutation:
+class Query:
+    comments: List[CommentType] = gql.django.field(resolver=get_all_posts)
 
-    @gql.mutation
-    def update_comment(self, info: Info, input: UpdateCommentInput) -> ModelNode:
-        data = vars(input)
-        node_id: relay.GlobalID = data.pop('id')
-        comment: Asset = node_id.resolve_node(info, ensure_type=Comment)
+@gql.type
+class Mutation:
+    create_model : CommentType = gql.django.create_mutation(CommentInput)
+    update_model : CommentType = gql.django.update_mutation(CommentInputPartial)
+    delete_model : CommentType = gql.django.delete_mutation(gql.NodeInput)
 
-        if comment.owner != info.context.request.user:
-            raise PermissionError("You can only modify objects you own.")
 
-        return resolvers.update(info, asset, resolvers.parse_input(info, data))

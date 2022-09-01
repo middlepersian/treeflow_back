@@ -1,18 +1,18 @@
 
+import strawberry
 from strawberry_django_plus import gql
 import strawberry_django_jwt.mutations as jwt_mutations
 from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
+from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+import mpcd.corpus.types.comment 
+
+@gql.type
+class Query(mpcd.corpus.types.comment.Query):
+    pass
 
 
 @gql.type
-class Query():
-    @gql.field
-    async def hello(self) -> str:
-        return "Hello World"
-
-
-@gql.type
-class Mutation:
+class Mutation(mpcd.corpus.types.comment.Mutation):
     # https://django-graphql-jwt.domake.io/relay.html
     token_auth = jwt_mutations.ObtainJSONWebTokenAsync.obtain
     verify_token = jwt_mutations.VerifyAsync.verify
@@ -25,4 +25,4 @@ class Mutation:
     #    graphql_jwt.relay.DeleteRefreshTokenCookie.Field()
 
 
-schema = gql.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware])
+schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware,  DjangoOptimizerExtension])
