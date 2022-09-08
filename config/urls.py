@@ -5,9 +5,10 @@ from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
-from strawberry.django.views import AsyncGraphQLView
+from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
-from mpcd.schema import schema
+#from mpcd.schema import schema
+from mpcd.corpus.types.comment import schema
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -20,7 +21,8 @@ urlpatterns = [
     path("users/", include("mpcd.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # graphql
-    path('graphql/', csrf_exempt(AsyncGraphQLView.as_view(schema=schema))),
+    path('graphql/sync', GraphQLView.as_view(schema=schema)),
+    path('graphql/', AsyncGraphQLView.as_view(schema=schema)),
 
     # Your stuff: custom urls includes go here
 

@@ -23,7 +23,8 @@ django-simple-history==3.1.1
 django-cors-headers==3.13.0
 
 #channels
-channels==3.0.4 
+#channels==3.0.4 
+uvicorn[standard]==0.18.3  # https://github.com/encode/uvicorn
 
 #django-ordered-model
 django-ordered-model==3.5
@@ -33,6 +34,6 @@ pydot==1.4.2
 
 #strawberry
 strawberry-graphql==0.127.1
-strawberry-django-plus==1.24.1
+strawberry-django-plus==1.25.2
 strawberry_django_jwt==0.2.2
 

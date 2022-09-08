@@ -1,1 +1,1 @@
-from .comment import CommentType, CommentInput, CommentInputPartial, Mutation, Query
+from .comment import Comment, CommentInput, CommentInputPartial, Mutation, Query

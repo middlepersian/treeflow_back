@@ -6,6 +6,8 @@ from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 import mpcd.corpus.types.comment 
 
+
+
 @gql.type
 class Query(mpcd.corpus.types.comment.Query):
     pass
@@ -25,4 +27,5 @@ class Mutation(mpcd.corpus.types.comment.Mutation):
     #    graphql_jwt.relay.DeleteRefreshTokenCookie.Field()
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware,  DjangoOptimizerExtension])
+#schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware,  DjangoOptimizerExtension])
+schema = strawberry.Schema(query=Query)
