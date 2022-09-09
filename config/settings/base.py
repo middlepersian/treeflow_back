@@ -48,7 +48,7 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = False
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = "config.urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
-WSGI_APPLICATION = "config.wsgi.application"
+#WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 # APPS
 # ------------------------------------------------------------------------------
@@ -64,7 +64,6 @@ DJANGO_APPS = [
     "django.forms",
 ]
 THIRD_PARTY_APPS = [
-    "crispy_forms",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -313,12 +312,7 @@ CORS_ALLOW_HEADERS = [
 CHANNELS_WS_PROTOCOLS = [
     "graphql-ws",
 ]
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "asgiref.inmemory.ChannelLayer",
-        "ROUTING": "django_subscriptions.urls.channel_routing",
-    },
-}
+
 
 
 GRAPHQL_JWT = {
