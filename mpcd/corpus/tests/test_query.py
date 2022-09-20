@@ -1,12 +1,14 @@
-
+import pytest
+from django.contrib.auth import get_user_model
+from typing import List
+import strawberry_django
 from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from typing import List
-from mpcd.corpus import models
-from django.contrib.auth import get_user_model
-from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+import asyncio
 
+from mpcd.corpus import models
+from . import utils
 
 @gql.django.type(get_user_model())
 class User:
@@ -48,4 +50,33 @@ class Mutation:
     delete_model: Comment = gql.django.delete_mutation(gql.NodeInput)
 
 
-schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])
+#schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])
+@pytest.fixture
+def query(db):
+    return utils.generate_query(Query)
+
+'''
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.django_db(transaction=True),
+]
+'''
+
+
+@pytest.mark.asyncio 
+def test_async():
+    def is_async() -> bool:
+    # django uses the same method to detect async operation
+    # https://github.com/django/django/blob/bb076476cf560b988f8d80dbbc4a3c85df54b1b9/django/utils/asyncio.py
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return False
+        else:
+            return True
+
+    assert is_async()        
+
+
+def test_query(db):
+    return utils.generate_query(Query)

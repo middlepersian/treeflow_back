@@ -21,3 +21,4 @@ async def application(scope, receive, send):
         await websocket_application(scope, receive, send)
     else:
         raise NotImplementedError(f"Unknown scope type {scope['type']}")
+

@@ -21,8 +21,8 @@ urlpatterns = [
     path("users/", include("mpcd.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # graphql
-    path('graphql/sync', GraphQLView.as_view(schema=schema)),
-    path('graphql/', AsyncGraphQLView.as_view(schema=schema)),
+    path('graphql_sync/', GraphQLView.as_view(schema=schema)),
+    path('graphql_async/', AsyncGraphQLView.as_view(schema=schema)),
 
     # Your stuff: custom urls includes go here
 
