@@ -1,1 +1,2 @@
-from .comment import Comment, CommentInput, CommentInputPartial, Mutation, Query
+from .comment import Comment, CommentInput, CommentInputPartial
+from .token import Token, TokenInput, TokenInputPartial

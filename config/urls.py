@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
 #from mpcd.schema import schema
-from mpcd.corpus.types.comment import schema
+from schema import schema
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),

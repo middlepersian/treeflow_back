@@ -4,12 +4,12 @@ from strawberry_django_plus import gql
 import strawberry_django_jwt.mutations as jwt_mutations
 from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-import mpcd.corpus.types.comment 
-
+from mpcd.corpus.schemas import comment
+from mpcd.corpus.schemas import token
 
 
 @gql.type
-class Query(mpcd.corpus.types.comment.Query):
+class Query(comment.Query, token.Query):
     pass
 
 
