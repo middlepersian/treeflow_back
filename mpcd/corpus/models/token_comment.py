@@ -1,6 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from .comment import Comment

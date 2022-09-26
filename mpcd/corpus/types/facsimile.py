@@ -1,16 +1,14 @@
-
 from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from typing import List
 from mpcd.corpus import models
-from mpcd.corpus.types import Corpus, User, TextSigle
+from mpcd.corpus.types import Folio, Comment
 
-
-@gql.django.type(models.Text)
-class Text:
+@gql.django.type(models.Facsimile)
+class Facsimile:
     id: gql.auto
-    corpus: 'Corpus'
-    title: gql.auto
-    text_sigle: 'TextSigle'
-    editors: List['User']
+    bib_entry: 'BibEntry'
+    codex_part: 'CodexPart'
+    comments: List['Comment']
+    folios: List['Folio']

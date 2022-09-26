@@ -1,3 +1,4 @@
+from strawberry_django_plus import gql
 from django.contrib.auth import get_user_model
 
 

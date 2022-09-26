@@ -4,13 +4,12 @@ from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from typing import List
 from mpcd.corpus import models
-from mpcd.corpus.types import Corpus, User, TextSigle
+from mpcd.corpus.types import Comment, Token
 
-
-@gql.django.type(models.Text)
-class Text:
+@gql.django.type(models.Dependency)
+class Dependency:
     id: gql.auto
-    corpus: 'Corpus'
-    title: gql.auto
-    text_sigle: 'TextSigle'
-    editors: List['User']
+    head : 'Token'
+    rel: gql.auto
+    producer: gql.auto
+    comments: List['Comment']

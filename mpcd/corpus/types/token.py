@@ -4,7 +4,8 @@ from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from typing import List
 from mpcd.corpus import models
-
+from mpcd.corpus.types import Dependency, Text
+from mpcd.dict.types import Lemma, Line, Meaning, TokenComment
 
 
 @gql.django.type(models.Token)
@@ -15,12 +16,12 @@ class Token:
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
-    lemmas: List['dict.Lemma']
-    meanings: List['dict.Meaning']
+    lemmas: List[Lemma]
+    meanings: List[Meaning]
     pos: gql.auto
     morphological_annotation: List['MorphologicalAnnotation']
-    syntactic_annotation: List['MorphologicalAnnotation']
-    comments: List['TokenComment']
+    syntactic_annotation: List[Dependency]
+    comments: List[TokenComment]
     avestan: gql.auto
     line: 'Line'
     previous: 'Token'
@@ -35,11 +36,11 @@ class TokenInput:
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
-    lemmas: List['dict.Lemma']
-    meanings: List['dict.Meaning']
+    lemmas: List['Lemma']
+    meanings: List['Meaning']
     pos: gql.auto
     morphological_annotation: List['MorphologicalAnnotation']
-    syntactic_annotation: List['MorphologicalAnnotation']
+    syntactic_annotation: List['Dependency']
     comments: List['TokenComment']
     avestan: gql.auto
     line: 'Line'
@@ -55,11 +56,11 @@ class TokenInputPartial(gql.NodeInput):
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
-    lemmas: List['dict.Lemma']
-    meanings: List['dict.Meaning']
+    lemmas: List['Lemma']
+    meanings: List['Meaning']
     pos: gql.auto
     morphological_annotation: List['MorphologicalAnnotation']
-    syntactic_annotation: List['MorphologicalAnnotation']
+    syntactic_annotation: List['Dependency']
     comments: List['TokenComment']
     avestan: gql.auto
     line: 'Line'
