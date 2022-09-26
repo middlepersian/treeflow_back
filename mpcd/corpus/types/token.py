@@ -4,8 +4,8 @@ from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from typing import List
 from mpcd.corpus import models
-from mpcd.corpus.types import Dependency, Text
-from mpcd.dict.types import Lemma, Line, Meaning, TokenComment
+from mpcd.corpus.types import Dependency, Text, TokenComment, Line, MorphologicalAnnotation
+from mpcd.dict.types import Lemma, Meaning
 
 
 @gql.django.type(models.Token)

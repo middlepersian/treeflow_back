@@ -3,8 +3,7 @@ from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from mpcd.corpus import models
 
-@gql.django.type(models.TextSigle)
-class TextSigle:
+@gql.django.type(models.BibEntry)
+class BibEntry:
     id: gql.auto
-    sigle: gql.auto
-    genre: gql.auto
+    key: gql.auto
