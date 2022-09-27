@@ -1,7 +1,7 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from typing import List
+from typing import List, TYPE_CHECKING
 from mpcd.corpus import models
 
 

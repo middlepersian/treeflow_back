@@ -4,8 +4,7 @@ from strawberry_django_plus import gql
 import strawberry_django_jwt.mutations as jwt_mutations
 from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-from mpcd.corpus.schemas import comment
-from mpcd.corpus.schemas import token
+from mpcd.corpus.schemas import comment, token
 
 
 @gql.type
@@ -14,7 +13,7 @@ class Query(comment.Query, token.Query):
 
 
 @gql.type
-class Mutation(mpcd.corpus.types.comment.Mutation):
+class Mutation():
     # https://django-graphql-jwt.domake.io/relay.html
     token_auth = jwt_mutations.ObtainJSONWebTokenAsync.obtain
     verify_token = jwt_mutations.VerifyAsync.verify
