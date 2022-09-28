@@ -27,4 +27,4 @@ class Mutation():
 
 
 #schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware,  DjangoOptimizerExtension])
-schema = strawberry.Schema(query=Query)
+schema = strawberry.Schema(query=Query, extensions=[DjangoOptimizerExtension])
