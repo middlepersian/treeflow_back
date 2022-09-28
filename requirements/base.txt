@@ -32,8 +32,6 @@ pyparsing==3.0.7
 pydot==1.4.2
 
 #strawberry
-strawberry-graphql[debug-server]==0.130.0
-strawberry-graphql-django==0.5.0 
-strawberry-django-plus==1.26
+strawberry-django-plus==1.27
 strawberry_django_jwt==0.2.2
 
