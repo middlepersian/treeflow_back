@@ -7,7 +7,7 @@ from mpcd.corpus.types.comment import Comment
 
 @gql.type
 class Query:
-    comments:  List[LazyType['Comment', 'mpcd.corpus.types.comment']] = gql.django.field()
+    comments:  List[Comment] = gql.django.field()
 
 
 schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])
