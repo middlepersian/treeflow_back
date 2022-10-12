@@ -2,8 +2,9 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 from strawberry.lazy_type import LazyType
+
 from mpcd.corpus import models
 
 if TYPE_CHECKING:
@@ -32,5 +33,5 @@ class Token:
     comments: List[LazyType['TokenComment', 'mpcd.corpus.types.token_comment']]
     avestan: gql.auto
     line: LazyType['Line', 'mpcd.corpus.types.line']
-    previous:'Token'
+    previous: Optional['Token']
     gloss: gql.auto
