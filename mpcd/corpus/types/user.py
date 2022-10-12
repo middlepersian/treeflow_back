@@ -1,9 +1,10 @@
 from strawberry_django_plus import gql
+from strawberry_django_plus.gql import relay
 from django.contrib.auth import get_user_model
 
 
 @gql.django.type(get_user_model())
-class User:
+class User(relay.Node):
     id: gql.auto
     name: gql.auto
     is_superuser: gql.auto

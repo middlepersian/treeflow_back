@@ -1,7 +1,7 @@
-from typing import List, TYPE_CHECKING
+from typing import List
 from strawberry_django_plus import gql
+from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-from strawberry.dataloader import DataLoader
 
 
 from mpcd.corpus.types.token import Token
@@ -9,8 +9,7 @@ from mpcd.corpus.types.token import Token
 
 @gql.type
 class Query:
-    tokens: List[Token] = gql.django.field()
-
+    tokens: relay.Connection[Token] = gql.django.connection()
 
 
 schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])

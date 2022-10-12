@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Token)
-class Token:
+class Token(relay.Node):
     id: gql.auto
     number: gql.auto
     text: LazyType['Text', 'mpcd.corpus.types.text']
