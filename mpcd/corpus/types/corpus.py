@@ -5,7 +5,7 @@ from mpcd.corpus import models
 
 
 @gql.django.type(models.Corpus)
-class Corpus:
+class Corpus(relay.Node):
     id: gql.auto
     name: gql.auto
     slug: gql.auto

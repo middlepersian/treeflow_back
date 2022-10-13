@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Line)
-class Line:
+class Line(relay.Node):
     id: gql.auto
     number: gql.auto
     folio: LazyType['Folio', 'mpcd.corpus.types.folio']

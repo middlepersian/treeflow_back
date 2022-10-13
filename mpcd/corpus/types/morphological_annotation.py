@@ -6,7 +6,7 @@ from mpcd.corpus import models
 
 
 @gql.django.type(models.MorphologicalAnnotation)
-class MorphologicalAnnotation:
+class MorphologicalAnnotation(relay.Node):
     id: gql.auto
     feature: gql.auto
     feature_value: gql.auto

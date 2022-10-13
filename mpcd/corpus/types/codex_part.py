@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.CodexPart)
-class CodexPart:
+class CodexPart(relay.Node):
     id: gql.auto
     codex: LazyType['Codex', 'mpcd.corpus.types.codex']
     slug: gql.auto

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Facsimile)
-class Facsimile:
+class Facsimile(relay.Node):
     id: gql.auto
     bib_entry: LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     codex_part:  LazyType['CodexPart', 'mpcd.corpus.types.codex_part']

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.TokenComment)
-class TokenComment:
+class TokenComment(relay.Node):
     id: gql.auto
     user: LazyType['User', 'mpcd.corpus.types.user']
     text: gql.auto

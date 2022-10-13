@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Line)
-class Folio:
+class Folio(relay.Node):
     id: gql.auto
     number: gql.auto
     facsimile: LazyType['Facsimile', 'mpcd.corpus.types.facsimile']

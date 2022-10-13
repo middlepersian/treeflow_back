@@ -4,7 +4,7 @@ from strawberry_django_plus.gql import relay
 from mpcd.corpus import models
 
 @gql.django.type(models.TextSigle)
-class TextSigle:
+class TextSigle(relay.Node):
     id: gql.auto
     sigle: gql.auto
     genre: gql.auto

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Dependency)
-class Dependency:
+class Dependency(relay.Node):
     id: gql.auto
     head:  LazyType['Token', 'mpcd.corpus.types.token']
     rel: gql.auto

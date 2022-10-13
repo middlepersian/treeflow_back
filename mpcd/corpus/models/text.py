@@ -1,15 +1,25 @@
-from .bibliography import BibEntry
-from .source import Source
-from .text_sigle import TextSigle
-from .corpus import Corpus
+from typing import TYPE_CHECKING
+from strawberry.lazy_type import LazyType
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
 from django.contrib.auth import get_user_model
+
+from .bibliography import BibEntry
+from .source import Source
+from .text_sigle import TextSigle
+from .corpus import Corpus
+
 User = get_user_model()
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
+    from mpcd.corpus.models.token import Token
 
 
 class Text(models.Model):
+
+    token_text: "RelatedManager[Token]"
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
 

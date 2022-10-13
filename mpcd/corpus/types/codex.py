@@ -10,6 +10,6 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Codex)
-class Codex:
+class Codex(relay.Node):
     sigle: gql.auto
     comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
