@@ -6,25 +6,20 @@ from strawberry.lazy_type import LazyType
 
 from mpcd.corpus import models
 
+
 if TYPE_CHECKING:
-    from mpcd.corpus.types.section_type import SectionType
     from mpcd.corpus.types.text import Text
+    from mpcd.corpus.types.token import Token
     from mpcd.corpus.types.comment import Comment
-    from mpcd.corpus.types.line import Line
-    from mpcd.corpus.types.morphological_annotation import MorphologicalAnnotation
+    from mpcd.dict.types.meaning import Meaning
 
 
-
-@gql.django.type(models.Section)
-class Section(relay.Node):
+@gql.django.type(models.Sentence)
+class Sentence(relay.Node):
     id: gql.auto
-    number: gql.auto
-    identifier: gql.auto
-    text: Optional['Text']
-    section_type: Optional['SectionType']
-    source: Optional['Source']
+    number: float
+    text: LazyType['Text', 'mpcd.corpus.types.text']
     tokens: List[LazyType['Token', 'mpcd.corpus.types.token']]
-    previous: Optional['Section']
-    container: Optional['Section']
+    translations: List[LazyType['Meaning', 'mpcd.dict.types.meaning']]
     comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
-
+    previous: Optional[LazyType['Sentence', 'mpcd.corpus.types.sentence']]

@@ -8,6 +8,9 @@ from .facsimile import Facsimile
 from .folio import Folio
 from .line import Line
 from .morphological_annotation import MorphologicalAnnotation
+from .section import Section
+from .section_type import SectionType
+from .sentence import Sentence
 from .text import Text
 from .text_sigle import TextSigle
 from .token import Token

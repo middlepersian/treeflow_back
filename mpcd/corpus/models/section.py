@@ -1,6 +1,7 @@
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
+from .comment import Comment
 from .text import Text
 from .section_type import SectionType
 from .source import Source
@@ -21,8 +22,7 @@ class Section(models.Model):
     # this is the case if a section "paragraph" has a "chapter" container
     container = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
                                   blank=True, related_name='section_container')
-    comment = models.ForeignKey('Comment', on_delete=models.SET_NULL, null=True, blank=True)
-                              
+    comments = models.ManyToManyField(Comment, blank=True, related_name="section_comments")
 
     history = HistoricalRecords()
 
