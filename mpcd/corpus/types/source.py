@@ -7,12 +7,10 @@ from strawberry.lazy_type import LazyType
 
 from mpcd.corpus import models
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.bibliography import BibEntry
 
 @gql.django.type(models.Source)
 class Source(relay.Node):
     id: gql.auto
     identifier: gql.auto
     bib_entry: LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
-    description: gql.auto   
+    description: gql.auto

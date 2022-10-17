@@ -4,8 +4,6 @@ from strawberry_django_plus.gql import relay
 from strawberry.lazy_type import LazyType
 from typing import List, TYPE_CHECKING, Optional
 from mpcd.corpus import models
-if TYPE_CHECKING:
-    from mpcd.corpus.types.user import User
 
 
 @gql.django.type(models.TokenComment)

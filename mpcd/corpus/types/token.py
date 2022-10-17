@@ -35,3 +35,23 @@ class Token(relay.Node):
     line: LazyType['Line', 'mpcd.corpus.types.line']
     previous: Optional['Token']
     gloss: gql.auto
+
+
+@gql.django.type(models.Token)
+class TokenInput:
+    id: gql.auto
+    number: gql.auto
+    text: gql.auto
+    language: gql.auto
+    transcription: gql.auto
+    transliteration: gql.auto
+    lemmas: Optional[List[gql.NodeInput]]
+    meanings: Optional[List[gql.NodeInput]]
+    pos: gql.auto
+    morphological_annotation: Optional[List[gql.NodeInput]]
+    syntactic_annotation: Optional[List[gql.NodeInput]]
+    comments: Optional[List[gql.NodeInput]]
+    avestan: gql.auto
+    line: gql.auto
+    previous: Optional['Token']
+    gloss: gql.auto

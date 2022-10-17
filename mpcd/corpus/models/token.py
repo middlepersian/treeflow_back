@@ -9,6 +9,10 @@ from .token_comment import TokenComment
 
 
 class Token(models.Model):
+    # TODO
+    #root = BooleanField()
+    #word_token = BooleanField()
+    #visible = BooleanField()
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')

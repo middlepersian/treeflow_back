@@ -7,13 +7,6 @@ from strawberry.lazy_type import LazyType
 from mpcd.corpus import models
 
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.text import Text
-    from mpcd.corpus.types.token import Token
-    from mpcd.corpus.types.comment import Comment
-    from mpcd.dict.types.meaning import Meaning
-
-
 @gql.django.type(models.Sentence)
 class Sentence(relay.Node):
     id: gql.auto

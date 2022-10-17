@@ -5,6 +5,7 @@ from simple_history.models import HistoricalRecords
 
 class Dependency(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+
     head = models.ForeignKey("Token", on_delete=models.SET_NULL, related_name='dependency_head', null=True)
     rel = models.CharField(max_length=9)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py

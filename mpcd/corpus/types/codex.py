@@ -5,11 +5,10 @@ from strawberry.lazy_type import LazyType
 from typing import List, TYPE_CHECKING
 from mpcd.corpus import models
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.comment import Comment
-
 
 @gql.django.type(models.Codex)
 class Codex(relay.Node):
+    codex_part_codex: relay.Connection[LazyType['CodexPart', 'mpcd.corpus.types.codex_part']]
+
     sigle: gql.auto
     comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]

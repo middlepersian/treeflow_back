@@ -6,10 +6,6 @@ from typing import TYPE_CHECKING
 from mpcd.corpus import models
 
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.user import User
-
-
 @gql.django.type(models.Comment)
 class Comment(relay.Node):
     id: gql.auto

@@ -5,15 +5,11 @@ from strawberry.lazy_type import LazyType
 from typing import List, TYPE_CHECKING
 from mpcd.corpus import models
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.folio import Folio
-    from mpcd.corpus.types.comment import Comment
-    from mpcd.corpus.types.bibliography import BibEntry
-    from mpcd.corpus.types.codex_part import CodexPart
-
 
 @gql.django.type(models.Facsimile)
 class Facsimile(relay.Node):
+    folio_facsimile: relay.Connection[LazyType['Folio', 'mpcd.corpus.types.folio']]
+
     id: gql.auto
     bib_entry: LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     codex_part:  LazyType['CodexPart', 'mpcd.corpus.types.codex_part']

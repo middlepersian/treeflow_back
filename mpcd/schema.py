@@ -5,6 +5,7 @@ import strawberry_django_jwt.mutations as jwt_mutations
 from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token_comment, token, user
+from mpcd.dict.schemas import lemma, meaning
 
 
 @gql.type
@@ -26,7 +27,9 @@ class Query(
     text.Query,
     token_comment.Query,
     token.Query,
-    user.Query
+    user.Query,
+    lemma.Query,
+    meaning.Query
 ):
     pass
 

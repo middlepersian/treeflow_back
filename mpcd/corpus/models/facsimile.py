@@ -1,11 +1,16 @@
 import uuid as uuid_lib
+from typing import TYPE_CHECKING
 from django.db import models
 from simple_history.models import HistoricalRecords
 from mpcd.corpus.models.bibliography import BibEntry
 from mpcd.corpus.models.codex_part import CodexPart
 
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 class Facsimile(models.Model):
+    folio_facsimile: "RelatedManager[Folio]"
+
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     bib_entry = models.OneToOneField(BibEntry, on_delete=models.SET_NULL, related_name='facsimile_reference', null=True)
     codex_part = models.ForeignKey(CodexPart, on_delete=models.SET_NULL, null=True,

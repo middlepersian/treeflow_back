@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @gql.django.type(models.Meaning)
-class Meaning:
+class Meaning(relay.Node):
     id: gql.auto
     meaning: gql.auto
     language: gql.auto
