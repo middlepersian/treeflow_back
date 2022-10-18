@@ -7,18 +7,12 @@ from strawberry.lazy_type import LazyType
 
 from mpcd.corpus import models
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.dependency import Dependency
-    from mpcd.corpus.types.text import Text
-    from mpcd.corpus.types.token_comment import TokenComment
-    from mpcd.corpus.types.line import Line
-    from mpcd.corpus.types.morphological_annotation import MorphologicalAnnotation
-    from mpcd.dict.types.lemma import Lemma
-    from mpcd.dict.types.meaning import Meaning
-
 
 @gql.django.type(models.Token)
 class Token(relay.Node):
+
+    section_tokens: relay.Connection[LazyType['Section', 'mpcd.corpus.types.section']]
+
     id: gql.auto
     number: gql.auto
     text: LazyType['Text', 'mpcd.corpus.types.text']

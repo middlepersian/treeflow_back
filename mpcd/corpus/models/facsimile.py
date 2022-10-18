@@ -1,5 +1,4 @@
 import uuid as uuid_lib
-from typing import TYPE_CHECKING
 from django.db import models
 from simple_history.models import HistoricalRecords
 from mpcd.corpus.models.bibliography import BibEntry

@@ -4,9 +4,6 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from mpcd.corpus.models.codex import Codex
 
-if TYPE_CHECKING:
-    from django.db.models.manager import RelatedManager
-
 
 class CodexPart(models.Model):
 

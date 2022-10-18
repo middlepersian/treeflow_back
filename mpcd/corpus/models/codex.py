@@ -4,9 +4,6 @@ from simple_history.models import HistoricalRecords
 from .source import Source
 
 
-if TYPE_CHECKING:
-    from django.db.models.manager import RelatedManager
-
 
 class Codex(Source):
     # TODO add :

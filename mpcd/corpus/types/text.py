@@ -10,7 +10,6 @@ from mpcd.corpus import models
 @gql.django.type(models.Text)
 class Text(relay.Node):
 
-    # related_managers
     token_text: relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
     section_text: relay.Connection[LazyType['Section', 'mpcd.corpus.types.section']]
     sentence_text: relay.Connection[LazyType['Sentence', 'mpcd.corpus.types.sentence']]
