@@ -11,7 +11,7 @@ from mpcd.corpus import models
 @gql.django.type(models.Token)
 class Token(relay.Node):
 
-    section_tokens: relay.Connection[LazyType['Section', 'mpcd.corpus.types.section']]
+    section_tokens: List[LazyType['Section', 'mpcd.corpus.types.section']]
 
     id: gql.auto
     number: gql.auto

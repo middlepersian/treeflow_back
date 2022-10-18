@@ -6,12 +6,6 @@ from strawberry.lazy_type import LazyType
 
 from mpcd.corpus import models
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.section_type import SectionType
-    from mpcd.corpus.types.text import Text
-    from mpcd.corpus.types.comment import Comment
-    from mpcd.corpus.types.line import Line
-    from mpcd.corpus.types.morphological_annotation import MorphologicalAnnotation
 
 
 @gql.django.type(models.Section)
