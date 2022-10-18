@@ -9,6 +9,9 @@ from mpcd.corpus import models
 
 @gql.django.type(models.Dependency)
 class Dependency(relay.Node):
+
+    token_syntactic_annotation: relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
+
     id: gql.auto
     head:  LazyType['Token', 'mpcd.corpus.types.token']
     rel: gql.auto

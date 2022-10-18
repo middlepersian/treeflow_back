@@ -6,12 +6,12 @@ from strawberry.lazy_type import LazyType
 from typing import List, TYPE_CHECKING
 from mpcd.dict import models
 
-if TYPE_CHECKING:
-    from mpcd.corpus.types.comment import Comment
-
 
 @gql.django.type(models.Meaning)
 class Meaning(relay.Node):
+    
+    token_meanings:  relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
+
     id: gql.auto
     meaning: gql.auto
     language: gql.auto

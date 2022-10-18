@@ -12,15 +12,7 @@ from .corpus import Corpus
 
 User = get_user_model()
 
-if TYPE_CHECKING:
-    from django.db.models.manager import RelatedManager
-
-
 class Text(models.Model):
-
-    token_text: "RelatedManager[Token]"
-    section_text: "RelatedManager[Section]"
-    sentence_text: "RelatedManager[Sentence]"
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')

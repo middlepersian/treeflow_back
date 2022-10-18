@@ -8,6 +8,9 @@ from mpcd.corpus import models
 
 @gql.django.type(models.TokenComment)
 class TokenComment(relay.Node):
+
+    token_comments: relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
+
     id: gql.auto
     user: LazyType['User', 'mpcd.corpus.types.user']
     text: gql.auto

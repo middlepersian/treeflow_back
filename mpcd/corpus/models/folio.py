@@ -4,13 +4,8 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from .facsimile import Facsimile
 
-if TYPE_CHECKING:
-    from django.db.models.manager import RelatedManager
-
 
 class Folio(models.Model):
-
-    line_folio: "RelatedManager[Line]"
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     identifier = models.CharField(max_length=100)

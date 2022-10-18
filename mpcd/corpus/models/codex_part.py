@@ -10,8 +10,6 @@ if TYPE_CHECKING:
 
 class CodexPart(models.Model):
 
-    facsimile_codex_part: "RelatedManager[Facsimile]"
-
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     codex = models.ForeignKey(Codex, on_delete=models.SET_NULL, related_name='codex_part_codex', null=True)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)

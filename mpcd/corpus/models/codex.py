@@ -9,8 +9,6 @@ if TYPE_CHECKING:
 
 
 class Codex(Source):
-    codex_part_codex: "RelatedManager[CodexPart]"
-
     # TODO add :
 
     #id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
