@@ -13,3 +13,16 @@ class TextSigle(relay.Node):
     id: gql.auto
     sigle: gql.auto
     genre: gql.auto
+
+
+@gql.django.input(models.TextSigle)
+class TextSigleInput:
+    sigle: gql.auto
+    genre: gql.auto
+
+@gql.django.partial(models.TextSigle)
+class TextSiglePartial(gql.NodeInputPartial):
+    id: gql.auto
+    sigle: gql.auto
+    genre: gql.auto
+        

@@ -3,7 +3,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from strawberry.lazy_type import LazyType
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 from mpcd.corpus import models
 
 
@@ -24,4 +24,28 @@ class Text(relay.Node):
     stage: gql.auto
     sources: List[LazyType['Source', 'mpcd.corpus.types.source']]
     resources: List[LazyType['BibEntry', 'mpcd.corpus.types.bibliography']]
- 
+
+
+@gql.django.input(models.Text)
+class TextInput:
+    corpus: gql.auto
+    title: gql.auto
+    text_sigle: gql.auto
+    editors: gql.auto
+    collaborators: gql.auto
+    stage: gql.auto
+    sources: Optional[List[LazyType['SourceInput', 'mpcd.corpus.types.source']]]
+    resources: Optional[List[LazyType['BibEntryInput', 'mpcd.corpus.types.bibliography']]]
+
+
+@gql.django.partial(models.Text)
+class TextPartial(gql.NodeInputPartial):
+    id: gql.auto
+    corpus: gql.auto
+    title: gql.auto
+    text_sigle: gql.auto
+    editors: gql.auto
+    collaborators: gql.auto
+    stage: gql.auto
+    sources: Optional[List[LazyType['SourcePartial', 'mpcd.corpus.types.source']]]
+    resources: Optional[List[LazyType['BibEntryPartial', 'mpcd.corpus.types.bibliography']]]

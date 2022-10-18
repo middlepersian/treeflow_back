@@ -14,3 +14,18 @@ class Source(relay.Node):
     identifier: gql.auto
     bib_entry: LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     description: gql.auto
+
+
+@gql.django.input(models.Source)
+class SourceInput:
+    identifier: gql.auto
+    bib_entry: LazyType['BibEntryInput', 'mpcd.corpus.types.bibliography']
+    description: gql.auto
+
+
+@gql.django.partial(models.Source)
+class SourcePartial(gql.NodeInputPartial):
+    id: gql.auto
+    identifier: gql.auto
+    bib_entry: LazyType['BibEntryPartial', 'mpcd.corpus.types.bibliography']
+    description: gql.auto

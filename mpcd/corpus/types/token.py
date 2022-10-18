@@ -31,21 +31,40 @@ class Token(relay.Node):
     gloss: gql.auto
 
 
-@gql.django.type(models.Token)
+@gql.django.input(models.Token)
 class TokenInput:
+    number: gql.auto
+    text: gql.auto
+    language: gql.auto
+    transcription: gql.auto
+    transliteration: gql.auto
+    lemmas: gql.auto
+    meanings: gql.auto
+    pos: gql.auto
+    morphological_annotation: gql.auto
+    syntactic_annotation: gql.auto
+    comments: gql.auto
+    avestan: gql.auto
+    line: gql.auto
+    previous: gql.auto
+    gloss: gql.auto
+
+
+@gql.django.partial(models.Token)
+class TokenPartial:
     id: gql.auto
     number: gql.auto
     text: gql.auto
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
-    lemmas: Optional[List[gql.NodeInput]]
-    meanings: Optional[List[gql.NodeInput]]
+    lemmas: gql.auto
+    meanings: gql.auto
     pos: gql.auto
-    morphological_annotation: Optional[List[gql.NodeInput]]
-    syntactic_annotation: Optional[List[gql.NodeInput]]
-    comments: Optional[List[gql.NodeInput]]
+    morphological_annotation: gql.auto
+    syntactic_annotation: gql.auto
+    comments: gql.auto
     avestan: gql.auto
     line: gql.auto
-    previous: Optional['Token']
+    previous: gql.auto
     gloss: gql.auto

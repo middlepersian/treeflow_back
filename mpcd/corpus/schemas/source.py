@@ -3,7 +3,7 @@ from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from typing import Optional
 
-from mpcd.corpus.types.source import Source
+from mpcd.corpus.types.source import Source, SourceInput, SourcePartial
 
 
 @gql.type
@@ -12,4 +12,11 @@ class Query:
     sources:  relay.Connection[Source] = gql.django.connection()
 
 
-schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])
+@gql.type
+class Mutation:
+    create_source: Source = gql.django.create_mutation(SourceInput)
+    update_source: Source = gql.django.update_mutation(SourcePartial)
+    delete_source: Source = gql.django.delete_mutation(gql.NodeInput)
+
+
+schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])

@@ -4,7 +4,7 @@ from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 
 
-from mpcd.corpus.types.comment import Comment
+from mpcd.corpus.types.comment import Comment, CommentInput, CommentPartial
 
 
 @gql.type
@@ -13,4 +13,11 @@ class Query:
     comments: relay.Connection[Comment] = gql.django.connection()
 
 
-schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])
+@gql.type
+class Mutation:
+    create_comment: Comment = gql.django.create_mutation(CommentInput)
+    update_comment: Comment = gql.django.update_mutation(CommentPartial)
+    delete_comment: Comment = gql.django.delete_mutation(gql.NodeInput)
+
+
+schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])

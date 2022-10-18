@@ -10,5 +10,3 @@ class User(relay.Node):
     is_superuser: gql.auto
     is_staff: gql.auto
     email: gql.auto
-
-

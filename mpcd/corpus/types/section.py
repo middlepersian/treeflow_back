@@ -5,7 +5,7 @@ from typing import List, TYPE_CHECKING, Optional
 from strawberry.lazy_type import LazyType
 
 from mpcd.corpus import models
-
+from mpcd.corpus.types.comment import CommentPartial, CommentInput
 
 
 @gql.django.type(models.Section)
@@ -20,3 +20,30 @@ class Section(relay.Node):
     previous: Optional['Section']
     container: Optional['Section']
     comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
+
+
+@gql.django.input(models.Section)
+class SectionInput:
+    number: gql.auto
+    identifier: gql.auto
+    text: gql.auto
+    section_type: gql.auto
+    source: gql.auto
+    tokens: gql.auto
+    previous: gql.auto
+    container: gql.auto
+    comments: Optional[LazyType['CommentInput', 'mpcd.corpus.types.comment']]
+
+
+@gql.django.partial(models.Section)
+class SectionPartial:
+    id: gql.auto
+    number: gql.auto
+    identifier: gql.auto
+    text: gql.auto
+    section_type: gql.auto
+    source: gql.auto
+    tokens: gql.auto
+    previous: gql.auto
+    container: gql.auto
+    comments: Optional[LazyType['CommentPartial', 'mpcd.corpus.types.comment']]

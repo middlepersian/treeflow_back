@@ -18,3 +18,21 @@ class Lemma(relay.Node):
     related_lemmas: List['Lemma']
     related_meanings: List[LazyType['Meaning', 'mpcd.dict.types.meaning']]
     comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
+
+
+@gql.django.input(models.Lemma)
+class LemmaInput:
+    id: gql.auto
+    word: gql.auto
+    language: gql.auto
+    related_lemmas: List['LemmaInput']
+    related_meanings: List[LazyType['MeaningInput', 'mpcd.dict.types.meaning']]
+
+
+@gql.django.partial(models.Lemma)
+class LemmaPartial:
+    id: gql.auto
+    word: gql.auto
+    language: gql.auto
+    related_lemmas: List['LemmaPartial']
+    related_meanings: List[LazyType['MeaningPartial', 'mpcd.dict.types.meaning']]

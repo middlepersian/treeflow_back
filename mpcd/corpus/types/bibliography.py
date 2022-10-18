@@ -7,3 +7,12 @@ from mpcd.corpus import models
 class BibEntry(relay.Node):
     id: gql.auto
     key: gql.auto
+
+@gql.django.input(models.BibEntry)
+class BibEntryInput:
+    key: gql.auto
+
+@gql.django.partial(models.BibEntry)
+class BibEntryPartial(gql.NodeInputPartial):
+    id: gql.auto
+    key: gql.auto    

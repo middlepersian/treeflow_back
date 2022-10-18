@@ -14,8 +14,28 @@ class TokenComment(relay.Node):
     id: gql.auto
     user: LazyType['User', 'mpcd.corpus.types.user']
     text: gql.auto
-    created_at: gql.auto
-    updated_at: gql.auto
+
+    uncertain: Optional[List[Optional[str]]]
+    to_discuss: Optional[List[Optional[str]]]
+    new_suggestion:  Optional[List[Optional[str]]]
+
+
+@gql.django.input(models.TokenComment)
+class TokenCommentInput:
+    user: gql.auto
+    text: gql.auto
+
+    uncertain: Optional[List[Optional[str]]]
+    to_discuss: Optional[List[Optional[str]]]
+    new_suggestion:  Optional[List[Optional[str]]]
+
+
+@gql.django.partial(models.TokenComment)
+class TokenCommentPartial:
+    id: gql.auto
+    user: gql.auto
+    text: gql.auto
+
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]
     new_suggestion:  Optional[List[Optional[str]]]

@@ -15,3 +15,16 @@ class MorphologicalAnnotation(relay.Node):
     id: gql.auto
     feature: gql.auto
     feature_value: gql.auto
+
+
+@gql.django.input(models.MorphologicalAnnotation)
+class MorphologicalAnnotationInput:
+    feature: gql.auto
+    feature_value: gql.auto
+
+@gql.django.partial(models.MorphologicalAnnotation)
+class MorphologicalAnnotationPartial(gql.NodeInputPartial):
+    id: gql.auto
+    feature: gql.auto
+    feature_value: gql.auto
+        
