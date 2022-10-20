@@ -70,6 +70,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "simple_history",
     "strawberry.django",
+    "strawberry_django_plus",
     "strawberry_django_jwt.refresh_token"
 ]
 
