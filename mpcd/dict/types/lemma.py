@@ -22,7 +22,6 @@ class Lemma(relay.Node):
 
 @gql.django.input(models.Lemma)
 class LemmaInput:
-    id: gql.auto
     word: gql.auto
     language: gql.auto
     related_lemmas: List['LemmaInput']

@@ -21,7 +21,6 @@ class Meaning(relay.Node):
 
 @gql.django.input(models.Meaning)
 class MeaningInput:
-    id: gql.auto
     meaning: gql.auto
     language: gql.auto
     related_meanings: List['MeaningInput']
