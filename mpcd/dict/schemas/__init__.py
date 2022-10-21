@@ -1,2 +1,2 @@
-from .lemma import Query
-from .meaning import Query
+from .lemma import Query, Mutation
+from .meaning import Query, Mutation

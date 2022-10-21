@@ -23,8 +23,8 @@ class Meaning(relay.Node):
 class MeaningInput:
     meaning: gql.auto
     language: gql.auto
-    related_meanings: List['MeaningInput']
-    comments: List[LazyType['CommentInput', 'mpcd.corpus.types.comment']]
+    related_meanings: gql.auto
+    comments: gql.auto
 
 
 @gql.django.partial(models.Meaning)
@@ -32,5 +32,5 @@ class MeaningPartial:
     id: gql.auto
     meaning: gql.auto
     language: gql.auto
-    related_meanings: List['MeaningPartial']
-    comments: List[LazyType['CommentPartial', 'mpcd.corpus.types.comment']]
+    related_meanings: gql.auto
+    comments: gql.auto

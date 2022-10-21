@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser, Group
 import factory
 
-from demo.models import Issue, Milestone, Project, Tag
+from mpcd.corpus.models import Comment
 
 _T = TypeVar("_T")
 User = cast(Type[AbstractUser], get_user_model())
@@ -49,35 +49,9 @@ class SuperuserUserFactory(UserFactory):
     is_superuser = True
 
 
-class ProjectFactory(_BaseFactory[Project]):
+class CommentFactory(_BaseFactory[Comment]):
     class Meta:
-        model = Project
+        model = Comment
 
-    name = factory.Sequence(lambda n: f"Project {n}")
-    due_date = factory.Faker("future_date")
-
-
-class MilestoneFactory(_BaseFactory[Milestone]):
-    class Meta:
-        model = Milestone
-
-    name = factory.Sequence(lambda n: f"Milestone {n}")
-    due_date = factory.Faker("future_date")
-    project = factory.SubFactory(ProjectFactory)
-
-
-class IssueFactory(_BaseFactory[Issue]):
-    class Meta:
-        model = Issue
-
-    name = factory.Sequence(lambda n: f"Issue {n}")
-    kind = factory.Iterator(Issue.Kind)
-    milestone = factory.SubFactory(MilestoneFactory)
-    priority = factory.Faker("pyint", min_value=0, max_value=5)
-
-
-class TagFactory(_BaseFactory[Tag]):
-    class Meta:
-        model = Tag
-
-    name = factory.Sequence(lambda n: f"Tag {n}")
+    text = factory.Faker("text")
+    author = factory.SubFactory(UserFactory)

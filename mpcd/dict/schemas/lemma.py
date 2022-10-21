@@ -19,4 +19,4 @@ class Mutation:
     delete_lemma: Lemma = gql.django.delete_mutation(gql.NodeInput)
 
 
-schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension])
+schema = gql.Schema(query=Query, mutation= Mutation, extensions=[DjangoOptimizerExtension])

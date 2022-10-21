@@ -12,7 +12,7 @@ class Lemma(relay.Node):
 
     token_lemmas:  relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
 
-    id: gql.auto
+    #id: gql.auto
     word: gql.auto
     language: gql.auto
     related_lemmas: List['Lemma']
@@ -24,8 +24,8 @@ class Lemma(relay.Node):
 class LemmaInput:
     word: gql.auto
     language: gql.auto
-    related_lemmas: List['LemmaInput']
-    related_meanings: List[LazyType['MeaningInput', 'mpcd.dict.types.meaning']]
+    related_lemmas: gql.auto
+    related_meanings: gql.auto
 
 
 @gql.django.partial(models.Lemma)
@@ -33,5 +33,5 @@ class LemmaPartial:
     id: gql.auto
     word: gql.auto
     language: gql.auto
-    related_lemmas: List['LemmaPartial']
-    related_meanings: List[LazyType['MeaningPartial', 'mpcd.dict.types.meaning']]
+    related_lemmas: gql.auto
+    related_meanings: gql.auto

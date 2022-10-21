@@ -2,7 +2,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
 from strawberry.lazy_type import LazyType
-
+import uuid
 from mpcd.corpus import models
 
 
@@ -10,7 +10,7 @@ from mpcd.corpus import models
 class TextSigle(relay.Node):
     text_text_sigle: relay.Connection[LazyType['Text', 'mpcd.corpus.types.text']]
 
-    id: gql.auto
+    id: uuid.UUID
     sigle: gql.auto
     genre: gql.auto
 

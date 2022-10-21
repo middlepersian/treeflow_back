@@ -8,7 +8,6 @@ from mpcd.corpus import models
 
 @gql.django.type(models.Comment)
 class Comment(relay.Node):
-    id: gql.auto
     user: Optional[LazyType['User', 'mpcd.corpus.types.user']]
     text: gql.auto
     created_at: gql.auto
