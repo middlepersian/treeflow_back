@@ -1,20 +1,23 @@
+from strawberry import lazy
 from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Optional
-from strawberry.lazy_type import LazyType
+from typing import List, TYPE_CHECKING, Optional, Annotated
 from mpcd.corpus import models
-from mpcd.corpus.types.comment import CommentPartial, CommentInput
+
+if TYPE_CHECKING:
+    from .folio import Folio
+    from .comment import Comment, CommentPartial, CommentInput
+    from .token import Token
 
 
 @gql.django.type(models.Line)
 class Line(relay.Node):
-    token_line: relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
+    token_line: relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
 
     id: gql.auto
     number: gql.auto
-    folio: LazyType['Folio', 'mpcd.corpus.types.folio']
-    comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
+    folio: Annotated['Folio', lazy('mpcd.corpus.types.folio')]
+    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
     previous: Optional['Line']
 
 
@@ -22,7 +25,7 @@ class Line(relay.Node):
 class LineInput:
     number: gql.auto
     folio: gql.auto
-    comments: Optional[List[CommentInput]]
+    comments: gql.auto
     previous: gql.auto
 
 
@@ -31,5 +34,5 @@ class LinePartial(gql.NodeInputPartial):
     id: gql.auto
     number: gql.auto
     folio: gql.auto
-    comments: Optional[gql.ListInput[CommentPartial]]
+    comments:  gql.auto
     previous: gql.auto

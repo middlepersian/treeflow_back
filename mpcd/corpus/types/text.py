@@ -1,11 +1,8 @@
-
-from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
-from strawberry_django_plus.gql import relay
 from strawberry import lazy
+from strawberry_django_plus import gql
+from strawberry_django_plus.gql import relay
 from typing import List, TYPE_CHECKING, Optional, Annotated
 from mpcd.corpus import models
-import uuid
 
 if TYPE_CHECKING:
     from .token import Token
@@ -14,8 +11,8 @@ if TYPE_CHECKING:
     from .corpus import Corpus
     from .text_sigle import TextSigle
     from .user import User
-    from .source import Source, SourcePartial
-    from .bibliography import BibEntry, BibEntryPartial
+    from .source import Source
+    from .bibliography import BibEntry
 
 
 @gql.django.type(models.Text)
@@ -26,7 +23,7 @@ class Text(relay.Node):
     sentence_text: relay.Connection[Annotated['Sentence',  lazy('mpcd.corpus.types.sentence')]]
 
     # fields
-    id: uuid.UUID
+    id: gql.auto
     corpus: Annotated['Corpus', lazy('mpcd.corpus.types.corpus')]
     title: gql.auto
     text_sigle: Annotated['TextSigle', lazy('mpcd.corpus.types.text_sigle')]
@@ -58,5 +55,5 @@ class TextPartial(gql.NodeInputPartial):
     editors: gql.auto
     collaborators: gql.auto
     stage: gql.auto
-    sources: Optional[List[Annotated['SourcePartial', lazy('mpcd.corpus.types.source')]]]
-    resources: Optional[List[Annotated['BibEntryPartial', lazy('mpcd.corpus.types.bibliography')]]]
+    sources: gql.auto
+    resources: gql.auto

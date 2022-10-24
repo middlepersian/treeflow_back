@@ -1,16 +1,17 @@
+from strawberry import lazy
 from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Optional
-from strawberry.lazy_type import LazyType
+from typing import Annotated, TYPE_CHECKING
 
 from mpcd.corpus import models
-from mpcd.corpus.types.comment import CommentPartial, CommentInput
+
+if TYPE_CHECKING:
+    from .section import Section
 
 
 @gql.django.type(models.SectionType)
 class SectionType(relay.Node):
-    section_section_type: relay.Connection[LazyType['Section', 'mpcd.corpus.types.section']]
+    section_section_type: relay.Connection[Annotated['Section', lazy('mpcd.corpus.types.section')]]
 
     id: gql.auto
     identifier: gql.auto

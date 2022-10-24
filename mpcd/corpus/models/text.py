@@ -27,6 +27,8 @@ class Text(models.Model):
     resources = models.ManyToManyField(BibEntry, blank=True, related_name='text_resources')
     history = HistoricalRecords(inherit=True)
 
+    ## TODO: add comment
+
     class Meta:
         constraints = [
 

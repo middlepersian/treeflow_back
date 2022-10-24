@@ -1,31 +1,36 @@
+from strawberry import lazy
 from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Optional
-from strawberry.lazy_type import LazyType
+from typing import List, TYPE_CHECKING, Optional, Annotated
 
 from mpcd.corpus import models
+
+if TYPE_CHECKING:
+    from .comment import Comment
+    from mpcd.dict.types import Meaning
+    from .sentence import Sentence
+    from .text import Text
+    from .token import Token
 
 
 @gql.django.type(models.Sentence)
 class Sentence(relay.Node):
     id: gql.auto
     number: float
-    text: LazyType['Text', 'mpcd.corpus.types.text']
-    tokens: List[LazyType['Token', 'mpcd.corpus.types.token']]
-    translations: List[LazyType['Meaning', 'mpcd.dict.types.meaning']]
-    comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
-    previous: Optional[LazyType['Sentence', 'mpcd.corpus.types.sentence']]
+    text: Annotated['Text', lazy('mpcd.corpus.types.text')]
+    tokens: List[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    translations: List[Annotated['Meaning', lazy('mpcd.dict.types.meaning')]]
+    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    previous: Optional[Annotated['Sentence', lazy('mpcd.corpus.types.sentence')]]
 
 
 @gql.django.input(models.Sentence)
 class SentenceInput:
     number: float
     text: gql.auto
-    # see how this works
     tokens: gql.auto
-    translations: Optional[List[LazyType['MeaningInput', 'mpcd.dict.types.meaning']]]
-    comments: Optional[List[LazyType['CommentInput', 'mpcd.corpus.types.comment']]]
+    translations: gql.auto
+    comments: gql.auto
     previous: gql.auto
 
 
@@ -34,8 +39,7 @@ class SentencePartial:
     id: gql.auto
     number: float
     text: gql.auto
-    # see how this works
     tokens: gql.auto
-    translations: Optional[List[LazyType['MeaningPartial', 'mpcd.dict.types.meaning']]]
-    comments: Optional[List[LazyType['CommentPartial', 'mpcd.corpus.types.comment']]]
+    translations: gql.auto
+    comments: gql.auto
     previous: gql.auto

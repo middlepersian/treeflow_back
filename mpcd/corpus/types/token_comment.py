@@ -1,18 +1,21 @@
+from strawberry import lazy
 from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from strawberry.lazy_type import LazyType
-from typing import List, TYPE_CHECKING, Optional
+from typing import List, TYPE_CHECKING, Optional, Annotated
 from mpcd.corpus import models
+
+if TYPE_CHECKING:
+    from .token import Token
+    from .user import User
 
 
 @gql.django.type(models.TokenComment)
 class TokenComment(relay.Node):
 
-    token_comments: relay.Connection[LazyType['Token', 'mpcd.corpus.types.token']]
+    token_comments: relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
 
     id: gql.auto
-    user: LazyType['User', 'mpcd.corpus.types.user']
+    user: Annotated['User', lazy('mpcd.corpus.types.user')]
     text: gql.auto
 
     uncertain: Optional[List[Optional[str]]]

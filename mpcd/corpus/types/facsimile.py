@@ -1,31 +1,37 @@
+from strawberry import lazy
 from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.gql import relay
-from strawberry.lazy_type import LazyType
-from typing import List, TYPE_CHECKING, Optional
+from typing import Annotated, List, TYPE_CHECKING, Optional
 from mpcd.corpus import models
 from mpcd.corpus.types.comment import CommentPartial, CommentInput
+
+if TYPE_CHECKING:
+    from .bibliography import BibEntry
+    from .codex_part import CodexPart
+    from .comment import Comment, CommentPartial, CommentInput
+    from .folio import Folio
 
 
 @gql.django.type(models.Facsimile)
 class Facsimile(relay.Node):
-    folio_facsimile: relay.Connection[LazyType['Folio', 'mpcd.corpus.types.folio']]
+    folio_facsimile: relay.Connection[Annotated['Folio', lazy('mpcd.corpus.types.folio')]]
 
     id: gql.auto
-    bib_entry: LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
-    codex_part:  LazyType['CodexPart', 'mpcd.corpus.types.codex_part']
-    comments: List[LazyType['Comment', 'mpcd.corpus.types.comment']]
+    bib_entry: Annotated['BibEntry', lazy('mpcd.corpus.types.bibliography')]
+    codex_part:  Annotated['CodexPart', lazy('mpcd.corpus.types.codex_part')]
+    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
 
 
 @gql.django.input(models.Facsimile)
 class FacsimileInput:
     bib_entry: gql.auto
     codex_part: gql.auto
-    comments: Optional[List[CommentInput]]
+    comments: gql.auto
+
 
 @gql.django.partial(models.Facsimile)
 class FacsimilePartial(gql.NodeInputPartial):
     id: gql.auto
     bib_entry: gql.auto
     codex_part: gql.auto
-    comments: Optional[gql.ListInput[CommentPartial]]    
+    comments: gql.auto

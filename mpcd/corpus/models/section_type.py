@@ -7,6 +7,8 @@ class SectionType(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     identifier = models.CharField(max_length=30, unique=True)
 
+    ## TODO add comments
+
     history = HistoricalRecords()
 
     def __str__(self):

@@ -1,14 +1,16 @@
-
+from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from strawberry.lazy_type import LazyType
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Annotated, Optional
 from mpcd.corpus import models
+
+if TYPE_CHECKING:
+    from .user import User
 
 
 @gql.django.type(models.Comment)
 class Comment(relay.Node):
-    user: Optional[LazyType['User', 'mpcd.corpus.types.user']]
+    user: Optional[Annotated['User', lazy('mpcd.corpus.types.user')]]
     text: gql.auto
     created_at: gql.auto
     updated_at: gql.auto
