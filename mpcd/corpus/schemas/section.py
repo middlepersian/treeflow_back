@@ -21,6 +21,8 @@ class Mutation:
 
     @gql.django.input_mutation
     def set_previous_section(self, info, current_section_id: relay.GlobalID, previous_section_id: relay.GlobalID) -> Section:
+        ## get the current section
+        current_section = relay.from_global_id(current_section_id)
         obj = id.resolve_node(info)
         if obj.some_field == "some_value":
             raise ValidationError("Cannot update obj with some_value")
