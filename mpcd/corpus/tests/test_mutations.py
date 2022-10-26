@@ -2,8 +2,7 @@ import pytest
 from strawberry_django_plus.relay import from_base64, to_base64
 
 from .utils import GraphQLTestClient, assert_num_queries
-from .faker import(UserFactory)
-
+from .faker import(UserFactory, TextFactory, TextSigleFactory)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -67,6 +66,7 @@ def test_create_comment(db, gql_client: GraphQLTestClient):
 
     """
     user = UserFactory.create()
+    print("USER_FAKER", user, to_base64("User", user.pk))
     res = gql_client.query(
         query,
         {
@@ -85,3 +85,47 @@ def test_create_comment(db, gql_client: GraphQLTestClient):
 
     }
     print(res)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_create_text(db, gql_client: GraphQLTestClient):
+    query = """
+    mutation CreateText($input: TextInput!) {
+    createText(input: $input) {
+        ... on  Text{
+        title
+        textSigle {
+            id
+        }
+        }
+        ... on OperationInfo{
+        messages{
+            kind
+            message
+            field
+        }
+        }
+    }
+    }
+    """
+    text_faker = TextFactory.create()
+    print("TEXT_FAKER", text_faker, to_base64("Text", text_faker.pk),  text_faker.text_sigle.id)
+
+    #text_sigle_faker = TextSigleFactory.create()
+    #print("TEXT_SIGLE", text_sigle_faker.id, to_base64("TextSigle", text_sigle_faker.id))
+    res = gql_client.query(
+        query,
+        {
+            "input": {
+                "title": "This is a text",
+                "textSigle": {"id": to_base64("TextSigle", text_faker.text_sigle.id)},
+            }
+        },
+    )
+    print("RES_DATA", res.data)
+    assert res.data == {
+        "createText": {
+            "title": "This is a text",
+            "textSigle": {"id": to_base64("TextSigle",  text_faker.text_sigle.id)},
+        }
+    }
