@@ -50,7 +50,11 @@ def test_create_comment(db, gql_client: GraphQLTestClient):
     createComment(input: $input) {
         ... on  Comment{
         text
+        user {
+            id
         }
+        }
+
         ... on OperationInfo{
         messages{
             kind
@@ -75,6 +79,7 @@ def test_create_comment(db, gql_client: GraphQLTestClient):
 
     assert res.data == {
         "createComment": {
+            "user": {"id": to_base64("User", user.pk)},
             "text": "This is a comment",
         }
 
