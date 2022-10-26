@@ -1,30 +1,82 @@
 import pytest
+from strawberry_django_plus.relay import from_base64, to_base64
 
-from mpcd.corpus.models import Comment
-from .faker import CommentFactory
 from .utils import GraphQLTestClient, assert_num_queries
+from .faker import(UserFactory)
+
 
 
 @pytest.mark.django_db(transaction=True)
-def test_input_mutation(db, gql_client: GraphQLTestClient):
+def test_create_text_sigle(db, gql_client: GraphQLTestClient):
     query = """
-    mutation CreateComment ($input: CreateCommentInput!) {
-        createComment (input: $input) {
-            text
+    mutation CreateTextSigle($input: TextSigleInput!) {
+    createTextSigle(input: $input) {
+        ... on  TextSigle{
+        sigle
         }
-      }
+        ... on OperationInfo{
+        messages{
+            kind
+            message
+            field
+        }
+        }
+    }
+    }
     """
-    with assert_num_queries(1):
-        res = gql_client.query(
-            query,
-            {
-                "input": {
-                    "text": "Hello world",
-                }
-            },
-        )
-        assert res.data == {
-            "createComment": {
-                "text": "Hello world",
+    res = gql_client.query(
+        query,
+        {
+            "input": {
+                "sigle": "LOVE",
+                "genre": "POE",
             }
+        },
+    )
+
+    assert res.data == {
+        "createTextSigle": {
+            "sigle": "LOVE",
         }
+
+    }
+    print(res)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_create_comment(db, gql_client: GraphQLTestClient):
+    query = """
+    mutation CreateComment($input: CommentInput!) {
+    createComment(input: $input) {
+        ... on  Comment{
+        text
+        }
+        ... on OperationInfo{
+        messages{
+            kind
+            message
+            field
+        }
+        }
+    }
+    }
+
+    """
+    user = UserFactory.create()
+    res = gql_client.query(
+        query,
+        {
+            "input": {
+                "user": {"id": to_base64("User", user.pk)},
+                "text": "This is a comment",
+            }
+        },
+    )
+
+    assert res.data == {
+        "createComment": {
+            "text": "This is a comment",
+        }
+
+    }
+    print(res)

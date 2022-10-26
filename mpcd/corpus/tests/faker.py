@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser, Group
 import factory
 
+
 from mpcd.corpus.models import Comment
 
 _T = TypeVar("_T")
@@ -33,8 +34,6 @@ class UserFactory(_BaseFactory["User"]):
         model = User
 
     is_active = True
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
     username = factory.Faker("username")
     username = factory.Sequence(lambda n: f"username-{n}")
     email = factory.Faker("email")
