@@ -14,12 +14,12 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Facsimile)
 class Facsimile(relay.Node):
-    folio_facsimile: relay.Connection[Annotated['Folio', lazy('mpcd.corpus.types.folio')]]
+    folio_facsimile: relay.Connection[gql.LazyType['Folio', 'mpcd.corpus.types.folio']]
 
     id: gql.auto
-    bib_entry: Annotated['BibEntry', lazy('mpcd.corpus.types.bibliography')]
-    codex_part:  Annotated['CodexPart', lazy('mpcd.corpus.types.codex_part')]
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
+    codex_part:  gql.LazyType['CodexPart','mpcd.corpus.types.codex_part']
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Facsimile)

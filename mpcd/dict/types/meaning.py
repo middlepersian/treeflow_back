@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 @gql.django.type(models.Meaning)
 class Meaning(relay.Node):
 
-    token_meanings:  relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    token_meanings:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     id: gql.auto
     meaning: gql.auto
     language: gql.auto
     related_meanings: List['Meaning']
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Meaning)

@@ -12,10 +12,10 @@ if TYPE_CHECKING:
 @gql.django.type(models.TokenComment)
 class TokenComment(relay.Node):
 
-    token_comments: relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    token_comments: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     id: gql.auto
-    user: Annotated['User', lazy('mpcd.corpus.types.user')]
+    user: gql.LazyType['User', 'mpcd.corpus.types.user']
     text: gql.auto
 
     uncertain: Optional[List[Optional[str]]]

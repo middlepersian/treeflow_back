@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 @gql.django.type(models.Corpus)
 class Corpus(relay.Node):
 
-    text_corpus: relay.Connection[Annotated['Text', lazy('mpcd.corpus.types.text')]]
+    text_corpus: relay.Connection[gql.LazyType['Text', 'mpcd.corpus.types.text']]
 
     id: gql.auto
     name: gql.auto

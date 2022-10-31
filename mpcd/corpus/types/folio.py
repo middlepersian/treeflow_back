@@ -15,12 +15,12 @@ if TYPE_CHECKING:
 @gql.django.type(models.Folio)
 class Folio(relay.Node):
 
-    line_folio: relay.Connection[Annotated['Line', lazy('mpcd.corpus.types.line')]]
+    line_folio: relay.Connection[gql.LazyType['Line', 'mpcd.corpus.types.line']]
 
     id: gql.auto
     number: gql.auto
-    facsimile: Annotated['Facsimile', lazy('mpcd.corpus.types.facsimile')]
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    facsimile: gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional['Folio']
 
 # TODO: compare with models how comments work

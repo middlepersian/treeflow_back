@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 class Sentence(relay.Node):
     id: gql.auto
     number: float
-    text: Annotated['Text', lazy('mpcd.corpus.types.text')]
-    tokens: List[Annotated['Token', lazy('mpcd.corpus.types.token')]]
-    translations: List[Annotated['Meaning', lazy('mpcd.dict.types.meaning')]]
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
-    previous: Optional[Annotated['Sentence', lazy('mpcd.corpus.types.sentence')]]
+    text: gql.LazyType['Text', 'mpcd.corpus.types.text']
+    tokens: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]
+    translations: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
+    previous: Optional[gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']]
 
 
 @gql.django.input(models.Sentence)

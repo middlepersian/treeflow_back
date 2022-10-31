@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.SectionType)
 class SectionType(relay.Node):
-    section_section_type: relay.Connection[Annotated['Section', lazy('mpcd.corpus.types.section')]]
+    section_section_type: relay.Connection[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
     id: gql.auto
     identifier: gql.auto

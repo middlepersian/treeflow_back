@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 @gql.django.type(models.Dependency)
 class Dependency(relay.Node):
 
-    token_syntactic_annotation: relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    token_syntactic_annotation: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     id: gql.auto
-    head:  Annotated['Token', lazy('mpcd.corpus.types.token')]
+    head:  gql.LazyType['Token', 'mpcd.corpus.types.token']
     rel: gql.auto
     producer: gql.auto
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Dependency)

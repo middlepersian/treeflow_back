@@ -18,20 +18,20 @@ if TYPE_CHECKING:
 @gql.django.type(models.Text)
 class Text(relay.Node):
 
-    token_text: relay.Connection[Annotated['Token',  lazy('mpcd.corpus.types.token')]]
-    section_text: relay.Connection[Annotated['Section',  lazy('mpcd.corpus.types.section')]]
-    sentence_text: relay.Connection[Annotated['Sentence',  lazy('mpcd.corpus.types.sentence')]]
+    token_text: relay.Connection[gql.LazyType['Token',  'mpcd.corpus.types.token']]
+    section_text: relay.Connection[gql.LazyType['Section',  'mpcd.corpus.types.section']]
+    sentence_text: relay.Connection[gql.LazyType['Sentence',  'mpcd.corpus.types.sentence']]
 
     # fields
     id: gql.auto
-    corpus: Annotated['Corpus', lazy('mpcd.corpus.types.corpus')]
+    corpus: gql.LazyType['Corpus', 'mpcd.corpus.types.corpus']
     title: gql.auto
-    text_sigle: Annotated['TextSigle', lazy('mpcd.corpus.types.text_sigle')]
-    editors: List[Annotated['User', lazy('mpcd.corpus.types.user')]]
-    collaborators: List[Annotated['User', lazy('mpcd.corpus.types.user')]]
+    text_sigle: gql.LazyType['TextSigle', 'mpcd.corpus.types.text_sigle']
+    editors: List[gql.LazyType['User', 'mpcd.corpus.types.user']]
+    collaborators: List[gql.LazyType['User', 'mpcd.corpus.types.user']]
     stage: gql.auto
-    sources: List[Annotated['Source', lazy('mpcd.corpus.types.source')]]
-    resources: List[Annotated['BibEntry',  lazy('mpcd.corpus.types.bibliography')]]
+    sources: List[gql.LazyType['Source', 'mpcd.corpus.types.source']]
+    resources: List[gql.LazyType['BibEntry',  'mpcd.corpus.types.bibliography']]
 
 
 @gql.django.input(models.Text)

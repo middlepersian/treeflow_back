@@ -12,12 +12,12 @@ from .comment import Comment
 
 @gql.django.type(models.CodexPart)
 class CodexPart(relay.Node):
-    facsimile_codex_part: relay.Connection[Annotated['Facsimile', lazy('mpcd.corpus.types.facsimile')]]
+    facsimile_codex_part: relay.Connection[gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']]
 
     id: gql.auto
-    codex: Annotated['Codex', lazy('mpcd.corpus.types.codex')]
+    codex: gql.LazyType['Codex','mpcd.corpus.types.codex']
     slug: gql.auto
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.CodexPart)

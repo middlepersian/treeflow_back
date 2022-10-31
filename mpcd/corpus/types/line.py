@@ -12,12 +12,12 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Line)
 class Line(relay.Node):
-    token_line: relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    token_line: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     id: gql.auto
     number: gql.auto
-    folio: Annotated['Folio', lazy('mpcd.corpus.types.folio')]
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    folio: gql.LazyType['Folio', 'mpcd.corpus.types.folio']
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional['Line']
 
 

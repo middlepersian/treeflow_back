@@ -14,14 +14,14 @@ if TYPE_CHECKING:
 @gql.django.type(models.Lemma)
 class Lemma(relay.Node):
 
-    token_lemmas:  relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    token_lemmas:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     #id: gql.auto
     word: gql.auto
     language: gql.auto
     related_lemmas: List['Lemma']
-    related_meanings: List[Annotated['Meaning', lazy('mpcd.dict.types.meaning')]]
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    related_meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Lemma)

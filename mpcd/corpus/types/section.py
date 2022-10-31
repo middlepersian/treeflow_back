@@ -18,13 +18,13 @@ class Section(relay.Node):
     id: gql.auto
     number: gql.auto
     identifier: gql.auto
-    text: Optional[Annotated['Text', lazy('mpcd.corpus.types.text')]]
-    section_type:  Optional[Annotated['SectionType', lazy('mpcd.corpus.types.section_type')]]
-    source:  Optional[Annotated['Source', lazy('mpcd.corpus.types.source')]]
-    tokens: List[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    text: Optional[gql.LazyType['Text', 'mpcd.corpus.types.text']]
+    section_type:  Optional[gql.LazyType['SectionType', 'mpcd.corpus.types.section_type']]
+    source:  Optional[gql.LazyType['Source', 'mpcd.corpus.types.source']]
+    tokens: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]
     previous: Optional['Section']
     container: Optional['Section']
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]
+    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Section)

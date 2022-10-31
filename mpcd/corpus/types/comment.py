@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Comment)
 class Comment(relay.Node):
-    user: Optional[Annotated['User', lazy('mpcd.corpus.types.user')]]
+    user: Optional[gql.LazyType['User', 'mpcd.corpus.types.user']]
     text: gql.auto
     created_at: gql.auto
     updated_at: gql.auto

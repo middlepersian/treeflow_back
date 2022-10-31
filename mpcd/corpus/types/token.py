@@ -1,7 +1,7 @@
 from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Optional, Annotated
+from typing import List, TYPE_CHECKING, Optional
 
 from mpcd.corpus import models
 
@@ -19,23 +19,23 @@ if TYPE_CHECKING:
 @gql.django.type(models.Token)
 class Token(relay.Node):
 
-    section_tokens: List[Annotated['Section', lazy('mpcd.corpus.types.section')]]
+    section_tokens: List[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
     id: gql.auto
     number: gql.auto
-    text: Annotated['Text', lazy('mpcd.corpus.types.text')]
+    text: gql.LazyType['Text', 'mpcd.corpus.types.text']
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
-    lemmas: List[Annotated['Lemma', lazy('mpcd.dict.types.lemma')]]
-    meanings: List[Annotated['Meaning', lazy('mpcd.dict.types.meaning')]]
+    lemmas: List[gql.LazyType['Lemma', 'mpcd.dict.types.lemma']]
+    meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
     pos: gql.auto
-    morphological_annotation: List[Annotated['MorphologicalAnnotation',
-                                             lazy('mpcd.corpus.types.morphological_annotation')]]
-    syntactic_annotation: List[Annotated['Dependency', lazy('mpcd.corpus.types.dependency')]]
-    comments: List[Annotated['TokenComment', lazy('mpcd.corpus.types.token_comment')]]
+    morphological_annotation: List[gql.LazyType['MorphologicalAnnotation',
+                                             'mpcd.corpus.types.morphological_annotation']]
+    syntactic_annotation: List[gql.LazyType['Dependency', 'mpcd.corpus.types.dependency']]
+    comments: List[gql.LazyType['TokenComment', 'mpcd.corpus.types.token_comment']]
     avestan: gql.auto
-    line: Annotated['Line', lazy('mpcd.corpus.types.line')]
+    line: gql.LazyType['Line', 'mpcd.corpus.types.line']
     previous: Optional['Token']
     gloss: gql.auto
 

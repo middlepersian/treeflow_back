@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Codex)
 class Codex(relay.Node):
-    codex_part_codex: relay.Connection[Annotated['CodexPart', lazy('mpcd.corpus.types.codex_part')]]
+    codex_part_codex: relay.Connection[gql.LazyType['CodexPart', 'mpcd.corpus.types.codex_part']]
+
     sigle: gql.auto
     comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]

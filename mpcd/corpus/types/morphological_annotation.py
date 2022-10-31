@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 @gql.django.type(models.MorphologicalAnnotation)
 class MorphologicalAnnotation(relay.Node):
 
-    token_morphological_annotation: relay.Connection[Annotated['Token', lazy('mpcd.corpus.types.token')]]
+    token_morphological_annotation: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     id: gql.auto
     feature: gql.auto

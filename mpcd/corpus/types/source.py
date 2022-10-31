@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Source(relay.Node):
     id: gql.auto
     identifier: gql.auto
-    bib_entry: Annotated['BibEntry', lazy('mpcd.corpus.types.bibliography')]
+    bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     description: gql.auto
 
 

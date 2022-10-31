@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.TextSigle)
 class TextSigle(relay.Node):
-    text_text_sigle: relay.Connection[Annotated['Text', lazy('mpcd.corpus.types.text')]]
+    text_text_sigle: relay.Connection[gql.LazyType['Text', 'mpcd.corpus.types.text']]
 
     id: gql.auto
     sigle: gql.auto
