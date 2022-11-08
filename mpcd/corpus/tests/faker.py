@@ -7,7 +7,7 @@ import factory
 from factory import fuzzy
 
 
-from mpcd.corpus.models import Comment, Text, TextSigle, Corpus
+from mpcd.corpus.models import Comment, Text, TextSigle
 
 _T = TypeVar("_T")
 User = cast(Type[AbstractUser], get_user_model())
@@ -49,7 +49,7 @@ class SuperuserUserFactory(UserFactory):
     is_superuser = True
 
 
-class CommentFactory(_BaseFactory["Comment"]):
+class CommentFactory(_BaseFactory[Comment]):
     class Meta:
         model = Comment
 
@@ -57,8 +57,7 @@ class CommentFactory(_BaseFactory["Comment"]):
     author = factory.SubFactory(UserFactory)
 
 
-
-class TextSigleFactory(_BaseFactory["TextSigle"]):
+class TextSigleFactory(_BaseFactory[TextSigle]):
     class Meta:
         model = TextSigle
 
@@ -66,7 +65,7 @@ class TextSigleFactory(_BaseFactory["TextSigle"]):
     genre = fuzzy.FuzzyText(length=3)
 
 
-class TextFactory(_BaseFactory["Text"]):
+class TextFactory(_BaseFactory[Text]):
     class Meta:
         model = Text
 

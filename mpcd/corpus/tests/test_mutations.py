@@ -12,6 +12,7 @@ def test_create_text_sigle(db, gql_client: GraphQLTestClient):
     createTextSigle(input: $input) {
         ... on  TextSigle{
         sigle
+        genre
         }
         ... on OperationInfo{
         messages{
@@ -36,6 +37,7 @@ def test_create_text_sigle(db, gql_client: GraphQLTestClient):
     assert res.data == {
         "createTextSigle": {
             "sigle": "LOVE",
+            "genre": "POE"
         }
 
     }
@@ -92,11 +94,14 @@ def test_create_text(db, gql_client: GraphQLTestClient):
     query = """
     mutation CreateText($input: TextInput!) {
     createText(input: $input) {
+        __typename
         ... on  Text{
         title
         textSigle {
             id
-        }
+            sigle
+            genre
+            }
         }
         ... on OperationInfo{
         messages{
@@ -108,24 +113,23 @@ def test_create_text(db, gql_client: GraphQLTestClient):
     }
     }
     """
-    text_faker = TextFactory.create()
-    print("TEXT_FAKER", text_faker, to_base64("Text", text_faker.pk),  text_faker.text_sigle.id)
+    text_sigle_faker = TextSigleFactory.create(sigle="LOVE", genre="POE")
+    print("TEXT_SIGLE_FAKER", text_sigle_faker, to_base64("TextSigle",
+          text_sigle_faker.pk), text_sigle_faker.sigle, text_sigle_faker.genre)
 
-    #text_sigle_faker = TextSigleFactory.create()
-    #print("TEXT_SIGLE", text_sigle_faker.id, to_base64("TextSigle", text_sigle_faker.id))
     res = gql_client.query(
         query,
         {
             "input": {
                 "title": "This is a text",
-                "textSigle": {"id": to_base64("TextSigle", text_faker.text_sigle.id)},
-            }
-        },
+                "textSigle": {"id": to_base64("TextSigle", text_sigle_faker.pk), "sigle": "LOVE", "genre": "POE"},
+
+            }}
     )
-    print("RES_DATA", res.data)
+
     assert res.data == {
         "createText": {
-            "title": "This is a text",
-            "textSigle": {"id": to_base64("TextSigle",  text_faker.text_sigle.id)},
-        }
+            "title": "This is a text"}
     }
+
+    print(res)
