@@ -99,8 +99,6 @@ def test_create_text(db, gql_client: GraphQLTestClient):
         title
         textSigle {
             id
-            sigle
-            genre
             }
         }
         ... on OperationInfo{
@@ -122,7 +120,7 @@ def test_create_text(db, gql_client: GraphQLTestClient):
         {
             "input": {
                 "title": "This is a text",
-                "textSigle": {"id": to_base64("TextSigle", text_sigle_faker.pk), "sigle": "LOVE", "genre": "POE"},
+                "textSigle": {"id": to_base64("TextSigle", text_sigle_faker.pk)},
 
             }}
     )
