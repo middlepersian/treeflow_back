@@ -13,7 +13,7 @@ class MorphologicalAnnotation(relay.Node):
 
     token_morphological_annotation: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    id: gql.auto
+    #id: gql.auto
     feature: gql.auto
     feature_value: gql.auto
 

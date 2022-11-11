@@ -15,7 +15,7 @@ class Meaning(relay.Node):
 
     token_meanings:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    id: gql.auto
+    #id: gql.auto
     meaning: gql.auto
     language: gql.auto
     related_meanings: List['Meaning']

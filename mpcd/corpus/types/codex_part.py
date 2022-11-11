@@ -14,7 +14,7 @@ from .comment import Comment
 class CodexPart(relay.Node):
     facsimile_codex_part: relay.Connection[gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']]
 
-    id: gql.auto
+    #id: gql.auto
     codex: gql.LazyType['Codex','mpcd.corpus.types.codex']
     slug: gql.auto
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]

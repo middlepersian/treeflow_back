@@ -14,6 +14,6 @@ class Corpus(relay.Node):
 
     text_corpus: relay.Connection[gql.LazyType['Text', 'mpcd.corpus.types.text']]
 
-    id: gql.auto
+    #id: gql.auto
     name: gql.auto
     slug: gql.auto

@@ -15,7 +15,7 @@ class Dependency(relay.Node):
 
     token_syntactic_annotation: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    id: gql.auto
+    #id: gql.auto
     head:  gql.LazyType['Token', 'mpcd.corpus.types.token']
     rel: gql.auto
     producer: gql.auto

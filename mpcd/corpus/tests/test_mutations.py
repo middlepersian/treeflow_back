@@ -99,7 +99,7 @@ def test_create_text(db, gql_client: GraphQLTestClient):
         title
         textSigle {
             id
-            }
+        }
         }
         ... on OperationInfo{
         messages{
@@ -112,15 +112,14 @@ def test_create_text(db, gql_client: GraphQLTestClient):
     }
     """
     text_sigle_faker = TextSigleFactory.create(sigle="LOVE", genre="POE")
-    print("TEXT_SIGLE_FAKER", text_sigle_faker, to_base64("TextSigle",
-          text_sigle_faker.pk), text_sigle_faker.sigle, text_sigle_faker.genre)
+    text_faker = TextFactory.create(title="This is a title")
 
     res = gql_client.query(
         query,
         {
             "input": {
-                "title": "This is a text",
-                "textSigle": {"id": to_base64("TextSigle", text_sigle_faker.pk)},
+                "title": text_faker.title,
+                "textSigle": {"id": to_base64("TextSigle", text_faker.text_sigle.id)},
 
             }}
     )

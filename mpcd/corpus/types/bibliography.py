@@ -5,7 +5,7 @@ from mpcd.corpus import models
 
 @gql.django.type(models.BibEntry)
 class BibEntry(relay.Node):
-    id: gql.auto
+#    id: gql.ID
     key: gql.auto
 
 @gql.django.input(models.BibEntry)

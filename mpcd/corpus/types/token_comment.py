@@ -14,7 +14,7 @@ class TokenComment(relay.Node):
 
     token_comments: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    id: gql.auto
+    #id: gql.auto
     user: gql.LazyType['User', 'mpcd.corpus.types.user']
     text: gql.auto
 

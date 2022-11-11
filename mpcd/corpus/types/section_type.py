@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class SectionType(relay.Node):
     section_section_type: relay.Connection[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
-    id: gql.auto
+    #id: gql.auto
     identifier: gql.auto
 
 

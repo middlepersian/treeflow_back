@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Sentence)
 class Sentence(relay.Node):
-    id: gql.auto
+    #id: gql.auto
     number: float
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
     tokens: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]

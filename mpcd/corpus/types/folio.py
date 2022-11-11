@@ -17,7 +17,7 @@ class Folio(relay.Node):
 
     line_folio: relay.Connection[gql.LazyType['Line', 'mpcd.corpus.types.line']]
 
-    id: gql.auto
+    #id: gql.auto
     number: gql.auto
     facsimile: gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]

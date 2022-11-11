@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class TextSigle(relay.Node):
     text_text_sigle: relay.Connection[gql.LazyType['Text', 'mpcd.corpus.types.text']]
 
-    id: gql.auto
+    #id: gql.auto
     sigle: gql.auto
     genre: gql.auto
 

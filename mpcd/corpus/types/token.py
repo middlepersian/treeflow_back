@@ -21,7 +21,7 @@ class Token(relay.Node):
 
     section_tokens: List[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
-    id: gql.auto
+    #id: gql.auto
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
     language: gql.auto

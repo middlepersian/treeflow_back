@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Source)
 class Source(relay.Node):
-    id: gql.auto
+    #id: gql.auto
     identifier: gql.auto
     bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     description: gql.auto

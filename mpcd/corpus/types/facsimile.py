@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Facsimile(relay.Node):
     folio_facsimile: relay.Connection[gql.LazyType['Folio', 'mpcd.corpus.types.folio']]
 
-    id: gql.auto
+    #id: gql.auto
     bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     codex_part:  gql.LazyType['CodexPart','mpcd.corpus.types.codex_part']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]

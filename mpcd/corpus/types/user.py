@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 @gql.django.type(get_user_model())
 class User(relay.Node):
-    id: gql.auto
+    #id: gql.auto
     name: gql.auto
     is_superuser: gql.auto
     is_staff: gql.auto

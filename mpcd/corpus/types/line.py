@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Line(relay.Node):
     token_line: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    id: gql.auto
+    #id: gql.auto
     number: gql.auto
     folio: gql.LazyType['Folio', 'mpcd.corpus.types.folio']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]

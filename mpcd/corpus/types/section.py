@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Section)
 class Section(relay.Node):
-    id: gql.auto
+    #id: gql.auto
     number: gql.auto
     identifier: gql.auto
     text: Optional[gql.LazyType['Text', 'mpcd.corpus.types.text']]
