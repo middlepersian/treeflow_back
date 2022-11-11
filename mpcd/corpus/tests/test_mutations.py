@@ -94,7 +94,6 @@ def test_create_text(db, gql_client: GraphQLTestClient):
     query = """
     mutation CreateText($input: TextInput!) {
     createText(input: $input) {
-        __typename
         ... on  Text{
         title
         textSigle {
@@ -112,21 +111,22 @@ def test_create_text(db, gql_client: GraphQLTestClient):
     }
     """
     text_sigle_faker = TextSigleFactory.create(sigle="LOVE", genre="POE")
-    text_faker = TextFactory.create(title="This is a title")
+    # text_faker = TextFactory.create(title="This is a title")
 
     res = gql_client.query(
         query,
         {
             "input": {
-                "title": text_faker.title,
-                "textSigle": {"id": to_base64("TextSigle", text_faker.text_sigle.id)},
+                "title": "This is a text",
+                "textSigle": {"id": to_base64("TextSigle", text_sigle_faker.id)},
 
             }}
     )
 
     assert res.data == {
         "createText": {
-            "title": "This is a text"}
+            "title": "This is a text",
+            "textSigle": {"id": to_base64("TextSigle", text_sigle_faker.id)}}
     }
 
     print(res)
