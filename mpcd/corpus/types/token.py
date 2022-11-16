@@ -16,12 +16,24 @@ if TYPE_CHECKING:
     from .token_comment import TokenComment
 
 
-@gql.django.type(models.Token)
+@gql.django.filters.filter(models.Text)
+class TextFilter:
+    title: gql.auto
+    id: relay.GlobalID
+
+
+@gql.django.filters.filter(models.Token)
+class TokenFilter:
+    number: gql.auto
+    text: 'TextFilter'
+
+
+@gql.django.type(models.Token, filters=TokenFilter)
 class Token(relay.Node):
 
     section_tokens: List[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
-    #id: gql.auto
+    id: relay.GlobalID    
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
     language: gql.auto
@@ -31,7 +43,7 @@ class Token(relay.Node):
     meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
     pos: gql.auto
     morphological_annotation: List[gql.LazyType['MorphologicalAnnotation',
-                                             'mpcd.corpus.types.morphological_annotation']]
+                                                'mpcd.corpus.types.morphological_annotation']]
     syntactic_annotation: List[gql.LazyType['Dependency', 'mpcd.corpus.types.dependency']]
     comments: List[gql.LazyType['TokenComment', 'mpcd.corpus.types.token_comment']]
     avestan: gql.auto
