@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 
 @gql.django.filters.filter(models.Text)
 class TextFilter:
-    title: gql.auto
     id: relay.GlobalID
+    title: gql.auto
 
 
 @gql.django.filters.filter(models.Token)
@@ -33,7 +33,7 @@ class Token(relay.Node):
 
     section_tokens: List[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
-    id: relay.GlobalID    
+    id: relay.GlobalID
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
     language: gql.auto
