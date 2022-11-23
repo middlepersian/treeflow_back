@@ -22,10 +22,14 @@ class TextFilter:
     title: gql.auto
 
 
-@gql.django.filters.filter(models.Token)
+@gql.django.filters.filter(models.Token, lookups=True)
 class TokenFilter:
     number: gql.auto
     text: 'TextFilter'
+    search: Optional[str]
+
+    def filter_search(self, queryset: QuerySet[Token]):
+        return queryset.filter(name__contains=self.search)
 
 
 @gql.django.type(models.Token, filters=TokenFilter)
