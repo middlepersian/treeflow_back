@@ -11,12 +11,19 @@ if TYPE_CHECKING:
     from .meaning import Meaning
 
 
-@gql.django.type(models.Lemma)
+@gql.django.filters.filter(models.Lemma, lookups=True)
+class LemmaFilter:
+    id: relay.GlobalID
+    word: gql.auto
+    language: gql.auto
+
+
+@gql.django.type(models.Lemma, filters=LemmaFilter)
 class Lemma(relay.Node):
 
     token_lemmas:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     word: gql.auto
     language: gql.auto
     related_lemmas: List['Lemma']

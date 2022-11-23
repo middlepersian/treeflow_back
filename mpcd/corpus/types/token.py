@@ -24,12 +24,13 @@ class TextFilter:
 
 @gql.django.filters.filter(models.Token, lookups=True)
 class TokenFilter:
+    id: relay.GlobalID
+    transcription: gql.auto
+    transliteration: gql.auto
     number: gql.auto
     text: 'TextFilter'
     search: Optional[str]
 
-    def filter_search(self, queryset: QuerySet[Token]):
-        return queryset.filter(name__contains=self.search)
 
 
 @gql.django.type(models.Token, filters=TokenFilter)

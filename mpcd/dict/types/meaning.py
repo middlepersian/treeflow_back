@@ -10,12 +10,19 @@ if TYPE_CHECKING:
     from mpcd.corpus.types.comment import Comment
 
 
-@gql.django.type(models.Meaning)
+@gql.django.filters.filter(models.Meaning, lookups=True)
+class MeaningFilter:
+    id: relay.GlobalID
+    meaning: gql.auto
+    language: gql.auto
+
+
+@gql.django.type(models.Meaning, filters=MeaningFilter)
 class Meaning(relay.Node):
 
     token_meanings:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     meaning: gql.auto
     language: gql.auto
     related_meanings: List['Meaning']
