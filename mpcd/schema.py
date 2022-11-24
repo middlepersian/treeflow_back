@@ -35,7 +35,7 @@ class Query(
 ):
 
     @gql.field
-    def languages(self) -> List[language.Language]:
+    def languages(self, info) -> List[language.Language]:
         return language.Language
     pass
 

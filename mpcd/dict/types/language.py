@@ -1,8 +1,13 @@
 from strawberry_django_plus import gql
 from enum import Enum
+import strawberry
 
-@gql.enum
+
+@strawberry.enum
 class Language(Enum):
-    Pahlavi = "pal"
-    English = "eng"
-    German = "ger"
+    pal = "pal"
+    eng = "eng"
+    deu = "deu"
+    ita = "ita"
+
+

@@ -35,7 +35,6 @@ class TokenFilter:
     search: Optional[str]
 
 
-
 @gql.django.type(models.Token, filters=TokenFilter)
 class Token(relay.Node):
 
@@ -44,7 +43,7 @@ class Token(relay.Node):
     id: relay.GlobalID
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
-    language: language.Language
+    language: gql.enum(language.Language)
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: List[gql.LazyType['Lemma', 'mpcd.dict.types.lemma']]
@@ -64,7 +63,7 @@ class Token(relay.Node):
 class TokenInput:
     number: gql.auto
     text: gql.auto
-    language: language.Language
+    language: gql.enum(language.Language)
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: gql.auto

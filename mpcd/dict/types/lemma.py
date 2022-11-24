@@ -32,10 +32,12 @@ class Lemma(relay.Node):
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
+
 @gql.django.input(models.Lemma)
 class LemmaInput:
     word: gql.auto
     language: language.Language
+
     related_lemmas: gql.auto
     related_meanings: gql.auto
 
@@ -45,5 +47,6 @@ class LemmaPartial:
     id: gql.auto
     word: gql.auto
     language: language.Language
+
     related_lemmas: gql.auto
     related_meanings: gql.auto
