@@ -4,6 +4,8 @@ from strawberry_django_plus.gql import relay
 from typing import List, TYPE_CHECKING, Optional
 
 from mpcd.corpus import models
+from mpcd.dict.types import language
+
 
 if TYPE_CHECKING:
     from mpcd.dict.types.lemma import Lemma
@@ -27,6 +29,7 @@ class TokenFilter:
     id: relay.GlobalID
     transcription: gql.auto
     transliteration: gql.auto
+    language: language.Language
     number: gql.auto
     text: 'TextFilter'
     search: Optional[str]
@@ -41,7 +44,7 @@ class Token(relay.Node):
     id: relay.GlobalID
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
-    language: gql.auto
+    language: language.Language
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: List[gql.LazyType['Lemma', 'mpcd.dict.types.lemma']]
@@ -61,7 +64,7 @@ class Token(relay.Node):
 class TokenInput:
     number: gql.auto
     text: gql.auto
-    language: gql.auto
+    language: language.Language
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: gql.auto
@@ -81,7 +84,7 @@ class TokenPartial:
     id: gql.auto
     number: gql.auto
     text: gql.auto
-    language: gql.auto
+    language: language.Language
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: gql.auto

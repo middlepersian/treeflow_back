@@ -4,6 +4,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import Annotated, List, TYPE_CHECKING
 from mpcd.dict import models
+from mpcd.dict.types import language
 
 if TYPE_CHECKING:
     from mpcd.corpus.types.token import Token
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 class MeaningFilter:
     id: relay.GlobalID
     meaning: gql.auto
-    language: gql.auto
+    language: language.Language
 
 
 @gql.django.type(models.Meaning, filters=MeaningFilter)
@@ -24,7 +25,7 @@ class Meaning(relay.Node):
 
     id: relay.GlobalID
     meaning: gql.auto
-    language: gql.auto
+    language: language.Language
     related_meanings: List['Meaning']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
@@ -32,7 +33,7 @@ class Meaning(relay.Node):
 @gql.django.input(models.Meaning)
 class MeaningInput:
     meaning: gql.auto
-    language: gql.auto
+    language: language.Language
     related_meanings: gql.auto
     comments: gql.auto
 
@@ -41,6 +42,6 @@ class MeaningInput:
 class MeaningPartial:
     id: gql.auto
     meaning: gql.auto
-    language: gql.auto
+    language: language.Language
     related_meanings: gql.auto
     comments: gql.auto

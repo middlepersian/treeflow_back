@@ -4,6 +4,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, TYPE_CHECKING, Annotated
 from mpcd.dict import models
+from mpcd.dict.types import language
 
 if TYPE_CHECKING:
     from mpcd.corpus.types.token import Token
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 class LemmaFilter:
     id: relay.GlobalID
     word: gql.auto
-    language: gql.auto
+    language: language.Language
 
 
 @gql.django.type(models.Lemma, filters=LemmaFilter)
@@ -25,7 +26,7 @@ class Lemma(relay.Node):
 
     id: relay.GlobalID
     word: gql.auto
-    language: gql.auto
+    language: language.Language
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
@@ -34,7 +35,7 @@ class Lemma(relay.Node):
 @gql.django.input(models.Lemma)
 class LemmaInput:
     word: gql.auto
-    language: gql.auto
+    language: language.Language
     related_lemmas: gql.auto
     related_meanings: gql.auto
 
@@ -43,6 +44,6 @@ class LemmaInput:
 class LemmaPartial:
     id: gql.auto
     word: gql.auto
-    language: gql.auto
+    language: language.Language
     related_lemmas: gql.auto
     related_meanings: gql.auto
