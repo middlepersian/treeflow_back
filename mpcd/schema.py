@@ -7,6 +7,7 @@ from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token_comment, token, user
 from mpcd.dict.schemas import lemma, meaning
 from mpcd.dict.types import language
+from typing import List
 
 
 @gql.type
@@ -34,9 +35,8 @@ class Query(
 ):
 
     @gql.field
-    def languages(self) -> language.Language:
+    def languages(self) -> List[language.Language]:
         return language.Language
-
     pass
 
 
@@ -72,7 +72,6 @@ class Mutation(
     # revoke_token = graphql_jwt.relay.Revoke.Field()
     # delete_refresh_token_cookie = \
     #    graphql_jwt.relay.DeleteRefreshTokenCookie.Field()
-
 
     # schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware,  DjangoOptimizerExtension])
 schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])
