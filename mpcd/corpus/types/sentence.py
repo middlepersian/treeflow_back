@@ -19,7 +19,7 @@ class Sentence(relay.Node):
     number: float
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
     tokens: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]
-    translations: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
+    meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional[gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']]
 
@@ -29,7 +29,7 @@ class SentenceInput:
     number: float
     text: gql.auto
     tokens: gql.auto
-    translations: gql.auto
+    meanings: gql.auto
     comments: gql.auto
     previous: gql.auto
 
@@ -40,6 +40,6 @@ class SentencePartial:
     number: float
     text: gql.auto
     tokens: gql.auto
-    translations: gql.auto
+    meanings: gql.auto
     comments: gql.auto
     previous: gql.auto
