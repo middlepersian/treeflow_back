@@ -15,7 +15,7 @@ class Dependency(relay.Node):
 
     token_syntactic_annotation: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     head:  gql.LazyType['Token', 'mpcd.corpus.types.token']
     rel: gql.auto
     producer: gql.auto
@@ -32,7 +32,7 @@ class DependencyInput:
 
 @gql.django.partial(models.Dependency)
 class DependencyPartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     head:  gql.auto
     rel: gql.auto
     producer: gql.auto

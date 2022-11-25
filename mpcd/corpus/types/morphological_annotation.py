@@ -13,7 +13,7 @@ class MorphologicalAnnotation(relay.Node):
 
     token_morphological_annotation: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     feature: gql.auto
     feature_value: gql.auto
 
@@ -25,7 +25,7 @@ class MorphologicalAnnotationInput:
 
 @gql.django.partial(models.MorphologicalAnnotation)
 class MorphologicalAnnotationPartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     feature: gql.auto
     feature_value: gql.auto
         

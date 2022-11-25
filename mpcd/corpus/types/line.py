@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Line(relay.Node):
     token_line: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     number: gql.auto
     folio: gql.LazyType['Folio', 'mpcd.corpus.types.folio']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
@@ -31,7 +31,7 @@ class LineInput:
 
 @gql.django.partial(models.Line)
 class LinePartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     number: gql.auto
     folio: gql.auto
     comments:  gql.auto

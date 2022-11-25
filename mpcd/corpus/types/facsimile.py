@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Facsimile(relay.Node):
     folio_facsimile: relay.Connection[gql.LazyType['Folio', 'mpcd.corpus.types.folio']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     codex_part:  gql.LazyType['CodexPart','mpcd.corpus.types.codex_part']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
@@ -31,7 +31,7 @@ class FacsimileInput:
 
 @gql.django.partial(models.Facsimile)
 class FacsimilePartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     bib_entry: gql.auto
     codex_part: gql.auto
     comments: gql.auto

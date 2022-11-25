@@ -14,7 +14,7 @@ class TokenComment(relay.Node):
 
     token_comments: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     user: gql.LazyType['User', 'mpcd.corpus.types.user']
     text: gql.auto
 
@@ -35,7 +35,7 @@ class TokenCommentInput:
 
 @gql.django.partial(models.TokenComment)
 class TokenCommentPartial:
-    id: gql.auto
+    id: relay.GlobalID
     user: gql.auto
     text: gql.auto
 

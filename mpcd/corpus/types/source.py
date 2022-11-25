@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Source)
 class Source(relay.Node):
-    #id: gql.auto
+    id: relay.GlobalID
     identifier: gql.auto
     bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     description: gql.auto
@@ -27,7 +27,7 @@ class SourceInput:
 
 @gql.django.partial(models.Source)
 class SourcePartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     identifier: gql.auto
     bib_entry: gql.auto
     description: gql.auto

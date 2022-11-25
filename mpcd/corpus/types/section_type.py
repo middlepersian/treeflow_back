@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class SectionType(relay.Node):
     section_section_type: relay.Connection[gql.LazyType['Section', 'mpcd.corpus.types.section']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     identifier: gql.auto
 
 
@@ -24,5 +24,5 @@ class SectionTypeInput:
 
 @gql.django.partial(models.SectionType)
 class SectionTypePartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     identifier: gql.auto

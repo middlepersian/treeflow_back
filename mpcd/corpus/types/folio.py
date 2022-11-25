@@ -17,7 +17,7 @@ class Folio(relay.Node):
 
     line_folio: relay.Connection[gql.LazyType['Line', 'mpcd.corpus.types.line']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     number: gql.auto
     facsimile: gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
@@ -36,7 +36,7 @@ class FolioInput:
 
 @gql.django.partial(models.Folio)
 class FolioPartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     number: gql.auto
     facsimile: gql.auto
     comments:  gql.auto

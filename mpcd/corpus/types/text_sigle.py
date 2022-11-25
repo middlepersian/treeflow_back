@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class TextSigle(relay.Node):
     text_text_sigle: relay.Connection[gql.LazyType['Text', 'mpcd.corpus.types.text']]
 
-    #id: gql.auto
+    id: relay.GlobalID
     sigle: gql.auto
     genre: gql.auto
 
@@ -24,7 +24,7 @@ class TextSigleInput:
 
 @gql.django.partial(models.TextSigle)
 class TextSiglePartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     sigle: gql.auto
     genre: gql.auto
         

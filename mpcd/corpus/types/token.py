@@ -80,7 +80,7 @@ class TokenInput:
 
 @gql.django.partial(models.Token)
 class TokenPartial:
-    id: gql.auto
+    id: relay.GlobalID
     number: gql.auto
     text: gql.auto
     language : gql.auto

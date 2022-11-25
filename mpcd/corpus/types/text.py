@@ -23,7 +23,7 @@ class Text(relay.Node):
     sentence_text: relay.Connection[gql.LazyType['Sentence',  'mpcd.corpus.types.sentence']]
 
     # fields
-    #id: gql.auto
+    id: relay.GlobalID
     corpus: gql.LazyType['Corpus', 'mpcd.corpus.types.corpus']
     title: gql.auto
     text_sigle: gql.LazyType['TextSigle', 'mpcd.corpus.types.text_sigle']
@@ -48,7 +48,7 @@ class TextInput:
 
 @gql.django.partial(models.Text)
 class TextPartial(gql.NodeInputPartial):
-    id: gql.auto
+    id: relay.GlobalID
     corpus: gql.auto
     title: gql.auto
     text_sigle: gql.auto

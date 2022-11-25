@@ -44,7 +44,7 @@ class LemmaInput:
 
 @gql.django.partial(models.Lemma)
 class LemmaPartial:
-    id: gql.auto
+    id: relay.GlobalID
     word: gql.auto
     language : gql.auto
 
