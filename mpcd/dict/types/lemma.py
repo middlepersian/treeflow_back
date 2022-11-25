@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class LemmaFilter:
     id: relay.GlobalID
     word: gql.auto
-    language: language.Language
+    language : gql.auto
 
 
 @gql.django.type(models.Lemma, filters=LemmaFilter)
@@ -26,7 +26,7 @@ class Lemma(relay.Node):
 
     id: relay.GlobalID
     word: gql.auto
-    language: language.Language
+    language : gql.auto
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
@@ -36,7 +36,7 @@ class Lemma(relay.Node):
 @gql.django.input(models.Lemma)
 class LemmaInput:
     word: gql.auto
-    language: language.Language
+    language : gql.auto
 
     related_lemmas: gql.auto
     related_meanings: gql.auto
@@ -46,7 +46,7 @@ class LemmaInput:
 class LemmaPartial:
     id: gql.auto
     word: gql.auto
-    language: language.Language
+    language : gql.auto
 
     related_lemmas: gql.auto
     related_meanings: gql.auto

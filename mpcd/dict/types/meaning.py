@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class MeaningFilter:
     id: relay.GlobalID
     meaning: gql.auto
-    language: language.Language
+    language : gql.auto
 
 
 @gql.django.type(models.Meaning, filters=MeaningFilter)
@@ -25,7 +25,7 @@ class Meaning(relay.Node):
 
     id: relay.GlobalID
     meaning: gql.auto
-    language: language.Language
+    language : gql.auto
     related_meanings: List['Meaning']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
@@ -33,7 +33,7 @@ class Meaning(relay.Node):
 @gql.django.input(models.Meaning)
 class MeaningInput:
     meaning: gql.auto
-    language: language.Language
+    language : gql.auto
     related_meanings: gql.auto
     comments: gql.auto
 
@@ -42,6 +42,6 @@ class MeaningInput:
 class MeaningPartial:
     id: gql.auto
     meaning: gql.auto
-    language: language.Language
+    language : gql.auto
     related_meanings: gql.auto
     comments: gql.auto
