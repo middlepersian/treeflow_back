@@ -9,23 +9,25 @@ from mpcd.dict.types import language
 if TYPE_CHECKING:
     from mpcd.corpus.types.token import Token
     from mpcd.corpus.types.comment import Comment
+    from mpcd.dict.types.meaning import Meaning
 
 
 @gql.django.filters.filter(models.Meaning, lookups=True)
 class MeaningFilter:
     id: relay.GlobalID
     meaning: gql.auto
-    language : gql.auto
+    language: gql.auto
 
 
 @gql.django.type(models.Meaning, filters=MeaningFilter)
 class Meaning(relay.Node):
 
     token_meanings:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
+    sentence_meanings:  relay.Connection[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
 
     id: relay.GlobalID
     meaning: gql.auto
-    language : gql.auto
+    language: gql.auto
     related_meanings: List['Meaning']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
@@ -33,7 +35,7 @@ class Meaning(relay.Node):
 @gql.django.input(models.Meaning)
 class MeaningInput:
     meaning: gql.auto
-    language : gql.auto
+    language: gql.auto
     related_meanings: gql.auto
     comments: gql.auto
 
@@ -42,6 +44,6 @@ class MeaningInput:
 class MeaningPartial:
     id: gql.auto
     meaning: gql.auto
-    language : gql.auto
+    language: gql.auto
     related_meanings: gql.auto
     comments: gql.auto

@@ -13,7 +13,7 @@ class Sentence(models.Model):
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='sentence_text')
     tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
 
-    meanings = models.ManyToManyField('dict.Meaning', related_name='sentence_translations')
+    meanings = models.ManyToManyField('dict.Meaning', related_name='sentence_meanings')
     comments = models.ManyToManyField(Comment, blank=True, related_name='sentence_comments')
 
     number = models.FloatField(null=True, blank=True)
