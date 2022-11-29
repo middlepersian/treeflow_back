@@ -32,6 +32,6 @@ pyparsing==3.0.7
 pydot==1.4.2
 
 #strawberry
-strawberry-django-plus==1.29
+strawberry-django-plus==1.31
 strawberry_django_jwt==0.2.2
 
