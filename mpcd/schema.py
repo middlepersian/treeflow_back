@@ -1,13 +1,24 @@
 
 import strawberry
 from strawberry_django_plus import gql
-import strawberry_django_jwt.mutations as jwt_mutations
-from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token_comment, token, user
 from mpcd.dict.schemas import lemma, meaning
 from mpcd.dict.types import language
-from typing import List
+from typing import List, Union
+
+from gqlauth.user.queries import UserQueries
+from gqlauth.core.field_ import field
+from gqlauth.core.types_ import GQLAuthError
+from gqlauth.core.directives import TokenRequired
+from gqlauth.user import relay as mutations
+
+
+
+@strawberry.type
+class MyAuthorizedQueries(UserQueries, token.Query):
+    # add your queries that require authorization here.
+    pass
 
 
 @gql.type
@@ -28,11 +39,13 @@ class Query(
     text_sigle.Query,
     text.Query,
     token_comment.Query,
-    token.Query,
     user.Query,
     lemma.Query,
     meaning.Query
 ):
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[GQLAuthError, MyAuthorizedQueries]:
+        return MyAuthorizedQueries()
 
     @gql.field
     def languages(self, info) -> List[language.Language]:
@@ -40,8 +53,14 @@ class Query(
     pass
 
 
-@gql.type
+@strawberry.type
+class AuthMutation:
+    # include here your mutations that interact with a user object from a token.
 
+    verify_token = mutations.VerifyToken.field
+    refresh_token = mutations.RefreshToken.field
+
+@gql.type
 class Mutation(
     bibliography.Mutation,
     codex_part.Mutation,
@@ -62,17 +81,12 @@ class Mutation(
     lemma.Mutation,
     meaning.Mutation
 ):
-    
-    # https://django-graphql-jwt.domake.io/relay.html
-    token_auth = jwt_mutations.ObtainJSONWebTokenAsync.obtain
-    verify_token = jwt_mutations.VerifyAsync.verify
-    refresh_token = jwt_mutations.RefreshAsync.refresh
-    delete_token_cookie = jwt_mutations.DeleteJSONWebTokenCookieAsync.delete_cookie
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
+        return AuthOutput(node=AuthMutation())
 
-    # Long running refresh tokens
-    #revoke_token = graphql_jwt.relay.Revoke.Field()
-    #delete_refresh_token_cookie = \
-    #graphql_jwt.relay.DeleteRefreshTokenCookie.Field()
 
-    # schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware,  DjangoOptimizerExtension])
-schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[AsyncJSONWebTokenMiddleware, DjangoOptimizerExtension])
+    token_auth = mutations.ObtainJSONWebToken.field
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])

@@ -3,7 +3,6 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry.types.info import Info
-from strawberry_django_jwt.decorators import login_required
 
 
 from mpcd.corpus.types.token import Token, TokenInput, TokenPartial
@@ -13,9 +12,9 @@ import mpcd.corpus.models as models
 
 @gql.type
 class Query:
-    token: Optional[Token] = login_required(gql.django.node())
-    #tokens: relay.Connection[Token] = login_required(gql.django.connection())
+    token: Optional[Token] = gql.django.node()
     tokens: relay.Connection[Token] = gql.django.connection()
+    #tokens: relay.Connection[Token] = gql.django.connection()
 
 
 @gql.type
