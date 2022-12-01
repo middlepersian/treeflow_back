@@ -3,6 +3,8 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 
+from mpcd.dict.types.meaning import MeaningInput
+from mpcd.dict.types.lemma import LemmaInput
 
 from mpcd.corpus.types.token import Token, TokenInput, TokenPartial
 from mpcd.corpus.types.token_comment import TokenCommentInput
@@ -22,7 +24,7 @@ class Mutation:
     update_token: Token = gql.django.update_mutation(TokenPartial)
     delete_token: Token = gql.django.delete_mutation(gql.NodeInput)
 
-    @gql.django.mutation
+    @gql.django.input_mutation
     def join_tokens(self, info,
                     current: relay.GlobalID,
                     previous: relay.GlobalID,
@@ -34,7 +36,7 @@ class Mutation:
         current_token.save()
         return current_token
 
-    @gql.django.mutation
+    @gql.django.input_mutation
     def add_lemmas_to_token(self, info,
                             token: relay.GlobalID,
                             lemmas: List[relay.GlobalID],
@@ -43,9 +45,22 @@ class Mutation:
         token = token.resolve_node(info)
         lemmas = [lemma.resolve_node(info) for lemma in lemmas]
         token.lemmas.add(*lemmas)
+        token.save()
         return token
 
-    @gql.django.mutation
+    @gql.django.input_mutation
+    def add_new_lemma_to_token(self, info,
+                            token: relay.GlobalID,
+                            lemma: LemmaInput,
+                            ) -> Token:
+
+        token = token.resolve_node(info)
+        lemma = models.Lemma.objects.create(**lemma)
+        token.lemmas.add(lemma)
+        token.save()
+        return token
+
+    @gql.django.input_mutation
     def add_meanings_to_token(self, info,
                               token: relay.GlobalID,
                               meanings: List[relay.GlobalID],
@@ -57,7 +72,19 @@ class Mutation:
         token.save()
         return token
 
-    @gql.django.mutation
+    @gql.django.input_mutation
+    def add_new_meaning_to_token(self, info,
+                              token: relay.GlobalID,
+                              meaning: MeaningInput,
+                              ) -> Token:
+
+        token = token.resolve_node(info)
+        meaning = models.Meaning.objects.create(**meaning)
+        token.meanings.add(meaning)
+        token.save()
+        return token
+
+    @gql.django.input_mutation
     def remove_lemmas_from_token(self,
                                  info,
                                  token: relay.GlobalID,
@@ -70,8 +97,21 @@ class Mutation:
         token.save()
         return token
 
-    @gql.django.mutation
-    def add_token_comment_to_token(self,
+    @gql.django.input_mutation
+    def add_tokens_comment_to_token(self,
+                                   info,
+                                   token: relay.GlobalID,
+                                   token_comments: List[relay.GlobalID],
+                                   ) -> Token:
+
+        token = token.resolve_node(info)
+        token_comments = [token_comment.resolve_node(info) for token_comment in token_comments]
+        token.comments.add(*token_comments)
+        token.save()
+        return token
+
+    @gql.django.input_mutation
+    def add_new_token_comment_to_token(self,
                                    info,
                                    token: relay.GlobalID,
                                    token_comment: TokenCommentInput,
@@ -82,6 +122,5 @@ class Mutation:
         token.comments.add(token_comment)
         token.save()
         return token
-
 
 schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])
