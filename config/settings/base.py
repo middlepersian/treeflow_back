@@ -5,6 +5,8 @@ from pathlib import Path
 
 import environ
 
+from gqlauth.settings_type import GqlAuthSettings
+
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # mpcd/
 APPS_DIR = ROOT_DIR / "mpcd"
@@ -71,7 +73,8 @@ THIRD_PARTY_APPS = [
     "simple_history",
     "strawberry.django",
     "strawberry_django_plus",
-    "strawberry_django_jwt.refresh_token"
+    "gqlauth",
+    # "strawberry_django_jwt.refresh_token"
 ]
 
 LOCAL_APPS = [
@@ -94,9 +97,6 @@ MIGRATION_MODULES = {"sites": "mpcd.contrib.sites.migrations"}
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
-    # https://django-graphql-jwt.domake.io/quickstart.html,
-    "strawberry_django_jwt.backends.JSONWebTokenBackend",
-    #"graphql_jwt.backends.JSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend"
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
@@ -140,7 +140,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    #"whitenoise.middleware.WhiteNoiseMiddleware",
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
     # https://django-simple-history.readthedocs.io/en/latest/
     "simple_history.middleware.HistoryRequestMiddleware"
 
@@ -280,7 +280,6 @@ ACCOUNT_ADAPTER = "mpcd.users.adapters.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "mpcd.users.adapters.SocialAccountAdapter"
 
 
-
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 #CORS_URLS_REGEX = r"^/api/.*$"
 # Your stuff...
@@ -308,23 +307,25 @@ CORS_ALLOW_HEADERS = [
 ]
 
 
-
-
 CHANNELS_WS_PROTOCOLS = [
     "graphql-ws",
 ]
 
 
-
 GRAPHQL_JWT = {
     "JWT_ALLOW_ARGUMENT": True,
     "JWT_ARGUMENT_NAME": "token",
-    "JWT_AUTHENTICATE_INTROSPECTION" : False
+    "JWT_AUTHENTICATE_INTROSPECTION": False
 }
 
 
 # settings.py
-STRAWBERRY_DJANGO = {
-    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
-    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
-}
+# STRAWBERRY_DJANGO = {
+#    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
+#    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
+# }
+
+GQL_AUTH = GqlAuthSettings(
+    LOGIN_REQUIRE_CAPTCHA=False,
+    REGISTER_REQUIRE_CAPTCHA=False,
+)
