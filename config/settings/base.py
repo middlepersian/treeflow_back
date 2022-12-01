@@ -5,7 +5,6 @@ from pathlib import Path
 
 import environ
 
-from gqlauth.settings_type import GqlAuthSettings
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # mpcd/
@@ -73,7 +72,7 @@ THIRD_PARTY_APPS = [
     "simple_history",
     "strawberry.django",
     "strawberry_django_plus",
-    "gqlauth",
+    # "gqlauth",
     # "strawberry_django_jwt.refresh_token"
 ]
 
@@ -324,8 +323,3 @@ GRAPHQL_JWT = {
 #    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
 #    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
 # }
-
-GQL_AUTH = GqlAuthSettings(
-    LOGIN_REQUIRE_CAPTCHA=False,
-    REGISTER_REQUIRE_CAPTCHA=False,
-)

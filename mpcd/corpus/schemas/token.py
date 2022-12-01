@@ -2,7 +2,6 @@ from typing import Optional, List, cast
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-from strawberry.types.info import Info
 
 
 from mpcd.corpus.types.token import Token, TokenInput, TokenPartial
@@ -14,7 +13,6 @@ import mpcd.corpus.models as models
 class Query:
     token: Optional[Token] = gql.django.node()
     tokens: relay.Connection[Token] = gql.django.connection()
-    #tokens: relay.Connection[Token] = gql.django.connection()
 
 
 @gql.type

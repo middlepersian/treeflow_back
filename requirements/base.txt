@@ -33,4 +33,4 @@ pydot==1.4.2
 
 #strawberry
 strawberry-django-plus==1.31.1
-strawberry-django-auth==0.3.7.0 
+#strawberry-django-auth==0.3.7.0
