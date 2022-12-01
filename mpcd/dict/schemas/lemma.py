@@ -4,7 +4,8 @@ from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from typing import Optional
 
 from mpcd.dict.types.lemma import Lemma, LemmaInput, LemmaPartial
-
+from mpcd.dict.types.meaning import MeaningInput
+import mpcd.dict.models as models
 
 @gql.type
 class Query:
@@ -18,7 +19,7 @@ class Mutation:
     update_lemma: Lemma = gql.django.update_mutation(LemmaPartial)
     delete_lemma: Lemma = gql.django.delete_mutation(gql.NodeInput)
 
-    @gql.django.mutation
+    @gql.django.input_mutation
     def add_related_lemma_to_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:
         current_lemma = lemma.resolve_node(info)
         related_lemma = related_lemma.resolve_node(info)
@@ -26,7 +27,16 @@ class Mutation:
         current_lemma.save()
         return lemma
 
-    @gql.django.mutation
+    @gql.django.input_mutation
+    def add_new_related_lemma_to_lemma(self, info, lemma: relay.GlobalID, related_lemma: LemmaInput,) -> Lemma:
+        current_lemma = lemma.resolve_node(info)
+        related_lemma = models.Lemma.objects.create(**related_lemma)
+        current_lemma.related_lemmas.add(related_lemma)
+        current_lemma.save()
+        return lemma
+
+
+    @gql.django.input_mutation
     def add_related_meaning_to_lemma(self, info, lemma: relay.GlobalID, related_meaning: relay.GlobalID,) -> Lemma:
         current_lemma = lemma.resolve_node(info)
         related_meaning = related_meaning.resolve_node(info)
@@ -34,7 +44,15 @@ class Mutation:
         current_lemma.save()
         return lemma
 
-    @gql.django.mutation
+    @gql.django.input_mutation
+    def add_related_meaning_to_lemma(self, info, lemma: relay.GlobalID, related_meaning: MeaningInput,) -> Lemma:
+        current_lemma = lemma.resolve_node(info)
+        related_meaning = models.Meaning.objects.create(**related_meaning)
+        current_lemma.related_meanings.add(related_meaning)
+        current_lemma.save()
+        return lemma
+
+    @gql.django.input_mutation
     def remove_related_lemma_from_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:
         current_lemma = lemma.resolve_node(info)
         related_lemma = related_lemma.resolve_node(info)
@@ -42,7 +60,7 @@ class Mutation:
         current_lemma.save()
         return lemma
 
-    @gql.django.mutation
+    @gql.django.input_mutation
     def remove_related_meaning_from_lemma(self, info, lemma: relay.GlobalID, related_meaning: relay.GlobalID,) -> Lemma:
         current_lemma = lemma.resolve_node(info)
         related_meaning = related_meaning.resolve_node(info)
