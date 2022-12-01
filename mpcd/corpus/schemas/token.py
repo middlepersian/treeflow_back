@@ -8,7 +8,8 @@ from mpcd.dict.types.lemma import LemmaInput
 
 from mpcd.corpus.types.token import Token, TokenInput, TokenPartial
 from mpcd.corpus.types.token_comment import TokenCommentInput
-import mpcd.corpus.models as models
+import mpcd.corpus.models as corpus_models
+import mpcd.dict.models as dict_models
 
 
 @gql.type
@@ -55,7 +56,7 @@ class Mutation:
                             ) -> Token:
 
         token = token.resolve_node(info)
-        lemma = models.Lemma.objects.create(**lemma)
+        lemma = dict_models.Lemma.objects.create(**lemma)
         token.lemmas.add(lemma)
         token.save()
         return token
@@ -79,7 +80,7 @@ class Mutation:
                               ) -> Token:
 
         token = token.resolve_node(info)
-        meaning = models.Meaning.objects.create(**meaning)
+        meaning = dict_models.Meaning.objects.create(**meaning)
         token.meanings.add(meaning)
         token.save()
         return token
@@ -118,7 +119,7 @@ class Mutation:
                                    ) -> Token:
 
         token = token.resolve_node(info)
-        token_comment = models.TokenComment.objects.create(**token_comment)
+        token_comment = corpus_models.TokenComment.objects.create(**token_comment)
         token.comments.add(token_comment)
         token.save()
         return token
