@@ -21,6 +21,9 @@ class TokenComment(relay.Node):
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]
     new_suggestion:  Optional[List[Optional[str]]]
+    created_at: gql.auto
+    updated_at: gql.auto
+
 
 
 @gql.django.input(models.TokenComment)
@@ -31,6 +34,7 @@ class TokenCommentInput:
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]
     new_suggestion:  Optional[List[Optional[str]]]
+
 
 
 @gql.django.partial(models.TokenComment)
