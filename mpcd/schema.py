@@ -2,10 +2,15 @@
 import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+from strawberry_django_plus.directives import SchemaDirectiveExtension
+
 from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token_comment, token, user
 from mpcd.dict.schemas import lemma, meaning
 from mpcd.dict.types import language
 from typing import List
+
+from strawberry.django import auth
+from mpcd.corpus.types.user import User
 
 
 @gql.type
@@ -31,6 +36,8 @@ class Query(
     lemma.Query,
     meaning.Query
 ):
+
+    me: User = auth.current_user()
 
     @gql.field
     def languages(self, info) -> List[language.Language]:
@@ -59,7 +66,10 @@ class Mutation(
     lemma.Mutation,
     meaning.Mutation
 ):
+    login: User = auth.login()
+    logout = auth.logout()
     pass
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])
+schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[
+                           DjangoOptimizerExtension, SchemaDirectiveExtension])
