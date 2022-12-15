@@ -23,6 +23,7 @@ class Section(relay.Node):
     source:  Optional[gql.LazyType['Source', 'mpcd.corpus.types.source']]
     tokens: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]
     previous: Optional['Section']
+    next: Optional['Section']
     container: Optional['Section']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
@@ -36,6 +37,7 @@ class SectionInput:
     source: gql.auto
     tokens: gql.auto
     previous: gql.auto
+    next: gql.auto
     container: gql.auto
     comments:  gql.auto
 
@@ -50,5 +52,6 @@ class SectionPartial:
     source: gql.auto
     tokens: gql.auto
     previous: gql.auto
+    next: gql.auto
     container: gql.auto
     comments: gql.auto

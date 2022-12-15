@@ -19,6 +19,7 @@ class Line(relay.Node):
     folio: gql.LazyType['Folio', 'mpcd.corpus.types.folio']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional['Line']
+    next : Optional['Line']
 
 
 @gql.django.input(models.Line)
@@ -27,6 +28,7 @@ class LineInput:
     folio: gql.auto
     comments: gql.auto
     previous: gql.auto
+    next : gql.auto
 
 
 @gql.django.partial(models.Line)
@@ -36,3 +38,4 @@ class LinePartial(gql.NodeInputPartial):
     folio: gql.auto
     comments:  gql.auto
     previous: gql.auto
+    next : gql.auto

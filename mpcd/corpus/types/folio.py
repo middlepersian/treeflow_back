@@ -22,6 +22,7 @@ class Folio(relay.Node):
     facsimile: gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional['Folio']
+    next : Optional['Folio']
 
 # TODO: compare with models how comments work
 
@@ -32,6 +33,7 @@ class FolioInput:
     facsimile: gql.auto
     comments: gql.auto
     previous: gql.auto
+    next : gql.auto
 
 
 @gql.django.partial(models.Folio)
@@ -41,3 +43,4 @@ class FolioPartial(gql.NodeInputPartial):
     facsimile: gql.auto
     comments:  gql.auto
     previous: gql.auto
+    next : gql.auto

@@ -56,6 +56,7 @@ class Token(relay.Node):
     avestan: gql.auto
     line: gql.LazyType['Line', 'mpcd.corpus.types.line']
     previous: Optional['Token']
+    next : Optional['Token']
     gloss: gql.auto
 
 
@@ -75,6 +76,7 @@ class TokenInput:
     avestan: gql.auto
     line: gql.auto
     previous: gql.auto
+    next : gql.auto
     gloss: gql.auto
 
 
@@ -95,4 +97,5 @@ class TokenPartial:
     avestan: gql.auto
     line: gql.auto
     previous: gql.auto
+    next : gql.auto
     gloss: gql.auto

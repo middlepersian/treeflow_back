@@ -22,6 +22,7 @@ class Sentence(relay.Node):
     meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
     comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional[gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']]
+    next: Optional[gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']]
 
 
 @gql.django.input(models.Sentence)
@@ -32,6 +33,7 @@ class SentenceInput:
     meanings: gql.auto
     comments: gql.auto
     previous: gql.auto
+    next: gql.auto
 
 
 @gql.django.partial(models.Sentence)
@@ -43,3 +45,4 @@ class SentencePartial:
     meanings: gql.auto
     comments: gql.auto
     previous: gql.auto
+    next: gql.auto
