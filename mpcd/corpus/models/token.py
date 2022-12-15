@@ -9,12 +9,13 @@ from .token_comment import TokenComment
 
 
 class Token(models.Model):
-    # TODO
-    #root = BooleanField()
-    #word_token = BooleanField()
-    #visible = BooleanField()
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
+
+    root = models.BooleanField(default=False)
+    word_token = models.BooleanField(default=True)
+    visible = models.BooleanField(default=True)
+    
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50)
