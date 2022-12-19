@@ -61,7 +61,8 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
 
         sentence = sentence.resolve_node(info)
-        token = corpus_models.Token.objects.create(**token)
+        data = vars(token)
+        token = resolvers.create(info, corpus_models.Token, resolvers.parse_input(info, data))
         sentence.tokens.add(token)
         sentence.save()
         return sentence
@@ -105,7 +106,8 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
 
         sentence = sentence.resolve_node(info)
-        meaning = dict_models.Meaning.objects.create(**meaning)
+        data = vars(meaning)
+        meaning = resolvers.create(info, dict_models.Meaning, resolvers.parse_input(info, data))
         sentence.meanings.add(meaning)
         return sentence
 
