@@ -2,14 +2,16 @@ from typing import Optional, List, cast
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+from strawberry_django_plus.mutations import resolvers
 
 from mpcd.dict.types.meaning import MeaningInput
 from mpcd.dict.types.lemma import LemmaInput
 
+from mpcd.corpus import models as corpus_models
+from mpcd.dict import models as dict_models
+
 from mpcd.corpus.types.token import Token, TokenInput, TokenPartial
 from mpcd.corpus.types.token_comment import TokenCommentInput
-import mpcd.corpus.models as corpus_models
-import mpcd.dict.models as dict_models
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -69,7 +71,8 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
-        lemma = dict_models.Lemma.objects.create(**lemma)
+        data = vars(lemma)
+        lemma = resolvers.create(info, dict_models.Lemma, resolvers.parse_input(info, data))
         token.lemmas.add(lemma)
         token.save()
         return token
@@ -95,7 +98,8 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
-        meaning = dict_models.Meaning.objects.create(**meaning)
+        data = vars(meaning)
+        meaning = resolvers.create(info, dict_models.Meaning, resolvers.parse_input(info, data))
         token.meanings.add(meaning)
         token.save()
         return token
@@ -137,7 +141,8 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
-        token_comment = corpus_models.TokenComment.objects.create(**token_comment)
+        data = vars(token_comment)
+        token_comment = resolvers.create(info, corpus_models.TokenComment, resolvers.parse_input(info, data))
         token.comments.add(token_comment)
         token.save()
         return token
