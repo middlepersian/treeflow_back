@@ -1,7 +1,10 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+from strawberry_django_plus.mutations import resolvers
+
 from typing import Optional
+
 
 from mpcd.dict.types.lemma import Lemma, LemmaInput, LemmaPartial
 from mpcd.dict.types.meaning import MeaningInput
@@ -45,7 +48,8 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node(info)
-        related_lemma = models.Lemma.objects.create(**related_lemma)
+        data = vars(related_lemma)
+        related_lemma = resolvers.create(info, models.Lemma, resolvers.parse_input(info, data))
         current_lemma.related_lemmas.add(related_lemma)
         current_lemma.save()
         return lemma
@@ -61,11 +65,12 @@ class Mutation:
         return lemma
 
     @gql.django.input_mutation
-    def add_related_meaning_to_lemma(self, info, lemma: relay.GlobalID, related_meaning: MeaningInput,) -> Lemma:
+    def add_new_related_meaning_to_lemma(self, info, lemma: relay.GlobalID, related_meaning: MeaningInput,) -> Lemma:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node(info)
-        related_meaning = models.Meaning.objects.create(**related_meaning)
+        data = vars(related_meaning)
+        related_meaning = resolvers.create(info, models.Meaning, resolvers.parse_input(info, data))
         current_lemma.related_meanings.add(related_meaning)
         current_lemma.save()
         return lemma
