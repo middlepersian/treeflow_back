@@ -41,7 +41,7 @@ class Mutation:
         related_lemma = related_lemma.resolve_node(info)
         current_lemma.related_lemmas.add(related_lemma)
         current_lemma.save()
-        return lemma
+        return current_lemma
 
     @gql.django.input_mutation
     def add_new_related_lemma_to_lemma(self, info, lemma: relay.GlobalID, related_lemma: LemmaInput,) -> Lemma:
@@ -52,7 +52,7 @@ class Mutation:
         related_lemma = resolvers.create(info, models.Lemma, resolvers.parse_input(info, data))
         current_lemma.related_lemmas.add(related_lemma)
         current_lemma.save()
-        return lemma
+        return current_lemma
 
     @gql.django.input_mutation
     def add_related_meaning_to_lemma(self, info, lemma: relay.GlobalID, related_meaning: relay.GlobalID,) -> Lemma:
@@ -62,7 +62,7 @@ class Mutation:
         related_meaning = related_meaning.resolve_node(info)
         current_lemma.related_meanings.add(related_meaning)
         current_lemma.save()
-        return lemma
+        return current_lemma
 
     @gql.django.input_mutation
     def add_new_related_meaning_to_lemma(self, info, lemma: relay.GlobalID, related_meaning: MeaningInput,) -> Lemma:
@@ -73,7 +73,7 @@ class Mutation:
         related_meaning = resolvers.create(info, models.Meaning, resolvers.parse_input(info, data))
         current_lemma.related_meanings.add(related_meaning)
         current_lemma.save()
-        return lemma
+        return current_lemma
 
     @gql.django.input_mutation
     def remove_related_lemma_from_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:
@@ -83,7 +83,7 @@ class Mutation:
         related_lemma = related_lemma.resolve_node(info)
         current_lemma.related_lemmas.remove(related_lemma)
         current_lemma.save()
-        return lemma
+        return current_lemma
 
     @gql.django.input_mutation
     def remove_related_meaning_from_lemma(self, info, lemma: relay.GlobalID, related_meaning: relay.GlobalID,) -> Lemma:
@@ -93,7 +93,7 @@ class Mutation:
         related_meaning = related_meaning.resolve_node(info)
         current_lemma.related_meanings.remove(related_meaning)
         current_lemma.save()
-        return lemma
+        return current_lemma
 
 
 schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])
