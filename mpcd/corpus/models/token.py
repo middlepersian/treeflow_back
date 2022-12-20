@@ -31,7 +31,7 @@ class Token(models.Model):
 
     avestan = models.TextField(null=True, blank=True)
 
-    line = models.ForeignKey(Line, on_delete=models.SET_NULL, null=True, related_name='token_line')
+    line = models.ForeignKey(Line, on_delete=models.SET_NULL, null=True, blank=True, related_name='token_line')
 
     previous = models.OneToOneField('self',
                                     related_name='next',
