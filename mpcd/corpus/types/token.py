@@ -32,7 +32,6 @@ class TokenFilter:
     language : gql.auto
     number: gql.auto
     text: 'TextFilter'
-    search: Optional[str]
 
 
 @gql.django.type(models.Token, filters=TokenFilter)
