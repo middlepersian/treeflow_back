@@ -6,9 +6,11 @@ from .folio import Folio
 
 class Line(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    number = models.FloatField(null=True, blank=True)
+    identifier = models.CharField(max_length=255, blank=True, null=True)
     folio = models.ForeignKey(Folio, on_delete=models.CASCADE, related_name='line_folio')
-    comments = models.ManyToManyField('Comment', blank=True, related_name = 'line_comments')
+    number = models.FloatField(null=True, blank=True)
+    number_in_text = models.FloatField(null=True, blank=True)
+    comments = models.ManyToManyField('Comment', blank=True, related_name='line_comments')
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,
