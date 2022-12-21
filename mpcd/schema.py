@@ -1,6 +1,7 @@
 
 import strawberry
 from strawberry_django_plus import gql
+from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -38,6 +39,8 @@ class Query(
 ):
 
     me: User = auth.current_user()
+    node = relay.node()
+
 
     @gql.field
     def languages(self, info) -> List[language.Language]:
