@@ -52,6 +52,15 @@ class SuperuserUserFactory(UserFactory):
     is_superuser = True
 
 
+class CorpusFactory(_BaseFactory[models.Corpus]):
+    class Meta:
+        model = models.Corpus
+    name = fuzzy.FuzzyText(length=100)
+    slug = fuzzy.FuzzyText(length=10)
+
+
+
+'''
 # Comment
 class CommentFactory(_BaseFactory[models.Comment]):
     class Meta:
@@ -76,7 +85,7 @@ class SourceFactory(_BaseFactory[models.Source]):
 
     identifier = factory.Faker("text")
     description = factory.Faker("text")
-    bib_entry = factory.SubFactory(BibEntryFactory)
+    #bib_entry = factory.SubFactory(BibEntryFactory)
 
 
 # Codex
@@ -84,7 +93,7 @@ class CodexFactory(_BaseFactory[models.Codex]):
     class Meta:
         model = models.Codex
     identifier = fuzzy.FuzzyText(length=30)
-    bib_entry = factory.SubFactory(BibEntryFactory)
+    #bib_entry = factory.SubFactory(BibEntryFactory)
     history = fuzzy.FuzzyText(length=3)
 
 
@@ -92,7 +101,7 @@ class CodexFactory(_BaseFactory[models.Codex]):
 class CodexPartFactory(_BaseFactory[models.CodexPart]):
     class Meta:
         model = models.CodexPart
-    codex = fuzzy.SubFactory(CodexFactory)
+    #codex = fuzzy.SubFactory(CodexFactory)
     slug = fuzzy.FuzzyText(length=3)
     comments = fuzzy.FuzzyText(length=3)
 
@@ -137,3 +146,4 @@ class TextFactory(_BaseFactory[models.Text]):
     title = fuzzy.FuzzyText(length=100)
     text_sigle = factory.SubFactory(TextSigleFactory)
     stage = fuzzy.FuzzyText(length=3)
+'''
