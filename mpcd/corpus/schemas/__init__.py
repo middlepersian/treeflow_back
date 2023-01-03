@@ -13,6 +13,5 @@ from .sentence import Query, Mutation
 from .source import Query, Mutation
 from .text_sigle import Query, Mutation
 from .text import Query, Mutation
-from .token_comment import Query, Mutation
 from .token import Query, Mutation
 from .user import Query

@@ -6,30 +6,29 @@ from mpcd.corpus import models
 
 if TYPE_CHECKING:
     from .token import Token
-    from .user import User
+    from .comment import Comment
 
 
 @gql.django.type(models.TokenComment)
 class TokenComment(relay.Node):
 
-    token_comments: relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
 
     id: relay.GlobalID
-    user: gql.LazyType['User', 'mpcd.corpus.types.user']
-    text: gql.auto
+    comment :  gql.LazyType['Comment', 'mpcd.corpus.types.comment']
+    token: gql.LazyType['Token', 'mpcd.corpus.types.token']
 
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]
     new_suggestion:  Optional[List[Optional[str]]]
-    created_at: gql.auto
-    updated_at: gql.auto
+
+
 
 
 
 @gql.django.input(models.TokenComment)
 class TokenCommentInput:
-    user: gql.auto
-    text: gql.auto
+    token :  gql.auto
+    comment :  gql.auto
 
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]
@@ -40,8 +39,8 @@ class TokenCommentInput:
 @gql.django.partial(models.TokenComment)
 class TokenCommentPartial:
     id: relay.GlobalID
-    user: gql.auto
-    text: gql.auto
+    token :  gql.auto
+    comment :  gql.auto
 
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]

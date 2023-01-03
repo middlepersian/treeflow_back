@@ -6,10 +6,7 @@ from .source import Source
 
 
 class Codex(Source):
-    # TODO add :
-
-    #id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-
+    
     sigle = models.CharField(max_length=5, unique=True)
     comments = models.ManyToManyField('Comment', blank=True, related_name='codex_comments')
 
