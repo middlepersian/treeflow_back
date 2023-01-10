@@ -21,6 +21,7 @@ class Text(relay.Node):
     token_text: relay.Connection[gql.LazyType['Token',  'mpcd.corpus.types.token']]
     section_text: relay.Connection[gql.LazyType['Section',  'mpcd.corpus.types.section']]
     sentence_text: relay.Connection[gql.LazyType['Sentence',  'mpcd.corpus.types.sentence']]
+    text_comment : relay.Connection[gql.LazyType['Comment',  'mpcd.corpus.types.comment']]
 
     # fields
     id: relay.GlobalID

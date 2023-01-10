@@ -19,14 +19,12 @@ class Facsimile(relay.Node):
     id: relay.GlobalID
     bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
     codex_part:  gql.LazyType['CodexPart','mpcd.corpus.types.codex_part']
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Facsimile)
 class FacsimileInput:
     bib_entry: gql.auto
     codex_part: gql.auto
-    comments: gql.auto
 
 
 @gql.django.partial(models.Facsimile)
@@ -34,4 +32,3 @@ class FacsimilePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     bib_entry: gql.auto
     codex_part: gql.auto
-    comments: gql.auto

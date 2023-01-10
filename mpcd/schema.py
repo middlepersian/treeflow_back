@@ -5,10 +5,10 @@ from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
-from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token_comment, token, user
+from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token, user
 from mpcd.dict.schemas import lemma, meaning
 from mpcd.dict.types import language
-from typing import List
+from typing import List, Optional
 
 from strawberry.django import auth
 from mpcd.corpus.types.user import User
@@ -32,15 +32,13 @@ class Query(
     text_sigle.Query,
     text.Query,
     token.Query,
-    token_comment.Query,
     user.Query,
     lemma.Query,
     meaning.Query
 ):
 
     me: User = auth.current_user()
-    node = relay.node()
-
+    node: Optional[gql.Node] = gql.django.node()
 
     @gql.field
     def languages(self, info) -> List[language.Language]:
@@ -64,7 +62,6 @@ class Mutation(
     source.Mutation,
     text_sigle.Mutation,
     text.Mutation,
-    token_comment.Mutation,
     token.Mutation,
     lemma.Mutation,
     meaning.Mutation

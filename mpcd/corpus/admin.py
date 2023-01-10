@@ -3,7 +3,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import Codex, CodexPart,  Facsimile, Folio, Line, Edition, TextSigle, \
     Corpus, Resource, Text, Sentence,\
     MorphologicalAnnotation, Dependency,\
-    Token, Source, Author, BibEntry, Comment, TokenComment
+    Token, Source, Author, BibEntry, Comment
 4
 
 
@@ -37,4 +37,4 @@ admin.site.register(MorphologicalAnnotation)
 admin.site.register(Dependency)
 
 admin.site.register(Comment)
-admin.site.register(TokenComment)
+

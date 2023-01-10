@@ -18,7 +18,5 @@ from .text import Text
 from .edition import Edition
 from .section_type import SectionType
 from .section import Section
-from .token_comment import TokenComment
-#from .codex_token import CodexToken
 
 # TODO add create date for all models

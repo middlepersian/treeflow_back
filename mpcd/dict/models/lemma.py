@@ -11,7 +11,6 @@ class Lemma(models.Model):
     language = models.CharField(max_length=3, null=True, blank=True)
     related_lemmas = models.ManyToManyField('self', blank=True)
     related_meanings = models.ManyToManyField(Meaning, blank=True, related_name='lemma_related_meanings')
-    comments = models.ManyToManyField(Comment, blank=True, related_name='lemma_comments')
 
     def get_related_lemmas(self):
         return " | ".join([p.word for p in self.related_lemmas.all()])

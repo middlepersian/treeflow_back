@@ -25,7 +25,6 @@ class Section(relay.Node):
     previous: Optional['Section']
     next: Optional['Section']
     container: Optional['Section']
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Section)
@@ -39,7 +38,6 @@ class SectionInput:
     previous: gql.auto
     next: gql.auto
     container: gql.auto
-    comments:  gql.auto
 
 
 @gql.django.partial(models.Section)
@@ -54,4 +52,3 @@ class SectionPartial:
     previous: gql.auto
     next: gql.auto
     container: gql.auto
-    comments: gql.auto

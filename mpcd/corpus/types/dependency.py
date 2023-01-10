@@ -19,7 +19,6 @@ class Dependency(relay.Node):
     head:  gql.LazyType['Token', 'mpcd.corpus.types.token']
     rel: gql.auto
     producer: gql.auto
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Dependency)
@@ -27,7 +26,6 @@ class DependencyInput:
     head:  gql.auto
     rel: gql.auto
     producer: gql.auto
-    comments: gql.auto
 
 
 @gql.django.partial(models.Dependency)
@@ -36,4 +34,3 @@ class DependencyPartial(gql.NodeInputPartial):
     head:  gql.auto
     rel: gql.auto
     producer: gql.auto
-    comments: gql.auto

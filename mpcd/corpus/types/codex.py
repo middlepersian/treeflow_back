@@ -15,4 +15,3 @@ class Codex(relay.Node):
     codex_part_codex: relay.Connection[gql.LazyType['CodexPart', 'mpcd.corpus.types.codex_part']]
 
     sigle: gql.auto
-    comments: List[Annotated['Comment', lazy('mpcd.corpus.types.comment')]]

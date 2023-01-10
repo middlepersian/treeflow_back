@@ -24,12 +24,12 @@ class Meaning(relay.Node):
 
     token_meanings:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
     sentence_meanings:  relay.Connection[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
+    comment_meaning: relay.Connection[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
     id: relay.GlobalID
     meaning: gql.auto
     language: gql.auto
     related_meanings: List['Meaning']
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
 
 @gql.django.input(models.Meaning)
@@ -37,7 +37,6 @@ class MeaningInput:
     meaning: gql.auto
     language: gql.auto
     related_meanings: gql.auto
-    comments: gql.auto
 
 
 @gql.django.partial(models.Meaning)
@@ -46,4 +45,3 @@ class MeaningPartial:
     meaning: gql.auto
     language: gql.auto
     related_meanings: gql.auto
-    comments: gql.auto

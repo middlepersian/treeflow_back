@@ -22,7 +22,6 @@ class Section(models.Model):
     # this is the case if a section "paragraph" has a "chapter" container
     container = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
                                   blank=True, related_name='section_container')
-    comments = models.ManyToManyField(Comment, blank=True, related_name="section_comments")
 
     history = HistoricalRecords()
 

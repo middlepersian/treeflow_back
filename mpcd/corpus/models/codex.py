@@ -8,7 +8,7 @@ from .source import Source
 class Codex(Source):
     
     sigle = models.CharField(max_length=5, unique=True)
-    comments = models.ManyToManyField('Comment', blank=True, related_name='codex_comments')
+    #comments = models.ManyToManyField('Comment', blank=True, related_name='codex_comments')
 
     history = HistoricalRecords()
 

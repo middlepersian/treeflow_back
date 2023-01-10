@@ -14,5 +14,4 @@ from .sentence import Sentence
 from .text import Text
 from .text_sigle import TextSigle
 from .token import Token
-from .token_comment import TokenComment
 from .user import User

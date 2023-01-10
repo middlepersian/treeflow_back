@@ -17,6 +17,8 @@ class Token(models.Model):
     visible = models.BooleanField(default=True)
     
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
+    sentence = models.ForeignKey('Sentence', on_delete=models.SET_NULL, null=True, blank=True, related_name='token_sentence')
+
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
@@ -27,7 +29,6 @@ class Token(models.Model):
         MorphologicalAnnotation, blank=True, related_name='token_morphological_annotation')
     syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
 
-    comments = models.ManyToManyField(Comment, through='TokenComment', related_name='token_comments')
 
     avestan = models.TextField(null=True, blank=True)
 

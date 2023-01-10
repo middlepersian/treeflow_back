@@ -17,7 +17,6 @@ class Line(relay.Node):
     id: relay.GlobalID
     number: gql.auto
     folio: gql.LazyType['Folio', 'mpcd.corpus.types.folio']
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional['Line']
     next : Optional['Line']
 
@@ -26,7 +25,6 @@ class Line(relay.Node):
 class LineInput:
     number: gql.auto
     folio: gql.auto
-    comments: gql.auto
     previous: gql.auto
     next : gql.auto
 
@@ -36,6 +34,5 @@ class LinePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     number: gql.auto
     folio: gql.auto
-    comments:  gql.auto
     previous: gql.auto
     next : gql.auto

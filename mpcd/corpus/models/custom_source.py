@@ -9,6 +9,5 @@ User = get_user_model()
 class CustomSource(Source):
     authors = models.ManyToManyField(User, blank=True, related_name='custom_source_authors')
     references = models.ManyToManyField(BibEntry, blank=True, related_name='custom_source_references')
-    comments = models.ManyToManyField('Comment', blank=True, related_name = 'custom_source_comments')
 
     history = HistoricalRecords()

@@ -2,14 +2,82 @@ import uuid as uuid_lib
 from django.db import models
 from simple_history.models import HistoricalRecords
 from django.conf import settings
-
+from django.contrib.postgres.fields import ArrayField
 
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    text = models.TextField(null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    txt = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # codex_part
+    codex_part = models.ForeignKey('CodexPart', on_delete=models.CASCADE, null=True,
+                                   blank=True, related_name='comment_codex_part')
+
+    # codex
+    codex = models.ForeignKey('Codex', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_codex')
+
+    # dependency
+    dependency = models.ForeignKey('Dependency', on_delete=models.CASCADE, null=True,
+                                   blank=True, related_name='comment_dependency')
+
+    # edition
+    edition = models.ForeignKey('Edition', on_delete=models.CASCADE, null=True,
+                                 blank=True, related_name='comment_edition')
+
+    # facsimile
+    facsimile = models.ForeignKey('Facsimile', on_delete=models.CASCADE, null=True,
+                                  blank=True, related_name='comment_facsimile')
+
+    # folio
+    folio = models.ForeignKey('Folio', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_folio')
+
+    # line
+    line = models.ForeignKey('Line', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_line')
+
+    # resource
+    resource = models.ForeignKey('Resource', on_delete=models.CASCADE, null=True,
+                                 blank=True, related_name='comment_resource')
+
+    # section_type
+    section_type = models.ForeignKey('SectionType', on_delete=models.CASCADE, null=True,
+                                     blank=True, related_name='comment_section_type')
+
+    # section
+    section = models.ForeignKey('Section', on_delete=models.CASCADE, null=True,
+                                blank=True, related_name='comment_section')
+
+    # sentence
+    sentence = models.ForeignKey('Sentence', on_delete=models.CASCADE, null=True,
+                                 blank=True, related_name='comment_sentence')
+
+    # text_sigle
+    text_sigle = models.ForeignKey('TextSigle', on_delete=models.CASCADE, null=True,
+                                   blank=True, related_name='comment_text_sigle')
+
+    # token
+    token = models.ForeignKey('Token', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_token')
+
+    # text
+    text = models.ForeignKey('Text', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_text')
+
+    # fields for Token
+    uncertain = ArrayField(models.CharField(max_length=1, blank=True, null=True), blank=True, null=True)
+    to_discuss = ArrayField(models.CharField(max_length=1, blank=True, null=True), blank=True, null=True)
+    new_suggestion = ArrayField(models.CharField(max_length=1, blank=True, null=True), blank=True, null=True)
+
+    # lemma
+    lemma = models.ForeignKey('dict.Lemma', on_delete=models.CASCADE, null=True,
+                              blank=True, related_name='comment_lemma')
+
+    # meaning
+    meaning = models.ForeignKey('dict.Meaning', on_delete=models.CASCADE, null=True,
+                                blank=True, related_name='comment_meaning')
+
+    # semantic
+    semantic = models.ForeignKey('dict.Semantic', on_delete=models.CASCADE, null=True, blank=True)
+
     history = HistoricalRecords()
 
     def __str__(self):

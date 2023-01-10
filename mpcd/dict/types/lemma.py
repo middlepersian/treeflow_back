@@ -25,14 +25,17 @@ class LemmaFilter:
 @gql.django.type(models.Lemma, filters=LemmaFilter)
 class Lemma(relay.Node):
 
+
+    token_lemmas:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
+    comment_lemma: relay.Connection[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
+
     id: relay.GlobalID
     word: gql.auto
     language: gql.auto
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
-    token_lemmas:  relay.Connection[gql.LazyType['Token', 'mpcd.corpus.types.token']]
+
 
 
 @gql.django.input(models.Lemma)

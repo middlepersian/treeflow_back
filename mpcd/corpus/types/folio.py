@@ -20,7 +20,6 @@ class Folio(relay.Node):
     id: relay.GlobalID
     number: gql.auto
     facsimile: gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional['Folio']
     next : Optional['Folio']
 
@@ -31,7 +30,6 @@ class Folio(relay.Node):
 class FolioInput:
     number: gql.auto
     facsimile: gql.auto
-    comments: gql.auto
     previous: gql.auto
     next : gql.auto
 
@@ -41,6 +39,5 @@ class FolioPartial(gql.NodeInputPartial):
     id: relay.GlobalID
     number: gql.auto
     facsimile: gql.auto
-    comments:  gql.auto
     previous: gql.auto
     next : gql.auto

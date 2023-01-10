@@ -15,12 +15,14 @@ if TYPE_CHECKING:
 
 @gql.django.type(models.Sentence)
 class Sentence(relay.Node):
+
+    token_sentence: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]
+    comment_sentence: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
+
     id: relay.GlobalID
     number: float
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
-    tokens: List[gql.LazyType['Token', 'mpcd.corpus.types.token']]
     meanings: List[gql.LazyType['Meaning', 'mpcd.dict.types.meaning']]
-    comments: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
     previous: Optional[gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']]
     next: Optional[gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']]
 
@@ -29,9 +31,7 @@ class Sentence(relay.Node):
 class SentenceInput:
     number: float
     text: gql.auto
-    tokens: gql.auto
     meanings: gql.auto
-    comments: gql.auto
     previous: gql.auto
     next: gql.auto
 
@@ -41,8 +41,6 @@ class SentencePartial:
     id: relay.GlobalID
     number: float
     text: gql.auto
-    tokens: gql.auto
     meanings: gql.auto
-    comments: gql.auto
     previous: gql.auto
     next: gql.auto

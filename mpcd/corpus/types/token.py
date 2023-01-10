@@ -29,7 +29,7 @@ class TokenFilter:
     id: relay.GlobalID
     transcription: gql.auto
     transliteration: gql.auto
-    language : gql.auto
+    language: gql.auto
     number: gql.auto
     text: 'TextFilter'
 
@@ -38,11 +38,13 @@ class TokenFilter:
 class Token(relay.Node):
 
     section_tokens: List[gql.LazyType['Section', 'mpcd.corpus.types.section']]
+    comment_token: List[gql.LazyType['Comment', 'mpcd.corpus.types.comment']]
 
     id: relay.GlobalID
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
-    language : gql.auto
+    sentence: gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']
+    language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: List[gql.LazyType['Lemma', 'mpcd.dict.types.lemma']]
@@ -51,11 +53,10 @@ class Token(relay.Node):
     morphological_annotation: List[gql.LazyType['MorphologicalAnnotation',
                                                 'mpcd.corpus.types.morphological_annotation']]
     syntactic_annotation: List[gql.LazyType['Dependency', 'mpcd.corpus.types.dependency']]
-    comments: List[gql.LazyType['TokenComment', 'mpcd.corpus.types.token_comment']]
     avestan: gql.auto
     line: gql.LazyType['Line', 'mpcd.corpus.types.line']
     previous: Optional['Token']
-    next : Optional['Token']
+    next: Optional['Token']
     gloss: gql.auto
 
 
@@ -63,7 +64,8 @@ class Token(relay.Node):
 class TokenInput:
     number: gql.auto
     text: gql.auto
-    language : gql.auto
+    sentence: gql.auto
+    language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: gql.auto
@@ -71,11 +73,10 @@ class TokenInput:
     pos: gql.auto
     morphological_annotation: gql.auto
     syntactic_annotation: gql.auto
-    comments: gql.auto
     avestan: gql.auto
     line: gql.auto
     previous: gql.auto
-    next : gql.auto
+    next: gql.auto
     gloss: gql.auto
 
 
@@ -84,7 +85,8 @@ class TokenPartial:
     id: relay.GlobalID
     number: gql.auto
     text: gql.auto
-    language : gql.auto
+    sentence: gql.auto
+    language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: gql.auto
@@ -92,9 +94,8 @@ class TokenPartial:
     pos: gql.auto
     morphological_annotation: gql.auto
     syntactic_annotation: gql.auto
-    comments: gql.auto
     avestan: gql.auto
     line: gql.auto
     previous: gql.auto
-    next : gql.auto
+    next: gql.auto
     gloss: gql.auto

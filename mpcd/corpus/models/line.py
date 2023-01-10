@@ -10,7 +10,6 @@ class Line(models.Model):
     folio = models.ForeignKey(Folio, on_delete=models.CASCADE, related_name='line_folio')
     number = models.FloatField(null=True, blank=True)
     number_in_text = models.FloatField(null=True, blank=True)
-    comments = models.ManyToManyField('Comment', blank=True, related_name='line_comments')
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,

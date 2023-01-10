@@ -11,10 +11,7 @@ class Sentence(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='sentence_text')
-    tokens = models.ManyToManyField(Token, related_name='sentence_tokens')
-
     meanings = models.ManyToManyField('dict.Meaning', related_name='sentence_meanings')
-    comments = models.ManyToManyField(Comment, blank=True, related_name='sentence_comments')
 
     number = models.FloatField(null=True, blank=True)
     previous = models.OneToOneField('self',
