@@ -10,7 +10,6 @@ class Dependency(models.Model):
     rel = models.CharField(max_length=9)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py
     producer = models.SmallIntegerField(null=True, blank=True)
-    #comments = models.ManyToManyField('Comment', blank=True, related_name = 'dependency_comments')
 
     history = HistoricalRecords()
 
