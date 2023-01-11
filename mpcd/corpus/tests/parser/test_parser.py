@@ -5,27 +5,6 @@ from faker import Faker
 from mpcd.corpus.models import Codex, CodexPart, Facsimile, Folio, Line, BibEntry, MorphologicalAnnotation, Token
 
 
-class CodexFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Codex
-
-    sigle = factory.Faker("pystr",  max_chars=5)
-
-
-class CodexPartFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = CodexPart
-
-    slug = factory.Faker("slug")
-    codex = factory.SubFactory(CodexFactory)
-
-
-class BibEntryFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = BibEntry
-
-    key = factory.Faker("pystr",  max_chars=5)
-
 
 class FacsimileFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -33,8 +12,6 @@ class FacsimileFactory(factory.django.DjangoModelFactory):
 
     bib_entry = factory.SubFactory(BibEntryFactory)
     codex_part = factory.SubFactory(CodexPartFactory)
-
-###
 
 
 class CorpusFactory(factory.django.DjangoModelFactory):
