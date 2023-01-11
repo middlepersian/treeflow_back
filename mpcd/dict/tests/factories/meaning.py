@@ -1,10 +1,20 @@
-from factory import DjangoModelFactory, Faker
+import factory
 from mpcd.dict.models import Meaning
 
 
-class MeaningFactory(DjangoModelFactory):
+class MeaningFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Meaning
-    meaning = Faker("sentence", nb_words=3)
-    language = Faker("language_code")
-    related_meanings = SubFactory("self", _quantity=3)
+    meaning = factory.Faker("sentence", nb_words=3)
+    language = factory.Faker("language_code")
+
+    @factory.post_generation
+    def related_meanings(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of meanings were passed in, use them
+            for meaning in extracted:
+                self.related_meanings.add(meaning)

@@ -12,6 +12,7 @@ from .corpus import Corpus
 
 User = get_user_model()
 
+
 class Text(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -25,9 +26,10 @@ class Text(models.Model):
     sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
     # a Resource can be any Zotero reference
     resources = models.ManyToManyField(BibEntry, blank=True, related_name='text_resources')
-    history = HistoricalRecords(inherit=True)
 
-    ## TODO: add comment
+    history = HistoricalRecords()
+
+    # TODO: add comment
 
     class Meta:
         constraints = [

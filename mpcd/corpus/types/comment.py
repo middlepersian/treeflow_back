@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Comment(relay.Node):
     id: relay.GlobalID
     user: Optional[gql.LazyType['User', 'mpcd.corpus.types.user']]
-    txt: gql.auto
+    comment: gql.auto
     created_at: gql.auto
     updated_at: gql.auto
 
@@ -38,7 +38,7 @@ class Comment(relay.Node):
 @gql.django.input(models.Comment)
 class CommentInput:
     user: gql.auto
-    txt: gql.auto
+    comment: gql.auto
 
     codex_part:  gql.auto
     codex:  gql.auto
@@ -62,7 +62,7 @@ class CommentInput:
 @gql.django.partial(models.Comment)
 class CommentPartial(gql.NodeInputPartial):
     user: gql.auto
-    txt: gql.auto
+    comment: gql.auto
 
     codex_part:  gql.auto
     codex:  gql.auto

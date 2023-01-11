@@ -1,5 +1,5 @@
 import factory
-from faker import Faker
+from mpcd.corpus.models import Codex
 
 
 class CodexFactory(factory.django.DjangoModelFactory):

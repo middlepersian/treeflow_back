@@ -1,11 +1,11 @@
-from factory import DjangoModelFactory, Faker
+import factory
 from mpcd.corpus.models import Dependency
 
 
-class DependencyFactory(DjangoModelFactory):
+class DependencyFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Dependency
 
-    head = SubFactory('mpcd.tests.factories.TokenFactory')
-    rel = Faker("random_element", elements=["nsubj", "dobj", "ccomp", "pobj", "iobj"])
-    producer = Faker("random_element", elements=[1, 2])
+    head = factory.SubFactory('mpcd.corpus.tests.factories.TokenFactory')
+    rel = factory.Faker("random_element", elements=["nsubj", "dobj", "ccomp", "pobj", "iobj"])
+    producer = factory.Faker("random_element", elements=[1, 2])

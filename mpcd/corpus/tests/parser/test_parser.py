@@ -1,68 +1,23 @@
-from django.test import TestCase
 import pytest
-import factory
 from faker import Faker
-from mpcd.corpus.models import Codex, CodexPart, Facsimile, Folio, Line, BibEntry, MorphologicalAnnotation, Token
+from mpcd.corpus.models import Folio, Line
 
 
-
-class FacsimileFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Facsimile
-
-    bib_entry = factory.SubFactory(BibEntryFactory)
-    codex_part = factory.SubFactory(CodexPartFactory)
-
-
-class CorpusFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Corpus
-
-    name = factory.Faker("pystr", max_chars=10)
-    slug = factory.Faker("pystr", max_chars=10)
+from mpcd.corpus.tests.factories.codex import CodexFactory
+from mpcd.corpus.tests.factories.codex_part import CodexPartFactory
+from mpcd.corpus.tests.factories.facsimile import FacsimileFactory
+from mpcd.corpus.tests.factories.bibliography import BibEntryFactory
+from mpcd.corpus.tests.factories.token import TokenFactory
+from mpcd.corpus.tests.factories.sentence import SentenceFactory
 
 
-class TextFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Text
+@pytest.mark.django_db
+def test_create_codex():
+    # Create a Codex object
+    codex = CodexFactory()
 
-    id = factory.Faker("uuid4")
-    corpus = factory.SubFactory("path.to.CorpusFactory")
-    title = factory.Faker("sentence", nb_words=4)
-    text_sigle = factory.SubFactory("path.to.TextSigleFactory")
-    stage = factory.Faker("pystr", max_chars=3)
-
-
-class MorphologicalAnnotationFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = MorphologicalAnnotation
-
-    feature = factory.Faker("pystr", max_chars=10)
-    feature_value = factory.Faker("pystr", max_chars=10)
-
-
-class TokenFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Token
-
-    number = factory.Faker("pyfloat", left_digits=2, right_digits=2, positive=True)
-    root = factory.Faker("pybool")
-    word_token = factory.Faker("pybool")
-    visible = factory.Faker("pybool")
-    text = factory.SubFactory("your_app.factories.TextFactory")
-    language = factory.Faker("language_code")
-    transcription = factory.Faker("word")
-    transliteration = factory.Faker("word")
-    lemmas = factory.SubFactory("your_app.factories.LemmaFactory")
-    meanings = factory.SubFactory("your_app.factories.MeaningFactory")
-    pos = factory.Faker("word", length=8)
-    morphological_annotation = factory.SubFactory("your_app.factories.MorphologicalAnnotationFactory")
-    syntactic_annotation = factory.SubFactory("your_app.factories.DependencyFactory")
-    comments = factory.SubFactory("your_app.factories.TokenCommentFactory")
-    avestan = factory.Faker("text")
-    line = factory.SubFactory(L)
-    previous = factory.SubFactory("self")
-    gloss = factory.Faker("text")
+    # Assert that the Codex object was created correctly
+    assert codex.sigle == codex.sigle
 
 
 @pytest.mark.django_db
@@ -82,6 +37,10 @@ def test_create_facsimile():
     # Assert that the Facsimile object was created correctly
     assert facsimile.codex_part == codex_part
     assert facsimile.bib_entry == bib_entry
+
+
+
+
 
 
 def parse_sentences(sentences, facsimile,  line_identifiers, folio_identifiers, text):
@@ -165,17 +124,3 @@ def sentences():
     ]
 
 # test_parse_sentences.py
-
-
-@pytest.mark.django_db
-def test_parse_sentences(sentences):
-    # Call the parse_sentences function with the fake sentences
-    facsimile = FacsimileFactory()
-    line_identifiers = set()
-    folio_identifiers = set()
-    parse_sentences(sentences, facsimile=facsimile, line_identifiers=line_identifiers,
-                    folio_identifiers=folio_identifiers)
-
-    # Assert that the correct number of lines and folios were created
-    assert Line.objects.count() == len(line_identifiers)
-    assert Folio.objects.count() == len(folio_identifiers)

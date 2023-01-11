@@ -4,19 +4,18 @@ from strawberry_django_plus.gql import relay
 from typing import List, TYPE_CHECKING, Optional
 
 from mpcd.corpus import models
-from mpcd.dict.types import language
 
 
 if TYPE_CHECKING:
     from mpcd.dict.types.lemma import Lemma
     from mpcd.dict.types.meaning import Meaning
-    from. dependency import Dependency
+    from .comment import Comment
+    from .dependency import Dependency
     from .line import Line
     from .morphological_annotation import MorphologicalAnnotation
     from .section import Section
     from .text import Text
-    from .token_comment import TokenComment
-
+    from .sentence import Sentence
 
 @gql.django.filters.filter(models.Text)
 class TextFilter:

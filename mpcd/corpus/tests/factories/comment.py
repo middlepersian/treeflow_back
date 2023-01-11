@@ -1,13 +1,12 @@
 import factory
-from django.contrib.auth import get_user_model
-from .models import Comment
+from mpcd.corpus.models import Comment
 
 
-class CommentFactory(factory.DjangoModelFactory):
+class CommentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Comment
 
-    user = factory.SubFactory(get_user_model())
+    user = factory.SubFactory("mpcd.corpus.tests.factories.UserFactory")
     txt = factory.Faker("text")
 
     codex_part = factory.SubFactory("mpcd.corpus.tests.factories.CodexPartFactory")
@@ -24,9 +23,7 @@ class CommentFactory(factory.DjangoModelFactory):
     text_sigle = factory.SubFactory("mpcd.corpus.tests.factories.TextSigleFactory")
     text = factory.SubFactory("mpcd.corpus.tests.factories.TextFactory")
 
-    
     token = factory.SubFactory("mpcd.corpus.tests.factories.TokenFactory")
-    uncertain = factory.List(["a","b","c"])
-    to_discuss = factory.List(["d","e","f"])
-    new_suggestion = factory.List(["g","h","i"])
-
+    uncertain = factory.List(["a", "b", "c"])
+    to_discuss = factory.List(["d", "e", "f"])
+    new_suggestion = factory.List(["g", "h", "i"])

@@ -1,5 +1,3 @@
-
-
 import factory
 from mpcd.corpus.models import Corpus
 

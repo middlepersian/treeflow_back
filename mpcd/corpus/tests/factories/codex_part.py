@@ -1,6 +1,6 @@
 import factory
-from faker import Faker
-
+from mpcd.corpus.models import CodexPart
+from mpcd.corpus.tests.factories.codex import CodexFactory
 
 class CodexPartFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -8,5 +8,4 @@ class CodexPartFactory(factory.django.DjangoModelFactory):
 
     slug = factory.Faker("slug")
     codex = factory.SubFactory(CodexFactory)
-
 

@@ -5,7 +5,6 @@ from .dependency import Dependency
 from .morphological_annotation import MorphologicalAnnotation
 from .text import Text
 from .line import Line
-from .comment import Comment
 
 
 class Token(models.Model):
@@ -16,7 +15,7 @@ class Token(models.Model):
     word_token = models.BooleanField(default=True)
     visible = models.BooleanField(default=True)
     
-    text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
+    text = models.ForeignKey('Text', on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
     sentence = models.ForeignKey('Sentence', on_delete=models.SET_NULL, null=True, blank=True, related_name='token_sentence')
 
     language = models.CharField(max_length=3, null=True, blank=True)
