@@ -5,8 +5,8 @@ from mpcd.dict.models import Meaning
 class MeaningFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Meaning
-    meaning = factory.Faker("sentence", nb_words=3)
-    language = factory.Faker("language_code")
+    meaning = factory.Faker("word")
+    language = factory.Faker("pystr", max_chars=3)
 
     @factory.post_generation
     def related_meanings(self, create, extracted, **kwargs):

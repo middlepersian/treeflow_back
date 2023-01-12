@@ -5,25 +5,23 @@ from mpcd.corpus.tests.factories import TokenFactory
 
 @pytest.mark.django_db
 def test_token_factory():
+    """Test token factory"""
     token = TokenFactory()
     assert isinstance(token, Token)
-    '''
-    assert token.number is not None
-    assert isinstance(token.root, bool)
-    assert isinstance(token.word_token, bool)
-    assert isinstance(token.visible, bool)
-    assert token.text is not None
-    assert token.sentence is not None
-    assert token.language is not None
-    assert token.transcription is not None
-    assert token.transliteration is not None
-    assert token.pos is not None
-    assert token.avestan is not None
-    assert token.line is not None
-    assert token.previous is not None
-    assert token.gloss is not None
-    assert token.lemmas is not None
-    assert token.meanings is not None
-    assert token.morphological_annotation is not None
-    assert token.syntactic_annotation is not None
-    '''
+
+    assert token.number
+    assert token.root == False
+    assert token.word_token
+    assert token.visible
+    assert token.text
+    assert token.sentence
+    assert token.language
+    assert token.transcription
+    assert token.transliteration
+    assert token.pos
+    assert token.avestan
+    assert token.gloss
+    assert token.lemmas
+    assert token.meanings
+    assert token.morphological_annotation
+    assert token.syntactic_annotation

@@ -2,7 +2,6 @@ from factory import Faker, SubFactory
 import factory
 from factory.django import DjangoModelFactory
 from mpcd.dict.models import Lemma
-from .meaning import MeaningFactory
 
 
 class LemmaFactory(DjangoModelFactory):
@@ -10,7 +9,7 @@ class LemmaFactory(DjangoModelFactory):
         model = Lemma
 
     word = Faker("word")
-    language = Faker("language_code")
+    language = factory.Faker("pystr", max_chars=3)
 
     @factory.post_generation
     def related_meanings(self, create, extracted, **kwargs):
