@@ -10,9 +10,9 @@ class TextFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Text
     corpus = factory.SubFactory(CorpusFactory)
-    title = factory.Faker("pystr", min_chars=1, max_chars=10)
+    title = factory.Faker("pystr", min_chars=1, max_chars=30)
     text_sigle = factory.SubFactory(TextSigleFactory)
-    stage = factory.Faker("pystr", max_chars=3)
+    stage = factory.Faker("pystr", max_chars=3  )
     #sources = factory.SubFactory(SourceFactory)
     #resources = factory.SubFactory(BibEntryFactory)
     #editors = factory.SubFactory(UserFactory)
