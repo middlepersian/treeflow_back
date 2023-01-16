@@ -5,7 +5,7 @@ from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
-from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, line, morphological_annotation, section_type, section, sentence, source, text_sigle, text, token, user
+from mpcd.corpus.schemas import bibliography, codex_part, comment, corpus, dependency, facsimile, folio, morphological_annotation, section_type, section, source, text_sigle, text, token, user
 from mpcd.dict.schemas import lemma, meaning
 from mpcd.dict.types import language
 from typing import List, Optional
@@ -23,11 +23,9 @@ class Query(
     dependency.Query,
     facsimile.Query,
     folio.Query,
-    line.Query,
     morphological_annotation.Query,
     section_type.Query,
     section.Query,
-    sentence.Query,
     source.Query,
     text_sigle.Query,
     text.Query,
@@ -54,11 +52,9 @@ class Mutation(
     dependency.Mutation,
     facsimile.Mutation,
     folio.Mutation,
-    line.Mutation,
     morphological_annotation.Mutation,
     section_type.Mutation,
     section.Mutation,
-    sentence.Mutation,
     source.Mutation,
     text_sigle.Mutation,
     text.Mutation,

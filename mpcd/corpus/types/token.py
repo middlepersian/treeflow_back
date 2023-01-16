@@ -11,11 +11,10 @@ if TYPE_CHECKING:
     from mpcd.dict.types.meaning import Meaning
     from .comment import Comment
     from .dependency import Dependency
-    from .line import Line
     from .morphological_annotation import MorphologicalAnnotation
     from .section import Section
     from .text import Text
-    from .sentence import Sentence
+
 
 @gql.django.filters.filter(models.Text)
 class TextFilter:
@@ -42,7 +41,6 @@ class Token(relay.Node):
     id: relay.GlobalID
     number: gql.auto
     text: gql.LazyType['Text', 'mpcd.corpus.types.text']
-    sentence: gql.LazyType['Sentence', 'mpcd.corpus.types.sentence']
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
@@ -53,7 +51,6 @@ class Token(relay.Node):
                                                 'mpcd.corpus.types.morphological_annotation']]
     syntactic_annotation: List[gql.LazyType['Dependency', 'mpcd.corpus.types.dependency']]
     avestan: gql.auto
-    line: gql.LazyType['Line', 'mpcd.corpus.types.line']
     previous: Optional['Token']
     next: Optional['Token']
     gloss: gql.auto
@@ -63,7 +60,6 @@ class Token(relay.Node):
 class TokenInput:
     number: gql.auto
     text: gql.auto
-    sentence: gql.auto
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
@@ -73,7 +69,6 @@ class TokenInput:
     morphological_annotation: gql.auto
     syntactic_annotation: gql.auto
     avestan: gql.auto
-    line: gql.auto
     previous: gql.auto
     next: gql.auto
     gloss: gql.auto
@@ -84,7 +79,6 @@ class TokenPartial:
     id: relay.GlobalID
     number: gql.auto
     text: gql.auto
-    sentence: gql.auto
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
@@ -94,7 +88,6 @@ class TokenPartial:
     morphological_annotation: gql.auto
     syntactic_annotation: gql.auto
     avestan: gql.auto
-    line: gql.auto
     previous: gql.auto
     next: gql.auto
     gloss: gql.auto

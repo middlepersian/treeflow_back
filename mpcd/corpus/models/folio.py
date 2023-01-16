@@ -12,7 +12,7 @@ class Folio(models.Model):
     number = models.FloatField(null=True, blank=True)
     facsimile = models.ForeignKey(Facsimile, on_delete=models.CASCADE, null=True,
                                   blank=True, related_name='folio_facsimile')
-    comments = models.ManyToManyField('Comment', blank=True, related_name='folio_comments')
+    sections = models.ManyToManyField('Section', blank=True, related_name='folio_sections')
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,

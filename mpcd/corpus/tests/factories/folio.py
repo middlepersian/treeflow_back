@@ -11,6 +11,12 @@ class FolioFactory(factory.django.DjangoModelFactory):
 
     previous = factory.SubFactory("mpcd.corpus.tests.factories.FolioFactory", previous=None)
 
+    sections = factory.RelatedFactoryList(
+        "mpcd.corpus.tests.factories.SectionFactory",
+        factory_related_name="folio_sections",
+        size=2
+    )
+
     @factory.post_generation
     def set_previous(self, create, extracted, **kwargs):
         if kwargs.get('previous'):

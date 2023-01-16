@@ -6,11 +6,9 @@ from .corpus import CorpusFactory
 from .dependency import DependencyFactory
 from .facsimile import FacsimileFactory
 from .folio import FolioFactory
-from .line import LineFactory
 from .morphological_annotation import MorphologicalAnnotationFactory
 from .section import SectionFactory
 from .section_type import SectionTypeFactory
-from .sentence import SentenceFactory
 from .source import SourceFactory
 from .text import TextFactory
 from .text_sigle import TextSigleFactory

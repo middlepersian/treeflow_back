@@ -5,10 +5,8 @@ from .codex_part import CodexPart
 from .comment import Comment
 from .folio import Folio
 from .facsimile import Facsimile
-from .line import Line
 from .morphological_annotation import MorphologicalAnnotation
 from .resource import Resource
-from .sentence import Sentence
 from .source import Source
 from .text_sigle import TextSigle
 from .token import Token

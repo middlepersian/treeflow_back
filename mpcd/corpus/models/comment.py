@@ -4,6 +4,7 @@ from simple_history.models import HistoricalRecords
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 
+
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
@@ -24,7 +25,7 @@ class Comment(models.Model):
 
     # edition
     edition = models.ForeignKey('Edition', on_delete=models.CASCADE, null=True,
-                                 blank=True, related_name='comment_edition')
+                                blank=True, related_name='comment_edition')
 
     # facsimile
     facsimile = models.ForeignKey('Facsimile', on_delete=models.CASCADE, null=True,
@@ -32,9 +33,6 @@ class Comment(models.Model):
 
     # folio
     folio = models.ForeignKey('Folio', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_folio')
-
-    # line
-    line = models.ForeignKey('Line', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_line')
 
     # resource
     resource = models.ForeignKey('Resource', on_delete=models.CASCADE, null=True,
@@ -47,10 +45,6 @@ class Comment(models.Model):
     # section
     section = models.ForeignKey('Section', on_delete=models.CASCADE, null=True,
                                 blank=True, related_name='comment_section')
-
-    # sentence
-    sentence = models.ForeignKey('Sentence', on_delete=models.CASCADE, null=True,
-                                 blank=True, related_name='comment_sentence')
 
     # text_sigle
     text_sigle = models.ForeignKey('TextSigle', on_delete=models.CASCADE, null=True,

@@ -13,7 +13,21 @@ if TYPE_CHECKING:
     from .token import Token
 
 
-@gql.django.type(models.Section)
+@gql.django.filters.filter(models.SectionType)
+class SectionTypeFilter:
+    id: relay.GlobalID
+    identifier: gql.auto
+
+
+@gql.django.filters.filter(models.Section)
+class SectionFilter:
+    id: relay.GlobalID
+    section_type: 'SectionTypeFilter'
+    container: 'SectionFilter'
+    section_container: 'SectionFilter'
+
+
+@gql.django.type(models.Section, filters=SectionFilter)
 class Section(relay.Node):
     id: relay.GlobalID
     number: gql.auto
@@ -25,6 +39,7 @@ class Section(relay.Node):
     previous: Optional['Section']
     next: Optional['Section']
     container: Optional['Section']
+    section_container: Optional['Section']
 
 
 @gql.django.input(models.Section)

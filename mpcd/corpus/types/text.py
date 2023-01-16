@@ -7,7 +7,6 @@ from mpcd.corpus import models
 if TYPE_CHECKING:
     from .token import Token
     from .section import Section
-    from .sentence import Sentence
     from .corpus import Corpus
     from .text_sigle import TextSigle
     from .user import User
@@ -20,7 +19,6 @@ class Text(relay.Node):
 
     token_text: relay.Connection[gql.LazyType['Token',  'mpcd.corpus.types.token']]
     section_text: relay.Connection[gql.LazyType['Section',  'mpcd.corpus.types.section']]
-    sentence_text: relay.Connection[gql.LazyType['Sentence',  'mpcd.corpus.types.sentence']]
     text_comment : relay.Connection[gql.LazyType['Comment',  'mpcd.corpus.types.comment']]
 
     # fields

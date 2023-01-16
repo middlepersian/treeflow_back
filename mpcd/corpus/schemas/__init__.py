@@ -5,11 +5,9 @@ from .corpus import Query
 from .dependency import Query, Mutation
 from .facsimile import Query, Mutation
 from .folio import Query, Mutation
-from .line import Query, Mutation
 from .morphological_annotation import Query, Mutation
 from .section_type import Query, Mutation
 from .section import Query, Mutation
-from .sentence import Query, Mutation
 from .source import Query, Mutation
 from .text_sigle import Query, Mutation
 from .text import Query, Mutation
