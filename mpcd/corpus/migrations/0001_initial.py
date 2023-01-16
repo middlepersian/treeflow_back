@@ -89,6 +89,108 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='MorphologicalAnnotation',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('feature', models.CharField(blank=True, max_length=10, null=True)),
+                ('feature_value', models.CharField(blank=True, max_length=10, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Resource',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('description', models.TextField(blank=True, null=True)),
+                ('project', models.TextField(blank=True, null=True)),
+                ('reference', models.URLField(blank=True, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Section',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('number', models.FloatField(blank=True, null=True)),
+                ('identifier', models.CharField(blank=True, max_length=100, null=True, unique=True)),
+                ('title', models.CharField(blank=True, max_length=100, null=True)),
+                ('language', models.CharField(blank=True, max_length=3)),
+            ],
+            options={
+                'ordering': ['number'],
+            },
+        ),
+        migrations.CreateModel(
+            name='SectionType',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('identifier', models.CharField(max_length=30, unique=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Source',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('identifier', models.CharField(blank=True, max_length=30, null=True)),
+                ('description', models.TextField(blank=True, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Text',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('title', models.CharField(max_length=100, unique=True)),
+                ('language', models.CharField(blank=True, max_length=3)),
+                ('stage', models.CharField(blank=True, max_length=3)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TextSigle',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('sigle', models.CharField(max_length=10)),
+                ('genre', models.CharField(max_length=3)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Codex',
+            fields=[
+                ('source_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='corpus.source')),
+                ('sigle', models.CharField(max_length=5, unique=True)),
+            ],
+            bases=('corpus.source',),
+        ),
+        migrations.CreateModel(
+            name='Edition',
+            fields=[
+                ('source_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='corpus.source')),
+            ],
+            bases=('corpus.source',),
+        ),
+        migrations.CreateModel(
+            name='Token',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('number', models.FloatField(blank=True, null=True)),
+                ('root', models.BooleanField(default=False)),
+                ('word_token', models.BooleanField(default=True)),
+                ('visible', models.BooleanField(default=True)),
+                ('language', models.CharField(blank=True, max_length=3, null=True)),
+                ('transcription', models.CharField(max_length=50)),
+                ('transliteration', models.CharField(blank=True, max_length=50)),
+                ('pos', models.CharField(blank=True, max_length=8, null=True)),
+                ('avestan', models.TextField(blank=True, null=True)),
+                ('gloss', models.TextField(blank=True, null=True)),
+                ('lemmas', models.ManyToManyField(blank=True, related_name='token_lemmas', to='dict.lemma')),
+                ('meanings', models.ManyToManyField(blank=True, related_name='token_meanings', to='dict.meaning')),
+                ('morphological_annotation', models.ManyToManyField(blank=True, related_name='token_morphological_annotation', to='corpus.morphologicalannotation')),
+                ('previous', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='next', to='corpus.token')),
+                ('syntactic_annotation', models.ManyToManyField(blank=True, related_name='token_syntactic_annotation', to='corpus.dependency')),
+                ('text', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='token_text', to='corpus.text')),
+            ],
+            options={
+                'ordering': ['number'],
+            },
+        ),
+        migrations.CreateModel(
             name='HistoricalBibEntry',
             fields=[
                 ('id', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)),
@@ -385,108 +487,6 @@ class Migration(migrations.Migration):
                 'get_latest_by': ('history_date', 'history_id'),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
-        ),
-        migrations.CreateModel(
-            name='MorphologicalAnnotation',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('feature', models.CharField(blank=True, max_length=10, null=True)),
-                ('feature_value', models.CharField(blank=True, max_length=10, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Resource',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('project', models.TextField(blank=True, null=True)),
-                ('reference', models.URLField(blank=True, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Section',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('number', models.FloatField(blank=True, null=True)),
-                ('identifier', models.CharField(blank=True, max_length=100, null=True, unique=True)),
-                ('title', models.CharField(blank=True, max_length=100, null=True)),
-                ('language', models.CharField(blank=True, max_length=3)),
-            ],
-            options={
-                'ordering': ['number'],
-            },
-        ),
-        migrations.CreateModel(
-            name='SectionType',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('identifier', models.CharField(max_length=30, unique=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Source',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('identifier', models.CharField(blank=True, max_length=30, null=True)),
-                ('description', models.TextField(blank=True, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Text',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('title', models.CharField(max_length=100, unique=True)),
-                ('language', models.CharField(blank=True, max_length=3)),
-                ('stage', models.CharField(blank=True, max_length=3)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='TextSigle',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('sigle', models.CharField(max_length=10)),
-                ('genre', models.CharField(max_length=3)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Codex',
-            fields=[
-                ('source_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='corpus.source')),
-                ('sigle', models.CharField(max_length=5, unique=True)),
-            ],
-            bases=('corpus.source',),
-        ),
-        migrations.CreateModel(
-            name='Edition',
-            fields=[
-                ('source_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='corpus.source')),
-            ],
-            bases=('corpus.source',),
-        ),
-        migrations.CreateModel(
-            name='Token',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('number', models.FloatField(blank=True, null=True)),
-                ('root', models.BooleanField(default=False)),
-                ('word_token', models.BooleanField(default=True)),
-                ('visible', models.BooleanField(default=True)),
-                ('language', models.CharField(blank=True, max_length=3, null=True)),
-                ('transcription', models.CharField(max_length=50)),
-                ('transliteration', models.CharField(blank=True, max_length=50)),
-                ('pos', models.CharField(blank=True, max_length=8, null=True)),
-                ('avestan', models.TextField(blank=True, null=True)),
-                ('gloss', models.TextField(blank=True, null=True)),
-                ('lemmas', models.ManyToManyField(blank=True, related_name='token_lemmas', to='dict.lemma')),
-                ('meanings', models.ManyToManyField(blank=True, related_name='token_meanings', to='dict.meaning')),
-                ('morphological_annotation', models.ManyToManyField(blank=True, related_name='token_morphological_annotation', to='corpus.morphologicalannotation')),
-                ('previous', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='next', to='corpus.token')),
-                ('syntactic_annotation', models.ManyToManyField(blank=True, related_name='token_syntactic_annotation', to='corpus.dependency')),
-                ('text', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='token_text', to='corpus.text')),
-            ],
-            options={
-                'ordering': ['number'],
-            },
         ),
         migrations.AddConstraint(
             model_name='textsigle',
