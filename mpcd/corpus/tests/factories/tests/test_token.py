@@ -14,7 +14,6 @@ def test_token_factory():
     assert token.word_token
     assert token.visible
     assert token.text
-    assert token.sentence
     assert token.language
     assert token.transcription
     assert token.transliteration
@@ -25,3 +24,8 @@ def test_token_factory():
     assert token.meanings
     assert token.morphological_annotation
     assert token.syntactic_annotation
+
+    previous = TokenFactory()
+    token.previous = previous
+    assert isinstance(token.previous, Token)
+    

@@ -1,6 +1,6 @@
 import pytest
 from faker import Faker
-from mpcd.corpus.models import Folio, Line
+from mpcd.corpus.models import Folio
 
 
 from mpcd.corpus.tests.factories.codex import CodexFactory
@@ -8,7 +8,6 @@ from mpcd.corpus.tests.factories.codex_part import CodexPartFactory
 from mpcd.corpus.tests.factories.facsimile import FacsimileFactory
 from mpcd.corpus.tests.factories.bibliography import BibEntryFactory
 from mpcd.corpus.tests.factories.token import TokenFactory
-from mpcd.corpus.tests.factories.sentence import SentenceFactory
 
 
 @pytest.mark.django_db
@@ -37,10 +36,6 @@ def test_create_facsimile():
     # Assert that the Facsimile object was created correctly
     assert facsimile.codex_part == codex_part
     assert facsimile.bib_entry == bib_entry
-
-
-
-
 
 
 def parse_sentences(sentences, facsimile,  line_identifiers, folio_identifiers, text):
@@ -81,22 +76,23 @@ def parse_sentences(sentences, facsimile,  line_identifiers, folio_identifiers, 
                 folio_obj.save()
 
              # Get or create a Line object with the specified line ID
-            line_obj, created = Line.objects.get_or_create(identifier=line_identifier, folio=folio_obj)
+            #line_obj, created = Line.objects.get_or_create(identifier=line_identifier, folio=folio_obj)
             if not created:
                 # Check if this is the first time the line has been encountered
                 if line_identifier in line_count and line_count[line_identifier] > 1:
                     # Set the previous_line field to the previous Line object
-                    line_obj.previous_line = previous_line_obj
-                previous_line_obj = line_obj  # Update the previous Line object
-                line_obj.save()
+                    #line_obj.previous_line = previous_line_obj
+                    pass
+                # previous_line_obj = line_obj  # Update the previous Line object
+                # line_obj.save()
 
             # Create a Token object
             token = TokenFactory(text=text, line=line_obj, previous=previous_token_obj)
             previous_token_obj = token
 
             # Create a Sentence object
-            sentence_obj = SentenceFactory(text=text, line=line_obj, previous=previous_sentence_obj)
-            previous_sentence_obj = sentence_obj
+            #sentence_obj = SentenceFactory(text=text, line=line_obj, previous=previous_sentence_obj)
+            #previous_sentence_obj = sentence_obj
 
     print(f"Number of lines: {len(line_count)}")
     print(f"Number of folios: {len(folio_count)}")

@@ -17,7 +17,6 @@ class TokenFactory(factory.django.DjangoModelFactory):
     visible = factory.LazyFunction(lambda: True)
 
     text = factory.SubFactory("mpcd.corpus.tests.factories.TextFactory")
-    sentence = factory.SubFactory("mpcd.corpus.tests.factories.SentenceFactory")
     language = factory.Faker("pystr", max_chars=3)
     transcription = factory.Faker("pystr", min_chars=5, max_chars=20)
     transliteration = factory.Faker("pystr", min_chars=5, max_chars=20)
