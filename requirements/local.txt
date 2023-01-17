@@ -38,3 +38,5 @@ django-coverage-plugin==2.0.0  # https://github.com/nedbat/django_coverage_plugi
 
 #pandas
 pandas==1.5.2
+#openpyxl
+openpyxl==3.0.10

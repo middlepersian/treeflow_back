@@ -1,11 +1,12 @@
 import re
 import pandas as pd
+import numpy as np
 
 
 def get_sentences(filepath):
     data = pd.read_excel(filepath)
     data = data.groupby(['sentence'])
-    return sentences
+    return data
 
 
 def check_field(field):
@@ -40,12 +41,12 @@ def process_new_part(new_part):
         new_part_dict['chapter_identifier'] = '_'.join(
             new_part_raw.split('_')[:-1])
 
-        print('new_part_dict: {} '.format(new_part_dict))
+        #print('new_part_dict: {} '.format(new_part_dict))
 
         return new_part_dict
 
 
-def parse_sentences(sentences):
+def format_sentences(sentences):
     all_sentences = []
     for i, e in enumerate(sentences):
         translations = []
@@ -144,5 +145,8 @@ def parse_sentences(sentences):
         sentence['mwe'] = mwe
         sentence['translations'] = translations
         all_sentences.append(sentence)
+
+    print('first sentence: {}'.format(all_sentences[0]))
+    print('last sentence: {}'.format(all_sentences[-1]))
 
     return all_sentences
