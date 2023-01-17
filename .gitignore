@@ -286,3 +286,9 @@ mpcd/media/
 
 mpcd.dot 
 mpcd.png 
+
+
+
+*.xlsx
+*.json
+*.sql
