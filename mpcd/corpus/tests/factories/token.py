@@ -8,10 +8,6 @@ class TokenFactory(factory.django.DjangoModelFactory):
 
     number = factory.Faker("pyfloat", positive=True, left_digits=2, right_digits=2)
 
-    #root = factory.Faker("pybool")
-    #word_token = factory.Faker("pybool")
-    #visible = factory.Faker("pybool")
-
     root = factory.LazyFunction(lambda: False)
     word_token = factory.LazyFunction(lambda: True)
     visible = factory.LazyFunction(lambda: True)

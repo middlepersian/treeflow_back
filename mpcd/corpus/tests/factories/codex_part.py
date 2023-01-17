@@ -1,11 +1,11 @@
 import factory
 from mpcd.corpus.models import CodexPart
-from mpcd.corpus.tests.factories.codex import CodexFactory
+
 
 class CodexPartFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CodexPart
+        django_get_or_create = ('slug',)
 
-    slug = factory.Faker("slug")
-    codex = factory.SubFactory(CodexFactory)
-
+    slug = factory.Faker("pystr", max_chars=5)
+    codex = factory.SubFactory("mpcd.corpus.tests.factories.CodexFactory")

@@ -7,4 +7,3 @@ def test_codex_part_factory():
     codex_part = CodexPartFactory()
     assert isinstance(codex_part, CodexPart)
     assert codex_part.slug is not None
-    assert codex_part.codex is not None

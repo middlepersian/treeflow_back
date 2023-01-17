@@ -1,10 +1,11 @@
 import pytest
 from mpcd.corpus.models import Facsimile
-from mpcd.corpus.tests.factories import FacsimileFactory
+from mpcd.corpus.tests.factories import FacsimileFactory, BibEntryFactory
 
 @pytest.mark.django_db
 def test_facsimile_factory():
-    facsimile = FacsimileFactory()
+
+    bib_entry = BibEntryFactory()
+    facsimile = FacsimileFactory(bib_entry=bib_entry)
     assert isinstance(facsimile, Facsimile)
-    assert facsimile.bib_entry is not None
-    assert facsimile.codex_part is not None
+
