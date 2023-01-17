@@ -5,6 +5,7 @@ from mpcd.corpus.models import Token
 class TokenFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Token
+        django_get_or_create = ("number", "text")
 
     number = factory.Faker("pyfloat", positive=True, left_digits=2, right_digits=2)
 

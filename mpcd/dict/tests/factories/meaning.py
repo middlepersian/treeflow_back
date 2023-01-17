@@ -5,6 +5,8 @@ from mpcd.dict.models import Meaning
 class MeaningFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Meaning
+        django_get_or_create = ("meaning", "language")
+
     meaning = factory.Faker("word")
     language = factory.Faker("pystr", max_chars=3)
 

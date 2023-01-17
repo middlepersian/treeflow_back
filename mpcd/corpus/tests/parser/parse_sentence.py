@@ -109,7 +109,7 @@ def format_sentences(sentences):
                     if check_field(row['meaning']):
                         token['meaning'] = check_field(row['meaning'])
                     if check_field(row['POSTag']):
-                        pos = check_field(row['POSTag'])
+                        token['pos'] = check_field(row['POSTag'])
                     if check_field(row['POSTFeatures']):
                         if [check_field(x) for x in check_field(row['POSTFeatures']).split('|') if x != '_']:
                             token['morphological_annotation'] = [check_field(x) for x in check_field(

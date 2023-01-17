@@ -7,6 +7,7 @@ from mpcd.dict.models import Lemma
 class LemmaFactory(DjangoModelFactory):
     class Meta:
         model = Lemma
+        django_get_or_create = ("word", "language")
 
     word = Faker("word")
     language = factory.Faker("pystr", max_chars=3)

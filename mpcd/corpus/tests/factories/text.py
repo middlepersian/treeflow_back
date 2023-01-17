@@ -9,6 +9,7 @@ from mpcd.users.tests.factories import UserFactory
 class TextFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Text
+        django_get_or_create = ("title", "corpus")
     corpus = factory.SubFactory(CorpusFactory)
     title = factory.Faker("pystr", min_chars=1, max_chars=30)
     text_sigle = factory.SubFactory(TextSigleFactory)
