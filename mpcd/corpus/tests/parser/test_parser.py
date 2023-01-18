@@ -1,8 +1,7 @@
 import os
 import json
 import pytest
-from faker import Faker
-from mpcd.corpus.models import Folio
+import pandas as pd
 
 
 from mpcd.corpus.tests.factories.codex import CodexFactory
@@ -44,50 +43,6 @@ def serialize_first_elements(sentences, number_of_elements):
     jsonFile.write(json.dumps(sentences[:number_of_elements], indent=4, ensure_ascii=False))
 
 
-@pytest.mark.django_db
-def test_create_codex():
-    # Create a Codex object
-    codex = CodexFactory()
-
-    # Assert that the Codex object was created correctly
-    assert codex.sigle == codex.sigle
-
-
-@pytest.mark.django_db
-def test_create_facsimile():
-    # Create a Codex object
-    codex = CodexFactory()
-
-    # Create a CodexPart object
-    codex_part = CodexPartFactory(codex=codex)
-
-    # Create a BibEntry object
-    bib_entry = BibEntryFactory()
-
-    # Create a Facsimile object
-    facsimile = FacsimileFactory(codex_part=codex_part, bib_entry=bib_entry)
-
-    # Assert that the Facsimile object was created correctly
-    # assert facsimile.codex_part == codex_part
-    # assert facsimile.bib_entry == bib_entry
-
-    assert facsimile.codex_part.codex == codex
-
-
-@pytest.mark.django_db
-def test_read_file():
-    file = 'DMX_K43a.xlsx'
-    script_path = os.path.abspath(__file__)
-    script_dir = os.path.dirname(script_path)
-    file_path = os.path.join(script_dir, file)
-
-    sentences = get_sentences(file_path)
-
-    sentences = format_sentences(sentences)
-    # serialize
-    serialize_first_elements(sentences, 10)
-
-
 @pytest.fixture
 def sentences():
     file = 'sentences_10.json'
@@ -97,6 +52,46 @@ def sentences():
     with open(file_path, 'r') as f:
         sentences = json.load(f)
     return sentences
+
+
+def parse_sentences(df):
+    sentences = []
+    sentence = pd.DataFrame(columns=df.columns)
+    for i, row in df.iterrows():
+        if str(row["id"]).startswith("#SENTENCE_ID"):
+            sentences.append(sentence)
+            sentence = pd.DataFrame(columns=df.columns)
+        else:
+            sentence = sentence.append(row)
+    sentences.append(sentence)
+    return sentences
+
+
+@pytest.mark.django_db
+def test_read_conll():
+    file = 'Dk5_preannotated.csv'
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    file_path = os.path.join(script_dir, file)
+    with open(file_path, 'r') as f:
+        df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
+        print(df.head())
+        sentences = parse_sentences(df)
+        populate_db(sentences)
+
+
+@pytest.mark.django_db
+def test_read_file():
+    file = 'GA_K20.xlsx'
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    file_path = os.path.join(script_dir, file)
+
+    sentences = get_sentences(file_path)
+
+    sentences = format_sentences(sentences)
+    # serialize
+    serialize_first_elements(sentences, 10)
 
 
 @pytest.mark.django_db
@@ -118,22 +113,66 @@ def test_parse(sentences):
 
     line_identifiers, folio_identifiers = parse_sentences(
         sentences, facsimile, line_identifiers, folio_identifiers, text)
-    
+
+    assert len(line_identifiers) == 16
+    assert len(folio_identifiers) == 2
 
 
 @pytest.mark.django_db
 def test_create_ga():
-    # CREATE TEXT
     codex_part = CodexPartFactory(codex__sigle="K20")
     facsimile = FacsimileFactory(bib_entry__key="zotero_k20", codex_part__codex__sigle="K20", codex_part__slug="k20new")
-    text = TextFactory(title="Mādīgān ī Gizistag Abālīš", text_sigle__sigle="GA", corpus__slug="mpcd")
+    text = TextFactory(title="Mādīgān ī Gizistag Abālīš", text_sigle__sigle="GA",
+                       text_sigle__genre="andarz", corpus__slug="mpcd")
     assert text.title == "Mādīgān ī Gizistag Abālīš"
     assert text.text_sigle.sigle == "GA"
     assert text.corpus.slug == "mpcd"
 
+    return text
+
 
 @pytest.mark.django_db
-def parse_sentences(sentences, facsimile,  line_identifiers, folio_identifiers, text):
+def test_create_dmx():
+    codex_part = CodexPartFactory(codex__sigle="K43a")
+    facsimile = FacsimileFactory(bib_entry__key="zotero_K43a",
+                                 codex_part__codex__sigle="K43a", codex_part__slug="K43anew")
+    text = TextFactory(title="Dādestān ī mēnōy ī xrad", text_sigle__sigle="DMX",
+                       text_sigle__genre="andarz",  corpus__slug="mpcd")
+    assert text.title == "Dādestān ī mēnōy ī xrad"
+    assert text.text_sigle.sigle == "DMX"
+    assert text.corpus.slug == "mpcd"
+
+    return text
+
+
+@pytest.mark.django_db
+def populate_db(sentences):
+
+    token_number = 1
+    current_newpart = None
+    newparts = {}
+    newpart_number = 0
+    for sentence in sentences:
+        for i, row in sentence.iterrows():
+            token_id = row["id"]
+            # assert token_id not empty
+            assert token_id != ""
+            token_number += 1
+            # if there is a newpart, add it to the newparts dictionary
+            if row["newpart"] == row["newpart"]:
+                newpart = str(row["newpart"])
+                if newpart.strip() not in ["_", ""]:
+                    current_newpart = newpart
+                    token_newpart = current_newpart
+                    newpart_number += 1
+                    newparts[newpart_number] = token_newpart
+            assert current_newpart != ""
+    print("Number of tokens: {}".format(token_number))
+    print("Number of newparts: {}".format(newpart_number))
+
+
+@pytest.mark.django_db
+def parse_dict(sentences, facsimile,  line_identifiers, folio_identifiers, text):
 
     line_count = {}
     folio_count = {}
@@ -166,7 +205,7 @@ def parse_sentences(sentences, facsimile,  line_identifiers, folio_identifiers, 
                 token_obj = TokenFactory(number=token_number, text=text,
                                          transcription=token_dict['transcription'], transliteration=token_dict['transliteration'])
                 if token_dict.get('pos'):
-                    token_obj.pos = token_dict['pos']                         
+                    token_obj.pos = token_dict['pos']
                 lemma_obj = LemmaFactory(word=token_dict['lemma'], language='pah')
                 token_obj.lemmas.add(lemma_obj)
                 meaning_obj = MeaningFactory(meaning=token_dict['meaning'], language='eng')
@@ -210,14 +249,17 @@ def parse_sentences(sentences, facsimile,  line_identifiers, folio_identifiers, 
                 folio_obj.sections.add(line_obj)
                 folio_obj.save()
 
+                # process sections
+                # sentence section
+
                 token_number += 1
             except Exception as e:
                 print(e)
                 print(token_dict)
                 raise e
 
-            print(f"Number of lines: {len(line_count)}")
-            print(f"Number of folios: {len(folio_count)}")
-
+    print(f"Number of lines: {len(line_count)}, lines: {line_count}")
+    print(f"Number of folios: {len(folio_count)}, folios: {folio_count}")
+    print(f"Number of tokens: {token_number}")
 
     return line_identifiers, folio_identifiers

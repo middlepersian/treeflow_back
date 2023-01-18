@@ -6,4 +6,4 @@ class TextSigleFactory(factory.django.DjangoModelFactory):
         model = TextSigle
 
     sigle = factory.Faker("pystr", max_chars=10)
-    genre = factory.Faker("pystr", max_chars=3)
+    genre = factory.Faker("pystr", max_chars=10)
