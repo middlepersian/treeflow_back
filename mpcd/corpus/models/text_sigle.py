@@ -5,7 +5,7 @@ from django.db import models
 class TextSigle(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     sigle = models.CharField(max_length=10)
-    genre = models.CharField(max_length=3)
+    genre = models.CharField(max_length=10)
 
     class Meta:
         constraints = [
