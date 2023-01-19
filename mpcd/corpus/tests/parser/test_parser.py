@@ -59,6 +59,7 @@ def parse_sentences(df):
     sentence = pd.DataFrame(columns=df.columns)
     for i, row in df.iterrows():
         if str(row["id"]).startswith("#SENTENCE_ID"):
+            sentence = sentence.append(row)  # This line appends the current row to the sentence DataFrame
             sentences.append(sentence)
             sentence = pd.DataFrame(columns=df.columns)
         else:
@@ -152,14 +153,76 @@ def populate_db(sentences):
     current_newpart = None
     newparts = {}
     newpart_number = 0
+    sentence_id = ""
     for sentence in sentences:
+
+        # initialize sections
+        # sentence section
+        sentence_section_type = SectionTypeFactory(identifier="sentence")
+        # line section
+        line_section_type = SectionTypeFactory(identifier="line")
+        # chapter section
+        chapter_section_type = SectionTypeFactory(identifier="chapter")
+        # section
+        section_section_type = SectionTypeFactory(identifier="section")
+
         for i, row in sentence.iterrows():
             token_id = row["id"]
+
+            #check if token_id starts with #
+            if str(token_id).strip().startswith("#"):
+                if str(token_id).startswith("#SENTENCE_ID"):
+                    sentence_id = str(token_id).split(" = ")[1]
+                    assert sentence_id != ""
+                elif str(token_id).startswith("#SENTENCE_TEXT"):
+                    sentence_text = str(token_id).split(" = ")[1]
+                    assert sentence_text != ""
+                continue
             # assert token_id not empty
             assert token_id != ""
             token_number += 1
+            # transcription
+            transcription = row["transcription"]
+            # assert transcription not empty
+            assert transcription != ""
+            # transliteration
+            transliteration = row["transliteration"]
+            # assert transliteration not empty
+            assert transliteration != ""
+
+            # postag
+            postag = row["postag"]
+            if postag != '_':
+                postag = postag
+            else:
+                postag = None
+
+            # postfeatures
+            postfeatures = str(row["postfeatures"]).strip()
+            if postfeatures != '_':
+                # create postfeatures (MorphologicalAnnotation)
+                if '|' in postfeatures:
+                    # split postfeatures
+                    postfeatures = postfeatures.split("|")
+                    # sub split postfeatures
+                    for postfeature in postfeatures:
+                        postfeature = postfeature.split("=")
+                        if len(postfeature) == 2:
+                            feature = postfeature[0]
+                            value = postfeature[1]
+                    else:
+                        postfeatures = None
+            print("transcription {} - postfeatures: {}".format(transcription, postfeatures))
+
             # if there is a newpart, add it to the newparts dictionary
             if row["newpart"] == row["newpart"]:
+                # check if newpart is not a digit or a _
+                if str(row["newpart"]).strip():
+                    # check if not _ or digit
+                    if str(row["newpart"]).strip() != "_":
+                        if not str(row["newpart"]).strip().replace('.', '').isdigit():
+                            print("newpart: {} - sentence #{}".format(row["newpart"], sentence_id))
+
                 newpart = str(row["newpart"])
                 if newpart.strip() not in ["_", ""]:
                     current_newpart = newpart
@@ -167,6 +230,7 @@ def populate_db(sentences):
                     newpart_number += 1
                     newparts[newpart_number] = token_newpart
             assert current_newpart != ""
+
     print("Number of tokens: {}".format(token_number))
     print("Number of newparts: {}".format(newpart_number))
 
@@ -204,12 +268,19 @@ def parse_dict(sentences, facsimile,  line_identifiers, folio_identifiers, text)
                 # Get or create a Token object with the specified token ID
                 token_obj = TokenFactory(number=token_number, text=text,
                                          transcription=token_dict['transcription'], transliteration=token_dict['transliteration'])
+                # check POS
                 if token_dict.get('pos'):
                     token_obj.pos = token_dict['pos']
-                lemma_obj = LemmaFactory(word=token_dict['lemma'], language='pah')
+                # check lemma
+                if token_dict.get('lemma'):
+                    lemma_obj = LemmaFactory(word=token_dict['lemma'], language='pah')
+                    token_obj.lemma = token_dict['lemma']
                 token_obj.lemmas.add(lemma_obj)
-                meaning_obj = MeaningFactory(meaning=token_dict['meaning'], language='eng')
-                token_obj.meanings.add(meaning_obj)
+                # split meaning
+                meanings = token_dict['meaning'].split(',')
+                for meaning in meanings:
+                    meaning_obj = MeaningFactory(meaning=meaning, language='eng')
+                    token_obj.meanings.add(meaning_obj)
                 token_obj.save()
 
                 line_identifiers.add(line_identifier)
