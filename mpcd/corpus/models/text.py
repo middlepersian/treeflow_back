@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from django.contrib.postgres.fields import ArrayField
 from strawberry.lazy_type import LazyType
 from django.db import models
 import uuid as uuid_lib
@@ -18,7 +19,7 @@ class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
     title = models.CharField(max_length=100, unique=True)
-    language = models.CharField(max_length=3, blank=True)
+    language = ArrayField(models.CharField(max_length=3), blank=True, null=True)
     text_sigle = models.ForeignKey(TextSigle, on_delete=models.SET_NULL, null=True, related_name='text_text_sigle')
     editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
