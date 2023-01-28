@@ -7,4 +7,4 @@ class FacsimileFactory(factory.django.DjangoModelFactory):
         model = Facsimile
 
     bib_entry = factory.SubFactory("mpcd.corpus.tests.factories.BibEntryFactory")
-    codex_part = factory.SubFactory("mpcd.corpus.tests.factories.CodexPartFactory")
+    codex = factory.SubFactory("mpcd.corpus.tests.factories.CodexFactory")

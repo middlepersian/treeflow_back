@@ -9,7 +9,6 @@ class CommentFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory("mpcd.corpus.tests.factories.UserFactory")
     txt = factory.Faker("text")
 
-    codex_part = factory.SubFactory("mpcd.corpus.tests.factories.CodexPartFactory")
     codex = factory.SubFactory("mpcd.corpus.tests.factories.CodexFactory")
     dependency = factory.SubFactory("mpcd.corpus.tests.factories.DependencyFactory")
     edition = factory.SubFactory("mpcd.corpus.tests.factories.EditionFactory")

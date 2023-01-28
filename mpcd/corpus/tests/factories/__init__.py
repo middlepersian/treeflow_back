@@ -1,6 +1,5 @@
 from .bibliography import BibEntryFactory
 from .codex import CodexFactory
-from .codex_part import CodexPartFactory
 from .comment import CommentFactory
 from .corpus import CorpusFactory
 from .dependency import DependencyFactory

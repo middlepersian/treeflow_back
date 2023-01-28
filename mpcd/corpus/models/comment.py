@@ -12,9 +12,6 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # codex_part
-    codex_part = models.ForeignKey('CodexPart', on_delete=models.CASCADE, null=True,
-                                   blank=True, related_name='comment_codex_part')
 
     # codex
     codex = models.ForeignKey('Codex', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_codex')

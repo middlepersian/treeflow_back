@@ -16,7 +16,6 @@ class Comment(relay.Node):
     created_at: gql.auto
     updated_at: gql.auto
 
-    codex_part: Optional[gql.LazyType['CodexPart', 'mpcd.corpus.types.codex_part']]
     codex: Optional[gql.LazyType['Codex', 'mpcd.corpus.types.codex']]
     dependency: Optional[gql.LazyType['Dependency', 'mpcd.corpus.types.dependency']]
     #edition: Optional[gql.LazyType['Edition', 'mpcd.corpus.types.edition']]
@@ -38,7 +37,6 @@ class CommentInput:
     user: gql.auto
     comment: gql.auto
 
-    codex_part:  gql.auto
     codex:  gql.auto
     dependency:  gql.auto
     #edition: Optional[gql.LazyType['Edition', 'mpcd.corpus.types.edition']]
@@ -60,7 +58,6 @@ class CommentPartial(gql.NodeInputPartial):
     user: gql.auto
     comment: gql.auto
 
-    codex_part:  gql.auto
     codex:  gql.auto
     dependency:  gql.auto
     #edition: Optional[gql.LazyType['Edition', 'mpcd.corpus.types.edition']]

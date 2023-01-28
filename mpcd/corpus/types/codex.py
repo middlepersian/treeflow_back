@@ -5,13 +5,13 @@ from typing import Annotated, List, TYPE_CHECKING
 from mpcd.corpus import models
 
 if TYPE_CHECKING:
-    from .codex_part import CodexPart
+    from .facsimile import Facsimile
     from .comment import Comment
 
 
 @gql.django.type(models.Codex)
 class Codex(relay.Node):
     id: relay.GlobalID
-    codex_part_codex: relay.Connection[gql.LazyType['CodexPart', 'mpcd.corpus.types.codex_part']]
+    facsimile_codex: relay.Connection[gql.LazyType['Facsimile', 'mpcd.corpus.types.facsimile']]
 
     sigle: gql.auto

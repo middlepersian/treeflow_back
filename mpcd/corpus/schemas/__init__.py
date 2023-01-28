@@ -1,5 +1,4 @@
 from .bibliography import Query, Mutation
-from .codex_part import Query, Mutation
 from .comment import Query, Mutation
 from .corpus import Query
 from .dependency import Query, Mutation
