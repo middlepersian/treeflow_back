@@ -7,7 +7,7 @@ from mpcd.corpus.types.comment import CommentPartial, CommentInput
 
 if TYPE_CHECKING:
     from .bibliography import BibEntry
-    from .codex_part import CodexPart
+    from .codex import Codex
     from .comment import Comment, CommentPartial, CommentInput
     from .folio import Folio
 
@@ -18,17 +18,17 @@ class Facsimile(relay.Node):
 
     id: relay.GlobalID
     bib_entry: gql.LazyType['BibEntry', 'mpcd.corpus.types.bibliography']
-    codex_part:  gql.LazyType['CodexPart','mpcd.corpus.types.codex_part']
+    codex:  gql.LazyType['Codex','mpcd.corpus.types.codex']
 
 
 @gql.django.input(models.Facsimile)
 class FacsimileInput:
     bib_entry: gql.auto
-    codex_part: gql.auto
+    codex: gql.auto
 
 
 @gql.django.partial(models.Facsimile)
 class FacsimilePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     bib_entry: gql.auto
-    codex_part: gql.auto
+    codex: gql.auto

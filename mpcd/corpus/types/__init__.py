@@ -1,7 +1,6 @@
 from .bibliography import BibEntry
 from .comment import Comment
 from .codex import Codex
-from .codex_part import CodexPart
 from .corpus import Corpus
 from .dependency import Dependency
 from .facsimile import Facsimile
