@@ -15,6 +15,7 @@ from mpcd.corpus.tests.factories.section import SectionFactory
 from mpcd.corpus.tests.factories.text_sigle import TextSigleFactory
 from mpcd.corpus.tests.factories.corpus import CorpusFactory
 from mpcd.corpus.tests.factories.section_type import SectionTypeFactory
+from mpcd.corpus.tests.factories.dependency import MorphologicalAnnotationFactory
 
 from mpcd.dict.tests.factories.lemma import LemmaFactory
 from mpcd.dict.tests.factories.meaning import MeaningFactory
@@ -147,7 +148,7 @@ def test_create_dmx():
 
 
 @pytest.mark.django_db
-def populate_db(sentences):
+def populate_db(sentences, text_object=None):
 
     token_number = 1
     current_newpart = None
@@ -178,9 +179,9 @@ def populate_db(sentences):
                     sentence_text = str(token_id).split(" = ")[1]
                     assert sentence_text != ""
                 continue
+
             # assert token_id not empty
             assert token_id != ""
-            token_number += 1
             # transcription
             transcription = row["transcription"]
             # assert transcription not empty
@@ -189,6 +190,15 @@ def populate_db(sentences):
             transliteration = row["transliteration"]
             # assert transliteration not empty
             assert transliteration != ""
+
+            # create token
+
+            token = TokenFactory(text=text_object, token_number=token_number)
+            # create token transcription
+            token.transcription = transcription
+            token.transliteration = transliteration
+
+            token_number += 1
 
             # postag
             postag = row["postag"]
@@ -199,8 +209,10 @@ def populate_db(sentences):
 
             # postfeatures
             postfeatures = str(row["postfeatures"]).strip()
+            postfeatures_to_add = []
             if postfeatures != '_':
                 # create postfeatures (MorphologicalAnnotation)
+                morpho_syntax = MorphologicalAnnotationFactory()
                 if '|' in postfeatures:
                     # split postfeatures
                     postfeatures = postfeatures.split("|")
@@ -210,8 +222,16 @@ def populate_db(sentences):
                         if len(postfeature) == 2:
                             feature = postfeature[0]
                             value = postfeature[1]
+                            # create postfeature
+                            postfeature = MorphologicalAnnotationFactory(
+                                feature=feature, value=value)
+                            postfeatures_to_add.append(postfeature)
                     else:
                         postfeatures = None
+
+            # add postfeatures to token
+            if postfeatures_to_add:
+                token.morphological_annotation.add(*postfeatures_to_add)
             print("transcription {} - postfeatures: {}".format(transcription, postfeatures))
 
             # if there is a newpart, add it to the newparts dictionary
