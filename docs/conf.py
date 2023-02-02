@@ -26,7 +26,7 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = "mpcd"
+project = "treeflow"
 copyright = """2021, Francisco Mondaca"""
 author = "Francisco Mondaca"
 

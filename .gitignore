@@ -270,7 +270,7 @@ tags
 
 ### Project template
 
-mpcd/media/
+treeflow/media/
 
 .pytest_cache/
 
@@ -279,16 +279,9 @@ mpcd/media/
 .env
 .envs/*
 !.envs/.local/
-
-
-
 .vscode
-
-mpcd.dot 
-mpcd.png 
-
-
-
+treeflow.dot
+treeflow.png
 *.xlsx
 *.json
 *.sql

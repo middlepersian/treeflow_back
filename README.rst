@@ -1,4 +1,4 @@
-mpcd
+treeflow
 ====
 
 Zoroastrian Middle Persian Corpus and Dictionary
@@ -40,7 +40,7 @@ Running type checks with mypy:
 
 ::
 
-  $ mypy mpcd
+  $ mypy treeflow
 
 Test coverage
 ^^^^^^^^^^^^^

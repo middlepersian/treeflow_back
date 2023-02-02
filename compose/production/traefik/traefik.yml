@@ -28,7 +28,7 @@ certificatesResolvers:
 http:
   routers:
     web-secure-router:
-      rule: "Host(`app.mpcd.uni-koeln.de`)"
+      rule: "Host(`app.treeflow.uni-koeln.de`)"
       entryPoints:
         - web-secure
       middlewares:

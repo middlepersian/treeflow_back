@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
-from mpcd.schema import schema
+from treeflow.schema import schema
 #from schema import schema
 
 urlpatterns = [
@@ -18,7 +18,7 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
-    path("users/", include("mpcd.users.urls", namespace="users")),
+    path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # graphql
     #path('graphql_sync/', GraphQLView.as_view(schema=schema)),

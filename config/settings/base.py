@@ -7,8 +7,8 @@ import environ
 
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
-# mpcd/
-APPS_DIR = ROOT_DIR / "mpcd"
+# treeflow/
+APPS_DIR = ROOT_DIR / "treeflow"
 env = environ.Env()
 
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
@@ -77,10 +77,10 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "mpcd.users.apps.UsersConfig",
+    "treeflow.users.apps.UsersConfig",
     # local apps
-    "mpcd.dict.apps.DictAppConfig",
-    "mpcd.corpus.apps.CorpusAppConfig"
+    "treeflow.dict.apps.DictAppConfig",
+    "treeflow.corpus.apps.CorpusAppConfig"
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -88,7 +88,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # MIGRATIONS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#migration-modules
-MIGRATION_MODULES = {"sites": "mpcd.contrib.sites.migrations"}
+MIGRATION_MODULES = {"sites": "treeflow.contrib.sites.migrations"}
 
 # AUTHENTICATION
 # ------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
-                "mpcd.utils.context_processors.settings_context",
+                "treeflow.utils.context_processors.settings_context",
             ],
         },
     }
@@ -274,9 +274,9 @@ ACCOUNT_EMAIL_REQUIRED = True
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_ADAPTER = "mpcd.users.adapters.AccountAdapter"
+ACCOUNT_ADAPTER = "treeflow.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-SOCIALACCOUNT_ADAPTER = "mpcd.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "treeflow.users.adapters.SocialAccountAdapter"
 
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup

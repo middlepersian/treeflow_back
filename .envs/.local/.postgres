@@ -2,6 +2,6 @@
 # ------------------------------------------------------------------------------
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-POSTGRES_DB=mpcd
+POSTGRES_DB=treeflow
 POSTGRES_USER=tLXzaDHwUMWwxtbwZTTKtTdAdPKcLVjd
 POSTGRES_PASSWORD=HMm8NQNH0iTun13GbFFvP0o4DZZGtF6M8PVuhEoI9U0wo0An1tq9WxMT0GJKggTO

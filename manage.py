@@ -24,8 +24,8 @@ if __name__ == "__main__":
         raise
 
     # This allows easy placement of apps within the interior
-    # mpcd directory.
+    # treeflow directory.
     current_path = Path(__file__).parent.resolve()
-    sys.path.append(str(current_path / "mpcd"))
+    sys.path.append(str(current_path / "treeflow"))
 
     execute_from_command_line(sys.argv)
