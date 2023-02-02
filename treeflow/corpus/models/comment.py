@@ -25,11 +25,11 @@ class Comment(models.Model):
                                 blank=True, related_name='comment_edition')
 
     # facsimile
-    facsimile = models.ForeignKey('Facsimile', on_delete=models.CASCADE, null=True,
+    facsimile = models.ForeignKey('images.Facsimile', on_delete=models.CASCADE, null=True,
                                   blank=True, related_name='comment_facsimile')
 
-    # folio
-    folio = models.ForeignKey('Folio', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_folio')
+    # image
+    image = models.ForeignKey('images.Image', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_image')
 
     # resource
     resource = models.ForeignKey('Resource', on_delete=models.CASCADE, null=True,

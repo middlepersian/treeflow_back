@@ -11,7 +11,6 @@ class Image(models.Model):
     number = models.FloatField(null=True, blank=True)
     facsimile = models.ForeignKey(Facsimile, on_delete=models.CASCADE, null=True,
                                   blank=True, related_name='image_facsimile')
-    sections = models.ManyToManyField('Section', blank=True, related_name='image_sections')
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,

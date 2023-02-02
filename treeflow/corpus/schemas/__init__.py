@@ -2,8 +2,6 @@ from .bibliography import Query, Mutation
 from .comment import Query, Mutation
 from .corpus import Query
 from .dependency import Query, Mutation
-from .facsimile import Query, Mutation
-from .folio import Query, Mutation
 from .morphological_annotation import Query, Mutation
 from .section_type import Query, Mutation
 from .section import Query, Mutation

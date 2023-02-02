@@ -2,8 +2,6 @@ from .author import Author
 from .bibliography import BibEntry
 from .codex import Codex
 from .comment import Comment
-from .folio import Folio
-from .facsimile import Facsimile
 from .morphological_annotation import MorphologicalAnnotation
 from .resource import Resource
 from .source import Source

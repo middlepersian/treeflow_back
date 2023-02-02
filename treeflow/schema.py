@@ -5,8 +5,9 @@ from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
-from treeflow.corpus.schemas import bibliography, comment, corpus, dependency, facsimile, folio, morphological_annotation, section_type, section, source, text_sigle, text, token, user
+from treeflow.corpus.schemas import bibliography, comment, corpus, dependency, morphological_annotation, section_type, section, source, text_sigle, text, token, user
 from treeflow.dict.schemas import lemma, meaning
+from treeflow.images.schemas import facsimile, image
 from treeflow.dict.types import language
 from typing import List, Optional
 
@@ -21,7 +22,7 @@ class Query(
     corpus.Query,
     dependency.Query,
     facsimile.Query,
-    folio.Query,
+    image.Query,
     morphological_annotation.Query,
     section_type.Query,
     section.Query,
@@ -49,7 +50,7 @@ class Mutation(
     comment.Mutation,
     dependency.Mutation,
     facsimile.Mutation,
-    folio.Mutation,
+    image.Mutation,
     morphological_annotation.Mutation,
     section_type.Mutation,
     section.Mutation,

@@ -1,11 +1,11 @@
 import pytest
-from treeflow.corpus.models import Folio
-from treeflow.corpus.tests.factories import FolioFactory
+from treeflow.images.models import Image
+from . import ImageFactory
 
 @pytest.mark.django_db
 def test_folio_factory():
-    folio = FolioFactory()
-    assert isinstance(folio, Folio)
+    folio = ImageFactory()
+    assert isinstance(folio, Image)
     assert folio.identifier is not None
     assert folio.number is not None
     assert folio.facsimile is not None

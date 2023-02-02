@@ -1,2 +1,2 @@
 from .facsimile import Facsimile
-from .folio import Folio
+from .image import Image

@@ -1,6 +1,7 @@
 import pytest
-from treeflow.corpus.models import Facsimile
-from treeflow.corpus.tests.factories import FacsimileFactory, BibEntryFactory
+from treeflow.images.models import Facsimile
+from . import FacsimileFactory
+from treeflow.corpus.tests.factories import BibEntryFactory
 
 @pytest.mark.django_db
 def test_facsimile_factory():

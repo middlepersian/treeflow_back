@@ -1,6 +1,6 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Codex,  Facsimile, Folio, Edition, TextSigle, \
+from .models import Codex, Edition, TextSigle, \
     Corpus, Resource, Text,\
     MorphologicalAnnotation, Dependency,\
     Token, Source, Author, BibEntry, Comment
@@ -15,9 +15,6 @@ admin.site.register(Author)
 admin.site.register(BibEntry)
 
 admin.site.register(Codex)
-admin.site.register(Facsimile)
-
-admin.site.register(Folio)
 admin.site.register(Resource)
 admin.site.register(Edition)
 admin.site.register(TextSigle)

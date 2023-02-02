@@ -2,7 +2,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from typing import Optional
-from treeflow.corpus.types.facsimile import Facsimile, FacsimileInput, FacsimilePartial
+from treeflow.images.types.facsimile import Facsimile, FacsimileInput, FacsimilePartial
 
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
