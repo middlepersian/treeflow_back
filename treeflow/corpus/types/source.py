@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @gql.django.type(models.Source)
 class Source(relay.Node):
     id: relay.GlobalID
+    type: gql.auto
     identifier: gql.auto
     bib_entry: gql.LazyType['BibEntry', 'treeflow.corpus.types.bibliography']
     description: gql.auto
@@ -20,6 +21,7 @@ class Source(relay.Node):
 
 @gql.django.input(models.Source)
 class SourceInput:
+    type: gql.auto
     identifier: gql.auto
     bib_entry: gql.auto
     description: gql.auto
@@ -28,6 +30,7 @@ class SourceInput:
 @gql.django.partial(models.Source)
 class SourcePartial(gql.NodeInputPartial):
     id: relay.GlobalID
+    type: gql.auto
     identifier: gql.auto
     bib_entry: gql.auto
     description: gql.auto

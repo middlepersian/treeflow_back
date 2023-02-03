@@ -1,9 +1,9 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Codex, Edition, TextSigle, \
-    Corpus, Resource, Text,\
+from .models import Edition, TextSigle, \
+    Corpus, Text,\
     MorphologicalAnnotation, Dependency,\
-    Token, Source, Author, BibEntry, Comment
+    Token, Author, BibEntry, Comment
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
     list_display = ["transcription", "transliteration", "pos", "previous"]
@@ -14,12 +14,8 @@ class TokenHistoryAdmin(SimpleHistoryAdmin):
 admin.site.register(Author)
 admin.site.register(BibEntry)
 
-admin.site.register(Codex)
-admin.site.register(Resource)
-admin.site.register(Edition)
 admin.site.register(TextSigle)
 
-admin.site.register(Source)
 
 admin.site.register(Corpus)
 admin.site.register(Text)

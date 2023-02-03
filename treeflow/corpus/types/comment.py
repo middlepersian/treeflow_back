@@ -12,7 +12,7 @@ class Comment(relay.Node):
     created_at: gql.auto
     updated_at: gql.auto
 
-    codex: Optional[gql.LazyType['Codex', 'treeflow.corpus.types.codex']]
+    codex: Optional[gql.LazyType['Codex', 'treeflow.images.types.codex']]
     dependency: Optional[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
     facsimile: Optional[gql.LazyType['Facsimile', 'treeflow.images.types.facsimile']]
     image: Optional[gql.LazyType['Image', 'treeflow.images.types.image']]

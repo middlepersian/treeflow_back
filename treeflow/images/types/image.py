@@ -10,7 +10,7 @@ class Image(relay.Node):
 
     id: relay.GlobalID
     number: gql.auto
-    facsimile: gql.LazyType['Facsimile', 'treeflow.images.types.facsimile']
+    source: gql.LazyType['Source', 'treeflow.corpus.types.source']
     previous: Optional['Image']
     next: Optional['Image']
 
@@ -19,7 +19,7 @@ class Image(relay.Node):
 @gql.django.input(models.Image)
 class ImageInput:
     number: gql.auto
-    facsimile: gql.auto
+    source: gql.auto
     previous: gql.auto
     next: gql.auto
 
@@ -28,6 +28,6 @@ class ImageInput:
 class ImagePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     number: gql.auto
-    facsimile: gql.auto
+    source: gql.auto
     previous: gql.auto
     next: gql.auto

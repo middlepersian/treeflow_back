@@ -1,6 +1,5 @@
 from .author import Author
 from .bibliography import BibEntry
-from .codex import Codex
 from .comment import Comment
 from .morphological_annotation import MorphologicalAnnotation
 from .resource import Resource
@@ -10,7 +9,6 @@ from .token import Token
 from .dependency import Dependency
 from .corpus import Corpus
 from .text import Text
-from .edition import Edition
 from .section_type import SectionType
 from .section import Section
 

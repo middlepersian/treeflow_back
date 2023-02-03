@@ -13,16 +13,9 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-    # codex
-    codex = models.ForeignKey('Codex', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_codex')
-
     # dependency
     dependency = models.ForeignKey('Dependency', on_delete=models.CASCADE, null=True,
                                    blank=True, related_name='comment_dependency')
-
-    # edition
-    edition = models.ForeignKey('Edition', on_delete=models.CASCADE, null=True,
-                                blank=True, related_name='comment_edition')
 
     # facsimile
     facsimile = models.ForeignKey('images.Facsimile', on_delete=models.CASCADE, null=True,

@@ -1,0 +1,1739 @@
+
+"""A connection to a list of items."""
+type BibEntryConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [BibEntryEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type BibEntryEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: BibEntry!
+}
+
+input BibEntryInput {
+  key: String
+}
+
+input BibEntryPartial {
+  id: UUID!
+  key: String
+}
+
+type Codex implements Node {
+  id: GlobalID!
+  codexPartCodex(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): CodexPartConnection!
+  sigle: String!
+  comments: [Comment!]!
+}
+
+type CodexPart implements Node {
+  id: GlobalID!
+  facsimileCodexPart(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): FacsimileConnection!
+  codex: Codex!
+  slug: String
+  comments: [Comment!]!
+}
+
+"""A connection to a list of items."""
+type CodexPartConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [CodexPartEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type CodexPartEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: CodexPart!
+}
+
+input CodexPartInput {
+  codex: NodeInput!
+  slug: String
+  comments: [CommentInput!]
+}
+
+input CodexPartPartial {
+  id: UUID!
+  codex: NodeInput
+  slug: String
+  comments: CommentPartialListInput
+}
+
+type Comment implements Node {
+  id: GlobalID!
+  user: User
+  text: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""A connection to a list of items."""
+type CommentConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [CommentEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type CommentEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Comment!
+}
+
+input CommentInput {
+  user: NodeInput
+  text: String
+}
+
+input CommentPartial {
+  id: UUID!
+  user: NodeInput
+  text: String
+}
+
+"""Add/remove/set the selected nodes."""
+input CommentPartialListInput {
+  set: [CommentPartial!]
+  add: [CommentPartial!]
+  remove: [CommentPartial!]
+}
+
+type Corpus implements Node {
+  id: GlobalID!
+  textCorpus(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TextConnection!
+  name: String!
+  slug: String!
+}
+
+"""A connection to a list of items."""
+type CorpusConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [CorpusEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type CorpusEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Corpus!
+}
+
+union CreateBibEntryPayload = BibEntry | OperationInfo
+
+union CreateCodexPartPayload = CodexPart | OperationInfo
+
+union CreateCommentPayload = Comment | OperationInfo
+
+union CreateDependencyPayload = Dependency | OperationInfo
+
+union CreateFacsimilePayload = Facsimile | OperationInfo
+
+union CreateFolioPayload = Folio | OperationInfo
+
+union CreateLemmaPayload = Lemma | OperationInfo
+
+union CreateLinePayload = Line | OperationInfo
+
+union CreateMeaningPayload = Meaning | OperationInfo
+
+union CreateMorphologicalAnnotationPayload = MorphologicalAnnotation | OperationInfo
+
+union CreateSectionPayload = Section | OperationInfo
+
+union CreateSectionTypePayload = SectionType | OperationInfo
+
+union CreateSentencePayload = Sentence | OperationInfo
+
+union CreateSourcePayload = Source | OperationInfo
+
+union CreateTextPayload = Text | OperationInfo
+
+union CreateTextSiglePayload = TextSigle | OperationInfo
+
+union CreateTokenCommentPayload = TokenComment | OperationInfo
+
+union CreateTokenPayload = Token | OperationInfo
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+union DeleteBibEntryPayload = BibEntry | OperationInfo
+
+union DeleteCodexPartPayload = CodexPart | OperationInfo
+
+union DeleteCommentPayload = Comment | OperationInfo
+
+union DeleteDependencyPayload = Dependency | OperationInfo
+
+union DeleteFacsimilePayload = Facsimile | OperationInfo
+
+union DeleteFolioPayload = Folio | OperationInfo
+
+union DeleteLemmaPayload = Lemma | OperationInfo
+
+union DeleteLinePayload = Line | OperationInfo
+
+union DeleteMeaningPayload = Meaning | OperationInfo
+
+union DeleteMorphologicalAnnotationPayload = MorphologicalAnnotation | OperationInfo
+
+union DeleteSectionPayload = Section | OperationInfo
+
+union DeleteSectionTypePayload = SectionType | OperationInfo
+
+union DeleteSentencePayload = Sentence | OperationInfo
+
+union DeleteSourcePayload = Source | OperationInfo
+
+union DeleteTextPayload = Text | OperationInfo
+
+union DeleteTextSiglePayload = TextSigle | OperationInfo
+
+union DeleteTokenCommentPayload = TokenComment | OperationInfo
+
+union DeleteTokenPayload = Token | OperationInfo
+
+type Dependency implements Node {
+  id: GlobalID!
+  tokenSyntacticAnnotation(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  head: Token!
+  rel: String!
+  producer: Int
+  comments: [Comment!]!
+}
+
+"""A connection to a list of items."""
+type DependencyConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [DependencyEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type DependencyEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Dependency!
+}
+
+input DependencyInput {
+  head: NodeInput!
+  rel: String!
+  producer: Int
+  comments: [CommentInput!]
+}
+
+input DependencyPartial {
+  id: UUID!
+  head: NodeInput
+  rel: String
+  producer: Int
+  comments: CommentPartialListInput
+}
+
+type Facsimile implements Node {
+  id: GlobalID!
+  folioFacsimile(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): FolioConnection!
+  bibEntry: BibEntry!
+  codexPart: CodexPart!
+  comments: [Comment!]!
+}
+
+"""A connection to a list of items."""
+type FacsimileConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [FacsimileEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type FacsimileEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Facsimile!
+}
+
+input FacsimileInput {
+  bibEntry: NodeInput!
+  codexPart: NodeInput
+  comments: [CommentInput!]
+}
+
+input FacsimilePartial {
+  id: UUID!
+  bibEntry: NodeInput
+  codexPart: NodeInput
+  comments: CommentPartialListInput
+}
+
+type Folio implements Node {
+  id: GlobalID!
+  lineFolio(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): LineConnection!
+  number: Float
+  facsimile: Facsimile!
+  comments: [Comment!]!
+  previous: Folio
+}
+
+"""A connection to a list of items."""
+type FolioConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [FolioEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type FolioEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Folio!
+}
+
+input FolioInput {
+  number: Float
+  facsimile: NodeInput
+  comments: [CommentInput!]
+  previous: NodeInput
+}
+
+input FolioPartial {
+  id: UUID!
+  number: Float
+  facsimile: NodeInput
+  comments: CommentPartialListInput
+  previous: NodeInput
+}
+
+"""
+The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID.
+"""
+scalar GlobalID @specifiedBy(url: "https://relay.dev/graphql/objectidentification.htm")
+
+type Lemma implements Node {
+  id: GlobalID!
+  tokenLemmas(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  word: String!
+  language: String
+  relatedLemmas: [Lemma!]!
+  relatedMeanings: [Meaning!]!
+  comments: [Comment!]!
+}
+
+"""A connection to a list of items."""
+type LemmaConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [LemmaEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type LemmaEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Lemma!
+}
+
+input LemmaInput {
+  id: UUID!
+  word: String!
+  language: String
+  relatedLemmas: [LemmaInput!]!
+  relatedMeanings: [MeaningInput!]!
+}
+
+input LemmaPartial {
+  id: UUID!
+  word: String
+  language: String
+  relatedLemmas: [LemmaPartial!]!
+  relatedMeanings: [MeaningPartial!]!
+}
+
+type Line implements Node {
+  id: GlobalID!
+  tokenLine(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  number: Float
+  folio: Folio!
+  comments: [Comment!]!
+  previous: Line
+}
+
+"""A connection to a list of items."""
+type LineConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [LineEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type LineEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Line!
+}
+
+input LineInput {
+  number: Float
+  folio: NodeInput!
+  comments: [CommentInput!]
+  previous: NodeInput
+}
+
+input LinePartial {
+  id: UUID!
+  number: Float
+  folio: NodeInput
+  comments: CommentPartialListInput
+  previous: NodeInput
+}
+
+type Meaning implements Node {
+  id: GlobalID!
+  tokenMeanings(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  meaning: String
+  language: String
+  relatedMeanings: [Meaning!]!
+  comments: [Comment!]!
+}
+
+"""A connection to a list of items."""
+type MeaningConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [MeaningEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type MeaningEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Meaning!
+}
+
+input MeaningInput {
+  id: UUID!
+  meaning: String
+  language: String
+  relatedMeanings: [MeaningInput!]!
+  comments: [CommentInput!]!
+}
+
+input MeaningPartial {
+  id: UUID!
+  meaning: String
+  language: String
+  relatedMeanings: [MeaningPartial!]!
+  comments: [CommentPartial!]!
+}
+
+type MorphologicalAnnotation implements Node {
+  id: GlobalID!
+  tokenMorphologicalAnnotation(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  feature: String
+  featureValue: String
+}
+
+"""A connection to a list of items."""
+type MorphologicalAnnotationConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [MorphologicalAnnotationEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type MorphologicalAnnotationEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: MorphologicalAnnotation!
+}
+
+input MorphologicalAnnotationInput {
+  feature: String
+  featureValue: String
+}
+
+input MorphologicalAnnotationPartial {
+  id: UUID!
+  feature: String
+  featureValue: String
+}
+
+type Mutation {
+  createBibEntry(input: BibEntryInput!): CreateBibEntryPayload!
+  updateBibEntry(input: BibEntryPartial!): UpdateBibEntryPayload!
+  deleteBibEntry(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteBibEntryPayload!
+  createCodexPart(input: CodexPartInput!): CreateCodexPartPayload!
+  updateCodexPart(input: CodexPartPartial!): UpdateCodexPartPayload!
+  deleteCodexPart(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteCodexPartPayload!
+  createComment(input: CommentInput!): CreateCommentPayload!
+  updateComment(input: CommentPartial!): UpdateCommentPayload!
+  deleteComment(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteCommentPayload!
+  createDependency(input: DependencyInput!): CreateDependencyPayload!
+  updateDependency(input: DependencyPartial!): UpdateDependencyPayload!
+  deleteDependency(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteDependencyPayload!
+  createFacsimile(input: FacsimileInput!): CreateFacsimilePayload!
+  updateFacsimile(input: FacsimilePartial!): UpdateFacsimilePayload!
+  deleteFacsimile(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteFacsimilePayload!
+  createFolio(input: FolioInput!): CreateFolioPayload!
+  updateFolio(input: FolioPartial!): UpdateFolioPayload!
+  deleteFolio(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteFolioPayload!
+  createLine(input: LineInput!): CreateLinePayload!
+  updateLine(input: LinePartial!): UpdateLinePayload!
+  deleteLine(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteLinePayload!
+  createMorphologicalAnnotation(input: MorphologicalAnnotationInput!): CreateMorphologicalAnnotationPayload!
+  updateMorphologicalAnnotation(input: MorphologicalAnnotationPartial!): UpdateMorphologicalAnnotationPayload!
+  deleteMorphologicalAnnotation(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteMorphologicalAnnotationPayload!
+  createSectionType(input: SectionTypeInput!): CreateSectionTypePayload!
+  updateSectionType(input: SectionTypePartial!): UpdateSectionTypePayload!
+  deleteSectionType(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteSectionTypePayload!
+  createSection(input: SectionInput!): CreateSectionPayload!
+  updateSection(input: SectionPartial!): UpdateSectionPayload!
+  deleteSection(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteSectionPayload!
+  createSentence(input: SentenceInput!): CreateSentencePayload!
+  updateSentence(input: SentencePartial!): UpdateSentencePayload!
+  deleteSentence(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteSentencePayload!
+  createSource(input: SourceInput!): CreateSourcePayload!
+  updateSource(input: SourcePartial!): UpdateSourcePayload!
+  deleteSource(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteSourcePayload!
+  createTextSigle(input: TextSigleInput!): CreateTextSiglePayload!
+  updateTextSigle(input: TextSiglePartial!): UpdateTextSiglePayload!
+  deleteTextSigle(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteTextSiglePayload!
+  createText(input: TextInput!): CreateTextPayload!
+  updateText(input: TextPartial!): UpdateTextPayload!
+  deleteText(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteTextPayload!
+  createTokenComment(input: TokenCommentInput!): CreateTokenCommentPayload!
+  updateTokenComment(input: TokenCommentPartial!): UpdateTokenCommentPayload!
+  deleteTokenComment(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteTokenCommentPayload!
+  createToken(input: TokenInput!): CreateTokenPayload!
+  updateToken(input: TokenPartial!): UpdateTokenPayload!
+  deleteToken(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteTokenPayload!
+  createLemma(input: LemmaInput!): CreateLemmaPayload!
+  updateLemma(input: LemmaPartial!): UpdateLemmaPayload!
+  deleteLemma(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteLemmaPayload!
+  createMeaning(input: MeaningInput!): CreateMeaningPayload!
+  updateMeaning(input: MeaningPartial!): UpdateMeaningPayload!
+  deleteMeaning(
+    """Input of an object that implements the `Node` interface."""
+    input: NodeInput!
+  ): DeleteMeaningPayload!
+}
+
+"""An object with a Globally Unique ID"""
+interface Node {
+  """The Globally Unique ID of this object"""
+  id: GlobalID!
+}
+
+"""Input of an object that implements the `Node` interface."""
+input NodeInput {
+  id: GlobalID!
+}
+
+"""Input of an object that implements the `Node` interface."""
+input NodeInputPartial {
+  id: GlobalID
+}
+
+"""Add/remove/set the selected nodes."""
+input NodePartialListInput {
+  set: [NodeInputPartial!]
+  add: [NodeInputPartial!]
+  remove: [NodeInputPartial!]
+}
+
+"""Multiple messages returned by an operation."""
+type OperationInfo {
+  """List of messages returned by the operation."""
+  messages: [OperationMessage!]!
+}
+
+"""An error that happened while executing an operation."""
+type OperationMessage {
+  """The kind of this message."""
+  kind: OperationMessageKind!
+
+  """The error message."""
+  message: String!
+
+  """
+  The field that caused the error, or `null` if it isn't associated with any particular field.
+  """
+  field: String
+}
+
+"""The kind of the returned message."""
+enum OperationMessageKind {
+  INFO
+  WARNING
+  ERROR
+  PERMISSION
+  VALIDATION
+}
+
+"""Information to aid in pagination."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+type Query {
+  bibEntry(
+    """The ID of the object."""
+    id: GlobalID!
+  ): BibEntry
+  bibEntries(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): BibEntryConnection!
+  codexPart(
+    """The ID of the object."""
+    id: GlobalID!
+  ): CodexPart
+  codexParts(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): CodexPartConnection!
+  comment(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Comment
+  comments(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): CommentConnection!
+  corpus(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Corpus
+  corpora(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): CorpusConnection!
+  dependency(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Dependency
+  dependencies(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): DependencyConnection!
+  facsimile(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Facsimile
+  facsimiles(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): FacsimileConnection!
+  folio(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Folio
+  folios(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): FolioConnection!
+  line(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Line
+  lines(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): LineConnection!
+  morphologicalAnnotation(
+    """The ID of the object."""
+    id: GlobalID!
+  ): MorphologicalAnnotation
+  morphologicalAnnotations(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): MorphologicalAnnotationConnection!
+  sectionType(
+    """The ID of the object."""
+    id: GlobalID!
+  ): SectionType
+  sectionTypes(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SectionTypeConnection!
+  section(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Section
+  sections(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SectionConnection!
+  sentence(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Sentence
+  sentences(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SentenceConnection!
+  source(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Source
+  sources(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SourceConnection!
+  textSigle(
+    """The ID of the object."""
+    id: GlobalID!
+  ): TextSigle
+  textSigles(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TextSigleConnection!
+  text(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Text
+  texts(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TextConnection!
+  tokenComment(
+    """The ID of the object."""
+    id: GlobalID!
+  ): TokenComment
+  tokenComments(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenCommentConnection!
+  token(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Token
+  tokens(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  user(
+    """The ID of the object."""
+    id: GlobalID!
+  ): User
+  users(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): UserConnection!
+  lemma(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Lemma
+  lemmas(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): LemmaConnection!
+  meaning(
+    """The ID of the object."""
+    id: GlobalID!
+  ): Meaning
+  meanings(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): MeaningConnection!
+}
+
+type Section implements Node {
+  id: GlobalID!
+  number: Float
+  identifier: String
+  text: Text
+  sectionType: SectionType
+  source: Source
+  tokens: [Token!]!
+  previous: Section
+  container: Section
+  comments: [Comment!]!
+}
+
+"""A connection to a list of items."""
+type SectionConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [SectionEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type SectionEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Section!
+}
+
+input SectionInput {
+  number: Float
+  identifier: String
+  text: NodeInput
+  sectionType: NodeInput!
+  source: NodeInput
+  tokens: NodePartialListInput
+  previous: NodeInput
+  container: NodeInput
+  comments: CommentInput
+}
+
+input SectionPartial {
+  id: UUID!
+  number: Float
+  identifier: String
+  text: NodeInput
+  sectionType: NodeInput
+  source: NodeInput
+  tokens: NodePartialListInput
+  previous: NodeInput
+  container: NodeInput
+  comments: CommentPartial
+}
+
+type SectionType implements Node {
+  id: GlobalID!
+  sectionSectionType(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SectionConnection!
+  identifier: String!
+}
+
+"""A connection to a list of items."""
+type SectionTypeConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [SectionTypeEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type SectionTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: SectionType!
+}
+
+input SectionTypeInput {
+  identifier: String!
+}
+
+input SectionTypePartial {
+  id: UUID!
+  identifier: String
+}
+
+type Sentence implements Node {
+  id: GlobalID!
+  number: Float!
+  text: Text!
+  tokens: [Token!]!
+  translations: [Meaning!]!
+  comments: [Comment!]!
+  previous: Sentence
+}
+
+"""A connection to a list of items."""
+type SentenceConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [SentenceEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type SentenceEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Sentence!
+}
+
+input SentenceInput {
+  number: Float!
+  text: NodeInput
+  tokens: NodePartialListInput
+  translations: [MeaningInput!]
+  comments: [CommentInput!]
+  previous: NodeInput
+}
+
+input SentencePartial {
+  id: UUID!
+  number: Float!
+  text: NodeInput
+  tokens: NodePartialListInput
+  translations: [MeaningPartial!]
+  comments: [CommentPartial!]
+  previous: NodeInput
+}
+
+type Source implements Node {
+  id: GlobalID!
+  identifier: String
+  bibEntry: BibEntry!
+  description: String
+}
+
+"""A connection to a list of items."""
+type SourceConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [SourceEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type SourceEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Source!
+}
+
+input SourceInput {
+  identifier: String
+  bibEntry: BibEntryInput!
+  description: String
+}
+
+input SourcePartial {
+  id: UUID!
+  identifier: String
+  bibEntry: BibEntryPartial!
+  description: String
+}
+
+type Text implements Node {
+  id: GlobalID!
+  tokenText(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  sectionText(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SectionConnection!
+  sentenceText(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): SentenceConnection!
+  corpus: Corpus!
+  title: String!
+  textSigle: TextSigle!
+  editors: [User!]!
+  collaborators: [User!]!
+  stage: String!
+  sources: [Source!]!
+  resources: [BibEntry!]!
+}
+
+"""A connection to a list of items."""
+type TextConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [TextEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type TextEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Text!
+}
+
+input TextInput {
+  corpus: NodeInput
+  title: String!
+  textSigle: NodeInput!
+  editors: NodePartialListInput
+  collaborators: NodePartialListInput
+  stage: String
+  sources: [SourceInput!]
+  resources: [BibEntryInput!]
+}
+
+input TextPartial {
+  id: UUID!
+  corpus: NodeInput
+  title: String
+  textSigle: NodeInput
+  editors: NodePartialListInput
+  collaborators: NodePartialListInput
+  stage: String
+  sources: [SourcePartial!]
+  resources: [BibEntryPartial!]
+}
+
+type TextSigle implements Node {
+  id: GlobalID!
+  textTextSigle(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TextConnection!
+  sigle: String!
+  genre: String!
+}
+
+"""A connection to a list of items."""
+type TextSigleConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [TextSigleEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type TextSigleEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: TextSigle!
+}
+
+input TextSigleInput {
+  sigle: String!
+  genre: String!
+}
+
+input TextSiglePartial {
+  id: UUID!
+  sigle: String
+  genre: String
+}
+
+type Token implements Node {
+  id: GlobalID!
+  sectionTokens: [Section!]!
+  number: Float
+  text: Text!
+  language: String
+  transcription: String!
+  transliteration: String!
+  lemmas: [Lemma!]!
+  meanings: [Meaning!]!
+  pos: String
+  morphologicalAnnotation: [MorphologicalAnnotation!]!
+  syntacticAnnotation: [Dependency!]!
+  comments: [TokenComment!]!
+  avestan: String
+  line: Line!
+  previous: Token
+  gloss: String
+}
+
+type TokenComment implements Node {
+  id: GlobalID!
+  tokenComments(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): TokenConnection!
+  user: User!
+  text: String
+  uncertain: [String]
+  toDiscuss: [String]
+  newSuggestion: [String]
+}
+
+"""A connection to a list of items."""
+type TokenCommentConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [TokenCommentEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type TokenCommentEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: TokenComment!
+}
+
+input TokenCommentInput {
+  user: NodeInput
+  text: String
+  uncertain: [String]
+  toDiscuss: [String]
+  newSuggestion: [String]
+}
+
+input TokenCommentPartial {
+  id: UUID!
+  user: NodeInput
+  text: String
+  uncertain: [String]
+  toDiscuss: [String]
+  newSuggestion: [String]
+}
+
+"""A connection to a list of items."""
+type TokenConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [TokenEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type TokenEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Token!
+}
+
+input TokenInput {
+  number: Float
+  text: NodeInput
+  language: String
+  transcription: String!
+  transliteration: String
+  lemmas: NodePartialListInput
+  meanings: NodePartialListInput
+  pos: String
+  morphologicalAnnotation: NodePartialListInput
+  syntacticAnnotation: NodePartialListInput
+  comments: NodePartialListInput
+  avestan: String
+  line: NodeInput!
+  previous: NodeInput
+  gloss: String
+}
+
+input TokenPartial {
+  id: UUID!
+  number: Float
+  text: NodeInput
+  language: String
+  transcription: String
+  transliteration: String
+  lemmas: NodePartialListInput
+  meanings: NodePartialListInput
+  pos: String
+  morphologicalAnnotation: NodePartialListInput
+  syntacticAnnotation: NodePartialListInput
+  comments: NodePartialListInput
+  avestan: String
+  line: NodeInput
+  previous: NodeInput
+  gloss: String
+}
+
+scalar UUID
+
+union UpdateBibEntryPayload = BibEntry | OperationInfo
+
+union UpdateCodexPartPayload = CodexPart | OperationInfo
+
+union UpdateCommentPayload = Comment | OperationInfo
+
+union UpdateDependencyPayload = Dependency | OperationInfo
+
+union UpdateFacsimilePayload = Facsimile | OperationInfo
+
+union UpdateFolioPayload = Folio | OperationInfo
+
+union UpdateLemmaPayload = Lemma | OperationInfo
+
+union UpdateLinePayload = Line | OperationInfo
+
+union UpdateMeaningPayload = Meaning | OperationInfo
+
+union UpdateMorphologicalAnnotationPayload = MorphologicalAnnotation | OperationInfo
+
+union UpdateSectionPayload = Section | OperationInfo
+
+union UpdateSectionTypePayload = SectionType | OperationInfo
+
+union UpdateSentencePayload = Sentence | OperationInfo
+
+union UpdateSourcePayload = Source | OperationInfo
+
+union UpdateTextPayload = Text | OperationInfo
+
+union UpdateTextSiglePayload = TextSigle | OperationInfo
+
+union UpdateTokenCommentPayload = TokenComment | OperationInfo
+
+union UpdateTokenPayload = Token | OperationInfo
+
+type User implements Node {
+  id: GlobalID!
+  name: String!
+
+  """
+  Designates that this user has all permissions without explicitly assigning them.
+  """
+  isSuperuser: Boolean!
+
+  """Designates whether the user can log into this admin site."""
+  isStaff: Boolean!
+  email: String!
+}
+
+"""A connection to a list of items."""
+type UserConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [UserEdge!]!
+
+  """Total quantity of existing nodes"""
+  totalCount: Int
+}
+
+"""An edge in a connection."""
+type UserEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: User!
+}
