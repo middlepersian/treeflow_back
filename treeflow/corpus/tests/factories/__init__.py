@@ -2,12 +2,10 @@ from .bibliography import BibEntryFactory
 from .comment import CommentFactory
 from .corpus import CorpusFactory
 from .dependency import DependencyFactory
-from .folio import FolioFactory
 from .morphological_annotation import MorphologicalAnnotationFactory
 from .section import SectionFactory
 from .section_type import SectionTypeFactory
 from .source import SourceFactory
 from .text import TextFactory
-from .text_sigle import TextSigleFactory
 from .token import TokenFactory
 from .user import UserFactory

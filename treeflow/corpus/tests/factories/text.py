@@ -11,10 +11,12 @@ class TextFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ("title", "corpus")
     corpus = factory.SubFactory(CorpusFactory)
     title = factory.Faker("pystr", min_chars=1, max_chars=30)
-    text_sigle = factory.Faker("pystr", min_chars=1, max_chars=10)
-    stage = factory.Faker("pystr", max_chars=3  )
+    language = factory.List([factory.Faker("pystr", min_chars=1, max_chars=3)])
+    series = factory.Faker("pystr", min_chars=1, max_chars=20)
+    label = factory.Faker("pystr", min_chars=1, max_chars=20)
+    stage = factory.Faker("pystr", max_chars=3)
 
     editors = factory.RelatedFactory(UserFactory)
-    authors = factory.RelatedFactory(UserFactory)
     collaborators = factory.RelatedFactory(UserFactory)
+
     sources = factory.RelatedFactory(SourceFactory)

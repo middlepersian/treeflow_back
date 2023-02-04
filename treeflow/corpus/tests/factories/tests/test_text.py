@@ -12,7 +12,7 @@ def test_text_factory():
 
     assert text.title
     assert text.stage
-    assert text.text_sigle
+    assert text.label
     assert text.corpus
 
     # create a user and add it to the editors

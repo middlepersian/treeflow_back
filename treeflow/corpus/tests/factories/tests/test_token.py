@@ -22,8 +22,8 @@ def test_token_factory():
     assert token.gloss
     assert token.lemmas
     assert token.meanings
-    assert token.morphological_annotation
-    assert token.syntactic_annotation
+    assert token.morphological_annotations
+    assert token.syntactic_annotations
 
     previous = TokenFactory()
     token.previous = previous

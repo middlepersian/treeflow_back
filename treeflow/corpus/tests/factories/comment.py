@@ -10,9 +10,8 @@ class CommentFactory(factory.django.DjangoModelFactory):
     txt = factory.Faker("text")
 
     dependency = factory.SubFactory("treeflow.corpus.tests.factories.DependencyFactory")
-    edition = factory.SubFactory("treeflow.corpus.tests.factories.EditionFactory")
     image = factory.SubFactory("treeflow.images.tests.factories.ImageFactory")
-
+    source = factory.SubFactory("treeflow.corpus.tests.factories.SourceFactory")
     section_type = factory.SubFactory("treeflow.corpus.tests.factories.SectionTypeFactory")
     section = factory.SubFactory("treeflow.corpus.tests.factories.SectionFactory")
     text = factory.SubFactory("treeflow.corpus.tests.factories.TextFactory")

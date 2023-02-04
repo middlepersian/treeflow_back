@@ -25,4 +25,4 @@ class TokenFactory(factory.django.DjangoModelFactory):
     lemmas = factory.RelatedFactory("treeflow.dict.tests.factories.LemmaFactory")
     meanings = factory.RelatedFactory("treeflow.dict.tests.factories.MeaningFactory")
     morphological_annotations = factory.RelatedFactory("treeflow.corpus.tests.factories.MorphologicalAnnotationFactory")
-    #syntactic_annotation = factory.RelatedFactory("treeflow.corpus.tests.factories.DependencyFactory")
+    syntactic_annotation = factory.RelatedFactory("treeflow.corpus.tests.factories.DependencyFactory")
