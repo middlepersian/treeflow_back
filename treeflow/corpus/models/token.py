@@ -20,9 +20,9 @@ class Token(models.Model):
     lemmas = models.ManyToManyField('dict.Lemma', blank=True, related_name='token_lemmas')
     meanings = models.ManyToManyField('dict.Meaning', blank=True, related_name='token_meanings')
     pos = models.CharField(max_length=8, null=True, blank=True)
-    morphological_annotation = models.ManyToManyField(
+    morphological_annotations = models.ManyToManyField(
         'MorphologicalAnnotation', blank=True, related_name='token_morphological_annotation')
-    syntactic_annotation = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
+    syntactic_annotations = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
 
     avestan = models.TextField(null=True, blank=True)
 

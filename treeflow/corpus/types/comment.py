@@ -12,13 +12,11 @@ class Comment(relay.Node):
     created_at: gql.auto
     updated_at: gql.auto
 
-    codex: Optional[gql.LazyType['Codex', 'treeflow.images.types.codex']]
     dependency: Optional[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
-    facsimile: Optional[gql.LazyType['Facsimile', 'treeflow.images.types.facsimile']]
     image: Optional[gql.LazyType['Image', 'treeflow.images.types.image']]
     section_type: Optional[gql.LazyType['SectionType', 'treeflow.corpus.types.section_type']]
+    source: Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
     section: Optional[gql.LazyType['Section', 'treeflow.corpus.types.section']]
-    text_sigle: Optional[gql.LazyType['TextSigle', 'treeflow.corpus.types.text_sigle']]
     text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
     token: Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
 
@@ -32,13 +30,11 @@ class CommentInput:
     user: gql.auto
     comment: gql.auto
 
-    codex:  gql.auto
     dependency:  gql.auto
-    facsimile:  gql.auto
     image:  gql.auto
     section_type:  gql.auto
     section:  gql.auto
-    text_sigle:  gql.auto
+    source: gql.auto
     text:  gql.auto
     token:  gql.auto
 
@@ -52,13 +48,11 @@ class CommentPartial(gql.NodeInputPartial):
     user: gql.auto
     comment: gql.auto
 
-    codex:  gql.auto
     dependency:  gql.auto
-    facsimile:  gql.auto
     image:  gql.auto
     section_type:  gql.auto
     section:  gql.auto
-    text_sigle:  gql.auto
+    source: gql.auto
     text:  gql.auto
     token:  gql.auto
 

@@ -8,11 +8,6 @@ from typing import List, TYPE_CHECKING, Annotated
 from treeflow.dict import models
 from treeflow.dict.types.language import Language
 
-if TYPE_CHECKING:
-    from treeflow.corpus.types.token import Token
-    from treeflow.corpus.types.comment import Comment
-    from .meaning import Meaning
-
 
 
 @gql.django.filters.filter(models.Lemma, lookups=True)

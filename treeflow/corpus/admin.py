@@ -1,6 +1,6 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Edition, TextSigle, \
+from .models import \
     Corpus, Text,\
     MorphologicalAnnotation, Dependency,\
     Token, Author, BibEntry, Comment
@@ -14,7 +14,6 @@ class TokenHistoryAdmin(SimpleHistoryAdmin):
 admin.site.register(Author)
 admin.site.register(BibEntry)
 
-admin.site.register(TextSigle)
 
 
 admin.site.register(Corpus)

@@ -6,6 +6,5 @@ from .morphological_annotation import MorphologicalAnnotation
 from .section import Section
 from .section_type import SectionType
 from .text import Text
-from .text_sigle import TextSigle
 from .token import Token
 from .user import User

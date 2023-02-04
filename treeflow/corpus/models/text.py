@@ -8,7 +8,6 @@ from django.contrib.auth import get_user_model
 
 from .bibliography import BibEntry
 from .source import Source
-from .text_sigle import TextSigle
 from .corpus import Corpus
 
 User = get_user_model()
@@ -19,16 +18,17 @@ class Text(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
     title = models.CharField(max_length=100, unique=True)
+    #e.g. sigle
+    series = models.CharField(max_length=20, null=True,blank=True)
+    # e.g. genre
+    label = models.CharField(max_length=20, null=True, blank=True)
     language = ArrayField(models.CharField(max_length=3), blank=True, null=True)
-    text_sigle = models.ForeignKey(TextSigle, on_delete=models.SET_NULL, null=True, related_name='text_text_sigle')
     editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
-    stage = models.CharField(max_length=3, blank=True)
-    # a Source can be a "Codex" or an "Edition"
+    stage = models.CharField(max_length=10, blank=True)
+    # a any source that should be documented in Zotero
     sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
-    # a Resource can be any Zotero reference
-    resources = models.ManyToManyField(BibEntry, blank=True, related_name='text_resources')
-
+  
     history = HistoricalRecords()
 
     # TODO: add comment

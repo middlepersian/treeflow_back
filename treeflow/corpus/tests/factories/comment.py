@@ -9,17 +9,12 @@ class CommentFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory("treeflow.corpus.tests.factories.UserFactory")
     txt = factory.Faker("text")
 
-    codex = factory.SubFactory("treeflow.corpus.tests.factories.CodexFactory")
     dependency = factory.SubFactory("treeflow.corpus.tests.factories.DependencyFactory")
     edition = factory.SubFactory("treeflow.corpus.tests.factories.EditionFactory")
-    facsimile = factory.SubFactory("treeflow.corpus.tests.factories.FacsimileFactory")
-    folio = factory.SubFactory("treeflow.corpus.tests.factories.FolioFactory")
-    line = factory.SubFactory("treeflow.corpus.tests.factories.LineFactory")
-    resource = factory.SubFactory("treeflow.corpus.tests.factories.ResourceFactory")
+    image = factory.SubFactory("treeflow.images.tests.factories.ImageFactory")
+
     section_type = factory.SubFactory("treeflow.corpus.tests.factories.SectionTypeFactory")
     section = factory.SubFactory("treeflow.corpus.tests.factories.SectionFactory")
-    sentence = factory.SubFactory("treeflow.corpus.tests.factories.SentenceFactory")
-    text_sigle = factory.SubFactory("treeflow.corpus.tests.factories.TextSigleFactory")
     text = factory.SubFactory("treeflow.corpus.tests.factories.TextFactory")
 
     token = factory.SubFactory("treeflow.corpus.tests.factories.TokenFactory")

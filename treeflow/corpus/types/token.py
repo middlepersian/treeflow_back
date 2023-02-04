@@ -49,7 +49,7 @@ class Token(relay.Node):
     pos: gql.auto
     morphological_annotation: List[gql.LazyType['MorphologicalAnnotation',
                                                 'treeflow.corpus.types.morphological_annotation']]
-    syntactic_annotation: List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
+    syntactic_annotations: List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
     avestan: gql.auto
     previous: Optional['Token']
     next: Optional['Token']
@@ -66,8 +66,8 @@ class TokenInput:
     lemmas: gql.auto
     meanings: gql.auto
     pos: gql.auto
-    morphological_annotation: gql.auto
-    syntactic_annotation: gql.auto
+    morphological_annotations: gql.auto
+    syntactic_annotations: gql.auto
     avestan: gql.auto
     previous: gql.auto
     next: gql.auto
@@ -85,8 +85,8 @@ class TokenPartial:
     lemmas: gql.auto
     meanings: gql.auto
     pos: gql.auto
-    morphological_annotation: gql.auto
-    syntactic_annotation: gql.auto
+    morphological_annotations: gql.auto
+    syntactic_annotations: gql.auto
     avestan: gql.auto
     previous: gql.auto
     next: gql.auto

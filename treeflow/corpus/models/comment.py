@@ -17,16 +17,10 @@ class Comment(models.Model):
     dependency = models.ForeignKey('Dependency', on_delete=models.CASCADE, null=True,
                                    blank=True, related_name='comment_dependency')
 
-    # facsimile
-    facsimile = models.ForeignKey('images.Facsimile', on_delete=models.CASCADE, null=True,
-                                  blank=True, related_name='comment_facsimile')
 
     # image
     image = models.ForeignKey('images.Image', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_image')
 
-    # resource
-    resource = models.ForeignKey('Resource', on_delete=models.CASCADE, null=True,
-                                 blank=True, related_name='comment_resource')
 
     # section_type
     section_type = models.ForeignKey('SectionType', on_delete=models.CASCADE, null=True,
@@ -36,9 +30,9 @@ class Comment(models.Model):
     section = models.ForeignKey('Section', on_delete=models.CASCADE, null=True,
                                 blank=True, related_name='comment_section')
 
-    # text_sigle
-    text_sigle = models.ForeignKey('TextSigle', on_delete=models.CASCADE, null=True,
-                                   blank=True, related_name='comment_text_sigle')
+    # source
+    source = models.ForeignKey('Source', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_source')                           
+
 
     # token
     token = models.ForeignKey('Token', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_token')

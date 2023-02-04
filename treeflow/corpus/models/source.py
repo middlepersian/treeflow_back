@@ -13,8 +13,8 @@ class Source(models.Model):
     description = models.TextField(null=True, blank=True)
     references = models.ManyToManyField(BibEntry, related_name='source_references')
 
-    # a 'source' might have another source as a source
-    source = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='source_source')
+    # a 'source' might have another sources as a source
+    sources = models.ManyToManyField('self', related_name='source_sources', blank=True)
 
     history = HistoricalRecords()
 
