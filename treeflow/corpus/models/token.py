@@ -1,5 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
 from .dependency import Dependency
 
@@ -7,7 +8,7 @@ from .dependency import Dependency
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
-    number_in_sentence = models.ArrayField(models.IntegerField(), null=True, blank=True)
+    number_in_sentence = ArrayField(models.IntegerField(), null=True, blank=True)
 
     root = models.BooleanField(default=False)
     word_token = models.BooleanField(default=True)
@@ -20,7 +21,8 @@ class Token(models.Model):
     transliteration = models.CharField(max_length=50, blank=True)
     lemmas = models.ManyToManyField('dict.Lemma', blank=True, related_name='token_lemmas')
     meanings = models.ManyToManyField('dict.Meaning', blank=True, related_name='token_meanings')
-    postag = models.CharField(max_length=8, null=True, blank=True)
+    upos = models.CharField(max_length=8, null=True, blank=True)
+    xpos = ArrayField(models.CharField(max_length=8), null=True, blank=True)
     postfeatures = models.ManyToManyField(
         'MorphologicalAnnotation', blank=True, related_name='token_morphological_annotation')
     dependencies = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation", through_fields=['created_at', 'updated_at'])
