@@ -24,6 +24,8 @@ class Section(models.Model):
     container = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
                                   blank=True, related_name='section_container')
     meanings = models.ManyToManyField('dict.Meaning', related_name='section_meanings')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     history = HistoricalRecords()
 

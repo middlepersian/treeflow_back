@@ -7,6 +7,7 @@ from .dependency import Dependency
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
+    number_in_sentence = models.ArrayField(models.IntegerField(), null=True, blank=True)
 
     root = models.BooleanField(default=False)
     word_token = models.BooleanField(default=True)
@@ -19,10 +20,10 @@ class Token(models.Model):
     transliteration = models.CharField(max_length=50, blank=True)
     lemmas = models.ManyToManyField('dict.Lemma', blank=True, related_name='token_lemmas')
     meanings = models.ManyToManyField('dict.Meaning', blank=True, related_name='token_meanings')
-    pos = models.CharField(max_length=8, null=True, blank=True)
-    morphological_annotations = models.ManyToManyField(
+    postag = models.CharField(max_length=8, null=True, blank=True)
+    postfeatures = models.ManyToManyField(
         'MorphologicalAnnotation', blank=True, related_name='token_morphological_annotation')
-    syntactic_annotations = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation")
+    dependencies = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation", through_fields=['created_at', 'updated_at'])
 
     avestan = models.TextField(null=True, blank=True)
 
@@ -33,6 +34,13 @@ class Token(models.Model):
                                     on_delete=models.SET_NULL)
 
     gloss = models.TextField(blank=True, null=True)
+
+    multiword_token = models.BooleanField(default=False)
+    # vámonos : related_token1: vamos + related_token2: nos
+    related_tokens = models.ManyToManyField('self', blank=True, related_name='token_related_tokens')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     history = HistoricalRecords()
 

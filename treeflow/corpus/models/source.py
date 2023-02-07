@@ -16,6 +16,9 @@ class Source(models.Model):
     # a 'source' might have another sources as a source
     sources = models.ManyToManyField('self', related_name='source_sources', blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     history = HistoricalRecords()
 
 

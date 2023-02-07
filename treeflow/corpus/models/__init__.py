@@ -1,4 +1,3 @@
-from .author import Author
 from .bibliography import BibEntry
 from .comment import Comment
 from .morphological_annotation import MorphologicalAnnotation

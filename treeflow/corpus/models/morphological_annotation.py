@@ -7,6 +7,8 @@ class MorphologicalAnnotation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     feature = models.CharField(max_length=10, null=True, blank=True)
     feature_value = models.CharField(max_length=10, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
     class Meta:
