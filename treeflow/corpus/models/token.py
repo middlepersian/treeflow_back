@@ -8,7 +8,7 @@ from .dependency import Dependency
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
-    number_in_sentence = ArrayField(models.IntegerField(), null=True, blank=True)
+    number_in_sentence = ArrayField(models.FloatField(blank=True, null=True), null=True, blank=True)
 
     root = models.BooleanField(default=False)
     word_token = models.BooleanField(default=True)
@@ -24,8 +24,8 @@ class Token(models.Model):
     upos = models.CharField(max_length=8, null=True, blank=True)
     xpos = ArrayField(models.CharField(max_length=8), null=True, blank=True)
     postfeatures = models.ManyToManyField(
-        'MorphologicalAnnotation', blank=True, related_name='token_morphological_annotation')
-    dependencies = models.ManyToManyField(Dependency, blank=True, related_name="token_syntactic_annotation", through_fields=['created_at', 'updated_at'])
+        'MorphologicalAnnotation', blank=True, related_name='token_postfeatures')
+    dependencies = models.ManyToManyField(Dependency, blank=True, related_name="token_dependencies")
 
     avestan = models.TextField(null=True, blank=True)
 

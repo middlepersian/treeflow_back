@@ -4,35 +4,12 @@ import pytest
 import pandas as pd
 
 
-from treeflow.corpus.tests.factories.codex import CodexFactory
-from treeflow.corpus.tests.factories.codex_part import CodexPartFactory
-from treeflow.corpus.tests.factories.facsimile import FacsimileFactory
-from treeflow.corpus.tests.factories.bibliography import BibEntryFactory
+##TODO normalize strings before saving to database
+
 from treeflow.corpus.tests.factories.token import TokenFactory
-from treeflow.corpus.tests.factories.folio import FolioFactory
-from treeflow.corpus.tests.factories.text import TextFactory
-from treeflow.corpus.tests.factories.section import SectionFactory
-from treeflow.corpus.tests.factories.text_sigle import TextSigleFactory
-from treeflow.corpus.tests.factories.corpus import CorpusFactory
 from treeflow.corpus.tests.factories.section_type import SectionTypeFactory
-from treeflow.corpus.tests.factories.dependency import MorphologicalAnnotationFactory
-
-from treeflow.dict.tests.factories.lemma import LemmaFactory
-from treeflow.dict.tests.factories.meaning import MeaningFactory
-
-# models
-from treeflow.corpus.models import Text
-from treeflow.corpus.models import Corpus
-from treeflow.corpus.models import TextSigle
-from treeflow.corpus.models import Section
-from treeflow.corpus.models import Codex
-from treeflow.corpus.models import CodexPart
-from treeflow.corpus.models import Facsimile
-from treeflow.corpus.models import Folio
-from treeflow.corpus.models import Token
-
-
-from treeflow.corpus.tests.parser.parse_sentence import get_sentences, format_sentences
+from treeflow.corpus.tests.factories.section import SectionFactory
+from treeflow.corpus.tests.factories.dependency import DependencyFactory
 
 
 def serialize_first_elements(sentences, number_of_elements):
@@ -42,17 +19,6 @@ def serialize_first_elements(sentences, number_of_elements):
     file_path = os.path.join(script_dir, file)
     jsonFile = open(file_path, "w")
     jsonFile.write(json.dumps(sentences[:number_of_elements], indent=4, ensure_ascii=False))
-
-
-@pytest.fixture
-def sentences():
-    file = 'sentences_10.json'
-    script_path = os.path.abspath(__file__)
-    script_dir = os.path.dirname(script_path)
-    file_path = os.path.join(script_dir, file)
-    with open(file_path, 'r') as f:
-        sentences = json.load(f)
-    return sentences
 
 
 def parse_sentences(df):
@@ -70,7 +36,7 @@ def parse_sentences(df):
 
 
 @pytest.mark.django_db
-def test_read_conll():
+def test_parse_preannotated():
     file = 'Dk5_preannotated.csv'
     script_path = os.path.abspath(__file__)
     script_dir = os.path.dirname(script_path)
@@ -79,72 +45,21 @@ def test_read_conll():
         df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
         print(df.head())
         sentences = parse_sentences(df)
-        populate_db(sentences)
+        parse_preannotated(sentences)
 
 
 @pytest.mark.django_db
-def test_read_file():
-    file = 'GA_K20.xlsx'
+def test_parse_annotated():
+    file = 'DMX-L19.csv'
     script_path = os.path.abspath(__file__)
     script_dir = os.path.dirname(script_path)
     file_path = os.path.join(script_dir, file)
+    with open(file_path, 'r') as f:
+        df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
+        print(df.head())
+        sentences = parse_sentences(df)
+        parse_annotated(sentences)
 
-    sentences = get_sentences(file_path)
-
-    sentences = format_sentences(sentences)
-    # serialize
-    serialize_first_elements(sentences, 10)
-
-
-@pytest.mark.django_db
-def test_parse(sentences):
-    # CREATE TEXT
-    test_create_ga()
-
-    # get the text
-    text = Text.objects.get(text_sigle__sigle="GA")
-    assert text.corpus.slug == "treeflow"
-    assert text.title == "Mādīgān ī Gizistag Abālīš"
-
-    # get the facsimile
-    facsimile = Facsimile.objects.get(bib_entry__key="zotero_k20")
-    assert facsimile.bib_entry.key == "zotero_k20"
-
-    line_identifiers = set()
-    folio_identifiers = set()
-
-    line_identifiers, folio_identifiers = parse_sentences(
-        sentences, facsimile, line_identifiers, folio_identifiers, text)
-
-    assert len(line_identifiers) == 16
-    assert len(folio_identifiers) == 2
-
-
-@pytest.mark.django_db
-def test_create_ga():
-    codex_part = CodexPartFactory(codex__sigle="K20")
-    facsimile = FacsimileFactory(bib_entry__key="zotero_k20", codex_part__codex__sigle="K20", codex_part__slug="k20new")
-    text = TextFactory(title="Mādīgān ī Gizistag Abālīš", text_sigle__sigle="GA",
-                       text_sigle__genre="andarz", corpus__slug="treeflow")
-    assert text.title == "Mādīgān ī Gizistag Abālīš"
-    assert text.text_sigle.sigle == "GA"
-    assert text.corpus.slug == "treeflow"
-
-    return text
-
-
-@pytest.mark.django_db
-def test_create_dmx():
-    codex_part = CodexPartFactory(codex__sigle="K43a")
-    facsimile = FacsimileFactory(bib_entry__key="zotero_K43a",
-                                 codex_part__codex__sigle="K43a", codex_part__slug="K43anew")
-    text = TextFactory(title="Dādestān ī mēnōy ī xrad", text_sigle__sigle="DMX",
-                       text_sigle__genre="andarz",  corpus__slug="treeflow")
-    assert text.title == "Dādestān ī mēnōy ī xrad"
-    assert text.text_sigle.sigle == "DMX"
-    assert text.corpus.slug == "treeflow"
-
-    return text
 
 
 @pytest.mark.django_db
@@ -256,7 +171,9 @@ def parse_preannotated(sentences, text_object=None):
 
 
 @pytest.mark.django_db
-def parse_annotated(sentences, text):
+def parse_annotated(sentences, text_object=None):
+
+    parsed_sentences = []
 
     current_newpart = None
     newparts = {}
@@ -281,108 +198,125 @@ def parse_annotated(sentences, text):
     token_number = 1
     sentence_number = 1
 
-    for i, row in sentence.iterrows():
-        try:
 
-            # parse sentence info
-            #check if token_id starts with #
-            if str(transcription).strip().startswith("#"):
-                if str(transcription).startswith("#TRANSLATION"):
-                    # increase sentence number
-                    translation = str(transcription).split(":")[1].strip()
-                    assert translation != ""
-                elif str(transcription).startswith("#COMMENT"):
-                    comment = str(transcription).split(":")[1].strip()
-                    assert sentence_text != ""
-                # increase sentence number
-                sentence_number += 1
-                continue
+    for sen_n, sentence in enumerate(sentences):
 
-            line_identifier = str(row['line'])
-            folio_identifier = facsimile.bib_entry.key + '_' + \
-                str(token_dict['folioNew'])  # Initialize the folio_id variable
+        # list of tokens in sentence
+        tokens = []
+        dependencies = []
+        #create sentence
+        print("SENTENCE #{}".format(sentence_number))
+        sentence_obj = SectionFactory(section_type = sentence_section_type, number = sentence_number)
+        assert sentence_obj.number == sentence_number
 
-            # Get or create a Token object with the specified token ID
-            token_obj = TokenFactory(number=token_number, text=text,
-                                     transcription=token_dict['transcription'], transliteration=token_dict['transliteration'])
-            # check POS
-            if row.get('POSTag'):
-                token_obj.pos = token_dict['POSTag']
-            # check lemma
-            if row.get('lemma'):
-                lemma_obj = LemmaFactory(word=row['lemma'], language='pah')
-                token_obj.lemma = token_dict['lemma']
-            token_obj.lemmas.add(lemma_obj)
-            # split meaning
-            meanings = token_dict['meaning'].split(',')
-            for meaning in meanings:
-                meaning_obj = MeaningFactory(meaning=meaning, language='eng')
-                token_obj.meanings.add(meaning_obj)
-            token_obj.save()
+        sentence_number += 1
 
-            line_identifiers.add(line_identifier)
-            folio_identifiers.add(folio_identifier)
+        for i, row in sentence.iterrows():
+            token = None
+            token_number_in_sentence = None
+            transliteration = None
+            transcription = None
+            postag = None
+            postfeatures = None
+            newpart = None
+            word_token = True
 
-            if line_identifier not in line_count:
-                line_count[line_identifier] = 1
-            else:
-                line_count[line_identifier] += 1
-            if folio_identifier not in folio_count:
-                folio_count[folio_identifier] = 1
-            else:
-                folio_count[folio_identifier] += 1
+            try:                
+                #check if id value present and is a digit
+                if row["id"]:
+                    # check if id value is a digit
+                    if str(row["id"]).isdigit():
+                        token_number_in_sentence = float(row["id"])
+                        print("token_number_in_sentence: {}".format(token_number_in_sentence))
 
-            # Get or create a Line object with the specified line ID
-            line_obj = SectionFactory(section_type=line_section_type, identifier=line_identifier, text=text)
-            # Check if this is the first time the line has been encountered
-            if line_identifier in line_count and line_count[line_identifier] > 1:
-                # Set the previous_line field to the previous Line object
-                line_obj.previous = previous_line_obj
 
-            previous_line_obj = line_obj  # Update the previous Line object
-            # add token to line
-            line_obj.tokens.add(token_obj)
-            line_obj.save()
+                #check if transliteration value present
+                if row["transliteration"] and row["transliteration"] != "_" and pd.isna(row['transliteration']) == False:
+                    transliteration = row["transliteration"]
+                    print("transliteration:{}".format(transliteration))        
 
-            # Get or create a Folio object with the specified folio ID
-            # create the folio with factor_boy
-            folio_obj = FolioFactory(identifier=folio_identifier, facsimile=facsimile,
-                                     number=folio_count[folio_identifier])
-            assert folio_obj.identifier == folio_identifier
+                if row["transcription"] and row["transcription"] != "_" and pd.isna(row['transliteration']) == False:
+                    # assert row not nan
+                    transcription = row["transcription"]
+                    print("transcription:{}".format( transcription))
 
-            if folio_identifier in folio_count and folio_count[folio_identifier] > 1:
-                # Set the previous_folio field to the previous Folio object
-                folio_obj.previous = previous_folio_obj
-            previous_folio_obj = folio_obj  # Update the previous Folio object
-            folio_obj.sections.add(line_obj)
-            folio_obj.save()
+                if row["postag"] and row["postag"] != "_" and pd.isna(row['transliteration']) == False:
+                    postag = row["postag"]
+                    print("postag {}".format( postag))    
 
-            # process sections
-            # if there is a newpart, add it to the newparts dictionary
-            if row["newpart"] == row["newpart"]:
-                # check if newpart is not a digit or a _
-                if str(row["newpart"]).strip():
-                    # check if not _ or digit
-                    if str(row["newpart"]).strip() != "_":
-                        if not str(row["newpart"]).strip().replace('.', '').isdigit():
-                            print("newpart: {} - sentence #{}".format(row["newpart"], sentence_id))
+                if transliteration:
+                    #create token
+                    token = TokenFactory(text = text_object, token_number = token_number)
+                    token.transliteration = transliteration
+                    
+                    #add token to tokens list
+                    tokens.append(token)
 
-                newpart = str(row["newpart"])
-                if newpart.strip() not in ["_", ""]:
-                    current_newpart = newpart
-                    token_newpart = current_newpart
-                    newpart_number += 1
-                    newparts[newpart_number] = token_newpart
-            assert current_newpart != ""
-            # increase token number
-            token_number += 1
-        except Exception as e:
-            print(e)
-            print(token_dict)
-            raise e
+                    #add transliteration
+                    token.transliteration = transliteration
+                    #add transcription
+                    if transcription:
+                        token.transcription = transcription
+                    #add postag
+                    if postag and postag != "X":
+                        token.postag = postag
+                    # if there is a number_in_sentence, then it is a word token    
+                    if token_number_in_sentence:
+                        token.token_number_in_sentence = token_number_in_sentence
+                        token.word_token = True
+                    else: 
+                        token.word_token = False    
 
-    print(f"Number of lines: {len(line_count)}, lines: {line_count}")
-    print(f"Number of folios: {len(folio_count)}, folios: {folio_count}")
-    print(f"Number of tokens: {token_number}")
+                    #increase token number
+                    token_number += 1
 
-    return line_identifiers, folio_identifiers
+
+                # process dependencies
+                if row["deprel"] and row["deprel"] != "_" and pd.isna(row['transliteration']) == False:
+                    deprel = row["deprel"]
+                    print("deprel {}".format( deprel))
+                    #get head
+                    if row["head"] and row["head"] != "_" and pd.isna(row['transliteration']) == False:
+                        head = row["head"]
+                        print("head {}".format( head))
+                        #create dependency
+                        dependency = DependencyFactory(head_number = head, deprel = deprel)
+                        dependencies.append(dependency)
+                if row['deps'] and row['deps'] != '_' and pd.isna(row['transliteration']) == False:
+                    deprel = row['deprel']
+                    print("deprel {}".format(deprel))
+                    # get head
+                    if row['head'] and row['head'] != '_' and pd.isna(row['transliteration']) == False:
+                        head = row['head']
+                        print("head {}".format(head))
+                        # create dependency
+                        dependency = DependencyFactory(head_number=head, deprel=deprel)
+                        dependencies.append(dependency)   
+                
+                if dependencies:
+                    token.dependencies.add(*dependencies)     
+                        
+            except:
+                pass    
+
+        # process dependencies and their heads
+        for dependency in dependencies:
+
+            # get head_number
+            head_number = dependency.head_number
+            assert head_number != None
+            #check if token in list hast the same token_number_in_sentence as head
+            for token in tokens:
+                if token.token_number_in_sentence == head_number:
+                    assert token_number_in_sentence != None
+                    assert token_number_in_sentence == head_number
+                    dependency.head = token
+                    dependency.save()
+
+        # add tokens to sentence
+        sentence_obj.tokens.add(*tokens)      
+        parsed_sentences.append(sentence_obj)    
+
+        
+    return parsed_sentences
+

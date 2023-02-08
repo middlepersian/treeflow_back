@@ -3,19 +3,15 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import \
     Corpus, Text,\
     MorphologicalAnnotation, Dependency,\
-    Token, Author, BibEntry, Comment
+    Token, BibEntry, Comment
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ["transcription", "transliteration", "pos", "previous"]
-    history_list_display = ["pos"]
+    list_display = ["transcription", "transliteration", "upos", "previous"]
+    history_list_display = ["upos"]
     search_fields = ['transcription']
 
 
-admin.site.register(Author)
 admin.site.register(BibEntry)
-
-
-
 admin.site.register(Corpus)
 admin.site.register(Text)
 

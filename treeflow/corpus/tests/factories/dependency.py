@@ -8,6 +8,10 @@ class DependencyFactory(factory.django.DjangoModelFactory):
 
     rel = factory.Faker("random_element", elements=["nsubj", "dobj", "ccomp", "pobj", "iobj"])
     producer = factory.Faker("random_element", elements=[1, 2])
+    head_number = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
+
+    created_at = factory.Faker("date_time")
+    updated_at = factory.Faker("date_time")
 
     @factory.post_generation
     def head(self, create, extracted, **kwargs):

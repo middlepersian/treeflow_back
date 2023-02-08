@@ -17,6 +17,7 @@ class Dependency(relay.Node):
 
     id: relay.GlobalID
     head:  gql.LazyType['Token', 'treeflow.corpus.types.token']
+    head_number: Optional[int]
     rel: gql.auto
     producer: gql.auto
 
@@ -24,7 +25,7 @@ class Dependency(relay.Node):
 @gql.django.input(models.Dependency)
 class DependencyInput:
     head:  gql.auto
-    rel: gql.auto
+    head_number: gql.auto
     producer: gql.auto
 
 
@@ -32,5 +33,6 @@ class DependencyInput:
 class DependencyPartial(gql.NodeInputPartial):
     id: relay.GlobalID
     head:  gql.auto
+    head_number: gql.auto
     rel: gql.auto
     producer: gql.auto

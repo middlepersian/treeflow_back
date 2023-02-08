@@ -51,7 +51,7 @@ class SectionInput:
     source: gql.auto
     tokens: gql.auto
     previous: gql.auto
-    next: gql.auto
+    #next: gql.auto
     container: gql.auto
 
 
@@ -65,5 +65,5 @@ class SectionPartial:
     source: gql.auto
     tokens: gql.auto
     previous: gql.auto
-    next: gql.auto
+    #next: gql.auto
     container: gql.auto

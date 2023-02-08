@@ -17,13 +17,16 @@ def test_token_factory():
     assert token.language
     assert token.transcription
     assert token.transliteration
-    assert token.pos
+    assert token.upos
+    assert token.xpos
+    for p in token.xpos:
+        assert isinstance(p, str)
     assert token.avestan
     assert token.gloss
     assert token.lemmas
     assert token.meanings
-    assert token.morphological_annotations
-    assert token.syntactic_annotations
+    assert token.postfeatures
+    assert token.dependencies
 
     previous = TokenFactory()
     token.previous = previous
