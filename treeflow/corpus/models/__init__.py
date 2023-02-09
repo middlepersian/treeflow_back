@@ -1,6 +1,6 @@
 from .bibliography import BibEntry
 from .comment import Comment
-from .morphological_annotation import MorphologicalAnnotation
+from .postfeature import PostFeature
 from .source import Source
 from .token import Token
 from .dependency import Dependency

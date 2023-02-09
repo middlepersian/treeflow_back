@@ -2,7 +2,6 @@ import uuid as uuid_lib
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
-from .dependency import Dependency
 
 
 class Token(models.Model):
@@ -24,8 +23,8 @@ class Token(models.Model):
     upos = models.CharField(max_length=8, null=True, blank=True)
     xpos = ArrayField(models.CharField(max_length=8), null=True, blank=True)
     postfeatures = models.ManyToManyField(
-        'MorphologicalAnnotation', blank=True, related_name='token_postfeatures')
-    dependencies = models.ManyToManyField(Dependency, blank=True, related_name="token_dependencies")
+        'PostFeature', blank=True, related_name='token_postfeatures')
+    dependencies = models.ManyToManyField('Dependency', blank=True, related_name="token_dependencies")
 
     avestan = models.TextField(null=True, blank=True)
 

@@ -25,7 +25,7 @@ class TokenFactory(factory.django.DjangoModelFactory):
 
     lemmas = factory.RelatedFactory("treeflow.dict.tests.factories.LemmaFactory")
     meanings = factory.RelatedFactory("treeflow.dict.tests.factories.MeaningFactory")
-    postfeatures = factory.RelatedFactory("treeflow.corpus.tests.factories.MorphologicalAnnotationFactory")
+    postfeatures = factory.RelatedFactory("treeflow.corpus.tests.factories.PostFeatureFactory")
     dependencies = factory.RelatedFactory("treeflow.corpus.tests.factories.DependencyFactory")
 
 

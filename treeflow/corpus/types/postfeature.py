@@ -1,15 +1,11 @@
-from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Annotated
 
 from treeflow.corpus import models
 
-if TYPE_CHECKING:
-    from .token import Token
 
-@gql.django.type(models.MorphologicalAnnotation)
-class MorphologicalAnnotation(relay.Node):
+@gql.django.type(models.PostFeature)
+class PostFeature(relay.Node):
 
     token_morphological_annotation: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
 
@@ -18,13 +14,13 @@ class MorphologicalAnnotation(relay.Node):
     feature_value: gql.auto
 
 
-@gql.django.input(models.MorphologicalAnnotation)
-class MorphologicalAnnotationInput:
+@gql.django.input(models.PostFeature)
+class PostFeatureInput:
     feature: gql.auto
     feature_value: gql.auto
 
-@gql.django.partial(models.MorphologicalAnnotation)
-class MorphologicalAnnotationPartial(gql.NodeInputPartial):
+@gql.django.partial(models.PostFeature)
+class PostFeaturePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     feature: gql.auto
     feature_value: gql.auto

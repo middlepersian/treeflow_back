@@ -7,5 +7,5 @@ class CorpusFactory(factory.django.DjangoModelFactory):
         model = Corpus
         django_get_or_create = ('name', 'slug')
 
-    name = factory.Faker("pystr", max_chars=3)
-    slug = factory.Faker("pystr", max_chars=3)
+    name = factory.Faker("pystr", max_chars=20)
+    slug = factory.Faker("pystr", max_chars=5)

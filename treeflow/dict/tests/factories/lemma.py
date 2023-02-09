@@ -11,6 +11,7 @@ class LemmaFactory(DjangoModelFactory):
 
     word = Faker("word")
     language = factory.Faker("pystr", max_chars=3)
+    multiword_expression = factory.LazyFunction(lambda: False)
 
     @factory.post_generation
     def related_meanings(self, create, extracted, **kwargs):

@@ -2,7 +2,7 @@ from .bibliography import BibEntryFactory
 from .comment import CommentFactory
 from .corpus import CorpusFactory
 from .dependency import DependencyFactory
-from .morphological_annotation import MorphologicalAnnotationFactory
+from .postfeature import PostFeatureFactory
 from .section import SectionFactory
 from .section_type import SectionTypeFactory
 from .source import SourceFactory

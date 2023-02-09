@@ -81,7 +81,8 @@ LOCAL_APPS = [
     # local apps
     "treeflow.dict.apps.DictAppConfig",
     "treeflow.corpus.apps.CorpusAppConfig",
-    "treeflow.images.apps.ImageAppConfig"
+    "treeflow.images.apps.ImageAppConfig",
+    "treeflow.datafeed.apps.DataFeedConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

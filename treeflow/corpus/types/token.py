@@ -45,8 +45,7 @@ class Token(relay.Node):
     upos: gql.auto
     xpos: Optional[List[Optional[str]]]
 
-    postfeatures: List[gql.LazyType['MorphologicalAnnotation',
-                                                'treeflow.corpus.types.morphological_annotation']]
+    postfeatures: List[gql.LazyType['PostFeature', 'treeflow.corpus.types.postfeature']]
     dependencies: List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
 
     avestan: gql.auto

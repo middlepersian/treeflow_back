@@ -2,7 +2,7 @@ from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from .models import \
     Corpus, Text,\
-    MorphologicalAnnotation, Dependency,\
+    PostFeature, Dependency,\
     Token, BibEntry, Comment
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
@@ -16,6 +16,6 @@ admin.site.register(Corpus)
 admin.site.register(Text)
 
 admin.site.register(Token, TokenHistoryAdmin)
-admin.site.register(MorphologicalAnnotation)
+admin.site.register(PostFeature)
 admin.site.register(Dependency)
 admin.site.register(Comment)
