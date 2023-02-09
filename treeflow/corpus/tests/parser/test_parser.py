@@ -216,6 +216,10 @@ def parse_annotated(df, text_object=None):
     sentence_obj = None
     
     for i, row in df.iterrows():
+
+        if i > 50:
+            break
+        
         token = None
         token_number_in_sentence = None
         transliteration = None
@@ -249,21 +253,17 @@ def parse_annotated(df, text_object=None):
                     continue
                 elif str(row["id"]) != "_":
                     token_number_in_sentence = float(row["id"])
-                    print("token_number_in_sentence: {} {}".format(token_number_in_sentence, token_number))
+                    #print("token_number_in_sentence: {} {}".format(token_number_in_sentence, token_number))
                 
             #check if transliteration value present
             if row["transliteration"] != "_" and pd.notna(row['transliteration']):
                 transliteration = row["transliteration"]
-                print("transliteration:{}".format(transliteration), token_number_in_sentence)        
 
             if row["transcription"] != "_" and pd.notna(row['transliteration']):
-                # assert row not nan
                 transcription = row["transcription"]
-                #print("transcription:{}".format( transcription))
 
             if row["postag"] != "_" and pd.notna(row['transliteration']) and row["postag"] != 'X':
                 postag = row["postag"]
-                #print("postag:{}".format(postag))
 
             if transliteration:
                 print("transliteration: {}".format(transliteration))
@@ -271,6 +271,7 @@ def parse_annotated(df, text_object=None):
                 token = TokenFactory(text = text_object, number = token_number)
                 #increase token number
                 token_number += 1
+                print(token)
                 assert token.text == text_object
                 assert token.token_number == token_number
                 #add transliteration
@@ -282,7 +283,7 @@ def parse_annotated(df, text_object=None):
                 if postag and postag != "X":
                     token.postag = normalize_nfc(postag)
                 # if there is a number_in_sentence, then it is a word token    
-                if token_number_in_sentence != "_" and not np.isnan(token_number_in_sentence):
+                if token_number_in_sentence:
                     print(transcription, token_number_in_sentence)
                     token.token_number_in_sentence = token_number_in_sentence
                     token.word_token = True
@@ -391,7 +392,8 @@ def parse_annotated(df, text_object=None):
             
             token.save()
             assert token.transliteration != None
-            tokens.append(token)    
+            tokens.append(token) 
+
 
                     
         except:
