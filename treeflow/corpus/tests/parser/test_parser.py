@@ -18,6 +18,9 @@ from treeflow.corpus.tests.factories.text import TextFactory
 from treeflow.corpus.tests.factories.source import SourceFactory
 from treeflow.images.factories.image import ImageFactory
 
+from treeflow.corpus.models import Token, Section, Dependency, PostFeature, Text, Source
+from treeflow.dict.models import Lemma, Meaning
+from treeflow.images.models import Image
 
 from treeflow.datafeed.utils import normalize_nfc
 
@@ -63,17 +66,25 @@ def test_parse_annotated():
     file_path = os.path.join(script_dir, file)
     with open(file_path, 'r') as f:
         df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
-        parse_annotated(df)
+        tokens, images, lines = parse_annotated(df)
+        print("tokens {}".format(len(tokens)))
+        print("images {}".format(len(images)))
+        print("lines {}".format(len(lines)))
 
+        print("token objects {}".format(Token.objects.count()))
+        print("lemma objects {}".format(Lemma.objects.count()))
+        print("image objects {}".format(Image.objects.count()))
+        print("line objects {}".format(Section.objects.filter(section_type__identifier="line").count()))
+        #assert len(tokens) == 100
 
 
 @pytest.mark.django_db
 def parse_annotated(df, text_object=None):
 
-    parsed_sentences = []
 
     current_newpart = None
     newparts = {}
+
 
 
     previous_folio_obj = None  # Initialize the previous_folio_obj variable
@@ -104,14 +115,19 @@ def parse_annotated(df, text_object=None):
     sentence_number = 1
     image_number = 1
 
-    # list of tokens in sentence
     tokens = []
     dependencies = []
     mwes = []
     lemmas = []
+    images = []
+    lines = []
+    parsed_sentences = []
  
     
     for i, row in df.iterrows():
+
+        if i > 50:
+            break
 
         token = None
         token_number_in_sentence = None
@@ -144,8 +160,6 @@ def parse_annotated(df, text_object=None):
                                 dependency.head = token
                                 dependency.save()
          
-
-
                 # process mwes
                 if mwes:
                     print("mwes {}".format(mwes))
@@ -173,8 +187,7 @@ def parse_annotated(df, text_object=None):
                 dependencies = []
                 #clear up mwes list
                 mwes = []
-                #clear up tokens list
-                tokens = []
+
 
                 sentence_number += 1
                 previous_sentence_obj = sentence_obj    
@@ -241,7 +254,7 @@ def parse_annotated(df, text_object=None):
             else: 
                 token.word_token = False    
 
-            print("ix {} -  token {} - transliteration: {} - transcription: {} - postag: {}".format(i,token.number, token.transliteration, token.transcription, token.upos))    
+            #print("ix {} -  token {} - transliteration: {} - transcription: {} - postag: {}".format(i,token.number, token.transliteration, token.transcription, token.upos))    
             token_number += 1
 
 
@@ -361,6 +374,8 @@ def parse_annotated(df, text_object=None):
             if previous_image_obj:
                 image.previous = previous_image_obj
                 assert image.previous == previous_image_obj
+            #add to list
+            images.append(image)    
             previous_image_obj = image
             image_number += 1
 
@@ -378,6 +393,8 @@ def parse_annotated(df, text_object=None):
                 current_line_obj = SectionFactory(section_type=line_section_type, identifier = line_identifier)
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
+                # add to list
+                lines.append(current_line_obj)
                 # save line to image
                 previous_image_obj.sections.add(current_line_obj)
                 previous_image_obj.save()    
@@ -398,10 +415,11 @@ def parse_annotated(df, text_object=None):
                 previous_line_obj.save()
 
             tokens.append(token) 
+            print('total tokens: {}'.format(len(tokens)))
 
 
 
-    return parsed_sentences
+    return tokens, images, lines
 
 
 
