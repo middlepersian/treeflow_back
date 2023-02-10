@@ -23,8 +23,8 @@ class TokenFactory(factory.django.DjangoModelFactory):
     avestan = factory.Faker("text")
     gloss = factory.Faker("text")
 
-    lemmas = factory.RelatedFactory("treeflow.dict.tests.factories.LemmaFactory")
-    meanings = factory.RelatedFactory("treeflow.dict.tests.factories.MeaningFactory")
+    #lemmas = factory.RelatedFactory("treeflow.dict.tests.factories.LemmaFactory")
+    #meanings = factory.RelatedFactory("treeflow.dict.tests.factories.MeaningFactory")
     postfeatures = factory.RelatedFactory("treeflow.corpus.tests.factories.PostFeatureFactory")
     dependencies = factory.RelatedFactory("treeflow.corpus.tests.factories.DependencyFactory")
 
@@ -49,4 +49,22 @@ class TokenFactory(factory.django.DjangoModelFactory):
             return
 
         if extracted:
-            self.previous = extracted             
+            self.previous = extracted     
+    
+    @factory.post_generation
+    def lemmas(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for lemma in extracted:
+                self.lemmas.add(lemma)
+
+    @factory.post_generation
+    def meanings(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for meaning in extracted:
+                self.meanings.add(meaning)

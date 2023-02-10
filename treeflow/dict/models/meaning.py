@@ -8,8 +8,9 @@ class Meaning(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     meaning = models.TextField(null=True, blank=True)
     language = models.CharField(max_length=10, blank=True, null=True)
-    # relationships
     related_meanings = models.ManyToManyField('self', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
     class Meta:

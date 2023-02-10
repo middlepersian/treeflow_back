@@ -67,6 +67,7 @@ def test_parse_annotated():
     with open(file_path, 'r') as f:
         df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
         tokens, images, lines = parse_annotated(df)
+        print()
         print("tokens {}".format(len(tokens)))
         print("images {}".format(len(images)))
         print("lines {}".format(len(lines)))
@@ -77,22 +78,28 @@ def test_parse_annotated():
         print("line objects {}".format(Section.objects.filter(section_type__identifier="line").count()))
         #assert len(tokens) == 100
 
+        for token_obj in Token.objects.all():
+            print(token_obj.number, token_obj.number_in_sentence, token_obj.transliteration, token_obj.transcription)
+
+        print()
+
+        for lemma_obj in Lemma.objects.filter().order_by('-created_at'):
+            print('lemma', lemma_obj.word, lemma_obj.language, lemma_obj.multiword_expression, lemma_obj.related_meanings.all())
+            for token in lemma_obj.token_lemmas.all():
+                print('token', token.number, token.number_in_sentence, token.transliteration, token.transcription, token.upos)
+
+            print()    
 
 @pytest.mark.django_db
 def parse_annotated(df, text_object=None):
-
-
+    # initialize variables
     current_newpart = None
     newparts = {}
-
-
-
     previous_folio_obj = None  # Initialize the previous_folio_obj variable
     previous_line_obj = None  # Initialize the previous_line_obj variable
     previous_token_obj = None  # Initialize the previous_token_obj variable
     previous_sentence_obj = None  # Initialize the previous_sentence_obj variable
     previous_image_obj = None
-
     sentence_obj = None
 
     text_object = TextFactory(title="Greater Bundahišn or Iranian Bundahišn",  series="dmx",corpus__slug = "MPCD", corpus__name = "Middle Persian Corpus and Dictionary")
@@ -115,20 +122,20 @@ def parse_annotated(df, text_object=None):
     sentence_number = 1
     image_number = 1
 
+    sentence_tokens = []
     tokens = []
     dependencies = []
     mwes = []
     lemmas = []
     images = []
-    lines = []
+    lines = set()
     parsed_sentences = []
  
     
     for i, row in df.iterrows():
 
-        if i > 50:
+        if i > 10:
             break
-
         token = None
         token_number_in_sentence = None
         transliteration = None
@@ -137,14 +144,11 @@ def parse_annotated(df, text_object=None):
         postfeatures = None
         newpart = None
 
-
         if sentence_obj:
             # check if at the end of the sentence
             if row.isna().all():
                 print('### END_OF_SENTENCE', sentence_number)
-
             # process dependencies and their heads
-
                 if dependencies:
                     for dependency in dependencies:
 
@@ -159,7 +163,6 @@ def parse_annotated(df, text_object=None):
                                 assert token_number_in_sentence == head_number
                                 dependency.head = token
                                 dependency.save()
-         
                 # process mwes
                 if mwes:
                     print("mwes {}".format(mwes))
@@ -172,30 +175,26 @@ def parse_annotated(df, text_object=None):
                                         print("lemma {}".format(lemma.word))
                                         print("mwe {}".format(mwe))
                                         lemma.related_lemmas.add(mwe)
-                                        lemma.save()  
-                                        
+                                        lemma.save()                          
                 # add tokens to sentence
                 #check that tokens are not empty
                 if tokens:
                     sentence_obj.tokens.add(*tokens)      
                     parsed_sentences.append(sentence_obj)   
-
+                    sentence_obj.save()
+                #clear up tokens list
+                sentence_tokens = []    
                 #clear up lemmas list
-                print('lemmas', lemmas)
                 lemmas = []
                 #clear up dependencies list
                 dependencies = []
                 #clear up mwes list
                 mwes = []
-
-
                 sentence_number += 1
                 previous_sentence_obj = sentence_obj    
                 continue        
 
-
         if row["id"]:
-
             # new sentence
             if str(row["id"]).startswith("#SENTENCE"):
                 #create sentence object
@@ -207,7 +206,6 @@ def parse_annotated(df, text_object=None):
                 else: 
                     sentence_obj.previous = None
                     sentence_obj.save()    
-
                 continue         
                 
             #new token with number (word token)
@@ -234,10 +232,10 @@ def parse_annotated(df, text_object=None):
             if transliteration:
                 token.transliteration = normalize_nfc(transliteration)
                 assert token.transliteration == normalize_nfc(transliteration)
-            
             assert token.number == token_number
+            token_number += 1
+
     
-           
             #add transcription
             if transcription:
                 token.transcription = normalize_nfc(transcription)
@@ -248,22 +246,22 @@ def parse_annotated(df, text_object=None):
                 assert token.upos == postag
             # if there is a number_in_sentence, then it is a word token    
             if token_number_in_sentence:
-                print(transcription, token_number_in_sentence)
+                #print(transcription, token_number_in_sentence)
                 token.number_in_sentence = token_number_in_sentence
                 token.word_token = True
             else: 
                 token.word_token = False    
 
             #print("ix {} -  token {} - transliteration: {} - transcription: {} - postag: {}".format(i,token.number, token.transliteration, token.transcription, token.upos))    
-            token_number += 1
+            
 
 
         # process postfeatures
         if row["postfeatures"] != "_" and pd.notna(row['postfeatures']):    
             postfeatures = row["postfeatures"]
-            print("postfeatures {}".format( postfeatures))
             #print("postfeatures {}".format( postfeatures))
-            # split postfeatures
+            #print("postfeatures {}".format( postfeatures))
+            #split postfeatures
             postfeatures = postfeatures.split("|")
             #create postfeatures
             postfeatures_to_add = []
@@ -315,16 +313,16 @@ def parse_annotated(df, text_object=None):
 
         # process lemmas
         # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
-        
         if row['lemma'] != '_' and pd.notna(row['lemma']):
-            # if token available, single lemma, if not, MWE
-            if token:
-                # create lemma
-                lemma = row['lemma']
-                if not lemma == '$':
-                    print("lemma {}".format(lemma))
-                    lemma = LemmaFactory(word=normalize_nfc(lemma), multiword_expression=False, language="pah")
-                    assert lemma.multiword_expression == False
+            lemma = row['lemma']
+            lemma = normalize_nfc(input_string=lemma)
+            if '$' != lemma and lemma != ',' and lemma != '$':
+                print("### lemma: {}".format(lemma))
+                # if token available, single lemma, if not, MWE
+                if token:
+                    # create lemma
+                    lemma_obj = LemmaFactory(word=normalize_nfc(lemma), multiword_expression=False, language="pah")
+                    assert lemma_obj.multiword_expression == False
                     # add meaning
                     if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
                         meaning = row['meaning']
@@ -332,41 +330,40 @@ def parse_annotated(df, text_object=None):
                             meaning = meaning.split(',')
                             for m in meaning:
                                 m = m.strip()
-                                m = MeaningFactory(meaning=normalize_nfc(m), language="eng")
-                                lemma.related_meanings.add(m)
+                                m_obj = MeaningFactory(meaning=normalize_nfc(m), language="eng")
+                                lemma_obj.related_meanings.add(m_obj)        
                         else:
-                            meaning = MeaningFactory(meaning=normalize_nfc(meaning), language="eng")
-                            lemma.related_meanings.add(meaning)
-                            token.meanings.add(meaning)
+                            meaning_obj = MeaningFactory(meaning=normalize_nfc(meaning), language="eng")
+                            lemma_obj.related_meanings.add(meaning_obj)
+                            token.meanings.add(meaning_obj)
                     lemmas.append(lemma)    
-                    token.lemmas.add(lemma)
-            else:
-                lemma = row['lemma']
-                print("MWE: {}".format(lemma))
-                lemma = LemmaFactory(word=normalize_nfc(lemma), multiword_expression=True, language="pah")
-                assert lemma.multiword_expression == True
-                # add meaning
-                if row['meaning'] != '_' and pd.notna(row['meaning']):
-                    meaning = row['meaning']
-                    if ',' in meaning:
-                        meaning = meaning.split(',')
-                        for m in meaning:
-                            m = m.strip()
-                            m = MeaningFactory(meaning=normalize_nfc(m), language="eng")
-                            lemma.related_meanings.add(m)
-                    else:
-                        meaning = MeaningFactory(meaning=normalize_nfc(meaning), language="eng")
-                        lemma.related_meanings.add(meaning)
-                mwes.append(lemma)    
+                    token.lemmas.add(lemma_obj)
+                else:
+                    #print("MWE: {}".format(lemma))
+                    lemma_obj = LemmaFactory(word=normalize_nfc(lemma), multiword_expression=True, language="pah")
+                    assert lemma_obj.multiword_expression == True
+                    # add meaning
+                    if row['meaning'] != '_' and pd.notna(row['meaning']):
+                        meaning = row['meaning']
+                        if ',' in meaning:
+                            meaning = meaning.split(',')
+                            for m in meaning:
+                                m = m.strip()
+                                m_obj = MeaningFactory(meaning=normalize_nfc(m), language="eng")
+                                lemma.related_meanings.add(m_obj)
+                        else:
+                            m_obj = MeaningFactory(meaning=normalize_nfc(meaning), language="eng")
+                            lemma.related_meanings.add(m_obj)
+                    mwes.append(lemma)    
 
 
 
         #process images
         if row['folionew'] != '_' and pd.notna(row['folionew']):
             img = row['folionew']
-            print("image {}".format(img))
+            #print("image {}".format(img))
             image_id = manuscript_obj.identifier + "_" + img
-            print("image_id {}".format(image_id))
+            #print("image_id {}".format(image_id))
             image = ImageFactory(identifier=normalize_nfc(image_id), source=manuscript_obj, number=image_number)
             #set source
             image.source = manuscript_obj
@@ -394,7 +391,7 @@ def parse_annotated(df, text_object=None):
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
                 # add to list
-                lines.append(current_line_obj)
+                lines.add(current_line_obj)
                 # save line to image
                 previous_image_obj.sections.add(current_line_obj)
                 previous_image_obj.save()    
@@ -410,15 +407,13 @@ def parse_annotated(df, text_object=None):
             token.save()
             previous_token_obj = token
             if previous_line_obj:
-               
                 previous_line_obj.tokens.add(token)
                 previous_line_obj.save()
-
+            sentence_tokens.append(token)    
             tokens.append(token) 
-            print('total tokens: {}'.format(len(tokens)))
+            #print('total tokens: {}'.format(len(tokens)))
 
-
-
+    print("total tokens: {}".format(token_number)) 
     return tokens, images, lines
 
 

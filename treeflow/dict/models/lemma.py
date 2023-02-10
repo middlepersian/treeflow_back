@@ -13,6 +13,9 @@ class Lemma(models.Model):
     related_lemmas = models.ManyToManyField('self', blank=True)
     related_meanings = models.ManyToManyField(Meaning, blank=True, related_name='lemma_related_meanings')
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def get_related_lemmas(self):
         return " | ".join([p.word for p in self.related_lemmas.all()])
     def get_related_meanings(self):
