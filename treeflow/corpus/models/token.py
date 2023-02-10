@@ -7,7 +7,7 @@ from simple_history.models import HistoricalRecords
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
-    number_in_sentence = ArrayField(models.FloatField(blank=True, null=True), null=True, blank=True)
+    number_in_sentence = models.FloatField(blank=True, null=True)
 
     root = models.BooleanField(default=False)
     word_token = models.BooleanField(default=True)
@@ -37,7 +37,7 @@ class Token(models.Model):
     gloss = models.TextField(blank=True, null=True)
 
     multiword_token = models.BooleanField(default=False)
-    # vámonos : related_token1: vamos + related_token2: nos
+    multiword_token_number = ArrayField(models.FloatField(blank=True, null=True), null=True, blank=True)
     related_tokens = models.ManyToManyField('self', blank=True, related_name='token_related_tokens')
     
     created_at = models.DateTimeField(auto_now_add=True)

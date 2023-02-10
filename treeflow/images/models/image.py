@@ -17,6 +17,9 @@ class Image(models.Model):
                                     null=True,
                                     on_delete=models.DO_NOTHING)
 
+    # lines
+    sections = models.ManyToManyField('corpus.Section', related_name='image_sections')                                
+
     history = HistoricalRecords()
 
     class Meta:

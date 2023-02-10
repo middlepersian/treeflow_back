@@ -8,7 +8,7 @@ class TokenFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ("number", "text")
 
     number = factory.Faker("pyfloat", positive=True)
-    number_in_sentence = factory.Faker("pylist", nb_elements=10, variable_nb_elements=True, value_types="int")
+    number_in_sentence = factory.Faker("pyfloat", positive=True)
 
     root = factory.LazyFunction(lambda: False)
     word_token = factory.LazyFunction(lambda: True)
@@ -30,6 +30,8 @@ class TokenFactory(factory.django.DjangoModelFactory):
 
 
     multiword_token = factory.LazyFunction(lambda: False)
+    multiword_token_number = factory.Faker("pylist", nb_elements=10, variable_nb_elements=True, value_types="int")
+
     created_at = factory.Faker("date_time")
     updated_at = factory.Faker("date_time")
 

@@ -47,7 +47,6 @@ class Token(relay.Node):
 
     postfeatures: List[gql.LazyType['PostFeature', 'treeflow.corpus.types.postfeature']]
     dependencies: List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
-
     avestan: gql.auto
     previous: Optional['Token']
     next: Optional['Token']

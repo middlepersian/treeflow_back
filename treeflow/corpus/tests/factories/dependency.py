@@ -6,9 +6,9 @@ class DependencyFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Dependency
 
-    rel = factory.Faker("random_element", elements=["nsubj", "dobj", "ccomp", "pobj", "iobj"])
+    rel = factory.Faker("pystr", min_chars=1, max_chars=25)
     producer = factory.Faker("random_element", elements=[1, 2])
-    head_number = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
+    head_number = factory.Faker("pyfloat", left_digits=2, right_digits=3, positive=True)
 
     created_at = factory.Faker("date_time")
     updated_at = factory.Faker("date_time")
