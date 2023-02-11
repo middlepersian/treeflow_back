@@ -80,15 +80,21 @@ def test_parse_annotated():
 
         for token_obj in Token.objects.all():
             print(token_obj.number, token_obj.number_in_sentence, token_obj.transliteration, token_obj.transcription)
+            for deps in token_obj.dependencies.all():
+                print('deps', deps.head, deps.head_number, deps.rel)
 
         print()
-
+        '''
         for lemma_obj in Lemma.objects.filter().order_by('-created_at'):
             print('lemma', lemma_obj.word, lemma_obj.language, lemma_obj.multiword_expression, lemma_obj.related_meanings.all())
             for token in lemma_obj.token_lemmas.all():
                 print('token', token.number, token.number_in_sentence, token.transliteration, token.transcription, token.upos)
 
             print()    
+        '''    
+
+
+
 
 @pytest.mark.django_db
 def parse_annotated(df, text_object=None):
@@ -134,7 +140,7 @@ def parse_annotated(df, text_object=None):
     
     for i, row in df.iterrows():
 
-        if i > 10:
+        if i > 20:
             break
         token = None
         token_number_in_sentence = None
@@ -150,17 +156,17 @@ def parse_annotated(df, text_object=None):
                 print('### END_OF_SENTENCE', sentence_number)
             # process dependencies and their heads
                 if dependencies:
+                    print("### DEPS {}".format(len(dependencies)))
                     for dependency in dependencies:
-
                         # get head_number
-                        head_number = dependency.head_number
+                        head_number = float(dependency.head_number)
+                        print("head_number {}".format(head_number))
                         assert head_number != None
                         #print('"head_number": {}'.format(head_number))
                         #check if token in list hast the same token_number_in_sentence as head
-                        for token in tokens:
+                        for token in sentence_tokens:
                             if token.number_in_sentence == head_number:
-                                assert token_number_in_sentence != None
-                                assert token_number_in_sentence == head_number
+                                assert token.number_in_sentence != None
                                 dependency.head = token
                                 dependency.save()
                 # process mwes
@@ -284,32 +290,30 @@ def parse_annotated(df, text_object=None):
 
 
         # process dependencies
-        if row["deprel"] != "_" and pd.notna(row['transliteration']):
+        if row["deprel"] != "_" :
             deprel = row["deprel"]
             #print("deprel {}".format( deprel))
             #get head
             if row["head"] and row["head"] != "_" and pd.notna(row['transliteration']):
-                head = row["head"]
+                head = float(row["head"])
                 #print("head {}".format( head))
                 #create dependency
                 dependency = DependencyFactory(head_number = head, rel = normalize_nfc(deprel))
                 assert dependency.head_number == head
                 dependencies.append(dependency)
-        if row['deps'] != '_' and pd.notna(row['transliteration']):
-            deprel = row['deprel']
-            #print("deprel {}".format(deprel))
-            # get head
-            if row['head'] and row['head'] != '_' and pd.notna(row['transliteration']):
-                head = row['head']
-                #print("head {}".format(head))
-                # create dependency
-                dependency = DependencyFactory(head_number=head, rel=normalize_nfc(deprel))
-                assert dependency.head_number == head
-                dependencies.append(dependency)   
-        
-        if dependencies:
-            if token:
-                token.dependencies.add(*dependencies)     
+                token.dependencies.add(dependency)
+        if row['deps'] != '_':
+            deps = row['deps']
+            # split on "|"
+            deps = deps.split("|")
+            for dep in deps:
+                if dep and dep != "_":
+                    head, rel = dep.split(":")
+                    dependency = DependencyFactory(head_number=float(head), rel=normalize_nfc(deprel))
+                    assert dependency.head_number == float(head)
+                    dependencies.append(dependency)   
+                    token.dependencies.add(dependency)
+
 
         # process lemmas
         # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
@@ -411,7 +415,7 @@ def parse_annotated(df, text_object=None):
                 previous_line_obj.save()
             sentence_tokens.append(token)    
             tokens.append(token) 
-            #print('total tokens: {}'.format(len(tokens)))
+            print('total deps: {}'.format(len(dependencies)))
 
     print("total tokens: {}".format(token_number)) 
     return tokens, images, lines
