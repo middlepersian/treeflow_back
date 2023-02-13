@@ -22,8 +22,8 @@ class Token(models.Model):
     meanings = models.ManyToManyField('dict.Meaning', blank=True, related_name='token_meanings')
     upos = models.CharField(max_length=8, null=True, blank=True)
     xpos = ArrayField(models.CharField(max_length=8), null=True, blank=True)
-    postfeatures = models.ManyToManyField(
-        'PostFeature', blank=True, related_name='token_postfeatures')
+    features = models.ManyToManyField(
+        'Feature', blank=True, related_name='token_features')
     dependencies = models.ManyToManyField('Dependency', blank=True, related_name="token_dependencies")
 
     avestan = models.TextField(null=True, blank=True)

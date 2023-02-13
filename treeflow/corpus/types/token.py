@@ -45,7 +45,7 @@ class Token(relay.Node):
     upos: gql.auto
     xpos: Optional[List[Optional[str]]]
 
-    postfeatures: List[gql.LazyType['PostFeature', 'treeflow.corpus.types.postfeature']]
+    features: List[gql.LazyType['Feature', 'treeflow.corpus.types.feature']]
     dependencies: List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
     avestan: gql.auto
     previous: Optional['Token']
@@ -72,7 +72,7 @@ class TokenInput:
     meanings: gql.auto
     upos: gql.auto
     xpos: Optional[List[Optional[str]]]
-    postfeatures: gql.auto
+    features: gql.auto
     dependencies: gql.auto
     avestan: gql.auto
     previous: gql.auto
@@ -99,7 +99,7 @@ class TokenPartial:
     meanings: gql.auto
     upos: gql.auto
     xpos: Optional[List[Optional[str]]]
-    postfeatures: gql.auto
+    features: gql.auto
     dependencies: gql.auto
     avestan: gql.auto
     previous: gql.auto

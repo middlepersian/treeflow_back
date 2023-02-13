@@ -21,6 +21,15 @@ class Source(models.Model):
 
     history = HistoricalRecords()
 
+    class Meta:
+        ordering = ['identifier']
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=['type', 'identifier'], name='source_type_identifier'
+            )
+        ]
+
 
     def __str__(self):
         return '{}'.format(self.identifier)

@@ -2,7 +2,7 @@ from .bibliography import BibEntry
 from .comment import Comment
 from .corpus import Corpus
 from .dependency import Dependency
-from .postfeature import PostFeature
+from .feature import Feature
 from .section import Section
 from .section_type import SectionType
 from .text import Text

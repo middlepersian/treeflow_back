@@ -5,22 +5,10 @@ import pandas as pd
 import numpy as np
 
 
-##TODO normalize strings before saving to database
-
-from treeflow.corpus.tests.factories.token import TokenFactory
-from treeflow.corpus.tests.factories.section_type import SectionTypeFactory
-from treeflow.corpus.tests.factories.section import SectionFactory
-from treeflow.corpus.tests.factories.dependency import DependencyFactory
-from treeflow.corpus.tests.factories.postfeature import PostFeatureFactory
-from treeflow.dict.tests.factories.lemma import LemmaFactory
-from treeflow.dict.tests.factories.meaning import MeaningFactory
-from treeflow.corpus.tests.factories.text import TextFactory
-from treeflow.corpus.tests.factories.source import SourceFactory
-from treeflow.images.factories.image import ImageFactory
-
-from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source
+from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source, Dependency, Feature, Comment
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
+
 
 
 
@@ -74,6 +62,9 @@ def test_parse_annotated():
         print("images {}".format(len(images)))
         print("lines {}".format(len(lines)))
 
+        #total number of sentences
+        print("sentence objects {}".format(Section.objects.filter(section_type__identifier="sentence").count()))
+
         print("token objects {}".format(Token.objects.count()))
         print("lemma objects {}".format(Lemma.objects.count()))
         print("image objects {}".format(Image.objects.count()))
@@ -95,9 +86,6 @@ def test_parse_annotated():
             print()    
         '''    
 
-
-
-
 @pytest.mark.django_db
 def parse_annotated(df, text_object=None):
     # initialize variables
@@ -113,21 +101,26 @@ def parse_annotated(df, text_object=None):
     previous_image_obj = None
     sentence_obj = None
 
-    text_object = TextFactory(title="Greater Bundahišn or Iranian Bundahišn",  series="dmx",corpus__slug = "MPCD", corpus__name = "Middle Persian Corpus and Dictionary")
+
+    corpus_object, corpus_created = Corpus.objects.get_or_create(slug="MPCD", name="Middle Persian Corpus and Dictionary")
+
+    text_object, text_object_created = Text.objects.get_or_create(title="Greater Bundahišn or Iranian Bundahišn",  series="DMX", corpus=corpus_object, identifier="DMX-L19")
     assert text_object.title == "Greater Bundahišn or Iranian Bundahišn"
+    assert text_object.series == "DMX"
+    assert text_object.corpus.slug == "MPCD"
 
     #create source manuscript object
-    manuscript_obj = SourceFactory(type='manuscript', identifier='L19')
+    manuscript_obj, manuscript_obj_created = Source.objects.get_or_create(type='manuscript', identifier='L19')
 
     # initialize sections
     # sentence section
-    sentence_section_type = SectionTypeFactory(identifier="sentence")
+    sentence_section_type, sentence_section_type_created = SectionType.objects.get_or_create(identifier="sentence")
     # line section
-    line_section_type = SectionTypeFactory(identifier="line")
+    line_section_type, line_section_type_created = SectionType.objects.get_or_create(identifier="line")
     # chapter section
-    chapter_section_type = SectionTypeFactory(identifier="chapter")
+    chapter_section_type, chapter_section_type_created = SectionType.objects.get_or_create(identifier="chapter")
     # section
-    section_section_type = SectionTypeFactory(identifier="section")
+    section_section_type, section_section_type_created = SectionType.objects.get_or_create(identifier="section")
 
     token_number = 1
     sentence_number = 1
@@ -209,7 +202,7 @@ def parse_annotated(df, text_object=None):
             # new sentence
             if str(row["id"]).startswith("#SENTENCE"):
                 #create sentence object
-                sentence_obj = SectionFactory(section_type = sentence_section_type, number = sentence_number, identifier = "sentence_{}".format(sentence_number), text = text_object)
+                sentence_obj, sentence_obj_created = Section.objects.get_or_create(section_type = sentence_section_type, number = str(sentence_number), identifier = text_object.identifier + "_sentence_" + str(sentence_number), text = text_object)
                 print("#SENTENCE: {}".format(sentence_number))
                 if previous_sentence_obj:
                     sentence_obj.previous = previous_sentence_obj
@@ -219,6 +212,29 @@ def parse_annotated(df, text_object=None):
                     sentence_obj.save()    
                 continue         
                 
+            if str(row["id"]).startswith("#TRANSLATION"):
+    
+                #split the cell
+                translation = str(row["id"]).split('=')
+                if sentence_obj:
+                    translation = translation[1]
+                    if translation:
+                        translation = normalize_nfc(input_string=translation)
+                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=normalize_nfc(translation[1]), language="deu")
+                        sentence_obj.meanings.add()
+                        sentence_obj.save()
+                        continue 
+            if str(row["id"]).startswith("#COMMENT"):
+    
+                #split the cell
+                comment = str(row["id"]).split('=')
+                if sentence_obj:
+                    comment = comment[1]
+                    if comment:
+                        comment = normalize_nfc(input_string=comment)
+                        comment_obj = Comment.objects.create(comment=comment, section=sentence_obj)
+                        continue                          
+
             #new token with number (word token)
             elif str(row["id"]) != "_":
                 token_number_in_sentence = float(row["id"])
@@ -237,7 +253,7 @@ def parse_annotated(df, text_object=None):
         # we do create a token if there is a transliteration or a token_number_in_sentence
         if transliteration or token_number_in_sentence:
             #create token object
-            token = TokenFactory(text = text_object, number = token_number)
+            token, token_created = Token.objects.get_or_create(text = text_object, number = token_number)
             token.language = "pah"
             #increase token number
             if transliteration:
@@ -245,7 +261,6 @@ def parse_annotated(df, text_object=None):
                 assert token.transliteration == normalize_nfc(transliteration)
             assert token.number == token_number
             token_number += 1
-
     
             #add transcription
             if transcription:
@@ -282,8 +297,8 @@ def parse_annotated(df, text_object=None):
                         feature, value = postfeature.split("=")
                         # assert that the split existed and that the feature and value are not empty
                         assert feature and value
-                        postfeature = PostFeatureFactory(feature=normalize_nfc(feature), feature_value=normalize_nfc(value))
-                        postfeatures_to_add.append(postfeature)
+                        feature_obj, feature_obj_created = Feature.objects.get_or_create(feature=normalize_nfc(feature), feature_value=normalize_nfc(value))
+                        postfeatures_to_add.append(feature_obj)
                     else: 
                         continue    
             else:
@@ -291,7 +306,7 @@ def parse_annotated(df, text_object=None):
             # add the to current token     
             if postfeatures_to_add:
                 #assert token is not None
-                token.postfeatures.add(*postfeatures_to_add)    
+                token.features.add(*postfeatures_to_add)    
 
 
         # process dependencies
@@ -303,10 +318,10 @@ def parse_annotated(df, text_object=None):
                 head = float(row["head"])
                 #print("head {}".format( head))
                 #create dependency
-                dependency = DependencyFactory(head_number = head, rel = normalize_nfc(deprel))
-                assert dependency.head_number == head
-                dependencies.append(dependency)
-                token.dependencies.add(dependency)
+                dependency_obj, dependency_obj_created = Dependency.objects.get_or_create(head_number = head, rel = normalize_nfc(deprel))
+                assert dependency_obj.head_number == head
+                dependencies.append(dependency_obj)
+                token.dependencies.add(dependency_obj)
         if row['deps'] != '_':
             deps = row['deps']
             # split on "|"
@@ -314,10 +329,9 @@ def parse_annotated(df, text_object=None):
             for dep in deps:
                 if dep and dep != "_":
                     head, rel = dep.split(":")
-                    dependency = DependencyFactory(head_number=float(head), rel=normalize_nfc(deprel))
-                    assert dependency.head_number == float(head)
-                    dependencies.append(dependency)   
-                    token.dependencies.add(dependency)
+                    dependency_obj, dependency_obj_created = Dependency.objects.get_or_create(head_number = head, rel = normalize_nfc(deprel))
+                    assert dependency_obj.head_number == head
+                    dependencies.append(dependency_obj)
 
 
         # process lemmas
@@ -330,7 +344,7 @@ def parse_annotated(df, text_object=None):
                 # if token available, single lemma, if not, MWE
                 if token:
                     # create lemma
-                    lemma_obj = LemmaFactory(word=normalize_nfc(lemma), multiword_expression=False, language="pah")
+                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=False, language="pah")
                     assert lemma_obj.multiword_expression == False
                     # add meaning
                     if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
@@ -339,17 +353,17 @@ def parse_annotated(df, text_object=None):
                             meaning = meaning.split(',')
                             for m in meaning:
                                 m = m.strip()
-                                m_obj = MeaningFactory(meaning=normalize_nfc(m), language="eng")
+                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(m), language="eng")
                                 lemma_obj.related_meanings.add(m_obj)        
                         else:
-                            meaning_obj = MeaningFactory(meaning=normalize_nfc(meaning), language="eng")
+                            meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
                             lemma_obj.related_meanings.add(meaning_obj)
                             token.meanings.add(meaning_obj)
                     lemmas.append(lemma)    
                     token.lemmas.add(lemma_obj)
                 else:
                     #print("MWE: {}".format(lemma))
-                    lemma_obj = LemmaFactory(word=normalize_nfc(lemma), multiword_expression=True, language="pah")
+                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=True, language="pah")
                     assert lemma_obj.multiword_expression == True
                     # add meaning
                     if row['meaning'] != '_' and pd.notna(row['meaning']):
@@ -358,10 +372,10 @@ def parse_annotated(df, text_object=None):
                             meaning = meaning.split(',')
                             for m in meaning:
                                 m = m.strip()
-                                m_obj = MeaningFactory(meaning=normalize_nfc(m), language="eng")
+                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(m), language="eng")
                                 lemma.related_meanings.add(m_obj)
                         else:
-                            m_obj = MeaningFactory(meaning=normalize_nfc(meaning), language="eng")
+                            m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
                             lemma.related_meanings.add(m_obj)
                     mwes.append(lemma)    
 
@@ -371,18 +385,18 @@ def parse_annotated(df, text_object=None):
         if row['folionew'] != '_' and pd.notna(row['folionew']):
             img = row['folionew']
             #print("image {}".format(img))
-            image_id = manuscript_obj.identifier + "_" + img
+            image_id = normalize_nfc(manuscript_obj.identifier + "_" + img)
             #print("image_id {}".format(image_id))
-            image = ImageFactory(identifier=normalize_nfc(image_id), source=manuscript_obj, number=image_number)
+            image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, source=manuscript_obj, number=image_number)
             #set source
-            image.source = manuscript_obj
-            assert image.identifier == image_id
+            image_obj.source = manuscript_obj
+            assert image_obj.identifier == image_id
             if previous_image_obj:
-                image.previous = previous_image_obj
-                assert image.previous == previous_image_obj
+                image_obj.previous = previous_image_obj
+                assert image_obj.previous == previous_image_obj
             #add to list
-            images.append(image)    
-            previous_image_obj = image
+            images.append(image_obj)    
+            previous_image_obj = image_obj
             image_number += 1
 
 
@@ -396,7 +410,7 @@ def parse_annotated(df, text_object=None):
                 print("img_name {}".format(img_name))
                 line_identifier = img_name + "_" + str(line)
                 print("line_identifier {}".format(line_identifier))
-                current_line_obj = SectionFactory(section_type=line_section_type, identifier = line_identifier)
+                current_line_obj, current_line_obj_created = Section.objects.get_or_create(section_type=line_section_type, identifier = line_identifier)
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
                 # add to list
@@ -410,30 +424,39 @@ def parse_annotated(df, text_object=None):
         # process new_parts
         if row['newpart'] != '_' and not pd.isna(row['newpart']):
             # split the newpart string into chapter and section
-            newpart = str(newpart)
-            print('newpart', newpart)
-            chapter, section = newpart.split(".")
-            
-            # if the current chapter is not the same as the previous chapter
-            if chapter != prev_chapter:
-                # create a new list for the current chapter in the chapters dictionary
-                chapters[chapter] = []
-                # set the current chapter as the previous chapter for the next iteration
-                prev_chapter = chapter
-            
-            # add the current section to the list of sections for the current chapter
-            chapters[prev_chapter].append(section)
-            # set the current section as the previous section for the next iteration
-            prev_section = section        
-   
+            newpart = row['newpart']
+            if not pd.isna(newpart) and newpart != '_':
+                # split the newpart string into chapter and section
+                newpart = str(newpart)
+                print('newpart', newpart)
+                chapter, section = newpart.split(".")
+                chapter = chapter.strip()
+                section = section.strip()
+                
+                # get or create the chapter object
+                chapter_identifier = 'dmx_' + chapter
+                assert chapter_identifier is not None
+                chapter_obj, chapter_obj_created = Section.objects.get_or_create(section_type=chapter_section_type, identifier=chapter_identifier, title = chapter, text=text_object)
+                # if the current chapter is not the same as the previous chapter
+                if prev_chapter:
+                    if chapter_obj != prev_chapter:
+                        # create a new list for the current chapter in the chapters dictionary
+                        chapters[chapter] = []
+                        # set the current chapter as the previous chapter for the next iteration
+                        chapter_obj.previous = prev_chapter
+                        chapter_obj.save()   
+
+            prev_chapter = chapter_obj
+
 
         if token:
             #add token to tokens list
             if previous_token_obj:
-                token.previous_token = previous_token_obj
-                assert token.previous_token == previous_token_obj
+                token.previous = previous_token_obj
+                assert token.previous == previous_token_obj
             token.save()
             previous_token_obj = token
+            # for the record: it is actually previous_line_obj == current line obj
             if previous_line_obj:
                 previous_line_obj.tokens.add(token)
                 previous_line_obj.save()
@@ -511,7 +534,7 @@ def test_read_newparts():
                     chapter_obj.previous = prev_chapter
                     chapter_obj.save()
                     
-
+            '''
             # section identifier
             section_identifier = 'dmx_' + chapter + '_' + section       
             assert section_identifier is not None
@@ -529,13 +552,14 @@ def test_read_newparts():
 
             else:
                 print("section_obj_exists")
+            '''    
                       
 
             prev_chapter = chapter_obj
-            prev_section = section_obj
+            #prev_section = section_obj
 
 
-    '''for chap in Section.objects.filter(section_type=chapter_section_type).order_by('created_at'):
+    for chap in Section.objects.filter(section_type=chapter_section_type).order_by('created_at'):
         print("chap_title", chap.title)
         if chap.previous:
             print("chap_previous",chap.previous.title)
@@ -549,18 +573,5 @@ def test_read_newparts():
             print("sec_previous",sec.previous.identifier)          
 
     print(chapters)
-
-
-@pytest.mark.django_db
-def test_sec():
-
-    # chapter section
-    chapter_section_type = SectionTypeFactory(identifier="chapter")
-    # section
-    section_section_type = SectionTypeFactory(identifier="section")
-
-    print('####################')
-    for sec in SectionType.objects.all().order_by('created_at'):        
-        print("sec_identifier",sec.identifier)
-
+  '''
 

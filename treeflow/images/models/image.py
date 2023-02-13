@@ -25,7 +25,7 @@ class Image(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['identifier', 'source', 'number'], name='identifier_source_number'
+                fields=['identifier', 'source'], name='identifier_source'
             )
         ]
         ordering = ['number']

@@ -4,8 +4,8 @@ from strawberry_django_plus.gql import relay
 from treeflow.corpus import models
 
 
-@gql.django.type(models.PostFeature)
-class PostFeature(relay.Node):
+@gql.django.type(models.Feature)
+class Feature(relay.Node):
 
     token_morphological_annotation: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
 
@@ -14,13 +14,13 @@ class PostFeature(relay.Node):
     feature_value: gql.auto
 
 
-@gql.django.input(models.PostFeature)
-class PostFeatureInput:
+@gql.django.input(models.Feature)
+class FeatureInput:
     feature: gql.auto
     feature_value: gql.auto
 
-@gql.django.partial(models.PostFeature)
-class PostFeaturePartial(gql.NodeInputPartial):
+@gql.django.partial(models.Feature)
+class FeaturePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     feature: gql.auto
     feature_value: gql.auto
