@@ -17,7 +17,6 @@ class Comment(models.Model):
     dependency = models.ForeignKey('Dependency', on_delete=models.CASCADE, null=True,
                                    blank=True, related_name='comment_dependency')
 
-
     # image
     image = models.ForeignKey('images.Image', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_image')
 
