@@ -32,5 +32,13 @@ class Section(models.Model):
     class Meta:
         ordering = ['number']
 
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=['text', 'identifier'], name='section_text_identifier'
+            )
+        ]
+
     def __str__(self) -> str:
         return '{}'.format(self.identifier)

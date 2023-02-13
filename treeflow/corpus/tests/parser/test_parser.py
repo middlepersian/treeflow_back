@@ -18,9 +18,11 @@ from treeflow.corpus.tests.factories.text import TextFactory
 from treeflow.corpus.tests.factories.source import SourceFactory
 from treeflow.images.factories.image import ImageFactory
 
-from treeflow.corpus.models import Token, Section, Dependency, PostFeature, Text, Source
+from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
+
+
 
 from treeflow.datafeed.utils import normalize_nfc
 
@@ -101,6 +103,9 @@ def parse_annotated(df, text_object=None):
     # initialize variables
     current_newpart = None
     newparts = {}
+    chapters = {}
+    prev_chapter = None
+    prev_section = None
     previous_folio_obj = None  # Initialize the previous_folio_obj variable
     previous_line_obj = None  # Initialize the previous_line_obj variable
     previous_token_obj = None  # Initialize the previous_token_obj variable
@@ -401,6 +406,25 @@ def parse_annotated(df, text_object=None):
                 previous_image_obj.save()    
                 # update previous line
                 previous_line_obj = current_line_obj 
+
+        # process new_parts
+        if row['newpart'] != '_' and not pd.isna(row['newpart']):
+            # split the newpart string into chapter and section
+            newpart = str(newpart)
+            print('newpart', newpart)
+            chapter, section = newpart.split(".")
+            
+            # if the current chapter is not the same as the previous chapter
+            if chapter != prev_chapter:
+                # create a new list for the current chapter in the chapters dictionary
+                chapters[chapter] = []
+                # set the current chapter as the previous chapter for the next iteration
+                prev_chapter = chapter
+            
+            # add the current section to the list of sections for the current chapter
+            chapters[prev_chapter].append(section)
+            # set the current section as the previous section for the next iteration
+            prev_section = section        
    
 
         if token:
@@ -438,12 +462,24 @@ def test_escape_rows():
                 pass
                 #print(f"Not all values in row {i} are either None, NaN, '' or '_'")
 
-
+@pytest.mark.django_db
 def test_read_newparts():
     file = 'DMX-L19.csv'
     script_path = os.path.abspath(__file__)
     script_dir = os.path.dirname(script_path)
     file_path = os.path.join(script_dir, file)
+
+    corpus_object, corpus_created = Corpus.objects.get_or_create(slug="MPCD", name="Middle Persian Corpus and Dictionary")
+
+    text_object, text_created = Text.objects.get_or_create(title="Greater Bundahišn or Iranian Bundahišn",  series="dmx", corpus=corpus_object)
+    assert text_object.title == "Greater Bundahišn or Iranian Bundahišn"
+    assert text_object.series == "dmx"
+    assert text_object.corpus.slug == "MPCD"
+
+    # chapter section
+    chapter_section_type, chapter_section_type_created= SectionType.objects.get_or_create(identifier="chapter")
+    # section
+    section_section_type, section_section_type_created = SectionType.objects.get_or_create(identifier="section")
 
     # load the conll file into a pandas dataframe
     df = pd.read_csv(file_path, sep="\t")
@@ -452,26 +488,79 @@ def test_read_newparts():
     prev_chapter = None
     prev_section = None
 
-    for index, row in df.iterrows():
+    for index, row in df.iterrows(): 
         newpart = row['newpart']
         if not pd.isna(newpart) and newpart != '_':
             # split the newpart string into chapter and section
             newpart = str(newpart)
             print('newpart', newpart)
             chapter, section = newpart.split(".")
-            #chapter = int(chapter)
-            #section = int(section)
+            chapter = chapter.strip()
+            section = section.strip()
             
+            # get or create the chapter object
+            chapter_identifier = 'dmx_' + chapter
+            assert chapter_identifier is not None
+            chapter_obj, chapter_obj_created = Section.objects.get_or_create(section_type=chapter_section_type, identifier=chapter_identifier, title = chapter, text=text_object)
             # if the current chapter is not the same as the previous chapter
-            if chapter != prev_chapter:
-                # create a new list for the current chapter in the chapters dictionary
-                chapters[chapter] = []
-                # set the current chapter as the previous chapter for the next iteration
-                prev_chapter = chapter
-            
-            # add the current section to the list of sections for the current chapter
-            chapters[prev_chapter].append(section)
-            # set the current section as the previous section for the next iteration
-            prev_section = section
+            if prev_chapter:
+                if chapter_obj != prev_chapter:
+                    # create a new list for the current chapter in the chapters dictionary
+                    chapters[chapter] = []
+                    # set the current chapter as the previous chapter for the next iteration
+                    chapter_obj.previous = prev_chapter
+                    chapter_obj.save()
+                    
+
+            # section identifier
+            section_identifier = 'dmx_' + chapter + '_' + section       
+            assert section_identifier is not None
+
+            section_obj, section_obj_created = Section.objects.get_or_create(section_type=section_section_type, identifier=section_identifier, title = chapter + '.' +section, text=text_object)     
+            # check if object exists
+            if section_obj_created:
+                print("section_obj_created")
+                # check that previous section is not the same as the current section
+                if prev_section:
+                    section_obj.previous = prev_section
+                    print("section_obj", section_obj.identifier)
+                    print("section_obj_previous", section_obj.previous.identifier)
+                    section_obj.save()
+
+            else:
+                print("section_obj_exists")
+                      
+
+            prev_chapter = chapter_obj
+            prev_section = section_obj
+
+
+    '''for chap in Section.objects.filter(section_type=chapter_section_type).order_by('created_at'):
+        print("chap_title", chap.title)
+        if chap.previous:
+            print("chap_previous",chap.previous.title)
+    '''        
+    print('####################')
+    for sec in Section.objects.filter(section_type=section_section_type).order_by('created_at'):        
+
+        if sec.previous:
+            print("sec_chapter",sec.container.identifier)
+            print("sec_title",sec.identifier)
+            print("sec_previous",sec.previous.identifier)          
 
     print(chapters)
+
+
+@pytest.mark.django_db
+def test_sec():
+
+    # chapter section
+    chapter_section_type = SectionTypeFactory(identifier="chapter")
+    # section
+    section_section_type = SectionTypeFactory(identifier="section")
+
+    print('####################')
+    for sec in SectionType.objects.all().order_by('created_at'):        
+        print("sec_identifier",sec.identifier)
+
+

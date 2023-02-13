@@ -5,7 +5,7 @@ from treeflow.corpus.models import Section
 class SectionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Section
-        django_get_or_create = ('identifier',)
+        django_get_or_create = ('text', 'identifier')
 
     number = factory.Faker("pyfloat", positive=True, left_digits=2, right_digits=2)
     identifier = factory.Faker("pystr", min_chars=1, max_chars=10)
@@ -26,3 +26,12 @@ class SectionFactory(factory.django.DjangoModelFactory):
     def set_container(self, create, extracted, **kwargs):
         if kwargs.get('container'):
             self.container = kwargs.get('container')
+
+    @factory.post_generation
+    def meanings(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for meaning in extracted:
+                self.meanings.add(meaning)        
