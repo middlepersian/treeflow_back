@@ -439,3 +439,39 @@ def test_escape_rows():
                 #print(f"Not all values in row {i} are either None, NaN, '' or '_'")
 
 
+def test_read_newparts():
+    file = 'DMX-L19.csv'
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    file_path = os.path.join(script_dir, file)
+
+    # load the conll file into a pandas dataframe
+    df = pd.read_csv(file_path, sep="\t")
+    #print(df.head())
+    chapters = {}
+    prev_chapter = None
+    prev_section = None
+
+    for index, row in df.iterrows():
+        newpart = row['newpart']
+        if not pd.isna(newpart) and newpart != '_':
+            # split the newpart string into chapter and section
+            newpart = str(newpart)
+            print('newpart', newpart)
+            chapter, section = newpart.split(".")
+            #chapter = int(chapter)
+            #section = int(section)
+            
+            # if the current chapter is not the same as the previous chapter
+            if chapter != prev_chapter:
+                # create a new list for the current chapter in the chapters dictionary
+                chapters[chapter] = []
+                # set the current chapter as the previous chapter for the next iteration
+                prev_chapter = chapter
+            
+            # add the current section to the list of sections for the current chapter
+            chapters[prev_chapter].append(section)
+            # set the current section as the previous section for the next iteration
+            prev_section = section
+
+    print(chapters)
