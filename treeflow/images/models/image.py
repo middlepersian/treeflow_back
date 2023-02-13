@@ -23,12 +23,12 @@ class Image(models.Model):
     history = HistoricalRecords()
 
     class Meta:
+        ordering = ['number']
         constraints = [
             models.UniqueConstraint(
-                fields=['identifier', 'source'], name='identifier_source'
+                fields=['source', 'identifier'], name='image_source_identifier'
             )
         ]
-        ordering = ['number']
 
     def __str__(self):
         return '{} - {}'.format(self.source, self.identifier)

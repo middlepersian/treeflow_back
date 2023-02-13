@@ -3,6 +3,7 @@ import json
 import pytest
 import pandas as pd
 import numpy as np
+from django.db import IntegrityError
 
 
 from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source, Dependency, Feature, Comment
@@ -10,7 +11,9 @@ from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
 
 
+import logging
 
+logger = logging.getLogger(__name__)
 
 from treeflow.datafeed.utils import normalize_nfc
 
@@ -70,14 +73,16 @@ def test_parse_annotated():
         print("image objects {}".format(Image.objects.count()))
         print("line objects {}".format(Section.objects.filter(section_type__identifier="line").count()))
         #assert len(tokens) == 100
+        print("feature objects {}".format(Feature.objects.count()))
 
+        '''
         for token_obj in Token.objects.all():
             print(token_obj.number, token_obj.number_in_sentence, token_obj.transliteration, token_obj.transcription)
             for deps in token_obj.dependencies.all():
                 print('deps', deps.head, deps.head_number, deps.rel)
 
         print()
-        '''
+  
         for lemma_obj in Lemma.objects.filter().order_by('-created_at'):
             print('lemma', lemma_obj.word, lemma_obj.language, lemma_obj.multiword_expression, lemma_obj.related_meanings.all())
             for token in lemma_obj.token_lemmas.all():
@@ -138,8 +143,6 @@ def parse_annotated(df, text_object=None):
     
     for i, row in df.iterrows():
 
-        if i > 20:
-            break
         token = None
         token_number_in_sentence = None
         transliteration = None
@@ -327,11 +330,16 @@ def parse_annotated(df, text_object=None):
             # split on "|"
             deps = deps.split("|")
             for dep in deps:
-                if dep and dep != "_":
-                    head, rel = dep.split(":")
-                    dependency_obj, dependency_obj_created = Dependency.objects.get_or_create(head_number = head, rel = normalize_nfc(deprel))
-                    assert dependency_obj.head_number == head
-                    dependencies.append(dependency_obj)
+                try:
+                    if dep and dep != "_" and ':' in dep:
+                        head, rel = dep.split(":")
+                        head = float(head)
+                        dependency_obj, dependency_obj_created = Dependency.objects.get_or_create(head_number = head, rel = normalize_nfc(deprel))
+                        assert dependency_obj.head_number == head
+                        dependencies.append(dependency_obj)
+                except ValueError:
+                    print("ValueError: {}".format(dep))
+                    continue      
 
 
         # process lemmas
@@ -359,7 +367,7 @@ def parse_annotated(df, text_object=None):
                             meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
                             lemma_obj.related_meanings.add(meaning_obj)
                             token.meanings.add(meaning_obj)
-                    lemmas.append(lemma)    
+                    lemmas.append(lemma_obj)    
                     token.lemmas.add(lemma_obj)
                 else:
                     #print("MWE: {}".format(lemma))
@@ -373,31 +381,30 @@ def parse_annotated(df, text_object=None):
                             for m in meaning:
                                 m = m.strip()
                                 m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(m), language="eng")
-                                lemma.related_meanings.add(m_obj)
+                                lemma_obj.related_meanings.add(m_obj)
                         else:
                             m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
-                            lemma.related_meanings.add(m_obj)
-                    mwes.append(lemma)    
+                            lemma_obj.related_meanings.add(m_obj)
+                    mwes.append(lemma_obj)    
 
 
 
         #process images
         if row['folionew'] != '_' and pd.notna(row['folionew']):
-            img = row['folionew']
+            img = normalize_nfc(str(row['folionew']))
             #print("image {}".format(img))
             image_id = normalize_nfc(manuscript_obj.identifier + "_" + img)
             #print("image_id {}".format(image_id))
-            image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, source=manuscript_obj, number=image_number)
-            #set source
-            image_obj.source = manuscript_obj
-            assert image_obj.identifier == image_id
-            if previous_image_obj:
+            image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, number=image_number)
+            if image_obj_created:
+                image_obj.manuscript = manuscript_obj
                 image_obj.previous = previous_image_obj
-                assert image_obj.previous == previous_image_obj
-            #add to list
-            images.append(image_obj)    
-            previous_image_obj = image_obj
-            image_number += 1
+                image_obj.save()
+
+                #add to list
+                images.append(image_obj)    
+                previous_image_obj = image_obj
+                image_number += 1
 
 
         # process lines

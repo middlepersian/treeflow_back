@@ -17,8 +17,8 @@ class Text(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE, null=True, blank=True, related_name='text_corpus')
-    title = models.CharField(max_length=100, unique=True)
-    identifier = models.CharField(max_length=20, null=True, blank=True, unique=True)
+    title = models.CharField(max_length=100, null=True, blank=True)
+    identifier = models.CharField(max_length=20, null=True, blank=True)
     language = ArrayField(models.CharField(max_length=3), blank=True, null=True)
     #e.g. sigle
     series = models.CharField(max_length=20, null=True,blank=True)
@@ -34,8 +34,15 @@ class Text(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     history = HistoricalRecords()
+
+    class Meta:
+        ordering = ['title']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['corpus', 'identifier'], name='text_corpus_identifier'
+            )
+        ]
 
 
     def __str__(self):

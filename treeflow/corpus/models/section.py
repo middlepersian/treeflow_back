@@ -11,7 +11,7 @@ class Section(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     text = models.ForeignKey(Text, on_delete=models.CASCADE, null=True, blank=True, related_name='section_text')
     number = models.FloatField(null=True, blank=True)
-    identifier = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    identifier = models.CharField(max_length=100, blank=True, null=True)
     title = models.CharField(max_length=100, blank=True, null=True)
     language = models.CharField(max_length=3, blank=True)
     section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE,
