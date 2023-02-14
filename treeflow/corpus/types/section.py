@@ -4,7 +4,7 @@ from strawberry_django_plus.gql import relay
 from typing import List, TYPE_CHECKING, Optional, Annotated
 
 from treeflow.corpus import models
-
+from .token import TextFilter
 if TYPE_CHECKING:
     from .comment import Comment
     from .text import Text
@@ -25,6 +25,7 @@ class SectionFilter:
     section_type: 'SectionTypeFilter'
     container: 'SectionFilter'
     section_container: 'SectionFilter'
+    text: 'TextFilter'
 
 
 @gql.django.type(models.Section, filters=SectionFilter)
