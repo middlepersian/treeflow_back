@@ -68,10 +68,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
  
     
     for i, row in df.iterrows():
-
-        if i > 20:
-            break
-
+        
         token = None
         token_number_in_sentence = None
         transliteration = None
@@ -115,8 +112,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                                         lemma.save()                          
                 # add tokens to sentence
                 #check that tokens are not empty
-                if tokens:
-                    sentence_obj.tokens.add(*tokens)      
+                if sentence_tokens:
+                    sentence_obj.tokens.add(*sentence_tokens)      
                     parsed_sentences.append(sentence_obj)   
                     sentence_obj.save()
                 #clear up tokens list
@@ -255,6 +252,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 assert dependency_obj.head_number == head
                 dependencies.append(dependency_obj)
                 token.dependencies.add(dependency_obj)
+                #check if root
+                if normalize_nfc(deprel) == 'root'  and token:
+                    token.root = True
         
         if row['deps'] != '_':
             deps = row['deps']
