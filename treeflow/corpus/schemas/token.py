@@ -11,7 +11,7 @@ from treeflow.corpus import models as corpus_models
 from treeflow.dict import models as dict_models
 
 from treeflow.corpus.types.token import Token, TokenInput, TokenPartial
-from treeflow.dict.types.dependency import DependencyInput
+from treeflow.corpus.types.dependency import DependencyInput
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
