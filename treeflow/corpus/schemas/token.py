@@ -11,7 +11,7 @@ from treeflow.corpus import models as corpus_models
 from treeflow.dict import models as dict_models
 
 from treeflow.corpus.types.token import Token, TokenInput, TokenPartial
-
+from treeflow.dict.types.dependency import DependencyInput
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -104,6 +104,7 @@ class Mutation:
         token.save()
         return token
 
+
     @gql.django.input_mutation
     def remove_lemmas_from_token(self,
                                  info,
@@ -115,6 +116,19 @@ class Mutation:
         token = token.resolve_node(info)
         lemmas = [lemma.resolve_node(info) for lemma in lemmas]
         token.lemmas.remove(*lemmas)
+        token.save()
+        return token
+
+    @gql.django.input_mutation
+    def add_new_dependency_to_token(self, info,
+                                    token: relay.GlobalID,
+                                    dependency: DependencyInput,
+                                    ) -> Token:
+        if not info.context.request.user.is_authenticated:
+            raise Exception("You must be authenticated for this operation.")
+        token = token.resolve_node(info)
+        dependency = resolvers.create(info, corpus_models.Dependency, resolvers.parse_input(info, data))
+        token.dependencies.add(dependency)
         token.save()
         return token
 
