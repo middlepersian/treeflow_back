@@ -79,6 +79,7 @@ def test_parse_annotated():
     print("line objects {}".format(Section.objects.filter(section_type__identifier="line").count()))
     #assert len(tokens) == 100
     print("feature objects {}".format(Feature.objects.count()))
+    print("dependency objects {}".format(Dependency.objects.count()))
 
 
 @pytest.mark.django_db

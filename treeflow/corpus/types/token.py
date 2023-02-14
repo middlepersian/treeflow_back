@@ -30,7 +30,7 @@ class Token(relay.Node):
 
     id: relay.GlobalID
     number: gql.auto
-    number_in_sentence: Optional[List[Optional[float]]]
+    number_in_sentence: gql.auto
     root: gql.auto
     word_token: gql.auto
     visible: gql.auto
@@ -63,7 +63,7 @@ class Token(relay.Node):
 @gql.django.input(models.Token)
 class TokenInput:
     number: gql.auto
-    number_in_sentence: Optional[List[Optional[float]]]
+    number_in_sentence: gql.auto
     text: gql.auto
     language: gql.auto
     transcription: gql.auto
@@ -90,7 +90,7 @@ class TokenInput:
 class TokenPartial:
     id: relay.GlobalID
     number: gql.auto
-    number_in_sentence: Optional[List[Optional[float]]]
+    number_in_sentence: gql.auto
     text: gql.auto
     language: gql.auto
     transcription: gql.auto

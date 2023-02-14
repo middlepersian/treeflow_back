@@ -69,6 +69,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
     
     for i, row in df.iterrows():
 
+        if i > 20:
+            break
+
         token = None
         token_number_in_sentence = None
         transliteration = None
@@ -94,6 +97,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         for token in sentence_tokens:
                             if token.number_in_sentence == head_number:
                                 assert token.number_in_sentence != None
+                                dependency.producer = 1
                                 dependency.head = token
                                 dependency.save()
                 # process mwes
@@ -167,7 +171,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             #new token with number (word token)
             elif str(row["id"]) != "_":
                 token_number_in_sentence = float(row["id"])
-                #print("token_number_in_sentence: {}".format(token_number_in_sentence))
+                print("token_number_in_sentence: {}".format(token_number_in_sentence))
             
         #check if transliteration value present
         if row["transliteration"] != "_" and pd.notna(row['transliteration']):
@@ -201,13 +205,13 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 assert token.upos == postag
             # if there is a number_in_sentence, then it is a word token    
             if token_number_in_sentence:
-                #print(transcription, token_number_in_sentence)
+                print(transcription, token_number_in_sentence)
                 token.number_in_sentence = token_number_in_sentence
+                assert token.number_in_sentence == token_number_in_sentence
                 token.word_token = True
             else: 
                 token.word_token = False    
 
-            #print("ix {} -  token {} - transliteration: {} - transcription: {} - postag: {}".format(i,token.number, token.transliteration, token.transcription, token.upos))    
             
 
 
@@ -251,6 +255,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 assert dependency_obj.head_number == head
                 dependencies.append(dependency_obj)
                 token.dependencies.add(dependency_obj)
+        
         if row['deps'] != '_':
             deps = row['deps']
             # split on "|"
@@ -393,7 +398,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 previous_line_obj.save()
             sentence_tokens.append(token)    
             tokens.append(token) 
-            print('total deps: {}'.format(len(dependencies)))
 
     print("total tokens: {}".format(token_number)) 
     return tokens, images, lines

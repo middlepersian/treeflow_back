@@ -8,11 +8,11 @@ from treeflow.corpus import models
 @gql.django.type(models.Dependency)
 class Dependency(relay.Node):
 
-    token_syntactic_annotation: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    token_dependencies: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
 
     id: relay.GlobalID
-    head:  gql.LazyType['Token', 'treeflow.corpus.types.token']
-    head_number: Optional[int]
+    head:  Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    head_number: Optional[float]
     rel: gql.auto
     producer: gql.auto
 
@@ -21,6 +21,7 @@ class Dependency(relay.Node):
 class DependencyInput:
     head:  gql.auto
     head_number: gql.auto
+    rel: gql.auto
     producer: gql.auto
 
 
