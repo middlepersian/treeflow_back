@@ -68,7 +68,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
  
     
     for i, row in df.iterrows():
-        
+
         token = None
         token_number_in_sentence = None
         transliteration = None
@@ -80,8 +80,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
         if sentence_obj:
             # check if at the end of the sentence
             if row.isna().all():
-                #print('### END_OF_SENTENCE', sentence_number)
-            # process dependencies and their heads
+                print('### END_OF_SENTENCE', sentence_number)
+                # process dependencies and their heads
                 if dependencies:
                     #print("### DEPS {}".format(len(dependencies)))
                     for dependency in dependencies:
@@ -91,23 +91,25 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         assert head_number != None
                         #print('"head_number": {}'.format(head_number))
                         #check if token in list hast the same token_number_in_sentence as head
-                        for token in sentence_tokens:
-                            if token.number_in_sentence == head_number:
-                                assert token.number_in_sentence != None
+                        for stk in sentence_tokens:
+                            if stk.number_in_sentence == head_number:
+                                assert stk.number_in_sentence != None
                                 dependency.producer = 1
-                                dependency.head = token
+                                dependency.head = stk
                                 dependency.save()
+                    #clear up dependencies list
+                    dependencies.clear()            
                 # process mwes
                 if mwes:
-                    print("mwes {}".format(mwes))
+                    #print("mwes {}".format(mwes))
                     for mwe in mwes:
                         # split the mwe into its component lemmas
                         mwe_split = mwe.word.split()
                         for sub in mwe_split:
                                 for lemma in lemmas:
                                     if sub in lemma.word:
-                                        print("lemma {}".format(lemma.word))
-                                        print("mwe {}".format(mwe))
+                                        #print("lemma {}".format(lemma.word))
+                                        #print("mwe {}".format(mwe))
                                         lemma.related_lemmas.add(mwe)
                                         lemma.save()                          
                 # add tokens to sentence
@@ -117,13 +119,11 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     parsed_sentences.append(sentence_obj)   
                     sentence_obj.save()
                 #clear up tokens list
-                sentence_tokens = []    
+                sentence_tokens.clear()
                 #clear up lemmas list
-                lemmas = []
-                #clear up dependencies list
-                dependencies = []
+                lemmas.clear()
                 #clear up mwes list
-                mwes = []
+                mwes.clear()
                 sentence_number += 1
                 previous_sentence_obj = sentence_obj    
                 continue        
@@ -133,7 +133,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             if str(row["id"]).startswith("#SENTENCE"):
                 #create sentence object
                 sentence_obj, sentence_obj_created = Section.objects.get_or_create(section_type = sentence_section_type, number = str(sentence_number), identifier = text_object.identifier + "_sentence_" + str(sentence_number), text = text_object)
-                #print("#SENTENCE: {}".format(sentence_number))
+                print("#SENTENCE: {}".format(sentence_number))
                 if previous_sentence_obj:
                     sentence_obj.previous = previous_sentence_obj
                     sentence_obj.save()
@@ -149,9 +149,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if sentence_obj:
                     translation = translation[1]
                     if translation:
-                        translation = normalize_nfc(input_string=translation)
-                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=normalize_nfc(translation[1]), language="deu")
-                        sentence_obj.meanings.add()
+                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=normalize_nfc(translation), language="deu")
+                        sentence_obj.meanings.add(meaning_obj)
                         sentence_obj.save()
                         continue 
             if str(row["id"]).startswith("#COMMENT"):
@@ -162,13 +161,13 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     comment = comment[1]
                     if comment:
                         comment = normalize_nfc(input_string=comment)
-                        comment_obj = Comment.objects.create(comment=comment, section=sentence_obj)
+                        Comment.objects.create(comment=comment, section=sentence_obj)
                         continue                          
 
             #new token with number (word token)
             elif str(row["id"]) != "_":
                 token_number_in_sentence = float(row["id"])
-                print("token_number_in_sentence: {}".format(token_number_in_sentence))
+                #print("token_number_in_sentence: {}".format(token_number_in_sentence))
             
         #check if transliteration value present
         if row["transliteration"] != "_" and pd.notna(row['transliteration']):
@@ -191,7 +190,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 assert token.transliteration == normalize_nfc(transliteration)
             assert token.number == token_number
             token_number += 1
-    
             #add transcription
             if transcription:
                 token.transcription = normalize_nfc(transcription)
@@ -208,15 +206,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 token.word_token = True
             else: 
                 token.word_token = False    
-
-            
-
-
         # process postfeatures
         if row["postfeatures"] != "_" and pd.notna(row['postfeatures']):    
             postfeatures = row["postfeatures"]
-            #print("postfeatures {}".format( postfeatures))
-            #print("postfeatures {}".format( postfeatures))
             #split postfeatures
             postfeatures = postfeatures.split("|")
             #create postfeatures
@@ -237,8 +229,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             if postfeatures_to_add:
                 #assert token is not None
                 token.features.add(*postfeatures_to_add)    
-
-
         # process dependencies
         if row["deprel"] != "_" :
             deprel = row["deprel"]
@@ -248,14 +238,14 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 head = float(row["head"])
                 #print("head {}".format( head))
                 #create dependency
-                dependency_obj, dependency_obj_created = Dependency.objects.get_or_create(head_number = head, rel = normalize_nfc(deprel))
+                dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(deprel))
                 assert dependency_obj.head_number == head
                 dependencies.append(dependency_obj)
                 token.dependencies.add(dependency_obj)
                 #check if root
                 if normalize_nfc(deprel) == 'root'  and token:
+                    print("ROOT: {}".format(token))
                     token.root = True
-        
         if row['deps'] != '_':
             deps = row['deps']
             # split on "|"
@@ -265,21 +255,19 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     if dep and dep != "_" and ':' in dep:
                         head, rel = dep.split(":")
                         head = float(head)
-                        dependency_obj, dependency_obj_created = Dependency.objects.get_or_create(head_number = head, rel = normalize_nfc(deprel))
+                        dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(rel))
                         assert dependency_obj.head_number == head
                         dependencies.append(dependency_obj)
                 except ValueError:
                     print("ValueError: {}".format(dep))
                     continue      
-
-
         # process lemmas
         # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
         if row['lemma'] != '_' and pd.notna(row['lemma']):
             lemma = row['lemma']
             lemma = normalize_nfc(input_string=lemma)
             if '$' != lemma and lemma != ',' and lemma != '$':
-                print("### lemma: {}".format(lemma))
+                #print("### lemma: {}".format(lemma))
                 # if token available, single lemma, if not, MWE
                 if token:
                     # create lemma
@@ -316,10 +304,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         else:
                             m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
                             lemma_obj.related_meanings.add(m_obj)
-                    mwes.append(lemma_obj)    
-
-
-
+                    mwes.append(lemma_obj)   
         #process images
         if row['folionew'] != '_' and pd.notna(row['folionew']):
             img = normalize_nfc(str(row['folionew']))
@@ -336,11 +321,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 images.append(image_obj)    
                 previous_image_obj = image_obj
                 image_number += 1
-
-
         # process lines
         if row['line'] != '_' and pd.notna(row['line']):
-
             # save line to image
             if previous_image_obj:
                 line = row['line']
@@ -369,8 +351,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 print('newpart', newpart)
                 chapter, section = newpart.split(".")
                 chapter = chapter.strip()
-                section = section.strip()
-                
+                section = section.strip()        
                 # get or create the chapter object
                 chapter_identifier = 'dmx_' + chapter
                 assert chapter_identifier is not None
@@ -383,8 +364,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         chapter_obj.save()   
 
             prev_chapter = chapter_obj
-
-
         if token:
             #add token to tokens list
             if previous_token_obj:
