@@ -1,7 +1,5 @@
-import pytest
 import pandas as pd
-import numpy as np
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from treeflow.datafeed.utils import normalize_nfc
 from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source, Dependency, Feature, Comment
 from treeflow.dict.models import Lemma, Meaning
@@ -68,6 +66,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
  
     
     for i, row in df.iterrows():
+
+        if i > 50:
+            break
 
         token = None
         token_number_in_sentence = None
@@ -158,10 +159,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 #split the cell
                 comment = str(row["id"]).split('=')
                 if sentence_obj:
-                    comment = comment[1]
-                    if comment:
-                        comment = normalize_nfc(input_string=comment)
-                        Comment.objects.create(comment=comment, section=sentence_obj)
+                    comment_content = normalize_nfc(input_string=comment[1])
+                    if comment_content:
+                        Comment.objects.create(comment=comment_content, section=sentence_obj)
                         continue                          
 
             #new token with number (word token)
@@ -362,8 +362,34 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         # set the current chapter as the previous chapter for the next iteration
                         chapter_obj.previous = prev_chapter
                         chapter_obj.save()   
-
             prev_chapter = chapter_obj
+        #process comments
+        if (row['comment'] != '_' and not pd.isna(row['comment'])) or (row['new_suggestion'] != '_' and not pd.isna(row['new_suggestion'])) or (row['uncertain'] != '_' and not pd.isna(row['uncertain'])) or (row['discussion'] != '_' and not pd.isna(row['discussion'])):  
+            token_comment = row['comment']
+            new_suggestion = row['new_suggestion']
+            uncertain = row['uncertain']
+            discussion = row['discussion']
+            #print("comment: {}".format(comment))
+            #print("new_suggestion: {}".format(new_suggestion))
+            #print("uncertain: {}".format(uncertain))
+            #print("discussion: {}".format(discussion))
+            comment_obj = Comment()
+            comment_obj.token = token
+            if token_comment != '_' and not pd.isna(token_comment):
+                comment_obj.comment = token_comment
+            if new_suggestion != '_' and not pd.isna(new_suggestion):
+                comment_obj.new_suggestion = [] 
+                comment_obj.new_suggestion.append(new_suggestion)
+            if uncertain != '_' and not pd.isna(uncertain):
+                comment_obj.uncertain = [] 
+                comment_obj.uncertain.append(uncertain)
+            if discussion != '_' and not pd.isna(discussion):
+                comment_obj.to_discuss = [] 
+                comment_obj.to_discuss.append(discussion)
+            comment_obj.save()    
+
+
+        
         if token:
             #add token to tokens list
             if previous_token_obj:
