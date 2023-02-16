@@ -348,7 +348,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 print("img_name {}".format(img_name))
                 line_identifier = img_name + "_" + str(line)
                 print("line_identifier {}".format(line_identifier))
-                current_line_obj, current_line_obj_created = Section.objects.get_or_create(section_type=line_section_type, identifier = line_identifier)
+                ## TODO Add text to line
+                current_line_obj, current_line_obj_created = Section.objects.get_or_create(section_type=line_section_type, identifier = line_identifier, text=text_object)
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
                 # add to list
