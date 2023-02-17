@@ -183,8 +183,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
         if transliteration or token_number_in_sentence:
             #create token object
             token, token_created = Token.objects.get_or_create(text = text_object, number = token_number)
-            token.language = "pah"
-            #increase token number
+            token.language = "pal"
+            #increase token numbe
             if transliteration:
                 token.transliteration = normalize_nfc(transliteration)
                 assert token.transliteration == normalize_nfc(transliteration)
@@ -271,7 +271,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 # if token available, single lemma, if not, MWE
                 if token:
                     # create lemma
-                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=False, language="pah")
+                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=False, language="pal")
                     assert lemma_obj.multiword_expression == False
                     # add meaning
                     if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
@@ -290,7 +290,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     token.lemmas.add(lemma_obj)
                 else:
                     #print("MWE: {}".format(lemma))
-                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=True, language="pah")
+                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=True, language="pal")
                     assert lemma_obj.multiword_expression == True
                     # add meaning
                     if row['meaning'] != '_' and pd.notna(row['meaning']):
