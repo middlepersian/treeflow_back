@@ -16,10 +16,6 @@ class Lemma(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def get_related_lemmas(self):
-        return " | ".join([p.word for p in self.related_lemmas.all()])
-    def get_related_meanings(self):
-        return " | ".join([p.meaning for p in self.related_meanings.all()])
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -31,4 +27,4 @@ class Lemma(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{} {} - {} {}'.format(self.word, self.language, self.get_related_lemmas(), self.get_related_meanings())
+        return '{} {} - {} {}'.format(self.word, self.language)

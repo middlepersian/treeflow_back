@@ -36,11 +36,6 @@ class Query(
     me: User = auth.current_user()
     node: Optional[gql.Node] = gql.django.node()
 
-    @gql.field
-    def languages(self, info) -> List[language.Language]:
-        return language.Language
-    pass
-
 
 @gql.type
 class Mutation(
