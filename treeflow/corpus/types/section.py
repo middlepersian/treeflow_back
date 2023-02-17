@@ -1,16 +1,10 @@
 from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Optional, Annotated
+from typing import List, Optional
 
 from treeflow.corpus import models
 from .token import TextFilter
-if TYPE_CHECKING:
-    from .comment import Comment
-    from .text import Text
-    from .section_type import SectionType
-    from .source import Source
-    from .token import Token
 
 
 @gql.django.filters.filter(models.SectionType)
@@ -37,6 +31,7 @@ class Section(relay.Node):
     section_type:  Optional[gql.LazyType['SectionType', 'treeflow.corpus.types.section_type']]
     source:  Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
     tokens: List[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
     previous: Optional['Section']
     next: Optional['Section']
     container: Optional['Section']
@@ -51,8 +46,9 @@ class SectionInput:
     section_type: gql.auto
     source: gql.auto
     tokens: gql.auto
+    meanings: gql.auto
     previous: gql.auto
-    #next: gql.auto
+    next: gql.auto
     container: gql.auto
 
 
@@ -66,5 +62,6 @@ class SectionPartial:
     source: gql.auto
     tokens: gql.auto
     previous: gql.auto
-    #next: gql.auto
+    meanings: gql.auto
+    next: gql.auto
     container: gql.auto
