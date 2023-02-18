@@ -15,6 +15,7 @@ class LemmaFilter:
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    multiword_expression: gql.auto
 
 
 @gql.django.type(models.Lemma, filters=LemmaFilter)
@@ -26,6 +27,7 @@ class Lemma(relay.Node):
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    multiword_expression: gql.auto
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
 
@@ -35,6 +37,7 @@ class Lemma(relay.Node):
 class LemmaInput:
     word: gql.auto
     language: Language
+    multiword_expression: gql.auto
     related_lemmas: gql.auto
     related_meanings: gql.auto
 
@@ -44,5 +47,6 @@ class LemmaPartial:
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    multiword_expression: gql.auto
     related_lemmas: gql.auto
     related_meanings: gql.auto

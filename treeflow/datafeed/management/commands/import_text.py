@@ -67,9 +67,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
     
     for i, row in df.iterrows():
 
-        if i > 50:
-            break
-
         token = None
         token_number_in_sentence = None
         transliteration = None
