@@ -65,30 +65,38 @@ upos_feature_feature_value = {
     }
 }
 
-
-
 @strawberry.type
 class UPOSFeatures:
     upos: str
-    features: List[str]
-    feature_values: List[str]
+    feature: Optional[str]
+    features: Optional[List[str]]
+    feature_values: Optional[List[str]]
 
-    @strawberry.field
-    def resolve_upos(self, info) -> str:
-        return self.upos
-
-    @strawberry.field
     def resolve_features(self, info, feature: Optional[str] = None) -> List[str]:
         feature_names = upos_feature_feature_value.get(self.upos, {})
-        if feature:
-            feature_values = feature_names.get(feature, [])
-            return [feature] if feature_values else []
+        if feature and feature in feature_names:
+            return [feature]
         return list(feature_names.keys())
 
+    def resolve_feature_values(self, info, feature: Optional[str] = None) -> List[str]:
+        feature_names = upos_feature_feature_value.get(self.upos, {})
+        if feature and feature in feature_names:
+            feature_values = feature_names[feature]
+            return [", ".join(feature_values)]
+        else:
+            feature_values = []
+            for feat_values in feature_names.values():
+                feature_values.extend(feat_values)
+            return [", ".join(set(feature_values))] if feature_values else []
+
     @strawberry.field
-    def resolve_feature_values(self, info, upos: str, feature: str) -> List[str]:
-        feature_values = upos_feature_feature_value.get(upos, {}).get(feature, ())
-        return list(feature_values)
+    def features(self, info) -> Optional[List[str]]:
+        return self.resolve_features(info, self.feature)
+
+    @strawberry.field
+    def feature_values(self, info) -> Optional[List[str]]:
+        return self.resolve_feature_values(info, self.feature)
+
 
 
 @gql.django.type(models.Feature)

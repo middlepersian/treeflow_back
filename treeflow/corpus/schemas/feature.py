@@ -19,14 +19,7 @@ class Query:
 
     @strawberry.field
     def upos_features(self, info, upos: str, feature: Optional[str] = None) -> UPOSFeatures:
-        feature_names = upos_feature_feature_value.get(upos, {})
-        features = list(feature_names.keys())
-        if feature is not None:
-            feature_values = [', '.join(feature_names.get(feature, []))]
-        else:
-            feature_values = [', '.join(feature_names.get(feat, [])) for feat in features]
-        return UPOSFeatures(upos=upos, features=features, feature_values=feature_values)
-
+        return UPOSFeatures(upos=upos, feature=feature)
 
 
 
