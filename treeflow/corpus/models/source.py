@@ -31,6 +31,9 @@ class Source(models.Model):
                 fields=['type', 'identifier'], name='source_type_identifier'
             )
         ]
+        indices = [
+            models.Index(fields=['type', 'identifier']),
+        ]
 
 
     def __str__(self):

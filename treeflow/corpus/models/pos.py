@@ -7,6 +7,7 @@ class POS(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     token = models.ForeignKey('Token', on_delete=models.CASCADE, null=True, blank=True)
     pos = models.CharField(max_length=10, null=True, blank=True)
+    #upos, xpos
     type = models.CharField(max_length=10, null=True, blank=True)
 
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

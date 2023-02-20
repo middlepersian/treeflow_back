@@ -4,7 +4,6 @@ from .corpus import Corpus
 from .dependency import Dependency
 from .feature import Feature
 from .section import Section
-from .section_type import SectionType
 from .text import Text
 from .token import Token
 from .user import User

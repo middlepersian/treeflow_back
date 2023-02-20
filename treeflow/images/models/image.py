@@ -18,7 +18,7 @@ class Image(models.Model):
                                     on_delete=models.DO_NOTHING)
 
     # lines
-    sections = models.ManyToManyField('corpus.Section', related_name='image_sections')                                
+    sections = models.ManyToManyField('corpus.Section', related_name='image_sections', through='ImageSection')                                
 
     history = HistoricalRecords()
 
@@ -29,6 +29,30 @@ class Image(models.Model):
                 fields=['source', 'identifier'], name='image_source_identifier'
             )
         ]
+        indices= [
+            models.Index(fields=['source', 'identifier', 'number', 'previous']),
+        ]
 
     def __str__(self):
         return '{} - {}'.format(self.source, self.identifier)
+
+
+class ImageSection(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
+    image = models.ForeignKey('Image', on_delete=models.CASCADE)
+    section = models.ForeignKey('corpus.Section', on_delete=models.CASCADE)
+    history = HistoricalRecords()
+
+    class Meta:
+        ordering = ['number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['image', 'section'], name='image_section_image_section'
+            )
+        ]
+        indices = [
+            models.Index(fields=['image', 'section']),
+        ]
+
+    def __str__(self):
+        return '{} - {}'.format(self.image, self.section)

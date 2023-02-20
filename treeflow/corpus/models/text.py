@@ -32,7 +32,9 @@ class Text(models.Model):
     # a any source that should be documented in Zotero
     sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
