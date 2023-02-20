@@ -59,3 +59,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.user, self.text)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'text', 'token', 'lemma', 'meaning', 'semantic', 'dependency', 'image', 'section_type', 'section', 'source']),
+        ]

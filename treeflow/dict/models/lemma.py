@@ -7,8 +7,8 @@ from treeflow.corpus.models.comment import Comment
 
 class Lemma(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    word = models.CharField(max_length=100)
-    language = models.CharField(max_length=3, null=True, blank=True)
+    word = models.CharField(max_length=100, db_index=True)
+    language = models.CharField(max_length=3, null=True, blank=True, db_index=True)
     multiword_expression = models.BooleanField(default=False)
     related_lemmas = models.ManyToManyField('self', blank=True)
     related_meanings = models.ManyToManyField(Meaning, blank=True, related_name='lemma_related_meanings')

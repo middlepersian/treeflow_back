@@ -16,10 +16,12 @@ class Source(models.Model):
     # a 'source' might have another sources as a source
     sources = models.ManyToManyField('self', related_name='source_sources', blank=True)
 
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
-
     history = HistoricalRecords()
+
 
     class Meta:
         ordering = ['identifier']
