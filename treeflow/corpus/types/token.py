@@ -25,6 +25,7 @@ class TokenFilter:
 @gql.django.type(models.Token, filters=TokenFilter)
 class Token(relay.Node):
 
+    section_tokens: List[gql.LazyType['Section', 'treeflow.corpus.types.section']]
     comment_token: List[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
     feature_token : List[gql.LazyType['Feature', 'treeflow.corpus.types.feature']]
     pos_token : List[gql.LazyType['POS', 'treeflow.corpus.types.pos']]
