@@ -37,12 +37,6 @@ class Token(models.Model):
     multiword_token = models.BooleanField(default=False)
     multiword_token_number = ArrayField(models.FloatField(blank=True, null=True), null=True, blank=True)
     related_tokens = models.ManyToManyField('self', blank=True)
-
-    pos = "RelatedManager[POS]"
-    dependencies = "RelatedManager[Dependency]"
-    features = "RelatedManager[Feature]"
-
-
     history = HistoricalRecords()
 
 
