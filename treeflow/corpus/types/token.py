@@ -29,6 +29,7 @@ class Token(relay.Node):
     comment_token: List[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
     feature_token : List[gql.LazyType['Feature', 'treeflow.corpus.types.feature']]
     pos_token : List[gql.LazyType['POS', 'treeflow.corpus.types.pos']]
+    dependency_token : List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
 
     id: relay.GlobalID
     number: gql.auto
