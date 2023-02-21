@@ -20,6 +20,7 @@ class Image(models.Model):
 
     # lines
     sections = models.ManyToManyField('corpus.Section', related_name='image_sections', through='ImageSection')                                
+    created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()
 
@@ -42,6 +43,8 @@ class ImageSection(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     image = models.ForeignKey('Image', on_delete=models.CASCADE)
     section = models.ForeignKey('corpus.Section', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     history = HistoricalRecords()
 
 

@@ -1,5 +1,4 @@
 from .dictionary import Dictionary
-from .reference import Reference
 from .meaning import Meaning
 from .lemma import Lemma
 from .semantic import Semantic

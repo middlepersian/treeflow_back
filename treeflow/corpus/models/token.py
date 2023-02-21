@@ -37,6 +37,8 @@ class Token(models.Model):
     multiword_token = models.BooleanField(default=False)
     multiword_token_number = ArrayField(models.FloatField(blank=True, null=True), null=True, blank=True)
     related_tokens = models.ManyToManyField('self', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     history = HistoricalRecords()
 
 
@@ -48,7 +50,12 @@ class Token(models.Model):
             )
         ]
         indexes = [
-            models.Index(fields=['text', 'number', 'transcription', 'transliteration', 'previous'])
+            models.Index(fields=['text', 'number', 'transcription', 'transliteration', 'previous']),
+            models.Index(fields=['text']),
+            models.Index(fields=['previous']),
+            models.Index(fields=['number']),
+            models.Index(fields=['transcription']),
+            models.Index(fields=['transliteration'])
         ]
 
     def __str__(self):
@@ -59,11 +66,14 @@ class Token(models.Model):
 class TokenLemma(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE)
     lemma = models.ForeignKey('dict.Lemma', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         unique_together = ['token', 'lemma']
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['lemma']),
+            models.Index(fields=['token', 'lemma']),
         ]
 
 
@@ -71,6 +81,7 @@ class TokenLemma(models.Model):
 class TokenMeaning(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE)
     meaning = models.ForeignKey('dict.Meaning', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
     class Meta:
@@ -78,4 +89,5 @@ class TokenMeaning(models.Model):
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['meaning']),
+            models.Index(fields=['token', 'meaning']),
         ]

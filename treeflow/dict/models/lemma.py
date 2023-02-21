@@ -11,6 +11,7 @@ class Lemma(models.Model):
     multiword_expression = models.BooleanField(default=False)
     related_lemmas = models.ManyToManyField('self', blank=True, related_name="lemma_related_lemmas",through='LemmaRelation')
     related_meanings = models.ManyToManyField('Meaning', blank=True, related_name='lemma_related_meanings', through='LemmaMeaning')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()
     class Meta:

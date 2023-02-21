@@ -12,6 +12,8 @@ class Dependency(models.Model):
     rel = models.CharField(max_length=25, null=True, blank=True)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py
     producer = models.SmallIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     history = HistoricalRecords()
 
         

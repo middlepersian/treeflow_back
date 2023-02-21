@@ -2,9 +2,12 @@ from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, Optional
+from django.db.models import Prefetch
+from strawberry.types.info import Info
 
 from treeflow.corpus import models
 from .token import TextFilter
+
 
 
 
@@ -24,13 +27,21 @@ class Section(relay.Node):
     type: gql.auto
     text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
     source:  Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
-    tokens: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    tokens: List[gql.LazyType['Token', 'treeflow.corpus.types.token']]
     meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
     previous: Optional['Section']
     next: Optional['Section']
     container: Optional['Section']
-
-
+    
+    '''
+    @gql.django.field(
+        prefetch_related=[
+            "tokens"
+        ],
+    )
+    def resolve_tokens(self, info: Info) -> List[gql.LazyType['Token', 'treeflow.corpus.types.token']]:
+        return [gql.LazyType('Token', token.pk) for token in self.tokens.all()]
+    '''
 @gql.django.input(models.Section)
 class SectionInput:
     number: gql.auto

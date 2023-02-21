@@ -10,6 +10,7 @@ class Meaning(models.Model):
     meaning = models.TextField(null=True, blank=True, db_index=True)
     language = models.CharField(max_length=10, blank=True, null=True, db_index=True)
     related_meanings = models.ManyToManyField('self', blank=True, related_name='meaning_related_meanings')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()
     class Meta:

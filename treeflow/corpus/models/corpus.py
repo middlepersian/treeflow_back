@@ -8,9 +8,8 @@ class Corpus(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=10)
-
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
     history = HistoricalRecords()
     
     class Meta:

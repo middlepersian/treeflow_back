@@ -9,6 +9,8 @@ class POS(models.Model):
     pos = models.CharField(max_length=10, null=True, blank=True)
     #upos, xpos
     type = models.CharField(max_length=10, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     history = HistoricalRecords()
     
         

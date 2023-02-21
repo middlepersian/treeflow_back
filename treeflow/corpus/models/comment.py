@@ -46,6 +46,7 @@ class Comment(models.Model):
 
     # semantic
     semantic = models.ForeignKey('dict.Semantic', on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()
 

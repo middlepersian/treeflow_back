@@ -15,8 +15,7 @@ class Semantic(models.Model):
     #meanings = models.ManyToManyField('Meaning', blank=True, related_name='semantic_meanings')
     #term_techs = models.ManyToManyField(TermTech, blank=True, related_name='semantic_term_techs')
     related_semantics = models.ManyToManyField('self', blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
     history = HistoricalRecords()
 
     # TODO add pointers to taxonomy
