@@ -1,5 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
+from django.conf import settings
 from simple_history.models import HistoricalRecords
 
 
@@ -29,7 +30,7 @@ class Image(models.Model):
                 fields=['source', 'identifier'], name='image_source_identifier'
             )
         ]
-        indices= [
+        indexes= [
             models.Index(fields=['source', 'identifier', 'number', 'previous']),
         ]
 
@@ -43,14 +44,14 @@ class ImageSection(models.Model):
     section = models.ForeignKey('corpus.Section', on_delete=models.CASCADE)
     history = HistoricalRecords()
 
+
     class Meta:
-        ordering = ['number']
         constraints = [
             models.UniqueConstraint(
                 fields=['image', 'section'], name='image_section_image_section'
             )
         ]
-        indices = [
+        indexes = [
             models.Index(fields=['image', 'section']),
         ]
 

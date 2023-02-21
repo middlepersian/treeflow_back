@@ -3,14 +3,16 @@ from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
+from typing import TYPE_CHECKING
 
-
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
     number_in_sentence = models.FloatField(blank=True, null=True)
 
-    root = models.BooleafnField(default=False)
+    root = models.BooleanField(default=False)
     word_token = models.BooleanField(default=True)
     visible = models.BooleanField(default=True)
 
@@ -19,12 +21,9 @@ class Token(models.Model):
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50)
     transliteration = models.CharField(max_length=50, blank=True)
-    lemmas = models.ManyToManyField('dict.Lemma', blank=True, related_name='token_lemmas', through='TokenLemma')
-    meanings = models.ManyToManyField('dict.Meaning', blank=True, related_name='token_meanings', through='TokenMeaning')
-    #upos = models.CharField(max_length=8, null=True, blank=True)
-    #xpos = ArrayField(models.CharField(max_length=8), null=True, blank=True)
-    #features = models.ManyToManyField('Feature', blank=True, related_name='token_features', through='TokenFeature', db_index=True)
-    #dependencies = models.ManyToManyField('Dependency', blank=True, related_name="token_dependencies", through='TokenDependency', db_index=True)
+    lemmas = models.ManyToManyField('dict.Lemma', blank=True, through='TokenLemma', related_name='token_lemmas')
+    meanings = models.ManyToManyField('dict.Meaning', blank=True, through='TokenMeaning', related_name='token_meanings')
+
     avestan = models.TextField(null=True, blank=True)
 
     previous = models.OneToOneField('self',
@@ -37,12 +36,13 @@ class Token(models.Model):
 
     multiword_token = models.BooleanField(default=False)
     multiword_token_number = ArrayField(models.FloatField(blank=True, null=True), null=True, blank=True)
-    related_tokens = models.ManyToManyField('self', blank=True, related_name='token_related_tokens')
-    
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
+    related_tokens = models.ManyToManyField('self', blank=True)
+
+    pos = "RelatedManager[POS]"
+    dependencies = "RelatedManager[Dependency]"
+    features = "RelatedManager[Feature]"
+
+
     history = HistoricalRecords()
 
 
@@ -73,13 +73,15 @@ class TokenLemma(models.Model):
         ]
 
 
+
 class TokenMeaning(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE)
     meaning = models.ForeignKey('dict.Meaning', on_delete=models.CASCADE)
+
+
     class Meta:
         unique_together = ['token', 'meaning']
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['meaning']),
         ]
-

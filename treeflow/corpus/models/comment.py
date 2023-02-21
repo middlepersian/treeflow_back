@@ -17,10 +17,6 @@ class Comment(models.Model):
     image = models.ForeignKey('images.Image', on_delete=models.CASCADE, null=True, blank=True, related_name='comment_image')
 
 
-    # section_type
-    section_type = models.ForeignKey('SectionType', on_delete=models.CASCADE, null=True,
-                                     blank=True, related_name='comment_section_type')
-
     # section
     section = models.ForeignKey('Section', on_delete=models.CASCADE, null=True,
                                 blank=True, related_name='comment_section')
@@ -51,10 +47,6 @@ class Comment(models.Model):
     # semantic
     semantic = models.ForeignKey('dict.Semantic', on_delete=models.CASCADE, null=True, blank=True)
 
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -62,5 +54,5 @@ class Comment(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['user', 'text', 'token', 'lemma', 'meaning', 'semantic', 'dependency', 'image', 'section_type', 'section', 'source']),
+            models.Index(fields=[ 'text', 'token', 'lemma', 'meaning', 'semantic', 'dependency', 'image',  'section', 'source']),
         ]

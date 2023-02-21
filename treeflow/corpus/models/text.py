@@ -4,13 +4,12 @@ from strawberry.lazy_type import LazyType
 from django.db import models
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from .bibliography import BibEntry
 from .source import Source
 from .corpus import Corpus
 
-User = get_user_model()
 
 
 class Text(models.Model):
@@ -26,17 +25,16 @@ class Text(models.Model):
     label = models.CharField(max_length=20, null=True, blank=True)
     stage = models.CharField(max_length=10, blank=True)
     
-    editors = models.ManyToManyField(User, blank=True, related_name="text_editors")
-    collaborators = models.ManyToManyField(User, blank=True, related_name="text_collaborators")
+    editors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="text_editors")
+    collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="text_collaborators")
    
     # a any source that should be documented in Zotero
     sources = models.ManyToManyField(Source, blank=True, related_name='text_sources')
     
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return '{}'.format(self.title)
 
     class Meta:
         ordering = ['title']
@@ -47,5 +45,4 @@ class Text(models.Model):
         ]
 
 
-    def __str__(self):
-        return '{}'.format(self.title)
+

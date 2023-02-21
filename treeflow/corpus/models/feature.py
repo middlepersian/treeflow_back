@@ -6,15 +6,11 @@ from simple_history.models import HistoricalRecords
 
 class Feature(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
-    token = models.ForeignKey('Token', on_delete=models.CASCADE, null=True, blank=True)
-    pos = models.ForeignKey('POS', on_delete=models.CASCADE, null=True, blank=True)
+    token = models.ForeignKey('Token', on_delete=models.CASCADE, null=True, blank=True, related_name='feature_token')
+    pos = models.ForeignKey('POS', on_delete=models.CASCADE, null=True, blank=True, related_name='feature_pos')
     feature = models.CharField(max_length=10, null=True, blank=True)
     feature_value = models.CharField(max_length=10, null=True, blank=True)
 
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     
     def __str__(self):
@@ -22,7 +18,6 @@ class Feature(models.Model):
 
 
     class Meta:
-        unique_together = ('feature', 'pos')
         indexes = [
             models.Index(fields=['token', 'pos', 'feature', 'feature_value']),
         ]

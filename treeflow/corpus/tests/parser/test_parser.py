@@ -6,7 +6,7 @@ import numpy as np
 from django.db import IntegrityError
 
 
-from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source, Dependency, Feature, Comment
+from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
 
@@ -82,14 +82,12 @@ def test_parse_annotated():
     print("feature objects {}".format(Feature.objects.count()))
     '''
 
-    for sentence in Section.objects.filter(section_type__identifier="sentence"):
+    for sentence in Section.objects.filter(type="sentence"):
         print('sentence', sentence.number)
         for meaning in sentence.meanings.all():
             print('meaning',meaning.meaning, meaning.language)
         for token in sentence.tokens.all():
             print('token', token.transcription, token.number_in_sentence)
-            for dependency in token.dependencies.all():
-                print('dependency',dependency.head, dependency.head_number, dependency.rel)
             print()
         print()
 

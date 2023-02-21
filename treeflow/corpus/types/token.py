@@ -25,8 +25,9 @@ class TokenFilter:
 @gql.django.type(models.Token, filters=TokenFilter)
 class Token(relay.Node):
 
-    section_tokens: List[gql.LazyType['Section', 'treeflow.corpus.types.section']]
     comment_token: List[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
+    feature_token : List[gql.LazyType['Feature', 'treeflow.corpus.types.feature']]
+    pos_token : List[gql.LazyType['POS', 'treeflow.corpus.types.pos']]
 
     id: relay.GlobalID
     number: gql.auto
@@ -34,19 +35,13 @@ class Token(relay.Node):
     root: gql.auto
     word_token: gql.auto
     visible: gql.auto
-
-
     text: gql.LazyType['Text', 'treeflow.corpus.types.text']
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
     lemmas: List[gql.LazyType['Lemma', 'treeflow.dict.types.lemma']]
     meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
-    upos: gql.auto
-    xpos: Optional[List[Optional[str]]]
 
-    features: List[gql.LazyType['Feature', 'treeflow.corpus.types.feature']]
-    dependencies: List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
     avestan: gql.auto
     previous: Optional['Token']
     next: Optional['Token']
@@ -56,8 +51,7 @@ class Token(relay.Node):
     multiword_token: gql.auto
     related_tokens: List['Token']
 
-    created_at: gql.auto
-    updated_at: gql.auto
+
 
 
 @gql.django.input(models.Token)
@@ -70,10 +64,6 @@ class TokenInput:
     transliteration: gql.auto
     lemmas: gql.auto
     meanings: gql.auto
-    upos: gql.auto
-    xpos: Optional[List[Optional[str]]]
-    features: gql.auto
-    dependencies: gql.auto
     avestan: gql.auto
     previous: gql.auto
     next: gql.auto
@@ -82,8 +72,6 @@ class TokenInput:
     multiword_token: gql.auto
     related_tokens: gql.auto
 
-    created_at: gql.auto
-    updated_at: gql.auto
 
 
 @gql.django.partial(models.Token)
@@ -97,10 +85,7 @@ class TokenPartial:
     transliteration: gql.auto
     lemmas: gql.auto
     meanings: gql.auto
-    upos: gql.auto
-    xpos: Optional[List[Optional[str]]]
-    features: gql.auto
-    dependencies: gql.auto
+
     avestan: gql.auto
     previous: gql.auto
     next: gql.auto
@@ -109,5 +94,3 @@ class TokenPartial:
     multiword_token: gql.auto
     related_tokens: gql.auto
 
-    created_at: gql.auto
-    updated_at: gql.auto

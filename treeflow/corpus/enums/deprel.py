@@ -64,3 +64,4 @@ class Deprel(StrEnum):
     ROOT = 'root'
     VOCATIVE = 'vocative'
     XCOMP = 'xcomp'
+    REF= 'ref'

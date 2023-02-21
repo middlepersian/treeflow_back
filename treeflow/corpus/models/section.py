@@ -13,19 +13,14 @@ class Section(models.Model):
     type = models.CharField(max_length=25, blank=True, null=True)
     title = models.CharField(max_length=100, blank=True, null=True)
     language = models.CharField(max_length=3, blank=True)
-    source = models.ForeignKey(Source, on_delete=models.SET_NULL, related_name='section_source', null=True, blank=True)
-    tokens = models.ManyToManyField(Token, related_name='section_tokens')
+    source = models.ForeignKey('Source', on_delete=models.SET_NULL, related_name='section_source', null=True, blank=True)
+    tokens = models.ManyToManyField('Token', related_name='section_tokens')
     previous = models.OneToOneField('self', on_delete=models.SET_NULL, null=True,
                                     blank=True, related_name='next')
     # this is the case if a section "paragraph" has a "chapter" container
     container = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
                                   blank=True, related_name='section_container')
     meanings = models.ManyToManyField('dict.Meaning', related_name='section_meanings')
-
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
 

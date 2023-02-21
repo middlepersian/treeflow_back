@@ -6,8 +6,7 @@ from .models import \
     Token, BibEntry, Comment
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ["transcription", "transliteration", "upos", "previous"]
-    history_list_display = ["upos"]
+    list_display = ["transcription", "transliteration",  "previous"]
     search_fields = ['transcription']
 
 

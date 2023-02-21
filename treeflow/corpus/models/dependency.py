@@ -12,13 +12,9 @@ class Dependency(models.Model):
     rel = models.CharField(max_length=25, null=True, blank=True)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py
     producer = models.SmallIntegerField(null=True, blank=True)
-
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
+        
     def __str__(self):
         return '{} {}'.format(str(self.head), self.rel)
 

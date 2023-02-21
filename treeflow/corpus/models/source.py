@@ -1,5 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
+from django.conf import settings
 from .bibliography import BibEntry
 from simple_history.models import HistoricalRecords
 
@@ -11,15 +12,11 @@ class Source(models.Model):
 
     identifier = models.CharField(max_length=20, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    references = models.ManyToManyField(BibEntry, related_name='source_references')
+    references = models.ManyToManyField(BibEntry, blank=True)
 
     # a 'source' might have another sources as a source
-    sources = models.ManyToManyField('self', related_name='source_sources', blank=True)
+    sources = models.ManyToManyField('self',blank=True, related_name='source_sources')
 
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
 
 
@@ -31,7 +28,7 @@ class Source(models.Model):
                 fields=['type', 'identifier'], name='source_type_identifier'
             )
         ]
-        indices = [
+        indexes = [
             models.Index(fields=['type', 'identifier']),
         ]
 

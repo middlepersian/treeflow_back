@@ -1,7 +1,7 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
 from treeflow.datafeed.utils import normalize_nfc
-from treeflow.corpus.models import Token, Section, SectionType, Section, Text, Corpus, Source, Dependency, Feature, Comment
+from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment, POS
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
 
@@ -37,17 +37,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
 
     text_object, text_object_created = Text.objects.get_or_create(title=text_title,  series=text_sigle, corpus=corpus_object, identifier=text_identifier)
 
-
-    # initialize sections
-    # sentence section
-    sentence_section_type, sentence_section_type_created = SectionType.objects.get_or_create(identifier="sentence")
-    # line section
-    line_section_type, line_section_type_created = SectionType.objects.get_or_create(identifier="line")
-    # chapter section
-    chapter_section_type, chapter_section_type_created = SectionType.objects.get_or_create(identifier="chapter")
-    # section
-    section_section_type, section_section_type_created = SectionType.objects.get_or_create(identifier="section")
-
     token_number = 1
     sentence_number = 1
     image_number = 1
@@ -72,8 +61,10 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
         transliteration = None
         transcription = None
         postag = None
+        pos = None
         postfeatures = None
         newpart = None
+    
 
         if sentence_obj:
             # check if at the end of the sentence
@@ -130,7 +121,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             # new sentence
             if str(row["id"]).startswith("#SENTENCE"):
                 #create sentence object
-                sentence_obj, sentence_obj_created = Section.objects.get_or_create(section_type = sentence_section_type, number = str(sentence_number), identifier = text_object.identifier + "_sentence_" + str(sentence_number), text = text_object)
+                sentence_obj, sentence_obj_created = Section.objects.get_or_create(type = "sentence", number = str(sentence_number), identifier = text_object.identifier + "_sentence_" + str(sentence_number), text = text_object)
                 print("#SENTENCE: {}".format(sentence_number))
                 if previous_sentence_obj:
                     sentence_obj.previous = previous_sentence_obj
@@ -191,10 +182,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             if transcription:
                 token.transcription = normalize_nfc(transcription)
                 #print("token.transcription", token.transcription)
-            #add postag
-            if postag and postag != "X":
-                token.upos = normalize_nfc(postag)
-                assert token.upos == postag
+            #add upos
+
             # if there is a number_in_sentence, then it is a word token    
             if token_number_in_sentence:
                 print(transcription, token_number_in_sentence)
@@ -203,29 +192,32 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 token.word_token = True
             else: 
                 token.word_token = False    
+
+        # process pos
+
+        if postag and postag != "X":
+            upos = normalize_nfc(postag)
+            pos, pos_created = POS.objects.get_or_create(pos=upos, type="upos", token=token)        
         # process postfeatures
         if row["postfeatures"] != "_" and pd.notna(row['postfeatures']):    
             postfeatures = row["postfeatures"]
             #split postfeatures
             postfeatures = postfeatures.split("|")
             #create postfeatures
-            postfeatures_to_add = []
+
             for postfeature in postfeatures:
                 if postfeature and postfeature != "_":
                     if "=" in postfeature:
                         feature, value = postfeature.split("=")
                         # assert that the split existed and that the feature and value are not empty
                         assert feature and value
-                        feature_obj, feature_obj_created = Feature.objects.get_or_create(feature=normalize_nfc(feature), feature_value=normalize_nfc(value))
-                        postfeatures_to_add.append(feature_obj)
+                        feature_obj = Feature.objects.create(feature=normalize_nfc(feature), feature_value=normalize_nfc(value), token=token, pos=pos)
                     else: 
                         continue    
             else:
                 postfeatures = None
             # add the to current token     
-            if postfeatures_to_add:
-                #assert token is not None
-                token.features.add(*postfeatures_to_add)    
+
         # process dependencies
         if row["deprel"] != "_" :
             deprel = row["deprel"]
@@ -235,10 +227,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 head = float(row["head"])
                 #print("head {}".format( head))
                 #create dependency
-                dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(deprel))
+                dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(deprel), token=token)
                 assert dependency_obj.head_number == head
                 dependencies.append(dependency_obj)
-                token.dependencies.add(dependency_obj)
                 #check if root
                 if normalize_nfc(deprel) == 'root'  and token:
                     print("ROOT: {}".format(token))
@@ -252,7 +243,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     if dep and dep != "_" and ':' in dep:
                         head, rel = dep.split(":")
                         head = float(head)
-                        dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(rel))
+                        dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(rel), token=token)
                         assert dependency_obj.head_number == head
                         dependencies.append(dependency_obj)
                 except ValueError:
@@ -313,7 +304,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 image_obj.manuscript = manuscript_obj
                 image_obj.previous = previous_image_obj
                 image_obj.save()
-
                 #add to list
                 images.append(image_obj)    
                 previous_image_obj = image_obj
@@ -328,7 +318,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 line_identifier = img_name + "_" + str(line)
                 print("line_identifier {}".format(line_identifier))
                 ## TODO Add text to line
-                current_line_obj, current_line_obj_created = Section.objects.get_or_create(section_type=line_section_type, identifier = line_identifier, text=text_object)
+                current_line_obj, current_line_obj_created = Section.objects.get_or_create(type="line",identifier = line_identifier, text=text_object)
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
                 # add to list
@@ -353,7 +343,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 # get or create the chapter object
                 chapter_identifier = 'dmx_' + chapter
                 assert chapter_identifier is not None
-                chapter_obj, chapter_obj_created = Section.objects.get_or_create(section_type=chapter_section_type, identifier=chapter_identifier, title = chapter, text=text_object)
+                chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter, text=text_object)
                 # if the current chapter is not the same as the previous chapter
                 if prev_chapter:
                     if chapter_obj != prev_chapter:

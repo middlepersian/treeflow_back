@@ -102,11 +102,12 @@ class UPOSFeatures:
 @gql.django.type(models.Feature)
 class Feature(relay.Node):
 
-    token_morphological_annotation: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
-
     id: relay.GlobalID
+    token:  gql.LazyType['Token', 'treeflow.corpus.types.token']
+    pos : gql.LazyType['POS', 'treeflow.corpus.types.pos']
     feature: gql.auto
     feature_value: gql.auto
+
 
 
 @gql.django.input(models.Feature)

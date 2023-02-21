@@ -79,8 +79,8 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "treeflow.users.apps.UsersConfig",
     # local apps
-    "treeflow.dict.apps.DictAppConfig",
     "treeflow.corpus.apps.CorpusAppConfig",
+    "treeflow.dict.apps.DictAppConfig",
     "treeflow.images.apps.ImageAppConfig",
     "treeflow.datafeed.apps.DataFeedConfig",
 ]
