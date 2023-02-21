@@ -35,3 +35,14 @@ class Section(models.Model):
 
     def __str__(self) -> str:
         return '{}'.format(self.identifier)
+
+
+
+class SectionToken(models.Model):
+    section = models.ForeignKey('Section', on_delete=models.CASCADE)
+    token = models.ForeignKey('Token', on_delete=models.CASCADE)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['section', 'token']),
+        ]

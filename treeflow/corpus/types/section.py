@@ -24,7 +24,7 @@ class Section(relay.Node):
     type: gql.auto
     text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
     source:  Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
-    tokens: List[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    tokens: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
     meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
     previous: Optional['Section']
     next: Optional['Section']
