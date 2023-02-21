@@ -343,13 +343,18 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 # get or create the chapter object
                 chapter_identifier = 'dmx_' + chapter
                 assert chapter_identifier is not None
-                chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter, text=text_object)
-                # if the current chapter is not the same as the previous chapter
-                if prev_chapter:
-                    if chapter_obj != prev_chapter:
-                        # set the current chapter as the previous chapter for the next iteration
-                        chapter_obj.previous = prev_chapter
-                        chapter_obj.save()   
+                if token:
+                    chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter, text=text_object)
+                    chapter_obj.number = float(chapter)
+                    chapter_obj.tokens.add(token)
+                    assert chapter_obj.number == float(chapter)
+                    # if the current chapter is not the same as the previous chapter
+                    if prev_chapter:
+                        if chapter_obj != prev_chapter:
+                            # set the current chapter as the previous chapter for the next iteration
+                            chapter_obj.previous = prev_chapter
+                    chapter_obj.save()
+ 
             prev_chapter = chapter_obj
         #process comments
         if (row['comment'] != '_' and not pd.isna(row['comment'])) or (row['new_suggestion'] != '_' and not pd.isna(row['new_suggestion'])) or (row['uncertain'] != '_' and not pd.isna(row['uncertain'])) or (row['discussion'] != '_' and not pd.isna(row['discussion'])):  
