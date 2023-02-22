@@ -33,7 +33,7 @@ class Section(relay.Node):
     next: Optional['Section']
     container: Optional['Section']
     
-    '''
+    
     @gql.django.field(
         prefetch_related=[
             "tokens"
@@ -41,7 +41,16 @@ class Section(relay.Node):
     )
     def resolve_tokens(self, info: Info) -> List[gql.LazyType['Token', 'treeflow.corpus.types.token']]:
         return [gql.LazyType('Token', token.pk) for token in self.tokens.all()]
-    '''
+
+
+    @gql.django.field(
+        prefetch_related=[
+            "meanings"
+        ],
+    )
+    def resolve_meanings(self, info: Info) -> List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]:
+        return [gql.LazyType('Meaning', meaning.pk) for meaning in self.meanings.all()]     
+    
 @gql.django.input(models.Section)
 class SectionInput:
     number: gql.auto
