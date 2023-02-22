@@ -4,7 +4,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
 from treeflow.schema import schema
@@ -27,6 +28,9 @@ urlpatterns = [
     # Your stuff: custom urls includes go here
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    # Static file serving when using Gunicorn + Uvicorn for local web socket development
+    urlpatterns += staticfiles_urlpatterns()
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit
