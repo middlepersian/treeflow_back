@@ -1,9 +1,9 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-from typing import Optional
+from typing import Optional, List
 
-from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, UPOSFeatures, upos_feature_feature_value
+from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial,PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features, upos_feature_feature_value
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -18,10 +18,17 @@ class Query:
     features:  relay.Connection[Feature] = gql.django.connection(directives=[IsAuthenticated()])
 
     @strawberry.field
-    def upos_features(self, info, upos: str, feature: Optional[str] = None) -> UPOSFeatures:
-        return UPOSFeatures(upos=upos, feature=feature)
-
-
+    def get_features(self, pos: str) -> PartOfSpeechFeatures:
+        feature_values = []
+        for feature, values in get_features(pos).items():
+            feature_values.append(UPOSFeatures(name=feature, values=values))
+            
+        return PartOfSpeechFeatures(pos=pos, features=list(get_features(pos).keys()), feature_values=feature_values)
+    
+    @strawberry.field
+    def pos_list(self, info) -> UPOSList:
+        pos_list = list(upos_feature_feature_value.keys())
+        return UPOSList(pos=pos_list)
 
 
 @gql.type

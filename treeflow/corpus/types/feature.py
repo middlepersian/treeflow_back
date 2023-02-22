@@ -1,7 +1,7 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, Optional
-
+from typing import List, Dict, Tuple
+from dataclasses import dataclass
 from treeflow.corpus import models
 
 import strawberry
@@ -65,38 +65,24 @@ upos_feature_feature_value = {
     }
 }
 
+def get_features(pos: str ) -> Dict[str, Tuple[str]]:
+    pos_features = upos_feature_feature_value
+    return pos_features.get(pos, {})
+
+@strawberry.type
+class UPOSList:
+    pos: List[str]
+    
 @strawberry.type
 class UPOSFeatures:
-    upos: str
-    feature: Optional[str]
-    features: Optional[List[str]]
-    feature_values: Optional[List[str]]
+    name: str
+    values: Tuple[str]
 
-    def resolve_features(self, info, feature: Optional[str] = None) -> List[str]:
-        feature_names = upos_feature_feature_value.get(self.upos, {})
-        if feature and feature in feature_names:
-            return [feature]
-        return list(feature_names.keys())
-
-    def resolve_feature_values(self, info, feature: Optional[str] = None) -> List[str]:
-        feature_names = upos_feature_feature_value.get(self.upos, {})
-        if feature and feature in feature_names:
-            feature_values = feature_names[feature]
-            return [", ".join(feature_values)]
-        else:
-            feature_values = []
-            for feat_values in feature_names.values():
-                feature_values.extend(feat_values)
-            return [", ".join(set(feature_values))] if feature_values else []
-
-    @strawberry.field
-    def features(self, info) -> Optional[List[str]]:
-        return self.resolve_features(info, self.feature)
-
-    @strawberry.field
-    def feature_values(self, info) -> Optional[List[str]]:
-        return self.resolve_feature_values(info, self.feature)
-
+@strawberry.type
+class PartOfSpeechFeatures:
+    pos: str
+    features: List[str]
+    feature_values: List[UPOSFeatures]
 
 
 @gql.django.type(models.Feature)
