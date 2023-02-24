@@ -337,14 +337,15 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 # split the newpart string into chapter and section
                 newpart = str(newpart)
                 print('newpart', newpart)
-                chapter, section = newpart.split(".")
-                chapter = chapter.strip()
-                section = section.strip()        
+                #chapter, section = newpart.split(".")
+                #chapter = chapter.strip()
+                #section = section.strip()        
                 # get or create the chapter object
                 chapter_identifier = 'dmx_' + chapter
                 assert chapter_identifier is not None
                 if token:
-                    chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter, text=text_object)
+                    #chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter, text=text_object)
+                    chapter_obj= Section.objects.create(type="chapter", identifier=chapter_identifier, text=text_object)
                     chapter_obj.number = float(chapter)
                     chapter_obj.tokens.add(token)
                     assert chapter_obj.number == float(chapter)
