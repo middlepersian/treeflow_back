@@ -1,5 +1,6 @@
-from elasticsearch_dsl import Document, Date, Integer, Boolean, Text, Keyword, Nested, Float
-from .text import TextDocument
+from elasticsearch_dsl import Document, Date, Boolean, Text, Keyword, Nested, Float
+
+
 class TokenDocument(Document):
     id = Keyword()
     number = Float()
@@ -9,50 +10,26 @@ class TokenDocument(Document):
     word_token = Boolean()
     visible = Boolean()
 
-    text = Nested(TextDocument())
+    text = Nested('TextDocument')
 
     language = Keyword()
     transcription = Text()
     transliteration = Text()
-    lemmas = Nested(TokenLemmaDocument)
-    meanings = Nested(TokenMeaningDocument)
+    lemmas = Nested('TokenLemmaDocument')
+    meanings = Nested('TokenMeaningDocument')
 
     avestan = Text()
 
-    previous = Nested(properties={
-        'id': Keyword()
-    })
+    previous = Nested('TokenDocument')
 
     gloss = Text()
 
     multiword_token = Boolean()
-    multiword_token_number = Nested(properties={
-        'number': Float()
-    })
-
-    related_tokens = Nested(properties={
-        'id': Keyword()
-    })
+    multiword_token_number = Nested('TokenDocument')
+    related_tokens = Nested('TokenDocument')
 
     created_at = Date()
 
     class Index:
         name = 'tokens'
 
-
-class TokenLemmaDocument(InnerDoc):
-    lemma = Nested(properties={
-        'id': Keyword(),
-        'word': Keyword(),
-        'language': Keyword()
-    })
-    order = Integer()
-
-
-class TokenMeaningDocument(InnerDoc):
-    meaning = Nested(properties={
-        'id': Keyword(),
-        'meaning': Keyword(),
-        'language': Keyword()
-    })
-    order = Integer()
