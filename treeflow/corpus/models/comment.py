@@ -9,6 +9,9 @@ class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     comment = models.TextField(null=True, blank=True)
 
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='comment_user')
+    
     # dependency
     dependency = models.ForeignKey('Dependency', on_delete=models.CASCADE, null=True,
                                    blank=True, related_name='comment_dependency')
