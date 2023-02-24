@@ -1,11 +1,11 @@
+import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from typing import Optional, List
-from django.core.exceptions import ValidationError
-
+from asgiref.sync import sync_to_async
 from treeflow.corpus.types.section import Section, SectionInput, SectionPartial
-
+from treeflow.corpus.models.section import Section as SectionModel
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -22,6 +22,12 @@ from strawberry_django_plus.permissions import (
 class Query:
     section: Optional[Section] = gql.django.node(directives=[IsAuthenticated()])
     sections:  relay.Connection[Section] = gql.django.connection(directives=[IsAuthenticated()])
+
+    @gql.field
+    @sync_to_async
+    def get_types(self) -> List[str]:
+        section_types = SectionModel.objects.order_by('type').distinct('type').values_list('type', flat=True)
+        return list(section_types)
 
 
 @gql.type
