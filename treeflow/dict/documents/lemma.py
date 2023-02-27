@@ -1,6 +1,9 @@
 from django_elasticsearch_dsl import Document, fields
+from django_elasticsearch_dsl.registries import registry
 from treeflow.dict.models import Lemma
 
+
+@registry.register_document
 class LemmaDocument(Document):
     related_lemmas = fields.NestedField(
         properties={
