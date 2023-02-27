@@ -1,12 +1,25 @@
-from elasticsearch_dsl import Document, Text, Keyword, Nested, Date
+from django_elasticsearch_dsl import Document, fields
+from treeflow.dict.models import Meaning
+
 
 
 class MeaningDocument(Document):
-    id = Keyword()
-    meaning = Text()
-    language = Keyword()
-    related_meanings = Nested('MeaningDocument')
-    created_at = Date()
-
+    related_meanings = fields.NestedField(
+        properties={
+            'id': fields.KeywordField(),
+            'meaning': fields.TextField(),
+            'language': fields.KeywordField(),
+            'related_meanings': fields.NestedField(properties={'id': fields.KeywordField()}),
+            'created_at': fields.DateField(),
+        }
+    )
     class Index:
         name = 'meanings'
+    class Django:
+        model = Meaning
+        fields = [
+            'id',
+            'meaning',
+            'language',
+            'created_at',
+        ]

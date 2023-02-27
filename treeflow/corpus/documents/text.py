@@ -1,26 +1,34 @@
-from elasticsearch_dsl import Document, Date, Integer, Boolean, Text, Keyword, Nested, Object
-
+from django_elasticsearch_dsl import Document, fields
+from django_elasticsearch_dsl.registries import registry
+from treeflow.corpus.models import Text
+@registry.register_document
 class TextDocument(Document):
-    id = Keyword()
-    title = Text()
-    identifier = Text()
-    language = Keyword(multi=True)
-    series = Text()
-    label = Text()
-    stage = Text()
-    editors = Nested(properties={
-        'id': Keyword(),
-        'username': Text()
+    
+
+    editors = fields.NestedField(properties={
+        'id': fields.KeywordField(),
+        'username': fields.TextField()
     })
-    collaborators = Nested(properties={
-        'id': Keyword(),
-        'username': Text()
+    collaborators = fields.NestedField(properties={
+        'id': fields.KeywordField(),
+        'username': fields.TextField()
     })
-    sources = Nested(properties={
-        'id': Keyword(),
-        'title': Text()
-    })
-    created_at = Date()
+
+    sources = fields.NestedField(properties={'id':fields.KeywordField(), 'identifier': fields.KeywordField(),})
+
+    language = fields.NestedField(properties={'language': fields.TextField(), })
 
     class Index:
         name = 'texts'
+
+    class Django:
+        model = Text
+        fields = [
+            'id',
+            'title',
+            'identifier',
+            'series',
+            'label',
+            'stage',
+            'created_at',
+        ]    

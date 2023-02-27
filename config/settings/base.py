@@ -72,6 +72,7 @@ THIRD_PARTY_APPS = [
     "simple_history",
     "strawberry.django",
     "strawberry_django_plus",
+    "django_elasticsearch_dsl"
     # "gqlauth",
     # "strawberry_django_jwt.refresh_token"
 ]
@@ -320,3 +321,8 @@ GRAPHQL_JWT = {
 #    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
 #    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
 # }
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'elastic:9200'
+    },
+}

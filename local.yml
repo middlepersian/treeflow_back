@@ -3,6 +3,7 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
+  local_elastic_data: {}
 
 services:
   django:
@@ -13,6 +14,7 @@ services:
     container_name: django
     depends_on:
       - postgres
+      - elastic
     volumes:
       - .:/app:z
       - ../corpora/texts_exports/_old/test_imports:/app_data:ro
@@ -47,6 +49,10 @@ services:
       memlock:
         soft: -1
         hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - local_elastic_data:/usr/share/elasticsearch/data
     healthcheck:
       interval: 5s
       retries: 500
