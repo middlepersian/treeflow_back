@@ -15,3 +15,12 @@ def test_token_document():
     assert total_count > 0
     for hit in response[:10]:
         print(hit.transcription)
+        print([x.pos for x in hit.pos_token])
+
+def test_total_count():
+    connections.create_connection(hosts=['elastic:9200'], timeout=20)
+    s = Search(index='tokens')
+    response = s.execute()
+    total_count = response.hits.total.value
+    print('total_count', total_count)
+    assert total_count > 0

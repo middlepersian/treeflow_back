@@ -6,6 +6,7 @@ from pytest_elasticsearch import factories
 from elasticsearch import Elasticsearch
 from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.documents.meaning import MeaningDocument
+from elasticsearch_dsl import Search, connections
 
 
 def test_index_lemma_document():
@@ -27,4 +28,20 @@ def test_index_lemma_document():
     )
 
     assert lemma_doc.id == '2'
+def test_total_count():
+    connections.create_connection(hosts=['elastic:9200'], timeout=20)
+    s = Search(index='lemmas')
+    response = s.execute()
+    total_count = response.hits.total.value
+    print('total_count', total_count)
+    assert total_count > 0    
 
+def test_query_lemmas():
+    connections.create_connection(hosts=['elastic:9200'], timeout=20)
+    s = Search(index='lemmas').query('wildcard', word='s*')
+    response = s.execute()
+    total_count = response.hits.total.value
+    print('total_count', total_count)
+    assert total_count > 0
+    for hit in response[:10]:
+        print(hit.word)
