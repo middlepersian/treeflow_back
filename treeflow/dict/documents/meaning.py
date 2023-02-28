@@ -10,9 +10,6 @@ class MeaningDocument(Document):
         properties={
             'id': fields.KeywordField(),
             'meaning': fields.TextField(),
-            'language': fields.KeywordField(),
-            'related_meanings': fields.NestedField(properties={'id': fields.KeywordField()}),
-            'created_at': fields.DateField(),
         }
     )
     class Index:

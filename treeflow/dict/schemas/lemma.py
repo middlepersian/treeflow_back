@@ -1,15 +1,14 @@
+from asgiref.sync import sync_to_async
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.mutations import resolvers
+from typing import Optional, List, Iterable
 
-from typing import Optional
 
-
-from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial
+from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic
 from treeflow.dict.types.meaning import MeaningInput
 import treeflow.dict.models as models
-
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -21,10 +20,27 @@ from strawberry_django_plus.permissions import (
     IsSuperuser,)
 
 
+from elasticsearch_dsl import Search, Q, connections
+es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
+
+
 @gql.type
 class Query:
     lemma: Optional[Lemma] = gql.django.node(directives=[IsAuthenticated()])
     lemmas:  relay.Connection[Lemma] = gql.django.connection(directives=[IsAuthenticated()])
+
+    @gql.field
+    @sync_to_async
+    def get_lemmas_by_wildcard(pattern: str) -> List[LemmaElastic]:
+        s = Search(using=es_conn, index='lemmas').query(Q('wildcard', word=pattern))
+        response = s.execute()
+
+        lemmas = []
+        for hit in response.hits.hits:
+            lemma = LemmaElastic.from_hit(hit)
+            lemmas.append(lemma)
+
+        return lemmas
 
 
 @gql.type
@@ -32,6 +48,8 @@ class Mutation:
     create_lemma: Lemma = gql.django.create_mutation(LemmaInput, directives=[IsAuthenticated()])
     update_lemma: Lemma = gql.django.update_mutation(LemmaPartial, directives=[IsAuthenticated()])
     delete_lemma: Lemma = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
+
+
 
     @gql.django.input_mutation
     def add_related_lemma_to_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:

@@ -1,4 +1,5 @@
 
+import strawberry
 from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
@@ -45,3 +46,12 @@ class MeaningPartial:
     meaning: gql.auto
     language: gql.auto
     related_meanings: gql.auto
+
+
+
+@strawberry.type
+class MeaningElastic:
+    id: relay.GlobalID
+    meaning: str
+    language: str
+    related_meanings: List[str]    
