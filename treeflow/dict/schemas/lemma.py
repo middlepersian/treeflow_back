@@ -39,7 +39,7 @@ class Query:
         for hit in response.hits.hits:
             lemma = LemmaElastic.from_hit(hit)
             lemmas.append(lemma)
-
+            
         return lemmas
 
 

@@ -326,3 +326,6 @@ ELASTICSEARCH_DSL={
         'hosts': 'elastic:9200'
     },
 }
+
+ELASTICSEARCH_DSL_PARALLEL = True
+ELASTICSEARCH_DSL_AUTOSYNC = True

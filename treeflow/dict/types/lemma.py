@@ -13,10 +13,13 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q, connections
 from strawberry.types import Info
 from typing_extensions import Self
+from elasticsearch.exceptions import NotFoundError
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
-
 
 
 @gql.django.filters.filter(models.Lemma, lookups=True)
@@ -75,6 +78,7 @@ class Lemma(relay.Node):
 
 @strawberry.type
 class LemmaElastic(relay.Node):
+
     id: relay.GlobalID
     word: str
     language: str
@@ -96,7 +100,7 @@ class LemmaElastic(relay.Node):
             multiword_expression=source['multiword_expression'],
             created_at=source['created_at'],
             related_lemmas=[],
-            related_meanings=[]
+            related_meanings=['related_meanings']
         )
 
     @classmethod
@@ -111,45 +115,47 @@ class LemmaElastic(relay.Node):
         node_ids: Optional[Iterable[str]] = None,
     ):
         if node_ids is not None:
-            lemmas = get_lemmas_by_ids(ids=[relay.Node.from_global_id(gid)[1] for gid in node_ids], es_conn=es_conn)
-            return [LemmaElastic(id=relay.Node.to_global_id('LemmaElastic', lemma['id']), **lemma) for lemma in lemmas]
+            lemmas = get_lemmas_by_ids(ids=[relay.from_base64(gid)[1] for gid in node_ids], es_conn=es_conn)
+            return [LemmaElastic(id=relay.to_base64('LemmaElastic', lemma['id']), **lemma) for lemma in lemmas]
 
         return []
 
     @classmethod
-    def resolve_node(
-        cls,
-        node_id: str,
-        *,
-        info: Optional[Info] = None,
-        required: bool = False,
-    ):
+    def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False):
         try:
-            lemma = get_lemma_by_id(id=relay.from_base64(node_id)[1], es_conn=es_conn)
-            return LemmaElastic(id=node_id, **lemma)
-        except Lemma.DoesNotExist:
+            global_id = relay.from_base64(node_id)
+            node = get_lemma_by_id(id = global_id[1])
+            return node
+        except (relay.GlobalIDValueError, NotFoundError):
             if required:
-                raise ValueError(f"No lemma by id {node_id}")
+                raise ValueError(f"No node by id {node_id}")
             return None
 
 
-def get_lemma_by_id(id: str) -> Lemma:
-    s = Search(using=es_conn, index='lemmas').filter('ids', id=[id])
+            
+
+    def __str__(self):
+        return f"LemmaElastic(word='{self.word}', language='{self.language}')"        
+
+
+def get_lemma_by_id(id: str) -> LemmaElastic:
+    s = Search(using=es_conn, index='lemmas').query('ids', values=[id])
     response = s.execute()
 
     if len(response.hits.hits) == 0:
-        raise Lemma.DoesNotExist
+        logger.warning(f"No lemma by id {id}")
+        raise NotFoundError(f"No lemma by id {id}")
 
-    return Lemma.from_hit(response.hits.hits[0])
+    return LemmaElastic.from_hit(response.hits.hits[0])
 
 
-def get_lemmas_by_ids(ids: List[str]) -> List[Lemma]:
-    s = Search(using=es_conn, index='lemmas').filter('ids', id=ids)
+def get_lemmas_by_ids(ids: List[str]) -> List[LemmaElastic]:
+    s = Search(index='lemmas').query('ids', values=ids)
     response = s.execute()
 
     lemmas = []
     for hit in response.hits.hits:
-        lemma = Lemma.from_hit(hit)
-        lemmas.append(lemma)
+        lemma = LemmaElastic.from_hit(hit)
+        lemmas.append(LemmaElastic)
 
     return lemmas

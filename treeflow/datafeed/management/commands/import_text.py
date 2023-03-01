@@ -4,9 +4,11 @@ from treeflow.datafeed.utils import normalize_nfc
 from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment, POS
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
-
+from django.conf import settings
 
 def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
+
+
     # initialize variables
     prev_chapter = None
     prev_section = None
@@ -418,5 +420,13 @@ class Command(BaseCommand):
         manuscript_id = kwargs['manuscript_id']
         text_sigle = kwargs['text_sigle']
         text_title = kwargs['text_title']
+
+        settings.ELASTICSEARCH_DSL_AUTOSYNC = False
+        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
+        
         tokens, images, lines= import_annotated_file(csv_file=csv_file, manuscript_id=manuscript_id, text_sigle=text_sigle, text_title=text_title)
+
+        settings.ELASTICSEARCH_DSL_AUTOSYNC = True
+        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = True
+
         self.stdout.write(self.style.SUCCESS('Successfully imported {} tokens'.format(len(tokens))))
