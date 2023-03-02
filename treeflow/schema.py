@@ -8,7 +8,7 @@ from strawberry_django_plus.directives import SchemaDirectiveExtension
 from treeflow.corpus.schemas import bibliography, comment, corpus, dependency, feature, section, source, text, token, user
 from treeflow.dict.schemas import lemma, meaning
 from treeflow.images.schemas import image
-from treeflow.dict.types import language
+from treeflow.dict.types.language import Language
 from typing import List, Optional
 
 from strawberry.django import auth
@@ -34,7 +34,9 @@ class Query(
 
     me: User = auth.current_user()
     node: Optional[gql.Node] = gql.relay.node()
-
+    @strawberry.field
+    def languages(self) -> List[str]:
+        return [language.value for language in Language]
 
 @gql.type
 class Mutation(
