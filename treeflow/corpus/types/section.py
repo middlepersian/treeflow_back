@@ -21,6 +21,8 @@ class SectionFilter:
 
 @gql.django.type(models.Section, filters=SectionFilter)
 class Section(relay.Node):
+    comment_section: List[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
+
     id: relay.GlobalID
     number: gql.auto
     identifier: gql.auto

@@ -1,22 +1,17 @@
 
 import strawberry
-from enum import Enum
-from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, Optional, Iterable
+from typing import List, Optional, Iterable, cast
 from treeflow.dict import models
 from treeflow.dict.types.language import Language
-from django.db.models import Prefetch
 from datetime import datetime
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q, connections
 from strawberry.types import Info
-from typing_extensions import Self
 from elasticsearch.exceptions import NotFoundError
+from asgiref.sync import sync_to_async
 
 import logging
-logger = logging.getLogger(__name__)
 
 
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
@@ -86,7 +81,12 @@ class LemmaElastic(relay.Node):
     created_at: datetime
     related_lemmas: Optional[List['LemmaElastic']] = None
     related_meanings:  Optional[List[gql.LazyType['MeaningElastic', 'treeflow.dict.types.meaning']]] = None
+    #lemma : Optional['Lemma'] = None
 
+    @strawberry.field(description="The Globally Unique ID of this object")
+    def resolve_id(self: "LemmaElastic", info: Optional[Info] = None) -> str:
+        return self.id
+    
     @classmethod
     def from_hit(cls, hit):
         # Access the source data in the hit
@@ -95,6 +95,7 @@ class LemmaElastic(relay.Node):
         # Build and return a new instance of LemmaElastic
         return cls(
             id=relay.to_base64(LemmaElastic, source['id']),
+            #id=source['id'],
             word=source['word'],
             language=source['language'],
             multiword_expression=source['multiword_expression'],
@@ -102,14 +103,12 @@ class LemmaElastic(relay.Node):
             related_lemmas=[],
             related_meanings=[]
         )
-
     @classmethod
     def resolve_nodes(
         cls,
         *,
         info: Optional[Info] = None,
-        node_ids: Optional[Iterable[str]] = None,
-    ):
+        node_ids: Optional[Iterable[str]] = None):
         if node_ids is not None:
             lemmas = get_lemmas_by_ids(ids=[relay.from_base64(gid)[1] for gid in node_ids], es_conn=es_conn)
             return [LemmaElastic(id=relay.to_base64('LemmaElastic', lemma['id']), **lemma) for lemma in lemmas]
@@ -120,21 +119,29 @@ class LemmaElastic(relay.Node):
     def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['LemmaElastic']:
         try:
 
-            global_id = relay.from_base64(node_id)
-            node = get_lemma_by_id(id = global_id[1])
+            #global_id = relay.from_base64(node_id)
+            node = get_lemma_by_id(id = node_id)
             return node
         except (relay.GlobalIDValueError, NotFoundError):
             if required:
                 raise ValueError(f"No node by id {node_id}")
             return None
 
+    @strawberry.field
+    @sync_to_async
+    def lemma(self, info: Optional[Info]) -> Optional[Lemma]:
+        if self.id is not None:
+            node_id = relay.from_base64(self.id)[1]
+            lemma = models.Lemma.objects.get(id=node_id)
+            return lemma
+        else:
+            return None
 
 def get_lemma_by_id(id: str) -> LemmaElastic:
     s = Search(using=es_conn, index='lemmas').query('ids', values=[id])
     response = s.execute()
 
     if len(response.hits.hits) == 0:
-        logger.warning(f"No lemma by id {id}")
         raise NotFoundError(f"No lemma by id {id}")
 
     return LemmaElastic.from_hit(response.hits.hits[0])

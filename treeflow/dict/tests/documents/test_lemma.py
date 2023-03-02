@@ -1,19 +1,20 @@
-from elasticsearch_dsl import Document, Date, Integer, Boolean, Text, Keyword, Nested, Object, connections, Index
 from datetime import datetime
+import os
 import pytest
-from time import sleep
-from pytest_elasticsearch import factories
-from elasticsearch import Elasticsearch
+from treeflow.dict.models.lemma import Lemma as LemmaModel
 from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.documents.meaning import MeaningDocument
-from elasticsearch_dsl import Search, connections, Q
+from elasticsearch_dsl import Search, connections
 import asyncio
 from elasticsearch import AsyncElasticsearch
 from treeflow.dict.types.lemma import LemmaElastic
+from treeflow.dict.types.lemma import Lemma
 from typing import List
 from strawberry_django_plus.gql import relay
 from unittest.mock import patch
 from uuid import uuid4
+# import django settings
+from django.conf import settings
 
 from treeflow.schema import schema
 
@@ -230,14 +231,57 @@ def test_my_query():
         }
         """,
         variable_values={
-            "id": relay.to_base64("LemmaElastic", "1")
+            "id": relay.to_base64("LemmaElastic", 1)
         },
     )
     assert result.errors is None
     assert result.data == {
         "node":{
-                "id": relay.to_base64("LemmaElastic", "1"),
+                "id": relay.to_base64("LemmaElastic", 1),
                 "word": "example_word_1",
             }
-            }
+            } 
 
+
+
+@pytest.fixture
+def lemma_elastic_instance():
+    # Create a LemmaElastic instance with a known ID
+    return LemmaElastic(
+        id="TGVtbWFFbGFzdGljOjNmZTI5ODYxLTUzMjAtNDY3Yi04MDdjLTA5MWQ1NzgyZDQ3Mg==",
+        word="eieieie",
+        language="spa",
+        multiword_expression=False,
+        created_at=datetime.now(),
+        lemma="some_lemma_id"
+    )
+
+
+
+
+
+@pytest.fixture
+def lemma(db):
+    return LemmaModel.objects.create(
+        word="test",
+        language="eng",
+        multiword_expression=False,
+    )
+
+
+def test_resolve_lemma(lemma):
+    lemma_elastic = LemmaElastic(
+        id="TGVtbWFFbGFzdGljOjNmZTI5ODYxLTUzMjAtNDY3Yi04MDdjLTA5MWQ1NzgyZDQ3Mg==",
+        word="test",
+        language="ENGLISH",
+        multiword_expression=False,
+        created_at="2022-01-01T00:00:00",
+    )
+    lemma_elastic.lemma = lemma
+
+    resolved_lemma = lemma_elastic.resolve_lemma("TGVtbWFFbGFzdGljOjNmZTI5ODYxLTUzMjAtNDY3Yi04MDdjLTA5MWQ1NzgyZDQ3Mg==")
+
+    assert resolved_lemma.id == str(lemma.id)
+    assert resolved_lemma.word == lemma.word
+    assert resolved_lemma.language == lemma.language
+    assert resolved_lemma.multiword_expression == lemma.multiword_expression

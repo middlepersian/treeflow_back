@@ -33,7 +33,7 @@ class Query(
 ):
 
     me: User = auth.current_user()
-    node: Optional[gql.Node] = gql.django.node()
+    node: Optional[gql.Node] = gql.relay.node()
 
 
 @gql.type
