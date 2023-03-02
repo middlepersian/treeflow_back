@@ -87,7 +87,6 @@ class PartOfSpeechFeatures:
 
 @gql.django.type(models.Feature)
 class Feature(relay.Node):
-
     id: relay.GlobalID
     token:  gql.LazyType['Token', 'treeflow.corpus.types.token']
     pos : gql.LazyType['POS', 'treeflow.corpus.types.pos']
@@ -98,6 +97,7 @@ class Feature(relay.Node):
 
 @gql.django.input(models.Feature)
 class FeatureInput:
+    token: relay.GlobalID
     feature: gql.auto
     feature_value: gql.auto
 
