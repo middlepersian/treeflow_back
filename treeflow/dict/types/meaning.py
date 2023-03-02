@@ -42,7 +42,7 @@ class MeaningInput:
 
 @gql.django.partial(models.Meaning)
 class MeaningPartial:
-    id: gql.auto
+    id: relay.GlobalID
     meaning: gql.auto
     language: gql.auto
     related_meanings: gql.auto
