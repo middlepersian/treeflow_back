@@ -15,6 +15,9 @@ from strawberry_django_plus.gql import relay
 from unittest.mock import patch
 from uuid import uuid4
 
+from treeflow.schema import schema
+
+
 connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 
@@ -173,9 +176,68 @@ def test_solve_ids():
     gid ="TGVtbWFFbGFzdGljOjBlODUzZTY1LTMyZTktNGY5OS1iZDBlLTdlZjEzMjBkNTkxNA=="
     print(gid)
     # solve it as a global id
-    global_id = relay.from_base64(str(gid))
+    global_id = relay.from_base64(gid)
     print(global_id)
     print(global_id[0])
     print(global_id[1])
     node = LemmaElastic.resolve_node(gid)
-    print(node)
+    print('node', node)
+    print('node.id', node.id)
+
+def test_resolve_id():
+    # Create a mock instance of LemmaElastic
+    lemma = LemmaElastic(
+        id='TGVtbWFFcnN0aWNhbDoxcQ==',
+        word='test',
+        language='en',
+        multiword_expression=False,
+        created_at='2022-01-01T00:00:00',
+    )
+
+    # Call the resolve_id method of the LemmaElastic class
+    resolved_id = LemmaElastic.resolve_id(lemma)
+    print('resolved_id',resolved_id)
+
+    # Assert that the resolved ID matches the expected value
+    assert resolved_id == 'TGVtbWFFcnN0aWNhbDoxcQ=='
+
+def test_node_id():
+    node_id = "TGVtbWFFbGFzdGljOjBlODUzZTY1LTMyZTktNGY5OS1iZDBlLTdlZjEzMjBkNTkxNA=="
+    expected_id = "LemmaElastic:0e853e65-32e9-4f99-bd0e-7ef1320d5914"
+
+    # Check that node_id matches the expected value
+    assert node_id == relay.to_base64("LemmaElastic", "0e853e65-32e9-4f99-bd0e-7ef1320d5914")
+
+    # Decode the node ID and check that it matches the expected value
+    decoded_id = relay.from_base64(node_id)
+    assert decoded_id == ("LemmaElastic", "0e853e65-32e9-4f99-bd0e-7ef1320d5914")
+
+    # Check that the decoded node ID matches the expected value
+    assert ":".join(decoded_id) == expected_id
+   
+
+
+def test_my_query():
+    result = schema.execute_sync(
+        """
+        query TestQuery ($id: GlobalID!) {
+            node (id: $id) {
+                ... on LemmaElastic {
+                    id
+                    word
+                }
+            }
+        }
+        """,
+        variable_values={
+            "id": relay.to_base64("LemmaElastic", "1")
+        },
+    )
+    assert result.errors is None
+    assert result.data == {
+        "node":{
+                "id": relay.to_base64("LemmaElastic", "1"),
+                "word": "example_word_1",
+            }
+            }
+

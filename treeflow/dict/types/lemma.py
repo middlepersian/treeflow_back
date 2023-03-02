@@ -94,18 +94,14 @@ class LemmaElastic(relay.Node):
 
         # Build and return a new instance of LemmaElastic
         return cls(
-            id=relay.to_base64('LemmaElastic', hit['_id']),
+            id=relay.to_base64(LemmaElastic, source['id']),
             word=source['word'],
             language=source['language'],
             multiword_expression=source['multiword_expression'],
             created_at=source['created_at'],
             related_lemmas=[],
-            related_meanings=['related_meanings']
+            related_meanings=[]
         )
-
-    @classmethod
-    def resolve_id(cls, root: Self, *, info: Optional[Info] = None):
-        return root.id
 
     @classmethod
     def resolve_nodes(
@@ -121,8 +117,9 @@ class LemmaElastic(relay.Node):
         return []
 
     @classmethod
-    def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False):
+    def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['LemmaElastic']:
         try:
+
             global_id = relay.from_base64(node_id)
             node = get_lemma_by_id(id = global_id[1])
             return node
@@ -130,12 +127,6 @@ class LemmaElastic(relay.Node):
             if required:
                 raise ValueError(f"No node by id {node_id}")
             return None
-
-
-            
-
-    def __str__(self):
-        return f"LemmaElastic(word='{self.word}', language='{self.language}')"        
 
 
 def get_lemma_by_id(id: str) -> LemmaElastic:
@@ -159,3 +150,5 @@ def get_lemmas_by_ids(ids: List[str]) -> List[LemmaElastic]:
         lemmas.append(LemmaElastic)
 
     return lemmas
+
+
