@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 from simple_history.models import HistoricalRecords
 from treeflow.corpus.models.comment import Comment
+from treeflow.dict.models.lemma import Lemma
 
 
 class Meaning(models.Model):
@@ -12,6 +13,10 @@ class Meaning(models.Model):
     related_meanings = models.ManyToManyField('self', blank=True, related_name='meaning_related_meanings')
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+    def related_lemmas(self):
+            return self.lemma_related_meanings.all()
+            
     history = HistoricalRecords()
     class Meta:
         constraints = [

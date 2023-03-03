@@ -6,12 +6,7 @@ from treeflow.dict.models import Meaning
 @registry.register_document
 
 class MeaningDocument(Document):
-    related_meanings = fields.NestedField(
-        properties={
-            'id': fields.KeywordField(),
-            'meaning': fields.TextField(),
-        }
-    )
+
     class Index:
         name = 'meanings'
     class Django:
@@ -20,5 +15,4 @@ class MeaningDocument(Document):
             'id',
             'meaning',
             'language',
-            'created_at',
         ]

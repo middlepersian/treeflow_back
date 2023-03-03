@@ -6,18 +6,7 @@ from treeflow.dict.models import Lemma
 
 @registry.register_document
 class LemmaDocument(Document):
-    related_lemmas = fields.NestedField(
-        properties={
-            'id': fields.KeywordField(),
-            'word': fields.KeywordField(),
-        }
-    )
-    related_meanings = fields.NestedField(
-        properties={
-            'id': fields.KeywordField(),
-            'meaning': fields.TextField(),
-        }
-    )
+
     class Index:
         name = 'lemmas'
     class Django:
@@ -27,5 +16,4 @@ class LemmaDocument(Document):
             'word',
             'language',
             'multiword_expression',
-            'created_at',
         ]

@@ -29,17 +29,18 @@ class Query:
     lemma: Optional[Lemma] = gql.django.node(directives=[IsAuthenticated()])
     lemmas:  relay.Connection[Lemma] = gql.django.connection(directives=[IsAuthenticated()])
 
+
     @gql.field
     @sync_to_async
-    def get_lemmas_by_wildcard(pattern: str) -> List[LemmaElastic]:
-        s = Search(using=es_conn, index='lemmas').query(Q('wildcard', word=pattern))
+    def search_lemmas(pattern: str, query_type: str, size: int = 100) -> List[LemmaElastic]:
+        s = Search(using=es_conn, index='lemmas').query(Q(query_type, word=pattern)).extra(size=size)
         response = s.execute()
 
         lemmas = []
         for hit in response.hits.hits:
             lemma = LemmaElastic.from_hit(hit)
             lemmas.append(lemma)
-            
+
         return lemmas
 
 

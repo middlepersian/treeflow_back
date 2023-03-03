@@ -13,7 +13,6 @@ from asgiref.sync import sync_to_async
 
 import logging
 
-
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 
@@ -78,10 +77,7 @@ class LemmaElastic(relay.Node):
     word: str
     language: str
     multiword_expression: bool
-    created_at: datetime
-    related_lemmas: Optional[List['LemmaElastic']] = None
-    related_meanings:  Optional[List[gql.LazyType['MeaningElastic', 'treeflow.dict.types.meaning']]] = None
-    #lemma : Optional['Lemma'] = None
+
 
     @strawberry.field(description="The Globally Unique ID of this object")
     def resolve_id(self: "LemmaElastic", info: Optional[Info] = None) -> str:
@@ -95,13 +91,9 @@ class LemmaElastic(relay.Node):
         # Build and return a new instance of LemmaElastic
         return cls(
             id=relay.to_base64(LemmaElastic, source['id']),
-            #id=source['id'],
             word=source['word'],
             language=source['language'],
             multiword_expression=source['multiword_expression'],
-            created_at=source['created_at'],
-            related_lemmas=[],
-            related_meanings=[]
         )
     @classmethod
     def resolve_nodes(
@@ -129,7 +121,7 @@ class LemmaElastic(relay.Node):
 
     @strawberry.field
     @sync_to_async
-    def lemma(self, info: Optional[Info]) -> Optional[Lemma]:
+    def lemma_object(self, info: Optional[Info]) -> Optional[Lemma]:
         if self.id is not None:
             node_id = relay.from_base64(self.id)[1]
             lemma = models.Lemma.objects.get(id=node_id)
