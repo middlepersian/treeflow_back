@@ -11,11 +11,7 @@ class TokenDocument(Document):
 
     previous = fields.NestedField(properties={'id': fields.KeywordField(), 'number': fields.KeywordField(), 'number_in_sentence': fields.FloatField(),  'transcription': fields.KeywordField(), 'transliteration': fields.KeywordField(),})
     next = fields.NestedField(properties={'id': fields.KeywordField(), 'number': fields.KeywordField(), 'number_in_sentence': fields.FloatField(),  'transcription': fields.KeywordField(), 'transliteration': fields.KeywordField(),})
-    # used if multiword_token is True:
-    related_tokens = fields.NestedField(properties={'id': fields.KeywordField(),
-                                                    'number': fields.KeywordField(),
-                                                    'transcription': fields.KeywordField(),
-                                                    'transliteration': fields.KeywordField(),})         
+      
 
 
 

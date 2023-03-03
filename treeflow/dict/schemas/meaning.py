@@ -1,9 +1,11 @@
+from asgiref.sync import sync_to_async
+import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-from typing import Optional, cast
+from typing import Optional, cast, List
 
-from treeflow.dict.types.meaning import Meaning, MeaningInput, MeaningPartial
+from treeflow.dict.types.meaning import Meaning, MeaningInput, MeaningPartial, MeaningElastic
 from treeflow.dict.models.meaning import Meaning as MeaningModel
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
@@ -16,11 +18,28 @@ from strawberry_django_plus.permissions import (
     IsSuperuser,
 )
 
+from elasticsearch_dsl import Search, Q, connections
+es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 @gql.type
 class Query:
     meaning: Optional[Meaning] = gql.django.node(directives=[IsAuthenticated()])
     meanings:  relay.Connection[Meaning] = gql.django.connection(directives=[IsAuthenticated()])
+
+
+    @gql.field
+    @sync_to_async
+    def search_meanings(pattern: str, query_type: str, size: int = 100) -> List[MeaningElastic]:
+        s = Search(using=es_conn, index='meanings').query(Q(query_type, meaning=pattern)).extra(size=size)
+        response = s.execute()
+
+        meanings = []
+        for hit in response.hits.hits:
+            meaning = MeaningElastic.from_hit(hit)
+            meanings.append(meaning)
+
+        return meanings
+
 
 
 @gql.type

@@ -13,13 +13,6 @@ from asgiref.sync import sync_to_async
 
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
-if TYPE_CHECKING:
-    from treeflow.corpus.types.token import Token
-    from treeflow.corpus.types.comment import Comment
-    from treeflow.dict.types.meaning import Meaning
-    from treeflow.dict.types.lemma import Lemma
-
-
 @gql.django.filters.filter(models.Meaning, lookups=True)
 class MeaningFilter:
     id: relay.GlobalID
@@ -65,7 +58,7 @@ class MeaningElastic(relay.Node):
     meaning: str
 
 
-    @classmethod
+    @strawberry.field(description="The Globally Unique ID of this object")
     def resolve_id(self: "MeaningElastic", info: Optional[Info] = None) -> str:
         return self.id
     
@@ -105,13 +98,13 @@ class MeaningElastic(relay.Node):
 
     @strawberry.field
     @sync_to_async
-    def meaning_object(self, info: Optional[Info]) -> List[models.Meaning]:
+    def meaning_object(self, info: Optional[Info]) -> Optional[Meaning]:
         if self.id is not None:
             meaning_id = relay.from_base64(self.id)[1]
-            meaning = models.Meaning.get(id=meaning_id)
+            meaning = models.Meaning.objects.get(id=meaning_id)
             return meaning
         else:
-            return []
+            return None
 
 def get_meaning_by_id(id: str) -> MeaningElastic:
     s = Search(using=es_conn, index='meanings').query('ids', values=[id])
