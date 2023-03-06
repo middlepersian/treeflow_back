@@ -7,6 +7,7 @@ from strawberry.types.info import Info
 
 from treeflow.corpus import models
 from .token import TextFilter
+from treeflow.images.types.image import ImageFilter
 
 
 
@@ -17,6 +18,7 @@ class SectionFilter:
     type: gql.auto
     container: 'SectionFilter'
     text: 'TextFilter'
+    image : 'ImageFilter'
 
 
 @gql.django.type(models.Section, filters=SectionFilter)

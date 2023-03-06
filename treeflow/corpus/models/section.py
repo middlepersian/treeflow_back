@@ -27,7 +27,7 @@ class Section(models.Model):
 
 
     class Meta:
-        ordering = ['number']
+        ordering = ['created_at']
         constraints = [
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier' )
@@ -38,7 +38,8 @@ class Section(models.Model):
                 models.Index(fields=['identifier']),
                 models.Index(fields=['previous']),
                 models.Index(fields=['container']),
-                models.Index(fields=['type'])]
+                models.Index(fields=['type']),
+                models.Index(fields=['created_at'])]
 
     def __str__(self) -> str:
         return '{}'.format(self.identifier)
