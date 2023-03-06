@@ -1,8 +1,9 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 from treeflow.corpus import models
+from treeflow.corpus.types.pos import POSInput
 
 import strawberry
 
@@ -98,6 +99,7 @@ class Feature(relay.Node):
 @gql.django.input(models.Feature)
 class FeatureInput:
     token: relay.GlobalID
+    pos: Optional[POSInput]
     feature: gql.auto
     feature_value: gql.auto
 
