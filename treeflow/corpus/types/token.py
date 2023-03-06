@@ -3,13 +3,8 @@ from strawberry_django_plus.gql import relay
 from typing import List, Optional
 
 from treeflow.corpus import models
+#from treeflow.corpus.types.text import TextFilter
 
-
-
-@gql.django.filters.filter(models.Text)
-class TextFilter:
-    id: relay.GlobalID
-    title: gql.auto
 
 
 @gql.django.filters.filter(models.Token, lookups=True)
@@ -19,7 +14,7 @@ class TokenFilter:
     transliteration: gql.auto
     language: gql.auto
     number: gql.auto
-    text: 'TextFilter'
+    text: gql.LazyType['TextFilter', 'treeflow.corpus.types.text']
 
 
 @gql.django.type(models.Token, filters=TokenFilter)

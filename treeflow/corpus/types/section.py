@@ -6,8 +6,8 @@ from django.db.models import Prefetch
 from strawberry.types.info import Info
 
 from treeflow.corpus import models
-from .token import TextFilter
-from treeflow.images.types.image import ImageFilter
+#from .token import TextFilter
+#from treeflow.images.types.image import ImageFilter
 
 
 
@@ -17,8 +17,8 @@ class SectionFilter:
     id: relay.GlobalID
     type: gql.auto
     container: 'SectionFilter'
-    text: 'TextFilter'
-    image : 'ImageFilter'
+    text:  gql.LazyType['TextFilter', 'treeflow.corpus.types.text']
+    image : gql.LazyType['ImageFilter', 'treeflow.images.types.image']
 
 
 @gql.django.type(models.Section, filters=SectionFilter)

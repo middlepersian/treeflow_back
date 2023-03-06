@@ -3,10 +3,15 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, TYPE_CHECKING, Optional, Annotated
 from treeflow.corpus import models
+from treeflow.corpus.types.section import SectionFilter
+
+@gql.django.filters.filter(models.Text)
+class TextFilter:
+    id: relay.GlobalID
+    title: gql.auto
 
 
-
-@gql.django.type(models.Text)
+@gql.django.type(models.Text, filters=TextFilter)
 class Text(relay.Node):
 
     token_text: relay.Connection[gql.LazyType['Token',  'treeflow.corpus.types.token']]
