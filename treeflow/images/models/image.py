@@ -8,6 +8,8 @@ class Image(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     identifier = models.CharField(max_length=100)
+    page = models.CharField(max_length=100, null=True, blank=True)
+
     number = models.FloatField(null=True, blank=True)
     # In some cases, as in MK, images can have a source directly a "Codex" or a "Facsimile"
     source = models.ForeignKey('corpus.Source', on_delete=models.CASCADE, null=True,
