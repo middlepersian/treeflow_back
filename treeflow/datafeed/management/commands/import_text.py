@@ -334,58 +334,70 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 previous_line_obj = current_line_obj 
 
         # process new_parts
-        if row['newpart'] != '_' and not pd.isna(row['newpart']):
-            # split the newpart string into chapter and section
-            newpart = row['newpart']
-            if not pd.isna(newpart) and newpart != '_':
+        if not pd.isna(row['newpart']):
+            #new part there
+            if row['newpart'] != '_':
                 # split the newpart string into chapter and section
-                newpart = str(newpart)
-                print('newpart', newpart)
-                source, chapter, section = newpart.split("_")
-                chapter = chapter.strip()
-                section = section.strip()
-                chapter_human = chapter.replace("ch", "chapter ")
-                section_human = section.replace("sec", "section ")
-                       
-                # get or create the chapter object
-                chapter_identifier = source + '_' + chapter
-                assert chapter_identifier is not None
-                if token:
-                    chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter_human, text=text_object)
+                newpart = row['newpart']
+                if not pd.isna(newpart) and newpart != '_':
+                    # split the newpart string into chapter and section
+                    newpart = str(newpart)
+                    print('newpart', newpart)
+                    source, chapter, section = newpart.split("_")
+                    chapter = chapter.strip()
+                    section = section.strip()
+                    chapter_human = chapter.replace("ch", "chapter ")
+                    section_human = section.replace("sec", "section ")
+                        
+                    # get or create the chapter object
+                    chapter_identifier = source + '_' + chapter
+                    assert chapter_identifier is not None
+                    if token:
+                        chapter_obj, chapter_obj_created = Section.objects.get_or_create(type="chapter", identifier=chapter_identifier, title = chapter_human, text=text_object)
 
-                    if chapter_obj_created:
-                        chapter_obj.number = chapter_number
-                        chapter_number += 1
+                        if chapter_obj_created:
+                            chapter_obj.number = chapter_number
+                            chapter_number += 1
+                            #chapter_obj.tokens.add(token)
+                            # if the current chapter is not the same as the previous chapter
+                            if prev_chapter:
+                                if chapter_obj != prev_chapter:
+                                    # set the current chapter as the previous chapter for the next iteration
+                                    chapter_obj.previous = prev_chapter
+
+
+                        # get or create the section object
+                        section_identifier = source  + '_' +  chapter  + '_' +  section
+                        assert section_identifier is not None
+                        section_obj, section_obj_created = Section.objects.get_or_create(type="section", identifier=section_identifier, title = section_human, text=text_object)
+                        if section_obj_created:
+                            section_obj.number = section_number
+                            section_number += 1
+                            # if the current section is not the same as the previous section and belong to the same chapter
+                            if prev_section:
+                                if section_obj != prev_section and prev_section.container == chapter_obj:
+                                    # set the current section as the previous section for the next iteration
+                                    section_obj.previous = prev_section
+
+                        
+                        section_obj.container = chapter_obj
                         chapter_obj.tokens.add(token)
-                        # if the current chapter is not the same as the previous chapter
-                        if prev_chapter:
-                            if chapter_obj != prev_chapter:
-                                # set the current chapter as the previous chapter for the next iteration
-                                chapter_obj.previous = prev_chapter
-
-
-                    # get or create the section object
-                    section_identifier = source  + '_' +  chapter  + '_' +  section
-                    assert section_identifier is not None
-                    section_obj, section_obj_created = Section.objects.get_or_create(type="section", identifier=section_identifier, title = section_human, text=text_object)
-                    if section_obj_created:
-                        section_obj.number = section_number
-                        section_number += 1
-                        # if the current section is not the same as the previous section and belong to the same chapter
-                        if prev_section:
-                            if section_obj != prev_section and prev_section.container == chapter_obj:
-                                # set the current section as the previous section for the next iteration
-                                section_obj.previous = prev_section
-
-                    
-                    section_obj.container = chapter_obj
-                    chapter_obj.tokens.add(token)
-                    section_obj.tokens.add(token)
-                    section_obj.save()
-                    chapter_obj.save()
-                    # update previous chapter and section
-                    prev_chapter = chapter_obj
-                    prev_section = section_obj
+                        section_obj.tokens.add(token)
+                        section_obj.save()
+                        chapter_obj.save()
+                        # update previous chapter and section
+                        prev_chapter = chapter_obj
+                        prev_section = section_obj
+            else:
+                # no new part
+                # add token to previous section
+                if token:
+                    if prev_section:
+                        prev_section.tokens.add(token)
+                        prev_section.save()   
+                    if prev_chapter:
+                        prev_chapter.tokens.add(token)
+                        prev_chapter.save()             
 
         #process comments
         if (row['comment'] != '_' and not pd.isna(row['comment'])) or (row['new_suggestion'] != '_' and not pd.isna(row['new_suggestion'])) or (row['uncertain'] != '_' and not pd.isna(row['uncertain'])) or (row['discussion'] != '_' and not pd.isna(row['discussion'])):  
