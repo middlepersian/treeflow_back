@@ -28,6 +28,7 @@ class Section(relay.Node):
     id: relay.GlobalID
     number: gql.auto
     identifier: gql.auto
+    title: gql.auto
     type: gql.auto
     text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
     source:  Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
@@ -59,6 +60,7 @@ class Section(relay.Node):
 class SectionInput:
     number: gql.auto
     identifier: gql.auto
+    title: gql.auto
     text: gql.auto
     type: gql.auto
     source: gql.auto
@@ -73,6 +75,7 @@ class SectionInput:
 class SectionPartial:
     id: relay.GlobalID
     number: gql.auto
+    title: gql.auto
     identifier: gql.auto
     text: gql.auto
     type: gql.auto
