@@ -371,11 +371,12 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     if section_obj_created:
                         section_obj.number = section_number
                         section_number += 1
-                        # if the current section is not the same as the previous section
+                        # if the current section is not the same as the previous section and belong to the same chapter
                         if prev_section:
-                            if section_obj != prev_section:
+                            if section_obj != prev_section and prev_section.container == chapter_obj:
                                 # set the current section as the previous section for the next iteration
                                 section_obj.previous = prev_section
+
                     
                     section_obj.container = chapter_obj
                     chapter_obj.tokens.add(token)
