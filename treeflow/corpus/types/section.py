@@ -1,7 +1,7 @@
 from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, Optional
+from typing import List, Optional, cast
 from django.db.models import Prefetch
 from strawberry.types.info import Info
 
@@ -37,6 +37,17 @@ class Section(relay.Node):
     previous: Optional['Section']
     next: Optional['Section']
     container: Optional['Section']
+
+    @gql.django.field(
+        prefetch_related=[
+            "section_container"
+        ],
+    )
+    def contains_sections(self, info: Info) -> List[gql.LazyType['Section', 'treeflow.corpus.types.section']]:
+        return [cast(Section, section) for section in self.section_container.all()]
+
+
+
     
     
     @gql.django.field(
