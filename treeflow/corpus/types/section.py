@@ -45,9 +45,6 @@ class Section(relay.Node):
     )
     def contains_sections(self, info: Info) -> List[gql.LazyType['Section', 'treeflow.corpus.types.section']]:
         return [cast(Section, section) for section in self.section_container.all()]
-
-
-
     
     
     @gql.django.field(
