@@ -151,6 +151,20 @@ class Mutation:
         token.dependencies.add(dependency)
         token.save()
         return token
+    
+    @gql.django.input_mutation
+    def remove_features_from_token(self,
+                                   info,
+                                   token: relay.GlobalID,
+                                   features: List[relay.GlobalID],
+                                   ) -> Token:
+        if not info.context.request.user.is_authenticated:
+            raise Exception("You must be authenticated for this operation.")
+        token = token.resolve_node(info)
+        features = [feature.resolve_node(info) for feature in features]
+        token.features.remove(*features)
+        token.save()
+        return token
 
 
 
