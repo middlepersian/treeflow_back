@@ -2,6 +2,8 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from treeflow.corpus.models import Token
 
+
+
 @registry.register_document
 class TokenDocument(Document):
     text = fields.ObjectField(properties={'id': fields.KeywordField(), 'title': fields.TextField()})

@@ -39,4 +39,4 @@ def test_token_search():
 
     # Print the results
     for hit in response:
-        print(hit.transcription, hit.pos_token, hit.previous.transcription)
+        print(hit.transcription, hit.previous.transcription, hit.pos_token)

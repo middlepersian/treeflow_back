@@ -7,6 +7,7 @@ from strawberry_django_plus.mutations import resolvers
 
 from treeflow.dict.types.meaning import MeaningInput
 from treeflow.dict.types.lemma import LemmaInput
+from treeflow.corpus.documents.token import TokenDocument
 
 from treeflow.corpus import models as corpus_models
 from treeflow.dict import models as dict_models
@@ -37,11 +38,13 @@ class Query:
     @gql.field
     @sync_to_async
     def search_tokens(pattern: str, query_type: str, size: int = 100) -> List[TokenElastic]:
-        s = Search(using=es_conn, index='tokens').query(Q(query_type, transcription=pattern)).extra(size=size)
-        response = s.execute()
+        #s = Search(using=es_conn, index='tokens').query(Q(query_type, transcription=pattern)).extra(size=size)
+        #response = s.execute()
+        q = Q(query_type, transcription=pattern)
+        response = TokenDocument.search().query(q).extra(size=size)
 
         tokens = []
-        for hit in response.hits.hits:
+        for hit in response:
             token = TokenElastic.from_hit(hit)
             tokens.append(token)
 

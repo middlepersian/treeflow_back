@@ -10,7 +10,6 @@ from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 
-
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 
@@ -98,7 +97,6 @@ class TokenPartial:
 
 
 
-
 @strawberry.type
 class POSElastic:
     id: str
@@ -106,15 +104,14 @@ class POSElastic:
 
     @classmethod
     def from_hit(cls, hit):
-        # Access the source data in the hit
-        source = hit['_source']
+        if 'pos_token' in hit:
+            pos_tokens = hit['pos_token']
+            return [cls(
+                id=pos_token['id'],
+                pos=pos_token['pos'],
+            ) for pos_token in pos_tokens]
+        return None
 
-        # Build and return a new instance of PosElastic
-        return cls(
-            id=source['pos_token']['id'],
-            pos=source['pos_token']['pos']
-        )
-    
 @strawberry.type
 class FeatureElastic:
     id: str
@@ -122,15 +119,21 @@ class FeatureElastic:
     feature_value: str
     @classmethod
     def from_hit(cls, hit):
-        # Access the source data in the hit
-        source = hit['_source']
+        if 'feature_token' in hit:
+            return[ cls(
+                id=hit['feature_token']['id'],
+                feature=hit['feature_token']['feature'],
+                feature_value=hit['feature_token']['feature_value']
+            )]
+@strawberry.type
 
-        # Build and return a new instance of FeatureElastic
-        return cls(
-            id=source['feature_token']['id'],
-            feature=source['feature_token']['feature'],
-            feature_value=source['feature_token']['feature_value']
-        )
+class TokenSelection:
+    id: str
+    number: float
+    number_in_sentence: float
+    transcription: str
+    transliteration: str
+
 
 @strawberry.type
 class TokenElastic(relay.Node):
@@ -145,12 +148,11 @@ class TokenElastic(relay.Node):
     transliteration: str
     avestan: str
     gloss: str
-    previous: Optional['TokenElastic'] = None
     next: Optional['TokenElastic'] = None
     multiword_token: Optional['TokenElastic'] = None
-    pos_token: Optional[POSElastic] = None
-    feature_token: Optional[FeatureElastic] = None
-    lemmas: Optional[List['LemmaElastic']] = None
+    pos_token: Optional[List[POSElastic]] = None
+    feature_token: Optional[List[FeatureElastic]] = None
+    lemmas: Optional[List[LemmaElastic]] = None
     meanings: Optional[List[gql.LazyType['MeaningElastic', 'treeflow.dict.types.meaning']]] = None
 
     @strawberry.field
@@ -160,27 +162,22 @@ class TokenElastic(relay.Node):
     @classmethod
     def from_hit(cls, hit):
         # Access the source data in the hit
-        source = hit['_source']
+        #source = hit['_source']
 
         # Build and return a new instance of TokenElastic
         return cls(
-            id=relay.to_base64(TokenElastic, source['id']),
-            number=source['number'],
-            number_in_sentence=source['number_in_sentence'],
-            language=source['language'],
-            root=source['root'],
-            word_token=source['word_token'],
-            visible=source['visible'],
-            transcription=source['transcription'],
-            transliteration=source['transliteration'],
-            avestan=source['avestan'],
-            gloss=source['gloss'],
-            pos_token=POSElastic.from_hit(source['pos_token']) if 'pos_token' in hit else None,
-            feature_token=FeatureElastic.from_hit(source['feature_token']) if 'feature_token' in hit else None,
-            previous=source['previous'],           
-            next=source['next'],          
-            lemmas=[LemmaElastic.from_hit(lemma) for lemma in hit['lemmas']] if 'lemmas' in hit else None,
-            meanings=[MeaningElastic.from_hit(meaning) for meaning in hit['meanings']] if 'meanings' in hit else None,
+            id=relay.to_base64(TokenElastic, hit['id']),
+            number=hit['number'],
+            number_in_sentence=hit['number_in_sentence'],
+            language=hit['language'],
+            root=hit['root'],
+            word_token=hit['word_token'],
+            visible=hit['visible'],
+            transcription=hit['transcription'],
+            transliteration=hit['transliteration'],
+            avestan=hit['avestan'],
+            gloss=hit['gloss'],
+            pos_token=POSElastic.from_hit(hit),
         )
     
 
