@@ -162,7 +162,11 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
         features = [feature.resolve_node(info) for feature in features]
-        token.features.remove(*features)
+        features_objs = [feature.resolve_node(info) for feature in features]
+        
+        for feature in features_objs:
+            feature.delete()
+        
         token.save()
         return token
 
