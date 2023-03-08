@@ -393,7 +393,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 # add token to previous section
                 if token:
                     if prev_section:
-                        prev_section.add(token)
+                        prev_section.tokens.add(token)
                         prev_section.save()   
                     if prev_chapter:
                         prev_chapter.tokens.add(token)
