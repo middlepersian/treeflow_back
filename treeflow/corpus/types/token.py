@@ -3,6 +3,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, Optional, Iterable
 from treeflow.dict.types.lemma import LemmaElastic
+from treeflow.dict.types.meaning import MeaningElastic
 from treeflow.corpus import models
 from elasticsearch_dsl import Search, connections
 from strawberry.types import Info
@@ -144,6 +145,8 @@ class TokenElastic(relay.Node):
     transliteration: str
     avestan: str
     gloss: str
+    previous: Optional['TokenElastic'] = None
+    next: Optional['TokenElastic'] = None
     multiword_token: Optional['TokenElastic'] = None
     pos_token: Optional[POSElastic] = None
     feature_token: Optional[FeatureElastic] = None
@@ -172,11 +175,12 @@ class TokenElastic(relay.Node):
             transliteration=source['transliteration'],
             avestan=source['avestan'],
             gloss=source['gloss'],
-            pos_token=POSElastic.from_hit(hit['pos_token']) if 'pos_token' in hit else None,
-            feature_token=FeatureElastic.from_hit(hit['feature_token']) if 'feature_token' in hit else None,
-
-            lemmas=[],
-            meanings=[]
+            pos_token=POSElastic.from_hit(source['pos_token']) if 'pos_token' in hit else None,
+            feature_token=FeatureElastic.from_hit(source['feature_token']) if 'feature_token' in hit else None,
+            previous=source['previous'],           
+            next=source['next'],          
+            lemmas=[LemmaElastic.from_hit(lemma) for lemma in hit['lemmas']] if 'lemmas' in hit else None,
+            meanings=[MeaningElastic.from_hit(meaning) for meaning in hit['meanings']] if 'meanings' in hit else None,
         )
     
 
