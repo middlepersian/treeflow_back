@@ -6,7 +6,6 @@ from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.documents.meaning import MeaningDocument
 from elasticsearch_dsl import Search, connections
 import asyncio
-from elasticsearch import AsyncElasticsearch
 from treeflow.dict.types.lemma import LemmaElastic
 from treeflow.dict.types.lemma import Lemma
 from typing import List

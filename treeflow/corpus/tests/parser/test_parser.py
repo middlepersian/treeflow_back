@@ -62,6 +62,11 @@ def test_parse_annotated():
     text_sigle= "DMX"
     tokens, images, lines = import_annotated_file(csv_file=file_path,text_sigle=text_sigle, text_title=text_title, manuscript_id=manuscript_id)
     print()
+
+    #section objects
+    print("section objects {}".format(Section.objects.count()))
+    # get all chapter sections
+    print("chapter section objects {}".format(Section.objects.filter(section_type__identifier="chapter").count()))
     '''
     print("tokens {}".format(len(tokens)))
     print("images {}".format(len(images)))
@@ -80,7 +85,7 @@ def test_parse_annotated():
     print("line objects {}".format(Section.objects.filter(section_type__identifier="line").count()))
     #assert len(tokens) == 100
     print("feature objects {}".format(Feature.objects.count()))
-    '''
+
 
     for sentence in Section.objects.filter(type="sentence"):
         print('sentence', sentence.number)
@@ -91,7 +96,7 @@ def test_parse_annotated():
             print()
         print()
 
-
+    '''
 
 
 def test_escape_rows():

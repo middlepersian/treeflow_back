@@ -4,39 +4,39 @@ from django.db import models
 from treeflow.corpus.documents.token import TokenDocument
 from treeflow.corpus.models import Token
 from treeflow.corpus.models import Section
+import pytest
+from elasticsearch_dsl import Search, connections, Q
 
-'''
-def test_token_document(self):
+connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
+@pytest.mark.django_db
+def test_get_queryset():
+    qs = TokenDocument().get_queryset()
+    assert qs.count() == 0
 
-    # Create a new instance of the TokenDocument class
-    token_doc = TokenDocument(
-        id='1',
-        number=1.0,
-        number_in_sentence=1.0,
-        root=True,
-        word_token=True,
-        visible=True,
-        language='en',
-        transcription='dffb fgb',
-        transliteration='vdfvdfbvdrsbv',
-        avestan='ertbrtbn',
-        created_at=datetime.now()
-    )
-
-    # check that the document is not in the index
-    self.assertEqual(TokenDocument.django.model, Token)
-'''
-
-class TokenDocumentTest(TestCase):
-    def test_model_class_added(self):
-        self.assertEqual(TokenDocument.django.model, Token)
+def test_total_count():
+    s = Search(index='tokens')
+    response = s.execute()
+    total_count = response.hits.total.value
+    print('total_count', total_count)
+    for hit in response[:10]:
+        print(hit.id, hit.title, hit.language, hit.created_at)
 
 
-    def test_get_queryset(self):
-        qs = TokenDocument().get_queryset()
-        self.assertIsInstance(qs, models.QuerySet)
-        self.assertEqual(qs.model, Token)     
+def test_token_search():
+    
+    # Define the search query
+    prev_transcription_query = Q('nested', path='previous', query=Q('match', previous__transcription='frahang'))
+    current_transcription_query = Q('match', transcription='dēn')
+    pos_query = Q('nested', path='pos_token', query=Q('match', pos_token__pos='NOUN'))
+    q = prev_transcription_query & current_transcription_query & pos_query
 
 
-        
+    # Perform the search
+    response = TokenDocument.search().query(q)
+
+    print('response', response)
+
+    # Print the results
+    for hit in response:
+        print(hit.transcription, hit.pos_token, hit.previous.transcription)
