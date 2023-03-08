@@ -1,4 +1,5 @@
-from typing import Optional, List, cast
+from asgiref.sync import sync_to_async
+from typing import Optional, List
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
@@ -10,7 +11,7 @@ from treeflow.dict.types.lemma import LemmaInput
 from treeflow.corpus import models as corpus_models
 from treeflow.dict import models as dict_models
 
-from treeflow.corpus.types.token import Token, TokenInput, TokenPartial
+from treeflow.corpus.types.token import Token, TokenInput, TokenPartial, TokenElastic
 from treeflow.corpus.types.dependency import DependencyInput
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
@@ -24,18 +25,37 @@ from strawberry_django_plus.permissions import (
 )
 
 
+from elasticsearch_dsl import Search, Q, connections
+es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
+
+
 @gql.type
 class Query:
     token: Optional[Token] = gql.django.node(directives=[IsAuthenticated()])
     tokens: relay.Connection[Token] = gql.django.connection(directives=[IsAuthenticated()])
 
+    @gql.field
+    @sync_to_async
+    def search_tokens(pattern: str, query_type: str, size: int = 100) -> List[TokenElastic]:
+        s = Search(using=es_conn, index='tokens').query(Q(query_type, transcription=pattern)).extra(size=size)
+        response = s.execute()
 
+        tokens = []
+        for hit in response.hits.hits:
+            token = TokenElastic.from_hit(hit)
+            tokens.append(token)
+
+        return tokens
+    
+    
 @gql.type
 class Mutation:
 
     create_token: Token = gql.django.create_mutation(TokenInput, directives=[IsAuthenticated()])
     update_token: Token = gql.django.update_mutation(TokenPartial, directives=[IsAuthenticated()])
     delete_token: Token = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
+    
+
 
     @gql.django.input_mutation
     def join_tokens(self, info,

@@ -1,9 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from simple_history.models import HistoricalRecords
-from treeflow.corpus.models.comment import Comment
-from treeflow.dict.models.lemma import Lemma
+
 
 
 class Meaning(models.Model):

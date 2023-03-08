@@ -3,7 +3,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.mutations import resolvers
-from typing import Optional, List, Iterable
+from typing import Optional, List
 
 
 from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic

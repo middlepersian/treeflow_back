@@ -1,7 +1,6 @@
 
 import strawberry
 from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -16,7 +15,7 @@ from treeflow.corpus.types.user import User
 
 
 @gql.type
-class Query(
+class Query( 
     bibliography.Query,
     comment.Query,
     corpus.Query,

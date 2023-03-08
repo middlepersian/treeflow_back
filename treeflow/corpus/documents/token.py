@@ -1,6 +1,5 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from .text import TextDocument
 from treeflow.corpus.models import Token
 
 @registry.register_document
@@ -11,16 +10,11 @@ class TokenDocument(Document):
 
     previous = fields.NestedField(properties={'id': fields.KeywordField(), 'number': fields.KeywordField(), 'number_in_sentence': fields.FloatField(),  'transcription': fields.KeywordField(), 'transliteration': fields.KeywordField(),})
     next = fields.NestedField(properties={'id': fields.KeywordField(), 'number': fields.KeywordField(), 'number_in_sentence': fields.FloatField(),  'transcription': fields.KeywordField(), 'transliteration': fields.KeywordField(),})
-      
-
-
 
     pos_token = fields.NestedField(properties={'id': fields.KeywordField(), 'pos': fields.KeywordField(),})
     feature_token = fields.NestedField(properties={'id': fields.KeywordField(), 'feature': fields.KeywordField(), 'feature_value': fields.KeywordField(),})
     dependency_token = fields.NestedField(properties={'id': fields.KeywordField(), 'head_number': fields.FloatField(), 'rel': fields.KeywordField(),})
     dependency_head = fields.NestedField(properties={'id': fields.KeywordField(), 'head_number': fields.FloatField(), 'rel': fields.KeywordField(),})
-
-
 
 
     multiword_token_number = fields.NestedField(properties={'number': fields.KeywordField(),})                                                                                     
@@ -41,7 +35,6 @@ class TokenDocument(Document):
                 'transliteration',
                 'avestan',
                 'gloss',
-                'created_at',
                 'multiword_token',
                 
             ]
