@@ -21,6 +21,7 @@ class TokenFilter:
     language: gql.auto
     number: gql.auto
     text: gql.LazyType['TextFilter', 'treeflow.corpus.types.text']
+    section_tokens: gql.LazyType['SectionFilter', 'treeflow.corpus.types.section']
 
 
 @gql.django.type(models.Token, filters=TokenFilter)
@@ -117,6 +118,7 @@ class FeatureElastic:
     id: str
     feature: str
     feature_value: str
+
     @classmethod
     def from_hit(cls, hit):
         if 'feature_token' in hit:
@@ -125,8 +127,9 @@ class FeatureElastic:
                 feature=hit['feature_token']['feature'],
                 feature_value=hit['feature_token']['feature_value']
             )]
-@strawberry.type
+        
 
+@strawberry.type
 class TokenSelection:
     id: str
     number: float
@@ -178,6 +181,7 @@ class TokenElastic(relay.Node):
             avestan=hit['avestan'],
             gloss=hit['gloss'],
             pos_token=POSElastic.from_hit(hit),
+            feature_token=FeatureElastic.from_hit(hit),
         )
     
 
