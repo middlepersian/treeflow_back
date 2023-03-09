@@ -7,7 +7,7 @@ from treeflow.corpus.models import Token
 @registry.register_document
 class TokenDocument(Document):
     text = fields.ObjectField(properties={'id': fields.KeywordField(), 'title': fields.TextField()})
-    lemmas = fields.NestedField(properties={'id': fields.KeywordField(), 'word': fields.KeywordField(), 'language': fields.KeywordField(),})
+    lemmas = fields.NestedField(properties={'id': fields.KeywordField(), 'word': fields.KeywordField(), 'language': fields.KeywordField(), 'multiword_expression': fields.KeywordField()})
     meanings = fields.NestedField(properties={'id': fields.KeywordField(), 'meaning': fields.KeywordField(), 'language': fields.KeywordField(),})
 
     previous = fields.NestedField(properties={'id': fields.KeywordField(), 'number': fields.KeywordField(), 'number_in_sentence': fields.FloatField(),  'transcription': fields.KeywordField(), 'transliteration': fields.KeywordField(),})

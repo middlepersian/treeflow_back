@@ -99,7 +99,7 @@ class TokenPartial:
 
 
 @strawberry.type
-class POSElastic:
+class POSSelection:
     id: str
     pos: str
 
@@ -114,7 +114,7 @@ class POSElastic:
         return None
 
 @strawberry.type
-class FeatureElastic:
+class FeatureSelection:
     id: str
     feature: str
     feature_value: str
@@ -122,11 +122,13 @@ class FeatureElastic:
     @classmethod
     def from_hit(cls, hit):
         if 'feature_token' in hit:
+            feature_tokens = hit['feature_token']
             return[ cls(
-                id=hit['feature_token']['id'],
-                feature=hit['feature_token']['feature'],
-                feature_value=hit['feature_token']['feature_value']
-            )]
+                id=feature_token['id'],
+                feature=feature_token['feature'],
+                feature_value=feature_token['feature_value']
+            ) for feature_token in feature_tokens]
+        return None
         
 
 @strawberry.type
@@ -136,6 +138,19 @@ class TokenSelection:
     number_in_sentence: float
     transcription: str
     transliteration: str
+
+    @classmethod
+    def from_hit(cls, hit, field="next"):
+        if field in hit:
+            return cls(
+                id=hit[field]['id'],
+                number=hit[field]['number'],
+                number_in_sentence=hit[field]['number_in_sentence'],
+                transcription=hit[field]['transcription'],
+                transliteration=hit[field]['transliteration']
+            )
+        return None
+
 
 
 @strawberry.type
@@ -151,12 +166,12 @@ class TokenElastic(relay.Node):
     transliteration: str
     avestan: str
     gloss: str
-    next: Optional['TokenElastic'] = None
-    multiword_token: Optional['TokenElastic'] = None
-    pos_token: Optional[List[POSElastic]] = None
-    feature_token: Optional[List[FeatureElastic]] = None
+    next: Optional[TokenSelection] = None
+    previous: Optional[TokenSelection] = None
+    pos_token: Optional[List[POSSelection]] = None
+    feature_token: Optional[List[FeatureSelection]] = None
     lemmas: Optional[List[LemmaElastic]] = None
-    meanings: Optional[List[gql.LazyType['MeaningElastic', 'treeflow.dict.types.meaning']]] = None
+    meanings: Optional[List[MeaningElastic]] = None
 
     @strawberry.field
     def resolve_id(self: "TokenElastic", info: Optional[Info] = None) -> str:
@@ -164,8 +179,7 @@ class TokenElastic(relay.Node):
 
     @classmethod
     def from_hit(cls, hit):
-        # Access the source data in the hit
-        #source = hit['_source']
+
 
         # Build and return a new instance of TokenElastic
         return cls(
@@ -180,8 +194,12 @@ class TokenElastic(relay.Node):
             transliteration=hit['transliteration'],
             avestan=hit['avestan'],
             gloss=hit['gloss'],
-            pos_token=POSElastic.from_hit(hit),
-            feature_token=FeatureElastic.from_hit(hit),
+            pos_token=POSSelection.from_hit(hit),
+            feature_token=FeatureSelection.from_hit(hit),
+            next=TokenSelection.from_hit(hit, field='next'),
+            previous=TokenSelection.from_hit(hit,field='previous'),
+            lemmas = [LemmaElastic.from_hit(hit_lemma) for hit_lemma in hit['lemmas']],
+            meanings = [MeaningElastic.from_hit(hit_meaning) for hit_meaning in hit['meanings']]
         )
     
 
@@ -230,7 +248,7 @@ def get_token_by_id(id: str) -> TokenElastic:
     if len(response.hits.hits) == 0:
         raise NotFoundError(f"No token by id {id}")
 
-    return TokenElastic.from_hit(response.hits.hits[0])
+    return TokenElastic.from_hit(response.hits.hits[0]['_source'])
 
 
 def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
@@ -239,7 +257,7 @@ def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
 
     tokens = []
     for hit in response.hits.hits:
-        token = TokenElastic.from_hit(hit)
+        token = TokenElastic.from_hit(hit['_source'])
         tokens.append(token)
 
     return tokens

@@ -2,10 +2,10 @@
 import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import List, Optional, Iterable, cast
+from typing import List, Optional, Iterable
 from treeflow.dict import models
 from treeflow.dict.types.language import Language
-from datetime import datetime
+from treeflow.dict.documents.lemma import LemmaDocument
 from elasticsearch_dsl import Search, Q, connections
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
@@ -84,15 +84,12 @@ class LemmaElastic(relay.Node):
     
     @classmethod
     def from_hit(cls, hit):
-        # Access the source data in the hit
-        source = hit['_source']
-
         # Build and return a new instance of LemmaElastic
         return cls(
-            id=relay.to_base64(LemmaElastic, source['id']),
-            word=source['word'],
-            language=source['language'],
-            multiword_expression=source['multiword_expression'],
+            id=relay.to_base64(LemmaElastic, hit['id']),
+            word=hit['word'],
+            language=hit['language'],
+            multiword_expression=hit['multiword_expression'],
         )
     @classmethod
     def resolve_nodes(
@@ -135,7 +132,7 @@ def get_lemma_by_id(id: str) -> LemmaElastic:
     if len(response.hits.hits) == 0:
         raise NotFoundError(f"No lemma by id {id}")
 
-    return LemmaElastic.from_hit(response.hits.hits[0])
+    return LemmaElastic.from_hit(response.hits.hits[0]['_source'])
 
 
 def get_lemmas_by_ids(ids: List[str]) -> List[LemmaElastic]:
@@ -144,8 +141,8 @@ def get_lemmas_by_ids(ids: List[str]) -> List[LemmaElastic]:
 
     lemmas = []
     for hit in response.hits.hits:
-        lemma = LemmaElastic.from_hit(hit)
-        lemmas.append(LemmaElastic)
+        lemma = LemmaElastic.from_hit(hit['_source'])
+        lemmas.append(lemma)
 
     return lemmas
 

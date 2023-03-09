@@ -6,9 +6,11 @@ from strawberry_django_plus.mutations import resolvers
 from typing import Optional, List
 
 
+
 from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic
 from treeflow.dict.types.meaning import MeaningInput
 import treeflow.dict.models as models
+from  treeflow.dict.documents.lemma import LemmaDocument
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -33,11 +35,11 @@ class Query:
     @gql.field
     @sync_to_async
     def search_lemmas(pattern: str, query_type: str, size: int = 100) -> List[LemmaElastic]:
-        s = Search(using=es_conn, index='lemmas').query(Q(query_type, word=pattern)).extra(size=size)
-        response = s.execute()
-
+        
+        q = Q(query_type, word=pattern)
+        response =LemmaDocument.search().query(q).extra(size=size)
         lemmas = []
-        for hit in response.hits.hits:
+        for hit in response:
             lemma = LemmaElastic.from_hit(hit)
             lemmas.append(lemma)
 

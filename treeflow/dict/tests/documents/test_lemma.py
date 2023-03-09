@@ -4,9 +4,10 @@ import pytest
 from treeflow.dict.models.lemma import Lemma as LemmaModel
 from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.documents.meaning import MeaningDocument
-from elasticsearch_dsl import Search, connections
+from elasticsearch_dsl import Search, connections, Q
 import asyncio
 from treeflow.dict.types.lemma import LemmaElastic
+from treeflow.dict.types.lemma import get_lemma_by_id
 from treeflow.dict.types.lemma import Lemma
 from typing import List
 from strawberry_django_plus.gql import relay
@@ -284,3 +285,10 @@ def test_resolve_lemma(lemma):
     assert resolved_lemma.word == lemma.word
     assert resolved_lemma.language == lemma.language
     assert resolved_lemma.multiword_expression == lemma.multiword_expression
+
+
+def test_lemma_document():
+    id = "TGVtbWFFbGFzdGljOjU0ZDIwMjkyLTkxZWYtNDMxZi1hMjQxLWJiMDUzZTYzNzFhZg=="
+    q = Q('ids', values=[id])
+    lemma = LemmaDocument.search().query(q).execute()
+    print(lemma.to_dict())

@@ -1,9 +1,6 @@
-from datetime import datetime
-from django.test import TestCase
-from django.db import models
+
 from treeflow.corpus.documents.token import TokenDocument
-from treeflow.corpus.models import Token
-from treeflow.corpus.models import Section
+
 import pytest
 from elasticsearch_dsl import Search, connections, Q
 
@@ -39,4 +36,4 @@ def test_token_search():
 
     # Print the results
     for hit in response:
-        print(hit.transcription, hit.previous.transcription, hit.pos_token)
+        print(hit.transcription, hit.previous.transcription, hit.pos_token, hit.feature_token)

@@ -10,11 +10,9 @@ from treeflow.corpus.models.section import Section as SectionModel
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
 from strawberry_django_plus.permissions import (
-    HasObjPerm,
-    HasPerm,
+
     IsAuthenticated,
-    IsStaff,
-    IsSuperuser,
+
 )
 
 

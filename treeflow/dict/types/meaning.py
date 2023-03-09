@@ -65,13 +65,11 @@ class MeaningElastic(relay.Node):
     @classmethod
     def from_hit(cls, hit):
         # Access the source data in the hit
-        source = hit['_source']
-
         # Build and return a new instance of MeaningElastic
         return cls(
-            id=relay.to_base64(MeaningElastic, source['id']),
-            language=source['language'],
-            meaning=source['meaning'],
+            id=relay.to_base64(MeaningElastic, hit['id']),
+            language=hit['language'],
+            meaning=hit['meaning'],
         )
 
     @classmethod
@@ -121,7 +119,7 @@ def get_meanings_by_ids(ids: List[str]) -> List[MeaningElastic]:
 
     meanings = []
     for hit in response.hits.hits:
-        meaning = MeaningElastic.from_hit(hit)
+        meaning = MeaningElastic.from_hit(hit['_source'])
         meanings.append(meaning)
 
     return meanings

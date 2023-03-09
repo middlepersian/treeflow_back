@@ -38,8 +38,7 @@ class Query:
     @gql.field
     @sync_to_async
     def search_tokens(pattern: str, query_type: str, size: int = 100) -> List[TokenElastic]:
-        #s = Search(using=es_conn, index='tokens').query(Q(query_type, transcription=pattern)).extra(size=size)
-        #response = s.execute()
+
         q = Q(query_type, transcription=pattern)
         response = TokenDocument.search().query(q).extra(size=size)
 
