@@ -58,7 +58,7 @@ class MeaningElastic(relay.Node):
     meaning: str
 
 
-    @strawberry.field(description="The Globally Unique ID of this object")
+    @classmethod
     def resolve_id(self: "MeaningElastic", info: Optional[Info] = None) -> str:
         return self.id
     

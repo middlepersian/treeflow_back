@@ -173,7 +173,7 @@ class TokenElastic(relay.Node):
     lemmas: Optional[List[LemmaElastic]] = None
     meanings: Optional[List[MeaningElastic]] = None
 
-    @strawberry.field
+    @classmethod
     def resolve_id(self: "TokenElastic", info: Optional[Info] = None) -> str:
         return self.id
 

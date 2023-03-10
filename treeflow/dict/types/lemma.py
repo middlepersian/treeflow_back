@@ -78,7 +78,7 @@ class LemmaElastic(relay.Node):
     multiword_expression: bool
 
 
-    @strawberry.field(description="The Globally Unique ID of this object")
+    @classmethod
     def resolve_id(self: "LemmaElastic", info: Optional[Info] = None) -> str:
         return self.id
     
