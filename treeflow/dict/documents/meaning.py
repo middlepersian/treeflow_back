@@ -7,6 +7,9 @@ from treeflow.dict.models import Meaning
 
 class MeaningDocument(Document):
 
+
+    related_meanings = fields.NestedField(properties={'id': fields.KeywordField(), 'meaning': fields.TextField(), 'language': fields.KeywordField()})
+
     class Index:
         name = 'meanings'
     class Django:

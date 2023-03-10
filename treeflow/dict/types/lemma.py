@@ -70,12 +70,48 @@ class Lemma(relay.Node):
 
 
 @strawberry.type
+class LemmaSelection():
+    word: str
+    language: str
+    multiword_expression: bool
+
+    @classmethod
+    def from_hit(cls,hit, field="related_lemmas"):
+        if field in hit:
+            related_vals = hit[field]
+            return[ cls(
+                word=to_parse['word'],
+                language=to_parse['language'],
+                multiword_expression=to_parse['multiword_expression']
+            ) for to_parse in related_vals]
+        return None
+
+@strawberry.type
+class MeaningSelection():
+    meaning: str
+    language: str
+
+    @classmethod
+    def from_hit(cls, hit, field="related_meanings"):
+        if field in hit:
+            related_vals = hit[field]
+            return[ cls(
+                meaning=to_parse['meaning'],
+                language=to_parse['language']
+            ) for to_parse in related_vals]
+        return None
+
+
+
+@strawberry.type
 class LemmaElastic(relay.Node):
 
     id: relay.GlobalID
     word: str
     language: str
     multiword_expression: bool
+    related_lemmas: Optional[List[LemmaSelection]] = None
+    related_meanings: Optional[List[MeaningSelection]] = None
 
 
     @classmethod
@@ -90,6 +126,8 @@ class LemmaElastic(relay.Node):
             word=hit['word'],
             language=hit['language'],
             multiword_expression=hit['multiword_expression'],
+            related_lemmas=LemmaSelection.from_hit(hit, field="related_lemmas"),
+            related_meanings=MeaningSelection.from_hit(hit, field="related_meanings")
         )
     @classmethod
     def resolve_nodes(

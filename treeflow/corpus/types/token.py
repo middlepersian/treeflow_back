@@ -4,6 +4,7 @@ from strawberry_django_plus.gql import relay
 from typing import List, Optional, Iterable
 from treeflow.dict.types.lemma import LemmaElastic
 from treeflow.dict.types.meaning import MeaningElastic
+from treeflow.dict.types.lemma import LemmaSelection, MeaningSelection
 from treeflow.corpus import models
 from elasticsearch_dsl import Search, connections
 from strawberry.types import Info
@@ -170,8 +171,8 @@ class TokenElastic(relay.Node):
     previous: Optional[TokenSelection] = None
     pos_token: Optional[List[POSSelection]] = None
     feature_token: Optional[List[FeatureSelection]] = None
-    lemmas: Optional[List[LemmaElastic]] = None
-    meanings: Optional[List[MeaningElastic]] = None
+    lemmas: Optional[List[LemmaSelection]] = None
+    meanings: Optional[List[MeaningSelection]] = None
 
     @classmethod
     def resolve_id(self: "TokenElastic", info: Optional[Info] = None) -> str:
@@ -198,8 +199,8 @@ class TokenElastic(relay.Node):
             feature_token=FeatureSelection.from_hit(hit),
             next=TokenSelection.from_hit(hit, field='next'),
             previous=TokenSelection.from_hit(hit,field='previous'),
-            lemmas = [LemmaElastic.from_hit(hit_lemma) for hit_lemma in hit['lemmas']],
-            meanings = [MeaningElastic.from_hit(hit_meaning) for hit_meaning in hit['meanings']]
+            lemmas = LemmaSelection.from_hit(hit, field='lemmas'),
+            meanings = MeaningSelection.from_hit(hit, field='meanings'),
         )
     
 

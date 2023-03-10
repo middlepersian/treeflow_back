@@ -10,6 +10,7 @@ from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Search, Q, connections
 from asgiref.sync import sync_to_async
+from treeflow.dict.types.lemma import MeaningSelection
 
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
@@ -56,6 +57,7 @@ class MeaningElastic(relay.Node):
     id: relay.GlobalID
     language: str
     meaning: str
+    related_meanings: Optional[List[MeaningSelection]] = None
 
 
     @classmethod
@@ -70,6 +72,8 @@ class MeaningElastic(relay.Node):
             id=relay.to_base64(MeaningElastic, hit['id']),
             language=hit['language'],
             meaning=hit['meaning'],
+            related_meanings=MeaningSelection.from_hit(hit, field='related_meanings')
+
         )
 
     @classmethod

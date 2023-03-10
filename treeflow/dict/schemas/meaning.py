@@ -7,6 +7,7 @@ from typing import Optional, cast, List
 
 from treeflow.dict.types.meaning import Meaning, MeaningInput, MeaningPartial, MeaningElastic
 from treeflow.dict.models.meaning import Meaning as MeaningModel
+from treeflow.dict.documents.meaning import MeaningDocument
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -30,15 +31,14 @@ class Query:
     @gql.field
     @sync_to_async
     def search_meanings(pattern: str, query_type: str, size: int = 100) -> List[MeaningElastic]:
-        s = Search(using=es_conn, index='meanings').query(Q(query_type, meaning=pattern)).extra(size=size)
-        response = s.execute()
-
+        q = Q(query_type, meaning=pattern)
+        response =MeaningDocument.search().query(q).extra(size=size)
         meanings = []
-        for hit in response.hits.hits:
+        for hit in response:
             meaning = MeaningElastic.from_hit(hit)
             meanings.append(meaning)
-
         return meanings
+
 
 
 
