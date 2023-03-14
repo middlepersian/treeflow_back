@@ -1,8 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from simple_history.models import HistoricalRecords
-from treeflow.corpus.enums.deprel import Deprel
+from treeflow.utils.normalize import strip_and_normalize
 
 class Dependency(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -25,3 +24,12 @@ class Dependency(models.Model):
         indexes = [
             models.Index(fields=['token', 'head', 'rel']),
         ]
+
+    
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        self.rel = strip_and_normalize('NFC', self.rel)
+        # lowercase the rel
+        self.rel = self.rel.lower()
+        super().save(*args, **kwargs)
+    

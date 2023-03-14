@@ -1,7 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from simple_history.models import HistoricalRecords
+from treeflow.utils.normalize import strip_and_normalize
 
 
 class Lemma(models.Model):
@@ -24,6 +24,16 @@ class Lemma(models.Model):
             models.Index(fields=['word', 'language']),
         ]
         ordering = ['word']
+
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        self.word = strip_and_normalize('NFC', self.word)
+        #process language
+        self.language = self.language.strip().lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return '{} - {}'.format(self.word, self.language)    
 
 
 

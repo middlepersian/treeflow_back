@@ -1,8 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from simple_history.models import HistoricalRecords
-
+from treeflow.utils.normalize import strip_and_normalize
 
 class Feature(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -22,3 +21,11 @@ class Feature(models.Model):
         indexes = [
             models.Index(fields=['token', 'pos', 'feature', 'feature_value']),
         ]
+
+    
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        self.feature = strip_and_normalize('NFC', self.feature)
+        self.feature_value = strip_and_normalize('NFC', self.feature_value)
+        super().save(*args, **kwargs)
+    

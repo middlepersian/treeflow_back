@@ -3,7 +3,7 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-
+from treeflow.utils.normalize import strip_and_normalize
 
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -60,3 +60,9 @@ class Comment(models.Model):
         indexes = [
             models.Index(fields=[ 'text', 'token', 'lemma', 'meaning', 'semantic', 'dependency', 'image',  'section', 'source']),
         ]
+
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        if self.comment:
+            self.comment = strip_and_normalize('NFC', self.comment)
+            super().save(*args, **kwargs)

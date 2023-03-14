@@ -1,7 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from simple_history.models import HistoricalRecords
+from treeflow.utils.normalize import strip_and_normalize
 
 class POS(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -22,3 +22,11 @@ class POS(models.Model):
         indexes = [
             models.Index(fields=['token', 'pos', 'type']),
         ]
+
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        self.pos = strip_and_normalize('NFC', self.pos)
+        # uppercase pos
+        self.pos = self.pos.upper()
+        super().save(*args, **kwargs)
+    

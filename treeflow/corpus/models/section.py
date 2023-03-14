@@ -1,7 +1,7 @@
 from django.db import models
-from django.conf import settings
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
+from treeflow.utils.normalize import strip_and_normalize
 
 
 
@@ -43,6 +43,23 @@ class Section(models.Model):
 
     def __str__(self) -> str:
         return '{}'.format(self.identifier)
+    
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        if self.identifier:
+            #normalize identifier
+            self.identifier = strip_and_normalize('NFC', self.identifier)
+        if self.type:
+            #normalize type    
+            self.type = strip_and_normalize('NFC', self.type)
+        if self.title:    
+            #process title
+            self.title = strip_and_normalize('NFC', self.title)
+        if self.language:
+            # process language
+            self.language = self.language.strip().lower()
+        super().save(*args, **kwargs)
+    
 
 
 

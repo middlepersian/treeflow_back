@@ -1,12 +1,9 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
-from typing import TYPE_CHECKING
+from treeflow.utils.normalize import strip_and_normalize
 
-if TYPE_CHECKING:
-    from django.db.models.manager import RelatedManager
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
@@ -60,6 +57,31 @@ class Token(models.Model):
 
     def __str__(self):
         return '{}'.format(self.transcription)
+    
+    def save(self, *args, **kwargs):
+        #normalize transcription
+        if self.transcription:
+            self.transcription = strip_and_normalize('NFC', self.transcription)
+
+        #normalize transliteration
+        if self.transliteration:
+            self.transliteration = strip_and_normalize('NFC', self.transliteration)
+
+        #normalize language
+        if self.language:
+            #lowercase
+            self.language = self.language.strip().lower()    
+
+        #normalize avestan
+        if self.avestan:
+            self.avestan = strip_and_normalize('NFC', self.avestan)
+
+        #normalize gloss
+        if self.gloss:
+            self.gloss = strip_and_normalize('NFC', self.gloss)
+
+        #save
+        super().save(*args, **kwargs)
 
 
 

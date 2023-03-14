@@ -1,7 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
-
 from simple_history.models import HistoricalRecords
 
 
@@ -16,3 +14,8 @@ class BibEntry(models.Model):
 
     def __str__(self):
         return '{}'.format(self.key)
+
+    def save(self, *args, **kwargs):
+        # Normalize only the `normalized_field` before saving
+        self.key = self.key.strip().lower()
+        super().save(*args, **kwargs)

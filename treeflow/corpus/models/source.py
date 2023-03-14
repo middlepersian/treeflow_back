@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 from .bibliography import BibEntry
 from simple_history.models import HistoricalRecords
+from treeflow.utils.normalize import strip_and_normalize
 
 
 class Source(models.Model):
@@ -36,3 +37,18 @@ class Source(models.Model):
 
     def __str__(self):
         return '{}'.format(self.identifier)
+    
+    def save(self, *args, **kwargs):
+        #normalize type
+        if self.type:
+            self.type = strip_and_normalize('NFC', self.type)
+            #lowercase type
+            self.type = self.type.lower()
+        if self.identifier:    
+            #normalize identifier
+            self.identifier = strip_and_normalize('NFC', self.identifier)
+        if self.description:
+            #normalize description
+            self.description = strip_and_normalize('NFC', self.description)
+        #save
+        super().save(*args, **kwargs)
