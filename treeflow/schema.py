@@ -9,7 +9,7 @@ from treeflow.dict.schemas import lemma, meaning
 from treeflow.images.schemas import image
 from treeflow.dict.types.language import Language
 from typing import List, Optional
-
+from treeflow.corpus.directives.normalization import normalize
 from strawberry.django import auth
 from treeflow.corpus.types.user import User
 

@@ -17,6 +17,8 @@ from treeflow.corpus.types.dependency import DependencyInput
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
+from treeflow.corpus.directives.normalization import normalize
+
 from strawberry_django_plus.permissions import (
     HasObjPerm,
     HasPerm,
@@ -157,4 +159,4 @@ class Mutation:
 
 
 
-schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])
+schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension], directives=[normalize])

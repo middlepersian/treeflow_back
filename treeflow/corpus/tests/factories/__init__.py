@@ -2,9 +2,8 @@ from .bibliography import BibEntryFactory
 from .comment import CommentFactory
 from .corpus import CorpusFactory
 from .dependency import DependencyFactory
-from .postfeature import PostFeatureFactory
+from .feature import FeatureFactory
 from .section import SectionFactory
-from .section_type import SectionTypeFactory
 from .source import SourceFactory
 from .text import TextFactory
 from .token import TokenFactory

@@ -94,8 +94,6 @@ class Feature(relay.Node):
     feature: gql.auto
     feature_value: gql.auto
 
-
-
 @gql.django.input(models.Feature)
 class FeatureInput:
     token: relay.GlobalID

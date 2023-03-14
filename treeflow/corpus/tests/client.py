@@ -1,5 +1,5 @@
 import contextlib
-from typing import Any, Awaitable, Dict, Optional, cast
+from typing import Any, Awaitable, Dict, Optional, cast, Union, overload
 
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import AbstractUser
@@ -7,15 +7,25 @@ from django.test.client import AsyncClient, Client  # type:ignore
 from strawberry.test import BaseGraphQLTestClient
 from strawberry.test.client import Response
 
+from strawberry_django_plus.test.client import TestClient
 
-class TestClient(BaseGraphQLTestClient):
-    def __init__(self, path: str, client: Optional[Client] = None):
-        self.path = path
-        super().__init__(client or Client())
+class GraphQLTestClient(TestClient):
+    def __init__(
+        self,
+        path: str,
+        client: Union[Client, AsyncClient],
+    ):
+        super().__init__(path, client=client)
+        self._token: Optional[contextvars.Token] = None
+        self.is_async = isinstance(client, AsyncClient)
 
-    @property
-    def client(self) -> Client:
-        return self._client
+    def __enter__(self):
+        self._token = _client.set(self)
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        assert self._token
+        _client.reset(self._token)
 
     def request(
         self,
@@ -24,39 +34,27 @@ class TestClient(BaseGraphQLTestClient):
         files: Optional[Dict[str, object]] = None,
     ):
         kwargs: Dict[str, object] = {"data": body}
-        if files:
+        if files:  # pragma:nocover
             kwargs["format"] = "multipart"
         else:
             kwargs["content_type"] = "application/json"
 
         return self.client.post(self.path, **kwargs)
 
-    @contextlib.contextmanager
-    def login(self, user: AbstractUser):
-        self.client.force_login(user)
-        yield
-        self.client.logout()
-
-
-class AsyncTestClient(TestClient):
-    def __init__(self, path: str, client: AsyncClient = None):
-        super().__init__(path, client or AsyncClient())
-
-    @property
-    def client(self) -> AsyncClient:
-        return self._client
-
-    async def query(
+    def query(
         self,
         query: str,
         variables: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, object]] = None,
-        asserts_errors: bool = True,
+        asserts_errors: Optional[bool] = True,
         files: Optional[Dict[str, object]] = None,
     ) -> Response:
         body = self._build_body(query, variables, files)
 
-        resp = await cast(Awaitable, self.request(body, headers, files))
+        resp = self.request(body, headers, files)
+        if inspect.iscoroutine(resp):
+            resp = asyncio.run(resp)
+
         data = self._decode(resp, type="multipart" if files else "json")
 
         response = Response(
@@ -65,12 +63,6 @@ class AsyncTestClient(TestClient):
             extensions=data.get("extensions"),
         )
         if asserts_errors:
-            assert response.errors is None, response.errors
+            assert response.errors is None
 
         return response
-
-    @contextlib.asynccontextmanager
-    async def login(self, user: AbstractUser):
-        await sync_to_async(self.client.force_login)(user)  # type:ignore
-        yield
-        await sync_to_async(self.client.logout)()  # type:ignore

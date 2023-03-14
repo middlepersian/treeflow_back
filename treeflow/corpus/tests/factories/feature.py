@@ -1,10 +1,10 @@
 import factory
-from treeflow.corpus.models import PostFeature
+from treeflow.corpus.models import Feature
 
 
-class PostFeatureFactory(factory.django.DjangoModelFactory):
+class FeatureFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = PostFeature
+        model = Feature
 
         django_get_or_create = ('feature', 'feature_value')
 

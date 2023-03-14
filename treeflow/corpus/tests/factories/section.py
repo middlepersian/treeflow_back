@@ -12,7 +12,6 @@ class SectionFactory(factory.django.DjangoModelFactory):
     title = factory.Faker("pystr", min_chars=3, max_chars=20)
     language = factory.Faker("pystr", max_chars=3)
     text = factory.SubFactory("treeflow.corpus.tests.factories.TextFactory")
-    section_type = factory.SubFactory("treeflow.corpus.tests.factories.SectionTypeFactory")
     source = factory.SubFactory("treeflow.corpus.tests.factories.SourceFactory")
 
     tokens = factory.RelatedFactory("treeflow.corpus.tests.factories.TokenFactory")
