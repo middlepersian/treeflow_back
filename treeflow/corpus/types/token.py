@@ -11,7 +11,6 @@ from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 import unicodedata
-from treeflow.corpus.directives.normalization import normalize, NormalizeDirective
 
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
@@ -65,7 +64,7 @@ class TokenInput:
     number_in_sentence: gql.auto
     text: gql.auto
     language: gql.auto
-    transcription: str = gql.django.field(directives=[NormalizeDirective(form='NFC')])
+    transcription: gql.auto
     lemmas: gql.auto
     meanings: gql.auto
     avestan: gql.auto
