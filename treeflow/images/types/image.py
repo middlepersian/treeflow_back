@@ -1,6 +1,6 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import  Optional
+from typing import  Optional, List
 from treeflow.images import models
 
 @gql.django.filters.filter(models.Image)
@@ -17,7 +17,7 @@ class Image(relay.Node):
     source: gql.LazyType['Source', 'treeflow.corpus.types.source']
     previous: Optional['Image']
     next: Optional['Image']
-    sections: gql.LazyType['Section', 'treeflow.corpus.types.section']
+    sections: List[gql.LazyType['Section', 'treeflow.corpus.types.section']]
 
 
 @gql.django.input(models.Image)
