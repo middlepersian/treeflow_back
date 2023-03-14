@@ -2,7 +2,6 @@ from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, Optional, cast
-from django.db.models import Prefetch
 from strawberry.types.info import Info
 
 from treeflow.corpus import models
@@ -39,6 +38,11 @@ class Section(relay.Node):
     container: Optional['Section']
 
     @gql.django.field(
+        prefetch_related=["image_sections"])
+    def resolve_image(self, info: Info) -> List[gql.LazyType['Image', 'treeflow.images.types.image']]:
+        return [cast('Image', image) for image in self.image_sections.all().only("id", "identifier")]
+
+    @gql.django.field(
         prefetch_related=[
             "section_container"
         ],
@@ -53,7 +57,7 @@ class Section(relay.Node):
         ],
     )
     def resolve_tokens(self, info: Info) -> List[gql.LazyType['Token', 'treeflow.corpus.types.token']]:
-        return [gql.LazyType('Token', token.pk) for token in self.tokens.all()]
+        return [cast('Token', token) for token in self.tokens.all()]
 
 
     @gql.django.field(
@@ -62,7 +66,7 @@ class Section(relay.Node):
         ],
     )
     def resolve_meanings(self, info: Info) -> List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]:
-        return [gql.LazyType('Meaning', meaning.pk) for meaning in self.meanings.all()]     
+        return [cast('Meaning', meaning) for meaning in self.meanings.all()]     
     
 @gql.django.input(models.Section)
 class SectionInput:
