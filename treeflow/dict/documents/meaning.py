@@ -18,5 +18,5 @@ class MeaningDocument(Document):
             'id',
             'meaning',
             'language',
-            'related_lemma'
+            'lemma_related'
         ]
