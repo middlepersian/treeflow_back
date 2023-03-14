@@ -2,15 +2,12 @@ import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, Optional, Iterable
-from treeflow.dict.types.lemma import LemmaElastic
-from treeflow.dict.types.meaning import MeaningElastic
 from treeflow.dict.types.lemma import LemmaSelection, MeaningSelection
 from treeflow.corpus import models
 from elasticsearch_dsl import Search, connections
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
-import unicodedata
 
 es_conn =  connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
@@ -23,6 +20,7 @@ class TokenFilter:
     language: gql.auto
     number: gql.auto
     text: gql.LazyType['TextFilter', 'treeflow.corpus.types.text']
+    image : gql.LazyType['ImageFilter', 'treeflow.images.types.image']
     section_tokens: gql.LazyType['SectionFilter', 'treeflow.corpus.types.section']
 
 
@@ -42,6 +40,7 @@ class Token(relay.Node):
     word_token: gql.auto
     visible: gql.auto
     text: gql.LazyType['Text', 'treeflow.corpus.types.text']
+    image: gql.LazyType['Image', 'treeflow.images.types.image']
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto
@@ -63,6 +62,7 @@ class TokenInput:
     number: gql.auto
     number_in_sentence: gql.auto
     text: gql.auto
+    image: gql.auto
     language: gql.auto
     transcription: gql.auto
     lemmas: gql.auto
@@ -82,6 +82,7 @@ class TokenPartial:
     id: relay.GlobalID
     number: gql.auto
     number_in_sentence: gql.auto
+    image: gql.auto
     text: gql.auto
     language: gql.auto
     transcription: gql.auto
@@ -157,6 +158,8 @@ class TokenSelection:
 @strawberry.type
 class TokenElastic(relay.Node):
     id: relay.GlobalID
+    text: relay.GlobalID
+    image: relay.GlobalID
     number: float
     number_in_sentence: float
     language: str
@@ -185,6 +188,8 @@ class TokenElastic(relay.Node):
         # Build and return a new instance of TokenElastic
         return cls(
             id=relay.to_base64(TokenElastic, hit['id']),
+            text=relay.to_base64('Text', hit['text']['id']),
+            image=relay.to_base64('Image', hit['image']['id']),
             number=hit['number'],
             number_in_sentence=hit['number_in_sentence'],
             language=hit['language'],

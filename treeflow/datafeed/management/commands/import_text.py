@@ -296,20 +296,26 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                             lemma_obj.related_meanings.add(m_obj)
                     mwes.append(lemma_obj)   
         #process images
-        if row['folionew'] != '_' and pd.notna(row['folionew']):
-            img = str(row['folionew'])
-            #print("image {}".format(img))
-            image_id = manuscript_obj.identifier + "_" + img
-            #print("image_id {}".format(image_id))
-            image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, number=image_number)
-            if image_obj_created:
-                image_obj.manuscript = manuscript_obj
-                image_obj.previous = previous_image_obj
-                image_obj.save()
-                #add to list
-                images.append(image_obj)    
-                previous_image_obj = image_obj
-                image_number += 1
+        if pd.notna(row['folionew']):
+            if row['folionew'] != '_':
+                img = str(row['folionew'])
+                #print("image {}".format(img))
+                image_id = manuscript_obj.identifier + "_" + img
+                #print("image_id {}".format(image_id))
+                image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, number=image_number)
+                if image_obj_created:
+                    image_obj.manuscript = manuscript_obj
+                    image_obj.previous = previous_image_obj
+                    image_obj.save()
+                    #add to list
+                    images.append(image_obj)    
+                    previous_image_obj = image_obj
+                    image_number += 1
+            if previous_image_obj:
+                # add token to image
+                if token:
+                    token.image = previous_image_obj
+                
         # process lines
         if row['line'] != '_' and pd.notna(row['line']):
             # save line to image

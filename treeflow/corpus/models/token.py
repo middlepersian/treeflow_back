@@ -14,6 +14,7 @@ class Token(models.Model):
     visible = models.BooleanField(default=True)
 
     text = models.ForeignKey('Text', on_delete=models.CASCADE, null=True, blank=True, related_name='token_text')
+    image = models.ForeignKey('images.Image', on_delete=models.CASCADE, null=True, blank=True, related_name='token_image')
 
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50)
