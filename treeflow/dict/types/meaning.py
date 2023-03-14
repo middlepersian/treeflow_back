@@ -57,6 +57,7 @@ class MeaningElastic(relay.Node):
     id: relay.GlobalID
     language: str
     meaning: str
+    lemma_related : boolean
     related_meanings: Optional[List[MeaningSelection]] = None
 
 
@@ -72,6 +73,7 @@ class MeaningElastic(relay.Node):
             id=relay.to_base64(MeaningElastic, hit['id']),
             language=hit['language'],
             meaning=hit['meaning'],
+            lemma_related=hit['lemma_related'],
             related_meanings=MeaningSelection.from_hit(hit, field='related_meanings')
 
         )
