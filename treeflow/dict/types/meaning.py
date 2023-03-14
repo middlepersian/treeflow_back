@@ -57,7 +57,7 @@ class MeaningElastic(relay.Node):
     id: relay.GlobalID
     language: str
     meaning: str
-    lemma_related : boolean
+    lemma_related : bool
     related_meanings: Optional[List[MeaningSelection]] = None
 
 
