@@ -1,6 +1,6 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
-from treeflow.datafeed.utils import normalize_nfc
+#from treeflow.datafeed.utils import normalize_nfc
 from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment, POS
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
@@ -21,11 +21,11 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
 
 
     # normalize strings
-    manuscript_id = normalize_nfc(input_string=manuscript_id)
-    manuscript_id = manuscript_id.upper()
-    text_sigle = normalize_nfc(input_string=text_sigle)
-    text_sigle = text_sigle.upper()
-    text_title = normalize_nfc(input_string=text_title)
+    #manuscript_id = normalize_nfc(input_string=manuscript_id)
+    #manuscript_id = manuscript_id.upper()
+    #text_sigle = normalize_nfc(input_string=text_sigle)
+    #text_sigle = text_sigle.upper()
+    #text_title = normalize_nfc(input_string=text_title)
     text_title = text_title.title()
 
     #create source manuscript object
@@ -142,7 +142,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if sentence_obj:
                     translation = translation[1]
                     if translation:
-                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=normalize_nfc(translation), language="deu")
+                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=translation, language="deu", lemma_related=False)
                         sentence_obj.meanings.add(meaning_obj)
                         sentence_obj.save()
                         continue 
@@ -151,9 +151,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 #split the cell
                 comment = str(row["id"]).split('=')
                 if sentence_obj:
-                    comment_content = normalize_nfc(input_string=comment[1])
-                    if comment_content:
-                        Comment.objects.create(comment=comment_content, section=sentence_obj)
+                    if comment[1]:
+                        Comment.objects.create(comment=comment[1], section=sentence_obj)
                         continue                          
 
             #new token with number (word token)
@@ -178,13 +177,13 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             token.language = "pal"
             #increase token numbe
             if transliteration:
-                token.transliteration = normalize_nfc(transliteration)
-                assert token.transliteration == normalize_nfc(transliteration)
+                token.transliteration = transliteration
+                assert token.transliteration == transliteration
             assert token.number == token_number
             token_number += 1
             #add transcription
             if transcription:
-                token.transcription = normalize_nfc(transcription)
+                token.transcription = transcription
                 #print("token.transcription", token.transcription)
             #add upos
 
@@ -200,7 +199,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
         # process pos
 
         if postag and postag != "X":
-            upos = normalize_nfc(postag)
+            upos = postag
             pos, pos_created = POS.objects.get_or_create(pos=upos, type="upos", token=token)        
         # process postfeatures
         if row["postfeatures"] != "_" and pd.notna(row['postfeatures']):    
@@ -215,7 +214,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         feature, value = postfeature.split("=")
                         # assert that the split existed and that the feature and value are not empty
                         assert feature and value
-                        feature_obj = Feature.objects.create(feature=normalize_nfc(feature), feature_value=normalize_nfc(value), token=token, pos=pos)
+                        feature_obj = Feature.objects.create(feature=feature, feature_value=value, token=token, pos=pos)
                     else: 
                         continue    
             else:
@@ -231,11 +230,11 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 head = float(row["head"])
                 #print("head {}".format( head))
                 #create dependency
-                dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(deprel), token=token)
+                dependency_obj = Dependency.objects.create(head_number = head, rel =deprel, token=token)
                 assert dependency_obj.head_number == head
                 dependencies.append(dependency_obj)
                 #check if root
-                if normalize_nfc(deprel) == 'root'  and token:
+                if deprel == 'root'  and token:
                     print("ROOT: {}".format(token))
                     token.root = True
         if row['deps'] != '_':
@@ -247,7 +246,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                     if dep and dep != "_" and ':' in dep:
                         head, rel = dep.split(":")
                         head = float(head)
-                        dependency_obj = Dependency.objects.create(head_number = head, rel = normalize_nfc(rel), token=token)
+                        dependency_obj = Dependency.objects.create(head_number = head, rel = rel, token=token)
                         assert dependency_obj.head_number == head
                         dependencies.append(dependency_obj)
                 except ValueError:
@@ -257,13 +256,12 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
         # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
         if row['lemma'] != '_' and pd.notna(row['lemma']):
             lemma = row['lemma']
-            lemma = normalize_nfc(input_string=lemma)
             if '$' != lemma and lemma != ',' and lemma != '$':
                 #print("### lemma: {}".format(lemma))
                 # if token available, single lemma, if not, MWE
                 if token:
                     # create lemma
-                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=False, language="pal")
+                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=lemma, multiword_expression=False, language="pal")
                     assert lemma_obj.multiword_expression == False
                     # add meaning
                     if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
@@ -272,17 +270,17 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                             meaning = meaning.split(',')
                             for m in meaning:
                                 m = m.strip()
-                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(m), language="eng")
+                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=m, language="eng")
                                 lemma_obj.related_meanings.add(m_obj)        
                         else:
-                            meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
+                            meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=meaning, language="eng")
                             lemma_obj.related_meanings.add(meaning_obj)
                             token.meanings.add(meaning_obj)
                     lemmas.append(lemma_obj)    
                     token.lemmas.add(lemma_obj)
                 else:
                     #print("MWE: {}".format(lemma))
-                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=normalize_nfc(lemma), multiword_expression=True, language="pal")
+                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=lemma, multiword_expression=True, language="pal")
                     assert lemma_obj.multiword_expression == True
                     # add meaning
                     if row['meaning'] != '_' and pd.notna(row['meaning']):
@@ -291,17 +289,17 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                             meaning = meaning.split(',')
                             for m in meaning:
                                 m = m.strip()
-                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(m), language="eng")
+                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=m, language="eng")
                                 lemma_obj.related_meanings.add(m_obj)
                         else:
-                            m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=normalize_nfc(meaning), language="eng")
+                            m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=meaning, language="eng")
                             lemma_obj.related_meanings.add(m_obj)
                     mwes.append(lemma_obj)   
         #process images
         if row['folionew'] != '_' and pd.notna(row['folionew']):
-            img = normalize_nfc(str(row['folionew']))
+            img = str(row['folionew'])
             #print("image {}".format(img))
-            image_id = normalize_nfc(manuscript_obj.identifier + "_" + img)
+            image_id = manuscript_obj.identifier + "_" + img
             #print("image_id {}".format(image_id))
             image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, number=image_number)
             if image_obj_created:
@@ -423,8 +421,6 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 comment_obj.to_discuss = [] 
                 comment_obj.to_discuss.append(discussion)
             comment_obj.save()    
-
-
         
         if token:
             #add token to tokens list
