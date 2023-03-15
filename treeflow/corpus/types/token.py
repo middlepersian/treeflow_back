@@ -159,17 +159,17 @@ class TokenSelection:
 class TokenElastic(relay.Node):
     id: relay.GlobalID
     text: relay.GlobalID
-    image: relay.GlobalID
+    image: Optional[relay.GlobalID]
     number: float
-    number_in_sentence: float
+    number_in_sentence: Optional[float]
     language: str
-    root: str
-    word_token: str
-    visible: bool
+    root: Optional[bool]
+    word_token: Optional[bool]
+    visible: Optional[bool]
     transcription: str
     transliteration: str
-    avestan: str
-    gloss: str
+    avestan: Optional[str]
+    gloss: Optional[str]
     next: Optional[TokenSelection] = None
     previous: Optional[TokenSelection] = None
     pos_token: Optional[List[POSSelection]] = None
