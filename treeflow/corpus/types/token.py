@@ -212,7 +212,7 @@ class TokenElastic(relay.Node):
     def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['TokenElastic']:
         try:
             node = get_token_by_id(id=node_id)
-            return TokenElastic.from_hit(node)
+            return node
         except (relay.GlobalIDValueError, NotFoundError):
             if required:
                 raise ValueError(f"No node by id {node_id}")
