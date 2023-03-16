@@ -143,7 +143,8 @@ class TokenSelection:
 
     @classmethod
     def from_hit(cls, hit, field="next"):
-        if field in hit:
+
+        if field in hit and 'id' in hit[field]:
             return cls(
                 id=hit[field]['id'],
                 number=hit[field]['number'],
@@ -161,8 +162,8 @@ class TokenElastic(relay.Node):
     text: relay.GlobalID
     image: Optional[relay.GlobalID]
     number: float
-    number_in_sentence: Optional[float]
-    language: str
+    number_in_sentence: Optional[float] = None
+    language: Optional[str] = None
     root: Optional[bool]
     word_token: Optional[bool]
     visible: Optional[bool]
@@ -180,34 +181,32 @@ class TokenElastic(relay.Node):
     @classmethod
     def resolve_id(self: "TokenElastic", info: Optional[Info] = None) -> str:
         return self.id
-
+    
     @classmethod
     def from_hit(cls, hit):
 
-
         # Build and return a new instance of TokenElastic
         return cls(
-            id=relay.to_base64(TokenElastic, hit['id']),
-            text=relay.to_base64('Text', hit['text']['id']),
-            image=relay.to_base64('Image', hit['image']['id']),
-            number=hit['number'],
-            number_in_sentence=hit['number_in_sentence'],
-            language=hit['language'],
-            root=hit['root'],
-            word_token=hit['word_token'],
-            visible=hit['visible'],
-            transcription=hit['transcription'],
-            transliteration=hit['transliteration'],
-            avestan=hit['avestan'],
-            gloss=hit['gloss'],
-            pos_token=POSSelection.from_hit(hit),
-            feature_token=FeatureSelection.from_hit(hit),
-            next=TokenSelection.from_hit(hit, field='next'),
-            previous=TokenSelection.from_hit(hit,field='previous'),
-            lemmas = LemmaSelection.from_hit(hit, field='lemmas'),
-            meanings = MeaningSelection.from_hit(hit, field='meanings'),
+            id=relay.to_base64(TokenElastic, hit['id']) if 'id' in hit else None,
+            text=relay.to_base64('Text', hit['text']['id']) if 'text' in hit and 'id' in hit['text'] else None,
+            image=relay.to_base64('Image', hit['image']['id']) if 'image' in hit and 'id' in hit['image'] else None,
+            number=hit['number'] if 'number' in hit else None,
+            number_in_sentence=hit['number_in_sentence'] if 'number_in_sentence' in hit else None,
+            language=hit['language'] if 'language' in hit else None,
+            root=hit['root'] if 'root' in hit else None,
+            word_token=hit['word_token'] if 'word_token' in hit else None,
+            visible=hit['visible'] if 'visible' in hit else None,
+            transcription=hit['transcription'] if 'transcription' in hit else None,
+            transliteration=hit['transliteration'] if 'transliteration' in hit else None,
+            avestan=hit['avestan'] if 'avestan' in hit else None,
+            gloss=hit['gloss'] if 'gloss' in hit else None,
+            pos_token=POSSelection.from_hit(hit) if 'pos_token' in hit else None,
+            feature_token=FeatureSelection.from_hit(hit) if 'feature_token' in hit else None,
+            next=TokenSelection.from_hit(hit, field='next') if 'next' in hit and hit['next'] is not None else None,
+            previous=TokenSelection.from_hit(hit, field='previous') if 'previous' in hit and hit['previous'] is not None else None,
+            lemmas=LemmaSelection.from_hit(hit, field='lemmas') if 'lemmas' in hit else None,
+            meanings=MeaningSelection.from_hit(hit, field='meanings') if 'meanings' in hit else None,
         )
-    
 
     @classmethod
     def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['TokenElastic']:

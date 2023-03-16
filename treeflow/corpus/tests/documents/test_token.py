@@ -1,6 +1,6 @@
 
 from treeflow.corpus.documents.token import TokenDocument
-
+from treeflow.corpus.types.token import TokenElastic
 import pytest
 from elasticsearch_dsl import Search, connections, Q
 
@@ -37,3 +37,20 @@ def test_token_search():
     # Print the results
     for hit in response:
         print(hit.transcription, hit.previous.transcription, hit.pos_token, hit.feature_token)
+
+
+def test_search():
+        query_type = 'wildcard'
+        pattern = 'pad*'
+        q = Q(query_type, transcription=pattern)
+        size = 100
+        response = TokenDocument.search().query(q).extra(size=size)
+
+        tokens = []
+        for hit in response:
+            print(hit.transcription, hit.previous.transcription, hit.pos_token, hit.feature_token)
+            
+            token = TokenElastic.from_hit(hit)
+            tokens.append(token)
+
+        return tokens
