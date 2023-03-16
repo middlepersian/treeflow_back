@@ -32,6 +32,7 @@ class Lemma(relay.Node):
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    category: gql.auto
     multiword_expression: gql.auto
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
@@ -41,6 +42,7 @@ class Lemma(relay.Node):
 class LemmaInput:
     word: gql.auto
     language: Language
+    category: gql.auto
     multiword_expression: gql.auto
     related_lemmas: gql.auto
     related_meanings: gql.auto
@@ -51,6 +53,7 @@ class LemmaPartial:
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    category: gql.auto
     multiword_expression: gql.auto
     related_lemmas: gql.auto
     related_meanings: gql.auto
@@ -64,6 +67,7 @@ class Lemma(relay.Node):
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    category: gql.auto
     multiword_expression: gql.auto
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
@@ -73,6 +77,7 @@ class Lemma(relay.Node):
 class LemmaSelection():
     word: str
     language: str
+    category: str
     multiword_expression: bool
 
     @classmethod
@@ -82,6 +87,7 @@ class LemmaSelection():
             return[ cls(
                 word=to_parse['word'],
                 language=to_parse['language'],
+                category=to_parse['category'] if 'category' in to_parse else None,
                 multiword_expression=to_parse['multiword_expression']
             ) for to_parse in related_vals]
         return None
@@ -109,6 +115,7 @@ class LemmaElastic(relay.Node):
     id: relay.GlobalID
     word: str
     language: str
+    category: str
     multiword_expression: bool
     related_lemmas: Optional[List[LemmaSelection]] = None
     related_meanings: Optional[List[MeaningSelection]] = None
@@ -126,6 +133,7 @@ class LemmaElastic(relay.Node):
             word=hit['word'],
             language=hit['language'],
             multiword_expression=hit['multiword_expression'],
+            category=hit['category'],
             related_lemmas=LemmaSelection.from_hit(hit, field="related_lemmas"),
             related_meanings=MeaningSelection.from_hit(hit, field="related_meanings")
         )

@@ -8,6 +8,7 @@ class Lemma(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     word = models.CharField(max_length=100)
     language = models.CharField(max_length=3, null=True, blank=True)
+    category = models.CharField(max_length=15, null=True, blank=True)
     multiword_expression = models.BooleanField(default=False)
     related_lemmas = models.ManyToManyField('self', blank=True, related_name="lemma_related_lemmas",through='LemmaRelation')
     related_meanings = models.ManyToManyField('Meaning', blank=True, related_name='lemma_related_meanings', through='LemmaMeaning')
@@ -29,7 +30,12 @@ class Lemma(models.Model):
         # Normalize only the `normalized_field` before saving
         self.word = strip_and_normalize('NFC', self.word)
         #process language
-        self.language = self.language.strip().lower()
+        if self.language:
+            self.language = self.language.strip().lower()
+        #process category
+        if self.category:
+            self.category = self.category.strip().lower()
+
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:

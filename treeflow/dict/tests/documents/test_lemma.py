@@ -292,3 +292,17 @@ def test_lemma_document():
     q = Q('ids', values=[id])
     lemma = LemmaDocument.search().query(q).execute()
     print(lemma.to_dict())
+
+def test_lemma_search():
+    query_type = "wildcard"
+    pattern = "*da*"
+    size = 20
+    q = Q(query_type, word=pattern)
+    response =LemmaDocument.search().query(q).extra(size=size)
+
+    lemmas = []
+    for hit in response:
+        lemma = LemmaElastic.from_hit(hit)
+        lemmas.append(lemma)
+    print(lemmas)
+    return lemmas

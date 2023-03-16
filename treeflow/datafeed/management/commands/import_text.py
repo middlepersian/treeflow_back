@@ -1,10 +1,13 @@
 import pandas as pd
+import string
 from django.core.management.base import BaseCommand
 #from treeflow.datafeed.utils import normalize_nfc
 from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment, POS
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
 from django.conf import settings
+
+
 
 def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
 
@@ -262,7 +265,13 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if token:
                     # create lemma
                     lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=lemma, multiword_expression=False, language="pal")
-                    assert lemma_obj.multiword_expression == False
+                    # check if term.tech exists
+                    if row['term._tech._(cat.)'] and row['term._tech._(cat.)'] != '_' and pd.notna(row['term._tech._(cat.)']): 
+                        term_tech = row['term._tech._(cat.)']
+                        #print("term_tech: {}".format(term_tech))
+                        #remove punctuation with translate
+                        term_tech = term_tech.translate(str.maketrans('', '', string.punctuation))
+                        lemma_obj.category = term_tech
                     # add meaning
                     if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
                         meaning = row['meaning']
@@ -276,6 +285,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                             meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=meaning, language="eng")
                             lemma_obj.related_meanings.add(meaning_obj)
                             token.meanings.add(meaning_obj)
+                    # save lemma
+                    lemma_obj.save()        
                     lemmas.append(lemma_obj)    
                     token.lemmas.add(lemma_obj)
                 else:
@@ -294,6 +305,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         else:
                             m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=meaning, language="eng")
                             lemma_obj.related_meanings.add(m_obj)
+                    # save lemma
+                    lemma_obj.save()        
                     mwes.append(lemma_obj)   
         #process images
         if pd.notna(row['folionew']):
