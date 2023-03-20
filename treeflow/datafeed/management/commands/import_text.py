@@ -6,6 +6,7 @@ from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
 from django.conf import settings
+from treeflow.utils.normalize import strip_and_normalize
 
 
 
@@ -145,7 +146,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if sentence_obj:
                     translation = translation[1]
                     if translation:
-                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=translation, language="deu", lemma_related=False)
+                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=strip_and_normalize('NFC', translation), language="deu", lemma_related=False)
                         sentence_obj.meanings.add(meaning_obj)
                         sentence_obj.save()
                         continue 
@@ -176,7 +177,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
         # we do create a token if there is a transliteration or a token_number_in_sentence
         if transliteration or token_number_in_sentence:
             #create token object
-            token, token_created = Token.objects.get_or_create(text = text_object, number = token_number)
+            token = Token.objects.create(text = text_object, number = token_number)
             token.language = "pal"
             #increase token numbe
             if transliteration:
