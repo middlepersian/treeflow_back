@@ -15,8 +15,8 @@ from strawberry_django_plus.permissions import (
 
 @gql.type
 class Query:
-    image: Optional[Image] = gql.django.node(directives=[IsAuthenticated()])
-    images:  relay.Connection[Image] = gql.django.connection(directives=[IsAuthenticated()])
+    image: Optional[Image] = gql.django.node()
+    images:  relay.Connection[Image] = gql.django.connection()
 
 
 @gql.type

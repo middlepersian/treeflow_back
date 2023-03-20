@@ -24,8 +24,8 @@ es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 @gql.type
 class Query:
-    meaning: Optional[Meaning] = gql.django.node(directives=[IsAuthenticated()])
-    meanings:  relay.Connection[Meaning] = gql.django.connection(directives=[IsAuthenticated()])
+    meaning: Optional[Meaning] = gql.django.node()
+    meanings:  relay.Connection[Meaning] = gql.django.connection()
 
 
     @gql.field

@@ -28,8 +28,8 @@ es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 @gql.type
 class Query:
-    lemma: Optional[Lemma] = gql.django.node(directives=[IsAuthenticated()])
-    lemmas:  relay.Connection[Lemma] = gql.django.connection(directives=[IsAuthenticated()])
+    lemma: Optional[Lemma] = gql.django.node()
+    lemmas:  relay.Connection[Lemma] = gql.django.connection()
 
 
     @gql.field
