@@ -104,5 +104,7 @@ class FeatureInput:
 @gql.django.partial(models.Feature)
 class FeaturePartial(gql.NodeInputPartial):
     id: relay.GlobalID
+    token: relay.GlobalID
+    pos: Optional[POSInput]
     feature: gql.auto
     feature_value: gql.auto

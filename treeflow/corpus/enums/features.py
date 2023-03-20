@@ -1,4 +1,5 @@
 import strawberry
+from typing import List
 
 @strawberry.type
 class UPOS_Feature:
@@ -6,7 +7,6 @@ class UPOS_Feature:
     feat: str
     values: List[str]
 
-from typing import List
 
 data = [
     ("ADV", "Deixis", ["Prox","Remt"]),

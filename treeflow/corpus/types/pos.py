@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from treeflow.corpus import models
 
-import strawberry
+
 
 
 @gql.django.type(models.POS)
@@ -17,13 +17,13 @@ class POS(relay.Node):
 
 @gql.django.input(models.POS)
 class POSInput:
-    token : gql.auto
+    token : relay.GlobalID
     pos: gql.auto
     type: gql.auto
 
 @gql.django.partial(models.POS)
 class POSPartial(gql.NodeInputPartial):
     id: relay.GlobalID
-    token: gql.auto
+    token: relay.GlobalID
     pos: gql.auto
     type: gql.auto

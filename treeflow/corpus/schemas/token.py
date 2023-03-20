@@ -14,6 +14,8 @@ from treeflow.dict import models as dict_models
 
 from treeflow.corpus.types.token import Token, TokenInput, TokenPartial, TokenElastic
 from treeflow.corpus.types.dependency import DependencyInput
+from treeflow.corpus.types.feature import FeatureInput
+from treeflow.corpus.types.pos import POSInput
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -149,9 +151,35 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
+        data = vars(dependency)
         dependency = resolvers.create(info, corpus_models.Dependency, resolvers.parse_input(info, data))
-        token.dependencies.add(dependency)
-        token.save()
+        dependency.save()
+        return token
+
+    @gql.django.input_mutation
+    def add_new_pos_to_token(self, info,
+                             token: relay.GlobalID,
+                             pos: POSInput,
+                             ) -> Token:
+        if not info.context.request.user.is_authenticated:
+            raise Exception("You must be authenticated for this operation.")
+        data = vars(pos)
+        token = token.resolve_node(info)
+        pos = resolvers.create(info, corpus_models.Pos, resolvers.parse_input(info, data))
+        pos.save()
+        return token
+        
+    @gql.django.input_mutation
+    def add_new_feature_to_token(self, info,
+                                  token: relay.GlobalID,
+                                  feature:FeatureInput,
+                                  ) -> Token:
+        if not info.context.request.user.is_authenticated:
+            raise Exception("You must be authenticated for this operation.")
+        data = vars(feature)
+        token = token.resolve_node(info)
+        feature = resolvers.create(info, corpus_models.Feature, resolvers.parse_input(info, data))
+        feature.save()
         return token
     
 

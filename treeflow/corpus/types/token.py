@@ -39,8 +39,8 @@ class Token(relay.Node):
     root: gql.auto
     word_token: gql.auto
     visible: gql.auto
-    text: gql.LazyType['Text', 'treeflow.corpus.types.text']
-    image: gql.LazyType['Image', 'treeflow.images.types.image']
+    text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
+    image:  Optional[gql.LazyType['Image', 'treeflow.images.types.image']] = None
     language: gql.auto
     transcription: gql.auto
     transliteration: gql.auto

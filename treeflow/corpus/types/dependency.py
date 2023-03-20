@@ -12,6 +12,7 @@ class Dependency(relay.Node):
     token_dependencies: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
 
     id: relay.GlobalID
+    token: Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
     head:  Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
     head_number: Optional[float]
     rel: Deprel
@@ -20,7 +21,8 @@ class Dependency(relay.Node):
 
 @gql.django.input(models.Dependency)
 class DependencyInput:
-    head:  gql.auto
+    token: relay.GlobalID
+    head:  relay.GlobalID
     head_number: gql.auto
     rel: Deprel
     producer: gql.auto
@@ -29,7 +31,8 @@ class DependencyInput:
 @gql.django.partial(models.Dependency)
 class DependencyPartial(gql.NodeInputPartial):
     id: relay.GlobalID
-    head:  gql.auto
+    token: relay.GlobalID
+    head:  relay.GlobalID
     head_number: gql.auto
     rel: Deprel
     producer: gql.auto

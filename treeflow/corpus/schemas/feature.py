@@ -26,7 +26,7 @@ class Query:
         return PartOfSpeechFeatures(pos=pos, features=list(get_features(pos).keys()), feature_values=feature_values)
     
     @strawberry.field
-    def pos_list(self, info) -> UPOSList:
+    def upos_list(self, info) -> UPOSList:
         pos_list = list(upos_feature_feature_value.keys())
         return UPOSList(pos=pos_list)
 
