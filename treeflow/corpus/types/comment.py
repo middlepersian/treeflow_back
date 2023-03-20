@@ -3,11 +3,18 @@ from strawberry_django_plus.gql import relay
 from typing import Optional, List
 from treeflow.corpus import models
 
+from strawberry_django_plus.directives import SchemaDirectiveExtension
+
+from strawberry_django_plus.permissions import (
+    IsAuthenticated,
+     IsSuperuser,
+)
 
 @gql.django.type(models.Comment)
 class Comment(relay.Node):
     id: relay.GlobalID
-    comment: gql.auto
+    comment: gql.auto  
+    user : Optional[gql.LazyType('User', 'treeflow.corpus.types.user')] = gql.django.field(directives=[IsSuperuser()])
 
     dependency: Optional[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
     image: Optional[gql.LazyType['Image', 'treeflow.images.types.image']]
@@ -25,6 +32,7 @@ class Comment(relay.Node):
 class CommentInput:
     comment: gql.auto
 
+    user : gql.auto
     dependency:  gql.auto
     image:  gql.auto
     section:  gql.auto
@@ -41,6 +49,7 @@ class CommentInput:
 class CommentPartial(gql.NodeInputPartial):
     comment: gql.auto
 
+    user: gql.auto
     dependency:  gql.auto
     image:  gql.auto
     section:  gql.auto

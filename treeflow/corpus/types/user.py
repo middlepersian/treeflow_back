@@ -11,8 +11,8 @@ from strawberry_django_plus.permissions import (
 
 @gql.django.type(get_user_model())
 class User(relay.Node):
-    id: relay.GlobalID = gql.field(directives=[IsSuperuser()])
-    username: gql.auto = gql.field(directives=[IsSuperuser()])
-    is_superuser: gql.auto = gql.field(directives=[IsSuperuser()])
-    is_staff: gql.auto = gql.field(directives=[IsSuperuser()])
-    email: gql.auto = gql.field(directives=[IsSuperuser()])
+    id: relay.GlobalID = gql.field()
+    username: gql.auto = gql.field()
+    is_superuser: gql.auto = gql.field()
+    is_staff: gql.auto = gql.field()
+    email: gql.auto = gql.field()
