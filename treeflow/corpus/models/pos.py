@@ -25,8 +25,9 @@ class POS(models.Model):
 
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
-        self.pos = strip_and_normalize('NFC', self.pos)
-        # uppercase pos
-        self.pos = self.pos.upper()
+        if self.pos:
+            self.pos = strip_and_normalize('NFC', self.pos)
+            # uppercase pos
+            self.pos = self.pos.upper()
         super().save(*args, **kwargs)
     

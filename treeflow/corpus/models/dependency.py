@@ -28,8 +28,9 @@ class Dependency(models.Model):
     
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
-        self.rel = strip_and_normalize('NFC', self.rel)
-        # lowercase the rel
-        self.rel = self.rel.lower()
+        if self.rel:
+            self.rel = strip_and_normalize('NFC', self.rel)
+            # lowercase the rel
+            self.rel = self.rel.lower()
         super().save(*args, **kwargs)
     

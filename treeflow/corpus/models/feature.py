@@ -25,7 +25,9 @@ class Feature(models.Model):
     
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
-        self.feature = strip_and_normalize('NFC', self.feature)
-        self.feature_value = strip_and_normalize('NFC', self.feature_value)
+        if self.feature:
+            self.feature = strip_and_normalize('NFC', self.feature)
+        if self.feature_value:
+            self.feature_value = strip_and_normalize('NFC', self.feature_value)
         super().save(*args, **kwargs)
     
