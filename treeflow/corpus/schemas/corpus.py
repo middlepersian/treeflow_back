@@ -17,8 +17,8 @@ from strawberry_django_plus.permissions import (
 
 @gql.type
 class Query:
-    corpus: Optional[Corpus] = gql.django.node(directives=[IsAuthenticated()])
-    corpora:  relay.Connection[Corpus] = gql.django.connection(directives=[IsAuthenticated()])
+    corpus: Optional[Corpus] = gql.django.node()
+    corpora:  relay.Connection[Corpus] = gql.django.connection()
 
 
 schema = gql.Schema(query=Query, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])

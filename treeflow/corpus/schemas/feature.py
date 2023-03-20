@@ -14,8 +14,8 @@ import strawberry
 
 @gql.type
 class Query:
-    feature: Optional[Feature] = gql.django.node(directives=[IsAuthenticated()])
-    features:  relay.Connection[Feature] = gql.django.connection(directives=[IsAuthenticated()])
+    feature: Optional[Feature] = gql.django.node()
+    features:  relay.Connection[Feature] = gql.django.connection()
 
     @strawberry.field
     def get_features(self, pos: str) -> PartOfSpeechFeatures:

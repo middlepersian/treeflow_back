@@ -16,8 +16,8 @@ from strawberry_django_plus.permissions import (
 
 @gql.type
 class Query:
-    text: Optional[Text] = gql.django.node(directives=[IsAuthenticated()])
-    texts:  relay.Connection[Text] = gql.django.connection(directives=[IsAuthenticated()])
+    text: Optional[Text] = gql.django.node()
+    texts:  relay.Connection[Text] = gql.django.connection()
 
 
 @gql.type

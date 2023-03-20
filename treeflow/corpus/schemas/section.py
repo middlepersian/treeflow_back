@@ -18,8 +18,8 @@ from strawberry_django_plus.permissions import (
 
 @gql.type
 class Query:
-    section: Optional[Section] = gql.django.node(directives=[IsAuthenticated()])
-    sections:  relay.Connection[Section] = gql.django.connection(directives=[IsAuthenticated()])
+    section: Optional[Section] = gql.django.node()
+    sections:  relay.Connection[Section] = gql.django.connection()
 
     @gql.field
     @sync_to_async

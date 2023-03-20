@@ -34,8 +34,8 @@ es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
 
 @gql.type
 class Query:
-    token: Optional[Token] = gql.django.node(directives=[IsAuthenticated()])
-    tokens: relay.Connection[Token] = gql.django.connection(directives=[IsAuthenticated()])
+    token: Optional[Token] = gql.django.node()
+    tokens: relay.Connection[Token] = gql.django.connection()
 
     @gql.field
     @sync_to_async

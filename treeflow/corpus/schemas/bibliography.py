@@ -16,8 +16,8 @@ from strawberry_django_plus.permissions import (
 
 @gql.type
 class Query:
-    bib_entry: Optional[BibEntry] = gql.django.node(directives=[IsAuthenticated()])
-    bib_entries:  relay.Connection[BibEntry] = gql.django.connection(directives=[IsAuthenticated()])
+    bib_entry: Optional[BibEntry] = gql.django.node()
+    bib_entries:  relay.Connection[BibEntry] = gql.django.connection()
 
 
 @gql.type
