@@ -4,9 +4,6 @@ from typing import List, Optional
 
 from treeflow.corpus import models
 
-
-
-
 @gql.django.type(models.POS)
 class POS(relay.Node):
     id: relay.GlobalID

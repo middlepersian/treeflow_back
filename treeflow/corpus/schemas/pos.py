@@ -10,7 +10,7 @@ from strawberry_django_plus.directives import SchemaDirectiveExtension
 @gql.type
 class Query:
     pos: Optional[POS] = gql.django.node()
-    pos_list: relay.Connection[POS] = gql.django.connection()
+    pos_connection: relay.Connection[POS] = gql.django.connection()
 
 @gql.type
 class Mutation:

@@ -1,7 +1,8 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-from typing import Optional, List
+from typing import Optional
+from treeflow.corpus.enums.pos import UPOSValues
 
 from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial,PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features, upos_feature_feature_value
 
@@ -27,7 +28,7 @@ class Query:
     
     @strawberry.field
     def upos_list(self, info) -> UPOSList:
-        pos_list = list(upos_feature_feature_value.keys())
+        pos_list = [pos.value for pos in UPOSValues]
         return UPOSList(pos=pos_list)
 
 
