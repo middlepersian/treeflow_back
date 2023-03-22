@@ -4,6 +4,7 @@ volumes:
   production_postgres_data: {}
   production_postgres_data_backups: {}
   production_traefik: {}
+  production_elastic_data: {}
 
 services:
   django:
