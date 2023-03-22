@@ -1,0 +1,25 @@
+include:
+  - project: devops/vm.dh.uni-koeln.de/.gitlab-ci
+    file: project.yml
+
+variables:
+  CI_COMPOSE_HOST: dodgerblue
+  CI_COMPOSE_SERVICE: backend
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        CI_COMPOSE_STACK: mpcd-app
+    - if: $CI_COMMIT_BRANCH == "dev"
+      variables:
+        CI_COMPOSE_STACK: mpcd-dev
+
+stages:
+  - test
+  - deploy
+
+test:
+  stage: test
+  script:
+    - echo "Continuous Integration is not yet implemented"
