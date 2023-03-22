@@ -14,11 +14,9 @@ services:
     container_name: django
     depends_on:
       - postgres
-      - elastic
     volumes:
       - .:/app:z
       - ../corpora/texts_exports/_old/test_imports:/app_data:ro
-
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
