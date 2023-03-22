@@ -344,8 +344,9 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
                 # set previous line
-                if previous_line_obj:
-                    current_line_obj.previous = previous_line_obj
+                if current_line_obj_created:
+                    if previous_line_obj:
+                        current_line_obj.previous = previous_line_obj
                 # add to list
                 lines.add(current_line_obj)
                 # save line to image
