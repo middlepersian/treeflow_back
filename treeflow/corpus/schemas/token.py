@@ -10,8 +10,7 @@ from treeflow.dict.types.lemma import LemmaInput
 from treeflow.corpus.documents.token import TokenDocument
 
 from treeflow.corpus import models as corpus_models
-from treeflow.dict import models as dict_models
-
+import
 from treeflow.corpus.types.token import Token, TokenInput, TokenPartial, TokenElastic
 from treeflow.corpus.types.dependency import DependencyInput
 from treeflow.corpus.types.feature import FeatureInput
@@ -39,9 +38,22 @@ class Query:
 
     @gql.field
     @sync_to_async
-    def search_tokens(pattern: str, query_type: str, size: int = 100) -> List[TokenElastic]:
+    def search_tokens(
+        pattern: str,
+        query_type: str,
+        language: Optional[str] = None,
+        pos: Optional[str] = None,
+        size: int = 100
+    ) -> List[TokenElastic]:
 
         q = Q(query_type, transcription=pattern)
+
+        # Apply faceted search
+        if language:
+            q &= Q("term", language=language)
+        if pos:
+            q &= Q("nested", path="pos_token", query=Q("term", pos_token__pos=pos))
+
         response = TokenDocument.search().query(q).extra(size=size)
 
         tokens = []
@@ -50,7 +62,7 @@ class Query:
             tokens.append(token)
 
         return tokens
-    
+        
     
 @gql.type
 class Mutation:
@@ -59,6 +71,23 @@ class Mutation:
     update_token: Token = gql.django.update_mutation(TokenPartial, directives=[IsAuthenticated()])
     delete_token: Token = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
     
+    @gql.django.mutation
+    def create_token_between(self, info, previous_token: relay.GlobalID, new_token_data: TokenInput) -> Token:
+        if not info.context.request.user.is_authenticated:
+            raise Exception("You must be authenticated for this operation.")
+        data = vars(new_token_data)
+        previous = previous_token.resolve_node(info)
+        new_token = resolvers.create(info, corpus_models.Token, resolvers.parse_input(info, data))
+        next_token = previous.next
+        previous.next = new_token
+        previous.save()
+        if next_token:
+            next_token.previous = new_token
+            next_token.save()
+        new_token.previous = previous
+        new_token.next = next_token
+        new_token.save()
+        return new_token
 
 
     @gql.django.input_mutation
