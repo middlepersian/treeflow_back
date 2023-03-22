@@ -23,6 +23,8 @@ class Comment(relay.Node):
     text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
     token: Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
 
+    created_at: gql.auto
+
     uncertain: Optional[List[Optional[str]]]
     to_discuss: Optional[List[Optional[str]]]
     new_suggestion:  Optional[List[Optional[str]]]
