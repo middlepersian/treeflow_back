@@ -10,7 +10,8 @@ from treeflow.dict.types.lemma import LemmaInput
 from treeflow.corpus.documents.token import TokenDocument
 
 from treeflow.corpus import models as corpus_models
-import
+from treeflow.dict import models as dict_models
+
 from treeflow.corpus.types.token import Token, TokenInput, TokenPartial, TokenElastic
 from treeflow.corpus.types.dependency import DependencyInput
 from treeflow.corpus.types.feature import FeatureInput
