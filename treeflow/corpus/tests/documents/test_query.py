@@ -6,7 +6,7 @@ from elasticsearch import Elasticsearch
 ## we will make a query to get all tokens starting with the letter 'a'
 def test_token_document():
 
-    connections.create_connection(hosts=['elastic:9200'], timeout=20)
+    connections.get_connection()
 
     s = Search(index='tokens').query('wildcard', transcription='an*')
     response = s.execute()
@@ -29,7 +29,7 @@ def test_token_document():
     '''    
 
 def test_total_count():
-    connections.create_connection(hosts=['elastic:9200'], timeout=20)
+    connections.get_connection()
     s = Search(index='tokens')
     response = s.execute()
     total_count = response.hits.total.value

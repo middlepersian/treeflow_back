@@ -19,7 +19,7 @@ from django.conf import settings
 from treeflow.schema import schema
 
 
-connections.create_connection(hosts=['elastic:9200'], timeout=20)
+connections.get_connection()
 
 
 def test_index_lemma_document():

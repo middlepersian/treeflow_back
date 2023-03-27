@@ -4,7 +4,7 @@ from treeflow.corpus.types.token import TokenElastic
 import pytest
 from elasticsearch_dsl import Search, connections, Q
 
-connections.create_connection(hosts=['elastic:9200'], timeout=20)
+connections.get_connection()
 
 @pytest.mark.django_db
 def test_get_queryset():

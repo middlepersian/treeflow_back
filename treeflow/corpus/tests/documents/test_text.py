@@ -1,7 +1,7 @@
 import pytest
 from elasticsearch_dsl import Search, connections
 
-connections.create_connection(hosts=['elastic:9200'], timeout=20)
+connections.get_connection()
 
 
 
