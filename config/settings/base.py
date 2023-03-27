@@ -323,7 +323,7 @@ GRAPHQL_JWT = {
 # }
 ELASTICSEARCH_DSL={
     'default': {
-        'hosts': 'elastic:9200'
+        'hosts': env.str("DJANGO_ELASTIC_HOST", default="elastic:9200")
     },
 }
 
