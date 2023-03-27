@@ -226,7 +226,7 @@ class TokenElastic(relay.Node):
         node_ids: Optional[Iterable[str]] = None
     ):
         if node_ids is not None:
-            tokens = get_tokens_by_ids(ids=[relay.from_base64(gid)[1] for gid in node_ids], es_conn=es_conn)
+            tokens = get_tokens_by_ids(ids=[relay.from_base64(gid)[1] for gid in node_ids])
             return [TokenElastic(id=relay.to_base64('TokenElastic', token['id']), **token) for token in tokens]
 
         return []
@@ -247,7 +247,7 @@ class TokenElastic(relay.Node):
 
 
 def get_token_by_id(id: str) -> TokenElastic:
-    s = Search(using=es_conn, index='tokens').query('ids', values=[id])
+    s = Search(index='tokens').query('ids', values=[id])
     response = s.execute()
 
     if len(response.hits.hits) == 0:

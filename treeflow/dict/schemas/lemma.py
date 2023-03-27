@@ -7,7 +7,7 @@ from typing import Optional, List
 
 
 
-from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic
+from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic #CustomPaginationConnection
 from treeflow.dict.types.meaning import MeaningInput
 import treeflow.dict.models as models
 from  treeflow.dict.documents.lemma import LemmaDocument
@@ -23,13 +23,14 @@ from strawberry_django_plus.permissions import (
 
 
 from elasticsearch_dsl import Search, Q, connections
-es_conn = connections.create_connection(hosts=['elastic:9200'], timeout=20)
+es_conn = connections.get_connection()
 
 
 @gql.type
 class Query:
     lemma: Optional[Lemma] = gql.django.node()
     lemmas:  relay.Connection[Lemma] = gql.django.connection()
+    #lemmas_custom_pagination: CustomPaginationConnection[Lemma] = relay.connection()
 
 
     @gql.field

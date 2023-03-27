@@ -172,7 +172,7 @@ class LemmaElastic(relay.Node):
             return None
 
 def get_lemma_by_id(id: str) -> LemmaElastic:
-    s = Search(using=es_conn, index='lemmas').query('ids', values=[id])
+    s = Search(index='lemmas').query('ids', values=[id])
     response = s.execute()
 
     if len(response.hits.hits) == 0:

@@ -111,7 +111,7 @@ class MeaningElastic(relay.Node):
             return None
 
 def get_meaning_by_id(id: str) -> MeaningElastic:
-    s = Search(using=es_conn, index='meanings').query('ids', values=[id])
+    s = Search(index='meanings').query('ids', values=[id])
     response = s.execute()
 
     if len(response.hits.hits) == 0:
