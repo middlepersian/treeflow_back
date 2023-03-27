@@ -67,7 +67,7 @@ class Lemma(relay.Node):
     id: relay.GlobalID
     word: gql.auto
     language: Language
-    category: gql.auto
+    category: Optional[str] = None
     multiword_expression: gql.auto
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
