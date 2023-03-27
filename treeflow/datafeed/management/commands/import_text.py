@@ -1,7 +1,7 @@
 import pandas as pd
 import string
 from django.core.management.base import BaseCommand
-#from treeflow.datafeed.utils import normalize_nfc
+from django.db.utils import IntegrityError
 from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment, POS
 from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
@@ -347,8 +347,16 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if current_line_obj_created:
                     if previous_line_obj:
                         current_line_obj.previous = previous_line_obj
-                # add to list
-                lines.add(current_line_obj)
+                        try:
+                            current_line_obj.save()
+                        except IntegrityError as e:
+                            if 'duplicate key value violates unique constraint "corpus_section_previous_id_key"' in str(e):
+                                current_line_obj.previous = None
+                                current_line_obj.save()
+                    # add to list
+                    lines.add(current_line_obj)
+                    # update previous line
+                    previous_line_obj = current_line_obj
                 # save line to image
                 previous_image_obj.sections.add(current_line_obj)
                 previous_image_obj.save()    
