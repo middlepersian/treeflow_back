@@ -133,7 +133,7 @@ class LemmaElastic(relay.Node):
             word=hit['word'],
             language=hit['language'],
             multiword_expression=hit['multiword_expression'],
-            category=hit['category'],
+            category=hit['category'] if 'category' in hit else None,
             related_lemmas=LemmaSelection.from_hit(hit, field="related_lemmas"),
             related_meanings=MeaningSelection.from_hit(hit, field="related_meanings")
         )
