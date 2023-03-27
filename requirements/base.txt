@@ -39,3 +39,9 @@ elasticsearch[async]==7.9.1
 elasticsearch-dsl>=7.0.0,<8.0.0
 django-elasticsearch-dsl==7.3
 attrdict==2.0.1
+
+
+#pandas
+pandas==1.5.2
+#openpyxl
+openpyxl==3.0.10
