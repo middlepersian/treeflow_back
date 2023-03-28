@@ -320,11 +320,15 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if image_obj_created:
                     image_obj.manuscript = manuscript_obj
                     image_obj.previous = previous_image_obj
-                    image_obj.save()
+                    try:
+                        image_obj.save()
+                    except IntegrityError as e:
+                        image_obj.previous = None
+                        image_obj.save()
                     #add to list
                     images.append(image_obj)    
-                    previous_image_obj = image_obj
-                    image_number += 1
+                    image_number += 1  
+                previous_image_obj = image_obj
             if previous_image_obj:
                 # add token to image
                 if token:
