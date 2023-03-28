@@ -320,11 +320,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if image_obj_created:
                     image_obj.manuscript = manuscript_obj
                     image_obj.previous = previous_image_obj
-                    try:
-                            image_obj.save()
-                    except IntegrityError as e:
-                            image_obj.previous = None
-                            image_obj.save()
+                    image_obj.save()
                     #add to list
                     images.append(image_obj)    
                     previous_image_obj = image_obj
@@ -354,6 +350,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         try:
                             current_line_obj.save()
                         except IntegrityError as e:
+                            if 'duplicate key value violates unique constraint "corpus_section_previous_id_key"' in str(e):
                                 current_line_obj.previous = None
                                 current_line_obj.save()
                     # add to list
@@ -416,16 +413,8 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         section_obj.container = chapter_obj
                         chapter_obj.tokens.add(token)
                         section_obj.tokens.add(token)
-                        try:
-                            section_obj.save()
-                        except IntegrityError as e:
-                            section_obj.previous = None
-                            section_obj.save()
-                        try:
-                            chapter_obj.save()
-                        except IntegrityError as e:
-                            chapter_obj.previous = None
-                            chapter_obj.save()
+                        section_obj.save()
+                        chapter_obj.save()
                         # update previous chapter and section
                         prev_chapter = chapter_obj
                         prev_section = section_obj
@@ -470,14 +459,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             if previous_token_obj:
                 token.previous = previous_token_obj
                 assert token.previous == previous_token_obj
-                try:
-                    token.save()
-                except IntegrityError as e:
-                    token.previous = None
-                    token.save()
-            else:         
-                token.save()
-            #set previous token
+            token.save()
             previous_token_obj = token
             # for the record: it is actually previous_line_obj == current line obj
             if previous_line_obj:
