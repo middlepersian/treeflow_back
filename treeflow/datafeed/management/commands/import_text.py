@@ -30,7 +30,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
     #text_sigle = normalize_nfc(input_string=text_sigle)
     #text_sigle = text_sigle.upper()
     #text_title = normalize_nfc(input_string=text_title)
-    text_title = text_title.title()
+    #text_title = text_title.title()
 
     #create source manuscript object
     #manuscript_id = "L19"
