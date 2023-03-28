@@ -28,8 +28,7 @@ from strawberry_django_plus.permissions import (
 )
 
 
-from elasticsearch_dsl import Search, Q, connections
-es_conn = connections.get_connection()
+from elasticsearch_dsl import Q
 
 
 @gql.type

@@ -9,7 +9,6 @@ from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 
-es_conn =  connections.get_connection()
 
 
 @gql.django.filters.filter(models.Token, lookups=True)

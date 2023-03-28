@@ -4,22 +4,17 @@ import pytest
 from treeflow.dict.models.lemma import Lemma as LemmaModel
 from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.documents.meaning import MeaningDocument
-from elasticsearch_dsl import Search, connections, Q
-import asyncio
+from elasticsearch_dsl import Search, Q
 from treeflow.dict.types.lemma import LemmaElastic
-from treeflow.dict.types.lemma import get_lemma_by_id
-from treeflow.dict.types.lemma import Lemma
 from typing import List
 from strawberry_django_plus.gql import relay
 from unittest.mock import patch
-from uuid import uuid4
 # import django settings
 from django.conf import settings
 
 from treeflow.schema import schema
 
 
-connections.get_connection()
 
 
 def test_index_lemma_document():

@@ -1,9 +1,6 @@
 import pytest
 from elasticsearch_dsl import Search, connections
 
-connections.get_connection()
-
-
 
 
 def test_total_count():

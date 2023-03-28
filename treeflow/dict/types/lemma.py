@@ -12,7 +12,6 @@ from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 
 
-es_conn =  connections.get_connection()
 
 
 @gql.django.filters.filter(models.Lemma, lookups=True)

@@ -2,9 +2,8 @@
 from treeflow.corpus.documents.token import TokenDocument
 from treeflow.corpus.types.token import TokenElastic
 import pytest
-from elasticsearch_dsl import Search, connections, Q
+from elasticsearch_dsl import Search, Q
 
-connections.get_connection()
 
 @pytest.mark.django_db
 def test_get_queryset():

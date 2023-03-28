@@ -1,18 +1,14 @@
-
 import strawberry
-from strawberry import lazy
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import Annotated, List, TYPE_CHECKING, Optional, Iterable
+from typing import List, Optional, Iterable
 from treeflow.dict import models
-from treeflow.dict.types import language
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
-from elasticsearch_dsl import Search, Q, connections
+from elasticsearch_dsl import Search
 from asgiref.sync import sync_to_async
 from treeflow.dict.types.lemma import MeaningSelection
 
-es_conn =  connections.get_connection()
 
 @gql.django.filters.filter(models.Meaning, lookups=True)
 class MeaningFilter:

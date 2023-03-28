@@ -2,7 +2,6 @@
 from elasticsearch_dsl import Search, connections, Q
 from treeflow.dict.types.meaning import MeaningElastic
 
-connections.get_connection()
 
 
 def test_total_count():
