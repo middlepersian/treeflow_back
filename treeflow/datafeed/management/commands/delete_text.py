@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from treeflow.corpus.models.text import Text
 
@@ -8,6 +9,12 @@ class Command(BaseCommand):
         parser.add_argument('title', type=str, help='The title of the Text object to be deleted.')
 
     def handle(self, *args, **options):
+
+
+
+        settings.ELASTICSEARCH_DSL_AUTOSYNC = False
+        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
+
         title = options['title']
 
         # Find the Text object with the given title
@@ -21,3 +28,5 @@ class Command(BaseCommand):
         text.delete()
 
         self.stdout.write(self.style.SUCCESS(f"Successfully deleted Text object with title '{title}'."))
+        settings.ELASTICSEARCH_DSL_AUTOSYNC = True
+        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = True
