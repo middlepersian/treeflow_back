@@ -38,7 +38,7 @@ class Image(models.Model):
         ]
 
     def __str__(self):
-        return '{} - {}'.format(self.source, self.identifier)
+        return '{}'.format(self.identifier)
 
 
 class ImageSection(models.Model):
@@ -51,6 +51,7 @@ class ImageSection(models.Model):
 
 
     class Meta:
+        ordering = ['image', 'section']
         constraints = [
             models.UniqueConstraint(
                 fields=['image', 'section'], name='image_section_image_section'

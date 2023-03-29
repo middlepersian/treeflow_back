@@ -42,7 +42,7 @@ class Section(models.Model):
                 models.Index(fields=['created_at'])]
 
     def __str__(self) -> str:
-        return '{}'.format(self.identifier)
+        return '{} - {} '.format(self.type, self.identifier)
     
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
