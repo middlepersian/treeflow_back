@@ -1,7 +1,7 @@
-
+import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
-from typing import  Optional
+from typing import  Optional, List
 from treeflow.corpus import models
 from treeflow.corpus.enums.deprel import Deprel
 
@@ -36,3 +36,8 @@ class DependencyPartial(gql.NodeInputPartial):
     head_number: gql.auto
     rel: Deprel
     producer: gql.auto
+
+
+@strawberry.type
+class DeprelList:
+    dep: List[Deprel]
