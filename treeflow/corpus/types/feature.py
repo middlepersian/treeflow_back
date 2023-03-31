@@ -10,7 +10,7 @@ import strawberry
 
 
 upos_feature_feature_value = {
- 'ADJ': {('_',),
+ 'ADJ': {
   'Number': ('Plur',),
   'Degree': ('Cmp', 'Sup'),
   'NumType': ('Ord', 'Mult'),
@@ -26,17 +26,15 @@ upos_feature_feature_value = {
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)},
- 'ADV': {('_',),
+ 'ADV': {
   'AdvType': ('Man', 'Loc', 'Tim', 'Deg'),
   'NumType': ('Card', 'Mult', 'Ord'),
   'Deixis': ('Prox', 'Remt'),
   'Degree': ('Cmp', 'Sup'),
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
-  'Typo': ('Yes',),
-  'Transc': ('Yes',)},
- 'CCONJ': {('_')}
- 'DET': {('_',),
+  'Typo': ('Yes',),},
+ 'DET': {
   'Definite': ('Ind', 'Spec'),
   'PronType': ('Dem', 'Ind', 'Tot', 'Int', 'Prs', 'Emp'),
   'Deixis': ('Prox', 'Remt'),
@@ -48,28 +46,27 @@ upos_feature_feature_value = {
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)},
- 'INJ': {('_')}
- 'PUNCT': {('_',),
+ 'PUNCT': {
   'PunctType': ('Semi', 'Dash', 'Excl', 'Quot'),
   'PunctSide': ('Ini', 'Fin'),
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)},
- 'SCONJ': {('_',),
+ 'SCONJ': {
   'PronType': ('Rel',),
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)},
- 'NUM': {('_',),
+ 'NUM': {
   'NumType': ('Card', 'Fract', 'Sets'),
   'Number': ('Plur',),
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)},
- 'PART': {('_',),
+ 'PART': {
   'PartType': ('Mod', 'Neg', 'Emp', 'Vbp'),
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
@@ -87,7 +84,7 @@ upos_feature_feature_value = {
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)},
- 'NOUN': {('_',),
+ 'NOUN': {
   'Number': ('Sing', 'Plur'),
   'Polite': ('Inform', 'Form', 'Elev', 'Humb'),
   'Animacy': ('Hum', 'Nhum', 'Anim', 'Inan'),
@@ -107,7 +104,7 @@ upos_feature_feature_value = {
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
   'Typo': ('Yes',)},
- 'SYM': {('_',),
+ 'SYM': {
   'Foreign': ('Yes',),
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
@@ -137,7 +134,7 @@ upos_feature_feature_value = {
   'Hyph': ('Yes',),
   'Typo': ('Yes',),
   'Transc': ('Yes',)}
- 'X': {('_',)}}
+}
 
 def get_features(pos: str ) -> Dict[str, Tuple[str]]:
     pos_features = upos_feature_feature_value
