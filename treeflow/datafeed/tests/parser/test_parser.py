@@ -4,6 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from django.db import IntegrityError
+from django.conf import settings
 
 
 from treeflow.corpus.models import Token, Section, Section, Text, Corpus, Source, Dependency, Feature, Comment
@@ -53,10 +54,17 @@ def test_parse_preannotated():
 
 @pytest.mark.django_db
 def test_parse_annotated():
-    file = 'DMX-L19.csv'
-    script_path = os.path.abspath(__file__)
-    script_dir = os.path.dirname(script_path)
-    file_path = os.path.join(script_dir, file)
+    file_name = 'DMX-L19.csv'
+
+    # deactive elastic for performance reasons
+
+    settings.ELASTICSEARCH_DSL_AUTOSYNC = False
+    settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
+    
+    # Use the /app_data folder as the base directory
+    base_dir = '/app_data'
+    file_path = os.path.join(base_dir, file_name)
+    
     manuscript_id = "L19"
     text_title = "Greater Bundahišn or Iranian Bundahišn"
     text_sigle= "DMX"
