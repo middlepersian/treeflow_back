@@ -7,7 +7,7 @@ from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Search
 from asgiref.sync import sync_to_async
-from treeflow.dict.types.lemma import MeaningSelection
+from treeflow.dict.types.lemma import MeaningSelection, LemmaSelection
 
 
 @gql.django.filters.filter(models.Meaning, lookups=True)
@@ -55,7 +55,7 @@ class MeaningElastic(relay.Node):
     meaning: str
     lemma_related : bool
     related_meanings: Optional[List[MeaningSelection]] = None
-
+    related_lemmas: Optional[List[LemmaSelection]] = None
 
     @classmethod
     def resolve_id(self: "MeaningElastic", info: Optional[Info] = None) -> str:
@@ -70,7 +70,8 @@ class MeaningElastic(relay.Node):
             language=hit['language'],
             meaning=hit['meaning'],
             lemma_related=hit['lemma_related'],
-            related_meanings=MeaningSelection.from_hit(hit, field='related_meanings')
+            related_meanings=MeaningSelection.from_hit(hit, field='related_meanings'),
+            related_lemmas=LemmaSelection.from_hit(hit, field='related_lemmas')
 
         )
 

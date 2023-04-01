@@ -76,8 +76,8 @@ class Lemma(relay.Node):
 class LemmaSelection():
     word: str
     language: str
-    category: str
-    multiword_expression: bool
+    category: Optional[str] = None
+    multiword_expression: Optional[bool] = None
 
     @classmethod
     def from_hit(cls,hit, field="related_lemmas"):
@@ -87,7 +87,7 @@ class LemmaSelection():
                 word=to_parse['word'],
                 language=to_parse['language'],
                 category=to_parse['category'] if 'category' in to_parse else None,
-                multiword_expression=to_parse['multiword_expression']
+                multiword_expression=to_parse['multiword_expression'] if 'category' in to_parse else None,
             ) for to_parse in related_vals]
         return None
 
