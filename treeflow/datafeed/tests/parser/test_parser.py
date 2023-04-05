@@ -54,7 +54,7 @@ def test_parse_preannotated():
 
 @pytest.mark.django_db
 def test_parse_annotated():
-    file_name = 'DMX-L19.csv'
+    file_name = 'Dk5_B.csv'
 
     # deactive elastic for performance reasons
 
@@ -66,22 +66,22 @@ def test_parse_annotated():
     file_path = os.path.join(base_dir, file_name)
     
     manuscript_id = "L19"
-    text_title = "Greater Bundahišn or Iranian Bundahišn"
-    text_sigle= "DMX"
+    text_title = "dunkard"
+    text_sigle= "dk5"
     tokens, images, lines = import_annotated_file(csv_file=file_path,text_sigle=text_sigle, text_title=text_title, manuscript_id=manuscript_id)
     print()
 
     #section objects
     print("section objects {}".format(Section.objects.count()))
     # get all chapter sections
-    print("chapter section objects {}".format(Section.objects.filter(section_type__identifier="chapter").count()))
+    print("chapter section objects {}".format(Section.objects.filter(type="chapter").count()))
     '''
     print("tokens {}".format(len(tokens)))
     print("images {}".format(len(images)))
     print("lines {}".format(len(lines)))
 
     #total number of sentences
-    print("sentence objects {}".format(Section.objects.filter(section_type__identifier="sentence").count()))
+    print("sentence objects {}".format(Section.objects.filter(type="sentence").count()))
 
     print("token objects {}".format(Token.objects.count()))
     print("lemma objects {}".format(Lemma.objects.count()))
@@ -90,7 +90,7 @@ def test_parse_annotated():
     print("meaning objects {}".format(Meaning.objects.count()))
     # mwe objects
     print("image objects {}".format(Image.objects.count()))
-    print("line objects {}".format(Section.objects.filter(section_type__identifier="line").count()))
+    print("line objects {}".format(Section.objects.filter(type="line").count()))
     #assert len(tokens) == 100
     print("feature objects {}".format(Feature.objects.count()))
 
