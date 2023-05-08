@@ -7,7 +7,7 @@ from treeflow.dict.models import Lemma, Meaning
 from treeflow.images.models import Image
 from django.conf import settings
 from treeflow.utils.normalize import strip_and_normalize
-
+import logging
 
 
 def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
@@ -43,6 +43,21 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
 
     text_object, text_object_created = Text.objects.get_or_create(title=text_title,  series=text_sigle, corpus=corpus_object, identifier=text_identifier)
 
+    # create logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.ERROR)
+
+    # create file handler which logs messages with severity level ERROR
+    fh = logging.FileHandler(f'{text_identifier}_errors.log')
+    fh.setLevel(logging.ERROR)
+
+    # create formatter and add it to the file handler
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+
+    # add the file handler to the logger
+    logger.addHandler(fh)
+
     token_number = 1
     sentence_number = 1
     image_number = 1
@@ -59,7 +74,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
     section_number = 1
 
     # read csv file
-    df = pd.read_csv(csv_file, sep='\t', encoding='utf-8')
+    df = pd.read_csv(csv_file, sep='\t', encoding='utf-8', header=0)
  
     
     for i, row in df.iterrows():
@@ -146,10 +161,21 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 if sentence_obj:
                     translation = translation[1]
                     if translation:
-                        meaning_obj, meaning_created = Meaning.objects.get_or_create(meaning=strip_and_normalize('NFC', translation), language="deu", lemma_related=False)
+                        try:
+                            meaning_obj, created = Meaning.objects.get_or_create(
+                                meaning=strip_and_normalize('NFC', translation),
+                                language="deu",
+                                lemma_related=False
+                            )
+                        except IntegrityError as e:
+                            logger.error("Row {} - {} - {}".format(df.index[i]+2, row['id'], str(e)))
+                            meaning_obj = None
+
+                    if meaning_obj:
                         sentence_obj.meanings.add(meaning_obj)
                         sentence_obj.save()
-                        continue 
+                        continue  
+
             if str(row["id"]).startswith("#COMMENT"):
     
                 #split the cell
@@ -161,8 +187,12 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
 
             #new token with number (word token)
             elif str(row["id"]) != "_":
-                token_number_in_sentence = float(row["id"])
-                #print("token_number_in_sentence: {}".format(token_number_in_sentence))
+                try:
+                    token_number_in_sentence = float(row["id"])
+                except Exception as e:
+                    logger.error("Row {} - {} - {}".format(df.index[i]+2, row['id'], str(e)))
+                    token_number_in_sentence = None
+
             
         #check if transliteration value present
         if row["transliteration"] != "_" and pd.notna(row['transliteration']):
@@ -215,15 +245,19 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             for postfeature in postfeatures:
                 if postfeature and postfeature != "_":
                     if "=" in postfeature:
-                        feature, value = postfeature.split("=")
+                        feature, value = postfeature.split("=", maxsplit=1)
                         # assert that the split existed and that the feature and value are not empty
                         assert feature and value
-                        feature_obj = Feature.objects.create(feature=feature, feature_value=value, token=token, pos=pos)
+                        try:
+                            feature_obj = Feature.objects.create(feature=feature, feature_value=value, token=token, pos=pos)
+                        except Exception as e:
+                            logger.error("Row {} - {} - {}".format(df.index[i]+2,  row['postfeatures'], str(e)))
+                            feature_obj = None
                     else: 
                         continue    
             else:
                 postfeatures = None
-            # add the to current token     
+   
 
         # process dependencies
         if row["deprel"] != "_" :
@@ -231,16 +265,25 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             #print("deprel {}".format( deprel))
             #get head
             if row["head"] and row["head"] != "_" and pd.notna(row['transliteration']):
-                head = float(row["head"])
-                #print("head {}".format( head))
-                #create dependency
-                dependency_obj = Dependency.objects.create(head_number = head, rel =deprel, token=token)
-                assert dependency_obj.head_number == head
-                dependencies.append(dependency_obj)
-                #check if root
-                if deprel == 'root'  and token:
-                    print("ROOT: {}".format(token))
-                    token.root = True
+                try:
+                    head = float(row["head"])
+                except Exception as e:
+                    logger.error("Row {} - {} - {}".format(df.index[i]+2, row['head'], str(e)))
+                    head = None
+                if head:        
+                    #create dependency
+                    try:
+                        dependency_obj = Dependency.objects.create(head_number = head, rel =deprel, token=token)
+                    except Exception as e:
+                        logger.error("Row {} - {} - {}".format(df.index[i]+2, row['deprel'], str(e)))
+                        dependency_obj = None
+                    if dependency_obj:       
+                        assert dependency_obj.head_number == head
+                        dependencies.append(dependency_obj)
+                        #check if root
+                        if deprel == 'root'  and token:
+                            print("ROOT: {}".format(token))
+                            token.root = True
         if row['deps'] != '_':
             deps = row['deps']
             # split on "|"
@@ -248,14 +291,15 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
             for dep in deps:
                 try:
                     if dep and dep != "_" and ':' in dep:
-                        head, rel = dep.split(":")
-                        head = float(head)
-                        dependency_obj = Dependency.objects.create(head_number = head, rel = rel, token=token)
+                        head, rel = dep.split(":", 1)
+                        dependency_obj = Dependency.objects.create(head_number = float(head), rel = rel, token=token)
+                except Exception as e:
+                    logger.error("Row {} - {} - {}".format(df.index[i]+2, row['deps'], e))
+                    dependency_obj = None
+                    if dependency_obj:
                         assert dependency_obj.head_number == head
-                        dependencies.append(dependency_obj)
-                except ValueError:
-                    print("ValueError: {}".format(dep))
-                    continue      
+                        dependencies.append(dependency_obj)    
+                        continue      
         # process lemmas
         # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
         if row['lemma'] != '_' and pd.notna(row['lemma']):
@@ -265,70 +309,102 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                 # if token available, single lemma, if not, MWE
                 if token:
                     # create lemma
-                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=lemma, multiword_expression=False, language="pal")
-                    # check if term.tech exists
-                    if row['term._tech._(cat.)'] and row['term._tech._(cat.)'] != '_' and pd.notna(row['term._tech._(cat.)']): 
-                        term_tech = row['term._tech._(cat.)']
-                        #print("term_tech: {}".format(term_tech))
-                        #remove punctuation with translate
-                        term_tech = term_tech.translate(str.maketrans('', '', string.punctuation))
-                        lemma_obj.category = term_tech
-                    # add meaning
-                    if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
-                        meaning = row['meaning']
-                        if ',' in meaning:
-                            meaning = meaning.split(',')
-                            for m in meaning:
-                                m = m.strip()
-                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=m, language="eng")
-                                lemma_obj.related_meanings.add(m_obj)        
-                        else:
-                            meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=meaning, language="eng")
-                            lemma_obj.related_meanings.add(meaning_obj)
-                            token.meanings.add(meaning_obj)
-                    # save lemma
-                    lemma_obj.save()        
-                    lemmas.append(lemma_obj)    
-                    token.lemmas.add(lemma_obj)
+                    try:
+                        lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=strip_and_normalize('NFC',lemma), multiword_expression=False, language="pal")
+                    except IntegrityError as e:
+                        logger.error("Row {} - {} - {}".format(df.index[i]+2, row['lemma'], e))
+                        lemma_obj = None
+                    if lemma_obj:    
+                        # check if term.tech exists
+                        if row['term._tech._(cat.)'] and row['term._tech._(cat.)'] != '_' and pd.notna(row['term._tech._(cat.)']): 
+                            term_tech = row['term._tech._(cat.)']
+                            #print("term_tech: {}".format(term_tech))
+                            #remove punctuation with translate
+                            term_tech = term_tech.translate(str.maketrans('', '', string.punctuation))
+                            lemma_obj.category = term_tech
+                        # add meaning
+                        if row['meaning'] and row['meaning'] != '_' and pd.notna(row['meaning']):
+                            meaning = row['meaning']
+                            if ',' in meaning:
+                                meaning = meaning.split(',')
+                                for m in meaning:
+                                    try:
+                                        m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=strip_and_normalize('NFC', m), language="eng")
+                                    except IntegrityError as e:
+                                        logger.error("Row {} - {} - {}".format(df.index[i]+2, row['meaning'], e))
+                                        m_obj = None
+                                    if m_obj:
+                                        lemma_obj.related_meanings.add(m_obj)        
+                            else:
+                                try:
+                                    meaning_obj, meaning_obj_created = Meaning.objects.get_or_create(meaning=strip_and_normalize('NFC', meaning), language="eng")
+                                except IntegrityError as e:
+                                    logger.error("Row {} - {} - {}".format(df.index[i]+2, row['meaning'], e))
+                                    meaning_obj = None
+                                    if meaning_obj:
+                                        lemma_obj.related_meanings.add(meaning_obj)
+                                        token.meanings.add(meaning_obj)
+                        # save lemma
+                        lemma_obj.save()        
+                        lemmas.append(lemma_obj)    
+                        token.lemmas.add(lemma_obj)
                 else:
-                    #print("MWE: {}".format(lemma))
-                    lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=lemma, multiword_expression=True, language="pal")
-                    assert lemma_obj.multiword_expression == True
-                    # add meaning
-                    if row['meaning'] != '_' and pd.notna(row['meaning']):
-                        meaning = row['meaning']
-                        if ',' in meaning:
-                            meaning = meaning.split(',')
-                            for m in meaning:
-                                m = m.strip()
-                                m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=m, language="eng")
-                                lemma_obj.related_meanings.add(m_obj)
-                        else:
-                            m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=meaning, language="eng")
-                            lemma_obj.related_meanings.add(m_obj)
-                    # save lemma
-                    lemma_obj.save()        
-                    mwes.append(lemma_obj)   
+                    # MWE
+                    # create lemma
+                    try:
+                        lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(word=strip_and_normalize('NFC',lemma), multiword_expression=True, language="pal")
+                    except IntegrityError as e:
+                        logger.error("Row {} - {} - {}".format(df.index[i]+2, row['lemma'], e))
+                        lemma_obj = None
+                        if lemma_obj:        
+                            # add meaning
+                            if row['meaning'] != '_' and pd.notna(row['meaning']):
+                                meaning = row['meaning']
+                                if ',' in meaning:
+                                    meaning = meaning.split(',')
+                                    for m in meaning:
+                                        try:
+                                            m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=strip_and_normalize('NFC', m), language="eng")
+                                        except IntegrityError as e:
+                                            logger.error("Row {} - {} - {}".format(df.index[i]+2, row['meaning'],e))
+                                            m_obj = None
+                                        if m_obj:        
+                                            lemma_obj.related_meanings.add(m_obj)
+                                else:
+                                    try:
+                                        m_obj, m_obj_created = Meaning.objects.get_or_create(meaning=strip_and_normalize('NFC', meaning), language="eng")
+                                    except IntegrityError as e:
+                                        logger.error("Row {} - {} - {}".format(df.index[i]+2, row['meaning'], e))
+                                        m_obj = None
+                                    if m_obj:        
+                                        lemma_obj.related_meanings.add(m_obj)
+                            # save lemma
+                            lemma_obj.save()        
+                            mwes.append(lemma_obj)   
         #process images
         if pd.notna(row['folionew']):
             if row['folionew'] != '_':
                 img = str(row['folionew'])
                 #print("image {}".format(img))
                 image_id = manuscript_obj.identifier + "_" + img
-                #print("image_id {}".format(image_id))
-                image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, number=image_number)
-                if image_obj_created:
-                    image_obj.manuscript = manuscript_obj
-                    image_obj.previous = previous_image_obj
-                    try:
-                        image_obj.save()
-                    except IntegrityError as e:
-                        image_obj.previous = None
-                        image_obj.save()
-                    #add to list
-                    images.append(image_obj)    
-                    image_number += 1  
-                previous_image_obj = image_obj
+                try:
+                    image_obj, image_obj_created = Image.objects.get_or_create(identifier=image_id, number=image_number)
+                except IntegrityError as e:
+                    logger.error("Row {} - {} - {}".format(df.index[i]+2, row['folionew'], e))
+                    image_obj = None
+                if image_obj:        
+                    if image_obj_created:
+                        image_obj.manuscript = manuscript_obj
+                        image_obj.previous = previous_image_obj
+                        try:
+                            image_obj.save()
+                        except IntegrityError as e:
+                            image_obj.previous = None
+                            image_obj.save()
+                        #add to list
+                        images.append(image_obj)    
+                        image_number += 1  
+                    previous_image_obj = image_obj
             if previous_image_obj:
                 # add token to image
                 if token:
@@ -354,6 +430,7 @@ def import_annotated_file(csv_file,manuscript_id, text_sigle, text_title ):
                         try:
                             current_line_obj.save()
                         except IntegrityError as e:
+                            logger.error("Row {} - IntegrityError: {}".format(df.index[i]+2,e))
                             if 'duplicate key value violates unique constraint "corpus_section_previous_id_key"' in str(e):
                                 current_line_obj.previous = None
                                 current_line_obj.save()
