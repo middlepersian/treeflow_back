@@ -23,6 +23,7 @@ class Text(relay.Node):
     title: gql.auto
     series: gql.auto
     label: gql.auto
+    version: gql.auto
     editors: List[gql.LazyType['User', 'treeflow.corpus.types.user']]
     collaborators: List[gql.LazyType['User', 'treeflow.corpus.types.user']]
     stage: gql.auto
@@ -33,6 +34,7 @@ class Text(relay.Node):
 class TextInput:
     corpus: gql.auto
     title: gql.auto
+    version: gql.auto
     series: gql.auto
     label: gql.auto
     editors: gql.auto
@@ -46,6 +48,7 @@ class TextPartial(gql.NodeInputPartial):
     id: relay.GlobalID
     corpus: gql.auto
     title: gql.auto
+    version : gql.auto
     series: gql.auto
     label: gql.auto
     editors: gql.auto
