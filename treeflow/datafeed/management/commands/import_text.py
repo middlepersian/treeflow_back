@@ -21,7 +21,7 @@ from treeflow.utils.normalize import strip_and_normalize
 import logging
 
 
-def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title):
+def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_version):
     # initialize variables
     prev_chapter = None
     prev_section = None
@@ -51,13 +51,14 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title):
     corpus_object, corpus_created = Corpus.objects.get_or_create(
         slug="MPCD", name="Middle Persian Corpus and Dictionary"
     )
-    text_identifier = text_sigle + "-" + manuscript_id
+    text_identifier = text_sigle + "-" + manuscript_id + "-" + text_version
 
     text_object, text_object_created = Text.objects.get_or_create(
         title=text_title,
         series=text_sigle,
         corpus=corpus_object,
         identifier=text_identifier,
+        version=text_version
     )
 
     # create logger
@@ -240,7 +241,19 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title):
         if transliteration or token_number_in_sentence:
             # create token object
             token = Token.objects.create(text=text_object, number=token_number)
-            token.language = "pal"
+            #set language
+            try:
+                token_lang = row["token_lang"]
+                if token_lang:
+                    if token_lang == '_':
+                        token_lang = 'pal'
+                    else: 
+                        token_lang = strip_and_normalize('NFC', token_lang)    
+                    token.language = token_lang    
+            except Exception as e:
+                logger.error(
+                    "Row {} - {} - {}".format(df.index[i] + 2, row["token_lang"], str(e))
+                )
             # increase token numbe
             if transliteration:
                 token.transliteration = transliteration
@@ -727,12 +740,18 @@ class Command(BaseCommand):
             type=str,
             help="Text title e.g. Greater Bundahišn or Iranian Bundahišn",
         )
+        parser.add_argument(
+            "text_version",
+            type=str,
+            help="Text version e.g. with_newparts",
+        )
 
     def handle(self, *args, **kwargs):
         csv_file = kwargs["csv_file"]
         manuscript_id = kwargs["manuscript_id"]
         text_sigle = kwargs["text_sigle"]
         text_title = kwargs["text_title"]
+        text_version = kwargs["text_version"]
 
         settings.ELASTICSEARCH_DSL_AUTOSYNC = False
         settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
@@ -742,6 +761,7 @@ class Command(BaseCommand):
             manuscript_id=manuscript_id,
             text_sigle=text_sigle,
             text_title=text_title,
+            text_version=text_version,
         )
 
         settings.ELASTICSEARCH_DSL_AUTOSYNC = True
