@@ -18,6 +18,9 @@ class Text(models.Model):
     series = models.CharField(max_length=20, null=True,blank=True)
     # e.g. genre
     label = models.CharField(max_length=20, null=True, blank=True)
+    # version
+    version = models.CharField(max_length=20, null=True, blank=True)
+
     stage = models.CharField(max_length=10, blank=True)
     
     editors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="text_editors")
@@ -30,7 +33,7 @@ class Text(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{}'.format(self.title)
+        return '{}'.format(self.title, self.identifier)
 
     class Meta:
         ordering = ['title']
