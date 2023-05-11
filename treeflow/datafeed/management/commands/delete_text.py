@@ -1,32 +1,28 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.shortcuts import get_object_or_404
 from treeflow.corpus.models.text import Text
 
 class Command(BaseCommand):
-    help = 'Deletes a Text object based on its title.'
+    help = 'Deletes a Text object based on its identifier.'
 
     def add_arguments(self, parser):
-        parser.add_argument('title', type=str, help='The title of the Text object to be deleted.')
+        parser.add_argument('identifier', type=str, help='The identifier of the Text object to be deleted.')
 
     def handle(self, *args, **options):
+        # Temporarily set Elasticsearch settings to False
+            settings.ELASTICSEARCH_DSL_AUTOSYNC = False
+            settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
+            identifier = options['identifier']
 
+            # Find the Text object with the given identifier
+            text = get_object_or_404(Text, identifier=identifier)
 
+            # Delete the Text object
+            text.delete()
 
-        settings.ELASTICSEARCH_DSL_AUTOSYNC = False
-        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
+            self.stdout.write(self.style.SUCCESS(f"Successfully deleted Text object with identifier '{identifier}'."))
 
-        title = options['title']
+            settings.ELASTICSEARCH_DSL_AUTOSYNC = True
+            settings.ELASTICSEARCH_DSL_AUTO_REFRESH = True
 
-        # Find the Text object with the given title
-        try:
-            text = Text.objects.get(title=title)
-        except Text.DoesNotExist:
-            self.stdout.write(self.style.ERROR(f"Error: Text object with title '{title}' not found."))
-            return
-
-        # Delete the Text object
-        text.delete()
-
-        self.stdout.write(self.style.SUCCESS(f"Successfully deleted Text object with title '{title}'."))
-        settings.ELASTICSEARCH_DSL_AUTOSYNC = True
-        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = True
