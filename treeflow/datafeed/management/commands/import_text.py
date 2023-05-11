@@ -19,8 +19,9 @@ from treeflow.images.models import Image
 from django.conf import settings
 from treeflow.utils.normalize import strip_and_normalize
 import logging
+from django.db import transaction
 
-
+@transaction.atomic
 def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_version):
     # initialize variables
     prev_chapter = None
@@ -59,6 +60,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         corpus=corpus_object,
         identifier=text_identifier,
         version=text_version
+
     )
 
     # create logger
@@ -446,7 +448,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                         )
                                     )
                                     meaning_obj = None
-                                    if meaning_obj:
+                                if meaning_obj:
                                         lemma_obj.related_meanings.add(meaning_obj)
                                         token.meanings.add(meaning_obj)
                         # save lemma
@@ -512,11 +514,10 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                             # save lemma
                             lemma_obj.save()
                             mwes.append(lemma_obj)
-        # process images
+                            
         if pd.notna(row["folionew"]):
             if row["folionew"] != "_":
                 img = str(row["folionew"])
-                # print("image {}".format(img))
                 image_id = manuscript_obj.identifier + "_" + img
                 try:
                     image_obj, image_obj_created = Image.objects.get_or_create(
@@ -530,7 +531,10 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 if image_obj:
                     if image_obj_created:
                         image_obj.manuscript = manuscript_obj
-                        image_obj.previous = previous_image_obj
+                        # Check if there is already an Image object with the same previous_id
+                        previous_image_exists = Image.objects.filter(previous=previous_image_obj).exists()
+                        if not previous_image_exists:
+                            image_obj.previous = previous_image_obj
                         try:
                             image_obj.save()
                         except IntegrityError as e:
@@ -545,6 +549,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 if token:
                     token.image = previous_image_obj
 
+
         # process lines
         if row["line"] != "_" and pd.notna(row["line"]):
             # save line to image
@@ -554,31 +559,30 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 print("img_name {}".format(img_name))
                 line_identifier = img_name + "_" + str(line)
                 print("line_identifier {}".format(line_identifier))
-                ## TODO Add text to line
-                (
-                    current_line_obj,
-                    current_line_obj_created,
-                ) = Section.objects.get_or_create(
+                # Add text to line
+                current_line_obj, current_line_obj_created = Section.objects.get_or_create(
                     type="line", identifier=line_identifier, text=text_object
                 )
                 current_line_obj.number = float(line)
                 assert current_line_obj.number == float(line)
-                # set previous line
                 if current_line_obj_created:
                     if previous_line_obj:
-                        current_line_obj.previous = previous_line_obj
-                        try:
-                            current_line_obj.save()
-                        except IntegrityError as e:
-                            logger.error(
-                                "Row {} - IntegrityError: {}".format(df.index[i] + 2, e)
-                            )
-                            if (
-                                'duplicate key value violates unique constraint "corpus_section_previous_id_key"'
-                                in str(e)
-                            ):
-                                current_line_obj.previous = None
+                        # Check if there's already a Section object with this previous_id
+                        existing_section = Section.objects.filter(previous=previous_line_obj).first()
+                        if existing_section is None:
+                            current_line_obj.previous = previous_line_obj
+                            try:
                                 current_line_obj.save()
+                            except Exception as e:
+                                logger.error("Row {} - Exception: {}".format(df.index[i] + 2, e))
+                                if ('duplicate key value violates unique constraint "corpus_section_previous_id_key"' in str(e)):
+                                    current_line_obj.previous = None
+                                    current_line_obj.save()
+                        else:
+                            # Handle the case where a Section object with this previous_id already exists
+                            # For example, you might want to set current_line_obj.previous to None
+                            current_line_obj.previous = None
+                            current_line_obj.save()
                     # add to list
                     lines.add(current_line_obj)
                     # update previous line
@@ -588,7 +592,6 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 previous_image_obj.save()
                 # update previous line
                 previous_line_obj = current_line_obj
-
         # process new_parts
         if not pd.isna(row["newpart"]):
             try:
@@ -746,6 +749,7 @@ class Command(BaseCommand):
             help="Text version e.g. with_newparts",
         )
 
+
     def handle(self, *args, **kwargs):
         csv_file = kwargs["csv_file"]
         manuscript_id = kwargs["manuscript_id"]
@@ -762,6 +766,7 @@ class Command(BaseCommand):
             text_sigle=text_sigle,
             text_title=text_title,
             text_version=text_version,
+
         )
 
         settings.ELASTICSEARCH_DSL_AUTOSYNC = True
