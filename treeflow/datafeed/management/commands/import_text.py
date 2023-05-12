@@ -33,14 +33,6 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
     previous_image_obj = None
     sentence_obj = None
 
-    # normalize strings
-    # manuscript_id = normalize_nfc(input_string=manuscript_id)
-    # manuscript_id = manuscript_id.upper()
-    # text_sigle = normalize_nfc(input_string=text_sigle)
-    # text_sigle = text_sigle.upper()
-    # text_title = normalize_nfc(input_string=text_title)
-    # text_title = text_title.title()
-
     # create source manuscript object
     # manuscript_id = "L19"
     manuscript_obj, manuscript_obj_created = Source.objects.get_or_create(
@@ -297,19 +289,14 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                         feature, value = postfeature.split("=", maxsplit=1)
                         # assert that the split existed and that the feature and value are not empty
                         assert feature and value
+                        # check if feature and value are not too long 
+                        if len(feature) > 10 or len(value) > 10:
+                            logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["postfeatures"], "feature or value too long"))
+                            continue
                         try:
-                            feature_obj = Feature.objects.create(
-                                feature=feature,
-                                feature_value=value,
-                                token=token,
-                                pos=pos,
-                            )
+                            feature_obj = Feature.objects.create(feature=feature,feature_value=value,token=token,pos=pos)
                         except Exception as e:
-                            logger.error(
-                                "Row {} - {} - {}".format(
-                                    df.index[i] + 2, row["postfeatures"], str(e)
-                                )
-                            )
+                            logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["postfeatures"], str(e)))
                             feature_obj = None
                     else:
                         continue
@@ -319,28 +306,19 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         # process dependencies
         if row["deprel"] != "_":
             deprel = row["deprel"]
-            # print("deprel {}".format( deprel))
             # get head
             if row["head"] and row["head"] != "_" and pd.notna(row["transliteration"]):
                 try:
                     head = float(row["head"])
                 except Exception as e:
-                    logger.error(
-                        "Row {} - {} - {}".format(df.index[i] + 2, row["head"], str(e))
-                    )
+                    logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["head"], str(e)))
                     head = None
                 if head:
                     # create dependency
                     try:
-                        dependency_obj = Dependency.objects.create(
-                            head_number=head, rel=deprel, token=token
-                        )
+                        dependency_obj = Dependency.objects.create(head_number=head, rel=deprel, token=token)
                     except Exception as e:
-                        logger.error(
-                            "Row {} - {} - {}".format(
-                                df.index[i] + 2, row["deprel"], str(e)
-                            )
-                        )
+                        logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["deprel"], str(e)))
                         dependency_obj = None
                     if dependency_obj:
                         assert dependency_obj.head_number == head
@@ -357,13 +335,9 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 try:
                     if dep and dep != "_" and ":" in dep:
                         head, rel = dep.split(":", 1)
-                        dependency_obj = Dependency.objects.create(
-                            head_number=float(head), rel=rel, token=token
-                        )
+                        dependency_obj = Dependency.objects.create(head_number=float(head), rel=rel, token=token)
                 except Exception as e:
-                    logger.error(
-                        "Row {} - {} - {}".format(df.index[i] + 2, row["deps"], e)
-                    )
+                    logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["deps"], e))
                     dependency_obj = None
                     if dependency_obj:
                         assert dependency_obj.head_number == head
@@ -385,9 +359,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                             language="pal",
                         )
                     except IntegrityError as e:
-                        logger.error(
-                            "Row {} - {} - {}".format(df.index[i] + 2, row["lemma"], e)
-                        )
+                        logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["lemma"], e))
                         lemma_obj = None
                     if lemma_obj:
                         # check if term.tech exists
@@ -692,10 +664,6 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
             new_suggestion = row["new_suggestion"]
             uncertain = row["uncertain"]
             discussion = row["discussion"]
-            # print("comment: {}".format(comment))
-            # print("new_suggestion: {}".format(new_suggestion))
-            # print("uncertain: {}".format(uncertain))
-            # print("discussion: {}".format(discussion))
             comment_obj = Comment()
             comment_obj.token = token
             if token_comment != "_" and not pd.isna(token_comment):
