@@ -469,7 +469,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                             "Row {} - {} - {}".format(df.index[i] + 2, row["lemma"], e)
                         )
                         lemma_obj = None
-                        if lemma_obj:
+                    if lemma_obj:
                             # add meaning
                             if row["meaning"] != "_" and pd.notna(row["meaning"]):
                                 meaning = row["meaning"]
