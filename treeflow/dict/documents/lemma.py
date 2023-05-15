@@ -19,5 +19,5 @@ class LemmaDocument(Document):
             'id',
             'language',
             'multiword_expression',
-            'category',
+
         ]
