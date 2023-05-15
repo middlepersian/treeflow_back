@@ -355,13 +355,16 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     try:
                         lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
                             word=strip_and_normalize("NFC", lemma),
-                            multiword_expression=False,
-                            language="pal",
+                            language="pal"
                         )
                     except IntegrityError as e:
                         logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["lemma"], e))
                         lemma_obj = None
                     if lemma_obj:
+                        # set mwe status
+                        if lemma_obj_created:
+                            lemma_obj.mwe = False
+
                         # check if term.tech exists
                         if (
                             row["term._tech._(cat.)"]
@@ -433,7 +436,6 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     try:
                         lemma_obj, lemma_obj_created = Lemma.objects.get_or_create(
                             word=strip_and_normalize("NFC", lemma),
-                            multiword_expression=True,
                             language="pal",
                         )
                     except IntegrityError as e:
@@ -442,36 +444,22 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                         )
                         lemma_obj = None
                     if lemma_obj:
-                            # add meaning
-                            if row["meaning"] != "_" and pd.notna(row["meaning"]):
-                                meaning = row["meaning"]
-                                if "," in meaning:
-                                    meaning = meaning.split(",")
-                                    for m in meaning:
-                                        try:
-                                            (
-                                                m_obj,
-                                                m_obj_created,
-                                            ) = Meaning.objects.get_or_create(
-                                                meaning=strip_and_normalize("NFC", m),
-                                                language="eng",
-                                            )
-                                        except IntegrityError as e:
-                                            logger.error(
-                                                "Row {} - {} - {}".format(
-                                                    df.index[i] + 2, row["meaning"], e
-                                                )
-                                            )
-                                            m_obj = None
-                                        if m_obj:
-                                            lemma_obj.related_meanings.add(m_obj)
-                                else:
+                        # check multiword_expression status
+                        # if new set mwe to True
+                        if lemma_obj_created:
+                            lemma_obj.multiword_expression = True
+                        # add meaning
+                        if row["meaning"] != "_" and pd.notna(row["meaning"]):
+                            meaning = row["meaning"]
+                            if "," in meaning:
+                                meaning = meaning.split(",")
+                                for m in meaning:
                                     try:
                                         (
                                             m_obj,
                                             m_obj_created,
                                         ) = Meaning.objects.get_or_create(
-                                            meaning=strip_and_normalize("NFC", meaning),
+                                            meaning=strip_and_normalize("NFC", m),
                                             language="eng",
                                         )
                                     except IntegrityError as e:
@@ -483,9 +471,27 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                         m_obj = None
                                     if m_obj:
                                         lemma_obj.related_meanings.add(m_obj)
-                            # save lemma
-                            lemma_obj.save()
-                            mwes.append(lemma_obj)
+                            else:
+                                try:
+                                    (
+                                        m_obj,
+                                        m_obj_created,
+                                    ) = Meaning.objects.get_or_create(
+                                        meaning=strip_and_normalize("NFC", meaning),
+                                        language="eng",
+                                    )
+                                except IntegrityError as e:
+                                    logger.error(
+                                        "Row {} - {} - {}".format(
+                                            df.index[i] + 2, row["meaning"], e
+                                        )
+                                    )
+                                    m_obj = None
+                                if m_obj:
+                                    lemma_obj.related_meanings.add(m_obj)
+                        # save lemma
+                        lemma_obj.save()
+                        mwes.append(lemma_obj)
                             
         if pd.notna(row["folionew"]):
             if row["folionew"] != "_":
