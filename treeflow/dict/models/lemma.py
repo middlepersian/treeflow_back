@@ -9,10 +9,9 @@ class Lemma(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     word = models.CharField(max_length=100)
     language = models.CharField(max_length=3, null=True, blank=True)
-    category = models.CharField(max_length=16, null=True, blank=True)
-    # categories = ArrayField(
-    #     models.CharField(max_length=50, blank=True, null=True), null=True, blank=True
-    # )
+    categories = ArrayField(
+         models.CharField(max_length=50, blank=True, null=True), null=True, blank=True
+     )
     multiword_expression = models.BooleanField(default=False)
     related_lemmas = models.ManyToManyField(
         "self", blank=True, related_name="lemma_related_lemmas", through="LemmaRelation"
@@ -44,9 +43,7 @@ class Lemma(models.Model):
         # process language
         if self.language:
             self.language = self.language.strip().lower()
-        # process categories
-        if self.category:
-            self.category = self.category.strip().lower()
+
 
         super().save(*args, **kwargs)
 
