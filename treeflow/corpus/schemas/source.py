@@ -1,6 +1,8 @@
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+from strawberry_django_plus.mutations import resolvers
+
 from typing import Optional
 
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
@@ -33,7 +35,7 @@ class Mutation:
     delete_source: Source = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
 
     @gql.django.mutation
-    def create_source_with_new_bibentry(self, source: SourceInput, bibentry: BibEntryInput) -> Source:
+    def create_source_with_new_bibentry(self, info, source: SourceInput, bibentry: BibEntryInput) -> Source:
         if not info.context or not info.context.request.user.is_authenticated:
             raise Exception("Not authenticated")
         source =  vars(source)
