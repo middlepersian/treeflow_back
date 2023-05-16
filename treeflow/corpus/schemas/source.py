@@ -32,23 +32,23 @@ class Mutation:
     update_source: Source = gql.django.update_mutation(SourcePartial, directives=[IsAuthenticated()])
     delete_source: Source = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
 
-
+    @gql.django.mutation
+    def create_source_with_new_bibentry(self, source: SourceInput, bibentry: BibEntryInput) -> Source:
+        if not info.context or not info.context.request.user.is_authenticated:
+            raise Exception("Not authenticated")
+        source =  vars(source)
+        bibentry = vars(bibentry)
+        #create bibentry
+        new_bibentry = resolvers.create(info, BibEntryModel, resolvers.parse_input(info, bibentry))
+        new_bibentry.save()
+        #create source
+        new_source = resolvers.create(info, SourceModel, resolvers.parse_input(info, source))
+        # add bibentry to source
+        new_source.references.add(new_bibentry)
+        new_source.save()
+        return new_source   
 schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])
 
 
-@gql.django.mutation
-def create_source_with_new_bibentry(self, source: SourceInput, bibentry: BibEntryInput) -> Source:
-    if not info.context or not info.context.request.user.is_authenticated:
-        raise Exception("Not authenticated")
-    source =  vars(source)
-    bibentry = vars(bibentry)
-    #create bibentry
-    new_bibentry = resolvers.create(info, BibEntryModel, resolvers.parse_input(info, bibentry))
-    new_bibentry.save()
-    #create source
-    new_source = resolvers.create(info, SourceModel, resolvers.parse_input(info, source))
-    # add bibentry to source
-    new_source.references.add(new_bibentry)
-    new_source.save()
-    return new_source   
+
 
