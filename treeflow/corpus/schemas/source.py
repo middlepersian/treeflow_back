@@ -4,6 +4,9 @@ from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 from typing import Optional
 
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
+from treeflow.corpus.types.bibliography import BibEntry, BibEntryInput, BibEntryPartial
+from treeflow.corpus.models.source import Source as SourceModel
+from treeflow.corpus.models.bibliography import BibEntry as BibEntryModel
 
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
@@ -31,3 +34,21 @@ class Mutation:
 
 
 schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])
+
+
+@gql.django.mutation
+def create_source_with_new_bibentry(self, source: SourceInput, bibentry: BibEntryInput) -> Source:
+    if not info.context or not info.context.request.user.is_authenticated:
+        raise Exception("Not authenticated")
+    source =  vars(source)
+    bibentry = vars(bibentry)
+    #create bibentry
+    new_bibentry = resolvers.create(info, BibEntryModel, resolvers.parse_input(info, bibentry))
+    new_bibentry.save()
+    #create source
+    new_source = resolvers.create(info, SourceModel, resolvers.parse_input(info, source))
+    # add bibentry to source
+    new_source.bibentry = new_bibentry
+    new_source.save()
+    return new_source   
+
