@@ -48,7 +48,7 @@ def create_source_with_new_bibentry(self, source: SourceInput, bibentry: BibEntr
     #create source
     new_source = resolvers.create(info, SourceModel, resolvers.parse_input(info, source))
     # add bibentry to source
-    new_source.bibentry = new_bibentry
+    new_source.references.add(new_bibentry)
     new_source.save()
     return new_source   
 
