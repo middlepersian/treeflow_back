@@ -16,6 +16,7 @@ class SectionFilter:
     id: relay.GlobalID
     type: gql.auto
     container: 'SectionFilter'
+    tokens: gql.LazyType['TokenFilter', 'treeflow.corpus.types.token']
     text:  gql.LazyType['TextFilter', 'treeflow.corpus.types.text']
     image : gql.LazyType['ImageFilter', 'treeflow.images.types.image']
 
