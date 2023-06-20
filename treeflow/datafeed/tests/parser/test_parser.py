@@ -54,7 +54,7 @@ def test_parse_preannotated():
 
 @pytest.mark.django_db
 def test_parse_annotated():
-    file_name = 'Dk5_B.csv'
+    file_name = '06-syntactically_annotated_to_import/NM_K35.csv'
 
     # deactive elastic for performance reasons
 
@@ -65,10 +65,12 @@ def test_parse_annotated():
     base_dir = '/app_data'
     file_path = os.path.join(base_dir, file_name)
     
-    manuscript_id = "L19"
-    text_title = "dunkard"
-    text_sigle= "dk5"
-    tokens, images, lines = import_annotated_file(csv_file=file_path,text_sigle=text_sigle, text_title=text_title, manuscript_id=manuscript_id)
+    manuscript_id = "K35"
+    text_title = "Namagiha i manuscihr"
+    text_sigle= "NM"
+    text_version = "1"
+    tokens, images, lines = import_annotated_file(csv_file=file_path, text_sigle=text_sigle, text_title=text_title, \
+                                                  manuscript_id=manuscript_id, text_version=text_version)
     print()
 
     #section objects
