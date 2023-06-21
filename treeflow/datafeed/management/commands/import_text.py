@@ -665,6 +665,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 )
 
 
+
         # process comments
         if (
             (row["comment"] != "_" and not pd.isna(row["comment"]))
@@ -682,14 +683,18 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 comment_obj.comment = token_comment
             if new_suggestion != "_" and not pd.isna(new_suggestion):
                 comment_obj.new_suggestion = []
-                comment_obj.new_suggestion.append(new_suggestion)
+                new_suggestion = new_suggestion.split(",")
+                comment_obj.new_suggestion = [item.strip() for item in new_suggestion]
             if uncertain != "_" and not pd.isna(uncertain):
                 comment_obj.uncertain = []
-                comment_obj.uncertain.append(uncertain)
+                uncertain = uncertain.split(",")
+                comment_obj.uncertain = [item.strip() for item in uncertain]    
             if discussion != "_" and not pd.isna(discussion):
                 comment_obj.to_discuss = []
-                comment_obj.to_discuss.append(discussion)
+                discussion = discussion.split(",")
+                comment_obj.to_discuss = [item.strip() for item in discussion]
             comment_obj.save()
+
 
         if token:
             # add token to tokens list
