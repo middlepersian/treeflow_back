@@ -4,7 +4,8 @@ from strawberry_django_plus.gql import relay
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 
 
-from treeflow.corpus.types.comment import Comment, CommentInput, CommentPartial
+from treeflow.corpus.types.comment import Comment, CommentInput, CommentPartial, CommentCategoriesList
+from treeflow.corpus.enums.comment_categories import CommentCategories
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -21,6 +22,11 @@ from strawberry_django_plus.permissions import (
 class Query:
     comment: Optional[Comment] = gql.django.node()
     comments: relay.Connection[Comment] = gql.django.connection()
+
+    @gql.field
+    def comment_categories(self, info) -> CommentCategoriesList:
+        cc_list = [(c.value) for c in CommentCategories]
+        return CommentCategoriesList(categories=cc_list)
 
 
 @gql.type

@@ -54,7 +54,7 @@ class Comment(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return '{} {}'.format(self.user, self.text)
+        return '{} {}'.format(self.user, self.comment)
 
     class Meta:
         indexes = [

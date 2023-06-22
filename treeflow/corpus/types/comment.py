@@ -2,7 +2,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import Optional, List
 from treeflow.corpus import models
-
+from treeflow.corpus.enums.comment_categories import CommentCategories
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
 from strawberry_django_plus.permissions import (
@@ -25,9 +25,9 @@ class Comment(relay.Node):
 
     created_at: gql.auto
 
-    uncertain: Optional[List[Optional[str]]]
-    to_discuss: Optional[List[Optional[str]]]
-    new_suggestion:  Optional[List[Optional[str]]]
+    uncertain: Optional[List[Optional[CommentCategories]]]
+    to_discuss: Optional[List[Optional[CommentCategories]]]
+    new_suggestion: Optional[List[Optional[CommentCategories]]]
 
 
 @gql.django.input(models.Comment)
@@ -42,9 +42,9 @@ class CommentInput:
     text:  gql.auto
     token:  gql.auto
 
-    uncertain: Optional[List[Optional[str]]]
-    to_discuss: Optional[List[Optional[str]]]
-    new_suggestion:  Optional[List[Optional[str]]]
+    uncertain: Optional[List[Optional[CommentCategories]]]
+    to_discuss: Optional[List[Optional[CommentCategories]]]
+    new_suggestion: Optional[List[Optional[CommentCategories]]]
 
 
 @gql.django.partial(models.Comment)
@@ -59,6 +59,12 @@ class CommentPartial(gql.NodeInputPartial):
     text:  gql.auto
     token:  gql.auto
 
-    uncertain: Optional[List[Optional[str]]]
-    to_discuss: Optional[List[Optional[str]]]
-    new_suggestion:  Optional[List[Optional[str]]]
+    uncertain: Optional[List[Optional[CommentCategories]]]
+    to_discuss: Optional[List[Optional[CommentCategories]]]
+    new_suggestion: Optional[List[Optional[CommentCategories]]]
+
+
+@gql.type
+class CommentCategoriesList:
+    categories : List[CommentCategories]
+    

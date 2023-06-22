@@ -1,4 +1,3 @@
-import strawberry
 
 upos_feature_feature_value = {
  'ADJ': {
