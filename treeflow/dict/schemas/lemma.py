@@ -7,7 +7,9 @@ from typing import Optional, List
 
 
 
-from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic #CustomPaginationConnection
+from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic, TermTechList, LanguageList
+from treeflow.dict.enums.term_tech import TermTech
+from treeflow.dict.enums.language import Language
 from treeflow.dict.types.meaning import MeaningInput
 import treeflow.dict.models as models
 from  treeflow.dict.documents.lemma import LemmaDocument
@@ -30,6 +32,24 @@ class Query:
     lemma: Optional[Lemma] = gql.django.node()
     lemmas:  relay.Connection[Lemma] = gql.django.connection()
     #lemmas_custom_pagination: CustomPaginationConnection[Lemma] = relay.connection()
+
+    @gql.field
+    def term_tech_list(self, info) -> TermTechList:
+        term_tech_list = [tt.value for tt in TermTech]
+        return TermTechList(term_tech=term_tech_list)
+
+    @gql.field
+    def term_techs(self) -> List[str]:
+        return [term_tech.value for term_tech in TermTech]    
+
+    @gql.field
+    def language_list(self, info) -> LanguageList:
+        language_list = [l.value for l in Language]
+        return LanguageList(language=language_list)    
+
+    @gql.field
+    def languages(self) -> List[str]:
+        return [language.value for language in Language]
 
 
     @gql.field

@@ -9,8 +9,6 @@ from treeflow.corpus.enums.features import upos_feature_feature_value
 
 import strawberry
 
-
-
 def get_features(pos: str ) -> Dict[str, Tuple[str]]:
     return upos_feature_feature_value.get(pos, {})
 

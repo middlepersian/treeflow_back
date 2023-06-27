@@ -4,14 +4,22 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 from typing import List, Optional, Iterable
 from treeflow.dict import models
-from treeflow.dict.types.language import Language
 from treeflow.dict.documents.lemma import LemmaDocument
+from treeflow.dict.enums.term_tech import TermTech
+from treeflow.dict.enums.language import Language
 from elasticsearch_dsl import Search, Q, connections
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 
 
+@strawberry.type
+class TermTechList:
+    term_tech: List[TermTech]
+
+@strawberry.type
+class LanguageList:
+    language: List[Language]
 
 
 @gql.django.filters.filter(models.Lemma, lookups=True)
@@ -32,6 +40,7 @@ class Lemma(relay.Node):
     word: gql.auto
     language: Language
     multiword_expression: gql.auto
+    categories: Optional[List[Optional[str]]]
     related_lemmas: List['Lemma']
     related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
 
@@ -41,6 +50,7 @@ class LemmaInput:
     word: gql.auto
     language: Language
     multiword_expression: gql.auto
+    categories: Optional[List[Optional[str]]]
     related_lemmas: gql.auto
     related_meanings: gql.auto
 
@@ -51,21 +61,9 @@ class LemmaPartial:
     word: gql.auto
     language: Language
     multiword_expression: gql.auto
+    categories: Optional[List[Optional[str]]]
     related_lemmas: gql.auto
     related_meanings: gql.auto
-
-@gql.django.type(models.Lemma, filters=LemmaFilter)
-class Lemma(relay.Node):
-
-    token_lemmas:  relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
-    comment_lemma: relay.Connection[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
-
-    id: relay.GlobalID
-    word: gql.auto
-    language: Language
-    multiword_expression: gql.auto
-    related_lemmas: List['Lemma']
-    related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
 
 
 @strawberry.type
@@ -73,6 +71,7 @@ class LemmaSelection():
     word: str
     language: str
     multiword_expression: Optional[bool] = None
+
 
     @classmethod
     def from_hit(cls,hit, field="related_lemmas"):
@@ -108,8 +107,8 @@ class LemmaElastic(relay.Node):
 
     id: relay.GlobalID
     word: str
-    language: str
-    #category: str
+    language: Language
+    categories: Optional[List[Optional[str]]] = None
     multiword_expression: bool
     related_lemmas: Optional[List[LemmaSelection]] = None
     related_meanings: Optional[List[MeaningSelection]] = None
@@ -127,7 +126,7 @@ class LemmaElastic(relay.Node):
             word=hit['word'],
             language=hit['language'],
             multiword_expression=hit['multiword_expression'],
-            #category=hit['category'] if 'category' in hit else None,
+            categories=hit['categories'] if 'categories' in hit else None,
             related_lemmas=LemmaSelection.from_hit(hit, field="related_lemmas"),
             related_meanings=MeaningSelection.from_hit(hit, field="related_meanings")
         )
