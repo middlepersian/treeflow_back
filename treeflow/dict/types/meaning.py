@@ -8,13 +8,14 @@ from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Search
 from asgiref.sync import sync_to_async
 from treeflow.dict.types.lemma import MeaningSelection, LemmaSelection
+from treeflow.dict.enums.language import Language
 
 
 @gql.django.filters.filter(models.Meaning, lookups=True)
 class MeaningFilter:
     id: relay.GlobalID
     meaning: gql.auto
-    language: gql.auto
+    language: Language
 
 
 @gql.django.type(models.Meaning, filters=MeaningFilter)
@@ -26,7 +27,7 @@ class Meaning(relay.Node):
 
     id: relay.GlobalID
     meaning: gql.auto
-    language: gql.auto
+    language: Language
     related_meanings: List['Meaning']
     related_lemmas: List[gql.LazyType['Lemma', 'treeflow.dict.types.lemma']]
 
@@ -34,7 +35,7 @@ class Meaning(relay.Node):
 @gql.django.input(models.Meaning)
 class MeaningInput:
     meaning: gql.auto
-    language: gql.auto
+    language: Language
     related_meanings: gql.auto
 
 
@@ -42,7 +43,7 @@ class MeaningInput:
 class MeaningPartial:
     id: relay.GlobalID
     meaning: gql.auto
-    language: gql.auto
+    language: Language
     related_meanings: gql.auto
 
 
@@ -51,7 +52,7 @@ class MeaningPartial:
 class MeaningElastic(relay.Node):
 
     id: relay.GlobalID
-    language: str
+    language: Language
     meaning: str
     lemma_related : bool
     related_meanings: Optional[List[MeaningSelection]] = None
