@@ -8,4 +8,3 @@ from .corpus import Corpus
 from .text import Text
 from .section import Section
 from .pos import POS
-

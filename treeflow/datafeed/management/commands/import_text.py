@@ -5,7 +5,6 @@ from django.db.utils import IntegrityError
 from treeflow.corpus.models import (
     Token,
     Section,
-    Section,
     Text,
     Corpus,
     Source,
@@ -26,6 +25,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
     # initialize variables
     prev_chapter = None
     prev_section = None
+    prev_subsection = None
     previous_folio_obj = None  # Initialize the previous_folio_obj variable
     previous_line_obj = None  # Initialize the previous_line_obj variable
     previous_token_obj = None  # Initialize the previous_token_obj variable
@@ -84,6 +84,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
     parsed_sentences = []
     chapter_number = 1
     section_number = 1
+    subsection_number = 1
 
     # read csv file
     df = pd.read_csv(csv_file, sep="\t", encoding="utf-8", header=0)
@@ -101,6 +102,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         if sentence_obj:
             # check if at the end of the sentence
             if row.isna().all():
+                logger.error("### END_OF_SENTENCE {}".format(str(sentence_number)))
                 print("### END_OF_SENTENCE", sentence_number)
                 # process dependencies and their heads
                 if dependencies:
@@ -136,6 +138,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 # add tokens to sentence
                 # check that tokens are not empty
                 if sentence_tokens:
+                    logger.error(str(sentence_tokens)) ### DEBUG
                     sentence_obj.tokens.add(*sentence_tokens)
                     parsed_sentences.append(sentence_obj)
                     sentence_obj.save()
@@ -242,8 +245,8 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     if token_lang == '_':
                         token_lang = 'pal'
                     else: 
-                        token_lang = strip_and_normalize('NFC', token_lang)    
-                    token.language = token_lang    
+                        token_lang = strip_and_normalize('NFC', token_lang)
+                    token.language = token_lang
             except Exception as e:
                 logger.error(
                     "Row {} - {} - {}".format(df.index[i] + 2, row["token_lang"], str(e))
@@ -575,18 +578,47 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
             try:
                 # new part there
                 if row["newpart"] != "_":
-                    # split the newpart string into chapter and section
                     newpart = row["newpart"]
                     if not pd.isna(newpart) and newpart != "_":
                         # split the newpart string into constituent parts
                         # check how many parts there are
-
-                        newpart = str(newpart)
-                        # print("newpart", newpart)
-                        newpart_type = len(newpart.split("_"))
+                        newpart_type = len(str(newpart).split("_"))
+                        # Newpart: xxx_
                         if newpart_type == 1:
                             newpart = "_"
-                        if newpart_type == 3:
+                        # Newpart: xxx_ch001
+                        elif newpart_type == 2:
+                            source, chapter = newpart.split("_")
+                            chapter = chapter.strip()
+                            chapter_human = chapter.replace("ch", "chapter ")
+                            # get or create the chapter object
+                            chapter_identifier = source + "_" + chapter
+                            assert chapter_identifier is not None
+                            if token:
+                                (
+                                    chapter_obj,
+                                    chapter_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="chapter",
+                                    identifier=chapter_identifier,
+                                    title=chapter_human,
+                                    text=text_object,
+                                )
+                                if chapter_obj_created:
+                                    chapter_obj.number = chapter_number
+                                    chapter_number += 1
+                                    # chapter_obj.tokens.add(token)
+                                    # if the current chapter is not the same as the previous chapter
+                                    if prev_chapter:
+                                        if chapter_obj != prev_chapter:
+                                            # set the current chapter as the previous chapter for the next iteration
+                                            chapter_obj.previous = prev_chapter
+                                chapter_obj.tokens.add(token)
+                                chapter_obj.save()
+                                # update previous chapter and section
+                                prev_chapter = chapter_obj
+                        # Newpart: xxx_ch001_sec001
+                        elif newpart_type == 3:
                             source, chapter, section = newpart.split("_")
                             chapter = chapter.strip()
                             section = section.strip()
@@ -649,6 +681,98 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                 # update previous chapter and section
                                 prev_chapter = chapter_obj
                                 prev_section = section_obj
+                        # Newpart: xxx_ch001_sec001_subsec001
+                        elif newpart_type == 4:
+                            source, chapter, section, subsection = newpart.split("_")
+                            chapter = chapter.strip()
+                            section = section.strip()
+                            subsection = subsection.strip()
+                            chapter_human = chapter.replace("ch", "chapter ")
+                            section_human = section.replace("sec", "section ")
+                            subsection_human = subsection.replace("subsec", "subsection ")
+                            # get or create the chapter object
+                            chapter_identifier = source + "_" + chapter
+                            assert chapter_identifier is not None
+                            if token:
+                                (
+                                    chapter_obj,
+                                    chapter_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="chapter",
+                                    identifier=chapter_identifier,
+                                    title=chapter_human,
+                                    text=text_object,
+                                )
+
+                                if chapter_obj_created:
+                                    chapter_obj.number = chapter_number
+                                    chapter_number += 1
+                                    # chapter_obj.tokens.add(token)
+                                    # if the current chapter is not the same as the previous chapter
+                                    if prev_chapter:
+                                        if chapter_obj != prev_chapter:
+                                            # set the current chapter as the previous chapter for the next iteration
+                                            chapter_obj.previous = prev_chapter
+
+                                # get or create the section object
+                                section_identifier = source + "_" + chapter + "_" + section
+                                assert section_identifier is not None
+                                (
+                                    section_obj,
+                                    section_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="section",
+                                    identifier=section_identifier,
+                                    title=section_human,
+                                    text=text_object,
+                                )
+                                if section_obj_created:
+                                    section_obj.number = section_number
+                                    section_number += 1
+                                    # if the current section is not the same as the previous section and belong to the same chapter
+                                    if prev_section:
+                                        if (
+                                            section_obj != prev_section
+                                            and prev_section.container == chapter_obj
+                                        ):
+                                            # set the current section as the previous section for the next iteration
+                                            section_obj.previous = prev_section
+                                # get or create the subsection object
+                                subsection_identifier = source + "_" + chapter + "_" + subsection
+                                assert subsection_identifier is not None
+                                (
+                                    subsection_obj,
+                                    subsection_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="subsection",
+                                    identifier=subsection_identifier,
+                                    title=subsection_human,
+                                    text=text_object,
+                                )
+                                if subsection_obj_created:
+                                    subsection_obj.number = subsection_number
+                                    subsection_number += 1
+                                    # if the current section is not the same as the previous section and belong to the same chapter
+                                    if prev_subsection:
+                                        if (
+                                            subsection_obj != prev_subsection
+                                            and prev_subsection.container == section_obj
+                                        ):
+                                            # set the current section as the previous section for the next iteration
+                                            subsection_obj.previous = prev_subsection
+
+                                subsection_obj.container = section_obj
+                                section_obj.container = chapter_obj
+                                chapter_obj.tokens.add(token)
+                                section_obj.tokens.add(token)
+                                subsection_obj.tokens.add(token)
+                                subsection_obj.save()
+                                section_obj.save()
+                                chapter_obj.save()
+                                # update previous chapter and section
+                                prev_chapter = chapter_obj
+                                prev_section = section_obj
+                                prev_subsection = subsection_obj
                 else:
                     # no new part
                     # add token to previous section
@@ -697,6 +821,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
 
 
         if token:
+            #logger.error(token)
             # add token to tokens list
             if previous_token_obj:
                 token.previous = previous_token_obj
