@@ -17,8 +17,8 @@ class Token(models.Model):
     image = models.ForeignKey('images.Image', on_delete=models.CASCADE, null=True, blank=True, related_name='token_image')
 
     language = models.CharField(max_length=3, null=True, blank=True)
-    transcription = models.CharField(max_length=50)
-    transliteration = models.CharField(max_length=50, blank=True)
+    transcription = models.TextField(null=True, blank=True)
+    transliteration = models.TextField(null=True, blank=True)
     lemmas = models.ManyToManyField('dict.Lemma', blank=True, through='TokenLemma', related_name='token_lemmas')
     meanings = models.ManyToManyField('dict.Meaning', blank=True, through='TokenMeaning', related_name='token_meanings')
 
