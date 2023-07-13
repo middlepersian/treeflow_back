@@ -9,6 +9,7 @@ from elasticsearch_dsl import Search
 from asgiref.sync import sync_to_async
 from treeflow.dict.types.lemma import MeaningSelection, LemmaSelection
 from treeflow.dict.enums.language import Language
+from treeflow.dict.enums.dict_stage import DictStage
 
 
 @gql.django.filters.filter(models.Meaning, lookups=True)
@@ -16,6 +17,7 @@ class MeaningFilter:
     id: relay.GlobalID
     meaning: gql.auto
     language: Language
+    stage : Optional[DictStage]
 
 
 @gql.django.type(models.Meaning, filters=MeaningFilter)
@@ -28,6 +30,7 @@ class Meaning(relay.Node):
     id: relay.GlobalID
     meaning: gql.auto
     language: Language
+    stage : Optional[DictStage]
     related_meanings: List['Meaning']
     related_lemmas: List[gql.LazyType['Lemma', 'treeflow.dict.types.lemma']]
 
@@ -36,6 +39,7 @@ class Meaning(relay.Node):
 class MeaningInput:
     meaning: gql.auto
     language: Language
+    stage : Optional[DictStage]
     related_meanings: gql.auto
 
 
@@ -44,6 +48,7 @@ class MeaningPartial:
     id: relay.GlobalID
     meaning: gql.auto
     language: Language
+    stage : Optional[DictStage]
     related_meanings: gql.auto
 
 
@@ -53,6 +58,7 @@ class MeaningElastic(relay.Node):
 
     id: relay.GlobalID
     language: Language
+    stage : Optional[DictStage]
     meaning: str
     lemma_related : bool
     related_meanings: Optional[List[MeaningSelection]] = None

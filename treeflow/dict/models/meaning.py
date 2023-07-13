@@ -12,7 +12,7 @@ class Meaning(models.Model):
     language = models.CharField(max_length=10, blank=True, null=True, db_index=True)
     related_meanings = models.ManyToManyField('self', blank=True, related_name='meaning_related_meanings')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    stage = models.CharField(max_length=10, blank=True)
 
     def related_lemmas(self):
             return self.lemma_related_meanings.all()
