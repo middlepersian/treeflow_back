@@ -7,6 +7,7 @@ from treeflow.dict import models
 from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
+from treeflow.dict.enums.dict_stage import DictStage
 from elasticsearch_dsl import Search, Q, connections
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
@@ -39,6 +40,7 @@ class Lemma(relay.Node):
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    stage : Optional[DictStage]
     multiword_expression: gql.auto
     categories: Optional[List[Optional[str]]]
     related_lemmas: List['Lemma']
@@ -49,6 +51,7 @@ class Lemma(relay.Node):
 class LemmaInput:
     word: gql.auto
     language: Language
+    stage : Optional[DictStage]
     multiword_expression: gql.auto
     categories: Optional[List[Optional[str]]]
     related_lemmas: gql.auto
@@ -60,6 +63,7 @@ class LemmaPartial:
     id: relay.GlobalID
     word: gql.auto
     language: Language
+    stage : Optional[DictStage]
     multiword_expression: gql.auto
     categories: Optional[List[Optional[str]]]
     related_lemmas: gql.auto
@@ -108,6 +112,7 @@ class LemmaElastic(relay.Node):
     id: relay.GlobalID
     word: str
     language: Language
+    stage : Optional[DictStage]
     categories: Optional[List[Optional[str]]] = None
     multiword_expression: bool
     related_lemmas: Optional[List[LemmaSelection]] = None
