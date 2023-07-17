@@ -18,6 +18,6 @@ class LemmaDocument(Document):
         fields = [
             'id',
             'language',
+            'stage',
             'multiword_expression',
-
         ]

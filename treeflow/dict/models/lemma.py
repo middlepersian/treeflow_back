@@ -23,6 +23,7 @@ class Lemma(models.Model):
         through="LemmaMeaning",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    stage = models.CharField(max_length=10, blank=True)
 
     history = HistoricalRecords()
 

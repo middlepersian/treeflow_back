@@ -18,5 +18,6 @@ class MeaningDocument(Document):
             'id',
             'meaning',
             'language',
+            'stage',
             'lemma_related'
         ]
