@@ -13,8 +13,9 @@ class Image(relay.Node):
 
     id: relay.GlobalID
     identifier: gql.auto
+    page: gql.auto
     number: gql.auto
-    source: gql.LazyType['Source', 'treeflow.corpus.types.source']
+    source: Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
     previous: Optional['Image']
     next: Optional['Image']
     sections: List[gql.LazyType['Section', 'treeflow.corpus.types.section']]
@@ -24,6 +25,7 @@ class Image(relay.Node):
 class ImageInput:
     number: gql.auto
     identifier: gql.auto
+    page: gql.auto
     source: gql.auto
     previous: gql.auto
     next: gql.auto
@@ -34,6 +36,7 @@ class ImageInput:
 class ImagePartial(gql.NodeInputPartial):
     id: relay.GlobalID
     identifier: gql.auto
+    page: gql.auto
     number: gql.auto
     source: gql.auto
     previous: gql.auto
