@@ -27,7 +27,7 @@ class Image(models.Model):
     history = HistoricalRecords()
 
     class Meta:
-        ordering = ['number']
+        ordering = ['identifier', 'number']
         constraints = [
             models.UniqueConstraint(
                 fields=['source', 'identifier'], name='image_source_identifier'
