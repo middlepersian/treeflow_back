@@ -31,7 +31,7 @@ class Meaning(relay.Node):
     id: relay.GlobalID
     meaning: gql.auto
     language: Language
-    lemma_related : bool
+    lemma_related : Optional[bool]
     stage : Optional[DictStage]
     related_meanings: List['Meaning']
     related_lemmas: List[gql.LazyType['Lemma', 'treeflow.dict.types.lemma']]
@@ -41,7 +41,7 @@ class Meaning(relay.Node):
 class MeaningInput:
     meaning: gql.auto
     language: Language
-    lemma_related : bool
+    lemma_related : Optional[bool]
     stage : Optional[DictStage]
     related_meanings: gql.auto
 
@@ -51,7 +51,7 @@ class MeaningPartial:
     id: relay.GlobalID
     meaning: gql.auto
     language: Language
-    lemma_related : bool
+    lemma_related : Optional[bool]
     stage : Optional[DictStage]
     related_meanings: gql.auto
 
@@ -64,7 +64,7 @@ class MeaningElastic(relay.Node):
     language: Language
     stage : Optional[DictStage]
     meaning: str
-    lemma_related : bool
+    lemma_related : Optional[bool]
     related_meanings: Optional[List[MeaningSelection]] = None
     related_lemmas: Optional[List[LemmaSelection]] = None
 
