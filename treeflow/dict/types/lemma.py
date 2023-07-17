@@ -130,6 +130,7 @@ class LemmaElastic(relay.Node):
             id=relay.to_base64(LemmaElastic, hit['id']),
             word=hit['word'],
             language=hit['language'],
+            stage=hit['stage'] if 'stage' in hit else None,
             multiword_expression=hit['multiword_expression'],
             categories=hit['categories'] if 'categories' in hit else None,
             related_lemmas=LemmaSelection.from_hit(hit, field="related_lemmas"),

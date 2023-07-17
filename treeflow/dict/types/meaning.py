@@ -80,6 +80,7 @@ class MeaningElastic(relay.Node):
             id=relay.to_base64(MeaningElastic, hit['id']),
             language=hit['language'],
             meaning=hit['meaning'],
+            stage=hit['stage'] if 'stage' in hit else None,
             lemma_related=hit['lemma_related'],
             related_meanings=MeaningSelection.from_hit(hit, field='related_meanings'),
             related_lemmas=LemmaSelection.from_hit(hit, field='related_lemmas')
