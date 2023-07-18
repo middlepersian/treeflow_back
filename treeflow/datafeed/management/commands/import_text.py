@@ -686,10 +686,11 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                             source, chapter, section, subsection = newpart.split("_")
                             chapter = chapter.strip()
                             section = section.strip()
-                            subsection = subsection.strip()
+                            subsection = subsection.strip()                        
                             chapter_human = chapter.replace("ch", "chapter ")
                             section_human = section.replace("sec", "section ")
                             subsection_human = subsection.replace("subsec", "subsection ")
+                            logger.error(f"{text_identifier} {section_human}, {subsection_human}")
                             # get or create the chapter object
                             chapter_identifier = source + "_" + chapter
                             assert chapter_identifier is not None
@@ -738,7 +739,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                             # set the current section as the previous section for the next iteration
                                             section_obj.previous = prev_section
                                 # get or create the subsection object
-                                subsection_identifier = source + "_" + chapter + "_" + subsection
+                                subsection_identifier = source + "_" + chapter + "_" + section + "_" + subsection
                                 assert subsection_identifier is not None
                                 (
                                     subsection_obj,
@@ -820,8 +821,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
             comment_obj.save()
 
 
-        if token:
-            #logger.error(token)
+        if token:            
             # add token to tokens list
             if previous_token_obj:
                 token.previous = previous_token_obj
@@ -875,7 +875,7 @@ class Command(BaseCommand):
             manuscript_id=manuscript_id,
             text_sigle=text_sigle,
             text_title=text_title,
-            text_version=text_version,
+            text_version=text_version
 
         )
 
