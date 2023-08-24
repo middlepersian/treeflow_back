@@ -8,7 +8,13 @@ from typing import Optional, List
 from treeflow.corpus import models
 from treeflow.corpus.enums.comment_categories import CommentCategories
 
-@strawberry_django.type(models.Comment)
+@strawberry_django.filters.filter(models.Comment, lookups=True)
+class CommentFilter:
+    id: Optional[relay.GlobalID]
+    text: strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']
+
+
+@strawberry_django.type(models.Comment,filters=Optional[CommentFilter])
 class Comment(relay.Node):
     
     id: relay.NodeID[str]
