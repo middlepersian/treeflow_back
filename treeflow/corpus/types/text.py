@@ -1,61 +1,62 @@
-from strawberry import lazy
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry
+import strawberry_django
+from strawberry import relay
 from typing import List, TYPE_CHECKING, Optional, Annotated
 from treeflow.corpus import models
-from treeflow.corpus.types.section import SectionFilter
+from strawberry_django.relay import ListConnectionWithTotalCount
 from treeflow.corpus.enums.text_stage import TextStage
 
-@gql.django.filters.filter(models.Text)
+@strawberry_django.filters.filter(models.Text)
 class TextFilter:
-    id: relay.GlobalID
-    title: gql.auto
+    id: Optional[relay.GlobalID]
+    title: strawberry.auto
 
 
-@gql.django.type(models.Text, filters=TextFilter)
+@strawberry_django.type(models.Text, filters=Optional[TextFilter])
 class Text(relay.Node):
 
-    token_text: relay.Connection[gql.LazyType['Token',  'treeflow.corpus.types.token']]
-    section_text: relay.Connection[gql.LazyType['Section',  'treeflow.corpus.types.section']]
-    comment_text : relay.Connection[gql.LazyType['Comment',  'treeflow.corpus.types.comment']]
+    token_text: List[strawberry.LazyType['Token',  'treeflow.corpus.types.token']] = strawberry_django.field()
+    section_text: List[strawberry.LazyType['Section',  'treeflow.corpus.types.section']] = strawberry_django.field()
+    comment_text : List[strawberry.LazyType['Comment',  'treeflow.corpus.types.comment']] = strawberry_django.field()
 
-    id: relay.GlobalID
-    corpus: gql.LazyType['Corpus', 'treeflow.corpus.types.corpus']
-    title: gql.auto
-    identifier: gql.auto
-    series: gql.auto
-    label: gql.auto
-    version: gql.auto
-    editors: List[gql.LazyType['User', 'treeflow.corpus.types.user']]
-    collaborators: List[gql.LazyType['User', 'treeflow.corpus.types.user']]
+    id: relay.NodeID[str]
+    corpus: strawberry.LazyType['Corpus', 'treeflow.corpus.types.corpus']
+    title: strawberry.auto
+    identifier: strawberry.auto
+    series: strawberry.auto
+    label: strawberry.auto
+    version: strawberry.auto
+    editors: List[strawberry.LazyType['User', 'treeflow.corpus.types.user']]
+    collaborators: List[strawberry.LazyType['User', 'treeflow.corpus.types.user']]
     stage: Optional[TextStage]
-    sources: List[gql.LazyType['Source', 'treeflow.corpus.types.source']]
+    sources: List[strawberry.LazyType['Source', 'treeflow.corpus.types.source']]
 
 
-@gql.django.input(models.Text)
+@strawberry_django.input(models.Text)
 class TextInput:
-    corpus: gql.auto
-    title: gql.auto
-    identifier: gql.auto
-    series: gql.auto
-    label: gql.auto
-    version: gql.auto
-    editors: gql.auto
-    collaborators: gql.auto
+    corpus: strawberry.auto
+    title: strawberry.auto
+    identifier: strawberry.auto
+    series: strawberry.auto
+    label: strawberry.auto
+    version: strawberry.auto
+    editors: strawberry.auto
+    collaborators: strawberry.auto
     stage: Optional[TextStage]
-    sources: gql.auto
+    sources: strawberry.auto
 
 
-@gql.django.partial(models.Text)
-class TextPartial(gql.NodeInputPartial):
-    id: relay.GlobalID
-    corpus: gql.auto
-    title: gql.auto
-    identifier: gql.auto
-    series: gql.auto
-    label: gql.auto
-    version : gql.auto
-    editors: gql.auto
-    collaborators: gql.auto
+@strawberry_django.partial(models.Text)
+class TextPartial(strawberry_django.NodeInputPartial):
+    
+    id: relay.NodeID[str]
+    corpus: strawberry.auto
+    title: strawberry.auto
+    identifier: strawberry.auto
+    series: strawberry.auto
+    label: strawberry.auto
+    version : strawberry.auto
+    editors: strawberry.auto
+    collaborators: strawberry.auto
     stage: Optional[TextStage]
-    sources: gql.auto
+    sources: strawberry.auto

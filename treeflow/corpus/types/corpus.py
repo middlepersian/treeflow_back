@@ -1,19 +1,14 @@
-from strawberry import lazy
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
-from typing import List, TYPE_CHECKING, Annotated
-
+import strawberry
+import strawberry_django
+from strawberry import relay
+from typing import List, Optional
 from treeflow.corpus import models
 
-if TYPE_CHECKING:
-    from .text import Text
-
-
-@gql.django.type(models.Corpus)
+@strawberry_django.type(models.Corpus)
 class Corpus(relay.Node):
 
-    text_corpus: relay.Connection[gql.LazyType['Text', 'treeflow.corpus.types.text']]
+    text_corpus: List[strawberry.LazyType['Text', 'treeflow.corpus.types.text']] = strawberry_django.field()
 
-    id: relay.GlobalID
-    name: gql.auto
-    slug: gql.auto
+    id: relay.NodeID[str]
+    name: strawberry.auto
+    slug: strawberry.auto

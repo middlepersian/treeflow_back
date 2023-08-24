@@ -1,26 +1,26 @@
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry
+import strawberry_django
+from strawberry import relay
 from typing import List, Optional
 
 from treeflow.corpus import models
 
-@gql.django.type(models.POS)
+@strawberry_django.type(models.POS)
 class POS(relay.Node):
-    id: relay.GlobalID
-    token : gql.LazyType['Token', 'treeflow.corpus.types.token']
-    pos: gql.auto
-    type: gql.auto
+    id: relay.NodeID[str]
+    token : strawberry.LazyType['Token', 'treeflow.corpus.types.token']
+    pos: strawberry.auto
+    type: strawberry.auto
 
-
-@gql.django.input(models.POS)
+@strawberry_django.input(models.POS)
 class POSInput:
-    token : relay.GlobalID
-    pos: gql.auto
-    type: gql.auto
+    token : strawberry.auto
+    pos: strawberry.auto
+    type: strawberry.auto
 
-@gql.django.partial(models.POS)
-class POSPartial(gql.NodeInputPartial):
-    id: relay.GlobalID
-    token: relay.GlobalID
-    pos: gql.auto
-    type: gql.auto
+@strawberry_django.partial(models.POS)
+class POSPartial(strawberry_django.NodeInputPartial):
+    id: relay.NodeID[str]
+    token: strawberry.auto
+    pos: strawberry.auto
+    type: strawberry.auto

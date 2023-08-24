@@ -2,7 +2,6 @@ from enum import StrEnum
 import strawberry
 
 @strawberry.enum
-
 class Deprel(StrEnum):
     ACL = 'acl'
     ACL_CLEFT = 'acl:cleft'
