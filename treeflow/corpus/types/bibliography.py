@@ -1,18 +1,21 @@
-from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
-from strawberry_django_plus.gql import relay
+import strawberry
+import strawberry_django
+from strawberry import relay
 from treeflow.corpus import models
 
-@gql.django.type(models.BibEntry)
+@strawberry_django.type(models.BibEntry)
 class BibEntry(relay.Node):
-    id: relay.GlobalID
-    key: gql.auto
 
-@gql.django.input(models.BibEntry)
+    id: relay.NodeID[str]
+    key: strawberry.auto
+
+@strawberry_django.input(models.BibEntry)
 class BibEntryInput:
-    key: gql.auto
 
-@gql.django.partial(models.BibEntry)
-class BibEntryPartial(gql.NodeInputPartial):
-    id: relay.GlobalID
-    key: gql.auto
+    key: strawberry.auto
+
+@strawberry_django.partial(models.BibEntry)
+class BibEntryPartial:
+    
+    id: relay.NodeID[str]
+    key: strawberry.auto

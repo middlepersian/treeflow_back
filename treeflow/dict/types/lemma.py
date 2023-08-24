@@ -1,13 +1,11 @@
-
 import strawberry
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry_django
+from strawberry import relay
 from typing import List, Optional, Iterable
 from treeflow.dict import models
 from treeflow.dict.documents.lemma import LemmaDocument
 from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
-from treeflow.dict.enums.dict_stage import DictStage
 from elasticsearch_dsl import Search, Q, connections
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
@@ -23,52 +21,47 @@ class LanguageList:
     language: List[Language]
 
 
-@gql.django.filters.filter(models.Lemma, lookups=True)
+@strawberry_django.filters.filter(models.Lemma, lookups=True)
 class LemmaFilter:
-    id: relay.GlobalID
-    word: gql.auto
-    language: Language
-    multiword_expression: gql.auto
+    id: Optional[relay.GlobalID]
+    word: strawberry.auto
+    language: Optional[Language]
+    multiword_expression: strawberry.auto
 
-
-@gql.django.type(models.Lemma, filters=LemmaFilter)
+@strawberry_django.type(models.Lemma, filters=Optional[LemmaFilter])
 class Lemma(relay.Node):
 
-    token_lemmas:  relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
-    comment_lemma: relay.Connection[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
+    token_lemmas:  List[strawberry.LazyType['Token', 'treeflow.corpus.types.token']] = strawberry_django.field()
+    comment_lemma: List[strawberry.LazyType['Comment', 'treeflow.corpus.types.comment']] = strawberry_django.field()
 
-    id: relay.GlobalID
-    word: gql.auto
+    id: relay.NodeID[str]
+    word: strawberry.auto
     language: Language
-    stage : Optional[DictStage]
-    multiword_expression: gql.auto
+    multiword_expression: strawberry.auto
     categories: Optional[List[Optional[str]]]
     related_lemmas: List['Lemma']
-    related_meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
+    related_meanings: List[strawberry.LazyType['Meaning', 'treeflow.dict.types.meaning']]
 
 
-@gql.django.input(models.Lemma)
+@strawberry_django.input(models.Lemma)
 class LemmaInput:
-    word: gql.auto
+    word: strawberry.auto
     language: Language
-    stage : Optional[DictStage]
-    multiword_expression: gql.auto
+    multiword_expression: strawberry.auto
     categories: Optional[List[Optional[str]]]
-    related_lemmas: gql.auto
-    related_meanings: gql.auto
+    related_lemmas: strawberry.auto
+    related_meanings: strawberry.auto
 
 
-@gql.django.partial(models.Lemma)
-class LemmaPartial:
-    id: relay.GlobalID
-    word: gql.auto
-    language: Language
-    stage : Optional[DictStage]
-    multiword_expression: gql.auto
+@strawberry_django.partial(models.Lemma)
+class LemmaPartial(strawberry_django.NodeInputPartial):
+    id: relay.NodeID[str]
+    word: strawberry.auto
+    language: Optional[Language]
+    multiword_expression: strawberry.auto
     categories: Optional[List[Optional[str]]]
-    related_lemmas: gql.auto
-    related_meanings: gql.auto
-
+    related_lemmas: strawberry.auto
+    related_meanings: strawberry.auto
 
 @strawberry.type
 class LemmaSelection():
@@ -105,14 +98,12 @@ class MeaningSelection():
         return None
 
 
-
 @strawberry.type
 class LemmaElastic(relay.Node):
 
-    id: relay.GlobalID
+    id: relay.NodeID[str]
     word: str
     language: Language
-    stage : Optional[DictStage]
     categories: Optional[List[Optional[str]]] = None
     multiword_expression: bool
     related_lemmas: Optional[List[LemmaSelection]] = None
@@ -120,7 +111,7 @@ class LemmaElastic(relay.Node):
 
 
     @classmethod
-    def resolve_id(self: "LemmaElastic", info: Optional[Info] = None) -> str:
+    def resolve_id(cls, root: "LemmaElastic", *, info: Info) -> str:
         return self.id
     
     @classmethod
@@ -130,7 +121,6 @@ class LemmaElastic(relay.Node):
             id=relay.to_base64(LemmaElastic, hit['id']),
             word=hit['word'],
             language=hit['language'],
-            stage=hit['stage'] if 'stage' in hit else None,
             multiword_expression=hit['multiword_expression'],
             categories=hit['categories'] if 'categories' in hit else None,
             related_lemmas=LemmaSelection.from_hit(hit, field="related_lemmas"),
@@ -190,5 +180,4 @@ def get_lemmas_by_ids(ids: List[str]) -> List[LemmaElastic]:
         lemmas.append(lemma)
 
     return lemmas
-
 

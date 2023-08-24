@@ -1,44 +1,42 @@
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry
+import strawberry_django
+from strawberry import relay
 from typing import  Optional, List
 from treeflow.images import models
 
-@gql.django.filters.filter(models.Image)
+@strawberry_django.filters.filter(models.Image)
 class ImageFilter:
-    id: relay.GlobalID
-    identifier: gql.auto
+    id: relay.NodeID[str]
+    identifier: strawberry.auto
 
-@gql.django.type(models.Image)
+@strawberry_django.type(models.Image)
 class Image(relay.Node):
 
-    id: relay.GlobalID
-    identifier: gql.auto
-    page: gql.auto
-    number: gql.auto
-    source: Optional[gql.LazyType['Source', 'treeflow.corpus.types.source']]
+    id: relay.NodeID[str]
+    identifier: strawberry.auto
+    number: strawberry.auto
+    source: strawberry.LazyType['Source', 'treeflow.corpus.types.source']
     previous: Optional['Image']
     next: Optional['Image']
-    sections: List[gql.LazyType['Section', 'treeflow.corpus.types.section']]
+    sections: List[strawberry.LazyType['Section', 'treeflow.corpus.types.section']]
 
 
-@gql.django.input(models.Image)
+@strawberry_django.input(models.Image)
 class ImageInput:
-    number: gql.auto
-    identifier: gql.auto
-    page: gql.auto
-    source: gql.auto
-    previous: gql.auto
-    next: gql.auto
-    sections: gql.auto
+    number: strawberry.auto
+    identifier: strawberry.auto
+    source: strawberry.auto
+    previous: strawberry.auto
+    next: strawberry.auto
+    sections: strawberry.auto
 
 
-@gql.django.partial(models.Image)
-class ImagePartial(gql.NodeInputPartial):
-    id: relay.GlobalID
-    identifier: gql.auto
-    page: gql.auto
-    number: gql.auto
-    source: gql.auto
-    previous: gql.auto
-    next: gql.auto
-    sections: gql.auto
+@strawberry_django.partial(models.Image)
+class ImagePartial(strawberry_django.NodeInputPartial):
+    id: relay.NodeID[str]
+    identifier: strawberry.auto
+    number: strawberry.auto
+    source: strawberry.auto
+    previous: strawberry.auto
+    next: strawberry.auto
+    sections: strawberry.auto

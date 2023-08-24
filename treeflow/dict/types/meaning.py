@@ -1,6 +1,6 @@
 import strawberry
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry_django
+from strawberry import relay
 from typing import List, Optional, Iterable
 from treeflow.dict import models
 from strawberry.types import Info
@@ -9,67 +9,57 @@ from elasticsearch_dsl import Search
 from asgiref.sync import sync_to_async
 from treeflow.dict.types.lemma import MeaningSelection, LemmaSelection
 from treeflow.dict.enums.language import Language
-from treeflow.dict.enums.dict_stage import DictStage
 
 
-@gql.django.filters.filter(models.Meaning, lookups=True)
+@strawberry_django.filters.filter(models.Meaning, lookups=True)
 class MeaningFilter:
-    id: relay.GlobalID
-    meaning: gql.auto
-    language: Language
-    lemma_related : bool
-    stage : Optional[DictStage]
+    id: Optional[relay.GlobalID]
+    meaning: strawberry.auto
+    language: Optional[Language]
+    lemma_related: strawberry.auto
 
 
-@gql.django.type(models.Meaning, filters=MeaningFilter)
+@strawberry_django.type(models.Meaning, filters=Optional[MeaningFilter])
 class Meaning(relay.Node):
 
-    token_meanings:  relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
-    sentence_meanings:  relay.Connection[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
-    comment_meaning: relay.Connection[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
+    token_meanings:  List[strawberry.LazyType['Token', 'treeflow.corpus.types.token']] = strawberry_django.field()
+    sentence_meanings:  List[strawberry.LazyType['Meaning', 'treeflow.dict.types.meaning']] = strawberry_django.field()
+    comment_meaning: List[strawberry.LazyType['Comment', 'treeflow.corpus.types.comment']] = strawberry_django.field()
 
-    id: relay.GlobalID
-    meaning: gql.auto
+    id: relay.NodeID[str]
+    meaning: strawberry.auto
     language: Language
-    lemma_related : Optional[bool]
-    stage : Optional[DictStage]
     related_meanings: List['Meaning']
-    related_lemmas: List[gql.LazyType['Lemma', 'treeflow.dict.types.lemma']]
+    related_lemmas: List[strawberry.LazyType['Lemma', 'treeflow.dict.types.lemma']]
 
 
-@gql.django.input(models.Meaning)
+@strawberry_django.input(models.Meaning)
 class MeaningInput:
-    meaning: gql.auto
+    meaning: strawberry.auto
     language: Language
-    lemma_related : Optional[bool]
-    stage : Optional[DictStage]
-    related_meanings: gql.auto
+    related_meanings: strawberry.auto
 
 
-@gql.django.partial(models.Meaning)
-class MeaningPartial:
-    id: relay.GlobalID
-    meaning: gql.auto
-    language: Language
-    lemma_related : Optional[bool]
-    stage : Optional[DictStage]
-    related_meanings: gql.auto
-
+@strawberry_django.partial(models.Meaning)
+class MeaningPartial(strawberry_django.NodeInputPartial):
+    id: relay.NodeID[str]
+    meaning: strawberry.auto
+    language: Optional[Language]
+    related_meanings: strawberry.auto
 
 
 @strawberry.type
 class MeaningElastic(relay.Node):
 
-    id: relay.GlobalID
+    id: relay.NodeID[str]
     language: Language
-    stage : Optional[DictStage]
     meaning: str
-    lemma_related : Optional[bool]
+    lemma_related : bool
     related_meanings: Optional[List[MeaningSelection]] = None
     related_lemmas: Optional[List[LemmaSelection]] = None
 
     @classmethod
-    def resolve_id(self: "MeaningElastic", info: Optional[Info] = None) -> str:
+    def resolve_id(cls, root: "MeaningElastic", *, info: Info) -> str:
         return self.id
     
     @classmethod
@@ -80,7 +70,6 @@ class MeaningElastic(relay.Node):
             id=relay.to_base64(MeaningElastic, hit['id']),
             language=hit['language'],
             meaning=hit['meaning'],
-            stage=hit['stage'] if 'stage' in hit else None,
             lemma_related=hit['lemma_related'],
             related_meanings=MeaningSelection.from_hit(hit, field='related_meanings'),
             related_lemmas=LemmaSelection.from_hit(hit, field='related_lemmas')
