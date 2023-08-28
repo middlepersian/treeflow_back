@@ -169,7 +169,7 @@ class TokenElastic(relay.Node):
     word_token: Optional[bool]
     visible: Optional[bool]
     transcription: str
-    transliteration: str
+    transliteration: Optional[str]
     avestan: Optional[str]
     gloss: Optional[str]
     next: Optional[TokenSelection] = None
