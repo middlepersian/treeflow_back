@@ -41,8 +41,8 @@ class MeaningInput:
 
 
 @strawberry_django.partial(models.Meaning)
-class MeaningPartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class MeaningPartial:
+    id: relay.GlobalID
     meaning: strawberry.auto
     language: Optional[Language]
     related_meanings: strawberry.auto

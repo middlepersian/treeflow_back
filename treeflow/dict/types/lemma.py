@@ -54,8 +54,8 @@ class LemmaInput:
 
 
 @strawberry_django.partial(models.Lemma)
-class LemmaPartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class LemmaPartial:
+    id: relay.GlobalID
     word: strawberry.auto
     language: Optional[Language]
     multiword_expression: strawberry.auto
