@@ -17,5 +17,5 @@ class BibEntryInput:
 @strawberry_django.partial(models.BibEntry)
 class BibEntryPartial:
     
-    id: relay.NodeID[str]
+    id: relay.GlobalID
     key: strawberry.auto

@@ -1,7 +1,6 @@
 import strawberry
 import strawberry_django
 from strawberry import relay
-from strawberry_django.fields.types import NodeInputPartial
 from strawberry_django.permissions import IsAuthenticated, IsSuperuser
 
 from typing import Optional, List
@@ -53,8 +52,8 @@ class CommentInput:
 
 
 @strawberry_django.partial(models.Comment)
-class CommentPartial(NodeInputPartial):
-    id: relay.NodeID[str]
+class CommentPartial:
+    id: relay.GlobalID
 
     comment: strawberry.auto
 

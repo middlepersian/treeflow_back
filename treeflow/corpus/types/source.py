@@ -29,9 +29,9 @@ class SourceInput:
 
 
 @strawberry_django.partial(models.Source)
-class SourcePartial(strawberry_django.NodeInputPartial):
+class SourcePartial:
     
-    id: relay.NodeID[str]
+    id: relay.GlobalID
     type: strawberry.auto
     identifier: strawberry.auto
     description: strawberry.auto

@@ -80,8 +80,8 @@ class SectionInput:
 
 
 @strawberry_django.partial(models.Section)
-class SectionPartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class SectionPartial:
+    id: relay.GlobalID
     number: strawberry.auto
     title: strawberry.auto
     identifier: strawberry.auto

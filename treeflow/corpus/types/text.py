@@ -47,9 +47,9 @@ class TextInput:
 
 
 @strawberry_django.partial(models.Text)
-class TextPartial(strawberry_django.NodeInputPartial):
+class TextPartial:
     
-    id: relay.NodeID[str]
+    id: relay.GlobalID
     corpus: strawberry.auto
     title: strawberry.auto
     identifier: strawberry.auto

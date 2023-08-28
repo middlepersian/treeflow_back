@@ -44,8 +44,8 @@ class FeatureInput:
     feature_value: strawberry.auto
 
 @strawberry_django.partial(models.Feature)
-class FeaturePartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class FeaturePartial:
+    id: relay.GlobalID
     token:  strawberry.auto
     pos: Optional[POSInput]
     feature: strawberry.auto

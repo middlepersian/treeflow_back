@@ -19,8 +19,8 @@ class POSInput:
     type: strawberry.auto
 
 @strawberry_django.partial(models.POS)
-class POSPartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class POSPartial:
+    id: relay.GlobalID
     token: strawberry.auto
     pos: strawberry.auto
     type: strawberry.auto

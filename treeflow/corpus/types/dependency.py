@@ -28,8 +28,8 @@ class DependencyInput:
 
 
 @strawberry_django.partial(models.Dependency)
-class DependencyPartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class DependencyPartial:
+    id: relay.GlobalID
     token: strawberry.auto
     head:  strawberry.auto
     head_number: strawberry.auto

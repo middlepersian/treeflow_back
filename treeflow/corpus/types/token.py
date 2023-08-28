@@ -79,8 +79,8 @@ class TokenInput:
 
 
 @strawberry_django.partial(models.Token)
-class TokenPartial(strawberry_django.NodeInputPartial):
-    id: relay.NodeID[str]
+class TokenPartial:
+    id: relay.GlobalID
     number: strawberry.auto
     number_in_sentence: strawberry.auto
     image: strawberry.auto
