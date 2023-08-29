@@ -1,7 +1,7 @@
 import strawberry
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
-from typing import List, Optional, Iterable
+import strawberry_django
+from strawberry import relay
+from typing import List, Optional, Iterable, cast
 from treeflow.dict.types.lemma import LemmaSelection, MeaningSelection
 from treeflow.corpus import models
 from elasticsearch_dsl import Search, connections
@@ -11,91 +11,93 @@ from asgiref.sync import sync_to_async
 
 
 
-@gql.django.filters.filter(models.Token, lookups=True)
+@strawberry_django.filters.filter(models.Token, lookups=True)
 class TokenFilter:
-    id: relay.GlobalID
-    transcription: gql.auto
-    transliteration: gql.auto
-    language: gql.auto
-    number: gql.auto
-    text: gql.LazyType['TextFilter', 'treeflow.corpus.types.text']
-    image : gql.LazyType['ImageFilter', 'treeflow.images.types.image']
-    section_tokens: gql.LazyType['SectionFilter', 'treeflow.corpus.types.section']
+
+    id: Optional[relay.GlobalID]
+    transcription: strawberry.auto
+    transliteration: strawberry.auto
+    language: strawberry.auto
+    number: strawberry.auto
+    text: strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']
+    image : strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']
+    section_tokens: strawberry.LazyType['SectionFilter', 'treeflow.corpus.types.section']
 
 
-@gql.django.type(models.Token, filters=TokenFilter)
+@strawberry_django.type(models.Token, filters=Optional[TokenFilter])
 class Token(relay.Node):
 
-    section_tokens: List[gql.LazyType['Section', 'treeflow.corpus.types.section']]
-    comment_token: List[gql.LazyType['Comment', 'treeflow.corpus.types.comment']]
-    feature_token : List[gql.LazyType['Feature', 'treeflow.corpus.types.feature']]
-    pos_token : List[gql.LazyType['POS', 'treeflow.corpus.types.pos']]
-    dependency_token : List[gql.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
+    section_tokens: List[strawberry.LazyType['Section', 'treeflow.corpus.types.section']]
+    comment_token: List[strawberry.LazyType['Comment', 'treeflow.corpus.types.comment']]
+    feature_token : List[strawberry.LazyType['Feature', 'treeflow.corpus.types.feature']]
+    pos_token : List[strawberry.LazyType['POS', 'treeflow.corpus.types.pos']]
+    dependency_token : List[strawberry.LazyType['Dependency', 'treeflow.corpus.types.dependency']]
 
-    id: relay.GlobalID
-    number: gql.auto
-    number_in_sentence: gql.auto
-    root: gql.auto
-    word_token: gql.auto
-    visible: gql.auto
-    text: Optional[gql.LazyType['Text', 'treeflow.corpus.types.text']]
-    image:  Optional[gql.LazyType['Image', 'treeflow.images.types.image']] = None
-    language: gql.auto
-    transcription: gql.auto
-    transliteration: gql.auto
-    lemmas: List[gql.LazyType['Lemma', 'treeflow.dict.types.lemma']]
-    meanings: List[gql.LazyType['Meaning', 'treeflow.dict.types.meaning']]
+    id: relay.NodeID[str]
+    number: strawberry.auto
+    number_in_sentence: strawberry.auto
+    root: strawberry.auto
+    word_token: strawberry.auto
+    visible: strawberry.auto
+    text: Optional[strawberry.LazyType['Text', 'treeflow.corpus.types.text']]
+    image:  Optional[strawberry.LazyType['Image', 'treeflow.images.types.image']] = None
+    language: strawberry.auto
+    transcription: strawberry.auto
+    transliteration: strawberry.auto
+    lemmas: List[strawberry.LazyType['Lemma', 'treeflow.dict.types.lemma']]
+    meanings: List[strawberry.LazyType['Meaning', 'treeflow.dict.types.meaning']]
 
-    avestan: gql.auto
+    avestan: strawberry.auto
     previous: Optional['Token']
     next: Optional['Token']
 
-    gloss: gql.auto
+    gloss: strawberry.auto
 
-    multiword_token: gql.auto
+    multiword_token: strawberry.auto
     related_tokens: List['Token']
 
 
-@gql.django.input(models.Token)
+@strawberry_django.input(models.Token)
 class TokenInput:
-    number: gql.auto
-    number_in_sentence: gql.auto
-    text: gql.auto
-    image: gql.auto
-    language: gql.auto
-    transcription: gql.auto
-    lemmas: gql.auto
-    meanings: gql.auto
-    avestan: gql.auto
-    previous: gql.auto
-    next: gql.auto
-    gloss: gql.auto
+    
+    number: strawberry.auto
+    number_in_sentence: strawberry.auto
+    text: strawberry.auto
+    image: strawberry.auto
+    language: strawberry.auto
+    transcription: strawberry.auto
+    lemmas: strawberry.auto
+    meanings: strawberry.auto
+    avestan: strawberry.auto
+    previous: strawberry.auto
+    next: strawberry.auto
+    gloss: strawberry.auto
 
-    multiword_token: gql.auto
-    related_tokens: gql.auto
+    multiword_token: strawberry.auto
+    related_tokens: strawberry.auto
 
 
 
-@gql.django.partial(models.Token)
+@strawberry_django.partial(models.Token)
 class TokenPartial:
     id: relay.GlobalID
-    number: gql.auto
-    number_in_sentence: gql.auto
-    image: gql.auto
-    text: gql.auto
-    language: gql.auto
-    transcription: gql.auto
-    transliteration: gql.auto
-    lemmas: gql.auto
-    meanings: gql.auto
+    number: strawberry.auto
+    number_in_sentence: strawberry.auto
+    image: strawberry.auto
+    text: strawberry.auto
+    language: strawberry.auto
+    transcription: strawberry.auto
+    transliteration: strawberry.auto
+    lemmas: strawberry.auto
+    meanings: strawberry.auto
 
-    avestan: gql.auto
-    previous: gql.auto
-    next: gql.auto
-    gloss: gql.auto
+    avestan: strawberry.auto
+    previous: strawberry.auto
+    next: strawberry.auto
+    gloss: strawberry.auto
 
-    multiword_token: gql.auto
-    related_tokens: gql.auto
+    multiword_token: strawberry.auto
+    related_tokens: strawberry.auto
 
 
 
@@ -157,9 +159,9 @@ class TokenSelection:
 
 @strawberry.type
 class TokenElastic(relay.Node):
-    id: relay.GlobalID
-    text: relay.GlobalID
-    image: Optional[relay.GlobalID]
+    id: relay.NodeID[str]
+    text: strawberry.ID
+    image: Optional[strawberry.ID]
     number: float
     number_in_sentence: Optional[float] = None
     language: Optional[str] = None
@@ -167,7 +169,7 @@ class TokenElastic(relay.Node):
     word_token: Optional[bool]
     visible: Optional[bool]
     transcription: str
-    transliteration: str
+    transliteration: Optional[str]
     avestan: Optional[str]
     gloss: Optional[str]
     next: Optional[TokenSelection] = None
@@ -178,8 +180,8 @@ class TokenElastic(relay.Node):
     meanings: Optional[List[MeaningSelection]] = None
 
     @classmethod
-    def resolve_id(self: "TokenElastic", info: Optional[Info] = None) -> str:
-        return self.id
+    def resolve_id(cls, root: "TokenElastic", *, info: Info) -> str:
+        return root.id
     
     @classmethod
     def from_hit(cls, hit):
@@ -187,8 +189,8 @@ class TokenElastic(relay.Node):
         # Build and return a new instance of TokenElastic
         return cls(
             id=relay.to_base64(TokenElastic, hit['id']) if 'id' in hit else None,
-            text=relay.to_base64('Text', hit['text']['id']) if 'text' in hit and 'id' in hit['text'] else None,
-            image=relay.to_base64('Image', hit['image']['id']) if 'image' in hit and 'id' in hit['image'] else None,
+            text=strawberry.ID(relay.to_base64('Text', hit['text']['id'])) if 'text' in hit and 'id' in hit['text'] else None,
+            image=strawberry.ID(relay.to_base64('Image', hit['image']['id'])) if 'image' in hit and 'id' in hit['image'] else None,
             number=hit['number'] if 'number' in hit else None,
             number_in_sentence=hit['number_in_sentence'] if 'number_in_sentence' in hit else None,
             language=hit['language'] if 'language' in hit else None,
@@ -210,7 +212,7 @@ class TokenElastic(relay.Node):
     @classmethod
     def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['TokenElastic']:
         try:
-            node = get_token_by_id(id=node_id)
+            node = get_token_by_id(id=relay.from_base64(node_id)[1])
             return node
         except (relay.GlobalIDValueError, NotFoundError):
             if required:
@@ -234,15 +236,14 @@ class TokenElastic(relay.Node):
 
     @strawberry.field
     @sync_to_async
-    ## TODO check return type
     def token_object(self, info: Optional[Info]) -> Optional[Token]:
         if self.id is not None:
             node_id = relay.from_base64(self.id)[1]
             token = models.Token.objects.get(id=node_id)
-            return token
+            return cast(Token,token)
         else:
             return None
-    
+
 
 
 def get_token_by_id(id: str) -> TokenElastic:
