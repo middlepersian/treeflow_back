@@ -1,36 +1,39 @@
 
-from strawberry import lazy
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
-from typing import TYPE_CHECKING, Optional, List
+import strawberry
+import strawberry_django
+from strawberry import relay
+from typing import Optional, List
 
 from treeflow.corpus import models
 
 
-@gql.django.type(models.Source)
+@strawberry_django.type(models.Source)
 class Source(relay.Node):
-    id: relay.GlobalID
-    type: gql.auto
-    identifier: gql.auto
-    description: gql.auto
-    references: List[gql.LazyType['BibEntry', 'treeflow.corpus.types.bibliography']]
+
+    id: relay.NodeID[str]
+    type: strawberry.auto
+    identifier: strawberry.auto
+    description: strawberry.auto
+    references: List[strawberry.LazyType['BibEntry', 'treeflow.corpus.types.bibliography']]
     sources: List['Source']
 
 
-@gql.django.input(models.Source)
+@strawberry_django.input(models.Source)
 class SourceInput:
-    type: gql.auto
-    identifier: gql.auto
-    description: gql.auto
-    references: gql.auto
-    sources: gql.auto
+
+    type: strawberry.auto
+    identifier: strawberry.auto
+    description: strawberry.auto
+    references: strawberry.auto
+    sources: strawberry.auto
 
 
-@gql.django.partial(models.Source)
-class SourcePartial(gql.NodeInputPartial):
+@strawberry_django.partial(models.Source)
+class SourcePartial:
+    
     id: relay.GlobalID
-    type: gql.auto
-    identifier: gql.auto
-    description: gql.auto
-    references: gql.auto
-    sources: gql.auto
+    type: strawberry.auto
+    identifier: strawberry.auto
+    description: strawberry.auto
+    references: strawberry.auto
+    sources: strawberry.auto

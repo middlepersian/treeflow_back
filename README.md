@@ -1,4 +1,5 @@
 
 Repository for backend-related code
 
-For information about how to deploy, see the Wiki.
+Export GraphQL schema: 
+`docker-compose -f local.yml run --rm django python manage.py export_schema -o /app_output/schema.graphql`

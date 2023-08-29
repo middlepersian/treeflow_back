@@ -1,5 +1,6 @@
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry
+import strawberry_django
+from strawberry import relay
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 from treeflow.corpus import models
@@ -7,7 +8,6 @@ from treeflow.corpus.types.pos import POSInput
 from treeflow.corpus.enums.pos import UPOSValues
 from treeflow.corpus.enums.features import upos_feature_feature_value
 
-import strawberry
 
 def get_features(pos: str ) -> Dict[str, Tuple[str]]:
     return upos_feature_feature_value.get(pos, {})
@@ -28,25 +28,25 @@ class PartOfSpeechFeatures:
     feature_values: List[UPOSFeatures]
 
 
-@gql.django.type(models.Feature)
+@strawberry_django.type(models.Feature)
 class Feature(relay.Node):
-    id: relay.GlobalID
-    token:  gql.LazyType['Token', 'treeflow.corpus.types.token']
-    pos : gql.LazyType['POS', 'treeflow.corpus.types.pos']
-    feature: gql.auto
-    feature_value: gql.auto
+    id: relay.NodeID[str]
+    token:  strawberry.LazyType['Token', 'treeflow.corpus.types.token']
+    pos : strawberry.LazyType['POS', 'treeflow.corpus.types.pos']
+    feature: strawberry.auto
+    feature_value: strawberry.auto
 
-@gql.django.input(models.Feature)
+@strawberry_django.input(models.Feature)
 class FeatureInput:
-    token: relay.GlobalID
+    token: strawberry.auto
     pos: Optional[POSInput]
-    feature: gql.auto
-    feature_value: gql.auto
+    feature: strawberry.auto
+    feature_value: strawberry.auto
 
-@gql.django.partial(models.Feature)
-class FeaturePartial(gql.NodeInputPartial):
+@strawberry_django.partial(models.Feature)
+class FeaturePartial:
     id: relay.GlobalID
-    token: relay.GlobalID
+    token:  strawberry.auto
     pos: Optional[POSInput]
-    feature: gql.auto
-    feature_value: gql.auto
+    feature: strawberry.auto
+    feature_value: strawberry.auto

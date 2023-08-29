@@ -17,7 +17,9 @@ services:
     volumes:
       - .:/app:z
       - ../corpora/texts_exports:/app_data:ro
+      - .:/app_output
       - ../users:/user_data:ro
+      
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres

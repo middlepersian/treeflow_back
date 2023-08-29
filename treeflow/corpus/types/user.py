@@ -1,18 +1,13 @@
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry
+import strawberry_django
+from strawberry import relay
 from django.contrib.auth import get_user_model
 
-from strawberry_django_plus.directives import SchemaDirectiveExtension
 
-from strawberry_django_plus.permissions import (
-    IsAuthenticated,
-     IsSuperuser,
-)
-
-@gql.django.type(get_user_model())
+@strawberry_django.type(get_user_model())
 class User(relay.Node):
-    id: relay.GlobalID = gql.field()
-    username: gql.auto = gql.field()
-    is_superuser: gql.auto = gql.field()
-    is_staff: gql.auto = gql.field()
-    email: gql.auto = gql.field()
+    id: relay.NodeID[int]
+    username: strawberry.auto 
+    is_superuser: strawberry.auto 
+    is_staff: strawberry.auto 
+    email: strawberry.auto 
