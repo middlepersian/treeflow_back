@@ -15,6 +15,7 @@ class Dependency(relay.Node):
     head:  Optional[strawberry.LazyType['Token', 'treeflow.corpus.types.token']]
     head_number: Optional[float]
     rel: Deprel
+    enhanced: Optional[bool]
     producer: strawberry.auto
 
 
@@ -24,6 +25,7 @@ class DependencyInput:
     head:  strawberry.auto
     head_number: strawberry.auto
     rel: Optional[Deprel]
+    enhanced: Optional[bool]
     producer: strawberry.auto
 
 
@@ -34,6 +36,7 @@ class DependencyPartial:
     head:  strawberry.auto
     head_number: strawberry.auto
     rel: Deprel
+    enhanced: Optional[bool]
     producer: strawberry.auto
 
 
