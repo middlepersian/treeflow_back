@@ -57,18 +57,25 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
 
     # create logger
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.ERROR)
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False
 
     # create file handler which logs messages with severity level ERROR
     fh = logging.FileHandler(f"{text_identifier}_errors.log")
     fh.setLevel(logging.ERROR)
 
-    # create formatter and add it to the file handler
+    # create console handler which logs messages with severity level INFO
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+
+    # create formatter and add it to the handlers
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
 
-    # add the file handler to the logger
+    # add the handlers to the logger
     logger.addHandler(fh)
+    logger.addHandler(ch)
 
     token_number = 1
     sentence_number = 1
@@ -102,18 +109,16 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         if sentence_obj:
             # check if at the end of the sentence
             if row.isna().all():
-                logger.error("### END_OF_SENTENCE {}".format(str(sentence_number)))
-                print("### END_OF_SENTENCE", sentence_number)
+                logger.info("### END_OF_SENTENCE {}".format(str(sentence_number)))
                 # process dependencies and their heads
                 if dependencies:
-                    # print("### DEPS {}".format(len(dependencies)))
+                    logger.info("### DEPENDENCIES {}".format(dependencies))
                     for dependency in dependencies:
                         # get head_number
-                        head_number = float(dependency.head_number)
-                        # print("head_number {}".format(head_number))
+                        head_number = dependency.head_number
+                        logger.info("### ENHANCED DEPENDENCY {}".format(dependency.enhanced))
                         assert head_number != None
-                        # print('"head_number": {}'.format(head_number))
-                        # check if token in list hast the same token_number_in_sentence as head
+                        # check if token in list has the same token_number_in_sentence as head
                         for stk in sentence_tokens:
                             if stk.number_in_sentence == head_number:
                                 assert stk.number_in_sentence != None
@@ -138,7 +143,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 # add tokens to sentence
                 # check that tokens are not empty
                 if sentence_tokens:
-                    logger.error(str(sentence_tokens)) ### DEBUG
+                    #logger.info(str(sentence_tokens)) ### DEBUG
                     sentence_obj.tokens.add(*sentence_tokens)
                     parsed_sentences.append(sentence_obj)
                     sentence_obj.save()
@@ -316,7 +321,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 except Exception as e:
                     logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["head"], str(e)))
                     head = None
-                if head:
+                if head is not None:
                     # create dependency
                     try:
                         dependency_obj = Dependency.objects.create(head_number=head, rel=deprel, token=token)
@@ -326,10 +331,12 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     if dependency_obj:
                         assert dependency_obj.head_number == head
                         dependencies.append(dependency_obj)
-                        # check if root
-                        if deprel == "root" and token:
-                            print("ROOT: {}".format(token))
-                            token.root = True
+                    if deprel == "root":
+                        logger.info("ROOT: {}".format(token))
+                        token.root = True
+                    else:
+                        logger.info("NOT ROOT: {}".format(deprel))
+
         if row["deps"] != "_":
             deps = row["deps"]
             # split on "|"
@@ -339,13 +346,15 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     if dep and dep != "_" and ":" in dep:
                         head, rel = dep.split(":", 1)
                         dependency_obj = Dependency.objects.create(head_number=float(head), rel=rel, token=token)
+                        #set enhanced to True
+                        dependency_obj.enhanced = True
+                        dependency_obj.save()
                 except Exception as e:
                     logger.error("Row {} - {} - {}".format(df.index[i] + 2, row["deps"], e))
                     dependency_obj = None
-                    if dependency_obj:
-                        assert dependency_obj.head_number == head
-                        dependencies.append(dependency_obj)
-                        continue
+                if dependency_obj:
+                    dependencies.append(dependency_obj)
+                    continue
         # process lemmas
         # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
         if row["lemma"] != "_" and pd.notna(row["lemma"]):
