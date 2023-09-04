@@ -15,7 +15,7 @@ class Image(relay.Node):
     id: relay.NodeID[str]
     identifier: strawberry.auto
     number: strawberry.auto
-    source: strawberry.LazyType['Source', 'treeflow.corpus.types.source']
+    source: Optional [strawberry.LazyType['Source', 'treeflow.corpus.types.source']]
     previous: Optional['Image']
     next: Optional['Image']
     sections: List[strawberry.LazyType['Section', 'treeflow.corpus.types.section']]
