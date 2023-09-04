@@ -10,6 +10,9 @@ from treeflow.corpus import models
 @strawberry_django.type(models.Source)
 class Source(relay.Node):
 
+    image_source: List[strawberry.LazyType['Image',  'treeflow.images.types.image']] = strawberry_django.field()
+
+
     id: relay.NodeID[str]
     type: strawberry.auto
     identifier: strawberry.auto
