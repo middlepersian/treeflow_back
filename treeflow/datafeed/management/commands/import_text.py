@@ -54,6 +54,9 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         version=text_version
 
     )
+    ## add source to text
+    text_object.sources.add(manuscript_obj)
+    text_object.save()
 
     # create logger
     logger = logging.getLogger(__name__)
@@ -511,7 +514,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 image_id = manuscript_obj.identifier + "_" + img
                 try:
                     image_obj, image_obj_created = Image.objects.get_or_create(
-                        identifier=image_id, number=image_number
+                        identifier=image_id, number=image_number, source=manuscript_obj
                     )
                 except IntegrityError as e:
                     logger.error(
@@ -520,7 +523,6 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     image_obj = None
                 if image_obj:
                     if image_obj_created:
-                        image_obj.manuscript = manuscript_obj
                         # Check if there is already an Image object with the same previous_id
                         previous_image_exists = Image.objects.filter(previous=previous_image_obj).exists()
                         if not previous_image_exists:
