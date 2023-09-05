@@ -7,7 +7,6 @@ from typing import Optional, List
 from treeflow.corpus import models
 
 
-
 @strawberry_django.filters.filter(models.Source)
 class SourceFilter:
     id: Optional[relay.GlobalID]
