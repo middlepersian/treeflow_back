@@ -7,11 +7,17 @@ from typing import Optional, List
 from treeflow.corpus import models
 
 
-@strawberry_django.type(models.Source)
+
+@strawberry_django.filters.filter(models.Source)
+class SourceFilter:
+    id: Optional[relay.GlobalID]
+    type: strawberry.auto
+    identifier: strawberry.auto
+    sources: Optional[List['Source']]
+
+@strawberry_django.type(models.Source, filters=Optional[SourceFilter])
 class Source(relay.Node):
-
     image_source: List[strawberry.LazyType['Image',  'treeflow.images.types.image']] = strawberry_django.field()
-
 
     id: relay.NodeID[str]
     type: strawberry.auto
