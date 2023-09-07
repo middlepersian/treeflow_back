@@ -187,56 +187,64 @@ class Query:
         size: int,
         ignore_stopwords: bool = False
     ) -> List[TokenElastic]:
-
-        # Dynamic token and POS queries
+        
         token_clauses = []
-        transcription_field = "transcription.no_stop" if ignore_stopwords else "transcription.raw"
+        span_near_clauses = []
 
         for token_input in tokens_to_search:
-            query_field = f"{transcription_field}.{token_input.query_type}"
-        
+            query_field = token_input.field if token_input.field else "transcription"
+            query_value = token_input.value if token_input.value else token_input.transcription
+            if ignore_stopwords:
+                query_field = f"{query_field}.no_stop"
+
             if token_input.query_type == "exact":
-                token_q = Q("term", **{query_field: token_input.transcription})
-                elif token_input.query_type == "wildcard":
-                    token_q = Q("wildcard", transcription=f"{token_input.transcription}*")
-                elif token_input.query_type == "prefix":
-                    token_q = Q("prefix", transcription=token_input.transcription)
-                elif token_input.query_type == "fuzzy":
-                    token_q = Q("fuzzy", transcription=token_input.transcription)
-                elif token_input.query_type == "range":
-                    # Assuming token_input has "start" and "end" for the range
-                    token_q = Q("range", transcription={"gte": token_input.start, "lte": token_input.end})
-                elif token_input.query_type == "match":
-                    token_q = Q("match", transcription=token_input.transcription)
-                else:
-                    raise ValueError(f"Unsupported query_type: {token_input.query_type}")
+                token_q = Q("term", **{query_field: query_value})
+                span_term_q = {"span_term": {query_field: query_value}}
+                span_near_clauses.append(span_term_q)
+            elif token_input.query_type == "wildcard":
+                token_q = Q("wildcard", **{query_field: f"{query_value}*"})  
+            elif token_input.query_type == "prefix":
+                token_q = Q("prefix", **{query_field: query_value})
+            elif token_input.query_type == "fuzzy":
+                token_q = Q("fuzzy", **{query_field: query_value})
+            elif token_input.query_type == "range":
+                if token_input.start is None or token_input.end is None:
+                    raise ValueError("Both start and end must be provided for range query")
+                token_q = Q("range", **{query_field: {"gte": token_input.start, "lte": token_input.end}})
+            elif token_input.query_type == "match":
+                token_q = Q("match", **{query_field: query_value})
+            else:
+                raise ValueError(f"Unsupported query_type: {token_input.query_type}")
 
-                if token_input.pos_token:
-                    pos_q = Q("term", pos=token_input.pos_token)
-                    token_clauses.append(Q('bool', must=[token_q, pos_q]))
-                else:
-                    token_clauses.append(token_q)
-
-        # Combine the token_clauses
-        combined_token_q = Q('bool', should=token_clauses)
-
-        # Convert relay Id into UUID
+            if token_input.pos_token:
+                pos_q = Q("term", pos=token_input.pos_token)
+                token_clauses.append(Q('bool', must=[token_q, pos_q]))
+            else:
+                token_clauses.append(token_q)
+        
         text_ids = [relay.from_base64(text_id)[1] for text_id in text_ids]
         text_q = Q("terms", **{"text.id": text_ids})
+        
+        if len(span_near_clauses) > 1:
+            span_near_q = {
+                "span_near": {
+                    "clauses": span_near_clauses,
+                    "slop": token_input.slop,
+                    "in_order": True
+                }
+            }
+            inner_bool_q = Q('bool', should=[Q(span_near_q)])
+            final_q = Q('bool', must=[inner_bool_q, text_q])
+        else:
+            combined_token_q = Q('bool', should=token_clauses)
+            final_q = Q('bool', must=[combined_token_q, text_q])
 
-        # Combine all queries
-        final_q = Q('bool', must=[combined_token_q, text_q])
         logger.info(final_q.to_dict())
-
-        # Execute the search query
         response = TokenDocument.search().query(final_q).extra(size=size)
         logger.info(response.to_dict())
         tokens = [TokenElastic.from_hit(hit) for hit in response]
 
         return tokens
-
-
-
 
 
     @strawberry.field

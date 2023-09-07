@@ -1,6 +1,7 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from treeflow.corpus.models import Text
+
 @registry.register_document
 class TextDocument(Document):
     

@@ -24,7 +24,7 @@ class TokenDocument(Document):
             'no_stop': fields.TextField(analyzer='stopword_analyzer')
         }
     )
-    transliteration: fields.KeywordField()
+    transliteration =  fields.KeywordField()
     text = fields.ObjectField(properties={'id': fields.KeywordField(), 'title': fields.TextField()})
     image = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.KeywordField()})
     lemmas = fields.NestedField(properties={'id': fields.KeywordField(), 'word': fields.KeywordField(), 'language': fields.KeywordField(), 'multiword_expression': fields.KeywordField()})
@@ -81,6 +81,7 @@ class TokenDocument(Document):
                 }
             }
         }
+
     class Django:
         model = Token
         fields = [
@@ -94,5 +95,4 @@ class TokenDocument(Document):
                 'avestan',
                 'gloss',
                 'multiword_token',
-                
             ]

@@ -19,9 +19,9 @@ class TokenFilter:
     transliteration: strawberry.auto
     language: strawberry.auto
     number: strawberry.auto
-    text: strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']
-    image : strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']
-    section_tokens: strawberry.LazyType['SectionFilter', 'treeflow.corpus.types.section']
+    text: Optional[strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']]
+    image : Optional[strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']] 
+    section_tokens: Optional[strawberry.LazyType['SectionFilter', 'treeflow.corpus.types.section']]
 
 
 @strawberry_django.type(models.Token, filters=Optional[TokenFilter])
@@ -170,9 +170,14 @@ class FeatureSelectionInput:
 @strawberry.input
 class TokenSearchInput:
     query_type: Optional[str]
-    transcription: Optional[str]
+    value: Optional[str]
+    field: Optional[str] = 'transcription'  # default to 'transcription'
+    start: Optional[str] = None # for range queries
+    end: Optional[str] = None # for range queries
+    slop: Optional[int] = 0  # Add slop parameter for SpanNear queries
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
+
 
 @strawberry.type
 class TokenElastic(relay.Node):
