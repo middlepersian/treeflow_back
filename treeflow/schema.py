@@ -187,57 +187,52 @@ class Query:
         size: int,
         ignore_stopwords: bool = False
     ) -> List[TokenElastic]:
-        
+
+        def build_span_term_query(query_field, query_value):
+            return {"span_term": {query_field: query_value}}
+
+        def build_query(token_input):
+            query_field = token_input.field or "transcription"
+            query_value = token_input.value or token_input.transcription
+
+            if ignore_stopwords:
+                query_field = f"{query_field}.no_stop"
+
+            query_types = {
+                "exact": Q("term", **{query_field: query_value}),
+                "wildcard": Q("wildcard", **{query_field: f"{query_value}*"}),
+                "prefix": Q("prefix", **{query_field: query_value}),
+                "fuzzy": Q("fuzzy", **{query_field: query_value}),
+                "range": Q("range", **{query_field: {"gte": token_input.start, "lte": token_input.end}}),
+                "match": Q("match", **{query_field: query_value}),
+            }
+
+            return query_types.get(token_input.query_type)
+
         token_clauses = []
         span_near_clauses = []
 
         for token_input in tokens_to_search:
-            query_field = token_input.field if token_input.field else "transcription"
-            query_value = token_input.value if token_input.value else token_input.transcription
-            if ignore_stopwords:
-                query_field = f"{query_field}.no_stop"
+            query = build_query(token_input)
+            
+            # Directly append span term query for any query type
+            span_near_clauses.append(build_span_term_query(token_input.field or "transcription", token_input.value or token_input.transcription))
 
-            if token_input.query_type == "exact":
-                token_q = Q("term", **{query_field: query_value})
-                span_term_q = {"span_term": {query_field: query_value}}
-                span_near_clauses.append(span_term_q)
-            elif token_input.query_type == "wildcard":
-                token_q = Q("wildcard", **{query_field: f"{query_value}*"})  
-            elif token_input.query_type == "prefix":
-                token_q = Q("prefix", **{query_field: query_value})
-            elif token_input.query_type == "fuzzy":
-                token_q = Q("fuzzy", **{query_field: query_value})
-            elif token_input.query_type == "range":
-                if token_input.start is None or token_input.end is None:
-                    raise ValueError("Both start and end must be provided for range query")
-                token_q = Q("range", **{query_field: {"gte": token_input.start, "lte": token_input.end}})
-            elif token_input.query_type == "match":
-                token_q = Q("match", **{query_field: query_value})
-            else:
-                raise ValueError(f"Unsupported query_type: {token_input.query_type}")
 
             if token_input.pos_token:
                 pos_q = Q("term", pos=token_input.pos_token)
-                token_clauses.append(Q('bool', must=[token_q, pos_q]))
+                token_clauses.append(Q('bool', must=[query, pos_q]))
             else:
-                token_clauses.append(token_q)
-        
+                token_clauses.append(query)
+
         text_ids = [relay.from_base64(text_id)[1] for text_id in text_ids]
         text_q = Q("terms", **{"text.id": text_ids})
-        
+
         if len(span_near_clauses) > 1:
-            span_near_q = {
-                "span_near": {
-                    "clauses": span_near_clauses,
-                    "slop": token_input.slop,
-                    "in_order": True
-                }
-            }
-            inner_bool_q = Q('bool', should=[Q(span_near_q)])
+            inner_bool_q = Q('bool', should=[Q({"span_near": {"clauses": span_near_clauses, "slop": tokens_to_search[0].slop, "in_order": True}})])
             final_q = Q('bool', must=[inner_bool_q, text_q])
         else:
-            combined_token_q = Q('bool', should=token_clauses)
-            final_q = Q('bool', must=[combined_token_q, text_q])
+            final_q = Q('bool', must=[Q('bool', should=token_clauses), text_q])
 
         logger.info(final_q.to_dict())
         response = TokenDocument.search().query(final_q).extra(size=size)
