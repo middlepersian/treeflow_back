@@ -5,6 +5,6 @@ from .dependency import Dependency
 from .feature import Feature
 from .section import Section
 from .text import Text
-from .token import Token, TokenPartial, TokenInput
+from .token import Token, TokenPartial, TokenInput, TokenSearchInput
 from .pos import POS, POSInput, POSPartial
 from .user import User

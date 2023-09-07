@@ -9,7 +9,7 @@ from strawberry_django.relay import ListConnectionWithTotalCount
 from strawberry_django.permissions import IsAuthenticated, IsSuperuser
 from strawberry_django.optimizer import DjangoOptimizerExtension
 from strawberry.django import auth
-from typing import List, Optional, Dict, cast
+from typing import List, Optional, Dict, cast, Tuple
 #corpus
 from treeflow.corpus import models as corpus_models
 from treeflow.corpus.types.bibliography import BibEntry, BibEntryInput, BibEntryPartial
@@ -27,7 +27,7 @@ from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
 from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial
-from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic
+from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput
 from treeflow.corpus.documents.token import TokenDocument
 from treeflow.corpus.types.user import User
 #dict
@@ -41,6 +41,25 @@ from treeflow.images.types.image import Image, ImageInput, ImagePartial
 
 #from treeflow.corpus.enums.comment_categories import CommentCategories
 from elasticsearch_dsl import Search, Q, connections
+
+###logging
+# create logger
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+
+# create console handler which logs messages with severity level INFO
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create formatter and add it to the handlers
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+ch.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(ch)
+
 
 
 @strawberry.type
@@ -149,12 +168,146 @@ class Query:
 
         response = TokenDocument.search().query(q).extra(size=size)
 
+        logger.info(q.to_dict())
+        logger.info(response.to_dict())
+
         tokens = []
         for hit in response:
             token = TokenElastic.from_hit(hit)
             tokens.append(token)
 
         return tokens
+
+    @strawberry.field
+    @sync_to_async
+    def search_phrase_in_texts(
+        self,
+        tokens_to_search: List[TokenSearchInput],
+        text_ids: List[str],
+        size: int,
+        ignore_stopwords: bool = False
+    ) -> List[TokenElastic]:
+
+        # Dynamic token and POS queries
+        token_clauses = []
+        transcription_field = "transcription.no_stop" if ignore_stopwords else "transcription.raw"
+
+        for token_input in tokens_to_search:
+            query_field = f"{transcription_field}.{token_input.query_type}"
+        
+            if token_input.query_type == "exact":
+                token_q = Q("term", **{query_field: token_input.transcription})
+                elif token_input.query_type == "wildcard":
+                    token_q = Q("wildcard", transcription=f"{token_input.transcription}*")
+                elif token_input.query_type == "prefix":
+                    token_q = Q("prefix", transcription=token_input.transcription)
+                elif token_input.query_type == "fuzzy":
+                    token_q = Q("fuzzy", transcription=token_input.transcription)
+                elif token_input.query_type == "range":
+                    # Assuming token_input has "start" and "end" for the range
+                    token_q = Q("range", transcription={"gte": token_input.start, "lte": token_input.end})
+                elif token_input.query_type == "match":
+                    token_q = Q("match", transcription=token_input.transcription)
+                else:
+                    raise ValueError(f"Unsupported query_type: {token_input.query_type}")
+
+                if token_input.pos_token:
+                    pos_q = Q("term", pos=token_input.pos_token)
+                    token_clauses.append(Q('bool', must=[token_q, pos_q]))
+                else:
+                    token_clauses.append(token_q)
+
+        # Combine the token_clauses
+        combined_token_q = Q('bool', should=token_clauses)
+
+        # Convert relay Id into UUID
+        text_ids = [relay.from_base64(text_id)[1] for text_id in text_ids]
+        text_q = Q("terms", **{"text.id": text_ids})
+
+        # Combine all queries
+        final_q = Q('bool', must=[combined_token_q, text_q])
+        logger.info(final_q.to_dict())
+
+        # Execute the search query
+        response = TokenDocument.search().query(final_q).extra(size=size)
+        logger.info(response.to_dict())
+        tokens = [TokenElastic.from_hit(hit) for hit in response]
+
+        return tokens
+
+
+
+
+
+    @strawberry.field
+    @sync_to_async
+    def advanced_search_tokens(
+        patterns: Optional[List[str]] = None,
+        regex_patterns: Optional[List[str]] = None,
+        lemma_ids: Optional[List[str]] = None,
+        pos_tags: Optional[List[str]] = None,
+        features: Optional[List[str]] = None,
+        #metadata_conditions: Optional[Dict] = None,
+        # ... other parameters
+        #numerical_conditions: Optional[Dict] = None,
+        scope: Optional[str] = None,
+        range_within: Optional[int] = None,
+        size: int = 100
+    ) -> List[TokenElastic]:
+        bool_query = Q("bool", should=[], minimum_should_match=1)
+        
+        # Handle exact match and wildcard patterns
+        if patterns:
+            for pattern in patterns:
+                bool_query['bool']['should'].append(Q("wildcard", transcription=pattern))
+
+        # Handle regex patterns
+        if regex_patterns:
+            for pattern in regex_patterns:
+                bool_query['bool']['should'].append(Q("regexp", transcription=pattern))
+
+        # Nested queries for lemmas, pos_tags, and features
+        if lemma_ids:
+            bool_query &= Q("nested", path="lemmas", query=Q("terms", lemmas__id=lemma_ids))
+        if pos_tags:
+            bool_query &= Q("nested", path="pos_token", query=Q("terms", pos_token__pos=pos_tags))
+        if features:
+            bool_query &= Q("nested", path="feature_token", query=Q("terms", feature_token__feature=features))
+
+        # Metadata conditions (authors, annotators, etc.)
+        if metadata_conditions:
+            for field, value in metadata_conditions.items():
+                bool_query &= Q("term", **{f"metadata.{field}": value})
+
+        # Numerical conditions (greater than, less than etc.)
+        if numerical_conditions:
+            for field, (op, value) in numerical_conditions.items():
+                if op == "gt":
+                    bool_query &= Q("range", **{field: {"gt": value}})
+                elif op == "lt":
+                    bool_query &= Q("range", **{field: {"lt": value}})
+                # ... other operators
+
+        # Scope and Range conditions
+        if scope == 'sentence':
+            nested_query = Q("nested", 
+                            path="tokens", 
+                            query=Q("bool", 
+                                    should=[Q(query_type, transcription=pattern) for pattern in patterns], 
+                                    minimum_should_match=1
+                                    )
+                            )
+            bool_query &= nested_query
+
+
+        if range_within:
+            pass
+        # Execute the search query
+        response = TokenDocument.search().query(bool_query).extra(size=size)
+        tokens = [TokenElastic.from_hit(hit) for hit in response]
+        return tokens
+
+        
 
     # ### dict
     # # lemma

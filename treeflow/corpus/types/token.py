@@ -155,7 +155,24 @@ class TokenSelection:
             )
         return None
 
+# create input type for POS
+@strawberry.input
+class POSSelectionInput:
+    pos: Optional[str]
 
+
+# create input type for Feature
+@strawberry.input
+class FeatureSelectionInput:
+    feature: Optional[str]
+    feature_value: Optional[str]
+
+@strawberry.input
+class TokenSearchInput:
+    query_type: Optional[str]
+    transcription: Optional[str]
+    pos_token: Optional[List[POSSelectionInput]] = None
+    feature_token: Optional[List[FeatureSelectionInput]] = None
 
 @strawberry.type
 class TokenElastic(relay.Node):
