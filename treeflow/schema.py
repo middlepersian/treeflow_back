@@ -40,7 +40,7 @@ from treeflow.dict.enums.language import Language
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
 
 #from treeflow.corpus.enums.comment_categories import CommentCategories
-from elasticsearch_dsl import Search, Q, connections
+from elasticsearch_dsl import Search, Q, A, connections
 
 ###logging
 # create logger
@@ -177,6 +177,66 @@ class Query:
             tokens.append(token)
 
         return tokens
+
+
+    @strawberry.field
+    @sync_to_async
+    def search_tokens_in_same_section(
+        token_a: str,
+        token_b: str,
+        section_type: str,
+        language: Optional[str] = None,
+        pos: Optional[str] = None,
+        size: int = 100
+    ) -> List[TokenElastic]:
+
+            # Initial query to filter by section type and transcription
+            query = Q('bool', 
+                    must=[
+                        Q('terms', transcription=[token_a, token_b]),
+                        Q('term', type=section_type)
+                    ])
+
+            # Aggregation to find sentences (in this case, sections of type "sentence") where both tokens appear
+            aggs = A('terms', field='sentence_id.keyword')  # Replace 'sentence_id' with your actual sentence identifier field
+            token_aggs = A('terms', field='transcription.keyword')
+
+            # Create a search object and apply the query and aggregation
+            s = TokenDocument.search().query(query).extra(size=0)  # We set size=0 because we're using aggregations
+            s.aggs.bucket('sections', aggs).bucket('tokens', token_aggs)
+
+            # Execute the search to get aggregations
+            response = s.execute()
+
+            # Identify valid sentence IDs based on the aggregation
+            valid_sentence_ids = []
+            for section in response.aggregations.sections.buckets:
+                tokens = {token.key: token.doc_count for token in section.tokens.buckets}
+                if token_a in tokens and token_b in tokens:
+                    valid_sentence_ids.append(section.key)
+
+            # If we found valid sentences, query again to get the actual tokens
+            if valid_sentence_ids:
+                second_query = Q('terms', sentence_id=valid_sentence_ids)
+                if language:
+                    second_query &= Q("term", language=language)
+                if pos:
+                    second_query &= Q("nested", path="pos_token", query=Q("term", pos_token__pos=pos))
+                    
+                ## logg
+                logger.info(second_query.to_dict())    
+                response = TokenDocument.search().query(second_query).extra(size=size)
+
+                tokens = []
+                for hit in response:
+                    token_elastic = TokenElastic.from_hit(hit)
+                    tokens.append(token_elastic)
+
+                return tokens
+
+            return []
+
+
 
     @strawberry.field
     @sync_to_async
