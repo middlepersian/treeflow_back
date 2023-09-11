@@ -29,6 +29,7 @@ from treeflow.corpus.models.source import Source as SourceModel
 from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial
 from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput
 from treeflow.corpus.documents.token import TokenDocument
+from treeflow.corpus.documents.section import SectionDocument
 from treeflow.corpus.types.user import User
 #dict
 from treeflow.dict import models as dict_models
@@ -237,6 +238,53 @@ class Query:
             return []
 
 
+    @strawberry.field
+    @sync_to_async
+    def search_tokens_in_same_section(
+        token_a: str,
+        section_type: str,
+        language: Optional[str] = None,
+        pos: Optional[str] = None,
+        size: int = 100
+    ) -> List[TokenElastic]:
+
+        # Initial query to filter by section type and nested tokens
+        nested_query = Q('nested', 
+                        path='tokens', 
+                        query=Q('terms', tokens__transcription=[token_a])
+                        )
+                        
+        query = Q('bool', 
+                must=[
+                    nested_query,
+                    Q('term', type=section_type)
+                ])
+
+        # Create a search object and apply the query
+        s = Search(index="sections").query(query).extra(size=size)  # Adjust size as needed
+
+        # Execute the search
+        response = s.execute()
+
+        # Check if any hits were returned by the query
+        if response.hits.total['value'] == 0:
+            logger.info("No documents found matching the query.")
+            return []
+
+        # If hits were found, process them
+        tokens = []
+        for hit in response:
+            # Convert hit to dictionary if needed
+            hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
+
+            # Extract tokens from the section
+            section_tokens = hit_dict.get('tokens', [])
+            
+            for token_hit in section_tokens:
+                token_elastic = TokenElastic.from_hit(token_hit)
+                tokens.append(token_elastic)
+
+        return tokens
 
     @strawberry.field
     @sync_to_async

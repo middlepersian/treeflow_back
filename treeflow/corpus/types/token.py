@@ -10,6 +10,22 @@ from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 
 
+# create logger
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+
+# create console handler which logs messages with severity level INFO
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create formatter and add it to the handlers
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+ch.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(ch)
 
 @strawberry_django.filters.filter(models.Token, lookups=True)
 class TokenFilter:
@@ -134,26 +150,28 @@ class FeatureSelection:
         return None
         
 
+
 @strawberry.type
 class TokenSelection:
-    id: str
-    number: float
-    number_in_sentence: float
-    transcription: str
-    transliteration: str
+    id: Optional[str]
+    number: Optional[float]
+    number_in_sentence: Optional[float]
+    transcription: Optional[str]
+    transliteration: Optional[str]
 
     @classmethod
     def from_hit(cls, hit, field="next"):
-
+        
         if field in hit and 'id' in hit[field]:
             return cls(
-                id=hit[field]['id'],
-                number=hit[field]['number'],
-                number_in_sentence=hit[field]['number_in_sentence'],
-                transcription=hit[field]['transcription'],
-                transliteration=hit[field]['transliteration']
+                id=hit[field].get('id'),
+                number=hit[field].get('number'),
+                number_in_sentence=hit[field].get('number_in_sentence'),
+                transcription=hit[field].get('transcription'),
+                transliteration=hit[field].get('transliteration')
             )
         return None
+
 
 # create input type for POS
 @strawberry.input
@@ -178,22 +196,21 @@ class TokenSearchInput:
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
 
-
 @strawberry.type
 class TokenElastic(relay.Node):
     id: relay.NodeID[str]
-    text: strawberry.ID
-    image: Optional[strawberry.ID]
-    number: float
+    text: Optional[strawberry.ID] = None
+    image: Optional[strawberry.ID] = None
+    number: Optional[float] = None
     number_in_sentence: Optional[float] = None
     language: Optional[str] = None
-    root: Optional[bool]
-    word_token: Optional[bool]
-    visible: Optional[bool]
-    transcription: str
-    transliteration: Optional[str]
-    avestan: Optional[str]
-    gloss: Optional[str]
+    root: Optional[bool] = None
+    word_token: Optional[bool] = None
+    visible: Optional[bool] = None
+    transcription: Optional[str] = None
+    transliteration: Optional[str] = None
+    avestan: Optional[str] = None
+    gloss: Optional[str] = None
     next: Optional[TokenSelection] = None
     previous: Optional[TokenSelection] = None
     pos_token: Optional[List[POSSelection]] = None
@@ -207,29 +224,33 @@ class TokenElastic(relay.Node):
     
     @classmethod
     def from_hit(cls, hit):
-
+        # Convert the hit to a dictionary
+        hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit        
+        logger.info(f"Processing hit: {hit_dict}")
+        
         # Build and return a new instance of TokenElastic
         return cls(
-            id=relay.to_base64(TokenElastic, hit['id']) if 'id' in hit else None,
-            text=strawberry.ID(relay.to_base64('Text', hit['text']['id'])) if 'text' in hit and 'id' in hit['text'] else None,
-            image=strawberry.ID(relay.to_base64('Image', hit['image']['id'])) if 'image' in hit and 'id' in hit['image'] else None,
-            number=hit['number'] if 'number' in hit else None,
-            number_in_sentence=hit['number_in_sentence'] if 'number_in_sentence' in hit else None,
-            language=hit['language'] if 'language' in hit else None,
-            root=hit['root'] if 'root' in hit else None,
-            word_token=hit['word_token'] if 'word_token' in hit else None,
-            visible=hit['visible'] if 'visible' in hit else None,
-            transcription=hit['transcription'] if 'transcription' in hit else None,
-            transliteration=hit['transliteration'] if 'transliteration' in hit else None,
-            avestan=hit['avestan'] if 'avestan' in hit else None,
-            gloss=hit['gloss'] if 'gloss' in hit else None,
-            pos_token=POSSelection.from_hit(hit) if 'pos_token' in hit else None,
-            feature_token=FeatureSelection.from_hit(hit) if 'feature_token' in hit else None,
-            next=TokenSelection.from_hit(hit, field='next') if 'next' in hit and hit['next'] is not None else None,
-            previous=TokenSelection.from_hit(hit, field='previous') if 'previous' in hit and hit['previous'] is not None else None,
-            lemmas=LemmaSelection.from_hit(hit, field='lemmas') if 'lemmas' in hit else None,
-            meanings=MeaningSelection.from_hit(hit, field='meanings') if 'meanings' in hit else None,
+            id=relay.to_base64(TokenElastic, hit_dict.get('id', None)),
+            text=strawberry.ID(relay.to_base64('Text', hit_dict.get('text', {}).get('id'))) if 'text' in hit_dict else None,
+            image=strawberry.ID(relay.to_base64('Image', hit_dict.get('image', {}).get('id'))) if 'image' in hit_dict else None,
+            number=hit_dict['number'] if 'number' in hit_dict else None,            
+            language=hit_dict.get('language', None) if 'language' in hit_dict else None,
+            root=hit_dict.get('root', None) if 'root' in hit_dict else None,
+            word_token=hit_dict.get('word_token', None) if 'word_token' in hit_dict else None,
+            visible=hit_dict.get('visible', None) if 'visible' in hit_dict else None,
+            transcription=hit_dict.get('transcription', None) if 'transcription' in hit_dict else None,
+            transliteration=hit_dict.get('transliteration', None) if 'transliteration' in hit_dict else None,
+            avestan=hit_dict.get('avestan', None) if 'avestan' in hit_dict else None,
+            gloss=hit_dict.get('gloss', None) if 'gloss' in hit_dict else None,
+            pos_token=POSSelection.from_hit(hit_dict) if 'pos_token' in hit_dict else None,
+            feature_token=FeatureSelection.from_hit(hit_dict) if 'feature_token' in hit_dict else None,
+            next=TokenSelection.from_hit(hit_dict, field='next') if 'next' in hit_dict and hit_dict['next'] is not None else None,
+            previous=TokenSelection.from_hit(hit_dict, field='previous') if 'previous' in hit_dict and hit_dict['previous'] is not None else None,
+            lemmas=LemmaSelection.from_hit(hit_dict, field='lemmas') if 'lemmas' in hit_dict else None,
+            meanings=MeaningSelection.from_hit(hit_dict, field='meanings') if 'meanings' in hit_dict else None,
         )
+
+
 
     @classmethod
     def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['TokenElastic']:

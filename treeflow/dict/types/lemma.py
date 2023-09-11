@@ -66,7 +66,7 @@ class LemmaPartial:
 @strawberry.type
 class LemmaSelection():
     word: str
-    language: str
+    language: Optional[str] = None
     multiword_expression: Optional[bool] = None
 
 
@@ -75,8 +75,8 @@ class LemmaSelection():
         if field in hit:
             related_vals = hit[field]
             return[ cls(
-                word=to_parse['word'],
-                language=to_parse['language'],
+                word=to_parse['word'] if 'word' in to_parse else None,
+                language=to_parse['language'] if 'language' in to_parse else None,
                 #category=to_parse['category'] if 'category' in to_parse else None,
                 multiword_expression=to_parse['multiword_expression'] if 'category' in to_parse else None,
             ) for to_parse in related_vals]
@@ -85,15 +85,15 @@ class LemmaSelection():
 @strawberry.type
 class MeaningSelection():
     meaning: str
-    language: str
+    language: Optional[str] = None
 
     @classmethod
     def from_hit(cls, hit, field="related_meanings"):
         if field in hit:
             related_vals = hit[field]
             return[ cls(
-                meaning=to_parse['meaning'],
-                language=to_parse['language']
+                meaning=to_parse['meaning'] if 'meaning' in to_parse else None,
+                language=to_parse['language'] if 'language' in to_parse else None,
             ) for to_parse in related_vals]
         return None
 

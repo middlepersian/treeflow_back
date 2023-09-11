@@ -1,4 +1,5 @@
 from django.db import models
+from django_elasticsearch_dsl.registries import registry
 import uuid as uuid_lib
 from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
@@ -60,6 +61,9 @@ class Section(models.Model):
             self.language = self.language.strip().lower()
         super().save(*args, **kwargs)
     
+    def update_es_index(self):
+        """Update the Elasticsearch index for this Section instance."""
+        registry.update(self)    
 
 
 

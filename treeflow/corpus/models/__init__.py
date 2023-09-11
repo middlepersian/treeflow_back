@@ -6,5 +6,5 @@ from .token import Token
 from .dependency import Dependency
 from .corpus import Corpus
 from .text import Text
-from .section import Section
+from .section import Section, SectionToken
 from .pos import POS
