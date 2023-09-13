@@ -229,6 +229,7 @@ class TokenElastic(relay.Node):
         logger.info(f"Processing hit: {hit_dict}")
         
         # Build and return a new instance of TokenElastic
+        # TODO check fields like text and image thst are not necessary (siehe Token_object)
         return cls(
             id=relay.to_base64(TokenElastic, hit_dict.get('id', None)),
             text=strawberry.ID(relay.to_base64('Text', hit_dict.get('text', {}).get('id'))) if 'text' in hit_dict else None,

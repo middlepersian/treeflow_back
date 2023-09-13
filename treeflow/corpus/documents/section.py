@@ -23,12 +23,18 @@ class SectionDocument(Document):
     
     tokens = fields.NestedField(properties={
         'id': fields.KeywordField(),
+        'number': fields.FloatField(),
+        'number_in_sentence': fields.FloatField(),
+        'root': fields.BooleanField(),
+        'word_token': fields.BooleanField(),
+        'visible': fields.BooleanField(),
         'transcription': fields.TextField(
             analyzer='standard',
             fields={
                 'no_stop': fields.TextField(analyzer='stopword_analyzer')
             }
         ),
+        'transliteration': fields.KeywordField(),
         'lemmas': fields.NestedField(properties={
             'id': fields.KeywordField(),
             'word': fields.KeywordField(),
@@ -37,18 +43,21 @@ class SectionDocument(Document):
             'id': fields.KeywordField(),
             'meaning': fields.KeywordField(),
         }),
-        'pos': fields.NestedField(properties={
+        'language': fields.KeywordField(),
+        'avestan': fields.TextField(),
+        'previous': fields.ObjectField(properties={
             'id': fields.KeywordField(),
-            'pos': fields.KeywordField(),
-            'type': fields.KeywordField(),
+            'transcription': fields.TextField(
+            analyzer='standard',
+            fields={
+                'no_stop': fields.TextField(analyzer='stopword_analyzer')}),
+            'transliteration': fields.KeywordField(),
         }),
-        'features': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'feature': fields.KeywordField(),
-            'feature_value': fields.KeywordField(),
-        }),
+        'gloss': fields.TextField(),
+        'multiword_token': fields.BooleanField(),
+        'created_at': fields.DateField(),
     })
-    
+
     previous = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.TextField()})
     container = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.TextField()})
     meanings = fields.NestedField(properties={
