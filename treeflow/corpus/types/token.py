@@ -190,17 +190,13 @@ class TokenSearchInput:
     query_type: Optional[str]
     value: Optional[str]
     field: Optional[str] = 'transcription'  # default to 'transcription'
-    start: Optional[str] = None # for range queries
-    end: Optional[str] = None # for range queries
-    slop: Optional[int] = 0  # Add slop parameter for SpanNear queries
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
+    search_mode: Optional[str] = 'must'  # default to 'must'
 
 @strawberry.type
 class TokenElastic(relay.Node):
     id: relay.NodeID[str]
-    text: Optional[strawberry.ID] = None
-    image: Optional[strawberry.ID] = None
     number: Optional[float] = None
     number_in_sentence: Optional[float] = None
     language: Optional[str] = None
@@ -232,8 +228,6 @@ class TokenElastic(relay.Node):
         # TODO check fields like text and image thst are not necessary (siehe Token_object)
         return cls(
             id=relay.to_base64(TokenElastic, hit_dict.get('id', None)),
-            text=strawberry.ID(relay.to_base64('Text', hit_dict.get('text', {}).get('id'))) if 'text' in hit_dict else None,
-            image=strawberry.ID(relay.to_base64('Image', hit_dict.get('image', {}).get('id'))) if 'image' in hit_dict else None,
             number=hit_dict['number'] if 'number' in hit_dict else None,            
             language=hit_dict.get('language', None) if 'language' in hit_dict else None,
             root=hit_dict.get('root', None) if 'root' in hit_dict else None,

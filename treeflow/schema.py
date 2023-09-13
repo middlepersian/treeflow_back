@@ -180,85 +180,77 @@ class Query:
         return tokens
 
 
-    @strawberry.field
-    @sync_to_async
-    def search_tokens_in_same_section(
-        token_a: str,
-        token_b: str,
-        section_type: str,
-        language: Optional[str] = None,
-        pos: Optional[str] = None,
-        size: int = 100
-    ) -> List[TokenElastic]:
-
-            # Initial query to filter by section type and transcription
-            query = Q('bool', 
-                    must=[
-                        Q('terms', transcription=[token_a, token_b]),
-                        Q('term', type=section_type)
-                    ])
-
-            # Aggregation to find sentences (in this case, sections of type "sentence") where both tokens appear
-            aggs = A('terms', field='sentence_id.keyword')  # Replace 'sentence_id' with your actual sentence identifier field
-            token_aggs = A('terms', field='transcription.keyword')
-
-            # Create a search object and apply the query and aggregation
-            s = TokenDocument.search().query(query).extra(size=0)  # We set size=0 because we're using aggregations
-            s.aggs.bucket('sections', aggs).bucket('tokens', token_aggs)
-
-            # Execute the search to get aggregations
-            response = s.execute()
-
-            # Identify valid sentence IDs based on the aggregation
-            valid_sentence_ids = []
-            for section in response.aggregations.sections.buckets:
-                tokens = {token.key: token.doc_count for token in section.tokens.buckets}
-                if token_a in tokens and token_b in tokens:
-                    valid_sentence_ids.append(section.key)
-
-            # If we found valid sentences, query again to get the actual tokens
-            if valid_sentence_ids:
-                second_query = Q('terms', sentence_id=valid_sentence_ids)
-                if language:
-                    second_query &= Q("term", language=language)
-                if pos:
-                    second_query &= Q("nested", path="pos_token", query=Q("term", pos_token__pos=pos))
-                    
-                ## logg
-                logger.info(second_query.to_dict())    
-                response = TokenDocument.search().query(second_query).extra(size=size)
-
-                tokens = []
-                for hit in response:
-                    token_elastic = TokenElastic.from_hit(hit)
-                    tokens.append(token_elastic)
-
-                return tokens
-
-            return []
 
 
     @strawberry.field
     @sync_to_async
     def search_tokens_in_same_section(
-        token_a: str,
+        search_inputs: List[TokenSearchInput],
         section_type: str,
         language: Optional[str] = None,
-        pos: Optional[str] = None,
         size: int = 100
     ) -> List[TokenElastic]:
 
-        # Initial query to filter by section type and nested tokens
-        nested_query = Q('nested', 
-                        path='tokens', 
-                        query=Q('terms', tokens__transcription=[token_a])
-                        )
-                        
-        query = Q('bool', 
-                must=[
-                    nested_query,
-                    Q('term', type=section_type)
-                ])
+        # Initialize empty lists for query conditions
+        must_conditions = []
+        should_conditions = []
+        must_not_conditions = []
+        # Loop through each TokenSearchInput to create a corresponding nested query
+        for search_input in search_inputs:
+            nested_query = None  # Reset for each loop
+            if search_input.query_type == 'term':
+                nested_query = Q('nested', 
+                                path='tokens', 
+                                query=Q('term', **{f'tokens__{search_input.field}': search_input.value})
+                                )
+            elif search_input.query_type == 'range':
+                nested_query = Q('nested', 
+                                path='tokens', 
+                                query=Q('range', **{f'tokens__{search_input.field}': {'gte': search_input.start, 'lte': search_input.end}})
+                                )
+            elif search_input.query_type == 'match':
+                nested_query = Q('nested',
+                                path='tokens',
+                                query=Q('match', **{f'tokens__{search_input.field}': search_input.value})
+                                )
+            elif search_input.query_type == 'match_phrase':
+                nested_query = Q('nested',
+                                path='tokens',
+                                query=Q('match_phrase', **{f'tokens__{search_input.field}': search_input.value})
+                                )
+            elif search_input.query_type == 'wildcard':
+                nested_query = Q('nested',
+                                path='tokens',
+                                query=Q('wildcard', **{f'tokens__{search_input.field}': search_input.value})
+                                )
+            elif search_input.query_type == 'fuzzy':
+                nested_query = Q('nested',
+                                path='tokens',
+                                query=Q('fuzzy', **{f'tokens__{search_input.field}': search_input.value})
+                                )
+            else:
+                # Fallback to term query if query_type is not recognized
+                nested_query = Q('nested', 
+                                path='tokens', 
+                                query=Q('term', **{f'tokens__{search_input.field}': search_input.value})
+                                )
+
+            # Add to respective condition list based on search_mode
+            if search_input.search_mode == 'must':
+                must_conditions.append(nested_query)
+            elif search_input.search_mode == 'should':
+                should_conditions.append(nested_query)
+            elif search_input.search_mode == 'must_not':
+                must_not_conditions.append(nested_query)
+            else:
+                # Fallback to 'must' if search_mode is not recognized
+                must_conditions.append(nested_query)
+
+        # Add the section_type condition
+        must_conditions.append(Q('term', type=section_type))
+
+        # Create the final query
+        query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions)
 
         # Create a search object and apply the query
         s = Search(index="sections").query(query).extra(size=size)  # Adjust size as needed
@@ -286,139 +278,8 @@ class Query:
 
         return tokens
 
-    @strawberry.field
-    @sync_to_async
-    def search_phrase_in_texts(
-        self,
-        tokens_to_search: List[TokenSearchInput],
-        text_ids: List[str],
-        size: int,
-        ignore_stopwords: bool = False
-    ) -> List[TokenElastic]:
 
-        def build_span_term_query(query_field, query_value):
-            return {"span_term": {query_field: query_value}}
-
-        def build_query(token_input):
-            query_field = token_input.field or "transcription"
-            query_value = token_input.value or token_input.transcription
-
-            if ignore_stopwords:
-                query_field = f"{query_field}.no_stop"
-
-            query_types = {
-                "exact": Q("term", **{query_field: query_value}),
-                "wildcard": Q("wildcard", **{query_field: f"{query_value}*"}),
-                "prefix": Q("prefix", **{query_field: query_value}),
-                "fuzzy": Q("fuzzy", **{query_field: query_value}),
-                "range": Q("range", **{query_field: {"gte": token_input.start, "lte": token_input.end}}),
-                "match": Q("match", **{query_field: query_value}),
-            }
-
-            return query_types.get(token_input.query_type)
-
-        token_clauses = []
-        span_near_clauses = []
-
-        for token_input in tokens_to_search:
-            query = build_query(token_input)
             
-            # Directly append span term query for any query type
-            span_near_clauses.append(build_span_term_query(token_input.field or "transcription", token_input.value or token_input.transcription))
-
-
-            if token_input.pos_token:
-                pos_q = Q("term", pos=token_input.pos_token)
-                token_clauses.append(Q('bool', must=[query, pos_q]))
-            else:
-                token_clauses.append(query)
-
-        text_ids = [relay.from_base64(text_id)[1] for text_id in text_ids]
-        text_q = Q("terms", **{"text.id": text_ids})
-
-        if len(span_near_clauses) > 1:
-            inner_bool_q = Q('bool', should=[Q({"span_near": {"clauses": span_near_clauses, "slop": tokens_to_search[0].slop, "in_order": True}})])
-            final_q = Q('bool', must=[inner_bool_q, text_q])
-        else:
-            final_q = Q('bool', must=[Q('bool', should=token_clauses), text_q])
-
-        logger.info(final_q.to_dict())
-        response = TokenDocument.search().query(final_q).extra(size=size)
-        logger.info(response.to_dict())
-        tokens = [TokenElastic.from_hit(hit) for hit in response]
-
-        return tokens
-
-
-    @strawberry.field
-    @sync_to_async
-    def advanced_search_tokens(
-        patterns: Optional[List[str]] = None,
-        regex_patterns: Optional[List[str]] = None,
-        lemma_ids: Optional[List[str]] = None,
-        pos_tags: Optional[List[str]] = None,
-        features: Optional[List[str]] = None,
-        #metadata_conditions: Optional[Dict] = None,
-        # ... other parameters
-        #numerical_conditions: Optional[Dict] = None,
-        scope: Optional[str] = None,
-        range_within: Optional[int] = None,
-        size: int = 100
-    ) -> List[TokenElastic]:
-        bool_query = Q("bool", should=[], minimum_should_match=1)
-        
-        # Handle exact match and wildcard patterns
-        if patterns:
-            for pattern in patterns:
-                bool_query['bool']['should'].append(Q("wildcard", transcription=pattern))
-
-        # Handle regex patterns
-        if regex_patterns:
-            for pattern in regex_patterns:
-                bool_query['bool']['should'].append(Q("regexp", transcription=pattern))
-
-        # Nested queries for lemmas, pos_tags, and features
-        if lemma_ids:
-            bool_query &= Q("nested", path="lemmas", query=Q("terms", lemmas__id=lemma_ids))
-        if pos_tags:
-            bool_query &= Q("nested", path="pos_token", query=Q("terms", pos_token__pos=pos_tags))
-        if features:
-            bool_query &= Q("nested", path="feature_token", query=Q("terms", feature_token__feature=features))
-
-        # Metadata conditions (authors, annotators, etc.)
-        if metadata_conditions:
-            for field, value in metadata_conditions.items():
-                bool_query &= Q("term", **{f"metadata.{field}": value})
-
-        # Numerical conditions (greater than, less than etc.)
-        if numerical_conditions:
-            for field, (op, value) in numerical_conditions.items():
-                if op == "gt":
-                    bool_query &= Q("range", **{field: {"gt": value}})
-                elif op == "lt":
-                    bool_query &= Q("range", **{field: {"lt": value}})
-                # ... other operators
-
-        # Scope and Range conditions
-        if scope == 'sentence':
-            nested_query = Q("nested", 
-                            path="tokens", 
-                            query=Q("bool", 
-                                    should=[Q(query_type, transcription=pattern) for pattern in patterns], 
-                                    minimum_should_match=1
-                                    )
-                            )
-            bool_query &= nested_query
-
-
-        if range_within:
-            pass
-        # Execute the search query
-        response = TokenDocument.search().query(bool_query).extra(size=size)
-        tokens = [TokenElastic.from_hit(hit) for hit in response]
-        return tokens
-
-        
 
     # ### dict
     # # lemma
