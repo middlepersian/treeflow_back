@@ -756,7 +756,7 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node_sync(info)
         #data = vars(related_lemma)
-        related_lemma = resolvers.create(info, models.Lemma, resolvers.parse_input(info, data))
+        related_lemma = resolvers.create(info, dict_models.Lemma, resolvers.parse_input(info, data))
         current_lemma.related_lemmas.add(related_lemma)
         current_lemma.save()
         return cast(Lemma, current_lemma)
@@ -776,11 +776,25 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node_sync(info)
-        data = vars(related_meaning)
-        related_meaning = resolvers.create(info, models.Meaning, resolvers.parse_input(info, data))
-        current_lemma.related_meanings.add(related_meaning)
+        
+        # Check if the related meaning already exists
+        existing_related_meaning = dict_models.Meaning.objects.filter(
+            meaning=related_meaning.meaning,
+            language=related_meaning.language
+        ).first()
+        
+        if existing_related_meaning:
+            # If it exists, use the existing one
+            related_meaning_to_add = existing_related_meaning
+        else:
+            # Otherwise, create a new one
+            data = vars(related_meaning)
+            related_meaning_to_add = resolvers.create(info, dict_models.Meaning, resolvers.parse_input(info, data))
+            
+        current_lemma.related_meanings.add(related_meaning_to_add)
         current_lemma.save()
         return cast(Lemma, current_lemma)
+
 
     @strawberry_django.mutation(handle_django_errors=True)
     def remove_related_lemma_from_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:
