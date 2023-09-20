@@ -31,6 +31,7 @@ TEMPLATES[-1]["OPTIONS"]["loaders"] = [  # type: ignore[index] # noqa F405
         ],
     )
 ]
+TEMPLATES[-1]["APP_DIRS"] = False  # Set APP_DIRS to False in test settings
 
 # EMAIL
 # ------------------------------------------------------------------------------
