@@ -37,7 +37,7 @@ class Meaning(relay.Node):
 class MeaningInput:
     meaning: strawberry.auto
     language: Language
-    related_meanings: strawberry.auto
+    related_meanings: Optional[List['Meaning']]
 
 
 @strawberry_django.partial(models.Meaning)
