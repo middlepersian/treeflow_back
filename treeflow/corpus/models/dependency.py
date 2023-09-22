@@ -9,6 +9,8 @@ class Dependency(models.Model):
     head = models.ForeignKey("Token", on_delete=models.SET_NULL, related_name='dependency_head', null=True, blank=True)
     head_number = models.FloatField(null=True, blank=True)
     rel = models.CharField(max_length=25, null=True, blank=True)
+    #enahnced in case of deps (default: False)
+    enhanced = models.BooleanField(default=False)
     # producer values: manual(1), computational(2). see schemas/dependency_enum.py
     producer = models.SmallIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

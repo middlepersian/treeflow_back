@@ -71,10 +71,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "simple_history",
     "strawberry.django",
-    "strawberry_django_plus",
     "django_elasticsearch_dsl"
-    # "gqlauth",
-    # "strawberry_django_jwt.refresh_token"
 ]
 
 LOCAL_APPS = [
@@ -317,11 +314,16 @@ GRAPHQL_JWT = {
 }
 
 
-# settings.py
-# STRAWBERRY_DJANGO = {
-#    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
-#    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
-# }
+STRAWBERRY_DJANGO = {
+    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
+    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
+    "MUTATIONS_DEFAULT_HANDLE_ERRORS": True,
+    "GENERATE_ENUMS_FROM_CHOICES": False,
+    "MAP_AUTO_ID_AS_GLOBAL_ID": True,
+    "MUTATIONS_DEFAULT_ARGUMENT_NAME": "input",
+
+}
+
 ELASTICSEARCH_DSL={
     'default': {
         'hosts': env.str("DJANGO_ELASTIC_HOST", default="elastic:9200")

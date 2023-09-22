@@ -1,41 +1,43 @@
 import strawberry
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+import strawberry_django
+from strawberry import relay
 from typing import  Optional, List
 from treeflow.corpus import models
 from treeflow.corpus.enums.deprel import Deprel
 
-
-@gql.django.type(models.Dependency)
+@strawberry_django.type(models.Dependency)
 class Dependency(relay.Node):
 
-    token_dependencies: relay.Connection[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    token_dependencies: List[strawberry.LazyType['Token', 'treeflow.corpus.types.token']] = strawberry_django.field()
 
-    id: relay.GlobalID
-    token: Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
-    head:  Optional[gql.LazyType['Token', 'treeflow.corpus.types.token']]
+    id: relay.NodeID[str]
+    token: Optional[strawberry.LazyType['Token', 'treeflow.corpus.types.token']]
+    head:  Optional[strawberry.LazyType['Token', 'treeflow.corpus.types.token']]
     head_number: Optional[float]
     rel: Deprel
-    producer: gql.auto
+    enhanced: Optional[bool]
+    producer: strawberry.auto
 
 
-@gql.django.input(models.Dependency)
+@strawberry_django.input(models.Dependency)
 class DependencyInput:
-    token: relay.GlobalID
-    head:  relay.GlobalID
-    head_number: gql.auto
-    rel: Deprel
-    producer: gql.auto
+    token: strawberry.auto
+    head:  strawberry.auto
+    head_number: strawberry.auto
+    rel: Optional[Deprel]
+    enhanced: Optional[bool]
+    producer: strawberry.auto
 
 
-@gql.django.partial(models.Dependency)
-class DependencyPartial(gql.NodeInputPartial):
+@strawberry_django.partial(models.Dependency)
+class DependencyPartial:
     id: relay.GlobalID
-    token: relay.GlobalID
-    head:  relay.GlobalID
-    head_number: gql.auto
+    token: strawberry.auto
+    head:  strawberry.auto
+    head_number: strawberry.auto
     rel: Deprel
-    producer: gql.auto
+    enhanced: Optional[bool]
+    producer: strawberry.auto
 
 
 @strawberry.type

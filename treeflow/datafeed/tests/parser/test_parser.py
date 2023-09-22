@@ -43,10 +43,8 @@ def parse_sentences(df):
 
 @pytest.mark.django_db
 def test_parse_preannotated():
-    file = 'Dk5_preannotated.csv'
-    script_path = os.path.abspath(__file__)
-    script_dir = os.path.dirname(script_path)
-    file_path = os.path.join(script_dir, file)
+    file = '02-test_phase_without_newpart/DMX-L19.csv'
+    file_path = '/app_data/' + file
     with open(file_path, 'r') as f:
         df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
         parse_preannotated(df)
@@ -54,7 +52,7 @@ def test_parse_preannotated():
 
 @pytest.mark.django_db
 def test_parse_annotated():
-    file_name = '06-syntactically_annotated_to_import/NM_K35.csv'
+    file_name = '01-test_phase_with_newpart/DMX-L19.csv'
 
     # deactive elastic for performance reasons
 
@@ -65,9 +63,9 @@ def test_parse_annotated():
     base_dir = '/app_data'
     file_path = os.path.join(base_dir, file_name)
     
-    manuscript_id = "K35"
-    text_title = "Namagiha i manuscihr"
-    text_sigle= "NM"
+    manuscript_id = "L19"
+    text_title = "Dadestan i menod"
+    text_sigle= "DMX"
     text_version = "1"
     tokens, images, lines = import_annotated_file(csv_file=file_path, text_sigle=text_sigle, text_title=text_title, \
                                                   manuscript_id=manuscript_id, text_version=text_version)
