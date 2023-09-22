@@ -25,7 +25,6 @@ class Source(relay.Node):
     references: List[strawberry.LazyType['BibEntry', 'treeflow.corpus.types.bibliography']]
     sources: Optional[List['Source']]
 
-
 @strawberry_django.input(models.Source)
 class SourceInput:
 
