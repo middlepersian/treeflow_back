@@ -19,9 +19,9 @@ class TokenFilter:
     transliteration: strawberry.auto
     language: strawberry.auto
     number: strawberry.auto
-    text: strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']
-    image : strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']
-    section_tokens: strawberry.LazyType['SectionFilter', 'treeflow.corpus.types.section']
+    text: Optional[strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']]
+    image : Optional[strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']]
+    section_tokens: Optional[strawberry.LazyType['SectionFilter', 'treeflow.corpus.types.section']]
 
 
 @strawberry_django.type(models.Token, filters=Optional[TokenFilter])
