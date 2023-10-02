@@ -278,8 +278,106 @@ class Query:
 
         return tokens
 
+    def build_nested_query(search_input: TokenSearchInput) -> Q:
+        """Build and return the nested query based on the given search input."""
+        
+        # Define a mapping from query_type to the corresponding Elasticsearch query function
+        query_type_map = {
+            'term': Q('term'),
+            'range': Q('range'),
+            'match': Q('match'),
+            'match_phrase': Q('match_phrase'),
+            'wildcard': Q('wildcard'),
+            'fuzzy': Q('fuzzy')
+        }
+        
+        # Use the mapping to get the correct query function
+        query_function = query_type_map.get(search_input.query_type, Q('term'))
+        
+        # Build the actual query based on the input field and value
+        if search_input.query_type == 'range':
+            query = query_function(**{f'tokens__{search_input.field}': {'gte': search_input.start, 'lte': search_input.end}})
+        else:
+            query = query_function(**{f'tokens__{search_input.field}': search_input.value})
+        
+        return Q('nested', path='tokens', query=query)
 
+
+    @strawberry.field
+    @sync_to_async
+    def search_in_section(
+        search_inputs: List[TokenSearchInput],
+        section_type: str,
+        language: Optional[str] = None,
+        size: int = 100
+    ) -> List[SectionElastic]:
+
+        # Initialize empty lists for query conditions
+        must_conditions = []
+        should_conditions = []
+        must_not_conditions = []
+
+        try:
+            # Loop through each TokenSearchInput to create a corresponding nested query
+            for search_input in search_inputs:
+                nested_query = build_nested_query(search_input)
+
+                # Add to respective condition list based on search_mode
+                condition_list = {
+                    'must': must_conditions,
+                    'should': should_conditions,
+                    'must_not': must_not_conditions
+                }.get(search_input.search_mode, must_conditions)
+
+                condition_list.append(nested_query)
             
+            # Add the section_type condition
+            must_conditions.append(Q('term', type=section_type))
+
+            # Create the final query
+            query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions)
+
+            # Create a search object and apply the query
+            s = Search(index="sections").query(query).extra(size=size)
+
+            s = s.highlight_options(pre_tags='<em>', post_tags='</em>')
+            s = s.highlight('tokens.transcription', number_of_fragments=0)
+
+            # Execute the search
+            response = s.execute()
+
+        except Exception as e:
+            logger.error(f"Error during Elasticsearch query execution: {str(e)}")
+            return []
+
+        # Check if any hits were returned by the query
+        if response.hits.total['value'] == 0:
+            logger.info("No documents found matching the query.")
+            return []
+
+        # Process the hits
+        sections = []
+        for hit in response:
+            try:
+                hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
+
+                highlighted_tokens = hit.meta.highlight if hasattr(hit.meta, 'highlight') else None
+                if highlighted_tokens:
+                    for token in hit_dict['tokens']:
+                        token_transcription = token.get('transcription')
+                        if token_transcription in highlighted_tokens['tokens.transcription']:
+                            index = highlighted_tokens['tokens.transcription'].index(token_transcription)
+                            token['transcription'] = highlighted_tokens['tokens.transcription'][index]
+
+                section = SectionElastic.from_hit(hit_dict)
+                sections.append(section)
+
+            except Exception as e:
+                logger.error(f"Error processing hit: {str(e)}")
+
+        return sections
+
+                
 
     # ### dict
     # # lemma

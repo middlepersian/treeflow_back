@@ -93,3 +93,79 @@ class SectionPartial:
     meanings: strawberry.auto
     next: strawberry.auto
     container: strawberry.auto
+
+@strawberry.type
+class SectionElastic(relay.Node):
+    id: relay.NodeID[str]  # Section ID
+    text_id: str  # From the `text` object's `id`
+    title: str  # From the `text` object's `title`
+    type: str
+    tokens: List[TokenElastic]
+    
+    @classmethod
+    def from_hit(cls, hit):
+        # Convert hit to dictionary if needed
+        hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
+        
+        # Extract fields
+        text = hit_dict.get('text', {})
+        tokens_data = hit_dict.get('tokens', [])
+        
+        # Convert tokens
+        tokens_elastic = [TokenElastic.from_hit(token_hit) for token_hit in tokens_data]
+        
+        return cls(
+            id=hit_dict.get('id'),
+            text_id=text.get('id'),
+            title=text.get('title'),
+            type=hit_dict.get('type'),
+            tokens=tokens_elastic
+        )
+
+    @classmethod
+    def resolve_id(cls, root: "SectionElastic", *, info: Info) -> str:
+        return root.id
+        
+    @classmethod
+    def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['SectionElastic']:
+        try:
+            node = get_section_by_id(id=relay.from_base64(node_id)[1])
+            return node
+        except (relay.GlobalIDValueError, NotFoundError):
+            if required:
+                raise ValueError(f"No node by id {node_id}")
+            return None
+
+    @classmethod
+    def resolve_nodes(
+        cls,
+        *,
+        info: Optional[Info] = None,
+        node_ids: Optional[Iterable[str]] = None
+    ):
+        if node_ids is not None:
+            sections = get_sections_by_ids(ids=[relay.from_base64(gid)[1] for gid in node_ids])
+            return [SectionElastic.from_hit(section) for section in sections]
+        return []
+
+
+def get_section_by_id(id: str) -> SectionElastic:
+    s = Search(index='sections').query('ids', values=[id])
+    response = s.execute()
+
+    if len(response.hits.hits) == 0:
+        raise NotFoundError(f"No section by id {id}")
+
+    return SectionElastic.from_hit(response.hits.hits[0]['_source'])
+
+
+def get_sections_by_ids(ids: List[str]) -> List[SectionElastic]:
+    s = Search(index='sections').query('ids', values=ids)
+    response = s.execute()
+
+    sections = []
+    for hit in response.hits.hits:
+        section = SectionElastic.from_hit(hit['_source'])
+        sections.append(section)
+
+    return sections
