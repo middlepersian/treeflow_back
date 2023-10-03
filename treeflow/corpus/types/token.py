@@ -4,7 +4,7 @@ from strawberry import relay
 from typing import List, Optional, Iterable, cast
 from treeflow.dict.types.lemma import LemmaSelection, MeaningSelection
 from treeflow.corpus import models
-from elasticsearch_dsl import Search, connections
+from elasticsearch_dsl import Search, connections, Q
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
@@ -213,6 +213,8 @@ class TokenElastic(relay.Node):
     feature_token: Optional[List[FeatureSelection]] = None
     lemmas: Optional[List[LemmaSelection]] = None
     meanings: Optional[List[MeaningSelection]] = None
+    highlight: Optional[bool] = False
+
 
     @classmethod
     def resolve_id(cls, root: "TokenElastic", *, info: Info) -> str:
@@ -222,7 +224,7 @@ class TokenElastic(relay.Node):
     def from_hit(cls, hit):
         # Convert the hit to a dictionary
         hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit        
-        logger.info(f"Processing hit: {hit_dict}")
+        #logger.info(f"Processing hit: {hit_dict}")
         
         # Build and return a new instance of TokenElastic
         # TODO check fields like text and image thst are not necessary (siehe Token_object)
@@ -243,6 +245,7 @@ class TokenElastic(relay.Node):
             previous=TokenSelection.from_hit(hit_dict, field='previous') if 'previous' in hit_dict and hit_dict['previous'] is not None else None,
             lemmas=LemmaSelection.from_hit(hit_dict, field='lemmas') if 'lemmas' in hit_dict else None,
             meanings=MeaningSelection.from_hit(hit_dict, field='meanings') if 'meanings' in hit_dict else None,
+            highlight=hit_dict.get('highlight', False)  # Set highlight based on hit data
         )
 
 
@@ -304,3 +307,22 @@ def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
         tokens.append(token)
 
     return tokens
+    
+def build_main_query(search_input: TokenSearchInput) -> Q:
+    """Build and return the main query based on the given search input."""
+    
+    # Define a mapping from query_type to the corresponding Elasticsearch query function
+    query_type_map = {
+        'term': 'term',
+        'range': 'range',
+        'match': 'match',
+        'match_phrase': 'match_phrase',
+        'wildcard': 'wildcard',
+        'fuzzy': 'fuzzy'
+    }
+    
+    # Use the mapping to get the correct query type as a string
+    query_type = query_type_map.get(search_input.query_type, 'term')
+    
+    # Build and return the query
+    return Q(query_type, **{f'tokens__{search_input.field}': search_input.value})

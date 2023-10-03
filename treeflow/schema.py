@@ -21,13 +21,13 @@ from treeflow.corpus.types.dependency import Dependency, DependencyInput, Depend
 from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features, upos_feature_feature_value
 from treeflow.corpus.types.pos import POS, POSInput, POSPartial
 from treeflow.corpus.enums.pos import UPOSValues
-from treeflow.corpus.types.section import Section, SectionFilter, SectionInput, SectionPartial
+from treeflow.corpus.types.section import Section, SectionFilter, SectionInput, SectionPartial, SectionElastic
 from treeflow.corpus.models.section import Section as SectionModel
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
 from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial
-from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput
+from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query
 from treeflow.corpus.documents.token import TokenDocument
 from treeflow.corpus.documents.section import SectionDocument
 from treeflow.corpus.types.user import User
@@ -180,136 +180,14 @@ class Query:
         return tokens
 
 
-
-
-    @strawberry.field
-    @sync_to_async
-    def search_tokens_in_same_section(
-        search_inputs: List[TokenSearchInput],
-        section_type: str,
-        language: Optional[str] = None,
-        size: int = 100
-    ) -> List[TokenElastic]:
-
-        # Initialize empty lists for query conditions
-        must_conditions = []
-        should_conditions = []
-        must_not_conditions = []
-        # Loop through each TokenSearchInput to create a corresponding nested query
-        for search_input in search_inputs:
-            nested_query = None  # Reset for each loop
-            if search_input.query_type == 'term':
-                nested_query = Q('nested', 
-                                path='tokens', 
-                                query=Q('term', **{f'tokens__{search_input.field}': search_input.value})
-                                )
-            elif search_input.query_type == 'range':
-                nested_query = Q('nested', 
-                                path='tokens', 
-                                query=Q('range', **{f'tokens__{search_input.field}': {'gte': search_input.start, 'lte': search_input.end}})
-                                )
-            elif search_input.query_type == 'match':
-                nested_query = Q('nested',
-                                path='tokens',
-                                query=Q('match', **{f'tokens__{search_input.field}': search_input.value})
-                                )
-            elif search_input.query_type == 'match_phrase':
-                nested_query = Q('nested',
-                                path='tokens',
-                                query=Q('match_phrase', **{f'tokens__{search_input.field}': search_input.value})
-                                )
-            elif search_input.query_type == 'wildcard':
-                nested_query = Q('nested',
-                                path='tokens',
-                                query=Q('wildcard', **{f'tokens__{search_input.field}': search_input.value})
-                                )
-            elif search_input.query_type == 'fuzzy':
-                nested_query = Q('nested',
-                                path='tokens',
-                                query=Q('fuzzy', **{f'tokens__{search_input.field}': search_input.value})
-                                )
-            else:
-                # Fallback to term query if query_type is not recognized
-                nested_query = Q('nested', 
-                                path='tokens', 
-                                query=Q('term', **{f'tokens__{search_input.field}': search_input.value})
-                                )
-
-            # Add to respective condition list based on search_mode
-            if search_input.search_mode == 'must':
-                must_conditions.append(nested_query)
-            elif search_input.search_mode == 'should':
-                should_conditions.append(nested_query)
-            elif search_input.search_mode == 'must_not':
-                must_not_conditions.append(nested_query)
-            else:
-                # Fallback to 'must' if search_mode is not recognized
-                must_conditions.append(nested_query)
-
-        # Add the section_type condition
-        must_conditions.append(Q('term', type=section_type))
-
-        # Create the final query
-        query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions)
-
-        # Create a search object and apply the query
-        s = Search(index="sections").query(query).extra(size=size)  # Adjust size as needed
-
-        # Execute the search
-        response = s.execute()
-
-        # Check if any hits were returned by the query
-        if response.hits.total['value'] == 0:
-            logger.info("No documents found matching the query.")
-            return []
-
-        # If hits were found, process them
-        tokens = []
-        for hit in response:
-            # Convert hit to dictionary if needed
-            hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
-
-            # Extract tokens from the section
-            section_tokens = hit_dict.get('tokens', [])
-            
-            for token_hit in section_tokens:
-                token_elastic = TokenElastic.from_hit(token_hit)
-                tokens.append(token_elastic)
-
-        return tokens
-
-    def build_nested_query(search_input: TokenSearchInput) -> Q:
-        """Build and return the nested query based on the given search input."""
-        
-        # Define a mapping from query_type to the corresponding Elasticsearch query function
-        query_type_map = {
-            'term': Q('term'),
-            'range': Q('range'),
-            'match': Q('match'),
-            'match_phrase': Q('match_phrase'),
-            'wildcard': Q('wildcard'),
-            'fuzzy': Q('fuzzy')
-        }
-        
-        # Use the mapping to get the correct query function
-        query_function = query_type_map.get(search_input.query_type, Q('term'))
-        
-        # Build the actual query based on the input field and value
-        if search_input.query_type == 'range':
-            query = query_function(**{f'tokens__{search_input.field}': {'gte': search_input.start, 'lte': search_input.end}})
-        else:
-            query = query_function(**{f'tokens__{search_input.field}': search_input.value})
-        
-        return Q('nested', path='tokens', query=query)
-
-
     @strawberry.field
     @sync_to_async
     def search_in_section(
         search_inputs: List[TokenSearchInput],
         section_type: str,
         language: Optional[str] = None,
-        size: int = 100
+        size: int = 100,
+        text_ids: Optional[List[str]] = None,
     ) -> List[SectionElastic]:
 
         # Initialize empty lists for query conditions
@@ -317,31 +195,58 @@ class Query:
         should_conditions = []
         must_not_conditions = []
 
+        # Accumulate queries for tokens based on their search_mode
+        must_token_queries = []
+        should_token_queries = []
+        should_not_token_queries = []
+
         try:
-            # Loop through each TokenSearchInput to create a corresponding nested query
+            # Loop through each TokenSearchInput to create a corresponding main query
             for search_input in search_inputs:
-                nested_query = build_nested_query(search_input)
+                main_query = build_main_query(search_input) 
+                
+                if search_input.search_mode == "must":
+                    must_token_queries.append(main_query)
+                elif search_input.search_mode == "should":
+                    should_token_queries.append(main_query)
+                elif search_input.search_mode == "should_not":
+                    should_not_token_queries.append(main_query)
 
-                # Add to respective condition list based on search_mode
-                condition_list = {
-                    'must': must_conditions,
-                    'should': should_conditions,
-                    'must_not': must_not_conditions
-                }.get(search_input.search_mode, must_conditions)
+            # Construct the nested bool query using the token queries lists
+            nested_bool_query = Q('bool', must=must_token_queries, should=should_token_queries, must_not=should_not_token_queries)
+            
+            # Combine all token queries into one nested query with inner_hits
+            nested_query = Q('nested', path='tokens', query=nested_bool_query, inner_hits={
+                "highlight": {
+                    "fields": {
+                        "tokens.transcription": {}
+                    }
+                }
+            })
 
-                condition_list.append(nested_query)
+            must_conditions.append(nested_query)
             
             # Add the section_type condition
             must_conditions.append(Q('term', type=section_type))
 
+            # Decode text_ids using relay's method
+            decoded_text_ids = [relay.from_base64(encoded_id)[1] for encoded_id in text_ids] if text_ids else []
+
+            # If decoded_text_ids are provided, add them to the must_conditions
+            if decoded_text_ids:
+                must_conditions.append(Q('terms', text__id=decoded_text_ids))
+
             # Create the final query
             query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions)
+
+            # Logging the constructed query for review
+            logger.info(f"Constructed Elasticsearch query: {query}")
 
             # Create a search object and apply the query
             s = Search(index="sections").query(query).extra(size=size)
 
-            s = s.highlight_options(pre_tags='<em>', post_tags='</em>')
-            s = s.highlight('tokens.transcription', number_of_fragments=0)
+            # Log the constructed query
+            logger.info(f"Elasticsearch DSL query: {s.to_dict()}")
 
             # Execute the search
             response = s.execute()
@@ -350,10 +255,16 @@ class Query:
             logger.error(f"Error during Elasticsearch query execution: {str(e)}")
             return []
 
+        # Logging the total number of hits
+        logger.info(f"Total hits returned: {response.hits.total['value']}")
+
         # Check if any hits were returned by the query
         if response.hits.total['value'] == 0:
             logger.info("No documents found matching the query.")
             return []
+
+        # Log the Elasticsearch response
+        logger.info(f"Elasticsearch response: {response.to_dict()}")
 
         # Process the hits
         sections = []
@@ -361,13 +272,43 @@ class Query:
             try:
                 hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
 
-                highlighted_tokens = hit.meta.highlight if hasattr(hit.meta, 'highlight') else None
-                if highlighted_tokens:
-                    for token in hit_dict['tokens']:
-                        token_transcription = token.get('transcription')
-                        if token_transcription in highlighted_tokens['tokens.transcription']:
-                            index = highlighted_tokens['tokens.transcription'].index(token_transcription)
-                            token['transcription'] = highlighted_tokens['tokens.transcription'][index]
+                # Extract highlighted tokens
+                highlighted_tokens = set()
+
+                if hasattr(hit.meta, 'inner_hits') and hasattr(hit.meta.inner_hits, 'tokens'):
+                    logger.info("Has tokens")
+                    logger.info("Content of tokens: %s", hit.meta.inner_hits.tokens)
+                    
+                    if hasattr(hit.meta.inner_hits.tokens, 'hits') and hit.meta.inner_hits.tokens.hits:
+                        logger.info("Has hits within tokens")
+                        logger.info("Content of hits within tokens: %s", hit.meta.inner_hits.tokens.hits)
+                        
+                        for inner_hit in hit.meta.inner_hits.tokens.hits.hits:  # Adjusted this line
+                            # Convert inner_hit to dictionary if possible
+                            inner_hit_dict = inner_hit.to_dict() if hasattr(inner_hit, 'to_dict') else inner_hit
+                            logger.info("Entire content of inner_hit: %s", inner_hit_dict)
+                            
+                            if 'highlight' in inner_hit:
+                                logger.info("Found highlight in inner_hit")
+                                
+                                if 'tokens.transcription' in inner_hit['highlight']:
+                                    logger.info("Found tokens.transcription in highlight")
+                                    
+                                    for highlighted_transcription in inner_hit['highlight']['tokens.transcription']:
+                                        highlighted_tokens.add(highlighted_transcription)
+                                        logger.debug("Added highlighted transcription: %s", highlighted_transcription)
+
+                logger.info("Finished processing. Total highlighted tokens: %d", len(highlighted_tokens))
+
+
+                logger.info(f"Highlighted tokens: {highlighted_tokens}")
+                for token in hit_dict['tokens']:
+                    wrapped_transcription = f"<em>{token['transcription']}</em>"
+                    token['highlight'] = wrapped_transcription in highlighted_tokens
+
+                    # Logging each token's transcription and highlight status
+                    logger.info(f"Token transcription: {token['transcription']}, Highlight status: {token['highlight']}")
+
 
                 section = SectionElastic.from_hit(hit_dict)
                 sections.append(section)
@@ -376,6 +317,7 @@ class Query:
                 logger.error(f"Error processing hit: {str(e)}")
 
         return sections
+
 
                 
 
