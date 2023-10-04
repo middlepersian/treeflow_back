@@ -27,7 +27,7 @@ from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
 from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial
-from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query
+from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query, token_matches_criteria
 from treeflow.corpus.documents.token import TokenDocument
 from treeflow.corpus.documents.section import SectionDocument
 from treeflow.corpus.types.user import User
@@ -200,6 +200,9 @@ class Query:
         should_token_queries = []
         should_not_token_queries = []
 
+        #search creiteria list
+        search_criteria_list = []
+
         try:
             # Loop through each TokenSearchInput to create a corresponding main query
             for search_input in search_inputs:
@@ -212,6 +215,21 @@ class Query:
                 elif search_input.search_mode == "should_not":
                     should_not_token_queries.append(main_query)
 
+            #create search criteria dict
+            criteria_dict = {
+                "transcription": search_input.transcription if hasattr(search_input, 'transcription') else None,
+                "transliteration": search_input.transliteration if hasattr(search_input, 'transliteration') else None,
+                "lemma": search_input.lemma if hasattr(search_input, 'lemma') else None,
+                "pos": search_input.pos if hasattr(search_input, 'pos') else None,
+                "feature": search_input.feature if hasattr(search_input, 'feature') else None,
+                "feature_value": search_input.feature_value if hasattr(search_input, 'feature_value') else None,
+                "dependency_rel": search_input.dependency_rel if hasattr(search_input, 'dependency_rel') else None,
+                "dependency_head_rel": search_input.dependency_head_rel if hasattr(search_input, 'dependency_head_rel') else None,
+                "meaning": search_input.meaning if hasattr(search_input, 'meaning') else None,
+            }
+            search_criteria_list.append(criteria_dict)
+
+
             # Construct the nested bool query using the token queries lists
             nested_bool_query = Q('bool', must=must_token_queries, should=should_token_queries, must_not=should_not_token_queries)
             
@@ -219,7 +237,15 @@ class Query:
             nested_query = Q('nested', path='tokens', query=nested_bool_query, inner_hits={
                 "highlight": {
                     "fields": {
-                        "tokens.transcription": {}
+                        "tokens.transcription": {},
+                        "tokens.transliteration": {},
+                        "tokens.lemmas.word": {},
+                        "tokens.pos_token.pos" : {},
+                        "tokens.feature_token.feature" : {},
+                        "tokens.feature_token.feature_value" : {},
+                        "tokens.dependency_token.rel" : {},
+                        "tokens.dependency_head.rel" : {},
+                        "tokens.meanings.meaning" : {},
                     }
                 }
             })
@@ -251,75 +277,61 @@ class Query:
             # Execute the search
             response = s.execute()
 
+            # Logging the total number of hits
+            logger.info(f"Total hits returned: {response.hits.total['value']}")
+
+            # Check if any hits were returned by the query
+            if response.hits.total['value'] == 0:
+                logger.info("No documents found matching the query.")
+                return []
+
+            # Log the Elasticsearch response
+            logger.info(f"Elasticsearch response: {response.to_dict()}")
+
+            sections = []
+            for hit in response:
+                try:
+                    hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
+
+                    if hasattr(hit, 'meta') and hasattr(hit.meta, 'inner_hits') and hasattr(hit.meta.inner_hits, 'tokens'):
+                        logger.info("Has tokens")
+                        
+                        if hasattr(hit.meta.inner_hits.tokens, 'hits') and hit.meta.inner_hits.tokens.hits:
+                            logger.info("Has hits within tokens")
+                            
+                            for inner_hit in hit.meta.inner_hits.tokens.hits.hits:
+                                inner_hit_dict = inner_hit.to_dict() if hasattr(inner_hit, 'to_dict') else inner_hit
+                                
+                                token = inner_hit_dict["_source"]
+                                token_id = token['id']
+                                is_highlighted = any(token_matches_criteria(token, criteria) for criteria in search_criteria_list)
+                                if is_highlighted:
+                                        logger.info(f"Token highlighted: {token['transcription']} (ID: {token_id})")
+                                        token['highlight'] = True
+                                        
+                                        # Check if the token already exists in hit_dict['tokens']
+                                        existing_token = next((t for t in hit_dict['tokens'] if t['id'] == token_id), None)
+                                        if existing_token:
+                                            existing_token.update(token)
+                                        else:
+                                            hit_dict['tokens'].append(token)
+                                
+                    section = SectionElastic.from_hit(hit_dict)
+                    sections.append(section)
+
+                except Exception as e:
+                    logger.error(f"Error processing hit: {str(e)}")
+
+            return sections
+
+
+
+
+
+
         except Exception as e:
             logger.error(f"Error during Elasticsearch query execution: {str(e)}")
             return []
-
-        # Logging the total number of hits
-        logger.info(f"Total hits returned: {response.hits.total['value']}")
-
-        # Check if any hits were returned by the query
-        if response.hits.total['value'] == 0:
-            logger.info("No documents found matching the query.")
-            return []
-
-        # Log the Elasticsearch response
-        logger.info(f"Elasticsearch response: {response.to_dict()}")
-
-        # Process the hits
-        sections = []
-        for hit in response:
-            try:
-                hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
-
-                # Extract highlighted tokens
-                highlighted_tokens = set()
-
-                if hasattr(hit.meta, 'inner_hits') and hasattr(hit.meta.inner_hits, 'tokens'):
-                    logger.info("Has tokens")
-                    logger.info("Content of tokens: %s", hit.meta.inner_hits.tokens)
-                    
-                    if hasattr(hit.meta.inner_hits.tokens, 'hits') and hit.meta.inner_hits.tokens.hits:
-                        logger.info("Has hits within tokens")
-                        logger.info("Content of hits within tokens: %s", hit.meta.inner_hits.tokens.hits)
-                        
-                        for inner_hit in hit.meta.inner_hits.tokens.hits.hits:  # Adjusted this line
-                            # Convert inner_hit to dictionary if possible
-                            inner_hit_dict = inner_hit.to_dict() if hasattr(inner_hit, 'to_dict') else inner_hit
-                            logger.info("Entire content of inner_hit: %s", inner_hit_dict)
-                            
-                            if 'highlight' in inner_hit:
-                                logger.info("Found highlight in inner_hit")
-                                
-                                if 'tokens.transcription' in inner_hit['highlight']:
-                                    logger.info("Found tokens.transcription in highlight")
-                                    
-                                    for highlighted_transcription in inner_hit['highlight']['tokens.transcription']:
-                                        highlighted_tokens.add(highlighted_transcription)
-                                        logger.debug("Added highlighted transcription: %s", highlighted_transcription)
-
-                logger.info("Finished processing. Total highlighted tokens: %d", len(highlighted_tokens))
-
-
-                logger.info(f"Highlighted tokens: {highlighted_tokens}")
-                for token in hit_dict['tokens']:
-                    wrapped_transcription = f"<em>{token['transcription']}</em>"
-                    token['highlight'] = wrapped_transcription in highlighted_tokens
-
-                    # Logging each token's transcription and highlight status
-                    logger.info(f"Token transcription: {token['transcription']}, Highlight status: {token['highlight']}")
-
-
-                section = SectionElastic.from_hit(hit_dict)
-                sections.append(section)
-
-            except Exception as e:
-                logger.error(f"Error processing hit: {str(e)}")
-
-        return sections
-
-
-                
 
     # ### dict
     # # lemma

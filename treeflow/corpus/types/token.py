@@ -308,6 +308,8 @@ def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
 
     return tokens
     
+from elasticsearch_dsl.query import Q
+
 def build_main_query(search_input: TokenSearchInput) -> Q:
     """Build and return the main query based on the given search input."""
     
@@ -324,5 +326,29 @@ def build_main_query(search_input: TokenSearchInput) -> Q:
     # Use the mapping to get the correct query type as a string
     query_type = query_type_map.get(search_input.query_type, 'term')
     
-    # Build and return the query
-    return Q(query_type, **{f'tokens__{search_input.field}': search_input.value})
+    # List of nested fields within 'tokens'
+    nested_fields = ['lemmas', 'meanings', 'pos_token', 'feature_token', 'dependency_token', 'dependency_head']
+    # Check for nested fields and handle them
+    for nested_field in nested_fields:
+        if nested_field in search_input.field:
+            return Q('nested', 
+                    path=f'tokens.{nested_field}', 
+                    query=Q(query_type, **{f'tokens.{nested_field}.{search_input.field.split(".")[-1]}': search_input.value})
+                )
+    # Build and return the query for other fields
+    return Q(query_type, **{f'tokens.{search_input.field}': search_input.value})
+
+
+# Helper function to check if token matches criteria
+def token_matches_criteria(token, criteria):
+    return (
+        (not criteria["transcription"] or token.get("transcription") == criteria["transcription"]) and
+        (not criteria["transliteration"] or token.get("transliteration") == criteria["transliteration"]) and
+        (not criteria["lemma"] or token.get("lemmas.word") == criteria["lemma"]) and
+        (not criteria["pos"] or token.get("pos_token.pos") == criteria["pos"]) and
+        (not criteria["feature"] or token.get("feature_token.feature") == criteria["feature"]) and
+        (not criteria["feature_value"] or token.get("feature_token.feature_value") == criteria["feature_value"]) and
+        (not criteria["dependency_rel"] or token.get("dependency_token.rel") == criteria["dependency_rel"]) and
+        (not criteria["dependency_head_rel"] or token.get("dependency_head.rel") == criteria["dependency_head_rel"]) and
+        (not criteria["meaning"] or token.get("meanings.meaning") == criteria["meaning"])
+    )
