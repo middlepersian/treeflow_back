@@ -310,7 +310,7 @@ def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
     
 from elasticsearch_dsl.query import Q
 
-def build_main_query(search_input: TokenSearchInput) -> Q:
+def build_main_query(search_input: TokenSearchInput, stopwords: bool = False) -> Q:
     """Build and return the main query based on the given search input."""
     
     # Define a mapping from query_type to the corresponding Elasticsearch query function
@@ -326,18 +326,22 @@ def build_main_query(search_input: TokenSearchInput) -> Q:
     # Use the mapping to get the correct query type as a string
     query_type = query_type_map.get(search_input.query_type, 'term')
     
+    # Modify the field if transcription and stopwords is True
+    field_name = search_input.field
+    if field_name == "transcription" and stopwords:
+        field_name = "transcription.no_stop"
+    
     # List of nested fields within 'tokens'
     nested_fields = ['lemmas', 'meanings', 'pos_token', 'feature_token', 'dependency_token', 'dependency_head']
     # Check for nested fields and handle them
     for nested_field in nested_fields:
-        if nested_field in search_input.field:
+        if nested_field in field_name:
             return Q('nested', 
                     path=f'tokens.{nested_field}', 
-                    query=Q(query_type, **{f'tokens.{nested_field}.{search_input.field.split(".")[-1]}': search_input.value})
+                    query=Q(query_type, **{f'tokens.{nested_field}.{field_name.split(".")[-1]}': search_input.value})
                 )
     # Build and return the query for other fields
-    return Q(query_type, **{f'tokens.{search_input.field}': search_input.value})
-
+    return Q(query_type, **{f'tokens.{field_name}': search_input.value})
 
 # Helper function to check if token matches criteria
 def token_matches_criteria(token, criteria):

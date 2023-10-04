@@ -188,73 +188,78 @@ class Query:
         language: Optional[str] = None,
         size: int = 100,
         text_ids: Optional[List[str]] = None,
+        stopwords: bool = False,
     ) -> List[SectionElastic]:
 
         # Initialize empty lists for query conditions
         must_conditions = []
         should_conditions = []
         must_not_conditions = []
-
-        # Accumulate queries for tokens based on their search_mode
-        must_token_queries = []
-        should_token_queries = []
-        should_not_token_queries = []
-
-        #search creiteria list
         search_criteria_list = []
+        highlight_fields = {
+            "tokens.transliteration": {},
+            "tokens.lemmas.word": {},
+            "tokens.pos_token.pos": {},
+            "tokens.feature_token.feature": {},
+            "tokens.feature_token.feature_value": {},
+            "tokens.dependency_token.rel": {},
+            "tokens.dependency_head.rel": {},
+            "tokens.meanings.meaning": {},
+        }
 
+        # Adjust the transcription field based on stopwords flag
+        if stopwords:
+            highlight_fields["tokens.transcription.no_stop"] = {}
+        else:
+            highlight_fields["tokens.transcription"] = {}
+
+        # Create a dictionary to hold lists of main queries grouped by search_mode
+        queries_by_mode = {
+            "must": [],
+            "should": [],
+            "must_not": []
+        }
+    
         try:
-            # Loop through each TokenSearchInput to create a corresponding main query
+
             for search_input in search_inputs:
-                main_query = build_main_query(search_input) 
-                
-                if search_input.search_mode == "must":
-                    must_token_queries.append(main_query)
-                elif search_input.search_mode == "should":
-                    should_token_queries.append(main_query)
-                elif search_input.search_mode == "should_not":
-                    should_not_token_queries.append(main_query)
+                main_query = build_main_query(search_input, stopwords=stopwords)
+                queries_by_mode[search_input.search_mode].append(main_query)
 
-            #create search criteria dict
-            criteria_dict = {
-                "transcription": search_input.transcription if hasattr(search_input, 'transcription') else None,
-                "transliteration": search_input.transliteration if hasattr(search_input, 'transliteration') else None,
-                "lemma": search_input.lemma if hasattr(search_input, 'lemma') else None,
-                "pos": search_input.pos if hasattr(search_input, 'pos') else None,
-                "feature": search_input.feature if hasattr(search_input, 'feature') else None,
-                "feature_value": search_input.feature_value if hasattr(search_input, 'feature_value') else None,
-                "dependency_rel": search_input.dependency_rel if hasattr(search_input, 'dependency_rel') else None,
-                "dependency_head_rel": search_input.dependency_head_rel if hasattr(search_input, 'dependency_head_rel') else None,
-                "meaning": search_input.meaning if hasattr(search_input, 'meaning') else None,
-            }
-            search_criteria_list.append(criteria_dict)
-
-
-            # Construct the nested bool query using the token queries lists
-            nested_bool_query = Q('bool', must=must_token_queries, should=should_token_queries, must_not=should_not_token_queries)
-            
-            # Combine all token queries into one nested query with inner_hits
-            nested_query = Q('nested', path='tokens', query=nested_bool_query, inner_hits={
-                "highlight": {
-                    "fields": {
-                        "tokens.transcription": {},
-                        "tokens.transliteration": {},
-                        "tokens.lemmas.word": {},
-                        "tokens.pos_token.pos" : {},
-                        "tokens.feature_token.feature" : {},
-                        "tokens.feature_token.feature_value" : {},
-                        "tokens.dependency_token.rel" : {},
-                        "tokens.dependency_head.rel" : {},
-                        "tokens.meanings.meaning" : {},
-                    }
+                #create search criteria dict
+                transcription_field = "transcription.no_stop" if stopwords and hasattr(search_input, 'transcription.no_stop') else "transcription"
+                criteria_dict = {
+                    transcription_field: getattr(search_input, transcription_field, None),                
+                    "transliteration": search_input.transliteration if hasattr(search_input, 'transliteration') else None,
+                    "lemma": search_input.lemma if hasattr(search_input, 'lemma') else None,
+                    "pos": search_input.pos if hasattr(search_input, 'pos') else None,
+                    "feature": search_input.feature if hasattr(search_input, 'feature') else None,
+                    "feature_value": search_input.feature_value if hasattr(search_input, 'feature_value') else None,
+                    "dependency_rel": search_input.dependency_rel if hasattr(search_input, 'dependency_rel') else None,
+                    "dependency_head_rel": search_input.dependency_head_rel if hasattr(search_input, 'dependency_head_rel') else None,
+                    "meaning": search_input.meaning if hasattr(search_input, 'meaning') else None,
                 }
-            })
+                search_criteria_list.append(criteria_dict)
 
-            must_conditions.append(nested_query)
-            
-            # Add the section_type condition
-            must_conditions.append(Q('term', type=section_type))
-
+            for mode, queries in queries_by_mode.items():
+                if queries:
+                    # Iterate over the queries to assign unique inner_hits names
+                    for idx, main_query in enumerate(queries):
+                        nested_query = Q(
+                            'nested',
+                            path='tokens',
+                            query=main_query,
+                            inner_hits={
+                                "name": f"{mode}_hits_{idx}",  # Unique name for inner_hits
+                                "highlight": {"fields": highlight_fields}
+                            }
+                        )
+                        if mode == "must":
+                            must_conditions.append(nested_query)
+                        elif mode == "should":
+                            should_conditions.append(nested_query)
+                        elif mode == "must_not":
+                            must_not_conditions.append(nested_query)
             # Decode text_ids using relay's method
             decoded_text_ids = [relay.from_base64(encoded_id)[1] for encoded_id in text_ids] if text_ids else []
 
@@ -264,7 +269,6 @@ class Query:
 
             # Create the final query
             query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions)
-
             # Logging the constructed query for review
             logger.info(f"Constructed Elasticsearch query: {query}")
 
@@ -289,45 +293,58 @@ class Query:
             logger.info(f"Elasticsearch response: {response.to_dict()}")
 
             sections = []
+           
             for hit in response:
                 try:
                     hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
 
-                    if hasattr(hit, 'meta') and hasattr(hit.meta, 'inner_hits') and hasattr(hit.meta.inner_hits, 'tokens'):
-                        logger.info("Has tokens")
-                        
-                        if hasattr(hit.meta.inner_hits.tokens, 'hits') and hit.meta.inner_hits.tokens.hits:
-                            logger.info("Has hits within tokens")
-                            
-                            for inner_hit in hit.meta.inner_hits.tokens.hits.hits:
-                                inner_hit_dict = inner_hit.to_dict() if hasattr(inner_hit, 'to_dict') else inner_hit
-                                
-                                token = inner_hit_dict["_source"]
-                                token_id = token['id']
-                                is_highlighted = any(token_matches_criteria(token, criteria) for criteria in search_criteria_list)
-                                if is_highlighted:
-                                        logger.info(f"Token highlighted: {token['transcription']} (ID: {token_id})")
-                                        token['highlight'] = True
-                                        
-                                        # Check if the token already exists in hit_dict['tokens']
-                                        existing_token = next((t for t in hit_dict['tokens'] if t['id'] == token_id), None)
-                                        if existing_token:
-                                            existing_token.update(token)
-                                        else:
-                                            hit_dict['tokens'].append(token)
-                                
+                    # Get all inner hits names
+                    all_inner_hit_names = [f"{mode}_hits_{idx}" for mode in ['must', 'should', 'must_not'] for idx in range(len(queries_by_mode[mode]))]
+                    
+                    logger.info(f"Expected inner hit names: {all_inner_hit_names}")  # Logging the expected inner hit names
+                    
+                    # Create a set of token IDs from inner hits for efficient lookup
+                    highlighted_token_ids = set()
+
+                    # Check if 'inner_hits' exists in the hit's meta
+                    if hasattr(hit, 'meta') and hasattr(hit.meta, 'inner_hits'):
+                        inner_hits = hit.meta.inner_hits
+                        for inner_hit_name in all_inner_hit_names:
+                            if hasattr(inner_hits, inner_hit_name):
+                                # Collecting 'id's from '_source' of each inner hit
+                                inner_hit_group = getattr(inner_hits, inner_hit_name)
+                                if hasattr(inner_hit_group, 'hits') and inner_hit_group.hits:
+                                    inner_hit_ids = {inner_hit["_source"]["id"] for inner_hit in inner_hit_group.hits.hits}
+                                    logger.info(f"Inner hit {inner_hit_name} has token IDs: {inner_hit_ids}")
+                                    highlighted_token_ids.update(inner_hit_ids)
+                            else:
+                                logger.info(f"Missing inner_hits for name: {inner_hit_name}")
+
+                    logger.info(f"Collected highlighted token IDs: {highlighted_token_ids}")  # Logging the collected token IDs
+
+                    for token in hit_dict['tokens']:
+                        token_id = token['id']
+                        if token_id in highlighted_token_ids:
+                            logger.info(f"Token highlighted: {token['transcription']} (ID: {token_id})")
+                            token['highlight'] = True
+
+                            # Check if the token already exists in hit_dict['tokens']
+                            existing_token = next((t for t in hit_dict['tokens'] if t['id'] == token_id), None)
+                            if existing_token:
+                                existing_token.update(token)
+                            else:
+                                hit_dict['tokens'].append(token)
+                        else:
+                            logger.info(f"Token not highlighted: {token['transcription']} (ID: {token_id})")  # Log tokens not highlighted
+                    
                     section = SectionElastic.from_hit(hit_dict)
                     sections.append(section)
 
                 except Exception as e:
                     logger.error(f"Error processing hit: {str(e)}")
 
+            # Return the list of sections
             return sections
-
-
-
-
-
 
         except Exception as e:
             logger.error(f"Error during Elasticsearch query execution: {str(e)}")
