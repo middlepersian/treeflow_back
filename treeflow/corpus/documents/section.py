@@ -16,11 +16,13 @@ stopword_list = [
 custom_stopwords = token_filter('custom_stopwords', type='stop', stopwords=stopword_list)
 stopword_analyzer = analyzer('stopword_analyzer', tokenizer='standard', filter=['lowercase', custom_stopwords])
 
-
 @registry.register_document
 class SectionDocument(Document):
-    text = fields.ObjectField(properties={'id': fields.KeywordField(), 'title': fields.TextField()})
-    
+    text = fields.ObjectField(properties={
+        'id': fields.KeywordField(),
+        'title': fields.TextField()
+    })
+
     tokens = fields.NestedField(properties={
         'id': fields.KeywordField(),
         'number': fields.FloatField(),
@@ -48,14 +50,40 @@ class SectionDocument(Document):
         'previous': fields.ObjectField(properties={
             'id': fields.KeywordField(),
             'transcription': fields.TextField(
-            analyzer='standard',
-            fields={
-                'no_stop': fields.TextField(analyzer='stopword_analyzer')}),
+                analyzer='standard',
+                fields={
+                    'no_stop': fields.TextField(analyzer='stopword_analyzer')
+                }
+            ),
             'transliteration': fields.KeywordField(),
         }),
         'gloss': fields.TextField(),
         'multiword_token': fields.BooleanField(),
         'created_at': fields.DateField(),
+        
+        # POS, Feature, Dependency fields
+        'pos_token': fields.NestedField(properties={
+            'id': fields.KeywordField(),
+            'pos': fields.KeywordField(),
+            'type': fields.KeywordField()
+        }),
+        'feature_token': fields.NestedField(properties={
+            'id': fields.KeywordField(),
+            'feature': fields.KeywordField(),
+            'feature_value': fields.KeywordField()
+        }),
+        'dependency_token': fields.NestedField(properties={
+            'id': fields.KeywordField(),
+            'head_number': fields.FloatField(),
+            'rel': fields.KeywordField(),
+            'enhanced': fields.BooleanField(),
+            'producer': fields.IntegerField()
+        }),
+        'dependency_head': fields.NestedField(properties={
+            'id': fields.KeywordField(),
+            'head_number': fields.FloatField(),
+            'rel': fields.KeywordField(),
+        }),
     })
 
     previous = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.TextField()})
@@ -66,7 +94,7 @@ class SectionDocument(Document):
         'language': fields.KeywordField(),
     })
     source = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.TextField()})
-    
+
     class Index:
         name = 'sections'
         settings = {
