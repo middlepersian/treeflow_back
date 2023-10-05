@@ -21,11 +21,12 @@ class TokenDocument(Document):
     transcription = fields.TextField(
         analyzer='standard',
         fields={
-            'no_stop': fields.TextField(analyzer='stopword_analyzer')
+            'with_stop': fields.TextField(analyzer='stopword_analyzer')
         }
     )
     transliteration =  fields.KeywordField()
-    text = fields.ObjectField(properties={'id': fields.KeywordField(), 'title': fields.TextField()})
+    text = fields.ObjectField(properties={'id': fields.KeywordField(), 'title': fields.TextField(), 'identifier': fields.KeywordField()})
+    section = fields.ObjectField(properties={'id': fields.KeywordField(), 'type':fields.KeywordField(), 'identifier': fields.KeywordField()})
     image = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.KeywordField()})
     lemmas = fields.NestedField(properties={'id': fields.KeywordField(), 'word': fields.KeywordField(), 'language': fields.KeywordField(), 'multiword_expression': fields.KeywordField()})
     meanings = fields.NestedField(properties={'id': fields.KeywordField(), 'meaning': fields.KeywordField(), 'language': fields.KeywordField(),})
@@ -37,7 +38,7 @@ class TokenDocument(Document):
         'transcription': fields.TextField(
             analyzer='standard',
             fields={
-                'no_stop': fields.TextField(analyzer='stopword_analyzer')
+                'with_stop': fields.TextField(analyzer='stopword_analyzer')
             }
         ),
         'transliteration': fields.KeywordField(),
@@ -49,7 +50,7 @@ class TokenDocument(Document):
         'transcription': fields.TextField(
             analyzer='standard',
             fields={
-                'no_stop': fields.TextField(analyzer='stopword_analyzer')
+                'with_stop': fields.TextField(analyzer='stopword_analyzer')
             }
         ),
         'transliteration': fields.KeywordField(),

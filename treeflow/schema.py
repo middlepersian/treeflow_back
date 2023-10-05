@@ -27,8 +27,7 @@ from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
 from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial
-from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query, token_matches_criteria
-from treeflow.corpus.documents.token import TokenDocument
+from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query, build_position_query
 from treeflow.corpus.documents.section import SectionDocument
 from treeflow.corpus.types.user import User
 #dict
@@ -151,37 +150,6 @@ class Query:
 
     @strawberry.field
     @sync_to_async
-    def search_tokens(
-        pattern: str,
-        query_type: str,
-        language: Optional[str] = None,
-        pos: Optional[str] = None,
-        size: int = 100
-    ) -> List[TokenElastic]:
-
-        q = Q(query_type, transcription=pattern)
-
-        # Apply faceted search
-        if language:
-            q &= Q("term", language=language)
-        if pos:
-            q &= Q("nested", path="pos_token", query=Q("term", pos_token__pos=pos))
-
-        response = TokenDocument.search().query(q).extra(size=size)
-
-        logger.info(q.to_dict())
-        logger.info(response.to_dict())
-
-        tokens = []
-        for hit in response:
-            token = TokenElastic.from_hit(hit)
-            tokens.append(token)
-
-        return tokens
-
-
-    @strawberry.field
-    @sync_to_async
     def search_in_section(
         search_inputs: List[TokenSearchInput],
         section_type: str,
@@ -190,7 +158,6 @@ class Query:
         text_ids: Optional[List[str]] = None,
         stopwords: bool = False,
     ) -> List[SectionElastic]:
-
         # Initialize empty lists for query conditions
         must_conditions = []
         should_conditions = []
@@ -206,10 +173,9 @@ class Query:
             "tokens.dependency_head.rel": {},
             "tokens.meanings.meaning": {},
         }
-
         # Adjust the transcription field based on stopwords flag
         if stopwords:
-            highlight_fields["tokens.transcription.no_stop"] = {}
+            highlight_fields["tokens.transcription.with_stops"] = {}
         else:
             highlight_fields["tokens.transcription"] = {}
 
@@ -219,15 +185,19 @@ class Query:
             "should": [],
             "must_not": []
         }
-    
         try:
-
             for search_input in search_inputs:
-                main_query = build_main_query(search_input, stopwords=stopwords)
+                main_query = build_main_query(search_input, stopwords=search_input.stopwords)
+                
+                # Check if token_position is provided for the current search input
+                if search_input.token_position:
+                    position_query = build_position_query(search_input, search_input.token_position)
+                    main_query = main_query & position_query  # Combine the main query with the position query
+
                 queries_by_mode[search_input.search_mode].append(main_query)
 
                 #create search criteria dict
-                transcription_field = "transcription.no_stop" if stopwords and hasattr(search_input, 'transcription.no_stop') else "transcription"
+                transcription_field = "transcription.with_stops" if stopwords and hasattr(search_input, 'transcription.with_stops') else "transcription"
                 criteria_dict = {
                     transcription_field: getattr(search_input, transcription_field, None),                
                     "transliteration": search_input.transliteration if hasattr(search_input, 'transliteration') else None,
@@ -267,8 +237,13 @@ class Query:
             if decoded_text_ids:
                 must_conditions.append(Q('terms', text__id=decoded_text_ids))
 
+
+            # Define filter conditions based on the section_type parameter
+            filter_conditions = []
+            if section_type:
+                filter_conditions.append(Q('term', type=section_type))
             # Create the final query
-            query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions)
+            query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions, filter=filter_conditions)            
             # Logging the constructed query for review
             logger.info(f"Constructed Elasticsearch query: {query}")
 
@@ -290,7 +265,7 @@ class Query:
                 return []
 
             # Log the Elasticsearch response
-            logger.info(f"Elasticsearch response: {response.to_dict()}")
+            #logger.info(f"Elasticsearch response: {response.to_dict()}")
 
             sections = []
            
@@ -349,6 +324,130 @@ class Query:
         except Exception as e:
             logger.error(f"Error during Elasticsearch query execution: {str(e)}")
             return []
+
+    @strawberry.field
+    @sync_to_async
+    def find_relative_tokens(index_name:str, search_inputs: List[TokenSearchInput]) -> List[SectionElastic]:
+        """
+        index_name: Name of the Elasticsearch index.
+        search_inputs: A list of TokenSearchInput instances.
+        """
+        
+        # Base function to build search based on TokenSearchInput
+        def build_search(s, token_search_input):
+            # Handle the basic query field and value
+            if token_search_input.value:
+                if token_search_input.query_type == "match":
+                    nested_query = Q('nested', path='tokens', query=Q('match', **{f"tokens.{token_search_input.field}": token_search_input.value}))
+                    s = s.query(nested_query)
+                else:
+                    nested_query = Q('nested', path='tokens', query=Q('term', **{f"tokens.{token_search_input.field}": token_search_input.value}))
+                    s = s.filter(nested_query)
+            
+            # Handle POS token conditions
+            if token_search_input.pos_token:
+                for pos_condition in token_search_input.pos_token:
+                    nested_query = Q('nested', path='tokens', query=Q('term', tokens__pos_token__pos=pos_condition.value))
+                    s = s.filter(nested_query)
+
+            # Handle Feature token conditions
+            if token_search_input.feature_token:
+                for feature_condition in token_search_input.feature_token:
+                    nested_query = Q('nested', path='tokens', query=Q('term', tokens__feature_token__feature_value=feature_condition.value))
+                    s = s.filter(nested_query)
+
+            # Handle search_mode
+            if token_search_input.search_mode == 'must_not':
+                nested_query = Q('nested', path='tokens', query=Q('term', **{f"tokens.{token_search_input.field}": token_search_input.value}))
+                s = s.exclude(nested_query)
+            
+            # Handle stopwords
+            if token_search_input.stopwords:
+                nested_query = Q('nested', path='tokens', query=Q('term', tokens__transcription__with_stops=token_search_input.value))
+                s = s.filter(nested_query)
+            
+            return s
+
+
+        def find_relative_tokens_search(search_inputs):
+            """
+            Construct a search query based on the anchor token and subsequent relative tokens.
+            """
+            # Start with the anchor token
+            s = Search(index=index_name)
+            s = build_search(s, search_inputs[0])
+            logger.info(f"Executing anchor token search: {s.to_dict()}")
+            #execute the search
+            res = s.execute()
+            # print each hits number
+            #logger.info(f"response: {res.to_dict()}")
+            valid_positions = [hit.tokens[0].number for hit in res]
+            logger.info(f"Anchor token positions: {valid_positions}")
+            
+            # If there's no result for the anchor, return an empty search object
+            if not valid_positions:
+                logger.warning(f"No valid positions for anchor token: {search_inputs[0].value}")
+                return Search(index=index_name).exclude('match_all')
+
+            # Loop through each subsequent token and adjust the valid positions
+            for i, token_search_input in enumerate(search_inputs[1:], 1):
+                next_valid_positions = []
+                gap = token_search_input.token_position.gap if token_search_input.token_position else 0
+
+                for pos in valid_positions:
+                    expected_position = pos + i + gap
+                    logger.info(f"Expected position: {expected_position}")
+                    s = Search(index=index_name)
+                    s = build_search(s, token_search_input)
+                    #log 
+                    logger.info(f"Executing search for token: {token_search_input.value}, Expected position: {expected_position}")
+                    
+                    # Changing to a nested filter query
+                    nested_query = Q('nested', path='tokens', query=Q('term', tokens__number=expected_position))
+                    s = s.filter(nested_query)
+                    next_positions = [hit.tokens[0].number for hit in s.execute() if hit.tokens and isinstance(hit.tokens, list)]
+                    next_valid_positions.extend(next_positions)
+                
+                logger.info(f"Executing search for token: {token_search_input.value}, Expected positions: {next_valid_positions}")
+                valid_positions = next_valid_positions
+
+            # If no valid positions remain after filtering through all tokens, return empty search
+            if not valid_positions:
+                return Search(index=index_name).exclude('match_all')
+
+            # Construct the final query with all the valid positions
+            combined_positions_query = Q('bool', should=[Q('nested', path='tokens', query=Q('term', tokens__number=pos)) for pos in valid_positions])
+            s = Search(index=index_name).filter(combined_positions_query)
+
+            logger.info(f"Executing final combined search: {s.to_dict()}")
+            return s
+
+
+        if len(search_inputs) > 1:
+            # Use the first as the anchor and the rest as relative tokens
+            s = find_relative_tokens_search(search_inputs)
+        else:
+            # If only one search input is provided, use it as the anchor token
+            s = Search(index=index_name)
+            s = build_search(s, search_inputs[0])
+
+        logger.info(f"Executing Elasticsearch query: {s.to_dict()}")     
+
+        # Execute the search
+        response = s.execute()
+        # Log the number of results returned
+        logger.info(f"Returned {len(response)} results from Elasticsearch")
+        
+        sections = []
+        for hit in response:
+            try:
+                hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
+                section = SectionElastic.from_hit(hit_dict)
+                sections.append(section)
+            except Exception as e:
+                logger.error(f"Error processing hit: {str(e)}")
+
+        return sections
 
     # ### dict
     # # lemma

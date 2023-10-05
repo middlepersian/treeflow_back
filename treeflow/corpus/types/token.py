@@ -185,14 +185,24 @@ class FeatureSelectionInput:
     feature: Optional[str]
     feature_value: Optional[str]
 
+
+@strawberry.input
+class TokenPositionInput:
+    gap: Optional[int] = 0  # The gap of other tokens between them; default to 0
+
+
+
 @strawberry.input
 class TokenSearchInput:
     query_type: Optional[str]
     value: Optional[str]
-    field: Optional[str] = 'transcription'  # default to 'transcription'
+    field: Optional[str] = 'transcription' # default to 'transcription'
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
-    search_mode: Optional[str] = 'must'  # default to 'must'
+    search_mode: Optional[str] = 'must' # default to 'must'#
+    stopwords: Optional[bool] = False
+    token_position: Optional[TokenPositionInput] = None
+
 
 @strawberry.type
 class TokenElastic(relay.Node):
@@ -329,19 +339,22 @@ def build_main_query(search_input: TokenSearchInput, stopwords: bool = False) ->
     # Modify the field if transcription and stopwords is True
     field_name = search_input.field
     if field_name == "transcription" and stopwords:
-        field_name = "transcription.no_stop"
+        field_name = "transcription.with_stops"
     
     # List of nested fields within 'tokens'
     nested_fields = ['lemmas', 'meanings', 'pos_token', 'feature_token', 'dependency_token', 'dependency_head']
+    
     # Check for nested fields and handle them
     for nested_field in nested_fields:
         if nested_field in field_name:
             return Q('nested', 
-                    path=f'tokens.{nested_field}', 
-                    query=Q(query_type, **{f'tokens.{nested_field}.{field_name.split(".")[-1]}': search_input.value})
+                     path=f'tokens.{nested_field}', 
+                     query=Q('bool', filter=[Q(query_type, **{f'tokens.{nested_field}.{field_name.split(".")[-1]}': search_input.value})])
                 )
-    # Build and return the query for other fields
-    return Q(query_type, **{f'tokens.{field_name}': search_input.value})
+    
+    # Build and return the query for other fields using filter context
+    return Q('bool', filter=[Q(query_type, **{f'tokens.{field_name}': search_input.value})])
+
 
 # Helper function to check if token matches criteria
 def token_matches_criteria(token, criteria):
@@ -356,3 +369,41 @@ def token_matches_criteria(token, criteria):
         (not criteria["dependency_head_rel"] or token.get("dependency_head.rel") == criteria["dependency_head_rel"]) and
         (not criteria["meaning"] or token.get("meanings.meaning") == criteria["meaning"])
     )
+
+def build_position_query(search_input: TokenSearchInput, position_input: TokenPositionInput) -> Q:
+    """
+    Build a position-based query based on the search and position inputs.
+
+    :param search_input: The search input containing the field to search.
+    :param position_input: The position input specifying the relative position.
+    :return: A nested query targeting the specified position.
+    """
+
+    if not position_input or not hasattr(position_input, 'relative_to_token') or not hasattr(position_input, 'position'):
+        raise ValueError("Invalid position_input provided!")
+
+    # Begin by searching for the relative token
+    relative_query = Q('term', **{f'tokens.{search_input.field}': position_input.relative_to_token})
+
+    if position_input.position == "before":
+        range_end = -1  # The token should be immediately before the relative token
+        range_start = -(position_input.gap + 1)  # The token can be up to 'gap' tokens before the relative token
+    elif position_input.position == "after":
+        range_start = 1  # The token should be immediately after the relative token
+        range_end = position_input.gap + 1  # The token can be up to 'gap' tokens after the relative token
+    else:  # For "exact", we need the tokens to be adjacent
+        range_start = 1
+        range_end = 1
+
+
+    # Construct the range query based on token's number
+    range_query = Q('range', tokens__number={"gte": range_start, "lte": range_end})
+
+    # Nest the queries to ensure they target the same section
+    nested_query = Q(
+        'nested',
+        path='tokens',
+        query=relative_query & range_query
+    )
+
+    return nested_query

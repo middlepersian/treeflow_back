@@ -4,18 +4,6 @@ from django_elasticsearch_dsl.registries import registry
 from treeflow.corpus.models import Section
 
 
-stopword_list = [
-    "ā", "abāg", "abar", "abārīg", "abāz", "abē", "ag", "agar", "amāh", "ān", "and", 
-    "andar", "ānōh", "ašmā", "ašmāh", "awēšān", "awiš", "ayāb", "az", "aziš", "be", 
-    "bē", "čand", "čē", "čiyōn", "did", "ēč", "ēd", "ēdōn", "ēg", "ēk", "ēn", "ēw", 
-    "hād", "ham", "hamē", "harw", "ī", "im", "imān", "iš", "išān", "it", "itān", "iz", 
-    "jud", "ka", "kas", "kē", "kū", "m", "man", "mān", "nē", "om", "ō", "ōh", "ōy", 
-    "ōwōn", "pad", "padiš", "pas", "pēš", "rāy", "š", "šān", "t", "tā", "tān", "tis", 
-    "tō", "u", "ud", "w", "was", "xwad", "xwēš", "y", "z", "_"
-]
-custom_stopwords = token_filter('custom_stopwords', type='stop', stopwords=stopword_list)
-stopword_analyzer = analyzer('stopword_analyzer', tokenizer='standard', filter=['lowercase', custom_stopwords])
-
 @registry.register_document
 class SectionDocument(Document):
     text = fields.ObjectField(properties={
@@ -25,65 +13,6 @@ class SectionDocument(Document):
 
     tokens = fields.NestedField(properties={
         'id': fields.KeywordField(),
-        'number': fields.FloatField(),
-        'number_in_sentence': fields.FloatField(),
-        'root': fields.BooleanField(),
-        'word_token': fields.BooleanField(),
-        'visible': fields.BooleanField(),
-        'transcription': fields.TextField(
-            analyzer='standard',
-            fields={
-                'no_stop': fields.TextField(analyzer='stopword_analyzer')
-            }
-        ),
-        'transliteration': fields.KeywordField(),
-        'lemmas': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'word': fields.KeywordField(),
-        }),
-        'meanings': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'meaning': fields.KeywordField(),
-        }),
-        'language': fields.KeywordField(),
-        'avestan': fields.TextField(),
-        'previous': fields.ObjectField(properties={
-            'id': fields.KeywordField(),
-            'transcription': fields.TextField(
-                analyzer='standard',
-                fields={
-                    'no_stop': fields.TextField(analyzer='stopword_analyzer')
-                }
-            ),
-            'transliteration': fields.KeywordField(),
-        }),
-        'gloss': fields.TextField(),
-        'multiword_token': fields.BooleanField(),
-        'created_at': fields.DateField(),
-        
-        # POS, Feature, Dependency fields
-        'pos_token': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'pos': fields.KeywordField(),
-            'type': fields.KeywordField()
-        }),
-        'feature_token': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'feature': fields.KeywordField(),
-            'feature_value': fields.KeywordField()
-        }),
-        'dependency_token': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'head_number': fields.FloatField(),
-            'rel': fields.KeywordField(),
-            'enhanced': fields.BooleanField(),
-            'producer': fields.IntegerField()
-        }),
-        'dependency_head': fields.NestedField(properties={
-            'id': fields.KeywordField(),
-            'head_number': fields.FloatField(),
-            'rel': fields.KeywordField(),
-        }),
     })
 
     previous = fields.ObjectField(properties={'id': fields.KeywordField(), 'identifier': fields.TextField()})
@@ -100,21 +29,6 @@ class SectionDocument(Document):
         settings = {
             'number_of_shards': 1,
             'number_of_replicas': 0,
-            'analysis': {
-                'filter': {
-                    'custom_stopwords': {
-                        'type': 'stop',
-                        'stopwords': stopword_list
-                    },
-                },
-                'analyzer': {
-                    'stopword_analyzer': {
-                        'type': 'custom',
-                        'tokenizer': 'standard',
-                        'filter': ['lowercase', 'custom_stopwords']
-                    },
-                }
-            }
         }
 
     class Django:
