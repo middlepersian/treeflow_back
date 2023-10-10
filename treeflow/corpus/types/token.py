@@ -148,7 +148,48 @@ class FeatureSelection:
                 feature_value=feature_token['feature_value']
             ) for feature_token in feature_tokens]
         return None
-        
+    
+@strawberry.type
+class TextSelection:
+    # add id, title, and identifier
+    id: str
+    title: str
+    identifier: str
+
+    @classmethod
+    def from_hit(cls, hit, field="text"):
+        if field in hit and 'id' in hit[field]:
+            return cls(
+                id=hit[field].get('id'),
+                title=hit[field].get('title'),
+                identifier=hit[field].get('identifier')
+            )
+        return None
+
+@strawberry.type
+class SectionSelection:
+    id: str
+    type: str
+    identifier: str
+    
+    @classmethod
+    def from_hit(cls, hit, field="section_tokens"):
+        results = []
+        # Check if the field exists in the hit and that it's a list
+        if field in hit and isinstance(hit[field], list):
+            # Iterate over each section_token in the list
+            for section_token in hit[field]:
+                # Extract the necessary fields and append to results
+                if 'id' in section_token:
+                    results.append(
+                        cls(
+                            id=section_token.get('id'),
+                            type=section_token.get('type'),
+                            identifier=section_token.get('identifier')
+                        )
+                    )
+        return results
+
 
 
 @strawberry.type
@@ -224,6 +265,8 @@ class TokenElastic(relay.Node):
     lemmas: Optional[List[LemmaSelection]] = None
     meanings: Optional[List[MeaningSelection]] = None
     highlight: Optional[bool] = False
+    section_tokens: Optional[List[SectionSelection]] = None
+    text: Optional[TextSelection] = None
 
 
     @classmethod
@@ -255,7 +298,9 @@ class TokenElastic(relay.Node):
             previous=TokenSelection.from_hit(hit_dict, field='previous') if 'previous' in hit_dict and hit_dict['previous'] is not None else None,
             lemmas=LemmaSelection.from_hit(hit_dict, field='lemmas') if 'lemmas' in hit_dict else None,
             meanings=MeaningSelection.from_hit(hit_dict, field='meanings') if 'meanings' in hit_dict else None,
-            highlight=hit_dict.get('highlight', False)  # Set highlight based on hit data
+            highlight=hit_dict.get('highlight', False),
+            text=TextSelection.from_hit(hit_dict, field='text') if 'text' in hit_dict else None,
+            section_tokens=SectionSelection.from_hit(hit_dict, field='section_tokens') if 'section_tokens' in hit_dict else None,
         )
 
 
@@ -317,11 +362,10 @@ def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
         tokens.append(token)
 
     return tokens
-    
-from elasticsearch_dsl.query import Q
+
 
 def build_main_query(search_input: TokenSearchInput, stopwords: bool = False) -> Q:
-    """Build and return the main query based on the given search input."""
+    """Build and return the main query based on the given search input for the tokens index."""
     
     # Define a mapping from query_type to the corresponding Elasticsearch query function
     query_type_map = {
@@ -339,7 +383,7 @@ def build_main_query(search_input: TokenSearchInput, stopwords: bool = False) ->
     # Modify the field if transcription and stopwords is True
     field_name = search_input.field
     if field_name == "transcription" and stopwords:
-        field_name = "transcription.with_stops"
+        field_name = "transcription.with_stop"
     
     # List of nested fields within 'tokens'
     nested_fields = ['lemmas', 'meanings', 'pos_token', 'feature_token', 'dependency_token', 'dependency_head']
@@ -348,62 +392,9 @@ def build_main_query(search_input: TokenSearchInput, stopwords: bool = False) ->
     for nested_field in nested_fields:
         if nested_field in field_name:
             return Q('nested', 
-                     path=f'tokens.{nested_field}', 
-                     query=Q('bool', filter=[Q(query_type, **{f'tokens.{nested_field}.{field_name.split(".")[-1]}': search_input.value})])
+                     path=nested_field,  # The path is now directly the nested_field
+                     query=Q('bool', filter=[Q(query_type, **{f'{nested_field}.{field_name.split(".")[-1]}': search_input.value})])
                 )
     
     # Build and return the query for other fields using filter context
-    return Q('bool', filter=[Q(query_type, **{f'tokens.{field_name}': search_input.value})])
-
-
-# Helper function to check if token matches criteria
-def token_matches_criteria(token, criteria):
-    return (
-        (not criteria["transcription"] or token.get("transcription") == criteria["transcription"]) and
-        (not criteria["transliteration"] or token.get("transliteration") == criteria["transliteration"]) and
-        (not criteria["lemma"] or token.get("lemmas.word") == criteria["lemma"]) and
-        (not criteria["pos"] or token.get("pos_token.pos") == criteria["pos"]) and
-        (not criteria["feature"] or token.get("feature_token.feature") == criteria["feature"]) and
-        (not criteria["feature_value"] or token.get("feature_token.feature_value") == criteria["feature_value"]) and
-        (not criteria["dependency_rel"] or token.get("dependency_token.rel") == criteria["dependency_rel"]) and
-        (not criteria["dependency_head_rel"] or token.get("dependency_head.rel") == criteria["dependency_head_rel"]) and
-        (not criteria["meaning"] or token.get("meanings.meaning") == criteria["meaning"])
-    )
-
-def build_position_query(search_input: TokenSearchInput, position_input: TokenPositionInput) -> Q:
-    """
-    Build a position-based query based on the search and position inputs.
-
-    :param search_input: The search input containing the field to search.
-    :param position_input: The position input specifying the relative position.
-    :return: A nested query targeting the specified position.
-    """
-
-    if not position_input or not hasattr(position_input, 'relative_to_token') or not hasattr(position_input, 'position'):
-        raise ValueError("Invalid position_input provided!")
-
-    # Begin by searching for the relative token
-    relative_query = Q('term', **{f'tokens.{search_input.field}': position_input.relative_to_token})
-
-    if position_input.position == "before":
-        range_end = -1  # The token should be immediately before the relative token
-        range_start = -(position_input.gap + 1)  # The token can be up to 'gap' tokens before the relative token
-    elif position_input.position == "after":
-        range_start = 1  # The token should be immediately after the relative token
-        range_end = position_input.gap + 1  # The token can be up to 'gap' tokens after the relative token
-    else:  # For "exact", we need the tokens to be adjacent
-        range_start = 1
-        range_end = 1
-
-
-    # Construct the range query based on token's number
-    range_query = Q('range', tokens__number={"gte": range_start, "lte": range_end})
-
-    # Nest the queries to ensure they target the same section
-    nested_query = Q(
-        'nested',
-        path='tokens',
-        query=relative_query & range_query
-    )
-
-    return nested_query
+    return Q('bool', filter=[Q(query_type, **{field_name: search_input.value})])
