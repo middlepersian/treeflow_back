@@ -26,7 +26,7 @@ from treeflow.corpus.models.section import Section as SectionModel
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
-from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial
+from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial, TextAggregate, TextSectionAggregate
 from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query
 from treeflow.corpus.documents.section import SectionDocument
 from treeflow.corpus.types.user import User
@@ -390,96 +390,42 @@ class Query:
 
     @strawberry.field
     @sync_to_async
-    def advanced_search(
-        search_inputs: List[TokenSearchInput],
-        section_type: str,
-        language: Optional[str] = None,
-        size: int = 100,
-        text_ids: Optional[List[str]] = None,
-        stopwords: bool = False,
-    ) -> List[TokenElastic]:
-        must_conditions = []
-        should_conditions = []
-        must_not_conditions = []
-        filter_conditions = []
-
-        logger.info(f"Received search_inputs: {search_inputs}")
-
-        # Decode text_ids using relay's method
-        decoded_text_ids = [relay.from_base64(encoded_id)[1] for encoded_id in text_ids] if text_ids else []
-
-        # If decoded_text_ids are provided, add them to the filter_conditions
-        if decoded_text_ids:
-            filter_conditions.append(Q('terms', text__id=decoded_text_ids))
-        
-        # Add filters for section type using a nested query
-        if section_type:
-            nested_section_type_query = Q('nested', path="section_tokens",
-                                        query=Q('bool', filter=Q('term', section_tokens__type=section_type)))
-            filter_conditions.append(nested_section_type_query)
-            
-        if language:
-            filter_conditions.append(Q('term', language=language))
-
-        # Build the main queries for each search input
-        for search_input in search_inputs:
-            main_query = build_main_query(search_input, stopwords=stopwords)
-            
-            if search_input.search_mode == "must":
-                must_conditions.append(main_query)
-            elif search_input.search_mode == "should":
-                should_conditions.append(main_query)
-            elif search_input.search_mode == "must_not":
-                must_not_conditions.append(main_query)
-
-        # Construct the final query
-        query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions, filter=filter_conditions)
-
-        # Log the final constructed query
-        logger.info(f"Final constructed query: {query.to_dict()}")
-
-        # Create a search object and execute
-        s = Search(index="tokens").query(query).extra(size=size)
-        response = s.execute()
-
-        tokens = []
-        for hit in response:
-            token = TokenElastic.from_hit(hit.to_dict())
-            tokens.append(token)
-
-        logger.info(f"Returning {len(tokens)} tokens")
-        return tokens
-
-        from elasticsearch_dsl import Search, A, Q
-
     def aggregate_by_text_and_section(
-        tokens: List[str],
+        search_inputs: List[TokenSearchInput],
         section_type: Optional[str] = None,
         index_name: str = "tokens"
-    ) -> Dict[str, List[str]]:
+    ) -> List[TextAggregate]:
         """
         Aggregate tokens by text and section.
 
         Parameters:
-        - tokens: List of tokens to search for.
+        - search_inputs: List of search inputs to look for.
         - section_type: Optional section type to filter by.
         - index_name: Elasticsearch index name (default is "tokens").
 
         Returns:
-        A dictionary with text identifiers as keys and lists of section identifiers as values.
+        A list of TextAggregate objects with text identifiers and lists of section identifiers.
         """
 
         # Initialize Elasticsearch search object
         s = Search(index=index_name)
 
-        # Base query to match provided tokens
-        token_queries = [Q("term", transcription=token) for token in tokens]
+        # Create a list to hold all token query conditions
+        token_queries = []
+
+        for search_input in search_inputs:
+            # Determine the query type and construct the appropriate query
+            if search_input.query_type == "term":
+                token_queries.append(Q(search_input.query_type, **{search_input.field: search_input.value}))
+            # Add more conditions for other query types as needed...
+
+        # Combine all token query conditions into a base 'must' query
         base_query = Q('bool', must=token_queries)
 
-        # Apply the base query
+        # Apply the base query to the search
         s = s.query(base_query)
 
-        # If section type is provided, add it to the aggregations
+        # If section type is provided, filter by it during aggregation
         if section_type:
             section_filter = A(
                 'filter',
@@ -492,17 +438,26 @@ class Query:
             .bucket('sections_with_tokens', 'nested', path='section_tokens')\
             .bucket('section_names', 'terms', field='section_tokens.identifier')
 
+        #log the query to be executed
+        logger.info(f"Constructed Elasticsearch query: {s.to_dict()}")    
+
         # Execute the search
         response = s.execute()
 
+        # print the reponse counter
+        logger.info(f"Total hits returned: {response.hits.total['value']}")
+
         # Parse the aggregation results
-        results = {}
+        aggregated_texts = []
         for text_bucket in response.aggregations.texts_with_tokens.buckets:
             text_id = text_bucket.key
-            section_ids = [section_bucket.key for section_bucket in text_bucket.sections_with_tokens.section_names.buckets]
-            results[text_id] = section_ids
+            sections = [
+                TextSectionAggregate(section_id=section_bucket.key, count=section_bucket.doc_count)
+                for section_bucket in text_bucket.sections_with_tokens.section_names.buckets
+            ]
+            aggregated_texts.append(TextAggregate(text_id=text_id, sections=sections))
 
-        return results
+        return aggregated_texts
 
 
     # ### dict

@@ -60,3 +60,13 @@ class TextPartial:
     collaborators: strawberry.auto
     stage: Optional[TextStage]
     sources: strawberry.auto
+
+@strawberry.type
+class TextSectionAggregate:
+    section_id: str
+    count: int
+
+@strawberry.type
+class TextAggregate:
+    text_id: str
+    sections: List[TextSectionAggregate]
