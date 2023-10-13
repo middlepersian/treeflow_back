@@ -67,20 +67,33 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue',
         }
     },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         }
     },
     'loggers': {
         'django.db.backends': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-        },
-        'treeflow.datafeed': {  # replace with the actual module where your command is defined
             'level': 'INFO',
+            'handlers': ['console'],
+            'formatter': 'simple',
+        },
+        'treeflow': {  # This will cover all modules under treeflow, including treeflow.datafeed
+            'level': 'DEBUG',
             'handlers': ['console'],
             'propagate': False,
         },
