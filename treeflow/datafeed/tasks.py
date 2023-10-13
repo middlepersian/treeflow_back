@@ -65,46 +65,50 @@ def get_sections_list_query(text_id):
     """
     return query
 
+
 def get_all_sections_lists():
+    logger.info("Fetching all section lists...")
     # Fetch all text IDs from the database
     text_ids = TextModel.objects.values_list('id', flat=True)
 
     # Iterate over each text ID and execute the GraphQL query
     for text_id in text_ids:
-        #convert id into relay global id
-        text_id = relay.to_base64(TextType, text_id)
-        query = get_sections_list_query(text_id)
-        #execute the query
+        # Convert id into relay global id
+        text_id_global = relay.to_base64(TextType, text_id)
+        query = get_sections_list_query(text_id_global)
+        
+        logger.debug(f"Executing sections list query for text ID {text_id_global}...")
+        # Execute the query
         try:
             result = asyncio.run(execute_query(query))
+            logger.debug(f"Successfully executed sections list query for text ID {text_id_global}.")
         except Exception as e:
-            logger.error(f"An error occurred while executing the query: {e}")
-            raise Exception("get_all_sections_lists failed") from e
+            logger.error(f"Error executing sections list query for text ID {text_id_global}: {e}")
+            raise Exception("get_all_sections_lists failed for text ID {text_id_global}") from e
+    logger.info("Fetched all section lists.")
 
 @shared_task
 def clear_and_warm_up_cache():
     logger.info("Starting to clear and warm up the cache.")
     
     # Clear the cache
+    logger.info("Clearing cache...")
     cache.clear()
     logger.info("Cache cleared.")
 
-    # get all texts
+    # Get all texts
     query = get_texts_query()
+    logger.debug("Executing texts query...")
     # Execute the query
     try:
         result = asyncio.run(execute_query(query))
+        logger.debug("Successfully executed texts query.")
     except Exception as e:
-        logger.error(f"An error occurred while executing the query: {e}")
-        raise Exception("clear_and_warm_up_cache failed") from e
+        logger.error(f"Error executing texts query: {e}")
+        raise Exception("clear_and_warm_up_cache failed during texts query execution") from e
 
-    # get all sections lists
-    query = get_all_sections_lists()    
-    # Execute the query
-    try:
-        result = asyncio.run(execute_query(query))
-    except Exception as e:
-        logger.error(f"An error occurred while executing the query: {e}")
-        raise Exception("clear_and_warm_up_cache failed") from e
-
-    logger.info("Cache cleared and warmed up.")    
+    # Get all sections lists
+    logger.info("Fetching all sections lists...")
+    get_all_sections_lists()
+    
+    logger.info("Cache cleared and warmed up.")
