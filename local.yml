@@ -4,6 +4,7 @@ volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
   local_elastic_data: {}
+  local_redis_data: {}
 
 services:
   django:
@@ -41,7 +42,6 @@ services:
     env_file:
       - ./.envs/.local/.postgres
 
-
   elastic:
     image: elasticsearch:7.17.9
     environment:
@@ -62,18 +62,47 @@ services:
       retries: 500
       test: curl -s 127.0.0.1:9200 &>/dev/null  
 
-  docs:
-    image: treeflow_local_docs
-    container_name: docs
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - local_redis_data:/data
+    ports:
+      - "6379:6379"
+  
+  celery_worker:
     build:
       context: .
-      dockerfile: ./compose/local/docs/Dockerfile
+      dockerfile: ./compose/local/django/Dockerfile
+    image: treeflow_local_django
+    container_name: celery_worker
+    depends_on:
+      - django
+      - redis
+    volumes:
+      - .:/app:z
     env_file:
       - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: celery -A treeflow worker --loglevel=info
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local  # or treeflow.settings.production
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: treeflow_local_django
+    container_name: celery_beat
+    depends_on:
+      - django
+      - redis
     volumes:
-      - ./docs:/docs:z
-      - ./config:/app/config:z
-      - ./treeflow:/app/treeflow:z
-    ports:
-      - "7000:7000"
-    command: /start-docs
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: celery -A treeflow beat --loglevel=info
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.local  # or treeflow.settings.production
+      - CELERY_BEAT=true
