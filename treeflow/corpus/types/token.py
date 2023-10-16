@@ -231,20 +231,21 @@ class FeatureSelectionInput:
 class TokenPositionInput:
     gap: Optional[int] = 0  # The gap of other tokens between them; default to 0
 
-
+@strawberry.input
+class DistanceFromPreviousToken:
+    distance_from_previous: Optional[int] = None
+    exact: Optional[bool] = False
 
 @strawberry.input
 class TokenSearchInput:
-    query_type: Optional[str]
+    query_type: Optional[str] = 'term' # default to 'term'
     value: Optional[str]
     field: Optional[str] = 'transcription' # default to 'transcription'
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
     search_mode: Optional[str] = 'must' # default to 'must'#
     stopwords: Optional[bool] = False
-    token_position: Optional[TokenPositionInput] = None
-
-
+    distance_from_previous: Optional[DistanceFromPreviousToken] = None
 @strawberry.type
 class TokenElastic(relay.Node):
     id: relay.NodeID[str]

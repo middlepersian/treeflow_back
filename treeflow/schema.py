@@ -1,8 +1,12 @@
 from asgiref.sync import sync_to_async
 import strawberry
 import strawberry_django
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Subquery, OuterRef, IntegerField, Case, When, Value
+
 from strawberry import relay
 from strawberry.tools import merge_types
+from django.db.models import Q, F
 from strawberry_django import mutations
 from strawberry_django.mutations import resolvers
 from strawberry_django.relay import ListConnectionWithTotalCount
@@ -21,13 +25,15 @@ from treeflow.corpus.types.dependency import Dependency, DependencyInput, Depend
 from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features, upos_feature_feature_value
 from treeflow.corpus.types.pos import POS, POSInput, POSPartial
 from treeflow.corpus.enums.pos import UPOSValues
-from treeflow.corpus.types.section import Section, SectionFilter, SectionInput, SectionPartial, SectionElastic
+from treeflow.corpus.types.section import Section, SectionInput, SectionPartial, SectionElastic
 from treeflow.corpus.models.section import Section as SectionModel
+from treeflow.corpus.models.section import SectionToken
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
 from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial, TextAggregate, TextSectionAggregate
 from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query
+from treeflow.corpus.models.token import Token as TokenModel
 from treeflow.corpus.documents.section import SectionDocument
 from treeflow.corpus.types.user import User
 #dict
@@ -38,9 +44,6 @@ from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
 #image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
-
-#from treeflow.corpus.enums.comment_categories import CommentCategories
-from elasticsearch_dsl import Search, Q, A, connections
 
 ###logging
 # create logger
@@ -147,317 +150,70 @@ class Query:
     token: Optional[Token] = strawberry_django.node()
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
     tokens_list : List[Token] = strawberry_django.field()
+    
 
     @strawberry.field
     @sync_to_async
-    def search_in_section(
-        search_inputs: List[TokenSearchInput],
-        section_type: str,
-        language: Optional[str] = None,
-        size: int = 100,
-        text_ids: Optional[List[str]] = None,
-        stopwords: bool = False,
-    ) -> List[SectionElastic]:
-        # Initialize empty lists for query conditions
-        must_conditions = []
-        should_conditions = []
-        must_not_conditions = []
-        search_criteria_list = []
-        highlight_fields = {
-            "tokens.transliteration": {},
-            "tokens.lemmas.word": {},
-            "tokens.pos_token.pos": {},
-            "tokens.feature_token.feature": {},
-            "tokens.feature_token.feature_value": {},
-            "tokens.dependency_token.rel": {},
-            "tokens.dependency_head.rel": {},
-            "tokens.meanings.meaning": {},
-        }
-        # Adjust the transcription field based on stopwords flag
-        if stopwords:
-            highlight_fields["tokens.transcription.with_stops"] = {}
-        else:
-            highlight_fields["tokens.transcription"] = {}
-
-        # Create a dictionary to hold lists of main queries grouped by search_mode
-        queries_by_mode = {
-            "must": [],
-            "should": [],
-            "must_not": []
-        }
-        try:
-            for search_input in search_inputs:
-                main_query = build_main_query(search_input, stopwords=search_input.stopwords)
-                
-                # Check if token_position is provided for the current search input
-                if search_input.token_position:
-                    position_query = build_position_query(search_input, search_input.token_position)
-                    main_query = main_query & position_query  # Combine the main query with the position query
-
-                queries_by_mode[search_input.search_mode].append(main_query)
-
-                #create search criteria dict
-                transcription_field = "transcription.with_stops" if stopwords and hasattr(search_input, 'transcription.with_stops') else "transcription"
-                criteria_dict = {
-                    transcription_field: getattr(search_input, transcription_field, None),                
-                    "transliteration": search_input.transliteration if hasattr(search_input, 'transliteration') else None,
-                    "lemma": search_input.lemma if hasattr(search_input, 'lemma') else None,
-                    "pos": search_input.pos if hasattr(search_input, 'pos') else None,
-                    "feature": search_input.feature if hasattr(search_input, 'feature') else None,
-                    "feature_value": search_input.feature_value if hasattr(search_input, 'feature_value') else None,
-                    "dependency_rel": search_input.dependency_rel if hasattr(search_input, 'dependency_rel') else None,
-                    "dependency_head_rel": search_input.dependency_head_rel if hasattr(search_input, 'dependency_head_rel') else None,
-                    "meaning": search_input.meaning if hasattr(search_input, 'meaning') else None,
-                }
-                search_criteria_list.append(criteria_dict)
-
-            for mode, queries in queries_by_mode.items():
-                if queries:
-                    # Iterate over the queries to assign unique inner_hits names
-                    for idx, main_query in enumerate(queries):
-                        nested_query = Q(
-                            'nested',
-                            path='tokens',
-                            query=main_query,
-                            inner_hits={
-                                "name": f"{mode}_hits_{idx}",  # Unique name for inner_hits
-                                "highlight": {"fields": highlight_fields}
-                            }
-                        )
-                        if mode == "must":
-                            must_conditions.append(nested_query)
-                        elif mode == "should":
-                            should_conditions.append(nested_query)
-                        elif mode == "must_not":
-                            must_not_conditions.append(nested_query)
-            # Decode text_ids using relay's method
-            decoded_text_ids = [relay.from_base64(encoded_id)[1] for encoded_id in text_ids] if text_ids else []
-
-            # If decoded_text_ids are provided, add them to the must_conditions
-            if decoded_text_ids:
-                must_conditions.append(Q('terms', text__id=decoded_text_ids))
-
-
-            # Define filter conditions based on the section_type parameter
-            filter_conditions = []
-            if section_type:
-                filter_conditions.append(Q('term', type=section_type))
-            # Create the final query
-            query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions, filter=filter_conditions)            
-            # Logging the constructed query for review
-            logger.info(f"Constructed Elasticsearch query: {query}")
-
-            # Create a search object and apply the query
-            s = Search(index="sections").query(query).extra(size=size)
-
-            # Log the constructed query
-            logger.info(f"Elasticsearch DSL query: {s.to_dict()}")
-
-            # Execute the search
-            response = s.execute()
-
-            # Logging the total number of hits
-            logger.info(f"Total hits returned: {response.hits.total['value']}")
-
-            # Check if any hits were returned by the query
-            if response.hits.total['value'] == 0:
-                logger.info("No documents found matching the query.")
-                return []
-
-            # Log the Elasticsearch response
-            #logger.info(f"Elasticsearch response: {response.to_dict()}")
-
-            sections = []
-           
-            for hit in response:
-                try:
-                    hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit
-
-                    # Get all inner hits names
-                    all_inner_hit_names = [f"{mode}_hits_{idx}" for mode in ['must', 'should', 'must_not'] for idx in range(len(queries_by_mode[mode]))]
-                    
-                    logger.info(f"Expected inner hit names: {all_inner_hit_names}")  # Logging the expected inner hit names
-                    
-                    # Create a set of token IDs from inner hits for efficient lookup
-                    highlighted_token_ids = set()
-
-                    # Check if 'inner_hits' exists in the hit's meta
-                    if hasattr(hit, 'meta') and hasattr(hit.meta, 'inner_hits'):
-                        inner_hits = hit.meta.inner_hits
-                        for inner_hit_name in all_inner_hit_names:
-                            if hasattr(inner_hits, inner_hit_name):
-                                # Collecting 'id's from '_source' of each inner hit
-                                inner_hit_group = getattr(inner_hits, inner_hit_name)
-                                if hasattr(inner_hit_group, 'hits') and inner_hit_group.hits:
-                                    inner_hit_ids = {inner_hit["_source"]["id"] for inner_hit in inner_hit_group.hits.hits}
-                                    logger.info(f"Inner hit {inner_hit_name} has token IDs: {inner_hit_ids}")
-                                    highlighted_token_ids.update(inner_hit_ids)
-                            else:
-                                logger.info(f"Missing inner_hits for name: {inner_hit_name}")
-
-                    logger.info(f"Collected highlighted token IDs: {highlighted_token_ids}")  # Logging the collected token IDs
-
-                    for token in hit_dict['tokens']:
-                        token_id = token['id']
-                        if token_id in highlighted_token_ids:
-                            logger.info(f"Token highlighted: {token['transcription']} (ID: {token_id})")
-                            token['highlight'] = True
-
-                            # Check if the token already exists in hit_dict['tokens']
-                            existing_token = next((t for t in hit_dict['tokens'] if t['id'] == token_id), None)
-                            if existing_token:
-                                existing_token.update(token)
-                            else:
-                                hit_dict['tokens'].append(token)
-                        else:
-                            logger.info(f"Token not highlighted: {token['transcription']} (ID: {token_id})")  # Log tokens not highlighted
-                    
-                    section = SectionElastic.from_hit(hit_dict)
-                    sections.append(section)
-
-                except Exception as e:
-                    logger.error(f"Error processing hit: {str(e)}")
-
-            # Return the list of sections
-            return sections
-
-        except Exception as e:
-            logger.error(f"Error during Elasticsearch query execution: {str(e)}")
+    def find_sections_with_token_sequence(self, info, token_search_criteria: List[TokenSearchInput], section_type: str) -> List[Section]:
+        if not token_search_criteria or len(token_search_criteria) < 2:
             return []
+
+        # For the initial token
+        initial_token = token_search_criteria[0]
+        matching_sections = SectionModel.objects.filter(tokens__transcription=initial_token.value, type=section_type)
+        prev_token_number = TokenModel.objects.filter(transcription=initial_token.value, section_tokens__in=matching_sections).first().number
+
+        for token_criteria in token_search_criteria[1:]:
+            distance = token_criteria.distance_from_previous.distance_from_previous or 0
+            exact = token_criteria.distance_from_previous.exact
             
+            if exact:
+                expected_number_min = prev_token_number + distance
+                expected_number_max = expected_number_min
+            else:
+                expected_number_min = prev_token_number + 1
+                expected_number_max = prev_token_number + distance + 1
 
-    @strawberry.field
-    @sync_to_async
-    def search_in_tokens(
-        search_inputs: List[TokenSearchInput],
-        section_type: str,
-        language: Optional[str] = None,
-        size: int = 100,
-        text_ids: Optional[List[str]] = None,
-        stopwords: bool = False,
-    ) -> List[TokenElastic]:
-        must_conditions = []
-        should_conditions = []
-        must_not_conditions = []
+            matching_sections = matching_sections.filter(tokens__transcription=token_criteria.value, tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
 
-        logger.info(f"Received search_inputs: {search_inputs}")
+            if not matching_sections.exists():
+                raise ValueError("No matching sections found for the given token sequence.")
 
-        # Decode text_ids using relay's method
-        decoded_text_ids = [relay.from_base64(encoded_id)[1] for encoded_id in text_ids] if text_ids else []
+            # Update previous token number for next iteration
+            prev_token_number = TokenModel.objects.filter(transcription=token_criteria.value, section_tokens__in=matching_sections).first().number
 
-        # If decoded_text_ids are provided, add them to the filter_conditions
-        filter_conditions = []
-        if decoded_text_ids:
-            filter_conditions.append(Q('terms', text__id=decoded_text_ids))
-        
-        # Add filters for section type using a nested query
-        if section_type:
-            nested_section_type_query = Q('nested', path="section_tokens",
-                                        query=Q('bool', filter=Q('term', section_tokens__type=section_type)))
-            filter_conditions.append(nested_section_type_query)
-            
-        if language:
-            filter_conditions.append(Q('term', language=language))
 
-        # Build the main queries for each search input
-        for search_input in search_inputs:
-            main_query = build_main_query(search_input, stopwords=search_input.stopwords)
-            if search_input.search_mode == "must":
-                must_conditions.append(main_query)
-            elif search_input.search_mode == "should":
-                should_conditions.append(main_query)
-            elif search_input.search_mode == "must_not":
-                must_not_conditions.append(main_query)
+        return [cast(Section, section) for section in matching_sections]
 
-        # Construct the final query
-        query = Q('bool', must=must_conditions, should=should_conditions, must_not=must_not_conditions, filter=filter_conditions)
-
-        # Log the final constructed query
-        logger.info(f"Final constructed query: {query.to_dict()}")
-
-        # Create a search object and execute
-        s = Search(index="tokens").query(query).extra(size=size)
-        response = s.execute()
-
-        tokens = []
-        for hit in response:
-            token = TokenElastic.from_hit(hit.to_dict())
-            tokens.append(token)
-
-        logger.info(f"Returning {len(tokens)} tokens")
-        return tokens
 
 
     @strawberry.field
     @sync_to_async
-    def aggregate_by_text_and_section(
-        search_inputs: List[TokenSearchInput],
-        section_type: Optional[str] = None,
-        index_name: str = "tokens"
-    ) -> List[TextAggregate]:
-        """
-        Aggregate tokens by text and section.
+    def find_sections_with_ordered_tokens(self, info, token_search_criteria: List[TokenSearchInput], section_type: str) -> List[Section]:
+        if not token_search_criteria or len(token_search_criteria) < 2:
+            return []
 
-        Parameters:
-        - search_inputs: List of search inputs to look for.
-        - section_type: Optional section type to filter by.
-        - index_name: Elasticsearch index name (default is "tokens").
+        # Starting with the first token in the search criteria
+        initial_token = token_search_criteria[0]
+        matching_sections = SectionModel.objects.filter(tokens__transcription=initial_token.value, type=section_type)
 
-        Returns:
-        A list of TextAggregate objects with text identifiers and lists of section identifiers.
-        """
-
-        # Initialize Elasticsearch search object
-        s = Search(index=index_name)
-
-        # Create a list to hold all token query conditions
-        token_queries = []
-
-        for search_input in search_inputs:
-            # Determine the query type and construct the appropriate query
-            if search_input.query_type == "term":
-                token_queries.append(Q(search_input.query_type, **{search_input.field: search_input.value}))
-            # Add more conditions for other query types as needed...
-
-        # Combine all token query conditions into a base 'must' query
-        base_query = Q('bool', must=token_queries)
-
-        # Apply the base query to the search
-        s = s.query(base_query)
-
-        # If section type is provided, filter by it during aggregation
-        if section_type:
-            section_filter = A(
-                'filter',
-                Q('nested', path="section_tokens", query=Q('term', section_tokens__type=section_type))
+        for token_criteria in token_search_criteria[1:]:
+            # Get the sections where this token appears after the previous token
+            matching_sections = matching_sections.filter(
+                sectiontoken__token__transcription=token_criteria.value,
+                sectiontoken__token__number__gt=Subquery(
+                    SectionToken.objects.filter(
+                        section=OuterRef('pk'),
+                        token__transcription=initial_token.value
+                    ).values('token__number')[:1]
+                )
             )
-            s.aggs.bucket('filtered_sections', section_filter)
+            initial_token = token_criteria
 
-        # Aggregate by text and section identifiers
-        s.aggs.bucket('texts_with_tokens', 'terms', field='text.id')\
-            .bucket('sections_with_tokens', 'nested', path='section_tokens')\
-            .bucket('section_names', 'terms', field='section_tokens.identifier')
+        # At this point, matching_sections should contain the sections where the tokens appear in the desired order
+        return [cast(Section, section) for section in matching_sections.distinct()]
 
-        #log the query to be executed
-        logger.info(f"Constructed Elasticsearch query: {s.to_dict()}")    
 
-        # Execute the search
-        response = s.execute()
-
-        # print the reponse counter
-        logger.info(f"Total hits returned: {response.hits.total['value']}")
-
-        # Parse the aggregation results
-        aggregated_texts = []
-        for text_bucket in response.aggregations.texts_with_tokens.buckets:
-            text_id = text_bucket.key
-            sections = [
-                TextSectionAggregate(section_id=section_bucket.key, count=section_bucket.doc_count)
-                for section_bucket in text_bucket.sections_with_tokens.section_names.buckets
-            ]
-            aggregated_texts.append(TextAggregate(text_id=text_id, sections=sections))
-
-        return aggregated_texts
 
 
     # ### dict
