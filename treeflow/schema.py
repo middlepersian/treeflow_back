@@ -6,7 +6,7 @@ from django.db.models import Subquery, OuterRef, IntegerField, Case, When, Value
 
 from strawberry import relay
 from strawberry.tools import merge_types
-from django.db.models import Q, F
+from django.db.models import Max
 from strawberry_django import mutations
 from strawberry_django.mutations import resolvers
 from strawberry_django.relay import ListConnectionWithTotalCount
@@ -151,56 +151,71 @@ class Query:
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
     tokens_list : List[Token] = strawberry_django.field()
     
-
     @strawberry.field
     @sync_to_async
-    def find_sections_with_tokens(self, info, token_search_criteria: List[TokenSearchInput], section_type: str, ordered: bool = False) -> List[Section]:
+    def find_sections_with_tokens(
+        self, 
+        info, 
+        token_search_criteria: List[TokenSearchInput], 
+        section_type: str, 
+        search_mode: str = "sequence",  # default to "distance", can also be "sequence"
+        enforce_order: bool = False
+    ) -> List[Section]:
+        
         if not token_search_criteria or len(token_search_criteria) < 2:
             return []
 
         # Starting with the first token in the search criteria
         initial_token = token_search_criteria[0]
-        matching_sections = SectionModel.objects.filter(tokens__transcription=initial_token.value, type=section_type)
+        matching_sections = SectionModel.objects.filter(**{f'tokens__{initial_token.field}': initial_token.value, 'type': section_type})
 
-        if ordered:
+        if search_mode == "sequence":
             for token_criteria in token_search_criteria[1:]:
                 # Get the sections where this token appears after the previous token
                 matching_sections = matching_sections.filter(
-                    sectiontoken__token__transcription=token_criteria.value,
+                    **{f'sectiontoken__token__{token_criteria.field}': token_criteria.value},
                     sectiontoken__token__number__gt=Subquery(
                         SectionToken.objects.filter(
                             section=OuterRef('pk'),
-                            token__transcription=initial_token.value
+                            **{f'token__{initial_token.field}': initial_token.value}
                         ).values('token__number')[:1]
                     )
                 )
                 initial_token = token_criteria
 
-        else:
-            prev_token_number = TokenModel.objects.filter(transcription=initial_token.value, section_tokens__in=matching_sections).first().number
-
+        elif search_mode == "distance":
+            prev_token_number = TokenModel.objects.filter(**{initial_token.field: initial_token.value, 'section_tokens__in': matching_sections}).first().number
             for token_criteria in token_search_criteria[1:]:
-                distance = token_criteria.distance_from_previous.distance_from_previous or 0
-                exact = token_criteria.distance_from_previous.exact
+                if token_criteria.min_previous_distance:
+                    distance = token_criteria.min_previous_distance.distance_from_previous or 0
+                    exact = token_criteria.min_previous_distance.exact
 
-                if exact:
-                    expected_number_min = prev_token_number + distance
-                    expected_number_max = expected_number_min
+                    if exact:
+                        expected_number_min = prev_token_number + distance
+                        expected_number_max = expected_number_min
+                    else:
+                        expected_number_min = prev_token_number + distance
+                        max_token_number_in_section = matching_sections.aggregate(Max('tokens__number'))['tokens__number__max']
+                        expected_number_max = max_token_number_in_section
+
                 else:
                     expected_number_min = prev_token_number + 1
-                    expected_number_max = prev_token_number + distance + 1
+                    expected_number_max = prev_token_number + 1
 
-                matching_sections = matching_sections.filter(tokens__transcription=token_criteria.value, tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
+                # If enforce_order is True, ensure token order by making sure the next token's number is greater than the previous token's number
+                if enforce_order:
+                    matching_sections = matching_sections.filter(tokens__number__gt=prev_token_number, tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
+                else:
+                    matching_sections = matching_sections.filter(tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
 
                 if not matching_sections.exists():
                     raise ValueError("No matching sections found for the given token sequence.")
 
                 # Update previous token number for next iteration
-                prev_token_number = TokenModel.objects.filter(transcription=token_criteria.value, section_tokens__in=matching_sections).first().number
+                prev_token_number = TokenModel.objects.filter(**{token_criteria.field: token_criteria.value, 'section_tokens__in': matching_sections}).first().number
 
         # At this point, matching_sections should contain the sections where the tokens appear in the desired order or sequence
         return [cast(Section, section) for section in matching_sections.distinct()]
-
 
     # ### dict
     # # lemma
