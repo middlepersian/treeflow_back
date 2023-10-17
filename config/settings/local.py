@@ -85,9 +85,10 @@ LOGGING = {
         }
     },
     'loggers': {
-        'django.db.backends': {
+        '': {  # This is the root logger, which will catch all log messages
             'level': 'DEBUG',
             'handlers': ['console'],
-        }
+            'propagate': True,
+        },
     }
 }

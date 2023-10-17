@@ -2,7 +2,6 @@ import strawberry
 import strawberry_django
 from strawberry import relay
 from typing import List, Dict, Tuple, Optional
-from dataclasses import dataclass
 from treeflow.corpus import models
 from treeflow.corpus.types.pos import POSInput
 from treeflow.corpus.enums.pos import UPOSValues

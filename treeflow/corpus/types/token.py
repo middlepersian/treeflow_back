@@ -2,9 +2,7 @@ import strawberry
 import strawberry_django
 from strawberry import relay
 from typing import List, Optional, Iterable, cast
-from treeflow.dict.types.lemma import LemmaSelection, MeaningSelection
 from treeflow.corpus import models
-from elasticsearch_dsl import Search, connections, Q
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
@@ -116,103 +114,9 @@ class TokenPartial:
     related_tokens: strawberry.auto
 
 
-
-@strawberry.type
-class POSSelection:
-    id: str
-    pos: str
-
-    @classmethod
-    def from_hit(cls, hit):
-        if 'pos_token' in hit:
-            pos_tokens = hit['pos_token']
-            return [cls(
-                id=pos_token['id'],
-                pos=pos_token['pos'],
-            ) for pos_token in pos_tokens]
-        return None
-
-@strawberry.type
-class FeatureSelection:
-    id: str
-    feature: str
-    feature_value: str
-
-    @classmethod
-    def from_hit(cls, hit):
-        if 'feature_token' in hit:
-            feature_tokens = hit['feature_token']
-            return[ cls(
-                id=feature_token['id'],
-                feature=feature_token['feature'],
-                feature_value=feature_token['feature_value']
-            ) for feature_token in feature_tokens]
-        return None
-    
-@strawberry.type
-class TextSelection:
-    # add id, title, and identifier
-    id: str
-    title: str
-    identifier: str
-
-    @classmethod
-    def from_hit(cls, hit, field="text"):
-        if field in hit and 'id' in hit[field]:
-            return cls(
-                id=hit[field].get('id'),
-                title=hit[field].get('title'),
-                identifier=hit[field].get('identifier')
-            )
-        return None
-
-@strawberry.type
-class SectionSelection:
-    id: str
-    type: str
-    identifier: str
-    
-    @classmethod
-    def from_hit(cls, hit, field="section_tokens"):
-        results = []
-        # Check if the field exists in the hit and that it's a list
-        if field in hit and isinstance(hit[field], list):
-            # Iterate over each section_token in the list
-            for section_token in hit[field]:
-                # Extract the necessary fields and append to results
-                if 'id' in section_token:
-                    results.append(
-                        cls(
-                            id=section_token.get('id'),
-                            type=section_token.get('type'),
-                            identifier=section_token.get('identifier')
-                        )
-                    )
-        return results
-
-
-
-@strawberry.type
-class TokenSelection:
-    id: Optional[str]
-    number: Optional[float]
-    number_in_sentence: Optional[float]
-    transcription: Optional[str]
-    transliteration: Optional[str]
-
-    @classmethod
-    def from_hit(cls, hit, field="next"):
-        
-        if field in hit and 'id' in hit[field]:
-            return cls(
-                id=hit[field].get('id'),
-                number=hit[field].get('number'),
-                number_in_sentence=hit[field].get('number_in_sentence'),
-                transcription=hit[field].get('transcription'),
-                transliteration=hit[field].get('transliteration')
-            )
-        return None
-
+@strawberry.input
+class TokenPositionInput:
+    gap: Optional[int] = 0  # The gap of other tokens between them; default to 0
 
 # create input type for POS
 @strawberry.input
@@ -228,10 +132,6 @@ class FeatureSelectionInput:
 
 
 @strawberry.input
-class TokenPositionInput:
-    gap: Optional[int] = 0  # The gap of other tokens between them; default to 0
-
-@strawberry.input
 class DistanceFromPreviousToken:
     distance_from_previous: Optional[int] = None
     exact: Optional[bool] = False
@@ -245,157 +145,4 @@ class TokenSearchInput:
     feature_token: Optional[List[FeatureSelectionInput]] = None
     search_mode: Optional[str] = 'must' # default to 'must'#
     stopwords: Optional[bool] = False
-    distance_from_previous: Optional[DistanceFromPreviousToken] = None
-@strawberry.type
-class TokenElastic(relay.Node):
-    id: relay.NodeID[str]
-    number: Optional[float] = None
-    number_in_sentence: Optional[float] = None
-    language: Optional[str] = None
-    root: Optional[bool] = None
-    word_token: Optional[bool] = None
-    visible: Optional[bool] = None
-    transcription: Optional[str] = None
-    transliteration: Optional[str] = None
-    avestan: Optional[str] = None
-    gloss: Optional[str] = None
-    next: Optional[TokenSelection] = None
-    previous: Optional[TokenSelection] = None
-    pos_token: Optional[List[POSSelection]] = None
-    feature_token: Optional[List[FeatureSelection]] = None
-    lemmas: Optional[List[LemmaSelection]] = None
-    meanings: Optional[List[MeaningSelection]] = None
-    highlight: Optional[bool] = False
-    section_tokens: Optional[List[SectionSelection]] = None
-    text: Optional[TextSelection] = None
-
-
-    @classmethod
-    def resolve_id(cls, root: "TokenElastic", *, info: Info) -> str:
-        return root.id
-    
-    @classmethod
-    def from_hit(cls, hit):
-        # Convert the hit to a dictionary
-        hit_dict = hit.to_dict() if hasattr(hit, 'to_dict') else hit        
-        #logger.info(f"Processing hit: {hit_dict}")
-        
-        # Build and return a new instance of TokenElastic
-        # TODO check fields like text and image thst are not necessary (siehe Token_object)
-        return cls(
-            id=relay.to_base64(TokenElastic, hit_dict.get('id', None)),
-            number=hit_dict['number'] if 'number' in hit_dict else None,            
-            language=hit_dict.get('language', None) if 'language' in hit_dict else None,
-            root=hit_dict.get('root', None) if 'root' in hit_dict else None,
-            word_token=hit_dict.get('word_token', None) if 'word_token' in hit_dict else None,
-            visible=hit_dict.get('visible', None) if 'visible' in hit_dict else None,
-            transcription=hit_dict.get('transcription', None) if 'transcription' in hit_dict else None,
-            transliteration=hit_dict.get('transliteration', None) if 'transliteration' in hit_dict else None,
-            avestan=hit_dict.get('avestan', None) if 'avestan' in hit_dict else None,
-            gloss=hit_dict.get('gloss', None) if 'gloss' in hit_dict else None,
-            pos_token=POSSelection.from_hit(hit_dict) if 'pos_token' in hit_dict else None,
-            feature_token=FeatureSelection.from_hit(hit_dict) if 'feature_token' in hit_dict else None,
-            next=TokenSelection.from_hit(hit_dict, field='next') if 'next' in hit_dict and hit_dict['next'] is not None else None,
-            previous=TokenSelection.from_hit(hit_dict, field='previous') if 'previous' in hit_dict and hit_dict['previous'] is not None else None,
-            lemmas=LemmaSelection.from_hit(hit_dict, field='lemmas') if 'lemmas' in hit_dict else None,
-            meanings=MeaningSelection.from_hit(hit_dict, field='meanings') if 'meanings' in hit_dict else None,
-            highlight=hit_dict.get('highlight', False),
-            text=TextSelection.from_hit(hit_dict, field='text') if 'text' in hit_dict else None,
-            section_tokens=SectionSelection.from_hit(hit_dict, field='section_tokens') if 'section_tokens' in hit_dict else None,
-        )
-
-
-
-    @classmethod
-    def resolve_node(cls, node_id: str, info: Optional[Info] = None, required: bool = False) -> Optional['TokenElastic']:
-        try:
-            node = get_token_by_id(id=relay.from_base64(node_id)[1])
-            return node
-        except (relay.GlobalIDValueError, NotFoundError):
-            if required:
-                raise ValueError(f"No node by id {node_id}")
-            return None
-        
-    @classmethod
-    def resolve_nodes(
-        cls,
-        *,
-        info: Optional[Info] = None,
-        node_ids: Optional[Iterable[str]] = None
-    ):
-        if node_ids is not None:
-            tokens = get_tokens_by_ids(ids=[relay.from_base64(gid)[1] for gid in node_ids])
-            return [TokenElastic(id=relay.to_base64('TokenElastic', token['id']), **token) for token in tokens]
-
-        return []
-
-
-
-    @strawberry.field
-    @sync_to_async
-    def token_object(self, info: Optional[Info]) -> Optional[Token]:
-        if self.id is not None:
-            node_id = relay.from_base64(self.id)[1]
-            token = models.Token.objects.get(id=node_id)
-            return cast(Token,token)
-        else:
-            return None
-
-
-
-def get_token_by_id(id: str) -> TokenElastic:
-    s = Search(index='tokens').query('ids', values=[id])
-    response = s.execute()
-
-    if len(response.hits.hits) == 0:
-        raise NotFoundError(f"No token by id {id}")
-
-    return TokenElastic.from_hit(response.hits.hits[0]['_source'])
-
-
-def get_tokens_by_ids(ids: List[str]) -> List[TokenElastic]:
-    s = Search(index='tokens').query('ids', values=ids)
-    response = s.execute()
-
-    tokens = []
-    for hit in response.hits.hits:
-        token = TokenElastic.from_hit(hit['_source'])
-        tokens.append(token)
-
-    return tokens
-
-
-def build_main_query(search_input: TokenSearchInput, stopwords: bool = False) -> Q:
-    """Build and return the main query based on the given search input for the tokens index."""
-    
-    # Define a mapping from query_type to the corresponding Elasticsearch query function
-    query_type_map = {
-        'term': 'term',
-        'range': 'range',
-        'match': 'match',
-        'match_phrase': 'match_phrase',
-        'wildcard': 'wildcard',
-        'fuzzy': 'fuzzy'
-    }
-    
-    # Use the mapping to get the correct query type as a string
-    query_type = query_type_map.get(search_input.query_type, 'term')
-    
-    # Modify the field if transcription and stopwords is True
-    field_name = search_input.field
-    if field_name == "transcription" and stopwords:
-        field_name = "transcription.with_stop"
-    
-    # List of nested fields within 'tokens'
-    nested_fields = ['lemmas', 'meanings', 'pos_token', 'feature_token', 'dependency_token', 'dependency_head']
-    
-    # Check for nested fields and handle them
-    for nested_field in nested_fields:
-        if nested_field in field_name:
-            return Q('nested', 
-                     path=nested_field,  # The path is now directly the nested_field
-                     query=Q('bool', filter=[Q(query_type, **{f'{nested_field}.{field_name.split(".")[-1]}': search_input.value})])
-                )
-    
-    # Build and return the query for other fields using filter context
-    return Q('bool', filter=[Q(query_type, **{field_name: search_input.value})])
+    min_previous_distance: Optional[DistanceFromPreviousToken] = None

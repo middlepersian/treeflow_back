@@ -54,11 +54,6 @@ def test_parse_preannotated():
 def test_parse_annotated():
     file_name = '01-test_phase_with_newpart/DMX-L19.csv'
 
-    # deactive elastic for performance reasons
-
-    settings.ELASTICSEARCH_DSL_AUTOSYNC = False
-    settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
-    
     # Use the /app_data folder as the base directory
     base_dir = '/app_data'
     file_path = os.path.join(base_dir, file_name)

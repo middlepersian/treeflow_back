@@ -878,9 +878,6 @@ class Command(BaseCommand):
         text_title = kwargs["text_title"]
         text_version = kwargs["text_version"]
 
-        settings.ELASTICSEARCH_DSL_AUTOSYNC = False
-        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
-
         tokens, images, lines = import_annotated_file(
             csv_file=csv_file,
             manuscript_id=manuscript_id,
@@ -890,8 +887,6 @@ class Command(BaseCommand):
 
         )
 
-        settings.ELASTICSEARCH_DSL_AUTOSYNC = True
-        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = True
 
         self.stdout.write(
             self.style.SUCCESS("Successfully imported {} tokens".format(len(tokens)))

@@ -34,11 +34,7 @@ pydot==1.4.2
 #strawberry
 #strawberry-graphql==0.199.3
 strawberry-graphql-django==0.16.0
-#elastic
-elasticsearch[async]==7.9.1
-# Elasticsearch 7.x
-elasticsearch-dsl>=7.0.0,<8.0.0
-django-elasticsearch-dsl==7.3
+
 attrdict==2.0.1
 
 

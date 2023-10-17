@@ -28,56 +28,30 @@ from strawberry_django_plus.permissions import (
 )
 
 
-from elasticsearch_dsl import Q
-
-
 @gql.type
 class Query:
     token: Optional[Token] = gql.django.node()
     tokens: relay.Connection[Token] = gql.django.connection()
 
-    @gql.field
-    @sync_to_async
-    def search_tokens(
-        pattern: str,
-        query_type: str,
-        language: Optional[str] = None,
-        pos: Optional[str] = None,
-        size: int = 100
-    ) -> List[TokenElastic]:
 
-        q = Q(query_type, transcription=pattern)
-
-        # Apply faceted search
-        if language:
-            q &= Q("term", language=language)
-        if pos:
-            q &= Q("nested", path="pos_token", query=Q("term", pos_token__pos=pos))
-
-        response = TokenDocument.search().query(q).extra(size=size)
-
-        tokens = []
-        for hit in response:
-            token = TokenElastic.from_hit(hit)
-            tokens.append(token)
-
-        return tokens
-        
-    
 @gql.type
 class Mutation:
 
-    create_token: Token = gql.django.create_mutation(TokenInput, directives=[IsAuthenticated()])
-    update_token: Token = gql.django.update_mutation(TokenPartial, directives=[IsAuthenticated()])
-    delete_token: Token = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
-    
+    create_token: Token = gql.django.create_mutation(
+        TokenInput, directives=[IsAuthenticated()])
+    update_token: Token = gql.django.update_mutation(
+        TokenPartial, directives=[IsAuthenticated()])
+    delete_token: Token = gql.django.delete_mutation(
+        gql.NodeInput, directives=[IsAuthenticated()])
+
     @gql.django.mutation
     def create_token_between(self, info, previous_token: relay.GlobalID, new_token_data: TokenInput) -> Token:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         data = vars(new_token_data)
         previous = previous_token.resolve_node(info)
-        new_token = resolvers.create(info, corpus_models.Token, resolvers.parse_input(info, data))
+        new_token = resolvers.create(
+            info, corpus_models.Token, resolvers.parse_input(info, data))
         next_token = previous.next
         previous.next = new_token
         previous.save()
@@ -88,7 +62,6 @@ class Mutation:
         new_token.next = next_token
         new_token.save()
         return new_token
-
 
     @gql.django.input_mutation
     def join_tokens(self, info,
@@ -125,7 +98,8 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
         data = vars(lemma)
-        lemma = resolvers.create(info, dict_models.Lemma, resolvers.parse_input(info, data))
+        lemma = resolvers.create(
+            info, dict_models.Lemma, resolvers.parse_input(info, data))
         token.lemmas.add(lemma)
         token.save()
         return token
@@ -152,11 +126,11 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
         data = vars(meaning)
-        meaning = resolvers.create(info, dict_models.Meaning, resolvers.parse_input(info, data))
+        meaning = resolvers.create(
+            info, dict_models.Meaning, resolvers.parse_input(info, data))
         token.meanings.add(meaning)
         token.save()
         return token
-
 
     @gql.django.input_mutation
     def remove_lemmas_from_token(self,
@@ -181,7 +155,8 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         token = token.resolve_node(info)
         data = vars(dependency)
-        dependency = resolvers.create(info, corpus_models.Dependency, resolvers.parse_input(info, data))
+        dependency = resolvers.create(
+            info, corpus_models.Dependency, resolvers.parse_input(info, data))
         dependency.save()
         return token
 
@@ -194,24 +169,25 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         data = vars(pos)
         token = token.resolve_node(info)
-        pos = resolvers.create(info, corpus_models.Pos, resolvers.parse_input(info, data))
+        pos = resolvers.create(info, corpus_models.Pos,
+                               resolvers.parse_input(info, data))
         pos.save()
         return token
-        
+
     @gql.django.input_mutation
     def add_new_feature_to_token(self, info,
-                                  token: relay.GlobalID,
-                                  feature:FeatureInput,
-                                  ) -> Token:
+                                 token: relay.GlobalID,
+                                 feature: FeatureInput,
+                                 ) -> Token:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         data = vars(feature)
         token = token.resolve_node(info)
-        feature = resolvers.create(info, corpus_models.Feature, resolvers.parse_input(info, data))
+        feature = resolvers.create(
+            info, corpus_models.Feature, resolvers.parse_input(info, data))
         feature.save()
         return token
-    
 
 
-
-schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])
+schema = gql.Schema(query=Query, mutation=Mutation, extensions=[
+                    DjangoOptimizerExtension, SchemaDirectiveExtension])

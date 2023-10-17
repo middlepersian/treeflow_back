@@ -1,19 +1,15 @@
 from asgiref.sync import sync_to_async
 import strawberry
 import strawberry_django
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Subquery, OuterRef, IntegerField, Case, When, Value
-
 from strawberry import relay
 from strawberry.tools import merge_types
-from django.db.models import Max
 from strawberry_django import mutations
 from strawberry_django.mutations import resolvers
 from strawberry_django.relay import ListConnectionWithTotalCount
 from strawberry_django.permissions import IsAuthenticated, IsSuperuser
 from strawberry_django.optimizer import DjangoOptimizerExtension
 from strawberry.django import auth
-from typing import List, Optional, Dict, cast, Tuple
+from typing import List, Optional, cast
 #corpus
 from treeflow.corpus import models as corpus_models
 from treeflow.corpus.types.bibliography import BibEntry, BibEntryInput, BibEntryPartial
@@ -22,19 +18,16 @@ from treeflow.corpus.types.comment import Comment, CommentInput, CommentPartial
 from treeflow.corpus.types.corpus import Corpus
 from treeflow.corpus.enums.deprel import Deprel
 from treeflow.corpus.types.dependency import Dependency, DependencyInput, DependencyPartial, DeprelList
-from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features, upos_feature_feature_value
+from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features
 from treeflow.corpus.types.pos import POS, POSInput, POSPartial
 from treeflow.corpus.enums.pos import UPOSValues
-from treeflow.corpus.types.section import Section, SectionInput, SectionPartial, SectionElastic
+from treeflow.corpus.types.section import Section, SectionInput, SectionPartial
 from treeflow.corpus.models.section import Section as SectionModel
-from treeflow.corpus.models.section import SectionToken
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
 #from treeflow.corpus.types.text_sigle import TextSigle
-from treeflow.corpus.types.text import Text, TextFilter, TextInput, TextPartial, TextAggregate, TextSectionAggregate
-from treeflow.corpus.types.token import Token, TokenFilter, TokenInput, TokenPartial, TokenElastic, TokenSearchInput, build_main_query
-from treeflow.corpus.models.token import Token as TokenModel
-from treeflow.corpus.documents.section import SectionDocument
+from treeflow.corpus.types.text import Text, TextInput, TextPartial
+from treeflow.corpus.types.token import Token, TokenInput, TokenPartial, TokenSearchInput
 from treeflow.corpus.types.user import User
 #dict
 from treeflow.dict import models as dict_models
@@ -44,6 +37,8 @@ from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
 #image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
+#search
+from treeflow.search.logic import find_sections_with_tokens_logic
 
 ###logging
 # create logger
@@ -161,61 +156,25 @@ class Query:
         search_mode: str = "sequence",  # default to "distance", can also be "sequence"
         enforce_order: bool = False
     ) -> List[Section]:
-        
-        if not token_search_criteria or len(token_search_criteria) < 2:
-            return []
+            
+        # Convert GraphQL input to plain Python list of dictionaries
+        criteria_list = [
+            {
+                'field': criteria.field,
+                'value': criteria.value,
+                'min_previous_distance': {
+                    'distance_from_previous': criteria.min_previous_distance.distance_from_previous,
+                    'exact': criteria.min_previous_distance.exact
+                } if criteria.min_previous_distance else None
+            }
+            for criteria in token_search_criteria
+        ]
 
-        # Starting with the first token in the search criteria
-        initial_token = token_search_criteria[0]
-        matching_sections = SectionModel.objects.filter(**{f'tokens__{initial_token.field}': initial_token.value, 'type': section_type})
+        # Call the core logic function
+        sections = find_sections_with_tokens_logic(criteria_list, section_type, search_mode, enforce_order)
+        #cast return type
+        return cast(List[Section], sections)
 
-        if search_mode == "sequence":
-            for token_criteria in token_search_criteria[1:]:
-                # Get the sections where this token appears after the previous token
-                matching_sections = matching_sections.filter(
-                    **{f'sectiontoken__token__{token_criteria.field}': token_criteria.value},
-                    sectiontoken__token__number__gt=Subquery(
-                        SectionToken.objects.filter(
-                            section=OuterRef('pk'),
-                            **{f'token__{initial_token.field}': initial_token.value}
-                        ).values('token__number')[:1]
-                    )
-                )
-                initial_token = token_criteria
-
-        elif search_mode == "distance":
-            prev_token_number = TokenModel.objects.filter(**{initial_token.field: initial_token.value, 'section_tokens__in': matching_sections}).first().number
-            for token_criteria in token_search_criteria[1:]:
-                if token_criteria.min_previous_distance:
-                    distance = token_criteria.min_previous_distance.distance_from_previous or 0
-                    exact = token_criteria.min_previous_distance.exact
-
-                    if exact:
-                        expected_number_min = prev_token_number + distance
-                        expected_number_max = expected_number_min
-                    else:
-                        expected_number_min = prev_token_number + distance
-                        max_token_number_in_section = matching_sections.aggregate(Max('tokens__number'))['tokens__number__max']
-                        expected_number_max = max_token_number_in_section
-
-                else:
-                    expected_number_min = prev_token_number + 1
-                    expected_number_max = prev_token_number + 1
-
-                # If enforce_order is True, ensure token order by making sure the next token's number is greater than the previous token's number
-                if enforce_order:
-                    matching_sections = matching_sections.filter(tokens__number__gt=prev_token_number, tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
-                else:
-                    matching_sections = matching_sections.filter(tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
-
-                if not matching_sections.exists():
-                    raise ValueError("No matching sections found for the given token sequence.")
-
-                # Update previous token number for next iteration
-                prev_token_number = TokenModel.objects.filter(**{token_criteria.field: token_criteria.value, 'section_tokens__in': matching_sections}).first().number
-
-        # At this point, matching_sections should contain the sections where the tokens appear in the desired order or sequence
-        return [cast(Section, section) for section in matching_sections.distinct()]
 
     # ### dict
     # # lemma

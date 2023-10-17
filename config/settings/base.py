@@ -70,8 +70,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "corsheaders",
     "simple_history",
-    "strawberry.django",
-    "django_elasticsearch_dsl"
+    "strawberry.django"
 ]
 
 LOCAL_APPS = [
@@ -81,6 +80,7 @@ LOCAL_APPS = [
     "treeflow.dict.apps.DictAppConfig",
     "treeflow.images.apps.ImageAppConfig",
     "treeflow.datafeed.apps.DataFeedConfig",
+    "treeflow.search.apps.SearchConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -324,11 +324,3 @@ STRAWBERRY_DJANGO = {
 
 }
 
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': env.str("DJANGO_ELASTIC_HOST", default="elastic:9200")
-    },
-}
-
-ELASTICSEARCH_DSL_PARALLEL = True
-ELASTICSEARCH_DSL_AUTOSYNC = True

@@ -6,13 +6,12 @@ from strawberry_django_plus.mutations import resolvers
 from typing import Optional, List
 
 
-
 from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, LemmaElastic, TermTechList, LanguageList
 from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
 from treeflow.dict.types.meaning import MeaningInput
 import treeflow.dict.models as models
-from  treeflow.dict.documents.lemma import LemmaDocument
+from treeflow.dict.documents.lemma import LemmaDocument
 
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 
@@ -24,14 +23,11 @@ from strawberry_django_plus.permissions import (
     IsSuperuser,)
 
 
-from elasticsearch_dsl import Q
-
-
 @gql.type
 class Query:
     lemma: Optional[Lemma] = gql.django.node()
     lemmas:  relay.Connection[Lemma] = gql.django.connection()
-    #lemmas_custom_pagination: CustomPaginationConnection[Lemma] = relay.connection()
+    # lemmas_custom_pagination: CustomPaginationConnection[Lemma] = relay.connection()
 
     @gql.field
     def term_tech_list(self, info) -> TermTechList:
@@ -40,39 +36,26 @@ class Query:
 
     @gql.field
     def term_techs(self) -> List[str]:
-        return [term_tech.value for term_tech in TermTech]    
+        return [term_tech.value for term_tech in TermTech]
 
     @gql.field
     def language_list(self, info) -> LanguageList:
         language_list = [l.value for l in Language]
-        return LanguageList(language=language_list)    
+        return LanguageList(language=language_list)
 
     @gql.field
     def languages(self) -> List[str]:
         return [language.value for language in Language]
 
 
-    @gql.field
-    @sync_to_async
-    def search_lemmas(pattern: str, query_type: str, size: int = 100) -> List[LemmaElastic]:
-        
-        q = Q(query_type, word=pattern)
-        response =LemmaDocument.search().query(q).extra(size=size)
-        lemmas = []
-        for hit in response:
-            lemma = LemmaElastic.from_hit(hit)
-            lemmas.append(lemma)
-
-        return lemmas
-
-
 @gql.type
 class Mutation:
-    create_lemma: Lemma = gql.django.create_mutation(LemmaInput, directives=[IsAuthenticated()])
-    update_lemma: Lemma = gql.django.update_mutation(LemmaPartial, directives=[IsAuthenticated()])
-    delete_lemma: Lemma = gql.django.delete_mutation(gql.NodeInput, directives=[IsAuthenticated()])
-
-
+    create_lemma: Lemma = gql.django.create_mutation(
+        LemmaInput, directives=[IsAuthenticated()])
+    update_lemma: Lemma = gql.django.update_mutation(
+        LemmaPartial, directives=[IsAuthenticated()])
+    delete_lemma: Lemma = gql.django.delete_mutation(
+        gql.NodeInput, directives=[IsAuthenticated()])
 
     @gql.django.input_mutation
     def add_related_lemma_to_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:
@@ -90,7 +73,8 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node(info)
         data = vars(related_lemma)
-        related_lemma = resolvers.create(info, models.Lemma, resolvers.parse_input(info, data))
+        related_lemma = resolvers.create(
+            info, models.Lemma, resolvers.parse_input(info, data))
         current_lemma.related_lemmas.add(related_lemma)
         current_lemma.save()
         return current_lemma
@@ -111,7 +95,8 @@ class Mutation:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node(info)
         data = vars(related_meaning)
-        related_meaning = resolvers.create(info, models.Meaning, resolvers.parse_input(info, data))
+        related_meaning = resolvers.create(
+            info, models.Meaning, resolvers.parse_input(info, data))
         current_lemma.related_meanings.add(related_meaning)
         current_lemma.save()
         return current_lemma
@@ -137,4 +122,5 @@ class Mutation:
         return current_lemma
 
 
-schema = gql.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension, SchemaDirectiveExtension])
+schema = gql.Schema(query=Query, mutation=Mutation, extensions=[
+                    DjangoOptimizerExtension, SchemaDirectiveExtension])
