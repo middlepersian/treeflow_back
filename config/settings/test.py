@@ -38,5 +38,40 @@ TEMPLATES[-1]["APP_DIRS"] = False  # Set APP_DIRS to False in test settings
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
-# Your stuff...
-# ------------------------------------------------------------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'root': {
+        'handlers': ['console_test'],
+        'level': 'DEBUG',
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console_test': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console_test'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'test': {
+            'handlers': ['console_test'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
