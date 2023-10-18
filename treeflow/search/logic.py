@@ -12,6 +12,9 @@ def find_sections_with_tokens_logic(
     enforce_order: bool = False
 ) -> List[Section]:
 
+    logger.info('#############################################')
+
+
     logger.info('Entering find_sections_with_tokens_logic function')
     
     if not token_search_criteria or len(token_search_criteria) < 2:
@@ -46,6 +49,8 @@ def find_sections_with_tokens_logic(
             **{initial_token["field"]: initial_token["value"], 'section_tokens__in': matching_sections}).first().number
 
         for token_criteria in token_search_criteria[1:]:
+            logger.debug(f"Starting iteration with token: {initial_token['value']} (number: {prev_token_number})")
+            
             if "min_previous_distance" in token_criteria:
                 distance = token_criteria["min_previous_distance"]["distance_from_previous"] or 0
                 exact = token_criteria["min_previous_distance"]["exact"] or False
@@ -56,11 +61,13 @@ def find_sections_with_tokens_logic(
                     expected_number_min = prev_token_number + distance
                     max_token_number_in_section = matching_sections.aggregate(
                         Max('tokens__number'))['tokens__number__max']
-                    expected_number_max = max_token_number_in_section
+                    expected_number_max = expected_number_min + 1
 
             else:
                 expected_number_min = prev_token_number + 1
                 expected_number_max = prev_token_number + 1
+
+            logger.debug(f"Expected token number range: {expected_number_min} - {expected_number_max}")
 
             # If enforce_order is True, ensure token order by making sure the next token's number is greater than the previous token's number
             if enforce_order:
@@ -70,6 +77,8 @@ def find_sections_with_tokens_logic(
                 matching_sections = matching_sections.filter(
                     tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
 
+            logger.debug(f"Number of matching sections after filtering: {matching_sections.count()}")
+
             if not matching_sections.exists():
                 raise ValueError(
                     "No matching sections found for the given token sequence.")
@@ -77,6 +86,8 @@ def find_sections_with_tokens_logic(
             # Update previous token number for next iteration
             prev_token_number = Token.objects.filter(
                 **{token_criteria["field"]: token_criteria["value"], 'section_tokens__in': matching_sections}).first().number
+
+            logger.debug(f"Updated prev_token_number for next iteration: {prev_token_number}")
 
             # Update initial token for next iteration
             initial_token = token_criteria
