@@ -46,10 +46,9 @@ def find_sections_with_tokens_logic(
             **{initial_token["field"]: initial_token["value"], 'section_tokens__in': matching_sections}).first().number
 
         for token_criteria in token_search_criteria[1:]:
-            if token_criteria.min_previous_distance:
-                distance = token_criteria.min_previous_distance.distance_from_previous or 0
-                exact = token_criteria.min_previous_distance.exact
-
+            if "min_previous_distance" in token_criteria:
+                distance = token_criteria["min_previous_distance"]["distance_from_previous"] or 0
+                exact = token_criteria["min_previous_distance"]["exact"] or False
                 if exact:
                     expected_number_min = prev_token_number + distance
                     expected_number_max = expected_number_min
@@ -65,8 +64,8 @@ def find_sections_with_tokens_logic(
 
             # If enforce_order is True, ensure token order by making sure the next token's number is greater than the previous token's number
             if enforce_order:
-                matching_sections = matching_sections.filter(
-                    tokens__number__gt=prev_token_number, tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)
+                logger.debug(f'Enforcing order: {enforce_order}')
+                matching_sections = matching_sections.filter(tokens__number=prev_token_number + 1)
             else:
                 matching_sections = matching_sections.filter(
                     tokens__number__gte=expected_number_min, tokens__number__lte=expected_number_max)

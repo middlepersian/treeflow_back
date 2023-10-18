@@ -22,17 +22,16 @@ class FindSectionsWithTokensTests(TestCase):
         token8 = Token.objects.create(transcription="honeydew", number=8)
         token9 = Token.objects.create(transcription="imbe", number=9)
 
-        section3 = Section.objects.create(type="sentence")
-        SectionToken.objects.create(token=token4, section=section3)
-        SectionToken.objects.create(token=token5, section=section3)
-        SectionToken.objects.create(token=token1, section=section3)  # Reusing tokens in different sections
+
 
         # Create some sections
         section1 = Section.objects.create(type="sentence")
         section2 = Section.objects.create(type="sentence")
         section3 = Section.objects.create(type="sentence")
+        section4 = Section.objects.create(type="sentence")
         
         # Create relationships between tokens and sections
+
         SectionToken.objects.create(token=token1, section=section1)
         SectionToken.objects.create(token=token2, section=section1)
         SectionToken.objects.create(token=token3, section=section1)
@@ -40,7 +39,6 @@ class FindSectionsWithTokensTests(TestCase):
         SectionToken.objects.create(token=token5, section=section1)
         SectionToken.objects.create(token=token6, section=section1)
         SectionToken.objects.create(token=token7, section=section1)
-
 
         SectionToken.objects.create(token=token3, section=section2)
         SectionToken.objects.create(token=token4, section=section2)
@@ -54,6 +52,8 @@ class FindSectionsWithTokensTests(TestCase):
         SectionToken.objects.create(token=token6, section=section3)
         SectionToken.objects.create(token=token7, section=section3)
         SectionToken.objects.create(token=token8, section=section3)
+        SectionToken.objects.create(token=token1, section=section3)  
+
         
 
 
@@ -75,3 +75,163 @@ class FindSectionsWithTokensTests(TestCase):
         
         self.assertEqual(tokens[0].transcription, "apple")
         self.assertEqual(tokens[1].transcription, "banana")
+
+
+    def test_find_sections_with_tokens_based_on_distance_without_enforcing_order(self):
+        # Define the search criteria with min_previous_distance
+        criteria = [
+            {"field": "transcription", "value": "date"},
+            {
+                "field": "transcription",
+                "value": "fig",
+                "min_previous_distance": {"distance_from_previous": 2, "exact": True}
+            }
+        ]
+
+        # Call the function with enforce_order set to False
+        result = find_sections_with_tokens_logic(criteria, "sentence", "distance", False)
+
+        # Assert the expected result
+        self.assertEqual(len(result), 3)
+        
+        # Get the tokens from the first matching section
+        tokens = result[0].tokens.all().order_by('number')
+
+        # Assert that "date" is followed by "fig" (not necessarily immediately if order is not enforced)
+        date_index = next((i for i, token in enumerate(tokens) if token.transcription == "date"), None)
+        self.assertIsNotNone(date_index, "Date token not found in the result.")
+        self.assertIn("fig", [token.transcription for token in tokens[date_index+1:]])
+
+
+
+
+    def test_find_sections_with_tokens_based_on_distance_without_enforcing_order(self):
+        # Define the search criteria with min_previous_distance
+        criteria = [
+            {"field": "transcription", "value": "date"},
+            {
+                "field": "transcription",
+                "value": "fig",
+                "min_previous_distance": {"distance_from_previous": 2, "exact": True}
+            }
+        ]
+
+        # Call the function with enforce_order set to False
+        result = find_sections_with_tokens_logic(criteria, "sentence", "distance", False)
+
+        # Assert the expected result
+        self.assertEqual(len(result), 3)
+        
+        # Get the tokens from the first matching section
+        tokens = result[0].tokens.all().order_by('number')
+
+        # Assert that "date" is followed by "fig" (not necessarily immediately if order is not enforced)
+        date_index = next((i for i, token in enumerate(tokens) if token.transcription == "date"), None)
+        self.assertIsNotNone(date_index, "Date token not found in the result.")
+        self.assertIn("fig", [token.transcription for token in tokens[date_index+1:]])
+
+
+    def test_find_adjacent_tokens_with_order(self):
+        # Define the search criteria for adjacent tokens with order
+        criteria = [
+            {"field": "transcription", "value": "date"},
+            {
+                "field": "transcription",
+                "value": "elderberry",
+                "min_previous_distance": {"distance_from_previous": 0, "exact": True}
+            }
+        ]
+
+        # Call the function with order enforced
+        result = find_sections_with_tokens_logic(criteria, "sentence", "distance", True)
+
+        # Assert the expected result: there should be sections that match the criteria
+        self.assertGreater(len(result), 0)
+
+        # Get the tokens from the first matching section
+        tokens = result[0].tokens.all().order_by('number')
+
+        # Assert that "date" is immediately followed by "elderberry"
+        date_index = next((i for i, token in enumerate(tokens) if token.transcription == "date"), None)
+        self.assertIsNotNone(date_index, "Date token not found in the result.")
+        self.assertEqual(tokens[date_index + 1].transcription, "elderberry")
+
+
+    def test_find_adjacent_tokens_without_order(self):
+        # Define the search criteria for adjacent tokens without order
+        criteria = [
+            {"field": "transcription", "value": "date"},
+            {
+                "field": "transcription",
+                "value": "elderberry",
+                "min_previous_distance": {"distance_from_previous": 0, "exact": True}
+            }
+        ]
+
+        # Call the function without order enforced
+        result = find_sections_with_tokens_logic(criteria, "sentence", "distance", False)
+
+        # Assert the expected result: there should be sections that match the criteria
+        self.assertGreater(len(result), 0)
+
+        # Get the tokens from the first matching section
+        tokens = result[0].tokens.all().order_by('number')
+
+        # Assert that "date" and "elderberry" are adjacent, without considering the order
+        date_index = next((i for i, token in enumerate(tokens) if token.transcription == "date"), None)
+        elderberry_index = next((i for i, token in enumerate(tokens) if token.transcription == "elderberry"), None)
+
+        self.assertIsNotNone(date_index, "Date token not found in the result.")
+        self.assertIsNotNone(elderberry_index, "Elderberry token not found in the result.")
+        self.assertTrue(abs(date_index - elderberry_index) == 1, "Tokens are not adjacent.")
+
+
+    def test_find_three_tokens_distance_with_order(self):
+        # Define the search criteria for a sequence of three tokens with order
+        criteria = [
+            {"field": "transcription", "value": "date"},
+            {"field": "transcription", "value": "elderberry", "min_previous_distance": {"distance_from_previous": 0, "exact": True}},
+            {"field": "transcription", "value": "fig", "min_previous_distance": {"distance_from_previous": 0, "exact": True}}
+        ]
+
+        # Call the function with order enforced
+        result = find_sections_with_tokens_logic(criteria, "sentence", "distance", True)
+
+        # Assert the expected result: there should be sections that match the criteria
+        self.assertGreater(len(result), 0)
+
+        # Get the tokens from the first matching section
+        tokens = result[0].tokens.all().order_by('number')
+
+        # Assert that the tokens appear in sequence
+        date_index = next((i for i, token in enumerate(tokens) if token.transcription == "date"), None)
+        elderberry_index = next((i for i, token in enumerate(tokens) if token.transcription == "elderberry"), None)
+        fig_index = next((i for i, token in enumerate(tokens) if token.transcription == "fig"), None)
+
+        self.assertIsNotNone(date_index, "Date token not found in the result.")
+        self.assertIsNotNone(elderberry_index, "Elderberry token not found in the result.")
+        self.assertIsNotNone(fig_index, "Fig token not found in the result.")
+        self.assertTrue(date_index < elderberry_index < fig_index, "Tokens are not in sequence.")
+
+
+    def test_find_three_tokens_distance_without_order(self):
+        # Define the search criteria for a sequence of three tokens without order
+        criteria = [
+            {"field": "transcription", "value": "date"},
+            {"field": "transcription", "value": "fig"},
+            {"field": "transcription", "value": "elderberry"}
+        ]
+
+        # Call the function without order enforced
+        result = find_sections_with_tokens_logic(criteria, "sentence", "distance", False)
+
+        # Assert the expected result: there should be sections that match the criteria
+        self.assertGreater(len(result), 0)
+
+        # Get the tokens from the first matching section
+        tokens = result[0].tokens.all().order_by('number')
+
+        # Assert that the tokens appear in the result, regardless of order
+        self.assertTrue(any(token.transcription == "date" for token in tokens))
+        self.assertTrue(any(token.transcription == "elderberry" for token in tokens))
+        self.assertTrue(any(token.transcription == "fig" for token in tokens))
