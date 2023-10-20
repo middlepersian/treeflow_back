@@ -73,37 +73,41 @@ def find_sections_with_all_tokens(token_search_criteria: List[Dict], section_typ
 
     return list(matching_sections)
 
-def find_sections_with_ordered_tokens(token_search_criteria: List[Dict], section_type: str, enforce_order: bool) -> List[Section]:
-    # Start with all sections containing the first token
-    valid_sections = Section.objects.filter(
-        type=section_type,
-        **{f'tokens__{token_search_criteria[0]["field"]}': token_search_criteria[0]["value"]}
-    )
-    logger.debug(f"Sections after {token_search_criteria[0]['value']} filter: {valid_sections.query}")
 
-    # Annotate the valid_sections with the position of each token in the section's token list
-    for idx, token_criteria in enumerate(token_search_criteria[1:], start=1):
-        subquery = SectionToken.objects.filter(
-            section=OuterRef('pk'),
-            token__transcription=token_criteria["value"]
-        ).values('token__number')
+def find_sections_with_ordered_tokens(token_dicts):
+    # Initial sections based on the first token
+    tokens = [t['value'] for t in token_dicts]
+    initial_sections = set(SectionToken.objects.filter(token__transcription=tokens[0]).values_list('section', flat=True))
+    logger.debug(f"Initial sections containing '{tokens[0]}': {initial_sections}")
+    valid_sections = initial_sections
 
-        # Annotate with the position of each token
-        valid_sections = valid_sections.annotate(**{f'token_pos_{idx}': Subquery(subquery[:1])})
+    for idx, token_value in enumerate(tokens[1:], start=1):
+        token_sections = set(SectionToken.objects.filter(token__transcription=token_value).values_list('section', flat=True))
+        logger.debug(f"Sections containing '{token_value}': {token_sections}")
 
-    # Filter to ensure each token's position is greater than the previous token's position
-    if enforce_order:
-        for idx in range(2, len(token_search_criteria) + 1):
-            valid_sections = valid_sections.filter(**{f'tokens__number__exact': F(f'token_pos_{idx - 1}')})
+        # Filter valid_sections to keep only those sections where:
+        # - they contain the current token
+        # - the position (i.e., 'number') of the current token is after the position of the previous token
+        # - no other token from our search tokens appears between the current and previous tokens
+        valid_sections = {
+            section for section in valid_sections
+            if section in token_sections
+            and Token.objects.filter(transcription=tokens[idx - 1], section_tokens=section).first().number
+            < Token.objects.filter(transcription=token_value, section_tokens=section).first().number
+            and not Token.objects.filter(
+                transcription__in=tokens[idx - 1: idx], 
+                section_tokens=section,
+                number__gt=Token.objects.filter(transcription=tokens[idx - 1], section_tokens=section).first().number,
+                number__lt=Token.objects.filter(transcription=token_value, section_tokens=section).first().number
+            ).exists()
+        }
+        logger.debug(f"Remaining valid sections after filtering by '{token_value}': {valid_sections}")
 
-    logger.debug(f"Sections after position filter: {valid_sections.query}")
+    logger.debug(f"Final valid sections after processing all tokens: {valid_sections}")
+    return valid_sections
 
-    # At this point, valid_sections should contain sections that have all the tokens in the correct order
-    # Filter out any sections that didn't have all tokens annotated (i.e., one or more tokens were missing)
-    valid_sections = valid_sections.exclude(**{f'tokens__number__exact': len(token_search_criteria)})
 
-    logger.debug(f"Final matching sections: {valid_sections.query}")
-    return list(valid_sections)
+
 
 def find_sections_by_token_distance(token_search_criteria: List[Dict], section_type: str, enforce_order: bool) -> List[Section]:
 
@@ -163,3 +167,4 @@ def find_sections_by_token_distance(token_search_criteria: List[Dict], section_t
         initial_token = token_criteria
 
     return list(set(matching_sections))
+

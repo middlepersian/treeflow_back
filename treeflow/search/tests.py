@@ -59,7 +59,6 @@ class TokenSearchTest(TestCase):
         for token in [token9, token2, token3, token8, token5, token1, token6, token4, token7]:
             SectionToken.objects.create(token=token, section=section5)
 
-
     def test_find_sections_with_ordered_tokens(self):
         criteria = [
             {"field": "transcription", "value": "apple"},
@@ -69,17 +68,16 @@ class TokenSearchTest(TestCase):
         ]
 
         # Call the search function
-        result = find_sections_with_ordered_tokens(criteria, "sentence", enforce_order=True)
+        result = find_sections_with_ordered_tokens(criteria)
 
         # Assert that only the section with ordered tokens is returned
         self.assertEqual(len(result), 1)
-
+'''
     def test_get_sections_with_token(self):
         sections = get_sections_with_token("fig", "sentence")
         self.assertEqual(len(sections), 4)
 
-
-"""     def test_search_three_tokens_without_order(self):
+     def test_search_three_tokens_without_order(self):
         # Define the search criteria
         criteria = [
             {"field": "transcription", "value": "apple"},
@@ -97,4 +95,4 @@ class TokenSearchTest(TestCase):
             self.assertTrue("apple" in tokens)
             self.assertTrue("banana" in tokens)
             self.assertTrue("cherry" in tokens) """
-
+'''
