@@ -73,40 +73,37 @@ def find_sections_with_all_tokens(token_search_criteria: List[Dict], section_typ
 
     return list(matching_sections)
 
-
 def find_sections_with_ordered_tokens(token_dicts):
-    # Initial sections based on the first token
     tokens = [t['value'] for t in token_dicts]
-    initial_sections = set(SectionToken.objects.filter(token__transcription=tokens[0]).values_list('section', flat=True))
-    logger.debug(f"Initial sections containing '{tokens[0]}': {initial_sections}")
-    valid_sections = initial_sections
+    valid_sections = set(SectionToken.objects.filter(token__transcription=tokens[0]).values_list('section', flat=True))
+    logger.debug(f"Initial sections containing '{tokens[0]}': {valid_sections}")
 
     for idx, token_value in enumerate(tokens[1:], start=1):
-        token_sections = set(SectionToken.objects.filter(token__transcription=token_value).values_list('section', flat=True))
-        logger.debug(f"Sections containing '{token_value}': {token_sections}")
+        for section in list(valid_sections):
+            prev_token = Token.objects.filter(transcription=tokens[idx - 1], section_tokens=section).first()
+            curr_token = Token.objects.filter(transcription=token_value, section_tokens=section).first()
+            
+            if not prev_token or not curr_token:
+                valid_sections.remove(section)
+                continue
 
-        # Filter valid_sections to keep only those sections where:
-        # - they contain the current token
-        # - the position (i.e., 'number') of the current token is after the position of the previous token
-        # - no other token from our search tokens appears between the current and previous tokens
-        valid_sections = {
-            section for section in valid_sections
-            if section in token_sections
-            and Token.objects.filter(transcription=tokens[idx - 1], section_tokens=section).first().number
-            < Token.objects.filter(transcription=token_value, section_tokens=section).first().number
-            and not Token.objects.filter(
+            prev_token_number = prev_token.number
+            curr_token_number = curr_token.number
+            
+            logger.debug(f"For section {section}, '{tokens[idx - 1]}' position: {prev_token_number}, '{token_value}' position: {curr_token_number}")
+            
+            if prev_token_number >= curr_token_number or Token.objects.filter(
                 transcription__in=tokens[idx - 1: idx], 
                 section_tokens=section,
-                number__gt=Token.objects.filter(transcription=tokens[idx - 1], section_tokens=section).first().number,
-                number__lt=Token.objects.filter(transcription=token_value, section_tokens=section).first().number
-            ).exists()
-        }
+                number__gt=prev_token_number,
+                number__lt=curr_token_number
+            ).exists():
+                valid_sections.remove(section)
+        
         logger.debug(f"Remaining valid sections after filtering by '{token_value}': {valid_sections}")
 
     logger.debug(f"Final valid sections after processing all tokens: {valid_sections}")
     return valid_sections
-
-
 
 
 def find_sections_by_token_distance(token_search_criteria: List[Dict], section_type: str, enforce_order: bool) -> List[Section]:
