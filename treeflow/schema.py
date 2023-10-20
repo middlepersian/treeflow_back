@@ -38,7 +38,7 @@ from treeflow.dict.enums.language import Language
 #image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
 #search
-from treeflow.search.logic import find_sections_with_tokens_logic
+from treeflow.search.logic import find_tokens_within_sections
 
 ###logging
 # create logger
@@ -171,7 +171,7 @@ class Query:
         ]
 
         # Call the core logic function
-        sections = find_sections_with_tokens_logic(criteria_list, section_type, search_mode, enforce_order)
+        sections = find_tokens_within_sections(criteria_list, section_type, search_mode, enforce_order)
         #cast return type
         return cast(List[Section], sections)
 
