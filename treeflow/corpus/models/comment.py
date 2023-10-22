@@ -57,12 +57,10 @@ class Comment(models.Model):
         return '{} {}'.format(self.user, self.comment)
 
     class Meta:
-        indexes = [
-            models.Index(fields=[ 'text', 'token', 'lemma', 'meaning', 'semantic', 'dependency', 'image',  'section', 'source']),
-        ]
-
+        pass
+    
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
         if self.comment:
             self.comment = strip_and_normalize('NFC', self.comment)
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)

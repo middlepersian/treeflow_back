@@ -18,10 +18,7 @@ class Feature(models.Model):
 
 
     class Meta:
-        indexes = [
-            models.Index(fields=['token', 'pos', 'feature', 'feature_value']),
-        ]
-
+        pass
     
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
