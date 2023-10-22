@@ -23,9 +23,7 @@ class Dependency(models.Model):
 
 
     class Meta:
-        indexes = [
-            models.Index(fields=['token', 'head', 'rel']),
-        ]
+        pass
 
     
     def save(self, *args, **kwargs):

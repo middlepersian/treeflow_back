@@ -44,16 +44,13 @@ class Token(models.Model):
         ordering = ['number']
         constraints = [
             models.UniqueConstraint(
-                fields=['number', 'text'], name='token_number_text'
+                fields=['text', 'number'], name='token_text_number'
             )
         ]
         indexes = [
-            models.Index(fields=['text', 'number', 'transcription', 'transliteration', 'previous']),
-            models.Index(fields=['text']),
-            models.Index(fields=['previous']),
-            models.Index(fields=['number']),
             models.Index(fields=['transcription']),
-            models.Index(fields=['transliteration'])
+            models.Index(fields=['transliteration']),
+            models.Index(fields=['number']),
         ]
 
     def __str__(self):
@@ -96,7 +93,6 @@ class TokenLemma(models.Model):
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['lemma']),
-            models.Index(fields=['token', 'lemma']),
         ]
 
 
@@ -112,5 +108,4 @@ class TokenMeaning(models.Model):
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['meaning']),
-            models.Index(fields=['token', 'meaning']),
         ]

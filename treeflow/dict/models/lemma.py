@@ -33,9 +33,6 @@ class Lemma(models.Model):
                 fields=["word", "language"], name="word_language_lemma"
             )
         ]
-        indexes = [
-            models.Index(fields=["word", "language"]),
-        ]
         ordering = ["word"]
 
     def save(self, *args, **kwargs):
@@ -67,9 +64,6 @@ class LemmaRelation(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["lemma1", "lemma2"], name="lemma_relation")
         ]
-        indexes = [
-            models.Index(fields=["lemma1", "lemma2"]),
-        ]
 
 
 class LemmaMeaning(models.Model):
@@ -84,7 +78,4 @@ class LemmaMeaning(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["lemma", "meaning"], name="lemma_meaning")
-        ]
-        indexes = [
-            models.Index(fields=["lemma", "meaning"]),
         ]

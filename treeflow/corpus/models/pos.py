@@ -18,10 +18,7 @@ class POS(models.Model):
         return '{}'.format(self.pos)    
 
     class Meta:
-        unique_together = ('token', 'pos')
-        indexes = [
-            models.Index(fields=['token', 'pos', 'type']),
-        ]
+        pass
 
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
