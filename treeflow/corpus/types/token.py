@@ -34,7 +34,7 @@ class TokenFilter:
     language: strawberry.auto
     number: strawberry.auto
     text: Optional[strawberry.LazyType['TextFilter', 'treeflow.corpus.types.text']]
-    image : Optional[strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']] 
+    image : Optional[strawberry.LazyType['ImageFilter', 'treeflow.images.types.image']]
     section_tokens: Optional[strawberry.LazyType['SectionFilter', 'treeflow.corpus.types.section']]
 
 

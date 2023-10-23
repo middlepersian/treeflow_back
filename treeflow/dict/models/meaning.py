@@ -24,9 +24,6 @@ class Meaning(models.Model):
                 fields=['meaning', 'language'], name='meaning_language_meaning'
             )]
         ordering = ['meaning']
-        indexes = [
-            models.Index(fields=['meaning', 'language']),
-        ]
 
     def __str__(self):
         return '{} - {} - {}'.format(self.meaning, self.language, self.lemma_related)

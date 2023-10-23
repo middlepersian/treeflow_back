@@ -2,8 +2,9 @@
 Base settings to build other settings files upon.
 """
 from pathlib import Path
-
 import environ
+from celery.schedules import crontab
+
 
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -43,6 +44,18 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["ATOMIC_REQUESTS"] = False
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env("REDIS_URL"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "IGNORE_EXCEPTIONS": True,
+        },
+        "TIMEOUT": 3600,  # Cache timeout in seconds (e.g., 3600 seconds = 1 hour)
+    }
+}
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -105,7 +118,6 @@ LOGIN_REDIRECT_URL = "users:redirect"
 LOGIN_URL = "account_login"
 
 # PASSWORDS
-# ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#password-hashers
 PASSWORD_HASHERS = [
     # https://docs.djangoproject.com/en/dev/topics/auth/passwords/#using-argon2-with-django
@@ -164,6 +176,9 @@ STATICFILES_FINDERS = [
 MEDIA_ROOT = str(APPS_DIR / "media")
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "/media/"
+
+
+
 
 # TEMPLATES
 # ------------------------------------------------------------------------------
@@ -323,4 +338,3 @@ STRAWBERRY_DJANGO = {
     "MUTATIONS_DEFAULT_ARGUMENT_NAME": "input",
 
 }
-

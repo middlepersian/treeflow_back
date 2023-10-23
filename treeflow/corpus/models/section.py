@@ -16,8 +16,12 @@ class Section(models.Model):
     language = models.CharField(max_length=3, blank=True)
     source = models.ForeignKey('Source', on_delete=models.SET_NULL,
                                related_name='section_source', null=True, blank=True)
+<<<<<<< HEAD
     tokens = models.ManyToManyField(
         'Token', related_name='section_tokens', through='SectionToken')
+=======
+    tokens = models.ManyToManyField('Token', related_name='section_tokens', through='SectionToken')
+>>>>>>> dev
     previous = models.OneToOneField('self', on_delete=models.SET_NULL, null=True,
                                     blank=True, related_name='next')
     # this is the case if a section "paragraph" has a "chapter" container
@@ -35,6 +39,7 @@ class Section(models.Model):
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier')
         ]
+<<<<<<< HEAD
         indexes = [models.Index(fields=['text', 'number', 'identifier', 'previous', 'type', 'container']),
                    models.Index(fields=['text']),
                    models.Index(fields=['number']),
@@ -43,6 +48,10 @@ class Section(models.Model):
                    models.Index(fields=['container']),
                    models.Index(fields=['type']),
                    models.Index(fields=['created_at'])]
+=======
+        indexes = [models.Index(fields=['text', 'type']),
+                   ]
+>>>>>>> dev
 
     def __str__(self) -> str:
         return '{} - {} '.format(self.type, self.identifier)
@@ -70,9 +79,9 @@ class SectionToken(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['section']),
-            models.Index(fields=['token']),
             models.Index(fields=['section', 'token']),
+            models.Index(fields=['token']), 
+            models.Index(fields=['section']),
         ]
 
     def __str__(self):
