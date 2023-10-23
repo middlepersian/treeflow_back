@@ -6,7 +6,6 @@ from treeflow.dict import models
 from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
 from strawberry.types import Info
-from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
 
 
