@@ -31,6 +31,7 @@ class TokenSearchTest(TestCase):
         section4 = Section.objects.create(type="sentence")
         section5 = Section.objects.create(type="sentence")
         section6 = Section.objects.create(type="sentence")
+        section7 = Section.objects.create(type="sentence")
 
         # Create relationships between tokens and sections
 
@@ -63,6 +64,9 @@ class TokenSearchTest(TestCase):
         # apple, fig and grape
         for token in [token1, token6, token7]:
             SectionToken.objects.create(token=token, section=section6)
+
+        # add only one token to section7
+            
 
     def test_get_sections_with_highlighted_tokens(self):
         # Test single criteria
