@@ -1,17 +1,74 @@
 from typing import List, Dict
-from django.db.models import Subquery, OuterRef, Max, F, query, Q
+from django.db.models import Subquery, OuterRef, Max, F, query, Q, Count
 from treeflow.corpus.models import Section, Token, SectionToken
 import logging
 
 logger = logging.getLogger(__name__)
 
-def get_sections_with_token(token_value: str, section_type: str) -> List[Section]:
-    sections = Section.objects.filter(
-        type=section_type,
-        tokens__transcription=token_value
-    ).distinct()
+from django.db.models import Q
+from typing import Dict, List
+
+def get_sections_with_criteria(criteria: Dict[str, str], section_type: str) -> List[Section]:
+    """
+    Fetch sections based on the specified criteria.
+    
+    Args:
+    - criteria (dict): A dictionary where keys are the token fields (e.g., 'tokens__transcription', 'tokens__transliteration') 
+      and values are the values to search for in those fields.
+    - section_type (str): The type of section to filter by.
+    
+    Returns:
+    - List[Section]: List of sections matching the criteria.
+    """
+
+    # Start with a base Q object to accumulate our queries
+    query = Q(type=section_type)
+
+    # Build the query based on the provided criteria
+    for field, value in criteria.items():
+        query &= Q(**{field: value})
+
+    # Query the sections based on the criteria
+    sections = Section.objects.filter(query).distinct()
+
     return sections
 
+def get_sections_with_tokens(section_criteria: Dict[str, str], token_criteria_list: List[Dict[str, str]]) -> List[Section]:
+    """
+    Fetch sections based on section criteria and containing tokens that match the specified token criteria.
+    
+    Args:
+    - section_criteria (dict): A dictionary where keys are the section fields and values are the values to search for.
+    - token_criteria_list (List[dict]): A list of dictionaries, where each dictionary contains criteria for a token (e.g., {'transcription': 'apple'}).
+    
+    Returns:
+    - List[Section]: List of sections matching the criteria.
+    """
+
+    # Start with the section criteria
+    query = Q()
+    for field, value in section_criteria.items():
+        query &= Q(**{field: value})
+
+    # Initialize a list to store the section IDs for each token criteria
+    section_ids_list = []
+
+    # Get section IDs for each token criteria
+    for token_criteria in token_criteria_list:
+        token_query = Q()
+        for field, value in token_criteria.items():
+            token_query &= Q(**{f"tokens__{field}__icontains": value})
+        section_ids = Section.objects.filter(query & token_query).values_list('id', flat=True)
+        section_ids_list.append(set(section_ids))
+
+    # Intersect the section IDs to get IDs matching all token criteria
+    final_section_ids = set.intersection(*section_ids_list)
+
+    # Fetch the actual sections using the final section IDs
+    sections = Section.objects.filter(id__in=final_section_ids).distinct()
+    logger.debug(f"Sections matching criteria: {sections.query}")
+
+    return sections
 
 def get_sections_with_token_position(token_value: str, section_type: str) -> List[Section]:
     sections = Section.objects.filter(
