@@ -100,13 +100,8 @@ class SectionPartial:
     container: strawberry.auto
 
 
-class NotFoundError(Exception):
-    """
-    Custom exception to be raised when an item is not found.
-    """
-    def __init__(self, message="Item not found"):
-        self.message = message
-        super().__init__(self.message)
+@strawberry.type
+class HighlightedSection:
+    section: Section 
+    highlighted_tokens: List[Token]
 
-    def __str__(self):
-        return self.message

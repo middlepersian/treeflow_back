@@ -21,7 +21,7 @@ from treeflow.corpus.types.dependency import Dependency, DependencyInput, Depend
 from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features
 from treeflow.corpus.types.pos import POS, POSInput, POSPartial
 from treeflow.corpus.enums.pos import UPOSValues
-from treeflow.corpus.types.section import Section, SectionInput, SectionPartial
+from treeflow.corpus.types.section import Section, SectionInput, SectionPartial, HighlightedSection
 from treeflow.corpus.models.section import Section as SectionModel
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
@@ -146,34 +146,28 @@ class Query:
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
     tokens_list : List[Token] = strawberry_django.field()
     
-    @strawberry.field
-    @sync_to_async
-    def find_sections_with_tokens(
-        self, 
-        info, 
-        token_search_criteria: List[TokenSearchInput], 
-        section_type: str, 
-        search_mode: str = "sequence",  # default to "distance", can also be "sequence"
-        enforce_order: bool = False
-    ) -> List[Section]:
+    @strawberry.type
+    class Query:
+        @strawberry.field
+        def get_sections_with_highlighted_tokens(
+            self,
+            criteria: List[TokenSearchInput], 
+            section_type: str
+        ) -> List[HighlightedSection]:
             
-        # Convert GraphQL input to plain Python list of dictionaries
-        criteria_list = [
-            {
-                'field': criteria.field,
-                'value': criteria.value,
-                'min_previous_distance': {
-                    'distance_from_previous': criteria.min_previous_distance.distance_from_previous,
-                    'exact': criteria.min_previous_distance.exact
-                } if criteria.min_previous_distance else None
-            }
-            for criteria in token_search_criteria
-        ]
+            # Convert the list of TokenSearchInput into the desired dictionary format
+            criteria_dict = {}
+            for item in criteria:
+                # Here you will convert each item of TokenSearchInput into the desired format
+                # This is just an example, you might need more detailed logic based on your requirements
+                criteria_dict[item.field] = {
+                    "value": item.value,
+                    "method": item.query_type  # or any other fields you want to use
+                }
+            
+            highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
 
-        # Call the core logic function
-        sections = find_tokens_within_sections(criteria_list, section_type, search_mode, enforce_order)
-        #cast return type
-        return cast(List[Section], sections)
+
 
 
     # ### dict

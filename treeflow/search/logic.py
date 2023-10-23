@@ -5,12 +5,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from django.db.models import Q
-from typing import Dict, List
-
-def get_sections_by_single_token_criteria(criteria: Dict[str, Dict[str, str]], section_type: str) -> List[Section]:
+def get_sections_with_highlighted_tokens(criteria: Dict[str, Dict[str, str]], section_type: str) -> List[Dict]:
     """
-    Fetch sections based on the specified criteria.
+    Fetch sections based on the specified criteria and get highlighted tokens within them.
     
     Args:
     - criteria (dict): A dictionary where keys are the token fields (e.g., 'tokens__transcription', 'tokens__transliteration') 
@@ -18,7 +15,7 @@ def get_sections_by_single_token_criteria(criteria: Dict[str, Dict[str, str]], s
     - section_type (str): The type of section to filter by.
     
     Returns:
-    - List[Section]: List of sections matching the criteria.
+    - List[Dict]: List of dictionaries, each containing a section and its corresponding highlighted tokens.
     """
 
     # Start with a base Q object to accumulate our queries
@@ -31,8 +28,22 @@ def get_sections_by_single_token_criteria(criteria: Dict[str, Dict[str, str]], s
 
     # Query the sections based on the criteria
     sections = Section.objects.filter(query).distinct()
+    logger.debug(f"Sections matching criteria: {sections.query}")
 
-    return sections
+    results = []
+    
+    # For each section, fetch the tokens that match the search criteria and store them.
+    for section in sections:
+        matching_tokens = Token.objects.filter(sectiontoken__section=section, **{f"{field.split('__')[1]}__{search_method}": search_data["value"]})
+        logger.debug(f"Matching tokens: {matching_tokens.query}")
+        
+        # Append the section and its highlighted tokens to the results list
+        results.append({
+            'section': section,
+            'highlighted_tokens': list(matching_tokens)
+        })
+
+    return results
 
 
 def get_sections_by_multiple_token_criteria(section_criteria: Dict[str, str], token_criteria_list: List[Dict[str, Dict[str, str]]]) -> List[Section]:

@@ -1,7 +1,7 @@
 # Create your tests here.
 from django.test import TestCase
 from treeflow.corpus.models import Token, Section, SectionToken
-from treeflow.search.logic import get_sections_by_single_token_criteria, get_sections_by_multiple_token_criteria
+from treeflow.search.logic import get_sections_with_highlighted_tokens, get_sections_by_multiple_token_criteria
 import asyncio
 import logging
 
@@ -64,31 +64,32 @@ class TokenSearchTest(TestCase):
         for token in [token1, token6, token7]:
             SectionToken.objects.create(token=token, section=section6)
 
-    def test_get_sections_with_criteria(self):
+    def test_get_sections_with_highlighted_tokens(self):
         # Test single criteria
         criteria = {
             "tokens__transcription": {"value": "apple", "method": "icontains"}
         }
-
-        sections = get_sections_by_single_token_criteria(criteria, "sentence")
-        # apple is present in section1, section2, section3, section4, section5 and section6
-        self.assertEqual(len(sections), 6)
+        highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
+        self.assertEqual(len(highlighted_sections), 6)  # apple is present in section1, section2, section3, section4, section5, and section6
+        for section_data in highlighted_sections:
+            self.assertTrue(any(token.transcription.lower() == "apple" for token in section_data['highlighted_tokens']))
 
         criteria = {
             "tokens__transcription": {"value": "date", "method": "icontains"}
         }
-
-        sections = get_sections_by_single_token_criteria(criteria, "sentence")
-        self.assertEqual(len(sections), 4)  # date is present in section1, section2, section3, section5
+        highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
+        self.assertEqual(len(highlighted_sections), 4)  # date is present in section1, section2, section3, and section5
+        for section_data in highlighted_sections:
+            self.assertTrue(any(token.transcription.lower() == "date" for token in section_data['highlighted_tokens']))
 
         criteria = {
             "tokens__transcription": {"value": "non_existen", "method": "icontains"}
         }
+        highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
+        self.assertEqual(len(highlighted_sections), 0)  # No sections should match this criteria
 
-        sections = get_sections_by_single_token_criteria(criteria, "sentence")
-        self.assertEqual(len(sections), 0)  # No sections should match this criteria
 
-    def test_get_sections_with_tokens(self):
+    def test_get_sections_by_multiple_token_criteria(self):
         # Define section criteria (in this case, just the type of section)
         section_criteria = {
             "type": "sentence"
