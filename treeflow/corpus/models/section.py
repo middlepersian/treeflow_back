@@ -35,6 +35,7 @@ class Section(models.Model):
                 fields=['text', 'identifier'], name='section_text_identifier')
         ]
         indexes = [models.Index(fields=['text', 'type']),
+                   models.Index(fields=['type']),
                    ]
 
     def __str__(self) -> str:
@@ -64,7 +65,7 @@ class SectionToken(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['section', 'token']),
-            models.Index(fields=['token']), 
+            models.Index(fields=['token']),
             models.Index(fields=['section']),
         ]
 
