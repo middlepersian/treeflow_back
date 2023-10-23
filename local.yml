@@ -3,11 +3,8 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
-<<<<<<< HEAD
-=======
   local_elastic_data: {}
   local_redis_data: {}
->>>>>>> dev
 
 services:
   django:
@@ -37,15 +34,43 @@ services:
       dockerfile: ./compose/production/postgres/Dockerfile
     image: treeflow_production_postgres
     container_name: postgres
+    depends_on:
+      - elastic
     volumes:
       - local_postgres_data:/var/lib/postgresql/data:Z
       - local_postgres_data_backups:/backups:z
     env_file:
       - ./.envs/.local/.postgres
 
-  docs:
-    image: treeflow_local_docs
-    container_name: docs
+  elastic:
+    image: elasticsearch:7.17.9
+    environment:
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - logger.level=error
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - local_elastic_data:/usr/share/elasticsearch/data
+    healthcheck:
+      interval: 5s
+      retries: 500
+      test: curl -s 127.0.0.1:9200 &>/dev/null  
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - local_redis_data:/data
+    ports:
+      - "6379:6379"
+  
+  celery_worker:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
