@@ -338,3 +338,20 @@ STRAWBERRY_DJANGO = {
     "MUTATIONS_DEFAULT_ARGUMENT_NAME": "input",
 
 }
+
+
+# Celery configuration
+CELERY_BROKER_URL = env("REDIS_URL")
+CELERY_RESULT_BACKEND = env("REDIS_URL")
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+
+CELERY_BEAT_SCHEDULE = {
+    'clear_and_warm_up_cache': {
+        'task': 'treeflow.datafeed.tasks.clear_and_warm_up_cache',
+        'schedule': crontab(minute=1), 
+    }
+}
