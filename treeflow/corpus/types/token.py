@@ -133,16 +133,15 @@ class FeatureSelectionInput:
 
 @strawberry.input
 class DistanceFromPreviousToken:
-    distance_from_previous: Optional[int] = None
+    distance: Optional[int] = None
     exact: Optional[bool] = False
 
 @strawberry.input
 class TokenSearchInput:
-    query_type: Optional[str] = 'term' # default to 'term'
+    query_type: Optional[str] = 'exact' # default to 'term'
     value: Optional[str]
     field: Optional[str] = 'transcription' # default to 'transcription'
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
-    search_mode: Optional[str] = 'must' # default to 'must'#
     stopwords: Optional[bool] = False
-    min_previous_distance: Optional[DistanceFromPreviousToken] = None
+    distance_from_previous: Optional[DistanceFromPreviousToken] = None

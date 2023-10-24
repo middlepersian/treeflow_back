@@ -165,8 +165,6 @@ class Query:
                     "method": item.query_type
                 }
             })
-
-
         try:
             # search
             highlighted_sections = get_sections_with_highlighted_tokens(criteria_list, section_type)

@@ -1,97 +1,89 @@
 # Create your tests here.
 from django.test import TestCase
 from treeflow.corpus.models import Token, Section, SectionToken
-from treeflow.search.logic import get_sections_with_highlighted_tokens, get_sections_by_multiple_token_criteria
+from treeflow.corpus.types.token import TokenSearchInput, DistanceFromPreviousToken
+from treeflow.search.logic import get_sections_with_highlighted_tokens, get_sections_by_multiple_token_criteria, get_sections_with_positional_highlighted_tokens
 import asyncio
 import logging
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 class TokenSearchTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # logging.disable(logging.NOTSET)  # Re-enable logg
-        # Create some tokens
-        token1 = Token.objects.create(transcription="apple", number=1)
-        token2 = Token.objects.create(transcription="banana", number=2)
-        token3 = Token.objects.create(transcription="cherry", number=3)
-        token4 = Token.objects.create(transcription="date", number=4)
-        token5 = Token.objects.create(transcription="elderberry", number=5)
-        token6 = Token.objects.create(transcription="fig", number=6)
-        token7 = Token.objects.create(transcription="grape", number=7)
-        token8 = Token.objects.create(transcription="honeydew", number=8)
-        token9 = Token.objects.create(transcription="imbe", number=9)
+        
+        # Create some tokens based on their numbers
+        cls.token1 = Token.objects.create(transcription="apple", number=1)
+        cls.token2 = Token.objects.create(transcription="banana", number=2)
+        cls.token3 = Token.objects.create(transcription="cherry", number=3)
+        cls.token4 = Token.objects.create(transcription="date", number=4)
+        cls.token5 = Token.objects.create(transcription="elderberry", number=5)
+        cls.token6 = Token.objects.create(transcription="fig", number=6)
+        cls.token7 = Token.objects.create(transcription="grape", number=7)
+        cls.token8 = Token.objects.create(transcription="honeydew", number=8)
+        cls.token9 = Token.objects.create(transcription="imbe", number=9)
 
         # Create some sections
-        section1 = Section.objects.create(type="sentence")
-        section2 = Section.objects.create(type="sentence")
-        section3 = Section.objects.create(type="sentence")
-        section4 = Section.objects.create(type="sentence")
-        section5 = Section.objects.create(type="sentence")
-        section6 = Section.objects.create(type="sentence")
-        section7 = Section.objects.create(type="sentence")
+        cls.section1 = Section.objects.create(type="sentence")
+        cls.section2 = Section.objects.create(type="sentence")
+        cls.section3 = Section.objects.create(type="sentence")
+        cls.section4 = Section.objects.create(type="sentence")
+        cls.section5 = Section.objects.create(type="sentence")
+        cls.section6 = Section.objects.create(type="sentence")
+        cls.section7 = Section.objects.create(type="sentence")
 
-        # Create relationships between tokens and sections
+        
+        # cls.section1: apple(1), banana(2), cherry(3), date(4), elderberry(5), grape(7), honeydew(8), imbe(9)
+        for token in sorted([cls.token1, cls.token2, cls.token3, cls.token4, cls.token5, cls.token7, cls.token8, cls.token9], key=lambda x: x.number):
+            SectionToken.objects.create(token=token, section=cls.section1)
 
-        # Add tokens to section1 in their original order
-        # apple, banana, cherry, date, elderberry, grape, honeydew, imbe
-        for token in [token1, token2, token3, token4, token5, token7, token8, token9]:
-            SectionToken.objects.create(token=token, section=section1)
+        # cls.section2: apple(1), banana(2), cherry(3), date(4), fig(6), grape(7), honeydew(8), imbe(9)
+        for token in sorted([cls.token1, cls.token2, cls.token3, cls.token4, cls.token6, cls.token7, cls.token8, cls.token9], key=lambda x: x.number):
+            SectionToken.objects.create(token=token, section=cls.section2)
 
-        # Add tokens to section2 in a different order (e.g., every second token followed by the remaining tokens)
-        # apple, cherry, grape, imbe, banana, date, fig, honeydew
-        for token in [token1, token3, token7, token9, token2, token4, token6, token8]:
-            SectionToken.objects.create(token=token, section=section2)
+        # cls.section3: apple(1), banana(2), cherry(3), date(4), elderberry(5), fig(6), grape(7), honeydew(8), imbe(9)
+        for token in sorted([cls.token1, cls.token2, cls.token3, cls.token4, cls.token5, cls.token6, cls.token7, cls.token8, cls.token9], key=lambda x: x.number, reverse=True):
+            SectionToken.objects.create(token=token, section=cls.section3)
 
-        # Add tokens to section3 in a different order (e.g., reversed)
-        # imbe, honeydew, grape, fig, elderberry, date, cherry, banana, apple
-        for token in reversed([token1, token2, token3, token4, token5, token6, token7, token8, token9]):
-            SectionToken.objects.create(token=token, section=section3)
+        # cls.section4: apple(1), banana(2), elderberry(5), grape(7), honeydew(8)
+        for token in sorted([cls.token1, cls.token2, cls.token5, cls.token7, cls.token8], key=lambda x: x.number):
+            SectionToken.objects.create(token=token, section=cls.section4)
 
-        # Add tokens to section4 in their original order but skip some
-        # apple, banana, elderberry, grape, honeydew
-        for token in [token1, token2, token5, token7, token8]:
-            SectionToken.objects.create(token=token, section=section4)
+        # cls.section5: apple(1), banana(2), cherry(3), date(4), fig(6), grape(7), honeydew(8), imbe(9)
+        for token in sorted([cls.token9, cls.token2, cls.token3, cls.token8, cls.token1, cls.token6, cls.token4, cls.token7], key=lambda x: x.number):
+            SectionToken.objects.create(token=token, section=cls.section5)
 
-        # Add tokens to section5 in some custom order
-        # imbe, banana, cherry, honeydew, apple, fig, date, grape
-        for token in [token9, token2, token3, token8, token1, token6, token4, token7]:
-            SectionToken.objects.create(token=token, section=section5)
+        # cls.section6: apple(1), fig(6), grape(7)
+        for token in sorted([cls.token1, cls.token6, cls.token7], key=lambda x: x.number):
+            SectionToken.objects.create(token=token, section=cls.section6)
 
-        # add only three tokens to section6
-        # apple, fig and grape
-        for token in [token1, token6, token7]:
-            SectionToken.objects.create(token=token, section=section6)
 
-        # add only one token to section7
-            
 
     def test_get_sections_with_highlighted_tokens(self):
         # Test single criteria
-        criteria = {
-            "tokens__transcription": {"value": "apple", "method": "icontains"}
-        }
+        criteria = [{
+            "transcription": {"value": "apple", "method": "icontains"}
+        }]
         highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
         self.assertEqual(len(highlighted_sections), 6)  # apple is present in section1, section2, section3, section4, section5, and section6
         for section_data in highlighted_sections:
             self.assertTrue(any(token.transcription.lower() == "apple" for token in section_data['highlighted_tokens']))
 
-        criteria = {
-            "tokens__transcription": {"value": "date", "method": "icontains"}
-        }
+        criteria = [{
+            "transcription": {"value": "date", "method": "icontains"}
+        }]
         highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
         self.assertEqual(len(highlighted_sections), 4)  # date is present in section1, section2, section3, and section5
         for section_data in highlighted_sections:
             self.assertTrue(any(token.transcription.lower() == "date" for token in section_data['highlighted_tokens']))
 
-        criteria = {
-            "tokens__transcription": {"value": "non_existen", "method": "icontains"}
-        }
+        criteria = [{
+            "transcription": {"value": "non_existen", "method": "icontains"}
+        }]
         highlighted_sections = get_sections_with_highlighted_tokens(criteria, "sentence")
         self.assertEqual(len(highlighted_sections), 0)  # No sections should match this criteria
-
 
     def test_get_sections_by_multiple_token_criteria(self):
         # Define section criteria (in this case, just the type of section)
@@ -114,3 +106,39 @@ class TokenSearchTest(TestCase):
         ]
         sections = get_sections_by_multiple_token_criteria(section_criteria, token_criteria_list)
         self.assertEqual(len(sections), 1)
+
+
+    def test_get_sections_with_positional_highlighted_tokens(self):
+
+        # Subtest 1: Find sections with 'apple' followed by 'banana' with a distance of 1
+        with self.subTest("Test with two tokens: apple followed by banana with a distance of 1"):
+            criteria_list = [
+                TokenSearchInput(value="apple", distance_from_previous=None),
+                TokenSearchInput(value="banana", distance_from_previous=DistanceFromPreviousToken(distance=1, exact=True))
+            ]
+            highlighted_sections = get_sections_with_positional_highlighted_tokens(criteria_list, "sentence")
+            expected_sections = {self.section1, self.section2, self.section3, self.section4, self.section5}
+            self.assertSetEqual({s['section'] for s in highlighted_sections}, expected_sections)
+
+        # Subtest 2: Find sections with 'apple' followed by 'banana' with a distance of 1, followed by 'cherry' with a distance of 1
+        with self.subTest("Test with three tokens: apple, banana, cherry with specific distances"):
+            criteria_list = [
+                TokenSearchInput(value="apple", distance_from_previous=None),
+                TokenSearchInput(value="banana", distance_from_previous=DistanceFromPreviousToken(distance=1, exact=True)),
+                TokenSearchInput(value="cherry", distance_from_previous=DistanceFromPreviousToken(distance=1, exact=True))
+            ]
+            highlighted_sections = get_sections_with_positional_highlighted_tokens(criteria_list, "sentence")
+            expected_sections = {self.section1, self.section2, self.section3,  self.section5}
+            self.assertSetEqual({s['section'] for s in highlighted_sections}, expected_sections)
+
+        # Subtest 3: Find sections with 'apple' followed by 'banana' with a distance of 1, followed by 'cherry' with a distance of 1, followed by 'date' with a distance of 1
+        with self.subTest("Test with four tokens: apple, banana, cherry, date with specific distances"):
+            criteria_list = [
+                TokenSearchInput(value="apple", distance_from_previous=None),
+                TokenSearchInput(value="banana", distance_from_previous=DistanceFromPreviousToken(distance=1, exact=True)),
+                TokenSearchInput(value="cherry", distance_from_previous=DistanceFromPreviousToken(distance=1, exact=True)),
+                TokenSearchInput(value="date", distance_from_previous=DistanceFromPreviousToken(distance=1, exact=True))
+            ]
+            highlighted_sections = get_sections_with_positional_highlighted_tokens(criteria_list, "sentence")
+            expected_sections = {self.section1, self.section2, self.section3,  self.section5}
+            self.assertSetEqual({s['section'] for s in highlighted_sections}, expected_sections)
