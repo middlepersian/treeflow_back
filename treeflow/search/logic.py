@@ -55,7 +55,7 @@ def get_sections_with_positional_highlighted_tokens(criteria_list: List[TokenSea
     section_query = Q(type=section_type)
 
     # Start with all sections of the given type
-    filtered_sections = Section.objects.filter(section_query).only('id', 'type')
+    filtered_sections = Section.objects.filter(section_query)
 
     # Begin with the first criteria
     first_criteria = criteria_list[0]

@@ -10,7 +10,7 @@ from strawberry_django.permissions import IsAuthenticated, IsSuperuser
 from strawberry_django.optimizer import DjangoOptimizerExtension
 from strawberry.django import auth
 from typing import List, Optional, cast
-#corpus
+# corpus
 from treeflow.corpus import models as corpus_models
 from treeflow.corpus.types.bibliography import BibEntry, BibEntryInput, BibEntryPartial
 from treeflow.corpus.models.bibliography import BibEntry as BibEntryModel
@@ -25,22 +25,22 @@ from treeflow.corpus.types.section import Section, SectionInput, SectionPartial,
 from treeflow.corpus.models.section import Section as SectionModel
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
-#from treeflow.corpus.types.text_sigle import TextSigle
+# from treeflow.corpus.types.text_sigle import TextSigle
 from treeflow.corpus.types.text import Text, TextInput, TextPartial
 from treeflow.corpus.types.token import Token, TokenInput, TokenPartial, TokenSearchInput
 from treeflow.corpus.types.user import User
-#dict
+# dict
 from treeflow.dict import models as dict_models
 from treeflow.dict.types.lemma import Lemma, LemmaInput, LemmaPartial, TermTechList, LanguageList
 from treeflow.dict.types.meaning import Meaning, MeaningInput, MeaningPartial
 from treeflow.dict.enums.term_tech import TermTech
 from treeflow.dict.enums.language import Language
-#image
+# image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
-#search
-from treeflow.search.logic import get_sections_with_highlighted_tokens
+# search
+from treeflow.search.logic import get_sections_with_highlighted_tokens, get_sections_with_positional_highlighted_tokens
 
-###logging
+# logging
 # create logger
 import logging
 logger = logging.getLogger(__name__)
@@ -59,12 +59,11 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-
 @strawberry.type
 class Query:
 
-    ##corpus
-    ### auth and users
+    # corpus
+    # auth and users
     user: Optional[User] = strawberry_django.node(extensions=[IsSuperuser()])
     users:  relay.ListConnection[User] = strawberry_django.connection(extensions=[IsSuperuser()])
     me: User = auth.current_user()
@@ -76,7 +75,7 @@ class Query:
     # comment
     comment: Optional[Comment] = strawberry_django.node()
     comments: ListConnectionWithTotalCount[Comment] = strawberry_django.connection()
-    comments_list : List[Comment] = strawberry_django.field()
+    comments_list: List[Comment] = strawberry_django.field()
 
     # corpus
     corpus: Optional[Corpus] = strawberry_django.node()
@@ -85,41 +84,40 @@ class Query:
     # dependency
     dependency: Optional[Dependency] = strawberry_django.node()
     dependencies: ListConnectionWithTotalCount[Dependency] = strawberry_django.connection()
-    dependencies_list : List[Dependency] = strawberry_django.field()
-    
+    dependencies_list: List[Dependency] = strawberry_django.field()
+
     @strawberry.field
     def deprel_list(self, info) -> DeprelList:
         dep_list = [dep.value for dep in Deprel]
         return DeprelList(dep=dep_list)
-    
+
     # feature
     feature: Optional[Feature] = strawberry_django.node()
     features: ListConnectionWithTotalCount[Feature] = strawberry_django.connection()
-    features_list : List[Feature] = strawberry_django.field()
+    features_list: List[Feature] = strawberry_django.field()
 
     @strawberry.field
     def get_features(self, pos: str) -> PartOfSpeechFeatures:
         feature_values = []
         for feature, values in get_features(pos).items():
             feature_values.append(UPOSFeatures(name=feature, values=values))
-            
+
         return PartOfSpeechFeatures(pos=pos, features=list(get_features(pos).keys()), feature_values=feature_values)
-    
+
     @strawberry.field
     def upos_list(self, info) -> UPOSList:
         pos_list = [pos.value for pos in UPOSValues]
         return UPOSList(pos=pos_list)
 
-
     # # pos
     pos: Optional[POS] = strawberry_django.node()
     pos_connection: ListConnectionWithTotalCount[POS] = strawberry_django.connection()
-    pos_list : List[POS] = strawberry_django.field()
+    pos_list: List[POS] = strawberry_django.field()
 
     # section
     section: Optional[Section] = strawberry_django.node()
     sections: ListConnectionWithTotalCount[Section] = strawberry_django.connection()
-    sections_list : List[Section] = strawberry_django.field()
+    sections_list: List[Section] = strawberry_django.field()
 
     @strawberry.field
     @sync_to_async
@@ -130,32 +128,30 @@ class Query:
     # source
     source: Optional[Source] = strawberry_django.node()
     sources: ListConnectionWithTotalCount[Source] = strawberry_django.connection()
-    sources_list : List[Source] = strawberry_django.field()
+    sources_list: List[Source] = strawberry_django.field()
 
     # text_sigle
-    #text_sigle: Optional[TextSigle] = strawberry_django.node()
-    #text_sigles:  relay.ListConnection[TextSigle] = strawberry_django.connection()
+    # text_sigle: Optional[TextSigle] = strawberry_django.node()
+    # text_sigles:  relay.ListConnection[TextSigle] = strawberry_django.connection()
 
     # # text
     text: Optional[Text] = strawberry_django.node()
     texts: ListConnectionWithTotalCount[Text] = strawberry_django.connection()
-    texts_list : List[Text] = strawberry_django.field()
+    texts_list: List[Text] = strawberry_django.field()
 
     # # token
     token: Optional[Token] = strawberry_django.node()
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
-    tokens_list : List[Token] = strawberry_django.field()
-    
+    tokens_list: List[Token] = strawberry_django.field()
 
     @strawberry.field
     @sync_to_async
-
     def get_sections_with_highlighted_tokens(
         self,
-        criteria: List[TokenSearchInput], 
+        criteria: List[TokenSearchInput],
         section_type: str
     ) -> List[HighlightedSection]:
-        
+
         # Convert the list of TokenSearchInput into a list of dictionaries
         criteria_list = []
         for item in criteria:
@@ -169,7 +165,6 @@ class Query:
             # search
             highlighted_sections = get_sections_with_highlighted_tokens(criteria_list, section_type)
 
-            
             # Transform the result to fit the HighlightedSection structure
             highlighted_sections_strawberry = [
                 HighlightedSection(section=result['section'], highlighted_tokens=result['highlighted_tokens'])
@@ -179,15 +174,38 @@ class Query:
             return highlighted_sections_strawberry
         except Exception as e:
             logger.error(e)
- 
 
+    @strawberry.field
+    @sync_to_async
+    def get_sections_with_positional_highlighted_tokens(
+        self,
+        criteria: List[TokenSearchInput],
+        section_type: str
+    ) -> List[HighlightedSection]:
 
+        try:
+            # Perform the search
+            highlighted_sections = get_sections_with_positional_highlighted_tokens(criteria, section_type)
+
+            # Transform the result to fit the HighlightedSection structure
+            highlighted_sections_strawberry = [
+                HighlightedSection(
+                    section=result['section'],
+                    highlighted_tokens=result['highlighted_tokens']
+                )
+                for result in highlighted_sections
+            ]
+
+            return highlighted_sections_strawberry
+        except Exception as e:
+            logger.error(e)
+            return []
 
         # ### dict
         # # lemma
     lemma: Optional[Lemma] = strawberry_django.node()
     lemmas: ListConnectionWithTotalCount[Lemma] = strawberry_django.connection()
-    lemmas_list : List[Lemma] = strawberry_django.field()
+    lemmas_list: List[Lemma] = strawberry_django.field()
 
     @strawberry.field
     def term_tech_list(self, info) -> TermTechList:
@@ -196,12 +214,12 @@ class Query:
 
     @strawberry.field
     def term_techs(self) -> List[str]:
-        return [term_tech.value for term_tech in TermTech]    
+        return [term_tech.value for term_tech in TermTech]
 
     @strawberry.field
     def language_list(self, info) -> LanguageList:
         language_list = [l.value for l in Language]
-        return LanguageList(language=language_list)    
+        return LanguageList(language=language_list)
 
     @strawberry.field
     def languages(self) -> List[str]:
@@ -210,14 +228,13 @@ class Query:
     # # meaning
     meaning: Optional[Meaning] = strawberry_django.node()
     meanings: ListConnectionWithTotalCount[Meaning] = strawberry_django.connection()
-    meanings_list : List[Meaning] = strawberry_django.field()
+    meanings_list: List[Meaning] = strawberry_django.field()
 
     # ### image
     # # image
     image: Optional[Image] = strawberry_django.node()
     images: ListConnectionWithTotalCount[Image] = strawberry_django.connection()
-    images_list : List[Image] = strawberry_django.field()
-
+    images_list: List[Image] = strawberry_django.field()
 
 
 @strawberry.type
@@ -225,7 +242,7 @@ class Mutation:
 
     login: User = auth.login()
     logout = auth.logout()
-    
+
     # bibliography
     create_bib_entry: BibEntry = mutations.create(BibEntryInput, extensions=[IsAuthenticated()])
     update_bib_entry: BibEntry = mutations.update(BibEntryPartial, extensions=[IsAuthenticated()])
@@ -322,28 +339,26 @@ class Mutation:
         section.save()
         return cast(Section, new_section)
 
-
     # source
     create_source: Source = mutations.create(SourceInput, extensions=[IsAuthenticated()])
     update_source: Source = mutations.update(SourcePartial, extensions=[IsAuthenticated()])
     delete_source: Source = mutations.delete(strawberry_django.NodeInput, extensions=[IsAuthenticated()])
 
-
     @strawberry_django.mutation(handle_django_errors=True)
     def create_source_with_new_bibentry(self, info, source: SourceInput, bibentry: BibEntryInput) -> Source:
         if not info.context or not info.context.request.user.is_authenticated:
             raise Exception("Not authenticated")
-        source =  vars(source)
+        source = vars(source)
         bibentry = vars(bibentry)
-        #create bibentry
+        # create bibentry
         new_bibentry = resolvers.create(info, BibEntryModel, resolvers.parse_input(info, bibentry))
         new_bibentry.save()
-        #create source
+        # create source
         new_source = resolvers.create(info, SourceModel, resolvers.parse_input(info, source))
         # add bibentry to source
         new_source.references.add(new_bibentry)
         new_source.save()
-        return cast(Source, new_source)   
+        return cast(Source, new_source)
 
     # text
     create_text: Text = mutations.create(TextInput, extensions=[IsAuthenticated()])
@@ -354,7 +369,6 @@ class Mutation:
     create_token: Token = mutations.create(TokenInput, extensions=[IsAuthenticated()])
     update_token: Token = mutations.update(TokenPartial, extensions=[IsAuthenticated()])
     delete_token: Token = mutations.delete(strawberry_django.NodeInput, extensions=[IsAuthenticated()])
-
 
     @strawberry_django.mutation(handle_django_errors=True)
     def create_token_between(self, info, previous_token: relay.GlobalID, new_token_data: TokenInput) -> Token:
@@ -374,19 +388,17 @@ class Mutation:
         new_token.save()
         return cast(Token, token)
 
-
     @strawberry_django.input_mutation(handle_django_errors=True)
     def join_tokens(self, info, current: relay.GlobalID, previous: relay.GlobalID,) -> Token:
-        
+
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
-        
-        current_token =  current.resolve_node_sync(info)
-        previous_token =  previous.resolve_node_sync(info)
+
+        current_token = current.resolve_node_sync(info)
+        previous_token = previous.resolve_node_sync(info)
         current_token.previous = previous_token
         current_token.save()
         return cast(Token, token)
-
 
     @strawberry_django.input_mutation(handle_django_errors=True)
     def add_lemmas_to_token(self, info,
@@ -442,7 +454,6 @@ class Mutation:
         token.save()
         return cast(Token, token)
 
-
     @strawberry_django.input_mutation(handle_django_errors=True)
     def remove_lemmas_from_token(self,
                                  info,
@@ -482,12 +493,12 @@ class Mutation:
         pos = resolvers.create(info, corpus_models.Pos, resolvers.parse_input(info, data))
         pos.save()
         return cast(Token, token)
-        
+
     @strawberry_django.input_mutation(handle_django_errors=True)
     def add_new_feature_to_token(self, info,
-                                  token: relay.GlobalID,
-                                  feature:FeatureInput,
-                                  ) -> Token:
+                                 token: relay.GlobalID,
+                                 feature: FeatureInput,
+                                 ) -> Token:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         data = vars(feature)
@@ -496,7 +507,7 @@ class Mutation:
         feature.save()
         return cast(Token, token)
 
-    ## dict
+    # dict
 
     # lemma
     create_lemma: Lemma = mutations.create(LemmaInput, extensions=[IsAuthenticated()])
@@ -518,7 +529,7 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node_sync(info)
-        #data = vars(related_lemma)
+        # data = vars(related_lemma)
         related_lemma = resolvers.create(info, dict_models.Lemma, resolvers.parse_input(info, data))
         current_lemma.related_lemmas.add(related_lemma)
         current_lemma.save()
@@ -539,13 +550,13 @@ class Mutation:
         if not info.context.request.user.is_authenticated:
             raise Exception("You must be authenticated for this operation.")
         current_lemma = lemma.resolve_node_sync(info)
-        
+
         # Check if the related meaning already exists
         existing_related_meaning = dict_models.Meaning.objects.filter(
             meaning=related_meaning.meaning,
             language=related_meaning.language
         ).first()
-        
+
         if existing_related_meaning:
             # If it exists, use the existing one
             related_meaning_to_add = existing_related_meaning
@@ -553,11 +564,10 @@ class Mutation:
             # Otherwise, create a new one
             data = vars(related_meaning)
             related_meaning_to_add = resolvers.create(info, dict_models.Meaning, resolvers.parse_input(info, data))
-            
+
         current_lemma.related_meanings.add(related_meaning_to_add)
         current_lemma.save()
         return cast(Lemma, current_lemma)
-
 
     @strawberry_django.mutation(handle_django_errors=True)
     def remove_related_lemma_from_lemma(self, info, lemma: relay.GlobalID, related_lemma: relay.GlobalID,) -> Lemma:
@@ -579,12 +589,10 @@ class Mutation:
         current_lemma.save()
         return cast(Lemma, current_lemma)
 
-
     # meaning
     create_meaning: Meaning = mutations.create(MeaningInput, extensions=[IsAuthenticated()])
     update_meaning: Meaning = mutations.update(MeaningPartial, extensions=[IsAuthenticated()])
     delete_meaning: Meaning = mutations.delete(strawberry_django.NodeInput, extensions=[IsAuthenticated()])
-
 
     @strawberry_django.input_mutation(handle_django_errors=True)
     def add_related_meaning_to_meaning(self, info, meaning: relay.GlobalID, related: relay.GlobalID) -> Meaning:
@@ -603,14 +611,12 @@ class Mutation:
         current_meaning.save()
         return cast(Meaning, current_meaning)
 
-    ## image
+    # image
     create_image: Image = mutations.create(ImageInput, extensions=[IsAuthenticated()])
     update_image: Image = mutations.update(ImagePartial, extensions=[IsAuthenticated()])
     delete_image: Image = mutations.delete(strawberry_django.NodeInput, extensions=[IsAuthenticated()])
 
 
-
-
-#MergedQuery = merge_types("MergedQuery", (Query, bibliography.Query, comment.Query, corpus.Query, dependency.Query, feature.Query, image.Query, lemma.Query, meaning.Query, pos.Query, section.Query, source.Query, text.Query, token.Query, user.Query))
-#MergedMutation = merge_types("MergedMutation", (Mutation, bibliography.Mutation, comment.Mutation, dependency.Mutation, feature.Mutation, image.Mutation, lemma.Mutation, meaning.Mutation, pos.Mutation, section.Mutation, source.Mutation, text.Mutation, token.Mutation))
+# MergedQuery = merge_types("MergedQuery", (Query, bibliography.Query, comment.Query, corpus.Query, dependency.Query, feature.Query, image.Query, lemma.Query, meaning.Query, pos.Query, section.Query, source.Query, text.Query, token.Query, user.Query))
+# MergedMutation = merge_types("MergedMutation", (Mutation, bibliography.Mutation, comment.Mutation, dependency.Mutation, feature.Mutation, image.Mutation, lemma.Mutation, meaning.Mutation, pos.Mutation, section.Mutation, source.Mutation, text.Mutation, token.Mutation))
 schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[DjangoOptimizerExtension])
