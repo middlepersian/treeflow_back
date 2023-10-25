@@ -38,7 +38,9 @@ from treeflow.dict.enums.language import Language
 # image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
 # search
-from treeflow.search.logic import get_sections_with_highlighted_tokens, get_sections_with_positional_highlighted_tokens
+from treeflow.search.logic import search_tokens, search_tokens_by_position
+# search enum
+from treeflow.search.enum import SearchType
 
 # logging
 # create logger
@@ -144,48 +146,25 @@ class Query:
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
     tokens_list: List[Token] = strawberry_django.field()
 
-    @strawberry.field
-    @sync_to_async
-    def get_sections_with_highlighted_tokens(
-        self,
-        criteria: List[TokenSearchInput],
-        section_type: str
-    ) -> List[HighlightedSection]:
-
-        # Convert the list of TokenSearchInput into a list of dictionaries
-        criteria_list = []
-        for item in criteria:
-            criteria_list.append({
-                item.field: {
-                    "value": item.value,
-                    "method": item.query_type
-                }
-            })
-        try:
-            # search
-            highlighted_sections = get_sections_with_highlighted_tokens(criteria_list, section_type)
-
-            # Transform the result to fit the HighlightedSection structure
-            highlighted_sections_strawberry = [
-                HighlightedSection(section=result['section'], highlighted_tokens=result['highlighted_tokens'])
-                for result in highlighted_sections
-            ]
-
-            return highlighted_sections_strawberry
-        except Exception as e:
-            logger.error(e)
 
     @strawberry.field
     @sync_to_async
-    def get_sections_with_positional_highlighted_tokens(
+    def search_tokens(
         self,
         criteria: List[TokenSearchInput],
-        section_type: str
+        section_type: str,
+        search_type: SearchType = SearchType.SIMPLE
     ) -> List[HighlightedSection]:
+
+        # Choose which search function to use based on the search type
+        search_function = {
+            SearchType.SIMPLE: search_tokens,
+            SearchType.BY_POSITION: search_tokens_by_position
+        }[search_type]
 
         try:
             # Perform the search
-            highlighted_sections = get_sections_with_positional_highlighted_tokens(criteria, section_type)
+            highlighted_sections = search_function(criteria, section_type)
 
             # Transform the result to fit the HighlightedSection structure
             highlighted_sections_strawberry = [
@@ -197,12 +176,14 @@ class Query:
             ]
 
             return highlighted_sections_strawberry
+
         except Exception as e:
             logger.error(e)
             return []
 
-        # ### dict
-        # # lemma
+
+    # ### dict
+    # # lemma
     lemma: Optional[Lemma] = strawberry_django.node()
     lemmas: ListConnectionWithTotalCount[Lemma] = strawberry_django.connection()
     lemmas_list: List[Lemma] = strawberry_django.field()
