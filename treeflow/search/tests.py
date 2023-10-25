@@ -1,7 +1,7 @@
 # Create your tests here.
 from django.test import TestCase
-from treeflow.corpus.models import Token, Section, SectionToken
-from treeflow.corpus.types.token import TokenSearchInput, DistanceFromPreviousToken
+from treeflow.corpus.models import Token, Section, SectionToken, POS, Feature
+from treeflow.corpus.types.token import TokenSearchInput, DistanceFromPreviousToken, FeatureSelectionInput, POSSelectionInput
 from treeflow.search.logic import search_tokens, search_tokens_by_position
 import asyncio
 import logging
@@ -25,6 +25,16 @@ class TokenSearchTest(TestCase):
         cls.token7 = Token.objects.create(transcription="grape", number=7)
         cls.token8 = Token.objects.create(transcription="honeydew", number=8)
         cls.token9 = Token.objects.create(transcription="imbe", number=9)
+
+        # Create some POS entries
+        cls.pos_noun = POS.objects.create(token=cls.token1, pos="noun", type="upos")
+        cls.pos_verb = POS.objects.create(token=cls.token2, pos="verb", type="upos")
+
+        # Create some features for tokens
+        cls.feature_singular = Feature.objects.create(
+            token=cls.token1, pos=cls.pos_noun, feature="number", feature_value="singular")
+        cls.feature_plural = Feature.objects.create(
+            token=cls.token2, pos=cls.pos_verb, feature="number", feature_value="plural")
 
         # Create some sections
         cls.section1 = Section.objects.create(type="sentence")
@@ -130,3 +140,37 @@ class TokenSearchTest(TestCase):
             highlighted_sections = search_tokens_by_position(criteria_list, "sentence")
             expected_sections = {self.section1, self.section2, self.section3,  self.section5}
             self.assertSetEqual({s['section'] for s in highlighted_sections}, expected_sections)
+
+    def test_search_tokens_with_pos(self):
+
+        logger.debug(f'POS entries: {POS.objects.all()}')
+        logger.debug(f"Tokens with POS 'noun': {Token.objects.filter(pos_token__pos='NOUN')}")
+
+        logger.debug(f"Token-Section relationships: {SectionToken.objects.all()}")
+
+        expected_count = 6
+
+        # Test with POS criteria
+        criteria_list = [
+            TokenSearchInput(pos_token=[POSSelectionInput(pos="NOUN")])
+        ]
+        highlighted_sections = search_tokens(criteria_list, "sentence")
+        # Expectation based on how many tokens with "noun" POS exist in sections
+        self.assertEqual(len(highlighted_sections), expected_count)  # Update expected_count based on setup
+        for section_data in highlighted_sections:
+            self.assertTrue(any(token.pos_token.first().pos == "NOUN"
+                                for token in section_data['highlighted_tokens']))
+
+    def test_search_tokens_with_feature(self):
+        expected_count = 6
+
+        # Test with feature criteria
+        criteria_list = [
+            TokenSearchInput(feature_token=[FeatureSelectionInput(feature="number", feature_value="singular")])
+        ]
+        highlighted_sections = search_tokens(criteria_list, "sentence")
+        # Expectation based on how many tokens with "number: singular" feature exist in sections
+        self.assertEqual(len(highlighted_sections), expected_count)  # Update expected_count based on setup
+        for section_data in highlighted_sections:
+            self.assertTrue(any(feature.feature == "number" and feature.feature_value ==
+                            "singular" for token in section_data['highlighted_tokens'] for feature in token.feature_token.all()))

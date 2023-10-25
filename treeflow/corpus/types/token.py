@@ -114,15 +114,10 @@ class TokenPartial:
     related_tokens: strawberry.auto
 
 
-@strawberry.input
-class TokenPositionInput:
-    gap: Optional[int] = 0  # The gap of other tokens between them; default to 0
-
 # create input type for POS
 @strawberry.input
 class POSSelectionInput:
     pos: Optional[str]
-
 
 # create input type for Feature
 @strawberry.input
@@ -139,7 +134,7 @@ class DistanceFromPreviousToken:
 @strawberry.input
 class TokenSearchInput:
     query_type: Optional[str] = 'exact' # default to 'term'
-    value: Optional[str]
+    value: Optional[str] = None
     field: Optional[str] = 'transcription' # default to 'transcription'
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
