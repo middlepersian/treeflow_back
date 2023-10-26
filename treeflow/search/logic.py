@@ -77,32 +77,32 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
 
     results = []
     for section in sections:
-        highlighted_tokens_set = set()  # Using a set to ensure uniqueness
+        # Start with all tokens in the current section
+        highlighted_tokens_set = set(Token.objects.filter(sectiontoken__section=section))
+
         for token_criteria in criteria_list:
+            temp_tokens_set = set(highlighted_tokens_set)  # Temporary set for the current criteria
+
             field = token_criteria.field
             value = token_criteria.value
             search_method = getattr(token_criteria, "query_type", "icontains")
 
-            # Base query for tokens in the current section
-            query = Token.objects.filter(sectiontoken__section=section)
-
             # Modify the query based on the criteria
             if field and value:
-                query = query.filter(**{f"{field}__{search_method}": value})
+                temp_tokens_set &= set(Token.objects.filter(**{f"{field}__{search_method}": value}))
             if token_criteria.pos_token:
                 # Assuming only one POS criteria for simplicity
                 pos = token_criteria.pos_token[0].pos
-                query = query.filter(pos_token__pos=pos)
+                temp_tokens_set &= set(Token.objects.filter(pos_token__pos=pos))
             if token_criteria.feature_token:
                 feature = token_criteria.feature_token[0].feature
                 feature_value = token_criteria.feature_token[0].feature_value
-                query = query.filter(
-                    feature_token__feature=feature, feature_token__feature_value=feature_value)
+                temp_tokens_set &= set(Token.objects.filter(
+                    feature_token__feature=feature, feature_token__feature_value=feature_value))
+            
+            # Update the highlighted_tokens_set with the filtered tokens for the current criteria
+            highlighted_tokens_set = temp_tokens_set
 
-            highlighted_tokens_set.update(query)
-
-        logger.debug(
-            f"Number of highlighted tokens for section {section.id}: {len(highlighted_tokens_set)}")
         results.append({
             'section': section,
             'highlighted_tokens': list(highlighted_tokens_set)
