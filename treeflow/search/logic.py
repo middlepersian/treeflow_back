@@ -8,12 +8,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def search_tokens(criteria_list: List[TokenSearchInput], section_type: str) -> List[Dict]:
+def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Dict]:
     logger.debug(f"#############################################")
-    logger.debug(f"search_tokens (criteria_list: {criteria_list}, section_type: {section_type})")
+    logger.debug(
+        f"search_tokens (criteria_list: {criteria_list}, section_type: {section_type})")
 
     # Base Q object for the section type
     query = Q(type=section_type)
+
+    #Filter by Text
+    if texts:
+        query &= Q(text__id__in=texts)
+        logger.debug(f"Filtering by texts: {texts}")
 
     section_ids_list = []
 
@@ -23,7 +29,8 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str) -> L
 
         field = token_criteria.field
         value = token_criteria.value
-        method = getattr(token_criteria, "query_type", "exact")  # default to exact if not specified
+        # default to exact if not specified
+        method = getattr(token_criteria, "query_type", "exact")
 
         if value:
             token_query &= Q(**{f"tokens__{field}__{method}": value})
@@ -34,25 +41,32 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str) -> L
 
         if token_criteria.feature_token:
             for feature in token_criteria.feature_token:
-                token_query &= Q(tokens__feature_token__feature=feature.feature, tokens__feature_token__feature_value=feature.feature_value)
-                
-        if token_criteria.stopwords:
-            token_query &= ~Q(tokens__transcription__in=STOPWORDS_LIST)  # Assuming you have a list of stopwords
-        
-        logger.debug(f"Constructed token_query for criteria {idx + 1}: {token_query}")
+                token_query &= Q(tokens__feature_token__feature=feature.feature,
+                                 tokens__feature_token__feature_value=feature.feature_value)
 
-        section_ids = Section.objects.filter(query & token_query).values_list('id', flat=True)
-        logger.debug(f"Sections matching criteria {idx + 1}: {Section.objects.filter(query & token_query).query}")
-        logger.debug(f"Number of sections found for criteria {idx + 1}: {len(section_ids)}")
+        if token_criteria.stopwords:
+            # Assuming you have a list of stopwords
+            token_query &= ~Q(tokens__transcription__in=STOPWORDS_LIST)
+
+        logger.debug(
+            f"Constructed token_query for criteria {idx + 1}: {token_query}")
+
+        section_ids = Section.objects.filter(
+            query & token_query).values_list('id', flat=True)
+        logger.debug(
+            f"Sections matching criteria {idx + 1}: {Section.objects.filter(query & token_query).query}")
+        logger.debug(
+            f"Number of sections found for criteria {idx + 1}: {len(section_ids)}")
 
         section_ids_list.append(set(section_ids))
 
     try:
         final_section_ids = set.intersection(*section_ids_list)
         logger.debug(f"Final intersected section IDs: {final_section_ids}")
-        
+
         sections = Section.objects.filter(id__in=final_section_ids).distinct()
-        logger.debug(f"Number of sections after intersection: {sections.count()}")
+        logger.debug(
+            f"Number of sections after intersection: {sections.count()}")
         logger.debug(f"Sections matching final criteria: {sections.query}")
 
     except EmptyResultSet:
@@ -65,24 +79,27 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str) -> L
             field = token_criteria.field
             value = token_criteria.value
             search_method = getattr(token_criteria, "query_type", "icontains")
-            
+
             # Base query for tokens in the current section
             query = Token.objects.filter(sectiontoken__section=section)
-            
+
             # Modify the query based on the criteria
             if field and value:
                 query = query.filter(**{f"{field}__{search_method}": value})
             if token_criteria.pos_token:
-                pos = token_criteria.pos_token[0].pos  # Assuming only one POS criteria for simplicity
+                # Assuming only one POS criteria for simplicity
+                pos = token_criteria.pos_token[0].pos
                 query = query.filter(pos_token__pos=pos)
             if token_criteria.feature_token:
                 feature = token_criteria.feature_token[0].feature
                 feature_value = token_criteria.feature_token[0].feature_value
-                query = query.filter(feature_token__feature=feature, feature_token__feature_value=feature_value)
-            
+                query = query.filter(
+                    feature_token__feature=feature, feature_token__feature_value=feature_value)
+
             highlighted_tokens_set.update(query)
-        
-        logger.debug(f"Number of highlighted tokens for section {section.id}: {len(highlighted_tokens_set)}")
+
+        logger.debug(
+            f"Number of highlighted tokens for section {section.id}: {len(highlighted_tokens_set)}")
         results.append({
             'section': section,
             'highlighted_tokens': list(highlighted_tokens_set)
@@ -91,14 +108,19 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str) -> L
     return results
 
 
-
-
 def search_tokens_by_position(criteria_list: List[TokenSearchInput], section_type: str) -> List[Dict]:
     logger.debug(f"#############################################")
-    logger.debug(f"search_tokens_by_position (criteria_list: {criteria_list}, section_type: {section_type})")
+    logger.debug(
+        f"search_tokens_by_position (criteria_list: {criteria_list}, section_type: {section_type})")
+
 
     # Base Q object for the section type
-    section_query = Q(type=section_type)
+    query = Q(type=section_type)#
+    # Filter by Text
+    if texts:
+        query &= Q(text__id__in=texts)
+        logger.debug(f"Filtering by texts: {texts}")
+
 
     # Start with all sections of the given type
     filtered_sections = Section.objects.filter(section_query)
@@ -149,16 +171,19 @@ def search_tokens_by_position(criteria_list: List[TokenSearchInput], section_typ
 
     # Fetch the matching sections
     sections = list(filtered_sections)
-    logger.debug(f"Sections matching criteria: {[s.id for s in sections]}")  # Log section IDs for brevity
+    # Log section IDs for brevity
+    logger.debug(f"Sections matching criteria: {[s.id for s in sections]}")
 
     results = []
     for section in sections:
         highlighted_tokens = []
         for criteria in criteria_list:
-            matching_tokens = Token.objects.filter(sectiontoken__section=section, **{criteria.field: criteria.value})
+            matching_tokens = Token.objects.filter(
+                sectiontoken__section=section, **{criteria.field: criteria.value})
             highlighted_tokens.extend(matching_tokens)
             # Log token IDs for brevity
-            logger.debug(f"Matching tokens for section {section.id}: {[t.transcription for t in matching_tokens]}")
+            logger.debug(
+                f"Matching tokens for section {section.id}: {[t.transcription for t in matching_tokens]}")
         results.append({
             'section': section,
             'highlighted_tokens': list(highlighted_tokens)

@@ -153,6 +153,7 @@ class Query:
         self,
         criteria: List[TokenSearchInput],
         section_type: str,
+        texts: Optional[List[relay.GlobalID]] = None,
         search_type: SearchType = SearchType.SIMPLE
     ) -> List[HighlightedSection]:
 
@@ -163,8 +164,14 @@ class Query:
         }[search_type]
 
         try:
-            # Perform the search
-            highlighted_sections = search_function(criteria, section_type)
+            # if texts available, convert the Global IDs into 'UUID' objects
+            if texts:
+                texts = [relay.from_base64(text)[1] for text in texts]
+            else:
+                texts = []  # ensure texts is always a list, even if empty
+
+            highlighted_sections = search_function(criteria, section_type, texts)    
+
 
             # Transform the result to fit the HighlightedSection structure
             highlighted_sections_strawberry = [
