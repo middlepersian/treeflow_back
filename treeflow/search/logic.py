@@ -22,7 +22,7 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
     #Filter by Text
     if texts:
         query &= Q(text__id__in=texts)
-        logger.debug(f"Filtering by texts: {texts}")
+    logger.debug(f"Filtering by texts: {texts}")
 
     section_ids_list = []
 
@@ -47,10 +47,20 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
                 token_query &= Q(tokens__feature_token__feature=feature.feature,
                                  tokens__feature_token__feature_value=feature.feature_value)
 
+        if token_criteria.lemmas:
+            for lemma in token_criteria.lemmas:
+                token_query &= Q(tokens__tokenlemma__lemma__word=lemma.word, 
+                tokens__tokenlemma__lemma__language=lemma.language)
+
+        if token_criteria.meanings:
+            for meaning in token_criteria.meanings:
+                token_query &= Q(tokens__tokenlemma__meaning__meaning=meaning.meaning, 
+                tokens__tokenlemma__meaning__language=meaning.language)
+
         if token_criteria.stopwords:
             # Assuming you have a list of stopwords
             token_query &= ~Q(tokens__transcription__in=STOPWORDS_LIST)
-
+            
         logger.debug(
             f"Constructed token_query for criteria {idx + 1}: {token_query}")
 
@@ -76,36 +86,55 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
         return []
 
     results = []
+
     for section in sections:
         # Start with all tokens in the current section
-        highlighted_tokens_set = set(Token.objects.filter(sectiontoken__section=section))
+        tokens_queryset = Token.objects.filter(sectiontoken__section=section)
 
         for token_criteria in criteria_list:
-            temp_tokens_set = set(highlighted_tokens_set)  # Temporary set for the current criteria
-
             field = token_criteria.field
             value = token_criteria.value
             search_method = getattr(token_criteria, "query_type", "icontains")
 
             # Modify the query based on the criteria
             if field and value:
-                temp_tokens_set &= set(Token.objects.filter(**{f"{field}__{search_method}": value}))
+                tokens_queryset = tokens_queryset.filter(**{f"{field}__{search_method}": value})
+
+            # Handle POS criteria
             if token_criteria.pos_token:
-                # Assuming only one POS criteria for simplicity
-                pos = token_criteria.pos_token[0].pos
-                temp_tokens_set &= set(Token.objects.filter(pos_token__pos=pos))
+                pos_list = [pos.pos for pos in token_criteria.pos_token]
+                tokens_queryset = tokens_queryset.filter(pos_token__pos__in=pos_list)
+
+            # Handle feature token criteria
             if token_criteria.feature_token:
-                feature = token_criteria.feature_token[0].feature
-                feature_value = token_criteria.feature_token[0].feature_value
-                temp_tokens_set &= set(Token.objects.filter(
-                    feature_token__feature=feature, feature_token__feature_value=feature_value))
-            
-            # Update the highlighted_tokens_set with the filtered tokens for the current criteria
-            highlighted_tokens_set = temp_tokens_set
+                feature_filters = Q()
+                for feature_token in token_criteria.feature_token:
+                    feature = feature_token.feature
+                    feature_value = feature_token.feature_value
+                    feature_filters |= Q(feature_token__feature=feature, feature_token__feature_value=feature_value)
+                tokens_queryset = tokens_queryset.filter(feature_filters)
+
+            # Handle lemmas criteria
+            if token_criteria.lemmas:
+                lemma_filters = Q()
+                for lemma in token_criteria.lemmas:
+                    lemma_filters |= Q(tokenlemma__lemma__word=lemma.word)
+                tokens_queryset = tokens_queryset.filter(lemma_filters)
+
+            # Handle meanings criteria
+            if token_criteria.meanings:
+                meaning_filters = Q()
+                for meaning in token_criteria.meanings:
+                    meaning_filters |= Q(tokenlemma__meaning__meaning=meaning.meaning)
+                tokens_queryset = tokens_queryset.filter(meaning_filters)
+     
+
+        # Convert the queryset to a list
+        highlighted_tokens_list = list(tokens_queryset)
 
         results.append({
             'section': section,
-            'highlighted_tokens': list(highlighted_tokens_set)
+            'highlighted_tokens': highlighted_tokens_list
         })
 
     return results

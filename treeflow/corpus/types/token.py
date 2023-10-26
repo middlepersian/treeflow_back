@@ -6,6 +6,8 @@ from treeflow.corpus import models
 from strawberry.types import Info
 from elasticsearch.exceptions import NotFoundError
 from asgiref.sync import sync_to_async
+from treeflow.dict.types.lemma import LemmaSelectionInput
+from treeflow.dict.types.meaning import MeaningSelectionInput
 
 
 # create logger
@@ -138,5 +140,7 @@ class TokenSearchInput:
     field: Optional[str] = 'transcription' # default to 'transcription'
     pos_token: Optional[List[POSSelectionInput]] = None
     feature_token: Optional[List[FeatureSelectionInput]] = None
+    lemmas : Optional[List[LemmaSelectionInput]] = None
+    meanings : Optional[List[MeaningSelectionInput]] = None
     stopwords: Optional[bool] = False
     distance_from_previous: Optional[DistanceFromPreviousToken] = None

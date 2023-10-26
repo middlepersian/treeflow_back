@@ -66,3 +66,10 @@ class LemmaPartial:
     related_meanings: strawberry.auto
 
 
+
+# create input type for search
+@strawberry.input
+class LemmaSelectionInput:
+    word: Optional[str]
+    language: Optional[Language]
+

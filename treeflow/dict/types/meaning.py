@@ -47,3 +47,10 @@ class MeaningPartial:
     meaning: strawberry.auto
     language: Optional[Language]
     related_meanings: strawberry.auto
+
+
+# create input type for search
+@strawberry.input
+class MeaningSelectionInput:
+    meaning: Optional[str]
+    language: Optional[Language]
