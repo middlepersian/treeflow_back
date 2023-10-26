@@ -3,6 +3,9 @@ from django.core.exceptions import EmptyResultSet
 from django.db.models import Subquery, OuterRef, Max, F, query, Q, Count, Exists
 from treeflow.corpus.models import Section, Token, SectionToken
 from treeflow.corpus.types.token import TokenSearchInput
+from treeflow.corpus.types.text import Text
+from strawberry import relay
+
 import logging
 
 logger = logging.getLogger(__name__)

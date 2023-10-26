@@ -150,10 +150,10 @@ class Query:
     @strawberry.field
     @sync_to_async
     def search_tokens(
-        self,
+        self, info,
         criteria: List[TokenSearchInput],
         section_type: str,
-        texts: Optional[List[relay.GlobalID]] = None,
+        texts: Optional[List[str]] = None,
         search_type: SearchType = SearchType.SIMPLE
     ) -> List[HighlightedSection]:
 
@@ -167,6 +167,8 @@ class Query:
             # if texts available, convert the Global IDs into 'UUID' objects
             if texts:
                 texts = [relay.from_base64(text)[1] for text in texts]
+                logger.debug(f"Type of first item in texts: {type(texts[0])}")
+
             else:
                 texts = []  # ensure texts is always a list, even if empty
 
