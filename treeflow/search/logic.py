@@ -166,6 +166,8 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
     end_time = time.time()  # End the timer
     logger.debug(f"Time taken for search_tokens: {end_time - start_time} seconds")
 
+    total_sections_count = len(results) 
+
     return results
 
 

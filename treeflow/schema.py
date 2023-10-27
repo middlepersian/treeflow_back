@@ -21,7 +21,7 @@ from treeflow.corpus.types.dependency import Dependency, DependencyInput, Depend
 from treeflow.corpus.types.feature import Feature, FeatureInput, FeaturePartial, PartOfSpeechFeatures, UPOSFeatures, UPOSList, get_features
 from treeflow.corpus.types.pos import POS, POSInput, POSPartial
 from treeflow.corpus.enums.pos import UPOSValues
-from treeflow.corpus.types.section import Section, SectionInput, SectionPartial, HighlightedSection
+from treeflow.corpus.types.section import Section, SectionInput, SectionPartial, HighlightedSection, HighlightedSectionConnection
 from treeflow.corpus.models.section import Section as SectionModel
 from treeflow.corpus.types.source import Source, SourceInput, SourcePartial
 from treeflow.corpus.models.source import Source as SourceModel
@@ -154,8 +154,12 @@ class Query:
         criteria: List[TokenSearchInput],
         section_type: str,
         texts: Optional[List[str]] = None,
-        search_type: SearchType = SearchType.SIMPLE
-    ) -> List[HighlightedSection]:
+        search_type: SearchType = SearchType.SIMPLE,
+        before: Optional[str] = None,
+        after: Optional[str] = None,
+        first: Optional[int] = None,
+        last: Optional[int] = None
+    ) -> HighlightedSectionConnection:
 
         # Choose which search function to use based on the search type
         search_function = {
@@ -172,8 +176,7 @@ class Query:
             else:
                 texts = []  # ensure texts is always a list, even if empty
 
-            highlighted_sections = search_function(criteria, section_type, texts)    
-
+            highlighted_sections = search_function(criteria, section_type, texts)
 
             # Transform the result to fit the HighlightedSection structure
             highlighted_sections_strawberry = [
@@ -184,12 +187,19 @@ class Query:
                 for result in highlighted_sections
             ]
 
-            return highlighted_sections_strawberry
+            # Use the resolve_connection method to paginate the results and return a connection
+            return HighlightedSectionConnection.resolve_connection(
+                nodes=highlighted_sections_strawberry,
+                info=info,
+                before=before,
+                after=after,
+                first=first,
+                last=last
+            )
 
         except Exception as e:
             logger.error(e)
-            return []
-
+            return HighlightedSectionConnection(edges=[], page_info=strawberry.relay.PageInfo())
 
     # ### dict
     # # lemma
