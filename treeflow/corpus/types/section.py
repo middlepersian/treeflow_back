@@ -137,7 +137,8 @@ class HighlightedSectionConnection(relay.Connection[HighlightedSection]):
         last_edge = edges[-1] if edges else None
 
         if first is None and last is None:
-            first = DEFAULT_MAX_ITEMS_PER_PAGE
+            first = cls.DEFAULT_MAX_ITEMS_PER_PAGE
+
         if after is not None:
             after_edge_idx = edges.index(edges_mapping[after])
             edges = [e for e in edges if edges.index(e) > after_edge_idx]

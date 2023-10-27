@@ -90,7 +90,6 @@ def get_matching_sections(criteria_list: List[TokenSearchInput], section_type: s
     return sections
 
 
-from collections import defaultdict
 
 def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Dict]:
     start_time = time.time()  # Start the timer
