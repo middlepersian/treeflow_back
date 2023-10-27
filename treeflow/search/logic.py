@@ -11,11 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Dict]:
-    logger.debug(f"#############################################")
-    logger.debug(
-        f"search_tokens (criteria_list: {criteria_list}, section_type: {section_type})")
-
+def get_matching_sections(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Section]:
     # Base Q object for the section type
     query = Q(type=section_type)
 
@@ -85,25 +81,40 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
     except EmptyResultSet:
         return []
 
+    return sections
+
+def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Dict]:
+    logger.debug(f"#############################################")
+    logger.debug(f"search_tokens (criteria_list: {criteria_list}, section_type: {section_type})")
+
+    sections = get_matching_sections(criteria_list, section_type, texts)
     results = []
 
     for section in sections:
-        # Start with all tokens in the current section
-        tokens_queryset = Token.objects.filter(sectiontoken__section=section)
+        initial_tokens_count = Token.objects.filter(sectiontoken__section=section).count()
+        logger.debug(f"Initial tokens for section {section.id}: {initial_tokens_count}")
+
+        final_tokens_set = set()
 
         for token_criteria in criteria_list:
+            logger.debug(f"Filtering using criteria: {token_criteria}")
+
+            filtered_tokens_queryset = Token.objects.filter(sectiontoken__section=section)
             field = token_criteria.field
             value = token_criteria.value
             search_method = getattr(token_criteria, "query_type", "icontains")
 
             # Modify the query based on the criteria
             if field and value:
-                tokens_queryset = tokens_queryset.filter(**{f"{field}__{search_method}": value})
+                filtered_tokens_queryset = filtered_tokens_queryset.filter(**{f"{field}__{search_method}": value})
+                logger.debug(f"Tokens after filtering by {field}={value}: {filtered_tokens_queryset.count()}")
+
 
             # Handle POS criteria
             if token_criteria.pos_token:
                 pos_list = [pos.pos for pos in token_criteria.pos_token]
-                tokens_queryset = tokens_queryset.filter(pos_token__pos__in=pos_list)
+                filtered_tokens_queryset = filtered_tokens_queryset.filter(pos_token__pos__in=pos_list)
+                logger.debug(f"Tokens after filtering by POS: {filtered_tokens_queryset.count()}")
 
             # Handle feature token criteria
             if token_criteria.feature_token:
@@ -112,35 +123,47 @@ def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, text
                     feature = feature_token.feature
                     feature_value = feature_token.feature_value
                     feature_filters |= Q(feature_token__feature=feature, feature_token__feature_value=feature_value)
-                tokens_queryset = tokens_queryset.filter(feature_filters)
+                filtered_tokens_queryset = filtered_tokens_queryset.filter(feature_filters)
+                logger.debug(f"Tokens after filtering by features: {filtered_tokens_queryset.count()}")
 
             # Handle lemmas criteria
             if token_criteria.lemmas:
                 lemma_filters = Q()
                 for lemma in token_criteria.lemmas:
                     lemma_filters |= Q(tokenlemma__lemma__word=lemma.word)
-                tokens_queryset = tokens_queryset.filter(lemma_filters)
+                filtered_tokens_queryset = filtered_tokens_queryset.filter(lemma_filters)
+                logger.debug(f"Tokens after filtering by lemmas: {filtered_tokens_queryset.count()}")
 
             # Handle meanings criteria
             if token_criteria.meanings:
                 meaning_filters = Q()
                 for meaning in token_criteria.meanings:
                     meaning_filters |= Q(tokenlemma__meaning__meaning=meaning.meaning)
-                tokens_queryset = tokens_queryset.filter(meaning_filters)
-     
+                filtered_tokens_queryset = filtered_tokens_queryset.filter(meaning_filters)
+                logger.debug(f"Tokens after filtering by meanings: {filtered_tokens_queryset.count()}")
+                
+            final_tokens_set.update(filtered_tokens_queryset)
 
-        # Convert the queryset to a list
-        highlighted_tokens_list = list(tokens_queryset)
+        # Convert the set to a list
+        highlighted_tokens_list = list(final_tokens_set)
 
         results.append({
             'section': section,
             'highlighted_tokens': highlighted_tokens_list
         })
 
+    # Debug print for each result
+    for result in results:
+        section_id = result['section'].id
+        token_transcriptions = [token.transcription for token in result['highlighted_tokens']]
+        logger.debug(f"Section ID: {section_id} -> Tokens: {token_transcriptions}")
+
     return results
 
 
-def search_tokens_by_position(criteria_list: List[TokenSearchInput], section_type: str) -> List[Dict]:
+
+
+def search_tokens_by_position(criteria_list: List[TokenSearchInput], section_type: str,  texts: List[str] = None) -> List[Dict]:
     logger.debug(f"#############################################")
     logger.debug(
         f"search_tokens_by_position (criteria_list: {criteria_list}, section_type: {section_type})")
@@ -155,7 +178,7 @@ def search_tokens_by_position(criteria_list: List[TokenSearchInput], section_typ
 
 
     # Start with all sections of the given type
-    filtered_sections = Section.objects.filter(section_query)
+    filtered_sections = Section.objects.filter(query)
 
     # Begin with the first criteria
     first_criteria = criteria_list[0]

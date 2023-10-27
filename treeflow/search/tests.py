@@ -71,35 +71,36 @@ class TokenSearchTest(TestCase):
 
     def test_search_tokens(self):
         # Test with a single criteria
-        criteria_list = [
-            TokenSearchInput(field="transcription", value="apple", query_type="icontains", distance_from_previous=None)
-        ]
-        highlighted_sections = search_tokens(criteria_list, "sentence")
-        # apple is present in section1, section2, section3, section4, section5, and section6
-        self.assertEqual(len(highlighted_sections), 6)
-        for section_data in highlighted_sections:
-            self.assertTrue(any(token.transcription.lower() == "apple" for token in section_data['highlighted_tokens']))
+        with self.subTest("Test with single criteria - apple"):
+            criteria_list = [
+                TokenSearchInput(field="transcription", value="apple", query_type="icontains", distance_from_previous=None)
+            ]
+            highlighted_sections = search_tokens(criteria_list, "sentence")
+            logger.debug(f"Section IDS:{[section_data['section'].id for section_data in highlighted_sections]}")
+            self.assertEqual(len(highlighted_sections), 6)
+            for section_data in highlighted_sections:
+                self.assertTrue(any(token.transcription.lower() == "apple" for token in section_data['highlighted_tokens']))
 
         # Test with multiple criteria
-        criteria_list = [
-            TokenSearchInput(field="transcription", value="apple", query_type="icontains", distance_from_previous=None),
-            TokenSearchInput(field="transcription", value="banana", query_type="icontains", distance_from_previous=None)
-        ]
-        highlighted_sections = search_tokens(criteria_list, "sentence")
-        # Both apple and banana are present in section1, section2, section3, section4, and section5
-        self.assertEqual(len(highlighted_sections), 5)
-        for section_data in highlighted_sections:
-            self.assertTrue(any(token.transcription.lower() == "apple" for token in section_data['highlighted_tokens']))
-            self.assertTrue(any(token.transcription.lower() ==
-                            "banana" for token in section_data['highlighted_tokens']))
+        with self.subTest("Test with multiple criteria - apple and banana"):
+            criteria_list = [
+                TokenSearchInput(field="transcription", value="apple", query_type="icontains", distance_from_previous=None),
+                TokenSearchInput(field="transcription", value="banana", query_type="icontains", distance_from_previous=None)
+            ]
+            highlighted_sections = search_tokens(criteria_list, "sentence")
+            self.assertEqual(len(highlighted_sections), 5)
+            for section_data in highlighted_sections:
+                self.assertTrue(any(token.transcription.lower() == "apple" for token in section_data['highlighted_tokens']))
+                self.assertTrue(any(token.transcription.lower() == "banana" for token in section_data['highlighted_tokens']))
 
         # Test with non-existing token
-        criteria_list = [
-            TokenSearchInput(field="transcription", value="non_existent",
-                             query_type="icontains", distance_from_previous=None)
-        ]
-        highlighted_sections = search_tokens(criteria_list, "sentence")
-        self.assertEqual(len(highlighted_sections), 0)  # No sections should match this criteria
+        with self.subTest("Test with non-existing token"):
+            criteria_list = [
+                TokenSearchInput(field="transcription", value="non_existent",
+                                query_type="icontains", distance_from_previous=None)
+            ]
+            highlighted_sections = search_tokens(criteria_list, "sentence")
+            self.assertEqual(len(highlighted_sections), 0)
 
     def test_search_tokens_by_position(self):
 
