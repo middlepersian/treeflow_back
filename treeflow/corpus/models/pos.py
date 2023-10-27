@@ -18,7 +18,7 @@ class POS(models.Model):
         return '{}'.format(self.pos)    
 
     class Meta:
-        pass
+        indexes = [models.Index(fields=['pos'])]
 
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
