@@ -129,9 +129,11 @@ class FeatureSelectionInput:
 
 
 @strawberry.input
-class DistanceFromPreviousToken:
+class Distance:
     distance: Optional[int] = None
     exact: Optional[bool] = False
+    type: Optional[str] = "both"  # Can be "before", "after", or "both"
+
 
 @strawberry.input
 class TokenSearchInput:
@@ -143,4 +145,4 @@ class TokenSearchInput:
     lemmas : Optional[List[LemmaSelectionInput]] = None
     meanings : Optional[List[MeaningSelectionInput]] = None
     stopwords: Optional[bool] = False
-    distance_from_previous: Optional[DistanceFromPreviousToken] = None
+    distance: Optional[Distance] = None

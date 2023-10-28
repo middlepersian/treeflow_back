@@ -1,6 +1,6 @@
-from typing import List, Dict
+from typing import List, Dict, Union, Optional
 from django.core.exceptions import EmptyResultSet
-from django.db.models import Subquery, OuterRef, Max, F, query, Q, Count, Exists
+from django.db.models import Subquery, OuterRef, Max, F, Q, Count, Exists
 from treeflow.corpus.models import Section, Token, SectionToken
 from treeflow.corpus.types.token import TokenSearchInput
 from treeflow.corpus.types.text import Text
@@ -8,245 +8,70 @@ from strawberry import relay
 from collections import defaultdict
 import logging
 import time
+from functools import reduce
+import operator
+
 logger = logging.getLogger(__name__)
 
-
-def get_matching_sections(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Section]:
-
-    start_time = time.time()  # Start the timer
-    # Base Q object for the section type
-    query = Q(type=section_type)
-
-    # Filter by Text
-    if texts:
-        query &= Q(text__id__in=texts)
-    logger.debug(f"Filtering by texts: {texts}")
-
-    end_time = time.time()  # End the timer
-    logger.debug(f"Time taken for get_matching_sections: {end_time - start_time} seconds")
-
-    section_ids_list = []
-
-    for idx, token_criteria in enumerate(criteria_list):
-        logger.debug(f"Processing token_criteria {idx + 1}: {token_criteria}")
-        token_query = Q()
-
-        field = token_criteria.field
-        value = token_criteria.value
-        # default to exact if not specified
-        method = getattr(token_criteria, "query_type", "exact")
-
-        if value:
-            token_query &= Q(**{f"tokens__{field}__{method}": value})
-
-        if token_criteria.pos_token:
-            for pos in token_criteria.pos_token:
-                token_query &= Q(tokens__pos_token__pos=pos.pos)
-
-        if token_criteria.feature_token:
-            for feature in token_criteria.feature_token:
-                token_query &= Q(tokens__feature_token__feature=feature.feature,
-                                 tokens__feature_token__feature_value=feature.feature_value)
-
-        if token_criteria.lemmas:
-            for lemma in token_criteria.lemmas:
-                token_query &= Q(tokens__tokenlemma__lemma__word=lemma.word,
-                                 tokens__tokenlemma__lemma__language=lemma.language)
-
-        if token_criteria.meanings:
-            for meaning in token_criteria.meanings:
-                token_query &= Q(tokens__tokenlemma__meaning__meaning=meaning.meaning,
-                                 tokens__tokenlemma__meaning__language=meaning.language)
-
-        if token_criteria.stopwords:
-            # Assuming you have a list of stopwords
-            token_query &= ~Q(tokens__transcription__in=STOPWORDS_LIST)
-
-        logger.debug(
-            f"Constructed token_query for criteria {idx + 1}: {token_query}")
-
-        section_ids = Section.objects.filter(
-            query & token_query).values_list('id', flat=True)
-        logger.debug(
-            f"Sections matching criteria {idx + 1}: {Section.objects.filter(query & token_query).query}")
-        logger.debug(
-            f"Number of sections found for criteria {idx + 1}: {len(section_ids)}")
-
-        section_ids_list.append(set(section_ids))
-
-    try:
-        final_section_ids = set.intersection(*section_ids_list)
-        logger.debug(f"Final intersected section IDs: {final_section_ids}")
-
-        sections = Section.objects.filter(id__in=final_section_ids).distinct()
-
-        logger.debug(
-            f"Number of sections after intersection: {sections.count()}")
-        logger.debug(f"Sections matching final criteria: {sections.query}")
-
-    except EmptyResultSet:
-        return []
-
-    return sections
-
-
-
-def search_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: List[str] = None) -> List[Dict]:
-    start_time = time.time()  # Start the timer
-
-    logger.debug(f"#############################################")
-    logger.debug(f"search_tokens (criteria_list: {criteria_list}, section_type: {section_type})")
-
-    sections = get_matching_sections(criteria_list, section_type, texts)
-    section_ids = [section.id for section in sections]
+def build_query_for_criteria(criteria: TokenSearchInput, number: Optional[int] = None) -> Q:
+    query = Q(**{f"{criteria.field}__{criteria.query_type}": criteria.value})
     
-    # Create a dictionary to hold tokens for each section
-    section_tokens_map = defaultdict(set)
-
-    for token_criteria in criteria_list:
-        base_tokens_queryset = Token.objects.filter(sectiontoken__section__in=section_ids)
-        token_query = Q()
-
-        field = token_criteria.field
-        value = token_criteria.value
-        search_method = getattr(token_criteria, "query_type", "icontains")
-
-        # Filter by field and value
-        if field and value:
-            token_query &= Q(**{f"{field}__{search_method}": value})
-
-        # Handle POS criteria
-        if token_criteria.pos_token:
-            pos_list = [pos.pos for pos in token_criteria.pos_token]
-            token_query &= Q(pos_token__pos__in=pos_list)
-
-        # Handle feature token criteria
-        if token_criteria.feature_token:
-            feature_filters = Q()
-            for feature_token in token_criteria.feature_token:
-                feature = feature_token.feature
-                feature_value = feature_token.feature_value
-                feature_filters |= Q(feature_token__feature=feature, feature_token__feature_value=feature_value)
-            token_query &= feature_filters
-
-        # Handle lemmas criteria
-        if token_criteria.lemmas:
-            lemma_filters = Q()
-            for lemma in token_criteria.lemmas:
-                lemma_filters |= Q(tokenlemma__lemma__word=lemma.word)
-            token_query &= lemma_filters
-
-        # Handle meanings criteria
-        if token_criteria.meanings:
-            meaning_filters = Q()
-            for meaning in token_criteria.meanings:
-                meaning_filters |= Q(tokenlemma__meaning__meaning=meaning.meaning)
-            token_query &= meaning_filters
-        
-        tokens_for_criteria = base_tokens_queryset.filter(token_query)
-        for token in tokens_for_criteria:
-            for section_token in token.sectiontoken_set.all():
-                section_tokens_map[section_token.section_id].add(token)
-
-    results = []
-    for section in sections:
-        highlighted_tokens_list = list(section_tokens_map[section.id])
-        results.append({
-            'section': section,
-            'highlighted_tokens': highlighted_tokens_list
-        })
-
-    # Debug print for each result
-    for result in results:
-        section_id = result['section'].id
-        token_transcriptions = [token.transcription for token in result['highlighted_tokens']]
-        logger.debug(f"Section ID: {section_id} -> Tokens: {token_transcriptions}")
-
-    end_time = time.time()  # End the timer
-    logger.debug(f"Time taken for search_tokens: {end_time - start_time} seconds")
-
-    total_sections_count = len(results) 
-
-    return results
-
-
-def search_tokens_by_position(criteria_list: List[TokenSearchInput], section_type: str,  texts: List[str] = None) -> List[Dict]:
-    logger.debug(f"#############################################")
-    logger.debug(
-        f"search_tokens_by_position (criteria_list: {criteria_list}, section_type: {section_type})")
-
-    # Base Q object for the section type
-    query = Q(type=section_type)
-    # Filter by Text
-    if texts:
-        query &= Q(text__id__in=texts)
-        logger.debug(f"Filtering by texts: {texts}")
-
-    # Start with all sections of the given type
-    filtered_sections = Section.objects.filter(query)
-
-    # Begin with the first criteria
-    first_criteria = criteria_list[0]
-    field_filter = f'token__{first_criteria.field}'
-    subquery = SectionToken.objects.filter(
-        section=OuterRef('pk'),
-        **{field_filter: first_criteria.value}
-    )
-    filtered_sections = filtered_sections.filter(Exists(subquery))
-
-    subqueries = []
-
-    for i in range(1, len(criteria_list)):
-        criteria = criteria_list[i]
-        distance = criteria.distance_from_previous.distance if criteria.distance_from_previous else 0
-        exact = criteria.distance_from_previous.exact if criteria.distance_from_previous else True
-        field_filter = f'token__{criteria.field}'
-
-        # Adjust the token number condition based on the exact flag
-        if exact:
-            token_number_condition = Q(token__number=Subquery(
-                SectionToken.objects.filter(
-                    section=OuterRef('section'),
-                    token__transcription=criteria_list[i-1].value
-                ).values('token__number')[:1]
-            ) + distance, **{field_filter: criteria.value})
+    if number is not None:
+        if criteria.distance and not criteria.distance.exact:
+            if criteria.distance.type == "after":
+                query &= Q(number__gte=number)
+            else:
+                query &= Q(number__lte=number)
         else:
-            token_number_condition = Q(token__number__gte=Subquery(
-                SectionToken.objects.filter(
-                    section=OuterRef('section'),
-                    token__transcription=criteria_list[i-1].value
-                ).values('token__number')[:1]
-            ) + distance, **{field_filter: criteria.value})
+            query &= Q(number=number)
 
-        subquery = SectionToken.objects.filter(
-            section=OuterRef('pk')
-        ).filter(token_number_condition)
+    logger.debug(f"Built query for criteria: {query}")
+    return query
 
-        subqueries.append(subquery)
+def execute_query(query: Q) -> Optional[Token]:
+    token_objects = Token.objects.filter(query)
+    logger.debug(f"Executing SQL query: {token_objects.query}")
+    token = token_objects.first()
+    if token:
+        logger.debug(f"Found token for query {query}: {token}")
+    else:
+        logger.warning(f"No token found for query: {query}")
+    return token
 
-    for sq in subqueries:
-        filtered_sections = filtered_sections.filter(Exists(sq))
+def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[Token]:
+    matched_tokens = []
 
-    logger.debug(f"Filtered sections query: {filtered_sections.query}")
+    # Fetch the anchor token
+    anchor_token_query = build_query_for_criteria(criteria_list[0])
+    anchor_token = execute_query(anchor_token_query)
+    
+    if not anchor_token:
+        logger.warning("Anchor token not found.")
+        return []
+    
+    matched_tokens.append(anchor_token)
+    current_number = anchor_token.number
 
-    # Fetch the matching sections
-    sections = list(filtered_sections)
-    # Log section IDs for brevity
-    logger.debug(f"Sections matching criteria: {[s.id for s in sections]}")
+    # Iterate over the rest of the criteria_list
+    for idx in range(1, len(criteria_list)):
+        criteria = criteria_list[idx]
+        
+        # Determine the expected position of the token
+        if criteria.distance.type == "after":
+            current_number += criteria.distance.distance
+        else:
+            # When looking for a token before another, compute its position relative to the last matched token
+            current_number = matched_tokens[-1].number - criteria.distance.distance
 
-    results = []
-    for section in sections:
-        highlighted_tokens = []
-        for criteria in criteria_list:
-            matching_tokens = Token.objects.filter(
-                sectiontoken__section=section, **{criteria.field: criteria.value})
-            highlighted_tokens.extend(matching_tokens)
-            # Log token IDs for brevity
-            logger.debug(
-                f"Matching tokens for section {section.id}: {[t.transcription for t in matching_tokens]}")
-        results.append({
-            'section': section,
-            'highlighted_tokens': list(highlighted_tokens)
-        })
+        # Build and execute query based on its characteristics and position
+        token_query = build_query_for_criteria(criteria, current_number)
+        token = execute_query(token_query)
+        
+        if not token:
+            logger.warning(f"Token not found for criteria {idx + 1}.")
+            break  # Break out of the loop, but don't return yet
 
-    return results
+        matched_tokens.append(token)
+
+    return matched_tokens
+
