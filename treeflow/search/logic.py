@@ -39,6 +39,9 @@ def execute_query(query: Q) -> Optional[Token]:
     return token
 
 def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[Token]:
+    logger.debug(f"####     search_tokens_in_sequence      ####")
+    start_time = time.time()
+
     matched_tokens = []
 
     # Fetch the anchor token
@@ -73,5 +76,29 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[Tok
 
         matched_tokens.append(token)
 
+    # log the time
+    logger.debug(f"Time taken to fetch tokens: {time.time() - start_time} seconds")   
+
     return matched_tokens
 
+
+
+def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> List[Section]:
+    logger.debug(f"####     get_sections_for_matched_tokens     ####")
+    #log the start time
+    start_time = time.time()
+    # Obtain the list of matched tokens using the search_tokens_in_sequence method
+    matched_tokens = search_tokens_in_sequence(criteria_list)
+    
+    # Initialize a set to store unique sections
+    matched_sections = set()
+    
+    # For each token in the matched tokens list, fetch the related sections and add them to the set
+    for token in matched_tokens:
+        for section_token in SectionToken.objects.filter(token=token):
+            matched_sections.add(section_token.section)
+    
+    # Log the time taken to fetch the sections
+    logger.debug(f"Time taken to fetch sections: {time.time() - start_time} seconds")
+    # Convert the set to a list and return
+    return list(matched_sections)

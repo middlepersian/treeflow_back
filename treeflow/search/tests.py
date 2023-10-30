@@ -4,7 +4,7 @@ from django.db.models import Q
 from treeflow.corpus.models import Token, Section, SectionToken, POS, Feature
 from treeflow.dict.models import Lemma
 from treeflow.corpus.types.token import TokenSearchInput, Distance, FeatureSelectionInput, POSSelectionInput
-from treeflow.search.logic import build_query_for_criteria, search_tokens_in_sequence
+from treeflow.search.logic import build_query_for_criteria, search_tokens_in_sequence, get_sections_for_matched_tokens
 import asyncio
 import logging
 
@@ -80,13 +80,12 @@ class TokenSearchTest(TestCase):
     
 
 
-    def test_construct_token_query(self):
+    def test_construct_token_query_and_matching_sections(self):
         criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
         criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
         criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
 
-
-        # Let's further test the `search_matching_tokens` function using the constructed query.
+        # Test the `search_tokens_in_sequence` function using the constructed query.
         matching_tokens = search_tokens_in_sequence([criteria1, criteria2, criteria3])
 
         # Check that the correct tokens were returned based on the criteria.
@@ -94,3 +93,19 @@ class TokenSearchTest(TestCase):
         self.assertEqual(matching_tokens[0].transcription, "apple")
         self.assertEqual(matching_tokens[1].transcription, "cherry")
         self.assertEqual(matching_tokens[2].transcription, "banana")
+
+        # Test the `get_sections_for_matched_tokens` function using the same criteria.
+        matching_sections = get_sections_for_matched_tokens([criteria1, criteria2, criteria3])
+
+        # Check that sections were returned.
+        self.assertTrue(len(matching_sections) > 0)
+
+        # log the length of the matching sections
+        logger.debug(f"Found {len(matching_sections)} matching sections.")
+
+
+        # Here, you might want to further validate the returned sections based on your data setup.
+        # For example, you could check if the sections actually contain the tokens.
+        for token in matching_tokens:
+            token_in_section = any(section for section in matching_sections if token in section.tokens.all())
+            self.assertTrue(token_in_section)
