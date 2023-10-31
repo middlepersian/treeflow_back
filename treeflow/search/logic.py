@@ -1,6 +1,6 @@
 from typing import List, Dict, Union, Optional
 from django.core.exceptions import EmptyResultSet
-from django.db.models import Subquery, OuterRef, Max, F, Q, Count, Exists
+from django.db.models import Subquery, OuterRef, Max, F, Q, Count, Exists, Prefetch
 from treeflow.corpus.models import Section, Token, SectionToken
 from treeflow.corpus.types.token import TokenSearchInput
 from treeflow.corpus.types.section import HighlightedSection
@@ -235,7 +235,6 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List
     return all_matched_sequences
 
 
-
 def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: Optional[List[str]] = None) -> List[HighlightedSection]:
     time_start = time.time()
     logger.info("Starting get_sections_for_matched_tokens.")
@@ -244,29 +243,31 @@ def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], secti
     matched_token_sequences = search_tokens_in_sequence(criteria_list, texts)
     logger.debug(f"Number of matched token sequences: {len(matched_token_sequences)}")
     
-    # Gather all tokens from the matched sequences using itertools.chain
-    all_tokens = list(chain.from_iterable(matched_token_sequences))
+    # Flatten the list of matched token sequences and extract only the IDs
+    all_token_ids = [token.id if hasattr(token, 'id') else token for sequence in matched_token_sequences for token in sequence]
 
-    # Initial query for SectionTokens based on the matched tokens and section_type
-    section_tokens_query = SectionToken.objects.filter(token__in=all_tokens, section__type=section_type).select_related('section')
+    # Prefetch SectionTokens with related tokens based on the matched token IDs
+    section_token_prefetch = Prefetch(
+        'sectiontoken_set',
+        queryset=SectionToken.objects.filter(token_id__in=all_token_ids).select_related('token'),
+        to_attr='related_section_tokens'
+    )
 
-    # If specific texts are provided, further filter the query
+    # Fetch sections based on section_type and optional texts, and prefetch the related tokens
+    sections_query = Section.objects.filter(type=section_type, sectiontoken__token_id__in=all_token_ids).distinct().prefetch_related(section_token_prefetch)
     if texts:
-        section_tokens_query = section_tokens_query.filter(section__text_id__in=texts)
+        sections_query = sections_query.filter(text_id__in=texts)
+    sections_with_tokens = list(sections_query)
 
-    # Fetch all the related SectionToken objects at once
-    all_section_tokens = list(section_tokens_query)
-
-    # Create a dictionary to map sections to tokens using setdefault
-    section_to_tokens = {}
-    for section_token in all_section_tokens:
-        section_to_tokens.setdefault(section_token.section, []).append(section_token.token)
-
-    # Create HighlightedSection objects
-    matched_highlighted_sections = [HighlightedSection(section=section, highlighted_tokens=tokens) for section, tokens in section_to_tokens.items()]
+    # Create HighlightedSection objects based on the fetched tokens
+    matched_highlighted_sections = [
+        HighlightedSection(section=section, highlighted_tokens=[st.token for st in section.related_section_tokens])
+        for section in sections_with_tokens if hasattr(section, 'related_section_tokens') and section.related_section_tokens
+    ]
 
     logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_highlighted_sections)}")
     time_end = time.time()
     logger.info(f"Time elapsed: {time_end - time_start} seconds")
     return matched_highlighted_sections
+
 
