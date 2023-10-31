@@ -80,37 +80,41 @@ class TokenSearchTest(TestCase):
     
 
 
-    def test_construct_token_query_and_matching_sections(self):
-        criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-        criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-        criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+def test_construct_token_query_and_matching_sections(self):
+    criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
+    criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+    criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
 
-        # Test the `search_tokens_in_sequence` function using the constructed query.
-        matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
+    # Test the `search_tokens_in_sequence` function using the constructed query.
+    matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
 
-        # Check that a sequence was found
-        self.assertEqual(len(matched_sequences), 1)
-        
-        # Now get the first sequence from the list of sequences
-        matching_tokens = matched_sequences[0]
+    # Check that a sequence was found
+    self.assertEqual(len(matched_sequences), 1)
+    
+    # Now get the first sequence from the list of sequences which contains UUIDs
+    matching_token_uuids = matched_sequences[0]
 
-        # Check that the correct tokens were returned based on the criteria.
-        self.assertEqual(len(matching_tokens), 3)
-        self.assertEqual(matching_tokens[0].transcription, "apple")
-        self.assertEqual(matching_tokens[1].transcription, "cherry")
-        self.assertEqual(matching_tokens[2].transcription, "banana")
-        # Test the `get_sections_for_matched_tokens` function using the same criteria.
-        matching_sections = get_sections_for_matched_tokens([criteria1, criteria2, criteria3])
+    # Fetch Token objects based on the UUIDs
+    matched_token_objects = Token.objects.filter(id__in=matching_token_uuids)
+    logger.debug(f"Matched tokens: {[token.transcription for token in matched_token_objects]}")
 
-        # Check that sections were returned.
-        self.assertTrue(len(matching_sections) > 0)
+    # Check that the correct tokens were returned based on the criteria.
+    self.assertEqual(len(matched_token_objects), 3)
+    self.assertEqual(matched_token_objects[0].transcription, "apple")
+    self.assertEqual(matched_token_objects[1].transcription, "cherry")
+    self.assertEqual(matched_token_objects[2].transcription, "banana")
+    
+    # Test the `get_sections_for_matched_tokens` function using the same criteria.
+    matching_sections = get_sections_for_matched_tokens([criteria1, criteria2, criteria3])
 
-        # log the length of the matching sections
-        logger.debug(f"Found {len(matching_sections)} matching sections.")
+    # Check that sections were returned.
+    self.assertTrue(len(matching_sections) > 0)
 
+    # log the length of the matching sections
+    logger.debug(f"Found {len(matching_sections)} matching sections.")
 
-        # Here, you might want to further validate the returned sections based on your data setup.
-        # For example, you could check if the sections actually contain the tokens.
-        for token in matching_tokens:
-            token_in_section = any(section for section in matching_sections if token in section.tokens.all())
-            self.assertTrue(token_in_section)
+    # Here, you might want to further validate the returned sections based on your data setup.
+    # For example, you could check if the sections actually contain the tokens.
+    for token in matched_token_objects:
+        token_in_section = any(section for section in matching_sections if token in section.highlighted_tokens)
+        self.assertTrue(token_in_section)
