@@ -169,7 +169,7 @@ class Query:
             else:
                 texts = []  # ensure texts is always a list, even if empty
 
-            highlighted_sections = get_sections_for_matched_tokens(criteria)
+            highlighted_sections = get_sections_for_matched_tokens(criteria, section_type, texts)
 
             # Use the resolve_connection method to paginate the results and return a connection
             return HighlightedSectionConnection.resolve_connection(

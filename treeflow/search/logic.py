@@ -79,11 +79,16 @@ def search_tokens_for_single_anchor(anchor_token: Token, criteria_list: List[Tok
     return matched_tokens
 
 
-def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[List[Token]]:
+def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List[str] = None) -> List[List[Token]]:
     logger.info("Starting search_tokens_in_sequence.")
     # Fetch all appearances of the anchor token
     anchor_token_query = build_query_for_criteria(criteria_list[0])
-    anchor_tokens = Token.objects.filter(anchor_token_query).all()
+    
+    # If texts are provided, filter the tokens based on the provided text IDs
+    if texts:
+        anchor_tokens = Token.objects.filter(anchor_token_query, text_id__in=texts).all()
+    else:
+        anchor_tokens = Token.objects.filter(anchor_token_query).all()
     
     logger.debug(f"Found {len(anchor_tokens)} anchor tokens")
     
@@ -98,9 +103,10 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[Lis
     logger.info(f"Finished search_tokens_in_sequence. Total sequences found: {len(all_matched_sequences)}")
     return all_matched_sequences
 
-def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> List[HighlightedSection]:
-    logger.info("Starting get_sections_for_matched_tokens.")
-    
+def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], section_type:str, texts : List[str] = None) -> List[HighlightedSection]:
+
+    #count time
+    start_time = time.time()
     # Obtain the list of matched token sequences
     matched_token_sequences = search_tokens_in_sequence(criteria_list)
     
@@ -112,11 +118,13 @@ def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> Li
         logger.debug(f"Processing token sequence: {token_sequence}")
         # For each token in the token sequence, fetch the related sections
         for token in token_sequence:
-            for section_token in SectionToken.objects.filter(token=token):
+            for section_token in SectionToken.objects.filter(token=token, section__type=section_type).all():
                 # Create a HighlightedSection object and add it to matched_sections
                 highlighted_section = HighlightedSection(section=section_token.section, highlighted_tokens=token_sequence)
                 matched_sections.add(highlighted_section)
                 logger.debug(f"Found section for token {token}: {section_token.section}")
 
     logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_sections)}")
+    end_time = time.time()
+    logger.info(f"Time taken: {end_time - start_time} seconds")
     return list(matched_sections)
