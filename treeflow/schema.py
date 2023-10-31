@@ -38,7 +38,7 @@ from treeflow.dict.enums.language import Language
 # image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
 # search
-#from treeflow.search.logic import search_tokens_in_range
+from treeflow.search.logic import get_sections_for_matched_tokens
 # search enum
 from treeflow.search.enum import SearchType
 
@@ -146,7 +146,6 @@ class Query:
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
     tokens_list: List[Token] = strawberry_django.field()
 
-    '''
     @strawberry.field
     @sync_to_async
     def search_tokens(
@@ -161,12 +160,6 @@ class Query:
         last: Optional[int] = None
     ) -> HighlightedSectionConnection:
 
-        # Choose which search function to use based on the search type
-        search_function = {
-            SearchType.SIMPLE: search_tokens,
-            SearchType.BY_POSITION: search_tokens_by_position
-        }[search_type]
-
         try:
             # if texts available, convert the Global IDs into 'UUID' objects
             if texts:
@@ -176,20 +169,11 @@ class Query:
             else:
                 texts = []  # ensure texts is always a list, even if empty
 
-            highlighted_sections = search_function(criteria, section_type, texts)
-
-            # Transform the result to fit the HighlightedSection structure
-            highlighted_sections_strawberry = [
-                HighlightedSection(
-                    section=result['section'],
-                    highlighted_tokens=result['highlighted_tokens']
-                )
-                for result in highlighted_sections
-            ]
+            highlighted_sections = get_sections_for_matched_tokens(criteria)
 
             # Use the resolve_connection method to paginate the results and return a connection
             return HighlightedSectionConnection.resolve_connection(
-                nodes=highlighted_sections_strawberry,
+                nodes=highlighted_sections,
                 info=info,
                 before=before,
                 after=after,
@@ -199,8 +183,16 @@ class Query:
 
         except Exception as e:
             logger.error(e)
-            return HighlightedSectionConnection(edges=[], page_info=strawberry.relay.PageInfo())
-    '''
+            return HighlightedSectionConnection(
+                edges=[],
+                page_info=strawberry.relay.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor=None,
+                    end_cursor=None
+                )
+            )
+
     # ### dict
     # # lemma
     lemma: Optional[Lemma] = strawberry_django.node()

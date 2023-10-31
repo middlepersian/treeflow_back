@@ -3,6 +3,7 @@ from django.core.exceptions import EmptyResultSet
 from django.db.models import Subquery, OuterRef, Max, F, Q, Count, Exists
 from treeflow.corpus.models import Section, Token, SectionToken
 from treeflow.corpus.types.token import TokenSearchInput
+from treeflow.corpus.types.section import HighlightedSection
 from treeflow.corpus.types.text import Text
 from strawberry import relay
 from collections import defaultdict
@@ -28,15 +29,21 @@ def build_query_for_criteria(criteria: TokenSearchInput, number: Optional[int] =
     logger.debug(f"Built query for criteria: {query}")
     return query
 
-def execute_query(query: Q) -> Optional[Token]:
+    
+def execute_query(query: Q) -> List[Token]:
     token_objects = Token.objects.filter(query)
-    logger.debug(f"Executing SQL query: {token_objects.query}")
-    token = token_objects.first()
-    if token:
-        logger.debug(f"Found token for query {query}: {token}")
-    else:
-        logger.warning(f"No token found for query: {query}")
-    return token
+    query_string = str(token_objects.query)  # Convert the SQL query to a string representation for logging
+    logger.debug(f"Executing SQL query: {query_string}")
+    
+    matching_tokens = list(token_objects)  # Convert the queryset to a list of tokens
+    
+    number_of_results = len(matching_tokens)  # Count the number of tokens that match the query
+    logger.debug(f"Number of tokens found for query {query}: {number_of_results}")
+    
+    if number_of_results == 0:
+        logger.warning(f"No tokens found for query: {query}")
+    
+    return matching_tokens
 
 def search_tokens_for_single_anchor(anchor_token: Token, criteria_list: List[TokenSearchInput]) -> List[Token]:
     logger.debug(f"Searching tokens for anchor: {anchor_token}")
@@ -55,16 +62,22 @@ def search_tokens_for_single_anchor(anchor_token: Token, criteria_list: List[Tok
         # Build and execute query
         token_query = build_query_for_criteria(criteria, current_number)
         logger.debug(f"Built query: {token_query}")
-        token = execute_query(token_query)
+        tokens = execute_query(token_query)
         
-        if not token:
-            logger.warning(f"Token not found for criteria: {criteria}. Breaking sequence for anchor: {anchor_token}.")
+        # Check if any tokens matched the criteria
+        if not tokens:
+            logger.warning(f"No tokens found for criteria: {criteria}. Breaking sequence for anchor: {anchor_token}.")
             return []
-        logger.debug(f"Found token: {token}")
+        
+        # For simplicity, we're assuming that the first token in the list is the desired match.
+        # Adjustments may be needed if other criteria for selecting a token from the list are required.
+        token = tokens[0]
+        logger.debug(f"Using token: {token} from {len(tokens)} potential matches.")
         matched_tokens.append(token)
 
     logger.debug(f"Completed sequence for anchor: {anchor_token}. Tokens: {matched_tokens}")
     return matched_tokens
+
 
 def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[List[Token]]:
     logger.info("Starting search_tokens_in_sequence.")
@@ -85,7 +98,7 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[Lis
     logger.info(f"Finished search_tokens_in_sequence. Total sequences found: {len(all_matched_sequences)}")
     return all_matched_sequences
 
-def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> List[Section]:
+def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> List[HighlightedSection]:
     logger.info("Starting get_sections_for_matched_tokens.")
     
     # Obtain the list of matched token sequences
@@ -100,7 +113,9 @@ def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> Li
         # For each token in the token sequence, fetch the related sections
         for token in token_sequence:
             for section_token in SectionToken.objects.filter(token=token):
-                matched_sections.add(section_token.section)
+                # Create a HighlightedSection object and add it to matched_sections
+                highlighted_section = HighlightedSection(section=section_token.section, highlighted_tokens=token_sequence)
+                matched_sections.add(highlighted_section)
                 logger.debug(f"Found section for token {token}: {section_token.section}")
 
     logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_sections)}")

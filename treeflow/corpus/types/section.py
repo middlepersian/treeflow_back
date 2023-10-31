@@ -105,6 +105,14 @@ class HighlightedSection:
     section: Section
     highlighted_tokens: List[Token]
 
+    def __hash__(self):
+        return hash((self.section, tuple(self.highlighted_tokens)))
+
+    def __eq__(self, other):
+        if isinstance(other, HighlightedSection):
+            return self.section == other.section and self.highlighted_tokens == other.highlighted_tokens
+        return False
+        
 @strawberry.type
 class HighlightedSectionConnection(relay.Connection[HighlightedSection]):
     DEFAULT_MAX_ITEMS_PER_PAGE = 10
@@ -153,7 +161,7 @@ class HighlightedSectionConnection(relay.Connection[HighlightedSection]):
         if last is not None:
             edges = edges[-last:]
 
-    # Instead of calling super().resolve_connection, just return the connection
+        # Instead of calling super().resolve_connection, just return the connection
         return cls(
             edges=edges,
             total_count=total_count,
@@ -168,4 +176,3 @@ class HighlightedSectionConnection(relay.Connection[HighlightedSection]):
                 ),
             ),
         )
-
