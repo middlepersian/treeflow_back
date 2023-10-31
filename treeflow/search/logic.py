@@ -15,19 +15,42 @@ import operator
 logger = logging.getLogger(__name__)
 
 def build_query_for_criteria(criteria: TokenSearchInput, number: Optional[int] = None) -> Q:
-    query = Q(**{f"{criteria.field}__{criteria.query_type}": criteria.value})
+    # Start with the base criteria if its value is not None
+    if criteria.value is not None:
+        query = Q(**{f"{criteria.field}__{criteria.query_type}": criteria.value})
+    else:
+        query = Q()  # Base empty Q object
     
+    # POS criteria
+    if criteria.pos_token:
+        pos_queries = [Q(pos_token__pos=pos_input.pos) for pos_input in criteria.pos_token]
+        query &= reduce(operator.or_, pos_queries)
+    
+    # Feature criteria
+    if criteria.feature_token:
+        feature_queries = []
+        for feature_input in criteria.feature_token:
+            feature_q = Q(feature_token__feature=feature_input.feature)
+            if feature_input.feature_value:
+                feature_q &= Q(feature_token__feature_value=feature_input.feature_value)
+            feature_queries.append(feature_q)
+        query &= reduce(operator.or_, feature_queries)
+    
+    # TODO: Add similar logic for lemmas and meanings once their schema and relationships are known
+    
+    # Number criteria (distance and position)
     if number is not None:
         if criteria.distance and not criteria.distance.exact:
             if criteria.distance.type == "after":
                 query &= Q(number__gte=number)
-            else:
+            elif criteria.distance.type == "before":
                 query &= Q(number__lte=number)
         else:
             query &= Q(number=number)
 
     logger.debug(f"Built query for criteria: {query}")
     return query
+
 
     
 def execute_query(query: Q) -> List[Token]:
@@ -103,28 +126,41 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List
     logger.info(f"Finished search_tokens_in_sequence. Total sequences found: {len(all_matched_sequences)}")
     return all_matched_sequences
 
-def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], section_type:str, texts : List[str] = None) -> List[HighlightedSection]:
+def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: Optional[List[str]] = None) -> List[HighlightedSection]:
 
-    #count time
-    start_time = time.time()
+    time_start = time.time()
+    logger.info("Starting get_sections_for_matched_tokens.")
+    
     # Obtain the list of matched token sequences
-    matched_token_sequences = search_tokens_in_sequence(criteria_list)
+    matched_token_sequences = search_tokens_in_sequence(criteria_list, texts)
     
     logger.debug(f"Number of matched token sequences: {len(matched_token_sequences)}")
     
-    matched_sections = set()
-    # For each token sequence in the matched token sequences
-    for token_sequence in matched_token_sequences:
-        logger.debug(f"Processing token sequence: {token_sequence}")
-        # For each token in the token sequence, fetch the related sections
-        for token in token_sequence:
-            for section_token in SectionToken.objects.filter(token=token, section__type=section_type).all():
-                # Create a HighlightedSection object and add it to matched_sections
-                highlighted_section = HighlightedSection(section=section_token.section, highlighted_tokens=token_sequence)
-                matched_sections.add(highlighted_section)
-                logger.debug(f"Found section for token {token}: {section_token.section}")
+    matched_highlighted_sections = []
 
-    logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_sections)}")
-    end_time = time.time()
-    logger.info(f"Time taken: {end_time - start_time} seconds")
-    return list(matched_sections)
+    # Gather all tokens from the matched sequences
+    all_tokens = [token for sequence in matched_token_sequences for token in sequence]
+
+    # Initial query for SectionTokens based on the matched tokens and section_type
+    section_tokens_query = SectionToken.objects.filter(token__in=all_tokens, section__type=section_type).select_related('section')
+
+    # If specific texts are provided, further filter the query
+    if texts:
+        section_tokens_query = section_tokens_query.filter(section__text_id__in=texts)
+
+    # Create a dictionary to map sections to tokens
+    section_to_tokens = defaultdict(list)
+    for section_token in section_tokens_query:
+        section_to_tokens[section_token.section].append(section_token.token)
+
+    # Create HighlightedSection objects
+    for section, tokens in section_to_tokens.items():
+        matched_highlighted_sections.append(HighlightedSection(section=section, highlighted_tokens=tokens))
+        logger.debug(f"Found section {section} with tokens: {tokens}")
+
+    logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_highlighted_sections)}")
+    time_end = time.time()
+    logger.info(f"Time elapsed: {time_end - time_start} seconds")
+    return matched_highlighted_sections
+
+
