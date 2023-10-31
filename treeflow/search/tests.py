@@ -86,14 +86,19 @@ class TokenSearchTest(TestCase):
         criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
 
         # Test the `search_tokens_in_sequence` function using the constructed query.
-        matching_tokens = search_tokens_in_sequence([criteria1, criteria2, criteria3])
+        matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
+
+        # Check that a sequence was found
+        self.assertEqual(len(matched_sequences), 1)
+        
+        # Now get the first sequence from the list of sequences
+        matching_tokens = matched_sequences[0]
 
         # Check that the correct tokens were returned based on the criteria.
         self.assertEqual(len(matching_tokens), 3)
         self.assertEqual(matching_tokens[0].transcription, "apple")
         self.assertEqual(matching_tokens[1].transcription, "cherry")
         self.assertEqual(matching_tokens[2].transcription, "banana")
-
         # Test the `get_sections_for_matched_tokens` function using the same criteria.
         matching_sections = get_sections_for_matched_tokens([criteria1, criteria2, criteria3])
 

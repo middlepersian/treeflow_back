@@ -38,67 +38,70 @@ def execute_query(query: Q) -> Optional[Token]:
         logger.warning(f"No token found for query: {query}")
     return token
 
-def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[Token]:
-    logger.debug(f"####     search_tokens_in_sequence      ####")
-    start_time = time.time()
-
-    matched_tokens = []
-
-    # Fetch the anchor token
-    anchor_token_query = build_query_for_criteria(criteria_list[0])
-    anchor_token = execute_query(anchor_token_query)
-    
-    if not anchor_token:
-        logger.warning("Anchor token not found.")
-        return []
-    
-    matched_tokens.append(anchor_token)
+def search_tokens_for_single_anchor(anchor_token: Token, criteria_list: List[TokenSearchInput]) -> List[Token]:
+    logger.debug(f"Searching tokens for anchor: {anchor_token}")
+    matched_tokens = [anchor_token]
     current_number = anchor_token.number
 
     # Iterate over the rest of the criteria_list
-    for idx in range(1, len(criteria_list)):
-        criteria = criteria_list[idx]
-        
+    for criteria in criteria_list[1:]:
+        logger.debug(f"Processing criteria: {criteria}")
         # Determine the expected position of the token
         if criteria.distance.type == "after":
             current_number += criteria.distance.distance
         else:
-            # When looking for a token before another, compute its position relative to the last matched token
             current_number = matched_tokens[-1].number - criteria.distance.distance
-
-        # Build and execute query based on its characteristics and position
+        
+        # Build and execute query
         token_query = build_query_for_criteria(criteria, current_number)
+        logger.debug(f"Built query: {token_query}")
         token = execute_query(token_query)
         
         if not token:
-            logger.warning(f"Token not found for criteria {idx + 1}.")
-            break  # Break out of the loop, but don't return yet
-
+            logger.warning(f"Token not found for criteria: {criteria}. Breaking sequence for anchor: {anchor_token}.")
+            return []
+        logger.debug(f"Found token: {token}")
         matched_tokens.append(token)
 
-    # log the time
-    logger.debug(f"Time taken to fetch tokens: {time.time() - start_time} seconds")   
-
+    logger.debug(f"Completed sequence for anchor: {anchor_token}. Tokens: {matched_tokens}")
     return matched_tokens
 
+def search_tokens_in_sequence(criteria_list: List[TokenSearchInput]) -> List[List[Token]]:
+    logger.info("Starting search_tokens_in_sequence.")
+    # Fetch all appearances of the anchor token
+    anchor_token_query = build_query_for_criteria(criteria_list[0])
+    anchor_tokens = Token.objects.filter(anchor_token_query).all()
+    
+    logger.debug(f"Found {len(anchor_tokens)} anchor tokens")
+    
+    all_matched_sequences = []
+    # For each anchor token, try to find a matching sequence
+    for anchor_token in anchor_tokens:
+        logger.debug(f"Processing anchor token: {anchor_token}")
+        matched_sequence = search_tokens_for_single_anchor(anchor_token, criteria_list)
+        if matched_sequence:
+            all_matched_sequences.append(matched_sequence)
 
+    logger.info(f"Finished search_tokens_in_sequence. Total sequences found: {len(all_matched_sequences)}")
+    return all_matched_sequences
 
 def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput]) -> List[Section]:
-    logger.debug(f"####     get_sections_for_matched_tokens     ####")
-    #log the start time
-    start_time = time.time()
-    # Obtain the list of matched tokens using the search_tokens_in_sequence method
-    matched_tokens = search_tokens_in_sequence(criteria_list)
+    logger.info("Starting get_sections_for_matched_tokens.")
     
-    # Initialize a set to store unique sections
+    # Obtain the list of matched token sequences
+    matched_token_sequences = search_tokens_in_sequence(criteria_list)
+    
+    logger.debug(f"Number of matched token sequences: {len(matched_token_sequences)}")
+    
     matched_sections = set()
-    
-    # For each token in the matched tokens list, fetch the related sections and add them to the set
-    for token in matched_tokens:
-        for section_token in SectionToken.objects.filter(token=token):
-            matched_sections.add(section_token.section)
-    
-    # Log the time taken to fetch the sections
-    logger.debug(f"Time taken to fetch sections: {time.time() - start_time} seconds")
-    # Convert the set to a list and return
+    # For each token sequence in the matched token sequences
+    for token_sequence in matched_token_sequences:
+        logger.debug(f"Processing token sequence: {token_sequence}")
+        # For each token in the token sequence, fetch the related sections
+        for token in token_sequence:
+            for section_token in SectionToken.objects.filter(token=token):
+                matched_sections.add(section_token.section)
+                logger.debug(f"Found section for token {token}: {section_token.section}")
+
+    logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_sections)}")
     return list(matched_sections)
