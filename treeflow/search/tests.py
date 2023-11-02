@@ -78,43 +78,38 @@ class TokenSearchTest(TestCase):
         cls.token_cherry.lemmas.add(cls.lemma_cherry)
         cls.token_delicious.lemmas.add(cls.lemma_delicious)
     
+    def test_search_tokens_in_sequence(self):
+        criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
+        criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+        criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+
+        matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
+
+        logger.debug(f"Matched sequences: {matched_sequences}")
+
+        self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
+
+        # Modified:
+        token_uuids = [token.id if isinstance(token, Token) else token for token in matched_sequences[0]]
+        matched_token_objects = Token.objects.filter(id__in=token_uuids)
+        
+        self.assertEqual(len(matched_token_objects), 3, "Expected three matched tokens")
+        transcriptions = [token.transcription for token in matched_token_objects]
+        self.assertListEqual(transcriptions, ["apple", "cherry", "banana"], "Unexpected tokens returned")
 
 
-def test_construct_token_query_and_matching_sections(self):
-    criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-    criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-    criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+    def test_get_sections_for_matched_tokens(self):
+        criteria_list = [
+            TokenSearchInput(query_type='exact', value='apple', field='transcription'),
+            TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after')),
+            TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+        ]
 
-    # Test the `search_tokens_in_sequence` function using the constructed query.
-    matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
+        matching_sections = get_sections_for_matched_tokens(criteria_list, section_type="sentence")
 
-    # Check that a sequence was found
-    self.assertEqual(len(matched_sequences), 1)
-    
-    # Now get the first sequence from the list of sequences which contains UUIDs
-    matching_token_uuids = matched_sequences[0]
+        self.assertTrue(len(matching_sections) > 0, "Expected at least one matching section")
 
-    # Fetch Token objects based on the UUIDs
-    matched_token_objects = Token.objects.filter(id__in=matching_token_uuids)
-    logger.debug(f"Matched tokens: {[token.transcription for token in matched_token_objects]}")
-
-    # Check that the correct tokens were returned based on the criteria.
-    self.assertEqual(len(matched_token_objects), 3)
-    self.assertEqual(matched_token_objects[0].transcription, "apple")
-    self.assertEqual(matched_token_objects[1].transcription, "cherry")
-    self.assertEqual(matched_token_objects[2].transcription, "banana")
-    
-    # Test the `get_sections_for_matched_tokens` function using the same criteria.
-    matching_sections = get_sections_for_matched_tokens([criteria1, criteria2, criteria3])
-
-    # Check that sections were returned.
-    self.assertTrue(len(matching_sections) > 0)
-
-    # log the length of the matching sections
-    logger.debug(f"Found {len(matching_sections)} matching sections.")
-
-    # Here, you might want to further validate the returned sections based on your data setup.
-    # For example, you could check if the sections actually contain the tokens.
-    for token in matched_token_objects:
-        token_in_section = any(section for section in matching_sections if token in section.highlighted_tokens)
-        self.assertTrue(token_in_section)
+        tokens_to_check = Token.objects.filter(transcription__in=["apple", "cherry", "banana"])
+        for token in tokens_to_check:
+            token_in_section = any(section for section in matching_sections if token in section.highlighted_tokens)
+            self.assertTrue(token_in_section, f"Token {token.transcription} not found in any section")

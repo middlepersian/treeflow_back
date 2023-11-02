@@ -54,6 +54,28 @@ def build_query_for_criteria(criteria: TokenSearchInput, number: Optional[int] =
                 feature_q &= Q(feature_token__feature_value=feature_input.feature_value)
             feature_queries.append(feature_q)
         query &= reduce(operator.or_, feature_queries)
+
+    if criteria.lemmas:
+        lemma_queries = []
+        for lemma_input in criteria.lemmas:
+            lemma_q = Q()
+            if lemma_input.word:
+                lemma_q &= Q(lemmas__word=lemma_input.word)
+            if lemma_input.language:
+                lemma_q &= Q(lemmas__language=lemma_input.language)
+            lemma_queries.append(lemma_q)
+        query &= reduce(operator.or_, lemma_queries)
+
+    if criteria.meanings:
+        meaning_queries = []
+        for meaning_input in criteria.meanings:
+            meaning_q = Q()
+            if meaning_input.meaning:
+                meaning_q &= Q(meanings__meaning=meaning_input.meaning)
+            if meaning_input.language:
+                meaning_q &= Q(meanings__language=meaning_input.language)
+            meaning_queries.append(meaning_q)
+        query &= reduce(operator.or_, meaning_queries)
     
     if number is not None and criteria.distance:
         if not criteria.distance.exact:
@@ -196,7 +218,7 @@ def process_criteria_for_batch(batched_anchors, criteria):
 
 def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List[str] = None, batch_size: int = 1000) -> List[List[Token]]:
     logger.info(f"Starting search_tokens_in_sequence with {len(criteria_list)} criteria.")
-    
+    time_start = time.time()
     # If only one criterion, process it and return
     if len(criteria_list) == 1:
         criteria = criteria_list[0]
@@ -232,6 +254,8 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List
         all_matched_sequences.extend(matched_sequences_in_batch)
 
     logger.info(f"Finished search_tokens_in_sequence. Total sequences found: {len(all_matched_sequences)}")
+    time_end = time.time()
+    logger.info(f"Time elapsed: {time_end - time_start} seconds")
     return all_matched_sequences
 
 
@@ -264,6 +288,18 @@ def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], secti
         HighlightedSection(section=section, highlighted_tokens=[st.token for st in section.related_section_tokens])
         for section in sections_with_tokens if hasattr(section, 'related_section_tokens') and section.related_section_tokens
     ]
+
+    # Check if there's more than one token in the criteria
+    if len(criteria_list) > 1:
+        # After creating the matched_highlighted_sections
+        for highlighted_section in matched_highlighted_sections:
+            token_ids_in_section = set([token.id for token in highlighted_section.highlighted_tokens])
+            for sequence in matched_token_sequences:
+                sequence_token_ids = set([token.id if hasattr(token, 'id') else token for token in sequence])
+                if not sequence_token_ids.issubset(token_ids_in_section):
+                    # This means not all tokens from this sequence are in the section
+                    highlighted_section.feedback = f"Tokens {sequence_token_ids - token_ids_in_section} are not present in the section."
+                    break
 
     logger.info(f"Finished get_sections_for_matched_tokens. Total sections found: {len(matched_highlighted_sections)}")
     time_end = time.time()
