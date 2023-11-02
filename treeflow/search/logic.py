@@ -13,6 +13,7 @@ from functools import reduce
 import operator
 from itertools import chain
 import json
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -35,59 +36,83 @@ def token_search_input_to_key(token_search_input: TokenSearchInput) -> str:
     """Convert a TokenSearchInput object into a string key."""
     return json.dumps(token_search_input_to_dict(token_search_input), sort_keys=True)
 
+def build_query_for_value(criteria: TokenSearchInput) -> Q:
+    return Q(**{f"{criteria.field}__{criteria.query_type}": criteria.value}) if criteria.value else Q()
+
+def build_query_for_pos_token(criteria: TokenSearchInput) -> Q:
+    if not criteria.pos_token:
+        return Q()
+    return reduce(operator.or_, [Q(pos_token__pos=pos_input.pos) for pos_input in criteria.pos_token])
+
+def build_query_for_feature_token(criteria: TokenSearchInput) -> Q:
+    if not criteria.feature_token:
+        return Q()
+    feature_queries = [Q(feature_token__feature=feature_input.feature) & (Q(feature_token__feature_value=feature_input.feature_value) if feature_input.feature_value else Q()) for feature_input in criteria.feature_token]
+    return reduce(operator.or_, feature_queries)
+
+def build_query_for_lemmas(criteria: TokenSearchInput) -> Q:
+    if not criteria.lemmas:
+        return Q()
+    lemma_queries = [Q(lemmas__word=lemma_input.word) & (Q(lemmas__language=lemma_input.language) if lemma_input.language else Q()) for lemma_input in criteria.lemmas]
+    return reduce(operator.or_, lemma_queries)
+
+def build_query_for_meanings(criteria: TokenSearchInput) -> Q:
+    if not criteria.meanings:
+        return Q()
+    meaning_queries = [Q(meanings__meaning=meaning_input.meaning) & (Q(meanings__language=meaning_input.language) if meaning_input.language else Q()) for meaning_input in criteria.meanings]
+    return reduce(operator.or_, meaning_queries)
+
+
+
+def build_query_for_distance(criteria: TokenSearchInput, number: float) -> Q:
+    if not criteria.distance:
+        return Q()
+
+    # Convert to Decimal for precise arithmetic
+    number = Decimal(str(number))
+    distance_val = abs(Decimal(str(criteria.distance.distance)))  # Ensure positive distance
+    logger.debug(f"Initial number: {number}, Distance value: {distance_val}")
+
+    if criteria.distance.type == "after":
+        if criteria.distance.exact:
+            query = Q(number=float(number + distance_val))
+        else:
+            query = Q(number__gte=float(number + Decimal("1.0")))
+
+    elif criteria.distance.type == "before":
+        if criteria.distance.exact:
+            query = Q(number=float(number - distance_val))
+        else:
+            query = Q(number__lte=float(number - Decimal("1.0")))
+
+    elif criteria.distance.type == "both":
+        if criteria.distance.exact:
+            query = Q(number__in=[float(number - distance_val), float(number + distance_val)])
+        else:
+            range_start = number - distance_val
+            range_end = number + distance_val
+            query = Q(number__range=(float(range_start), float(range_end))) & ~Q(number=float(number))
+
+    else:
+        return Q()
+
+    logger.debug(f"Constructed '{criteria.distance.type}' query: {query}")
+    return query or Q()  # Ensure we always return a Q object
+
 
 def build_query_for_criteria(criteria: TokenSearchInput, number: Optional[int] = None) -> Q:
-    if criteria.value is not None:
-        query = Q(**{f"{criteria.field}__{criteria.query_type}": criteria.value})
-    else:
-        query = Q()
+    query = Q()
     
-    if criteria.pos_token:
-        pos_queries = [Q(pos_token__pos=pos_input.pos) for pos_input in criteria.pos_token]
-        query &= reduce(operator.or_, pos_queries)
-    
-    if criteria.feature_token:
-        feature_queries = []
-        for feature_input in criteria.feature_token:
-            feature_q = Q(feature_token__feature=feature_input.feature)
-            if feature_input.feature_value:
-                feature_q &= Q(feature_token__feature_value=feature_input.feature_value)
-            feature_queries.append(feature_q)
-        query &= reduce(operator.or_, feature_queries)
-
-    if criteria.lemmas:
-        lemma_queries = []
-        for lemma_input in criteria.lemmas:
-            lemma_q = Q()
-            if lemma_input.word:
-                lemma_q &= Q(lemmas__word=lemma_input.word)
-            if lemma_input.language:
-                lemma_q &= Q(lemmas__language=lemma_input.language)
-            lemma_queries.append(lemma_q)
-        query &= reduce(operator.or_, lemma_queries)
-
-    if criteria.meanings:
-        meaning_queries = []
-        for meaning_input in criteria.meanings:
-            meaning_q = Q()
-            if meaning_input.meaning:
-                meaning_q &= Q(meanings__meaning=meaning_input.meaning)
-            if meaning_input.language:
-                meaning_q &= Q(meanings__language=meaning_input.language)
-            meaning_queries.append(meaning_q)
-        query &= reduce(operator.or_, meaning_queries)
-    
-    if number is not None and criteria.distance:
-        if not criteria.distance.exact:
-            if criteria.distance.type == "after":
-                query &= Q(number__gte=number)
-            elif criteria.distance.type == "before":
-                query &= Q(number__lte=number)
-        else:
-            query &= Q(number=number)
+    query &= build_query_for_value(criteria)
+    query &= build_query_for_pos_token(criteria)
+    query &= build_query_for_feature_token(criteria)
+    query &= build_query_for_lemmas(criteria)
+    query &= build_query_for_meanings(criteria)
+    query &= build_query_for_distance(criteria, number) if number else Q()
 
     logger.debug(f"Built query for criteria: {query}")
     return query
+
 
 def execute_query(query: Q) -> List[Token]:
     token_objects = Token.objects.filter(query)
@@ -128,44 +153,49 @@ def process_batch(anchor_tokens, batch_size):
         batches.append(batched_anchors)
     return batches
 
-
 def search_tokens_for_anchor_sequence(anchor_token: Token, criteria_list: List[TokenSearchInput], texts=None) -> List[Token]:
     logger.debug(f"Searching tokens for anchor: {anchor_token}")
     
     # Initialize the matched tokens list with the anchor token
     matched_tokens = [anchor_token]
     
-    # If there's only one criterion, process it using a single criterion processor
-    if len(criteria_list) == 1:
-        return single_criterion_processing(criteria_list[0], texts)
-    
     # Iterate over the criteria_list
-    for criteria in criteria_list[1:]:
+    for criteria in criteria_list:  # Process all elements
         logger.debug(f"Processing criteria: {criteria}")
         
         # Determine the expected position of the token
         current_number = matched_tokens[-1].number
-        if criteria.distance.type == "after":
-            current_number += criteria.distance.distance
-        else:
-            current_number -= criteria.distance.distance
         
-        # Build and execute the token query
-        token_query = build_query_for_criteria(criteria, current_number)
-        tokens = execute_query(token_query)
+        try:
+            # Build the distance-based query
+            distance_query = build_query_for_distance(criteria, current_number)
+            
+            # Build the base query for other criteria (like transcription, etc.)
+            base_query = build_query_for_criteria(criteria)
+            
+            # Combine the base query and distance query
+            token_query = base_query & distance_query
+            
+            tokens = execute_query(token_query)
+            
+            # If no tokens match the criteria, break the loop and return an empty list
+            if not tokens:
+                logger.warning(f"No tokens found for criteria: {criteria}. Breaking sequence for anchor: {anchor_token}.")
+                return []
+            
+            # Assume the first token is the desired match for now
+            token = tokens[0]
+            
+            logger.debug(f"Using token: {token} from {len(tokens)} potential matches.")
+            matched_tokens.append(token)
         
-        # Check if any tokens matched the criteria
-        if not tokens:
-            logger.warning(f"No tokens found for criteria: {criteria}. Breaking sequence for anchor: {anchor_token}.")
+        except Exception as e:
+            # Capture any exceptions that might occur during query building or execution
+            logger.error(f"Error processing criteria: {criteria}. Error: {str(e)}")
             return []
-        
-        # Assuming the first token in the list is the desired match
-        token = tokens[0]
-        logger.debug(f"Using token: {token} from {len(tokens)} potential matches.")
-        matched_tokens.append(token)
     
     logger.debug(f"Completed sequence for anchor: {anchor_token}. Tokens: {matched_tokens}")
-    return matched_tokens
+    return matched_tokens 
 
 def construct_queries_for_batch(batched_anchors, criteria):
     """Constructs token queries for all anchors in the current batch."""
@@ -197,6 +227,12 @@ def map_tokens_to_anchors(matched_tokens, batched_anchors, criteria):
                 condition_met = 0 < (closest_anchor.number - token.number) <= criteria.distance.distance
             else:
                 condition_met = 0 < (closest_anchor.number - token.number)
+        elif criteria.distance.type == 'both':
+            if criteria.distance.exact:
+                condition_met = (0 < (token.number - closest_anchor.number) <= criteria.distance.distance) or \
+                                (0 < (closest_anchor.number - token.number) <= criteria.distance.distance)
+            else:
+                condition_met = (0 < abs(token.number - closest_anchor.number) <= criteria.distance.distance)
         
         if condition_met:
             token_to_anchor[token.id] = closest_anchor
@@ -217,8 +253,10 @@ def process_criteria_for_batch(batched_anchors, criteria):
     return map_tokens_to_anchors(matched_tokens, batched_anchors, criteria)
 
 def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List[str] = None, batch_size: int = 1000) -> List[List[Token]]:
+    logger.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     logger.info(f"Starting search_tokens_in_sequence with {len(criteria_list)} criteria.")
     time_start = time.time()
+
     # If only one criterion, process it and return
     if len(criteria_list) == 1:
         criteria = criteria_list[0]
@@ -236,14 +274,19 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List
     # Split the anchor tokens into batches for processing
     for i in range(0, len(anchor_tokens), batch_size):
         batched_anchors = anchor_tokens[i: i + batch_size]
+        logger.debug(f"Processing batch {i//batch_size + 1} of anchor tokens.")
         
         # Initialize the dictionary with the anchor tokens
         anchor_to_sequence = {anchor: [anchor] for anchor in batched_anchors}
         
         # Iterate over the criteria_list to match tokens for each anchor token
         for criteria in criteria_list[1:]:
+            logger.debug(f"Processing criteria: {criteria} for batch {i//batch_size + 1}")
             token_queries = construct_queries_for_batch(batched_anchors, criteria)
+            logger.debug(f"Constructed {len(token_queries)} queries for current criteria in batch {i//batch_size + 1}.")
+            
             token_to_anchor = process_criteria_for_batch(batched_anchors, criteria)
+            logger.debug(f"Processed criteria for batch and mapped {len(token_to_anchor)} tokens to their respective anchors.")
             
             for token, anchor in token_to_anchor.items():
                 anchor_to_sequence[anchor].append(token)  # Add matched tokens to sequences of their respective anchors
@@ -260,6 +303,7 @@ def search_tokens_in_sequence(criteria_list: List[TokenSearchInput], texts: List
 
 
 def get_sections_for_matched_tokens(criteria_list: List[TokenSearchInput], section_type: str, texts: Optional[List[str]] = None) -> List[HighlightedSection]:
+    logger.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     time_start = time.time()
     logger.info("Starting get_sections_for_matched_tokens.")
     
