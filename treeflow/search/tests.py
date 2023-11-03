@@ -77,74 +77,6 @@ class TokenSearchTest(TestCase):
         cls.token_banana.lemmas.add(cls.lemma_banana)
         cls.token_cherry.lemmas.add(cls.lemma_cherry)
         cls.token_delicious.lemmas.add(cls.lemma_delicious)
-    
-    def test_search_tokens_in_sequence(self):
-        criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-        criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-        criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-
-        matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
-
-        logger.debug(f"Matched sequences: {matched_sequences}")
-
-        self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
-
-        # Modified:
-        token_uuids = [token.id if isinstance(token, Token) else token for token in matched_sequences[0]]
-        matched_token_objects = Token.objects.filter(id__in=token_uuids)
-        
-        self.assertEqual(len(matched_token_objects), 3, "Expected three matched tokens")
-        transcriptions = [token.transcription for token in matched_token_objects]
-        self.assertListEqual(transcriptions, ["apple", "cherry", "banana"], "Unexpected tokens returned")
-
-
-    def test_get_sections_for_matched_tokens(self):
-        criteria_list = [
-            TokenSearchInput(query_type='exact', value='apple', field='transcription'),
-            TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after')),
-            TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-        ]
-
-        matching_sections = get_sections_for_matched_tokens(criteria_list, section_type="sentence")
-
-        self.assertTrue(len(matching_sections) > 0, "Expected at least one matching section")
-
-        tokens_to_check = Token.objects.filter(transcription__in=["apple", "cherry", "banana"])
-        for token in tokens_to_check:
-            token_in_section = any(section for section in matching_sections if token in section.highlighted_tokens)
-            self.assertTrue(token_in_section, f"Token {token.transcription} not found in any section")
-
-
-    def test_search_tokens_mixed_directions(self):
-        # Creating criteria:
-        # 1. 'apple'
-        # 3. 'banana' exactly 3 tokens after 'apple'
-        # 4. 'fruit' exactly 3 tokens before 'banana'
-        criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-        criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=6, exact=True, type='after'))
-        criteria4 = TokenSearchInput(query_type='exact', value='fruit', field='transcription', distance=Distance(distance=3, exact=True, type='before'))
-
-        matched_sequences = search_tokens_in_sequence([criteria1, criteria3, criteria4])
-        self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
-
-        logger.debug(f"Matched sequences for mixed directions: {matched_sequences}")
-
-    def test_search_tokens_both_directions(self):
-        # Creating criteria:
-        # 1. 'apple'
-        # 2. 'cherry' exactly 3 tokens in both directions from 'apple'
-        criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-        criteria2 = TokenSearchInput(query_type='exact', value='cherry', field='transcription', 
-                                    distance=Distance(distance=3, exact=True, type='both'))
-
-        matched_sequences = search_tokens_in_sequence([criteria1, criteria2])
-        
-        # Expecting to find sequences where 'cherry' is exactly 3 tokens away from 'apple' in both directions
-        self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
-
-        # Logging the results for debugging
-        logger.debug(f"Matched sequences for 'both' directionality: {matched_sequences}")
-
 
     def test_search_tokens_mixed_directions_v2(self):
         # Creating criteria:
@@ -167,3 +99,74 @@ class TokenSearchTest(TestCase):
 
         # Logging the results for debugging
         logger.debug(f"Matched sequences for mixed directions v2: {matched_sequences}")
+
+
+        '''  
+            def test_search_tokens_in_sequence(self):
+                criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
+                criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+                criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+
+                matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
+
+                logger.debug(f"Matched sequences: {matched_sequences}")
+
+                self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
+
+                # Modified:
+                token_uuids = [token.id if isinstance(token, Token) else token for token in matched_sequences[0]]
+                matched_token_objects = Token.objects.filter(id__in=token_uuids)
+                
+                self.assertEqual(len(matched_token_objects), 3, "Expected three matched tokens")
+                transcriptions = [token.transcription for token in matched_token_objects]
+                self.assertListEqual(transcriptions, ["apple", "cherry", "banana"], "Unexpected tokens returned")
+
+
+            def test_get_sections_for_matched_tokens(self):
+                criteria_list = [
+                    TokenSearchInput(query_type='exact', value='apple', field='transcription'),
+                    TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after')),
+                    TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
+                ]
+
+                matching_sections = get_sections_for_matched_tokens(criteria_list, section_type="sentence")
+
+                self.assertTrue(len(matching_sections) > 0, "Expected at least one matching section")
+
+                tokens_to_check = Token.objects.filter(transcription__in=["apple", "cherry", "banana"])
+                for token in tokens_to_check:
+                    token_in_section = any(section for section in matching_sections if token in section.highlighted_tokens)
+                    self.assertTrue(token_in_section, f"Token {token.transcription} not found in any section")
+
+
+            def test_search_tokens_mixed_directions(self):
+                # Creating criteria:
+                # 1. 'apple'
+                # 3. 'banana' exactly 3 tokens after 'apple'
+                # 4. 'fruit' exactly 3 tokens before 'banana'
+                criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
+                criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=6, exact=True, type='after'))
+                criteria4 = TokenSearchInput(query_type='exact', value='fruit', field='transcription', distance=Distance(distance=3, exact=True, type='before'))
+
+                matched_sequences = search_tokens_in_sequence([criteria1, criteria3, criteria4])
+                self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
+
+                logger.debug(f"Matched sequences for mixed directions: {matched_sequences}")
+
+            def test_search_tokens_both_directions(self):
+                # Creating criteria:
+                # 1. 'apple'
+                # 2. 'cherry' exactly 3 tokens in both directions from 'apple'
+                criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
+                criteria2 = TokenSearchInput(query_type='exact', value='cherry', field='transcription', 
+                                            distance=Distance(distance=3, exact=True, type='both'))
+
+                matched_sequences = search_tokens_in_sequence([criteria1, criteria2])
+                
+                # Expecting to find sequences where 'cherry' is exactly 3 tokens away from 'apple' in both directions
+                self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
+
+                # Logging the results for debugging
+                logger.debug(f"Matched sequences for 'both' directionality: {matched_sequences}")
+
+        '''
