@@ -27,7 +27,10 @@ def retrieve_initial_anchors(criterion: TokenSearchInput) -> List[Token]:
 
     :param criterion: The TokenSearchInput object containing the search criterion.
     :return: A list of Token objects that match the criterion.
+    
     """
+
+    tokens = Token.objects.none()  # This will create an empty queryset
     # Assuming criterion.value contains the text to match and criterion.field is the field to search in
     if criterion.query_type == 'exact':
         tokens = Token.objects.filter(**{f'{criterion.field}__iexact': criterion.value})
@@ -58,29 +61,32 @@ def identify_candidate_sections(anchors: List[Token]) -> List[Section]:
     candidate_sections = Section.objects.filter(id__in=section_ids)
     return list(candidate_sections)
 
-
 def apply_criterion(queryset, criterion):
     # This function applies the specific criterion to the queryset and returns the modified queryset.
+    field_query = f"sectiontoken__token__{criterion.field}__"
+
     if criterion.query_type == 'exact':
-        return queryset.filter(sectiontoken__token__transcription__iexact=criterion.value)
+        return queryset.filter(**{f'{field_query}iexact': criterion.value})
     elif criterion.query_type == 'not':
-        return queryset.exclude(sectiontoken__token__transcription__iexact=criterion.value)
+        return queryset.exclude(**{f'{field_query}iexact': criterion.value})
     elif criterion.query_type == 'contains':
-        return queryset.filter(sectiontoken__token__transcription__icontains=criterion.value)
+        return queryset.filter(**{f'{field_query}icontains': criterion.value})
     elif criterion.query_type == 'not_contains':
-        return queryset.exclude(sectiontoken__token__transcription__icontains=criterion.value)
+        return queryset.exclude(**{f'{field_query}icontains': criterion.value})
     elif criterion.query_type == 'regex':
-        return queryset.filter(sectiontoken__token__transcription__regex=rf'{criterion.value}')
+        return queryset.filter(**{f'{field_query}regex': rf'{criterion.value}'})
     # Add more conditions as needed
 
     # Return the queryset unmodified if no matching condition was found
     return queryset
 
-def filter_sections_by_logic(candidate_sections, subsequent_criteria):
-    # Filter the candidate sections based on logical criteria
-    for criterion in subsequent_criteria:
-        candidate_sections = apply_criterion(candidate_sections, criterion)
+def filter_sections_by_logic(candidate_sections, token_search_inputs: List[TokenSearchInput]):
+    # Filter the candidate sections based on the logical criteria contained within the TokenSearchInput instances
+    for token_search_input in token_search_inputs:
+        # Directly pass the TokenSearchInput instance to the apply_criterion function
+        candidate_sections = apply_criterion(candidate_sections, token_search_input)
     
+    # Assuming candidate_sections is a Django queryset, this will remove duplicates
     return candidate_sections.distinct()
 
 def apply_distance_constraints(anchors, candidate_sections, distance_constraints):
@@ -117,3 +123,26 @@ def apply_distance_constraints(anchors, candidate_sections, distance_constraints
                     aggregated_results.append(token)
     
     return aggregated_results
+
+
+def process_search_inputs(token_search_inputs: List[TokenSearchInput]):
+    # Step 1: Retrieve initial anchors for the first TokenSearchInput
+    initial_anchors = retrieve_initial_anchors(token_search_inputs[0])
+    
+    # Step 2: Identify corresponding sections for the initial anchors
+    candidate_sections = identify_candidate_sections(initial_anchors)
+    
+    # Step 3 and Step 4: Process subsequent criteria
+    for criterion in token_search_inputs[1:]:
+        # Apply logical "AND" and "NOT" criteria to the sections
+        candidate_sections = filter_sections_by_logic(candidate_sections, criterion)
+
+        # If the criterion includes distance constraints, apply them
+        if criterion.distance:
+            for anchor in initial_anchors:
+                # Apply distance constraints here and update candidate_sections if necessary
+                # This will filter the tokens based on distance from the anchor
+                candidate_sections = apply_distance_constraints(anchor, candidate_sections, criterion.distance)
+
+    # At this point, candidate_sections contains sections that match all criteria
+    return candidate_sections

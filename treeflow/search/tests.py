@@ -4,7 +4,7 @@ from django.db.models import Q
 from treeflow.corpus.models import Token, Section, SectionToken, POS, Feature
 from treeflow.dict.models import Lemma
 from treeflow.corpus.types.token import TokenSearchInput, Distance, FeatureSelectionInput, POSSelectionInput
-from treeflow.search.logic import build_query_for_criteria, search_tokens_in_sequence, get_sections_for_matched_tokens
+from treeflow.search.logic import retrieve_initial_anchors, identify_candidate_sections
 import asyncio
 import logging
 
@@ -19,12 +19,19 @@ class TokenSearchTest(TestCase):
 
         # Create tokens with mixed order of transcriptions and numbers
         cls.token_apple = Token.objects.create(transcription="apple", number=1)
+        cls.token_pear = Token.objects.create(transcription="pear", number=2)
         cls.token_cherry = Token.objects.create(transcription="cherry", number=4)
+        cls.token_grape = Token.objects.create(transcription="grape", number=5)
         cls.token_banana = Token.objects.create(transcription="banana", number=7)
+        cls.token_mango = Token.objects.create(transcription="mango", number=8)
+        cls.token_pineapple = Token.objects.create(transcription="pineapple", number=11)
         cls.token_fruit = Token.objects.create(transcription="fruit", number=10)
+        cls.token_sweet = Token.objects.create(transcription="sweet", number=14)
         cls.token_delicious = Token.objects.create(transcription="delicious", number=13)
         cls.token_fresh = Token.objects.create(transcription="fresh", number=16)
+        cls.token_ripe = Token.objects.create(transcription="ripe", number=17)
         cls.token_juicy = Token.objects.create(transcription="juicy", number=19)
+        cls.token_tart = Token.objects.create(transcription="tart", number=20)
 
         # Create some sections with these tokens
         cls.section1 = Section.objects.create(type="sentence")
@@ -32,6 +39,8 @@ class TokenSearchTest(TestCase):
         cls.section3 = Section.objects.create(type="sentence")
         cls.section4 = Section.objects.create(type="sentence")
         cls.section5 = Section.objects.create(type="sentence")
+        cls.section6 = Section.objects.create(type="sentence")
+        cls.section7 = Section.objects.create(type="sentence")
 
         # cls.section1: apple(1), cherry(4), banana(7), fruit(10), delicious(13)
         for token in [cls.token_apple, cls.token_cherry, cls.token_banana, cls.token_fruit, cls.token_delicious]:
@@ -53,10 +62,37 @@ class TokenSearchTest(TestCase):
         for token in [cls.token_delicious, cls.token_fruit, cls.token_juicy, cls.token_fresh, cls.token_apple, cls.token_cherry, cls.token_banana]:
             SectionToken.objects.create(token=token, section=cls.section5)
 
+        # cls.section6: pear(2), grape(5), mango(8), pineapple(11), sweet(14)
+        for token in [cls.token_pear, cls.token_grape, cls.token_mango, cls.token_pineapple, cls.token_sweet]:
+            SectionToken.objects.create(token=token, section=cls.section6)
+
+        # cls.section7: ripe(17), tart(20), pear(2), mango(8)
+        for token in [cls.token_ripe, cls.token_tart, cls.token_pear, cls.token_mango]:
+            SectionToken.objects.create(token=token, section=cls.section7)
+
+
+        # Additional lemmas
+        cls.lemma_pear = Lemma.objects.create(word="pear", language="en")
+        cls.lemma_grape = Lemma.objects.create(word="grape", language="en")
+        cls.lemma_mango = Lemma.objects.create(word="mango", language="en")
+        cls.lemma_pineapple = Lemma.objects.create(word="pineapple", language="en")
+        cls.lemma_ripe = Lemma.objects.create(word="ripe", language="en")
+        cls.lemma_tart = Lemma.objects.create(word="tart", language="en")
+
+        # Associate tokens with these lemmas
+        cls.token_pear.lemmas.add(cls.lemma_pear)
+        cls.token_grape.lemmas.add(cls.lemma_grape)
+        cls.token_mango.lemmas.add(cls.lemma_mango)
+        cls.token_pineapple.lemmas.add(cls.lemma_pineapple)
+        cls.token_ripe.lemmas.add(cls.lemma_ripe)
+        cls.token_tart.lemmas.add(cls.lemma_tart)
+
         # Create some POS entries
         cls.pos_noun_apple = POS.objects.create(token=cls.token_apple, pos="noun", type="upos")
         cls.pos_noun_banana = POS.objects.create(token=cls.token_banana, pos="noun", type="upos")
         cls.pos_adjective_delicious = POS.objects.create(token=cls.token_delicious, pos="adjective", type="upos")
+        cls.pos_verb_eat = POS.objects.create(token=cls.token_mango, pos="verb", type="upos")
+        cls.pos_adjective_ripe = POS.objects.create(token=cls.token_ripe, pos="adjective", type="upos")
 
         # Create some features for tokens
         cls.feature_singular_apple = Feature.objects.create(
@@ -65,6 +101,10 @@ class TokenSearchTest(TestCase):
             token=cls.token_banana, pos=cls.pos_noun_banana, feature="number", feature_value="plural")
         cls.feature_taste_delicious = Feature.objects.create(
             token=cls.token_delicious, pos=cls.pos_adjective_delicious, feature="taste", feature_value="sweet")
+        cls.feature_singular_pear = Feature.objects.create(
+            token=cls.token_pear, pos=cls.pos_verb_eat, feature="number", feature_value="singular")
+        cls.feature_taste_ripe = Feature.objects.create(
+            token=cls.token_ripe, pos=cls.pos_adjective_ripe, feature="taste", feature_value="sweet")
 
         # Create some lemmas
         cls.lemma_apple = Lemma.objects.create(word="apple", language="en")
@@ -78,95 +118,43 @@ class TokenSearchTest(TestCase):
         cls.token_cherry.lemmas.add(cls.lemma_cherry)
         cls.token_delicious.lemmas.add(cls.lemma_delicious)
 
-    def test_search_tokens_mixed_directions_v2(self):
-        # Creating criteria:
-        # 1. 'apple'
-        # 2. 'banana' exactly 4 tokens after 'apple'
-        # 3. 'fruit' exactly 4 tokens before 'banana'
-        # 4. 'cherry' exactly 4 tokens in both directions from 'apple'
-        criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-        criteria2 = TokenSearchInput(query_type='exact', value='banana', field='transcription', 
-                                    distance=Distance(distance=5, exact=True, type='after'))
-        criteria3 = TokenSearchInput(query_type='exact', value='fruit', field='transcription', 
-                                    distance=Distance(distance=4, exact=True, type='before'))
-        criteria4 = TokenSearchInput(query_type='exact', value='cherry', field='transcription', 
-                                    distance=Distance(distance=4, exact=True, type='both'))
+    def test_retrieve_initial_anchors_exact(self):
+        # This test ensures that the exact match query returns only the exact matches
+        criterion = TokenSearchInput(field='transcription', value='apple', query_type='exact')
+        result = retrieve_initial_anchors(criterion)
+        self.assertIn(self.token_apple, result)
+        self.assertEqual(len(result), 1)  # Only one exact match for 'apple'
 
-        matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3, criteria4])
+    def test_retrieve_initial_anchors_contains(self):
+        # This test checks that the contains query returns all tokens that contain the string
+        criterion = TokenSearchInput(field='transcription', value='ap', query_type='contains')
+        result = retrieve_initial_anchors(criterion)
+        self.assertIn(self.token_apple, result)  # 'apple' contains 'ap'
+        self.assertIn(self.token_grape, result)  # 'grape' contains 'ap'
+        self.assertIn(self.token_pineapple, result)  # 'pineapple' contains 'ap'
+        # Assert that the number of returned tokens matches the expected
+        self.assertEqual(len(result), 3)
+
+    def test_retrieve_initial_anchors_unsupported_query_type(self):
+        # This test checks that an unsupported query type returns an empty list
+        criterion = TokenSearchInput(field='transcription', value='apple', query_type='unsupported')
+        result = retrieve_initial_anchors(criterion)
+        self.assertEqual(result, [])  # Expecting an empty list for unsupported query types
+
+
+    def test_identify_candidate_sections_with_anchors(self):
+        # Test with a list of tokens that should belong to multiple sections
+        anchors = [self.token_apple, self.token_banana]
+        expected_section_ids = {
+            self.section1.id, self.section2.id, self.section3.id, 
+            self.section4.id, self.section5.id  # These are the sections we expect
+        }
         
-        # Expecting to find sequences that satisfy all four criteria
-        self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
+        result_sections = identify_candidate_sections(anchors)
+        result_section_ids = {section.id for section in result_sections}
+        self.assertEqual(result_section_ids, expected_section_ids)
 
-        # Logging the results for debugging
-        logger.debug(f"Matched sequences for mixed directions v2: {matched_sequences}")
-
-
-        '''  
-            def test_search_tokens_in_sequence(self):
-                criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-                criteria2 = TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-                criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-
-                matched_sequences = search_tokens_in_sequence([criteria1, criteria2, criteria3])
-
-                logger.debug(f"Matched sequences: {matched_sequences}")
-
-                self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
-
-                # Modified:
-                token_uuids = [token.id if isinstance(token, Token) else token for token in matched_sequences[0]]
-                matched_token_objects = Token.objects.filter(id__in=token_uuids)
-                
-                self.assertEqual(len(matched_token_objects), 3, "Expected three matched tokens")
-                transcriptions = [token.transcription for token in matched_token_objects]
-                self.assertListEqual(transcriptions, ["apple", "cherry", "banana"], "Unexpected tokens returned")
-
-
-            def test_get_sections_for_matched_tokens(self):
-                criteria_list = [
-                    TokenSearchInput(query_type='exact', value='apple', field='transcription'),
-                    TokenSearchInput(query_type='iexact', value='cherry', field='transcription', distance=Distance(distance=3, exact=False, type='after')),
-                    TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=3, exact=False, type='after'))
-                ]
-
-                matching_sections = get_sections_for_matched_tokens(criteria_list, section_type="sentence")
-
-                self.assertTrue(len(matching_sections) > 0, "Expected at least one matching section")
-
-                tokens_to_check = Token.objects.filter(transcription__in=["apple", "cherry", "banana"])
-                for token in tokens_to_check:
-                    token_in_section = any(section for section in matching_sections if token in section.highlighted_tokens)
-                    self.assertTrue(token_in_section, f"Token {token.transcription} not found in any section")
-
-
-            def test_search_tokens_mixed_directions(self):
-                # Creating criteria:
-                # 1. 'apple'
-                # 3. 'banana' exactly 3 tokens after 'apple'
-                # 4. 'fruit' exactly 3 tokens before 'banana'
-                criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-                criteria3 = TokenSearchInput(query_type='exact', value='banana', field='transcription', distance=Distance(distance=6, exact=True, type='after'))
-                criteria4 = TokenSearchInput(query_type='exact', value='fruit', field='transcription', distance=Distance(distance=3, exact=True, type='before'))
-
-                matched_sequences = search_tokens_in_sequence([criteria1, criteria3, criteria4])
-                self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
-
-                logger.debug(f"Matched sequences for mixed directions: {matched_sequences}")
-
-            def test_search_tokens_both_directions(self):
-                # Creating criteria:
-                # 1. 'apple'
-                # 2. 'cherry' exactly 3 tokens in both directions from 'apple'
-                criteria1 = TokenSearchInput(query_type='exact', value='apple', field='transcription')
-                criteria2 = TokenSearchInput(query_type='exact', value='cherry', field='transcription', 
-                                            distance=Distance(distance=3, exact=True, type='both'))
-
-                matched_sequences = search_tokens_in_sequence([criteria1, criteria2])
-                
-                # Expecting to find sequences where 'cherry' is exactly 3 tokens away from 'apple' in both directions
-                self.assertEqual(len(matched_sequences), 1, "Expected one matched sequence")
-
-                # Logging the results for debugging
-                logger.debug(f"Matched sequences for 'both' directionality: {matched_sequences}")
-
-        '''
+    def test_identify_candidate_sections_no_anchors(self):
+        # Test with an empty list of tokens
+        result_sections = identify_candidate_sections([])
+        self.assertEqual(result_sections, [])

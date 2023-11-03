@@ -38,7 +38,7 @@ from treeflow.dict.enums.language import Language
 # image
 from treeflow.images.types.image import Image, ImageInput, ImagePartial
 # search
-from treeflow.search.logic import get_sections_for_matched_tokens
+#from treeflow.search.logic import get_sections_for_matched_tokens
 # search enum
 from treeflow.search.enum import SearchType
 
@@ -145,7 +145,7 @@ class Query:
     token: Optional[Token] = strawberry_django.node()
     tokens: ListConnectionWithTotalCount[Token] = strawberry_django.connection()
     tokens_list: List[Token] = strawberry_django.field()
-
+    '''
     @strawberry.field
     @sync_to_async
     def search_tokens(
@@ -192,7 +192,7 @@ class Query:
                     end_cursor=None
                 )
             )
-
+    '''
     # ### dict
     # # lemma
     lemma: Optional[Lemma] = strawberry_django.node()
