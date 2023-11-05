@@ -9,7 +9,7 @@ def sections_view(request):
     section_types = Section.objects.order_by('type').values_list('type', flat=True).distinct()
 
     # Retrieve GET parameters
-    text_id = request.GET.get('text_id')
+    selected_text_id = request.GET.get('text_id')
     selected_section_type = request.GET.get('section_type')
 
     # Start with an initial sections queryset
@@ -18,11 +18,11 @@ def sections_view(request):
         'sectiontoken_set__token__lemmas',  # Prefetch lemmas through TokenLemma
         'sectiontoken_set__token__meanings',  # Prefetch meanings through TokenMeaning
         'sectiontoken_set__token__pos_token'  # Prefetch related POS objects
-    )
+    ).order_by('number')
 
     # Filter sections if a text ID is provided
-    if text_id:
-        sections = sections.filter(text__id=text_id)
+    if selected_text_id:
+        sections = sections.filter(text__id=selected_text_id)
 
     # Filter sections if a section type is provided
     if selected_section_type:
@@ -38,7 +38,7 @@ def sections_view(request):
         'texts': texts,
         'section_types': section_types,
         'sections': sections_page,
-        'selected_text_id': text_id or '',
+        'selected_text_id': selected_text_id or '',
         'selected_section_type': selected_section_type,
     }
 

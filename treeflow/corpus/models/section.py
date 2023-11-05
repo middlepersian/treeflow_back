@@ -29,7 +29,7 @@ class Section(models.Model):
     history = HistoricalRecords()
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ['number']
         constraints = [
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier')
@@ -68,6 +68,7 @@ class SectionToken(models.Model):
             models.Index(fields=['token']),
             models.Index(fields=['section']),
         ]
+        ordering = ['section', 'token']
 
     def __str__(self):
         return 'SectionToken {}:{}'.format(self.section_id, self.token_id)
