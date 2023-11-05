@@ -45,18 +45,6 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["ATOMIC_REQUESTS"] = False
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env("REDIS_URL"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "IGNORE_EXCEPTIONS": True,
-        },
-        "TIMEOUT": 3600,  # Cache timeout in seconds (e.g., 3600 seconds = 1 hour)
-    }
-}
-
 # URLS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
@@ -339,19 +327,3 @@ STRAWBERRY_DJANGO = {
 
 }
 
-
-# Celery configuration
-CELERY_BROKER_URL = env("REDIS_URL")
-CELERY_RESULT_BACKEND = env("REDIS_URL")
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-
-
-CELERY_BEAT_SCHEDULE = {
-    'clear_and_warm_up_cache': {
-        'task': 'treeflow.datafeed.tasks.clear_and_warm_up_cache',
-        'schedule': crontab(minute=1), 
-    }
-}

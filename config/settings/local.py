@@ -101,3 +101,28 @@ LOGGING = {
         },
     }
 }
+
+
+# Celery configuration
+CELERY_BROKER_URL = env("REDIS_URL")
+CELERY_RESULT_BACKEND = env("REDIS_URL")
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Schedule for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    'clear_and_warm_up_cache': {
+        'task': 'treeflow.datafeed.tasks.clear_and_warm_up_cache',
+        'schedule': crontab(hour='*', minute=0),  # Runs at the beginning of every hour
+    }
+}
+
+# Local memory cache configuration (unchanged)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
