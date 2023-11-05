@@ -2,23 +2,25 @@
 
 {% block content %}
 <!-- Form for selecting text and section type -->
+<!-- Form for selecting text and section type with the correct URL pattern for action -->
 <form action="{% url 'corpus:sections_view' %}" method="get">
   <!-- Text selection dropdown -->
   <label for="text-select">Choose a text:</label>
   <select name="text_id" id="text-select" onchange="this.form.submit()">
     <option value="">Select a text...</option>
     {% for text in texts %}
-    <option value="{{ text.id }}" {% if text.id == selected_text_id %}selected{% endif %}>
+    <option value="{{ text.id }}" {% if text.id == selected_text_id %} selected="selected" {% endif %}>
       {{ text.title }}
     </option>
     {% endfor %}
   </select>
+
   <!-- Type selection dropdown -->
   <label for="type-select">Choose a type:</label>
   <select name="section_type" id="type-select" onchange="this.form.submit()">
     <option value="">Select a type...</option>
     {% for type in section_types %}
-    <option value="{{ type }}" {% if type == selected_section_type %}selected{% endif %}>
+    <option value="{{ type }}" {% if type == selected_section_type %} selected {% endif %}>
       {{ type }}
     </option>
     {% endfor %}
@@ -29,71 +31,20 @@
 <!-- Section and Token display -->
 {% for section in sections %}
 <div class="section-details">
-  <strong>Section:</strong> {{ section.identifier }} - {{ section.type }}
+  <!-- Section details here, e.g., title and type -->
+  <p>{{ section.title }} - {{ section.type }}</p>
 </div>
-<table class="token-table">
-  <thead>
-    <tr>
-      <th>Token</th>
-      <th>Transcription</th>
-      <th>Transliteration</th>
-      <th>Lemmas</th>
-      <th>Meanings</th>
-      <th>POS Tags</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-   {% for section_token in section.sectiontoken_set.all %}
-    <tr>
-      <td>{{ section_token.token.number }}</td>
-      <td>
-        <input type="text" name="transcription" value="{{ section_token.token.transcription }}">
-      </td>
-      <td>
-        <input type="text" name="transliteration" value="{{ section_token.token.transliteration }}">
-      </td>
-      <!-- Start the form for each token -->
-      <form method="post" action="{% url 'corpus:update_token' %}">
-        {% csrf_token %}
-        <input type="hidden" name="token_id" value="{{ section_token.token.id }}">
-        <td>
-          <!-- Display lemmas for editing -->
-          {% for lemma in section_token.token.tokenlemmas.all %}
-          <input type="text" name="lemma_{{ lemma.id }}" value="{{ lemma.word }}">
-          {% endfor %}
-          <!-- Add a button or link if you want to add new lemmas -->
-        </td>
-        <td>
-          <!-- Display meanings for editing -->
-          {% for meaning in section_token.token.tokenmeanings.all %}
-          <input  type="text" name="meaning_{{ meaning.id }}" value="{{ meaning.meaning }}">
-          {% endfor %}
-          <!-- Add a button or link if you want to add new meanings -->
-        </td>
-        <td>
-          <!-- Display POS tags for editing -->
-          {% for pos in section_token.token.postags.all %}
-          <select name="pos_{{ pos.id }}">
-            {% for choice in pos_choices %}
-            <option value="{{ choice }}" {% if choice == pos.pos %}selected{% endif %}>{{ choice }}</option>
-            {% endfor %}
-          </select>
-          {% endfor %}
-          <!-- Add a button or link if you want to add new POS tags -->
-        </td>
-        <td>
-          <input type="submit" value="Save Changes">
-        </td>
-      </form>
-      <!-- End the form for this token -->
-    </tr>
-    {% empty %}
-    <tr><td colspan="7">No tokens available for this section.</td></tr>
-    {% endfor %}
-  </tbody>
-  
-</table>
+<div class="token-list">
+  {% for section_token in section.sectiontoken_set.all %}
+    <form method="post" action="{% url 'corpus:update_token' %}">
+      {% csrf_token %}
+      <input type="hidden" name="token_id" value="{{ section_token.token.id }}">
+      <input type="text" name="transcription" value="{{ section_token.token.transcription }}">
+      <input type="text" name="transliteration" value="{{ section_token.token.transliteration }}">
+      <input type="submit" value="Save Changes">
+    </form>
+  {% endfor %}
+</div>
 {% empty %}
 <p>No sections available for the selected text or type.</p>
 {% endfor %}

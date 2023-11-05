@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Container for tokens and SVG drawing -->
+<div style="position: relative;">
+
+    <!-- Tokens will be absolutely positioned within this container based on their 'x' and 'y' attributes -->
+    <div id="tokens-container" style="position: absolute; z-index: 10;">
+        {% for token in tokens %}
+        <div class="token" data-token-id="{{ token.id }}"
+            style="position: absolute; left: {{ token.position.x }}px; top: {{ token.position.y }}px;">
+            {{ token.text }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- SVG container for arrows -->
+    <!-- Make sure the SVG container is the same size as the token container and positioned over it -->
+    <svg id="arrows-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;">
+        {% for dependency in dependencies %}
+        <!-- Draw lines for each dependency -->
+        <line
+            x1="{% for token in tokens %}{% if token.id == dependency.from_token_id %}{{ token.position.x }}{% endif %}{% endfor %}"
+            y1="{% for token in tokens %}{% if token.id == dependency.from_token_id %}{{ token.position.y }}{% endif %}{% endfor %}"
+            x2="{% for token in tokens %}{% if token.id == dependency.to_token_id %}{{ token.position.x }}{% endif %}{% endfor %}"
+            y2="{% for token in tokens %}{% if token.id == dependency.to_token_id %}{{ token.position.y }}{% endif %}{% endfor %}"
+            style="stroke:rgb(255,0,0);stroke-width:2" />
+        {% endfor %}
+    </svg>
+
+</div>
+{% endblock content %}
