@@ -6,14 +6,19 @@ from treeflow.corpus.models import Text, Section
 def sections_view(request):
     # Get all Text and Section types for the dropdowns
     texts = Text.objects.all()
-    section_types = Section.objects.values_list('type', flat=True).distinct()
+    section_types = Section.objects.order_by('type').values_list('type', flat=True).distinct()
 
     # Retrieve GET parameters
     text_id = request.GET.get('text_id')
     selected_section_type = request.GET.get('section_type')
 
-    # Initial sections queryset
-    sections = Section.objects.prefetch_related('sectiontoken_set__token')
+    # Start with an initial sections queryset
+    # and prefetch related data to minimize database hits
+    sections = Section.objects.prefetch_related(
+        'sectiontoken_set__token__lemmas',  # Prefetch lemmas through TokenLemma
+        'sectiontoken_set__token__meanings',  # Prefetch meanings through TokenMeaning
+        'sectiontoken_set__token__pos_token'  # Prefetch related POS objects
+    )
 
     # Filter sections if a text ID is provided
     if text_id:
@@ -33,7 +38,7 @@ def sections_view(request):
         'texts': texts,
         'section_types': section_types,
         'sections': sections_page,
-        'selected_text_id': text_id or '',  # No need to convert if it's already a string
+        'selected_text_id': text_id or '',
         'selected_section_type': selected_section_type,
     }
 
