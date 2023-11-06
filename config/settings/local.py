@@ -23,16 +23,16 @@ EMAIL_BACKEND = env(
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
-# INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa F405
+INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa F405
 
 
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#prerequisites
-# INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
-# INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]  # noqa F405
+INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
+#INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]  # noqa F405
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#middleware
-# MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa F405
+MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa F405
 # MIDDLEWARE += ["strawberry_django_plus.middlewares.debug_toolbar.DebugToolbarMiddleware"]  # noqa F405
 #
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips

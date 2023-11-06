@@ -8,8 +8,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
-from treeflow.schema import schema
-# from schema import schema
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -19,9 +17,7 @@ urlpatterns = [
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    # graphql
-    # path('graphql_sync/', GraphQLView.as_view(schema=schema)),
-    path('graphql/', AsyncGraphQLView.as_view(schema=schema)),
+
 
     # Your stuff: custom urls includes go here
 
