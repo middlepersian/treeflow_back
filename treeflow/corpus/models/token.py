@@ -20,7 +20,7 @@ class Token(models.Model):
     transcription = models.TextField(null=True, blank=True)
     transliteration = models.TextField(null=True, blank=True)
     lemmas = models.ManyToManyField('dict.Lemma', blank=True, through='TokenLemma', related_name='token_lemmas')
-    meanings = models.ManyToManyField('dict.Meaning', blank=True, through='TokenMeaning', related_name='token_meanings')
+    senses = models.ManyToManyField('dict.Sense', blank=True, through='TokenSense', related_name='token_senses')
 
     avestan = models.TextField(null=True, blank=True)
 
@@ -109,3 +109,16 @@ class TokenMeaning(models.Model):
             models.Index(fields=['token']),
             models.Index(fields=['meaning']),
         ]
+
+class TokenSense(models.Model):
+    token = models.ForeignKey(Token, on_delete=models.CASCADE)
+    sense = models.ForeignKey('dict.Sense', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    class Meta:
+        unique_together = ['token', 'sense']
+        indexes = [
+            models.Index(fields=['token']),
+            models.Index(fields=['sense']),
+        ]        

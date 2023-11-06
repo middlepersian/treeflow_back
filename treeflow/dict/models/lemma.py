@@ -79,3 +79,18 @@ class LemmaMeaning(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["lemma", "meaning"], name="lemma_meaning")
         ]
+
+
+class LemmaSense(models.Model):
+    lemma = models.ForeignKey(
+        Lemma, on_delete=models.CASCADE, related_name="related_lemma_sense"
+    )
+    sense = models.ForeignKey(
+        "Sense", on_delete=models.CASCADE, related_name="related_sense"
+    )
+    history = HistoricalRecords()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["lemma", "sense"], name="lemma_sense")
+        ]        

@@ -24,6 +24,9 @@ class Section(models.Model):
                                   blank=True, related_name='section_container')
     meanings = models.ManyToManyField(
         'dict.Meaning', related_name='section_meanings')
+    senses = models.ManyToManyField(
+        'dict.Sense', related_name='section_senses')
+            
     created_at = models.DateTimeField(auto_now_add=True)
 
     history = HistoricalRecords()

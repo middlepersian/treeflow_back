@@ -47,6 +47,10 @@ class Comment(models.Model):
     meaning = models.ForeignKey('dict.Meaning', on_delete=models.CASCADE, null=True,
                                 blank=True, related_name='comment_meaning')
 
+    #sense
+    sense = models.ForeignKey('dict.Sense', on_delete=models.CASCADE, null=True,
+                              blank=True, related_name='comment_sense')                            
+
     # semantic
     semantic = models.ForeignKey('dict.Semantic', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
