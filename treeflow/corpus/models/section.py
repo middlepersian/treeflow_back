@@ -22,8 +22,7 @@ class Section(models.Model):
     # this is the case if a section "paragraph" has a "chapter" container
     container = models.ForeignKey('self', on_delete=models.SET_NULL, null=True,
                                   blank=True, related_name='section_container')
-    meanings = models.ManyToManyField(
-        'dict.Meaning', related_name='section_meanings')
+
     senses = models.ManyToManyField(
         'dict.Sense', related_name='section_senses')
             

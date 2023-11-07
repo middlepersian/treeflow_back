@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Form for selecting text -->
+<form action="{% url 'corpus:tokens_view' %}" method="get">
+  <!-- Text selection dropdown -->
+  <label for="text-select">Choose a text:</label>
+  <select name="text_id" id="text-select" onchange="this.form.submit()">
+    <option value="">Select a text...</option>
+    {% for text in texts %}
+    <option value="{{ text.id }}" {% if text.id == selected_text_id %} selected="selected" {% endif %}>
+      {{ text.title }}
+    </option>
+    {% endfor %}
+  </select>
+  <noscript><input type="submit" value="Filter"></noscript>
+</form>
+
+<!-- Token display -->
+{% for token in tokens %}
+<div class="token-details">
+  <!-- Token details here, e.g., transcription and transliteration -->
+  <form method="post" action="{% url 'corpus:update_token' %}">
+    {% csrf_token %}
+    <input type="hidden" name="token_id" value="{{ token.id }}">
+    <input type="text" name="transcription" value="{{ token.transcription }}">
+    <input type="text" name="transliteration" value="{{ token.transliteration }}">
+    <input type="submit" value="Save Changes">
+  </form>
+</div>
+{% empty %}
+<p>No tokens available for the selected text.</p>
+{% endfor %}
+
+{% endblock content %}

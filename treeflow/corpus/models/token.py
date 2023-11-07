@@ -96,20 +96,6 @@ class TokenLemma(models.Model):
         ]
 
 
-
-class TokenMeaning(models.Model):
-    token = models.ForeignKey(Token, on_delete=models.CASCADE)
-    meaning = models.ForeignKey('dict.Meaning', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-    class Meta:
-        unique_together = ['token', 'meaning']
-        indexes = [
-            models.Index(fields=['token']),
-            models.Index(fields=['meaning']),
-        ]
-
 class TokenSense(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE)
     sense = models.ForeignKey('dict.Sense', on_delete=models.CASCADE)

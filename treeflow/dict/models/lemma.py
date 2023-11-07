@@ -16,11 +16,11 @@ class Lemma(models.Model):
     related_lemmas = models.ManyToManyField(
         "self", blank=True, related_name="lemma_related_lemmas", through="LemmaRelation"
     )
-    related_meanings = models.ManyToManyField(
-        "Meaning",
+    related_senses = models.ManyToManyField(
+        "Sense",
         blank=True,
-        related_name="lemma_related_meanings",
-        through="LemmaMeaning",
+        related_name="lemma_related_senses",
+        through="LemmaSense",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     stage = models.CharField(max_length=10, blank=True)
@@ -64,22 +64,6 @@ class LemmaRelation(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["lemma1", "lemma2"], name="lemma_relation")
         ]
-
-
-class LemmaMeaning(models.Model):
-    lemma = models.ForeignKey(
-        Lemma, on_delete=models.CASCADE, related_name="related_lemma"
-    )
-    meaning = models.ForeignKey(
-        "Meaning", on_delete=models.CASCADE, related_name="related_meaning"
-    )
-    history = HistoricalRecords()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["lemma", "meaning"], name="lemma_meaning")
-        ]
-
 
 class LemmaSense(models.Model):
     lemma = models.ForeignKey(

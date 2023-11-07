@@ -16,7 +16,7 @@ def sections_view(request):
     # and prefetch related data to minimize database hits
     sections = Section.objects.prefetch_related(
         'sectiontoken_set__token__lemmas',  # Prefetch lemmas through TokenLemma
-        'sectiontoken_set__token__meanings',  # Prefetch meanings through TokenMeaning
+        'sectiontoken_set__token__senses',  # Prefetch meanings through TokenSense
         'sectiontoken_set__token__pos_token'  # Prefetch related POS objects
     ).order_by('number')
 
