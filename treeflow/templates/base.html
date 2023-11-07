@@ -1,100 +1,62 @@
 {% load static i18n %}
 {% load django_browser_reload %}
+{% load static tailwind_tags %}
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+  {% tailwind_css %}
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <title>{% block title %}treeflow{% endblock title %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Zoroastrian Middle Persian Corpus and Dictionary">
   <meta name="author" content="Francisco Mondaca">
-
-  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-  <!--[if lt IE 9]>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
-
   <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}">
-
-  {% block css %}
-  <!-- Latest compiled and minified Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-  <!-- Your stuff: Third-party CSS libraries go here -->
-  <!-- This file stores project-specific CSS -->
-  <link href="{% static 'css/project.css' %}" rel="stylesheet">
-  {% endblock %}
-  <!-- Le javascript
-    ================================================== -->
-  {# Placed at the top of the document so pages load faster with defer #}
-  {% block javascript %}
-  <!-- Bootstrap JS and its dependencies-->
-  <script defer src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-    crossorigin="anonymous"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-    crossorigin="anonymous"></script>
-  <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"></script>
-
-  <!-- Your stuff: Third-party javascript libraries go here -->
-
-  <!-- place project specific Javascript in this file -->
-  <script defer src="{% static 'js/project.js' %}"></script>
-
-  {% endblock javascript %}
-
 </head>
 
 <body>
 
   <div class="mb-1">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
-        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <a class="navbar-brand" href="{% url 'home' %}">treeflow</a>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'about' %}">About</a>
-          </li>
-          {% if request.user.is_authenticated %}
-          <li class="nav-item">
-            {# URL provided by django-allauth/account/urls.py #}
-            <a class="nav-link" href="{% url 'users:detail' request.user.username  %}">{% trans "My Profile" %}</a>
-          </li>
-          <li class="nav-item">
-            {# URL provided by django-allauth/account/urls.py #}
-            <a class="nav-link" href="{% url 'account_logout' %}">{% trans "Sign Out" %}</a>
-          </li>
-          {% else %}
-          <li class="nav-item">
-            {# URL provided by django-allauth/account/urls.py #}
-            <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
-          </li>
-          <li class="nav-item">
-            {# URL provided by django-allauth/account/urls.py #}
-            <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% trans "Sign In" %}</a>
-          </li>
-          {% endif %}
-        </ul>
+    <nav class="bg-gray-100 px-2 sm:px-4 py-2.5 rounded">
+      <div class="container flex flex-wrap justify-between items-center mx-auto">
+        <a href="{% url 'home' %}" class="flex items-center">
+          <span class="self-center text-xl font-semibold whitespace-nowrap">treeflow</span>
+        </a>
+        <button data-collapse-toggle="navbarSupportedContent" type="button" class="inline-flex items-center p-2 ml-3 text-sm text-gray-700 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200" aria-controls="navbarSupportedContent" aria-expanded="false">
+          <span class="sr-only">Open main menu</span>
+          <!-- Icon for menu button here -->
+        </button>
+        <div class="hidden w-full md:block md:w-auto" id="navbarSupportedContent">
+          <ul class="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
+            <li>
+              <a href="{% url 'home' %}" class="block py-2 pr-4 pl-3 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0" aria-current="page">Home</a>
+            </li>
+            <li>
+              <a href="{% url 'about' %}" class="block py-2 pr-4 pl-3 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">About</a>
+            </li>
+            {% if request.user.is_authenticated %}
+            <li>
+              <a href="{% url 'users:detail' request.user.username %}" class="block py-2 pr-4 pl-3 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">My Profile</a>
+            </li>
+            <li>
+              <a href="{% url 'account_logout' %}" class="block py-2 pr-4 pl-3 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">Sign Out</a>
+            </li>
+            {% else %}
+            <li>
+              <a href="{% url 'account_signup' %}" class="block py-2 pr-4 pl-3 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">Sign Up</a>
+            </li>
+            <li>
+              <a href="{% url 'account_login' %}" class="block py-2 pr-4 pl-3 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">Sign In</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
     </nav>
-
   </div>
-
+  
   <div class="container">
 
     {% if messages %}

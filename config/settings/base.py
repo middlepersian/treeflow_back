@@ -73,6 +73,8 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "corsheaders",
     "simple_history",
+    "tailwind",
+    "theme",
     "strawberry.django"
 ]
 
@@ -332,3 +334,4 @@ STRAWBERRY_DJANGO = {
 
 }
 
+TAILWIND_APP_NAME = 'theme'

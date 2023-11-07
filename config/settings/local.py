@@ -19,20 +19,10 @@ ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
 )
-
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
 INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa F405
-
-# django_browser_reload
-INSTALLED_APPS = ["django_browser_reload"] + INSTALLED_APPS
-
-# django-debug-toolbar
-# ------------------------------------------------------------------------------
-# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#prerequisites
-INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
-
 
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#middleware
 MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa F405
@@ -51,11 +41,11 @@ if env("USE_DOCKER") == "yes":
 # ------------------------------------------------------------------------------
 # https://django-extensions.readthedocs.io/en/latest/installation_instructions.html#configuration
 INSTALLED_APPS += ["django_extensions"]
-# Your stuff: custom apps go here
-#
-#  # noqa F405
+# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#prerequisites
+INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
+# django_browser_reload
+INSTALLED_APPS += ["django_browser_reload"]
 
-# Your stuff...
 # ------------------------------------------------------------------------------
 GRAPH_MODELS = {
     'all_applications': True,
