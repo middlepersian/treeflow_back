@@ -25,17 +25,20 @@ EMAIL_BACKEND = env(
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
 INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa F405
 
+# django_browser_reload
+INSTALLED_APPS = ["django_browser_reload"] + INSTALLED_APPS
 
 # django-debug-toolbar
 # ------------------------------------------------------------------------------
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#prerequisites
 INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
-#INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]  # noqa F405
+
+
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#middleware
 MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa F405
-# MIDDLEWARE += ["strawberry_django_plus.middlewares.debug_toolbar.DebugToolbarMiddleware"]  # noqa F405
-#
-# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
+
+# django_browser_reload
+MIDDLEWARE += ["django_browser_reload.middleware.BrowserReloadMiddleware"]
 
 INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 if env("USE_DOCKER") == "yes":
