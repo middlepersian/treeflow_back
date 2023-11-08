@@ -146,5 +146,10 @@ def test_insert_after():
     token2.refresh_from_db()
     token3.refresh_from_db()
 
-    # Print tokens after refreshing
-    print(f"After refreshing: token2.next={token2.next}, new_token.previous={new_token.previous}, new_token.next={new_token.next}")
+
+    # print next and previous for each token
+    print(f"token1.next={token1.next}, token1.previous={token1.previous}")
+    print(f"token2.next={token2.next}, token2.previous={token2.previous}")
+    print(f"token3.next={token3.next}, token3.previous={token3.previous}")
+    print(f"new_token.next={new_token.next}, new_token.previous={new_token.previous}")
+    
