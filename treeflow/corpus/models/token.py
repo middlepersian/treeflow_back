@@ -1,18 +1,15 @@
 import uuid as uuid_lib
 from django.db import models
 from django.db.models import Q, F
+from django.db.models import Q, F
 from django.contrib.postgres.fields import ArrayField
 from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 from django.db import transaction
-import logging
-logger = logging.getLogger(__name__)
-
 
 class Token(models.Model):
 
-    id = models.UUIDField(
-        primary_key=True, default=uuid_lib.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     number = models.FloatField(null=True, blank=True)
     number_in_sentence = models.FloatField(blank=True, null=True)
 
@@ -93,14 +90,12 @@ class Token(models.Model):
         # save
         super().save(*args, **kwargs)
 
-    MIN_GAP = 0.01  # Define a class-level constant for the minimum gap
+    MIN_GAP = 0.01  # Define a class-level constant for the minimum gap    
 
     @staticmethod
     def find_nearest_tokens(token_number, text_id):
-        previous_token = Token.objects.filter(
-            number__lt=token_number, text_id=text_id).order_by('-number').first()
-        next_token = Token.objects.filter(
-            number__gt=token_number, text_id=text_id).order_by('number').first()
+        previous_token = Token.objects.filter(number__lt=token_number, text_id=text_id).order_by('-number').first()
+        next_token = Token.objects.filter(number__gt=token_number, text_id=text_id).order_by('number').first()
         return previous_token, next_token
 
     @staticmethod
@@ -115,80 +110,73 @@ class Token(models.Model):
         with transaction.atomic():
             reference_token = cls.objects.select_for_update().get(id=reference_token_id)
             text_id = reference_token.text_id
-            previous_token, next_token = cls.find_nearest_tokens(
-                reference_token.number, text_id)
-            before_number = previous_token.number if previous_token else (
-                reference_token.number - cls.MIN_GAP)
+            previous_token, next_token = cls.find_nearest_tokens(reference_token.number, text_id)
+            before_number = previous_token.number if previous_token else (reference_token.number - cls.MIN_GAP)
             after_number = reference_token.number
-            new_number = cls.calculate_insert_number(
-                before_number, after_number)
+            new_number = cls.calculate_insert_number(before_number, after_number)
 
             # Create a new token with the determined number and other data
             new_token = cls(number=new_number, **new_token_data)
             new_token.text_id = text_id
+            new_token.save()
 
-            # next token (reference)
+            # Update the 'next' field of the previous token to point to the new token, if applicable
+            if previous_token:
+                previous_token.next = new_token
+                previous_token.save()
+
+            # Update the 'previous' field of the reference token to point to the new token
             reference_token.previous = new_token
             reference_token.save()
 
-            # unless we are at the beginning of the text
-            if previous_token:
-                new_token.previous = previous_token
-
+            # Update the 'next' field of the new token to point to the reference token
+            new_token.next = reference_token
             new_token.save()
-            return new_token
 
-    @classmethod
-    def insert_after(cls, reference_token_id, new_token_data):
-        with transaction.atomic():  # Start a transaction to ensure atomicity.
-            # Fetch the reference token with a lock to prevent concurrent modifications.
-            reference_token = cls.objects.select_for_update().get(id=reference_token_id)
-
-            # Find the next token based on the current position to determine proper links.
-            _, next_token = cls.find_nearest_tokens(reference_token.number, reference_token.text_id)
-
-            # Prepare and validate the new token number based on the position it should take.
-            before_number = reference_token.number
-            after_number = next_token.number if next_token else (before_number + cls.MIN_GAP)
-            new_number = cls.calculate_insert_number(before_number, after_number)
-
-            # Create the new token with the proper number and additional data provided.
-            new_token = cls.objects.create(number=new_number, text_id=reference_token.text_id, **new_token_data)
-
-            # If we are not at the end of the text, update the 'previous' field of the next token to point to the new token.
-            if next_token:
+            # Update the 'previous' field of the next token to point to the new token, if applicable
+            if next_token and not next_token.previous_id:
                 next_token.previous = new_token
                 next_token.save()
 
-            # Update the 'next' field of the reference token to point to the new token.
-            new_token.previous = reference_token
+            return new_token
+            
+    @classmethod
+    def insert_after(cls, reference_token_id, new_token_data):
+        with transaction.atomic():
+            reference_token = cls.objects.select_for_update().get(id=reference_token_id)
+            text_id = reference_token.text_id
+            _, next_token = cls.find_nearest_tokens(reference_token.number, text_id)
+            before_number = reference_token.number
+            after_number = next_token.number if next_token else (reference_token.number + cls.MIN_GAP)
+            new_number = cls.calculate_insert_number(before_number, after_number)
+
+            # Create a new token with the determined number and other data
+            new_token = cls(number=new_number, **new_token_data)
+            new_token.text_id = text_id
             new_token.save()
 
-            return new_token
+            # Update the 'previous' field of the new token to point to the reference token
+            if not cls.objects.filter(previous=reference_token).exists():
+                new_token.previous = reference_token
+                new_token.save()
 
-    @classmethod
-    def delete_token(cls, token_id):
-        with transaction.atomic():
-            # Retrieve the token to delete and lock the row
-            token_to_delete = cls.objects.select_for_update().get(id=token_id)
-
-            # Retrieve the related previous and next tokens if they exist
-            previous_token = token_to_delete.previous
-            next_token = Token.objects.filter(previous=token_to_delete).first()
-
-            # clear up current previous from current token
-            token_to_delete.previous = None
-            token_to_delete.save()
-
-            # Update the next token to point to the previous token
-            if next_token:
-                next_token.previous = previous_token  # This could set it to None if previous_token doesn't exist
+            # Update the 'next' field of the reference token to point to the new token
+            if reference_token and not reference_token.next:
+                reference_token.next = new_token
+                reference_token.save()
+                print(f"After updating reference_token.next: {reference_token.next}")
+                
+            # Update the 'previous' field of the next token to point to the new token, if applicable
+            if next_token and not cls.objects.filter(previous=new_token).exists():
+                next_token.previous = new_token
                 next_token.save()
 
-            # Now delete the token
-            token_to_delete.delete()
+            # Update the 'next' field of the new token to point to the next token, if applicable
+            if next_token and not new_token.next:
+                new_token.next = next_token
+                new_token.save()
 
-
+            return new_token
 class TokenLemma(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE)
     lemma = models.ForeignKey('dict.Lemma', on_delete=models.CASCADE)
@@ -211,5 +199,4 @@ class TokenSense(models.Model):
         unique_together = ['token', 'sense']
         indexes = [
             models.Index(fields=['token']),
-            models.Index(fields=['sense']),
         ]
