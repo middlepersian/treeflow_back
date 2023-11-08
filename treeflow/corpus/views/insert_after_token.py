@@ -1,22 +1,24 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.db import transaction
-from django.urls import reverse
 from treeflow.corpus.models.token import Token
 
 def insert_after_token_view(request, token_id):
     if request.method == "POST":
+        # Wrap operations in a transaction to ensure atomicity
         with transaction.atomic():
-            # Capture current 'page' from the request before the transaction
-            current_page = request.POST.get('page') or request.GET.get('page', 1)
+            # Fetch and lock the reference token to prevent concurrent modifications
             reference_token = get_object_or_404(Token.objects.select_for_update(), id=token_id)
-            new_token_data = {}  # Populate with actual data as necessary
+
+            # Assume new_token_data is a dictionary with the minimum required data for a new token
+            # Since you mentioned no additional data is needed, we can keep it empty or 
+            # include any defaults that your Token model may require
+            new_token_data = {}
+
+            # Use the class method 'insert_after' to create the new token
             new_token = Token.insert_after(reference_token.id, new_token_data)
-            
-            # Redirect back to the same page of 'tokens' view after inserting the token
-            text_id = str(reference_token.text_id)  # Assuming reference_token has a 'text_id' attribute
-            redirect_url = reverse('corpus:tokens') + f'?page={current_page}&text_id={text_id}'
-            return HttpResponseRedirect(redirect_url)
+
+            # Redirect or respond according to your application's needs after successful insertion
+            return HttpResponse("New token inserted after token with ID: {}".format(token_id), status=200)
     else:
-        # Return a method not allowed response or redirect as needed
-        return HttpResponse("Method not allowed", status=405)
+        return HttpResponse("Invalid request method.", status=405)
