@@ -24,77 +24,87 @@
 </form>
 
 
-  <!-- Table for displaying tokens -->
-  <table class="min-w-full bg-white mt-6">
-    <thead class="bg-gray-800 text-white">
-      <tr>
-        <th class="px-4 py-2">Number</th> <!-- New column header for 'Number' -->
-        <th class="px-4 py-2">Transcription</th>
-        <th class="px-4 py-2">Transliteration</th>
-        <th class="px-4 py-2">Lemmas</th>
-        <th class="px-4 py-2">Senses</th>
-        <th class="px-4 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for token in tokens %}
-      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
-        <form method="post" action="{% url 'corpus:update_token' %}" class="grid grid-cols-1 gap-4 w-full">
+<!-- Table for displaying tokens -->
+<table class="min-w-full bg-white mt-6">
+  <thead class="bg-gray-800 text-white">
+    <tr>
+      <th class="px-4 py-2">Number</th>
+      <th class="px-4 py-2">Transcription</th>
+      <th class="px-4 py-2">Transliteration</th>
+      <th class="px-4 py-2">Lemmas</th>
+      <th class="px-4 py-2">Senses</th>
+      <th class="px-4 py-2" colspan="3">Actions</th> <!-- Note the colspan here for spanning three columns -->
+    </tr>
+  </thead>
+  <tbody>
+    {% for token in tokens %}
+    <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
+      <td class="border px-4 py-2">{{ token.number }}</td>
+      <td class="border px-4 py-2">{{ token.transcription }}</td>
+      <td class="border px-4 py-2">{{ token.transliteration }}</td>
+      <td class="border px-4 py-2">
+      <!-- Lemmas -->
+      <td class="border px-4 py-2">
+        {% if token.lemmas.exists %}
+          <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
+            {% for lemma in token.lemmas.all %}
+              <option value="{{ lemma.id }}" {% if lemma in token.lemmas.all %}selected{% endif %}>{{ lemma.word }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <!-- Senses -->
+      <td class="border px-6 py-2">
+        {% if token.senses.exists %}
+          <select name="senses" multiple class="shadow border rounded py-2 px-3">
+            {% for sense in token.senses.all %}
+              <option value="{{ sense.id }}" {% if sense in token.senses.all %}selected{% endif %}>{{ sense.sense }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <!-- Save Changes Button -->
+      <td class="border px-4 py-2">
+        <form method="post" action="{% url 'corpus:update_token' %}" class="inline">
           {% csrf_token %}
           <input type="hidden" name="token_id" value="{{ token.id }}">
-          <!-- Number -->
-          <td class="border px-4 py-2">{{ token.number }}</td> <!-- New data cell for 'Number' -->
-          <!-- Transcription -->
-          <td class="border px-4 py-2">
-            <input type="text" name="transcription" value="{{ token.transcription }}"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </td>
-          <!-- Transliteration -->
-          <td class="border px-4 py-2">
-            <input type="text" name="transliteration" value="{{ token.transliteration }}"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </td>
-          <!-- Lemmas -->
-          {% if token.lemmas.exists %}
-          <td class="border px-4 py-2">
-            <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
-              {% for lemma in token.lemmas.all %}
-              <option value="{{ lemma.id }}" {% if lemma in token.lemmas.all %} selected {% endif %}>{{ lemma.word }}
-              </option>
-              {% endfor %}
-            </select>
-          </td>
-          {% else %}
-          <td class="border px-4 py-2">-</td>
-          {% endif %}
-          <!-- Senses -->
-          {% if token.senses.exists %}
-          <td class="border px-6 py-2">
-            <select name="senses" multiple class="shadow border rounded py-2 px-3">
-              {% for sense in token.senses.all %}
-              <option value="{{ sense.id }}" {% if sense in token.senses.all %} selected {% endif %}>{{ sense.sense }}
-              </option>
-              {% endfor %}
-            </select>
-          </td>
-          {% else %}
-          <td class="border px-4 py-2">-</td>
-          {% endif %}
-          <!-- Actions -->
-          <td class="border px-4 py-2">
-            <input type="submit" value="Save Changes"
-              class="bg-blue-500 hover:bg-blue-700 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-          </td>
+          <input type="text" name="transcription" value="{{ token.transcription }}" class="hidden">
+          <input type="text" name="transliteration" value="{{ token.transliteration }}" class="hidden">
+          <!-- Additional hidden inputs for lemmas and senses if necessary -->
+          <input type="submit" value="Save Changes"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         </form>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="5" class="text-center py-4">No tokens available for the selected text.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
+      </td>
+      <!-- Insert After Button -->
+      <td class="border px-4 py-2">
+        <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="token_id" value="{{ token.id }}">
+          <input type="submit" value="Insert After"
+            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        </form>
+      </td>
+      <!-- Insert Before Button -->
+      <td class="border px-4 py-2">
+        <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="token_id" value="{{ token.id }}">
+          <input type="submit" value="Insert Before"
+            class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="6" class="text-center py-4">No tokens available for the selected text.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
   
 <!-- Pagination controls -->
