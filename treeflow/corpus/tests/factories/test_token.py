@@ -134,22 +134,24 @@ def test_insert_after():
     token2.save()
     token3.save()
 
-    #Insert a new token after token2
+    # Insert a new token after the last token (token3 in this case)
     new_token_data = {'transcription': 'new_token'}
-    new_token = Token.insert_after(token2.id, new_token_data)
+    new_token = Token.insert_after(token3.id, new_token_data)  # Change to token3 which is the last
 
-    # Print tokens before refreshing
-    print(f"Before refreshing: token2.next={token2.next}, new_token.previous={new_token.previous}, new_token.next={new_token.next}")
-
-    # Reload tokens from the database
+    # Reload tokens from the database to ensure all changes are reflected
     token1.refresh_from_db()
     token2.refresh_from_db()
     token3.refresh_from_db()
+    new_token.refresh_from_db()  # Make sure to refresh the new_token as well
 
+    # Assert conditions after insertion
+    assert token3.next == new_token, "Token3's 'next' should be set to the new token"
+    assert new_token.previous == token3, "New token's 'previous' should be token3"
+    # Try to access new_token.next, and confirm it raises the expected exception since it should not exist
+    try:
+        next_of_new_token = new_token.next
+        has_next = True  # If this line is reached, new_token.next exists which is not expected
+    except Token.next.RelatedObjectDoesNotExist:
+        has_next = False  # Catching the exception is the expected behavior
 
-    # print next and previous for each token
-    print(f"token1.next={token1.next}, token1.previous={token1.previous}")
-    print(f"token2.next={token2.next}, token2.previous={token2.previous}")
-    print(f"token3.next={token3.next}, token3.previous={token3.previous}")
-    print(f"new_token.next={new_token.next}, new_token.previous={new_token.previous}")
-    
+    assert not has_next, "New token's 'next' should be None since it's the last"
