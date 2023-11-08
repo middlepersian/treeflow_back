@@ -185,7 +185,6 @@ class Token(models.Model):
             return new_token
 
 
-
 class TokenLemma(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE)
     lemma = models.ForeignKey('dict.Lemma', on_delete=models.CASCADE)
