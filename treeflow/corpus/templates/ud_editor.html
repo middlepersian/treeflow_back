@@ -1,107 +1,145 @@
 {% extends "base.html" %} {% block content %}
 <svg id="svgCanvas" viewbox="0 0 800 600">
   <defs>
+    <marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
+        <path d="M 0 0 L 60 30 L 0 60 z" fill="#800000" /> 
+    </marker>
     <marker
       id="arrowhead"
       markerWidth="4"
       markerHeight="5"
-      refX="0"
+      refX="60"
       refY="3.5"
-      orient="auto"
+      orient="a"
     >
       <polygon points="0 0, 10 3.5, 0 7" />
     </marker>
   </defs>
-  <!-- Add your words here, each within a text element -->
   {% for token in tokens %} {% if token.number != null %}
-
-    <g
-      class="p-2 rounded fill-slate-500 hover:fill-slate-900 cursor-pointer"
-      id="{{token.id}}"
-    >
-      <circle cx="{{token.xpos}}" cy="35" r="2" fill="white" stroke="black" />
-      <text x="{{token.xpos}}" y="50" font-family="Verdana" font-size="12">
-        {{token.transcription}}
-      </text>
-    </g>
+  <g
+    class="p-2 rounded fill-slate-500 hover:fill-slate-900 cursor-pointer"
+    id="{{token.id}}"
+  >
+    <circle id="{{token.id}}" cx="{{token.xpos}}" cy="35" class="hover:fill-black hover:stroke-none" r="2.5" fill="white" stroke="black" />
+    <text x="{{token.xpos}}" y="50" font-family="Verdana" font-size="12">
+      {{token.transcription}}
+    </text>
+  </g>
   {% endif %} {% endfor %}
-  <!-- ... more words ... -->
 </svg>
 
 {{ tokens | json_script:"tokenData" }}
 <script>
   // Variables to hold the current position and scale of the viewbox
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("svgCanvas");
   let panning = true;
   let creating = false;
   let currentX = 0;
   let currentY = 0;
   let currentZoom = 1;
+  let fromTokenId = null;
 
   const tokenData = JSON.parse(
     document.getElementById("tokenData").textContent
   );
 
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.getElementById("svgCanvas");
+  document.querySelectorAll("circle").forEach((item) =>
+    item.addEventListener("click", (event) => {
+        console.log(`Circle ${event.target.id} clicked`)
+      if (!creating) {
+        creating = true;
+        fromTokenId = event.target.id;
+        return;
+      }
+      if (creating) {
+        const tokenTo = event.target.id;
+        console.log(`creating arc from ${fromTokenId} to ${tokenTo}`)
+        if (tokenTo) {
+          const path = document.createElementNS(svgNS, "path");
+          const arcDefinition = createBezierArc(
+            tokenData.find((e) => e.id === fromTokenId).xpos,
+            32.5,
+            tokenData.find((e)=> e.id === tokenTo).xpos,
+            32.5
+          );
+          path.setAttribute("d", arcDefinition);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "black");
+          path.setAttribute("stroke-width", "1.5");
+          path.setAttribute("marker-end", "url(#arrowhead)");
+          path.setAttribute("data-from", fromTokenId);
+          path.setAttribute("data-to", tokenTo.id);
+          path.addEventListener("click", (event) => {
+            console.log("Path clicked");
+          });
+          svg.appendChild(path);
+          creating = false;
+          fromTokenId = null;
+        }
+      }
+    })
+  );
 
 
-
+  svg.addEventListener("mousemove", (event) => {
+    if (!creating) {
+      return;
+    }
+    // const mouseX = event.offsetX;
+    // const mouseY = event.offsetY;
+    // const pathClass = "temp-path";
+    // const tempPaths = document.getElementsByClassName(pathClass);
+    // while (tempPaths.length > 0) {
+    //     tempPaths[0].parentNode.removeChild(tempPaths[0]);
+    // }
+    // const path = document.createElementNS(svgNS, "path");
+    // const arcDefinition = createBezierArc(
+    //     tokenData.find((e) => e.id === fromTokenId).xpos,
+    //     35,
+    //     mouseX,
+    //     mouseY
+    // );
+    // path.setAttribute("d", arcDefinition);
+    // path.setAttribute("fill", "none");
+    // path.setAttribute("stroke", "black");
+    // path.setAttribute("stroke-width", "1");
+    // path.setAttribute("marker-end", "url(#arrowhead)");
+    // path.classList.add("temp-path");
+    // svg.appendChild(path);
+  });
 
   function createBezierArc(x1, y1, x2, y2, upwards = true) {
-    // Control points for the Bézier curve
-    // These points will determine the shape of the curve
     const cp1x = x1;
     const cp2x = x2;
-
-    // // Adjust the y-coordinates of the control points to create the arc
-    const arcHeight = Math.abs(x1-x2); // Height of the arc
+    const arcHeight = Math.abs(x1 - x2);
     const cp1y = y1 - (upwards ? arcHeight : -arcHeight);
     const cp2y = y2 - (upwards ? arcHeight : -arcHeight);
-
-    // Create the path data for the Bézier curve
     return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
   }
 
-  function createArc(x1, y1, x2, y2, radius, upwards = true) {
-    const sweepFlag = upwards ? 0 : 1;
-    return `M ${x1},${y1} A ${radius},${radius} 0 0,${sweepFlag} ${x2},${y2}`;
-  }
-
-  tokenData.map((token) => {
-    token.dependencies?.map((dep) => {
+  tokenData.forEach((token) => {
+    token.dependencies?.forEach((dep) => {
       if (!dep.to_token_id) {
         return;
       }
-      console.log(
-        token.id,
-        token.transcription,
-        dep.to_token_id.id,
-        dep.to_token_id.transcription,
-        tokenData.filter((e) => e.id === dep.to_token_id.id)[0].xpos
-      );
+      const depPos = tokenData.find((e) => e.id === dep.to_token_id.id).xpos;
       const path = document.createElementNS(svgNS, "path");
-      dep_pos = tokenData.filter((e) => e.id === dep.to_token_id.id)[0].xpos;
-      const arcDefinition = createBezierArc(
-        token.xpos,
-        35,
-        dep_pos,
-        35,
-      );
-      
-      // createArc(dep_pos, 35, token.xpos, 35, 20, false);
-
-      console.info(arcDefinition);
-
+      const arcDefinition = createBezierArc(token.xpos,32.5, depPos, 32.5);
       path.setAttribute("d", arcDefinition);
       path.setAttribute("fill", "none");
       path.setAttribute("stroke", "black");
-      path.setAttribute("stroke-width", "1");
+      path.setAttribute("stroke-width", "1.5");
+      path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
       path.setAttribute("marker-end", "url(#arrowhead)");
+      path.setAttribute("data-from", token.id);
+      path.setAttribute("data-to", dep.to_token_id.id);
+      path.addEventListener("click", (event) => {
+        console.log("Path clicked");
+      });
       svg.appendChild(path);
     });
   });
-
-  const panning_speed = 1 / 3;
 
   function setViewBox() {
     if (!panning) {
@@ -121,9 +159,9 @@
 
     function onMouseMove(event) {
       currentX =
-        startViewBoxX + (event.clientX - startX) * currentZoom * panning_speed;
+        startViewBoxX + (event.clientX - startX) * currentZoom * (1 / 3);
       currentY =
-        startViewBoxY + (event.clientY - startY) * currentZoom * panning_speed;
+        startViewBoxY + (event.clientY - startY) * currentZoom * (1 / 3);
       setViewBox();
     }
 
@@ -141,7 +179,6 @@
     const zoomIntensity = 0.1;
     const wheelDelta = event.deltaY < 0 ? 1 : -1;
     const zoom = Math.exp(wheelDelta * zoomIntensity);
-
     currentZoom *= zoom;
     setViewBox();
   };
