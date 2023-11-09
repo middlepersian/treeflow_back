@@ -1,32 +1,21 @@
-{% extends "base.html" %}
-
-{% block content %}
-<!-- Container for tokens and SVG drawing -->
-<div style="position: relative;">
-
-    <!-- Tokens will be absolutely positioned within this container based on their 'x' and 'y' attributes -->
-    <div id="tokens-container" style="position: absolute; z-index: 10;">
-        {% for token in tokens %}
-        <div class="token" data-token-id="{{ token.id }}"
-            style="position: absolute; left: {{ token.position.x }}px; top: {{ token.position.y }}px;">
-            {{ token.text }}
-        </div>
+{% extends "base.html" %} {% block content %}
+<svg viewbox='0 0 400 400' xmlns='http://www.w3.org/2000/svg' height='60vmin' width='60vmin'>
+    {% for token in tokens %}
+    {% if token.number %}
+        <g>
+            <circle cx="{{ token.xpos }}" cy="{{ token.ypos }}" r="20" fill="white" stroke="black" stroke-width="2" />
+            <text x="{{ token.xpos}}" y="{{ token.ypos }}" text-anchor="middle" alignment-baseline="middle">{{ token.transcription }}</text>
+        </g>
+        {% for dependency in token.dependencies %}
+            <line x1="{{ token.xpos }}" y1="{{ token.ypos  }}" x2="{{ dependency.to_token_id.number }}" y2="{{ dependency.to_token_id.number }}" stroke="black" stroke-width="2" />
         {% endfor %}
-    </div>
-
-    <!-- SVG container for arrows -->
-    <!-- Make sure the SVG container is the same size as the token container and positioned over it -->
-    <svg id="arrows-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;">
-        {% for dependency in dependencies %}
-        <!-- Draw lines for each dependency -->
-        <line
-            x1="{% for token in tokens %}{% if token.id == dependency.from_token_id %}{{ token.position.x }}{% endif %}{% endfor %}"
-            y1="{% for token in tokens %}{% if token.id == dependency.from_token_id %}{{ token.position.y }}{% endif %}{% endfor %}"
-            x2="{% for token in tokens %}{% if token.id == dependency.to_token_id %}{{ token.position.x }}{% endif %}{% endfor %}"
-            y2="{% for token in tokens %}{% if token.id == dependency.to_token_id %}{{ token.position.y }}{% endif %}{% endfor %}"
-            style="stroke:rgb(255,0,0);stroke-width:2" />
-        {% endfor %}
-    </svg>
-
-</div>
+    {% endif %}
+    {% endfor %}
+</svg>
 {% endblock content %}
+
+<!-- 
+<script>
+
+</script>
+-->
