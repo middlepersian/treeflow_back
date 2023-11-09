@@ -80,6 +80,9 @@
         <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
           {% csrf_token %}
           <input type="hidden" name="token_id" value="{{ token.id }}">
+          <!-- Add hidden inputs for 'page' and 'text_id' -->
+          <input type="hidden" name="page" value="{{ request.GET.page }}">
+          <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
           <input type="submit" value="Insert After"
             class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         </form>
@@ -89,6 +92,8 @@
         <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
           {% csrf_token %}
           <input type="hidden" name="token_id" value="{{ token.id }}">
+          <input type="hidden" name="page" value="{{ request.GET.page }}">
+          <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
           <input type="submit" value="Insert Before"
             class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         </form>
