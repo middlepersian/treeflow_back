@@ -1,21 +1,152 @@
 {% extends "base.html" %} {% block content %}
-<svg viewbox='0 0 400 400' xmlns='http://www.w3.org/2000/svg' height='60vmin' width='60vmin'>
-    {% for token in tokens %}
-    {% if token.number %}
-        <g>
-            <circle cx="{{ token.xpos }}" cy="{{ token.ypos }}" r="20" fill="white" stroke="black" stroke-width="2" />
-            <text x="{{ token.xpos}}" y="{{ token.ypos }}" text-anchor="middle" alignment-baseline="middle">{{ token.transcription }}</text>
-        </g>
-        {% for dependency in token.dependencies %}
-            <line x1="{{ token.xpos }}" y1="{{ token.ypos  }}" x2="{{ dependency.to_token_id.number }}" y2="{{ dependency.to_token_id.number }}" stroke="black" stroke-width="2" />
-        {% endfor %}
-    {% endif %}
-    {% endfor %}
+<svg id="svgCanvas" viewbox="0 0 800 600">
+  <defs>
+    <marker
+      id="arrowhead"
+      markerWidth="4"
+      markerHeight="5"
+      refX="0"
+      refY="3.5"
+      orient="auto"
+    >
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+  <!-- Add your words here, each within a text element -->
+  {% for token in tokens %} {% if token.number != null %}
+
+    <g
+      class="p-2 rounded fill-slate-500 hover:fill-slate-900 cursor-pointer"
+      id="{{token.id}}"
+    >
+      <circle cx="{{token.xpos}}" cy="35" r="2" fill="white" stroke="black" />
+      <text x="{{token.xpos}}" y="50" font-family="Verdana" font-size="12">
+        {{token.transcription}}
+      </text>
+    </g>
+  {% endif %} {% endfor %}
+  <!-- ... more words ... -->
 </svg>
-{% endblock content %}
 
-<!-- 
+{{ tokens | json_script:"tokenData" }}
 <script>
+  // Variables to hold the current position and scale of the viewbox
+  let panning = true;
+  let creating = false;
+  let currentX = 0;
+  let currentY = 0;
+  let currentZoom = 1;
 
+  const tokenData = JSON.parse(
+    document.getElementById("tokenData").textContent
+  );
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("svgCanvas");
+
+
+
+
+  function createBezierArc(x1, y1, x2, y2, upwards = true) {
+    // Control points for the Bézier curve
+    // These points will determine the shape of the curve
+    const cp1x = x1;
+    const cp2x = x2;
+
+    // // Adjust the y-coordinates of the control points to create the arc
+    const arcHeight = Math.abs(x1-x2); // Height of the arc
+    const cp1y = y1 - (upwards ? arcHeight : -arcHeight);
+    const cp2y = y2 - (upwards ? arcHeight : -arcHeight);
+
+    // Create the path data for the Bézier curve
+    return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+  }
+
+  function createArc(x1, y1, x2, y2, radius, upwards = true) {
+    const sweepFlag = upwards ? 0 : 1;
+    return `M ${x1},${y1} A ${radius},${radius} 0 0,${sweepFlag} ${x2},${y2}`;
+  }
+
+  tokenData.map((token) => {
+    token.dependencies?.map((dep) => {
+      if (!dep.to_token_id) {
+        return;
+      }
+      console.log(
+        token.id,
+        token.transcription,
+        dep.to_token_id.id,
+        dep.to_token_id.transcription,
+        tokenData.filter((e) => e.id === dep.to_token_id.id)[0].xpos
+      );
+      const path = document.createElementNS(svgNS, "path");
+      dep_pos = tokenData.filter((e) => e.id === dep.to_token_id.id)[0].xpos;
+      const arcDefinition = createBezierArc(
+        token.xpos,
+        35,
+        dep_pos,
+        35,
+      );
+      
+      // createArc(dep_pos, 35, token.xpos, 35, 20, false);
+
+      console.info(arcDefinition);
+
+      path.setAttribute("d", arcDefinition);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "black");
+      path.setAttribute("stroke-width", "1");
+      path.setAttribute("marker-end", "url(#arrowhead)");
+      svg.appendChild(path);
+    });
+  });
+
+  const panning_speed = 1 / 3;
+
+  function setViewBox() {
+    if (!panning) {
+      return;
+    }
+    svg.setAttribute(
+      "viewBox",
+      `${currentX} ${currentY} ${800 / currentZoom} ${600 / currentZoom}`
+    );
+  }
+
+  svg.onmousedown = function (event) {
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startViewBoxX = currentX;
+    const startViewBoxY = currentY;
+
+    function onMouseMove(event) {
+      currentX =
+        startViewBoxX + (event.clientX - startX) * currentZoom * panning_speed;
+      currentY =
+        startViewBoxY + (event.clientY - startY) * currentZoom * panning_speed;
+      setViewBox();
+    }
+
+    function onMouseUp() {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
+
+  svg.onwheel = function (event) {
+    event.preventDefault();
+    const zoomIntensity = 0.1;
+    const wheelDelta = event.deltaY < 0 ? 1 : -1;
+    const zoom = Math.exp(wheelDelta * zoomIntensity);
+
+    currentZoom *= zoom;
+    setViewBox();
+  };
+
+  // Initialize the viewbox
+  setViewBox();
 </script>
--->
+{% endblock content %}
