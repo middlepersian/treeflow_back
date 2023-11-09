@@ -23,7 +23,7 @@ def tokens_view(request):
         tokens = tokens.filter(text__id=selected_text_id)
 
     # Setup paginator
-    paginator = Paginator(tokens, 10)  # Show 10 tokens per page
+    paginator = Paginator(tokens, 100)  # Show 10 tokens per page
     page_number = request.GET.get('page')
     tokens_page = paginator.get_page(page_number)
 
