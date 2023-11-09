@@ -131,10 +131,10 @@ class Token(models.Model):
             reference_token.previous = new_token
             reference_token.save()
 
-            # unless we are at the beginning of the text    
+            # unless we are at the beginning of the text
             if previous_token:
-                new_token.previous = previous_token 
-        
+                new_token.previous = previous_token
+
             new_token.save()
             return new_token
 
@@ -166,7 +166,27 @@ class Token(models.Model):
 
             return new_token
 
+    @classmethod
+    def delete_token(cls, token_id):
+        with transaction.atomic():
+            # Retrieve the token to delete and lock the row
+            token_to_delete = cls.objects.select_for_update().get(id=token_id)
 
+            # Retrieve the related previous and next tokens if they exist
+            previous_token = token_to_delete.previous
+            next_token = Token.objects.filter(previous=token_to_delete).first()
+
+            # clear up current previous from current token
+            token_to_delete.previous = None
+            token_to_delete.save()
+
+            # Update the next token to point to the previous token
+            if next_token:
+                next_token.previous = previous_token  # This could set it to None if previous_token doesn't exist
+                next_token.save()
+
+            # Now delete the token
+            token_to_delete.delete()
 
 
 class TokenLemma(models.Model):
