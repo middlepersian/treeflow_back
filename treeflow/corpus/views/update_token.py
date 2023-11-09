@@ -1,23 +1,26 @@
 # views.py
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render, get_object_or_404
 from treeflow.corpus.forms.token_form import TokenForm
 from treeflow.corpus.models import Token
-def update_token(request):
-    # Initialize the form with no instance
-    token_form = None
 
-    # Handle the form submission
+def update_token(request):
     if request.method == 'POST':
-        # Get the token ID from the posted form data
         token_id = request.POST.get('token_id')
-        # Get the token instance associated with the token ID
         token = get_object_or_404(Token, pk=token_id)
-        # Create a form instance with the POST data and the specific token instance
-        token_form = TokenForm(request.POST, instance=token)
+        # Pass 'token' as a keyword argument to TokenForm
+        token_form = TokenForm(request.POST, instance=token, token=token)
 
         if token_form.is_valid():
-            # Save the form and thus the token with new data
             token_form.save()
-            # Redirect to the same page to show the updated information
             return redirect(request.META.get('HTTP_REFERER', 'redirect_if_referer_not_found'))
-
+        else:
+            # Handle the invalid form case
+            return render(request, 'update_token.html', {'form': token_form, 'token_id': token_id})
+    else:
+        # Initialize the form for a GET request with 'token' if available
+        token_id = request.GET.get('token_id')
+        token = None
+        if token_id:
+            token = get_object_or_404(Token, pk=token_id)
+        token_form = TokenForm(token=token) if token else TokenForm()
+        return render(request, 'update_token.html', {'form': token_form, 'token_id': token_id})

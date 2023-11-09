@@ -1,8 +1,8 @@
 import factory
 from treeflow.corpus.models import Text
-from treeflow.corpus.tests.factories.corpus import CorpusFactory
-from treeflow.corpus.tests.factories.source import SourceFactory
-from treeflow.corpus.tests.factories.bibliography import BibEntryFactory
+from treeflow.corpus.tests.factories import CorpusFactory
+from treeflow.corpus.tests.factories import SourceFactory
+from treeflow.corpus.tests.factories import BibEntryFactory
 from treeflow.users.tests.factories import UserFactory
 
 class TextFactory(factory.django.DjangoModelFactory):
