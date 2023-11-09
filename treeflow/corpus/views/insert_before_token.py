@@ -1,25 +1,22 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.db import transaction
+from django.urls import reverse
 from treeflow.corpus.models.token import Token
-
 
 def insert_before_token_view(request, token_id):
     if request.method == "POST":
-        # Wrap operations in a transaction to ensure atomicity
         with transaction.atomic():
-            # Fetch and lock the reference token to prevent concurrent modifications
-            reference_token = get_object_or_404(
-                Token.objects.select_for_update(), id=token_id)
-
-            # Since you mentioned no additional data is needed, we can keep it empty or
-            # include any defaults that your Token model may require
-            new_token_data = {}
-
-            # Use the class method 'insert_before' to create the new token
+            # Capture current 'page' from the request before the transaction
+            current_page = request.POST.get('page') or request.GET.get('page', 1)
+            reference_token = get_object_or_404(Token.objects.select_for_update(), id=token_id)
+            new_token_data = {}  # Populate with actual data as necessary
             new_token = Token.insert_before(reference_token.id, new_token_data)
-
-            # Redirect or respond according to your application's needs after successful insertion
-            return HttpResponse("New token inserted before token with ID: {}".format(token_id), status=200)
+            
+            # Redirect back to the same page of 'tokens' view after inserting the token
+            text_id = str(reference_token.text_id)  # Assuming reference_token has a 'text_id' attribute
+            redirect_url = reverse('corpus:tokens') + f'?page={current_page}&text_id={text_id}'
+            return HttpResponseRedirect(redirect_url)
     else:
-        return HttpResponse("Invalid request method.", status=405)
+        # Return a method not allowed response or redirect as needed
+        return HttpResponse("Method not allowed", status=405)
