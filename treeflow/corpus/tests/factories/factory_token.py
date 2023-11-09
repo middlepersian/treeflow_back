@@ -18,22 +18,13 @@ class TokenFactory(factory.django.DjangoModelFactory):
     language = factory.Faker("pystr", max_chars=3)
     transcription = factory.Faker("pystr", min_chars=5, max_chars=20)
     transliteration = factory.Faker("pystr", min_chars=5, max_chars=20)
-    upos = factory.Faker("pystr", max_chars=5)
-    xpos = factory.Faker('pylist', nb_elements=10, variable_nb_elements=True, value_types='str')
     avestan = factory.Faker("text")
     gloss = factory.Faker("text")
-
-    #lemmas = factory.RelatedFactory("treeflow.dict.tests.factories.LemmaFactory")
-    #meanings = factory.RelatedFactory("treeflow.dict.tests.factories.MeaningFactory")
-    postfeatures = factory.RelatedFactory("treeflow.corpus.tests.factories.PostFeatureFactory")
-    dependencies = factory.RelatedFactory("treeflow.corpus.tests.factories.DependencyFactory")
-
 
     multiword_token = factory.LazyFunction(lambda: False)
     multiword_token_number = factory.Faker("pylist", nb_elements=10, variable_nb_elements=True, value_types="int")
 
     created_at = factory.Faker("date_time")
-    updated_at = factory.Faker("date_time")
 
     @factory.post_generation
     def related_tokens(self, create, extracted, **kwargs):
@@ -50,21 +41,3 @@ class TokenFactory(factory.django.DjangoModelFactory):
 
         if extracted:
             self.previous = extracted     
-    
-    @factory.post_generation
-    def lemmas(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            for lemma in extracted:
-                self.lemmas.add(lemma)
-
-    @factory.post_generation
-    def meanings(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            for meaning in extracted:
-                self.meanings.add(meaning)

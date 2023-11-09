@@ -3,90 +3,201 @@
 
 
 <div class="container mx-auto p-4">
-  <!-- Form for selecting text -->
-  <form action="{% url 'corpus:tokens' %}" method="get" class="mb-4">
-    <!-- Text selection dropdown -->
-    <div class="mb-3">
-      <label for="text-select" class="block text-gray-700 text-sm font-bold mb-2">Choose a text:</label>
-      <select name="text_id" id="text-select" onchange="this.form.submit()"
-        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-        <option value="">Select a text...</option>
-        {% for text in texts %}
-        <option value="{{ text.id }}" {% if text.id == selected_text_id %} selected="selected" {% endif %}>
-          {{ text.title }}
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-    <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
-  </form>
 
-  <!-- Table for displaying tokens -->
-  <table class="min-w-full bg-white mt-6">
-    <thead class="bg-gray-800 text-white">
-      <tr>
-        <th class="px-4 py-2">Transcription</th>
-        <th class="px-4 py-2">Transliteration</th>
-        <th class="px-4 py-2">Lemmas</th>
-        <th class="px-4 py-2">Senses</th>
-        <th class="px-4 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for token in tokens %}
-      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
-        <form method="post" action="{% url 'corpus:update_token' %}" class="grid grid-cols-1 gap-4 w-full">
+
+<!-- Form for selecting text -->
+<form action="{% url 'corpus:tokens' %}" method="get" class="mb-4">
+  <!-- Text selection dropdown -->
+  <div class="mb-3">
+    <label for="text-select" class="block text-gray-700 text-sm font-bold mb-2">Choose a text:</label>
+    <select name="text_id" id="text-select" onchange="this.form.submit()"
+      class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+      <option value="">Select a text...</option>
+      {% for text in texts %}
+      <option value="{{ text.id|stringformat:"s" }}" {% if text.id|stringformat:"s" == selected_text_id|stringformat:"s" %}selected{% endif %}>
+        {{ text.title }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
+</form>
+
+
+<!-- Table for displaying tokens -->
+<table class="min-w-full bg-white mt-6">
+  <thead class="bg-gray-800 text-white">
+    <tr>
+      <th class="px-4 py-2">Number</th>
+      <th class="px-4 py-2">Transcription</th>
+      <th class="px-4 py-2">Transliteration</th>
+      <th class="px-4 py-2">Lemmas</th>
+      <th class="px-4 py-2">Senses</th>
+      <th class="px-4 py-2" colspan="3">Actions</th> <!-- Note the colspan here for spanning three columns -->
+    </tr>
+  </thead>
+  <tbody>
+    {% for token in tokens %}
+    <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
+      <!-- Form for the entire row to edit a token -->
+      <form method="post" action="{% url 'corpus:update_token' %}">
+        {% csrf_token %}
+        <td class="border px-4 py-2">{{ token.number }}</td>
+        <td class="border px-4 py-2">
+          <input type="text" name="transcription" value="{{ token.transcription }}"
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+        </td>
+        <td class="border px-4 py-2">
+          <input type="text" name="transliteration" value="{{ token.transliteration }}"
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+        </td>
+        <td class="border px-4 py-2">
+          <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
+            {% for lemma in token.lemmas.all %}
+            <option value="{{ lemma.id }}" {% if lemma in token.selected_lemmas %}selected{% endif %}>
+              {{ lemma.word }}
+            </option>
+            {% endfor %}
+          </select>
+        </td>
+        <td class="border px-4 py-2">
+          <select name="senses" multiple class="shadow border rounded py-2 px-3">
+            {% for sense in token.senses.all %}
+            <option value="{{ sense.id }}" {% if sense in token.selected_senses %}selected{% endif %}>
+              {{ sense.sense }}
+            </option>
+            {% endfor %}
+          </select>
+        </td>
+        <td class="border px-4 py-2" colspan="3">
+          <input type="hidden" name="token_id" value="{{ token.id }}">
+          <input type="submit" value="Save Changes"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        </td>
+      </form>
+      <!-- Insert After Button -->
+      <td class="border px-4 py-2">
+        <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
           {% csrf_token %}
           <input type="hidden" name="token_id" value="{{ token.id }}">
-          <!-- Transcription -->
-          <td class="border px-4 py-2">
-            <input type="text" name="transcription" value="{{ token.transcription }}"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </td>
-          <!-- Transliteration -->
-          <td class="border px-4 py-2">
-            <input type="text" name="transliteration" value="{{ token.transliteration }}"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </td>
-          <!-- Lemmas -->
-          {% if token.lemmas.exists %}
-          <td class="border px-4 py-2">
-            <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
-              {% for lemma in token.lemmas.all %}
-              <option value="{{ lemma.id }}" {% if lemma in token.lemmas.all %} selected {% endif %}>{{ lemma.word }}
-              </option>
-              {% endfor %}
-            </select>
-          </td>
-          {% else %}
-          <td class="border px-4 py-2">-</td>
-          {% endif %}
-          <!-- Senses -->
-          {% if token.senses.exists %}
-          <td class="border px-6 py-2">
-            <select name="senses" multiple class="shadow border rounded py-2 px-3">
-              {% for sense in token.senses.all %}
-              <option value="{{ sense.id }}" {% if sense in token.senses.all %} selected {% endif %}>{{ sense.sense }}
-              </option>
-              {% endfor %}
-            </select>
-          </td>
-          {% else %}
-          <td class="border px-4 py-2">-</td>
-          {% endif %}
-          <!-- Actions -->
-          <td class="border px-4 py-2">
-            <input type="submit" value="Save Changes"
-              class="bg-green-500 hover:bg-blue-700 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-          </td>
+          <input type="submit" value="Insert After"
+            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         </form>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="5" class="text-center py-4">No tokens available for the selected text.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </td>
+      <!-- Insert Before Button -->
+      <td class="border px-4 py-2">
+        <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="token_id" value="{{ token.id }}">
+          <input type="submit" value="Insert Before"
+            class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="6" class="text-center py-4">No tokens available for the selected text.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-  {% endblock content %}
+  
+<!-- Pagination controls -->
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+  <div class="flex flex-1 justify-between sm:hidden">
+    {% if tokens.has_previous %}
+      <a href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
+        class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+    {% else %}
+      <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
+    {% endif %}
+    {% if tokens.has_next %}
+      <a href="?page={{ tokens.next_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
+        class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+    {% else %}
+      <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
+    {% endif %}
+  </div>
+  
+  <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm text-gray-700">
+        Showing
+        <span class="font-medium">{{ tokens.start_index }}</span>
+        to
+        <span class="font-medium">{{ tokens.end_index }}</span>
+        of
+        <span class="font-medium">{{ tokens.paginator.count }}</span>
+        results
+      </p>
+    </div>
+    <div>
+      <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        <!-- Previous Page Link with ID -->
+        {% if tokens.has_previous %}
+          <a id="prevPageLink" href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
+            class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            First
+          </a>
+          <a href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
+            class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 leading-5 hover:bg-gray-50">
+            <span>Previous</span>
+          </a>
+        {% endif %}
+        <!-- Current Page indicator -->
+        <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300">
+          Page {{ tokens.number }} of {{ tokens.paginator.num_pages }}.
+        </span>
+        <!-- Next Page Link with ID -->
+        {% if tokens.has_next %}
+          <a id="nextPageLink" href="?page={{ tokens.next_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
+            class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            Next
+          </a>
+          <a href="?page={{ tokens.paginator.num_pages }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
+            class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:bg-gray-50">
+            <span>Last</span>
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // Debug function to log event details
+  function logEventDetails(event) {
+    console.log(`Event Triggered: ${event.type}`);
+    console.log(`Control Key: ${event.ctrlKey}`);
+    console.log(`Meta Key: ${event.metaKey}`);
+    console.log(`Key: ${event.key}`);
+  }
+
+  document.addEventListener('DOMContentLoaded', (event) => {
+  console.log('DOMContentLoaded, adding keydown event listener.');
+
+  document.addEventListener('keydown', function(event) {
+    switch (event.key) {
+      case 'ArrowLeft': // User pressed the left arrow key
+        var prevPageLink = document.getElementById('prevPageLink');
+        if (prevPageLink) {
+          window.location.href = prevPageLink.href;
+        }
+        break;
+      case 'ArrowRight': // User pressed the right arrow key
+        var nextPageLink = document.getElementById('nextPageLink');
+        if (nextPageLink) {
+          window.location.href = nextPageLink.href;
+        }
+        break;
+    }
+  });
+});
+
+</script>
+
+
+{% endblock content %}
+
