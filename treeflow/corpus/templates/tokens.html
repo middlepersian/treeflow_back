@@ -17,7 +17,7 @@
       <option value="{{ text.id|stringformat:"s" }}" {% if text.id|stringformat:"s" == selected_text_id|stringformat:"s" %}selected{% endif %}>
         {{ text.title }}
       </option>
-      {% endfor %}
+      {% endfor %}mellenthgin 
     </select>
   </div>
   <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
@@ -37,7 +37,7 @@
       <option value="{{ text.id|stringformat:"s" }}" {% if text.id|stringformat:"s" == selected_text_id|stringformat:"s" %}selected{% endif %}>
         {{ text.title }}
       </option>
-      {% endfor %}
+      {% endfor %}mellenthgin 
     </select>
   </div>
   <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
@@ -51,6 +51,7 @@
       <th class="px-4 py-2">Number</th>
       <th class="px-4 py-2">Transcription</th>
       <th class="px-4 py-2">Transliteration</th>
+      <th class="px-4 py-2">POS</th>
       <th class="px-4 py-2">Lemmas</th>
       <th class="px-4 py-2">Senses</th>
       <th class="px-4 py-2" colspan="3">Actions</th> <!-- Note the colspan here for spanning three columns -->
@@ -59,13 +60,27 @@
   <tbody>
     {% for token in tokens %}
     <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
-      <td class="border px-4 py-2">{{ token.number }}</td>
-      <td class="border px-4 py-2">{{ token.transcription }}</td>
-      <td class="border px-4 py-2">{{ token.transliteration }}</td>
-      <td class="border px-4 py-2">
-      <!-- Lemmas -->
-      <td class="border px-4 py-2">
-        {% if token.lemmas.exists %}
+      <!-- Form for the entire row to edit a token -->
+      <form method="post" action="{% url 'corpus:update_token' %}">
+        {% csrf_token %}
+        <td class="border px-4 py-2">{{ token.number }}</td>
+        <td class="border px-4 py-2">
+          <input type="text" name="transcription" value="{{ token.transcription }}"
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+        </td>
+        <td class="border px-4 py-2">
+          <input type="text" name="transliteration" value="{{ token.transliteration }}"
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+        </td>
+        <td class="border px-4 py-2">
+          <!-- Display all related POS objects for the token -->
+          {% for pos in token.pos_token.all %}
+            <span>{{ pos.pos }}</span>
+          {% empty %}
+            <span>No POS</span>
+          {% endfor %}
+        </td>
+        <td class="border px-4 py-2">
           <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
             {% for lemma in token.lemmas.all %}
               <option value="{{ lemma.id }}" {% if lemma in token.lemmas.all %}selected{% endif %}>{{ lemma.word }}</option>
