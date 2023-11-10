@@ -16,10 +16,10 @@
             Language
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Series
+            Sigle
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Label
+            Genre
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
             Version
@@ -37,42 +37,43 @@
       </thead>
       <tbody class="text-gray-700">
         {% for text in texts %}
-          <tr class="border-b">
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.title }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.identifier }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.language|join:", " }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.series }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.label }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.version }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.stage }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ text.created_at|date:"Y-m-d H:i" }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-
-            </td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="9" class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-              No texts available.
-            </td>
-          </tr>
+        <tr class="border-b">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="title_{{ text.id }}" value="{{ text.title }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="identifier_{{ text.id }}" value="{{ text.identifier }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="language_{{ text.id }}" value="{{ text.language|join:', ' }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="series_{{ text.id }}" value="{{ text.series }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="label_{{ text.id }}" value="{{ text.label }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="version_{{ text.id }}" value="{{ text.version }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input type="text" name="stage_{{ text.id }}" value="{{ text.stage }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            {{ text.created_at|date:"Y-m-d H:i" }} <!-- assuming this is not editable -->
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button type="submit" name="action" value="save_{{ text.id }}" class="text-indigo-600 hover:text-indigo-900">Save</button>
+          </td>
+        </tr>
         {% endfor %}
+        {% if texts|length == 0 %}
+        <tr>
+          <td colspan="9" class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+            No texts available.
+          </td>
+        </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
