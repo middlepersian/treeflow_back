@@ -7,7 +7,7 @@ from treeflow.corpus.views.insert_after_token import insert_after_token_view
 from treeflow.corpus.views.insert_before_token import insert_before_token_view
 from treeflow.corpus.views.delete_token import delete_token_view
 from treeflow.corpus.views.texts import texts_view
-
+from treeflow.corpus.views.text_sections import text_sections_view
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('tokens/', tokens_view, name='tokens'),
     path('texts/', texts_view, name='texts'),
+    path('texts/<uuid:text_id>/sections/', text_sections_view, name='text-sections-view'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),
