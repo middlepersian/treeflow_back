@@ -24,8 +24,7 @@ def text_sections_view(request, text_id):
     sections = Section.objects.filter(
         text__id=text_id, 
         type='sentence'
-    ).prefetch_related(tokens_prefetch).order_by('number')
-
+    ).prefetch_related(tokens_prefetch)
     # Pass the sentence_sections with prefetched tokens to the template
     context = {
         'sections': sections,
