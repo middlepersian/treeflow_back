@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container flex">
+<!-- Sidebar with Chapter Information -->
+<div class="sidebar w-1/4 bg-gray-100 p-4">
+    <h2 class="font-bold text-lg mb-4">Chapters</h2>
+    {% for chapter in chapters %}
+    <div class="chapter" data-chapter-id="{{ chapter.id }}">
+        {{ chapter.identifier}}
+    </div>
+    {% endfor %}
+</div>
+
+
+<!-- Content Area for sentences -->
+<div class="content w-3/4 p-4">
+    <!-- Loop over sections of type 'sentence' -->
+    {% for section in sections %}
+            <!-- Sentence Block starts -->
+            <div class="sentence mb-2 flex items-center p-2 bg-white shadow rounded">
+                <!-- Display sentence section title or identifier with a fixed width -->
+                <div class="sentence-identifier w-1/8 font-bold mr-1">
+                    {{ section.number|default:"Untitled" }} 
+                </div>
+                <!-- Sentence content tokens displayed next to the identifier -->
+                <div class="sentence-content w-2/8 flex flex-wrap">
+                    {% for token in section.prefetched_tokens %}
+                        <span class="token inline-block bg-blue-100 rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}">
+                            {{ token.transcription }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+        <p>No sentence sections found for this text.</p>
+    {% endfor %}
+</div>
+</div>
+{% endblock content %}
