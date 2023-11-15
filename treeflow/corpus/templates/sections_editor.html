@@ -78,6 +78,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadChildSections(sectionId, parentDiv) {
+        // Check if child sections are already loaded
+        const existingChildList = parentDiv.querySelector('.child-section-list');
+        if (existingChildList) {
+            // Remove the child list to 'close' the section
+            parentDiv.removeChild(existingChildList);
+            return; // Exit the function
+        }
         fetch(`/corpus/get-child-sections/${sectionId}`)
             .then(response => response.json())
             .then(childSections => {
@@ -93,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Add event listener to prevent event bubbling
                     childDiv.addEventListener('click', function(event) {
                         event.stopPropagation();
+                        fetchAndHighlightSectionTokens(childSection.id);
                     });
 
                     childSectionList.appendChild(childDiv);
