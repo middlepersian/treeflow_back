@@ -36,7 +36,7 @@ def sections_editor_view(request, text_id):
     context = {
         'sentence_sections': sentence_sections,
         'section_types': section_types,
-        'all_sections': all_sections,
+        'text_id': text_id,
     }
 
     return render(request, 'sections_editor.html', context)

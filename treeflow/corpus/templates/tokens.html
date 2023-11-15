@@ -55,40 +55,7 @@
           <input type="text" name="transliteration" value="{{ token.transliteration }}"
             class="shadow border rounded py-2 px-3 text-grey-darker">
         </td>
-        <!-- POS Column with Dropdown -->
-        <td class="border px-4 py-2">
-          <select name="pos_{{ token.id }}" class="shadow border rounded py-2 px-3 text-grey-darker">
-            <!-- Assuming 'pos_choices' is a list of all possible POS tags -->
-            {% for pos_value in pos_choices %}
-              <option value="{{ pos_value }}"
-                      {% for pos in token.pos_token.all %}
-                        {% if pos.pos == pos_value %}
-                          selected
-                        {% endif %}
-                      {% endfor %}>
-                {{ pos_value }}
-              </option>
-            {% endfor %}
-          </select>
-        </td>
-        <td class="border px-4 py-2">
-          <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
-            {% for lemma in token.lemmas.all %}
-            <option value="{{ lemma.id }}" {% if lemma in token.selected_lemmas %}selected{% endif %}>
-              {{ lemma.word }}
-            </option>
-            {% endfor %}
-          </select>
-        </td>
-        <td class="border px-4 py-2">
-          <select name="senses" multiple class="shadow border rounded py-2 px-3">
-            {% for sense in token.senses.all %}
-            <option value="{{ sense.id }}" {% if sense in token.selected_senses %}selected{% endif %}>
-              {{ sense.sense }}
-            </option>
-            {% endfor %}
-          </select>
-        </td>
+
         <!-- Save Button -->
           <td class="border px-4 py-2">
             <input type="hidden" name="token_id" value="{{ token.id }}">
