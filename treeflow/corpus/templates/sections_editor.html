@@ -27,14 +27,18 @@
             <div class="sentence-identifier w-1/8 font-bold mr-1">
                 {{ section.number|default:"Untitled" }}
             </div>
-            <!-- Sentence content tokens displayed next to the identifier -->
-            <div class="sentence-content w-2/8 flex flex-wrap">
-                {% for token in section.prefetched_tokens %}
-                <span class="token inline-block bg-blue-100 rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}">
-                    {{ token.transcription }}
-                </span>
-                {% endfor %}
-            </div>
+        <!-- Sentence content tokens displayed next to the identifier -->
+        <div class="sentence-content w-2/8 flex flex-wrap">
+            {% for token in section.prefetched_tokens %}
+            <!-- Add data-section-id attribute to each token -->
+            <span class="token inline-block rounded px-1 py-0.5 m-0.5" 
+                data-token-id="{{ token.id }}" 
+                data-section-id="{{ section.id }}"> <!-- Add this line -->
+                {{ token.transcription }}
+            </span>
+            {% endfor %}
+        </div>
+
         </div>
         {% empty %}
         <p>No sentence sections found for this text.</p>
@@ -43,44 +47,106 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const selector = document.getElementById('sectionTypeSelector');
-        const sectionList = document.getElementById('sectionList');
-        const textId = '{{ text_id }}';  
+document.addEventListener('DOMContentLoaded', function () {
+    const selector = document.getElementById('sectionTypeSelector');
+    const sectionList = document.getElementById('sectionList');
+    const textId = '{{ text_id }}';
 
-        function loadSectionsOfType(sectionType) {
-            const url = `/corpus/get-sections/${textId}/${sectionType}`; 
-            fetch(url)
-                .then(response => response.json())
-                .then(sections => {
-                    sectionList.innerHTML = '';
-                    sections.forEach(section => {
-                        const sectionDiv = document.createElement('div');
-                        sectionDiv.classList.add('section-item');
-                        sectionDiv.textContent = section.identifier || 'Untitled';
-                        sectionList.appendChild(sectionDiv);
+
+    function highlightSectionTokens(tokenIds) {
+        const tokens = document.querySelectorAll('.token');
+        tokens.forEach(token => {
+            if (tokenIds.includes(token.dataset.tokenId)) {
+                token.classList.add('bg-yellow-200', 'text-black');
+            } else {
+                token.classList.remove('bg-yellow-200', 'text-black');
+            }
+        });
+    }
+
+
+    function fetchAndHighlightSectionTokens(sectionId) {
+        fetch(`/corpus/get-tokens-for-section/${sectionId}`)
+            .then(response => response.json())
+            .then(data => {
+                const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
+                highlightSectionTokens(tokenIds);
+            })
+            .catch(error => {
+                console.error('Error fetching tokens for section:', error);
+            });
+    }
+
+    function loadChildSections(sectionId, parentDiv) {
+        fetch(`/corpus/get-child-sections/${sectionId}`)
+            .then(response => response.json())
+            .then(childSections => {
+                const childSectionList = document.createElement('div');
+                childSectionList.classList.add('child-section-list');
+
+                childSections.forEach(childSection => {
+                    const childDiv = document.createElement('div');
+                    childDiv.classList.add('child-section-item');
+                    childDiv.textContent = childSection.identifier || 'Untitled';
+                    childDiv.dataset.sectionId = childSection.id;
+
+                    // Add event listener to prevent event bubbling
+                    childDiv.addEventListener('click', function(event) {
+                        event.stopPropagation();
                     });
 
-                    if (sections.length === 0) {
-                        sectionList.innerHTML = '<p>No sections found for this type.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching sections:', error);
-                    sectionList.innerHTML = '<p>Error loading sections.</p>';
+                    childSectionList.appendChild(childDiv);
                 });
-        }
 
-        selector.addEventListener('change', function () {
-            loadSectionsOfType(this.value);
-        });
+                // Check if child sections are already loaded to avoid duplication
+                if (!parentDiv.querySelector('.child-section-list')) {
+                    parentDiv.appendChild(childSectionList);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching child sections:', error);
+            });
+    }
 
-        if (selector.options.length > 0) {
-            loadSectionsOfType(selector.options[0].value);
-        }
+    function loadSectionsOfType(sectionType) {
+        fetch(`/corpus/get-sections/${textId}/${sectionType}`)
+            .then(response => response.json())
+            .then(sections => {
+                sectionList.innerHTML = '';
+                sections.forEach(section => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.classList.add('section-item');
+                    sectionDiv.textContent = section.identifier || 'Untitled';
+                    sectionDiv.dataset.sectionId = section.id;
+                    
+                    // Add event listener to load child sections    
+                    sectionDiv.addEventListener('click', function() {
+                    loadChildSections(section.id, this);
+                    fetchAndHighlightSectionTokens(section.id);
+                });
+
+                    sectionList.appendChild(sectionDiv);
+                });
+
+                if (sections.length === 0) {
+                    sectionList.innerHTML = '<p>No sections found for this type.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching sections:', error);
+                sectionList.innerHTML = '<p>Error loading sections.</p>';
+            });
+    }
+
+    selector.addEventListener('change', function () {
+        loadSectionsOfType(this.value);
     });
+
+    if (selector.options.length > 0) {
+        loadSectionsOfType(selector.options[0].value);
+    }
+});
+
 </script>
-
-
 
 {% endblock content %}
