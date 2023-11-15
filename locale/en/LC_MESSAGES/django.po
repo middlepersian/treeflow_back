@@ -1,0 +1,304 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-14 09:56+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: treeflow/templates/account/account_inactive.html:5
+#: treeflow/templates/account/account_inactive.html:8
+msgid "Account Inactive"
+msgstr ""
+
+#: treeflow/templates/account/account_inactive.html:10
+msgid "This account is inactive."
+msgstr ""
+
+#: treeflow/templates/account/email.html:7
+msgid "Account"
+msgstr ""
+
+#: treeflow/templates/account/email.html:10
+msgid "E-mail Addresses"
+msgstr ""
+
+#: treeflow/templates/account/email.html:13
+msgid "The following e-mail addresses are associated with your account:"
+msgstr ""
+
+#: treeflow/templates/account/email.html:27
+msgid "Verified"
+msgstr ""
+
+#: treeflow/templates/account/email.html:29
+msgid "Unverified"
+msgstr ""
+
+#: treeflow/templates/account/email.html:31
+msgid "Primary"
+msgstr ""
+
+#: treeflow/templates/account/email.html:37
+msgid "Make Primary"
+msgstr ""
+
+#: treeflow/templates/account/email.html:38
+msgid "Re-send Verification"
+msgstr ""
+
+#: treeflow/templates/account/email.html:39
+msgid "Remove"
+msgstr ""
+
+#: treeflow/templates/account/email.html:46
+msgid "Warning:"
+msgstr ""
+
+#: treeflow/templates/account/email.html:46
+msgid ""
+"You currently do not have any e-mail address set up. You should really add "
+"an e-mail address so you can receive notifications, reset your password, etc."
+msgstr ""
+
+#: treeflow/templates/account/email.html:51
+msgid "Add E-mail Address"
+msgstr ""
+
+#: treeflow/templates/account/email.html:56
+msgid "Add E-mail"
+msgstr ""
+
+#: treeflow/templates/account/email.html:66
+msgid "Do you really want to remove the selected e-mail address?"
+msgstr ""
+
+#: treeflow/templates/account/email_confirm.html:6
+#: treeflow/templates/account/email_confirm.html:10
+msgid "Confirm E-mail Address"
+msgstr ""
+
+#: treeflow/templates/account/email_confirm.html:16
+#, python-format
+msgid ""
+"Please confirm that <a href=\"mailto:%(email)s\">%(email)s</a> is an e-mail "
+"address for user %(user_display)s."
+msgstr ""
+
+#: treeflow/templates/account/email_confirm.html:20
+msgid "Confirm"
+msgstr ""
+
+#: treeflow/templates/account/email_confirm.html:27
+#, python-format
+msgid ""
+"This e-mail confirmation link expired or is invalid. Please <a href="
+"\"%(email_url)s\">issue a new e-mail confirmation request</a>."
+msgstr ""
+
+#: treeflow/templates/account/login.html:7
+#: treeflow/templates/account/login.html:11
+#: treeflow/templates/account/login.html:44 treeflow/templates/base.html:51
+msgid "Sign In"
+msgstr ""
+
+#: treeflow/templates/account/login.html:16
+#, python-format
+msgid ""
+"Please sign in with one\n"
+"of your existing third party accounts. Or, <a href=\"%(signup_url)s\">sign "
+"up</a>\n"
+"for a %(site_name)s account and sign in below:"
+msgstr ""
+
+#: treeflow/templates/account/login.html:26
+msgid "or"
+msgstr ""
+
+#: treeflow/templates/account/login.html:33
+#, python-format
+msgid ""
+"If you have not created an account yet, then please\n"
+"<a href=\"%(signup_url)s\">sign up</a> first."
+msgstr ""
+
+#: treeflow/templates/account/login.html:43
+msgid "Forgot Password?"
+msgstr ""
+
+#: treeflow/templates/account/logout.html:5
+#: treeflow/templates/account/logout.html:8
+#: treeflow/templates/account/logout.html:17 treeflow/templates/base.html:44
+msgid "Sign Out"
+msgstr ""
+
+#: treeflow/templates/account/logout.html:10
+msgid "Are you sure you want to sign out?"
+msgstr ""
+
+#: treeflow/templates/account/password_change.html:6
+#: treeflow/templates/account/password_change.html:9
+#: treeflow/templates/account/password_change.html:14
+#: treeflow/templates/account/password_reset_from_key.html:5
+#: treeflow/templates/account/password_reset_from_key.html:8
+#: treeflow/templates/account/password_reset_from_key_done.html:4
+#: treeflow/templates/account/password_reset_from_key_done.html:7
+msgid "Change Password"
+msgstr ""
+
+#: treeflow/templates/account/password_reset.html:7
+#: treeflow/templates/account/password_reset.html:11
+#: treeflow/templates/account/password_reset_done.html:6
+#: treeflow/templates/account/password_reset_done.html:9
+msgid "Password Reset"
+msgstr ""
+
+#: treeflow/templates/account/password_reset.html:16
+msgid ""
+"Forgotten your password? Enter your e-mail address below, and we'll send you "
+"an e-mail allowing you to reset it."
+msgstr ""
+
+#: treeflow/templates/account/password_reset.html:21
+msgid "Reset My Password"
+msgstr ""
+
+#: treeflow/templates/account/password_reset.html:24
+msgid "Please contact us if you have any trouble resetting your password."
+msgstr ""
+
+#: treeflow/templates/account/password_reset_done.html:15
+msgid ""
+"We have sent you an e-mail. Please contact us if you do not receive it "
+"within a few minutes."
+msgstr ""
+
+#: treeflow/templates/account/password_reset_from_key.html:8
+msgid "Bad Token"
+msgstr ""
+
+#: treeflow/templates/account/password_reset_from_key.html:12
+#, python-format
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
+"a>."
+msgstr ""
+
+#: treeflow/templates/account/password_reset_from_key.html:18
+msgid "change password"
+msgstr ""
+
+#: treeflow/templates/account/password_reset_from_key.html:21
+#: treeflow/templates/account/password_reset_from_key_done.html:8
+msgid "Your password is now changed."
+msgstr ""
+
+#: treeflow/templates/account/password_set.html:6
+#: treeflow/templates/account/password_set.html:9
+#: treeflow/templates/account/password_set.html:14
+msgid "Set Password"
+msgstr ""
+
+#: treeflow/templates/account/signup.html:6
+msgid "Signup"
+msgstr ""
+
+#: treeflow/templates/account/signup.html:9
+#: treeflow/templates/account/signup.html:19 treeflow/templates/base.html:48
+msgid "Sign Up"
+msgstr ""
+
+#: treeflow/templates/account/signup.html:11
+#, python-format
+msgid ""
+"Already have an account? Then please <a href=\"%(login_url)s\">sign in</a>."
+msgstr ""
+
+#: treeflow/templates/account/signup_closed.html:5
+#: treeflow/templates/account/signup_closed.html:8
+msgid "Sign Up Closed"
+msgstr ""
+
+#: treeflow/templates/account/signup_closed.html:10
+msgid "We are sorry, but the sign up is currently closed."
+msgstr ""
+
+#: treeflow/templates/account/verification_sent.html:5
+#: treeflow/templates/account/verification_sent.html:8
+#: treeflow/templates/account/verified_email_required.html:5
+#: treeflow/templates/account/verified_email_required.html:8
+msgid "Verify Your E-mail Address"
+msgstr ""
+
+#: treeflow/templates/account/verification_sent.html:10
+msgid ""
+"We have sent an e-mail to you for verification. Follow the link provided to "
+"finalize the signup process. Please contact us if you do not receive it "
+"within a few minutes."
+msgstr ""
+
+#: treeflow/templates/account/verified_email_required.html:12
+msgid ""
+"This part of the site requires us to verify that\n"
+"you are who you claim to be. For this purpose, we require that you\n"
+"verify ownership of your e-mail address. "
+msgstr ""
+
+#: treeflow/templates/account/verified_email_required.html:16
+msgid ""
+"We have sent an e-mail to you for\n"
+"verification. Please click on the link inside this e-mail. Please\n"
+"contact us if you do not receive it within a few minutes."
+msgstr ""
+
+#: treeflow/templates/account/verified_email_required.html:20
+#, python-format
+msgid ""
+"<strong>Note:</strong> you can still <a href=\"%(email_url)s\">change your e-"
+"mail address</a>."
+msgstr ""
+
+#: treeflow/templates/base.html:41
+msgid "My Profile"
+msgstr ""
+
+#: treeflow/users/admin.py:18
+msgid "Personal info"
+msgstr ""
+
+#: treeflow/users/admin.py:20
+msgid "Permissions"
+msgstr ""
+
+#: treeflow/users/admin.py:31
+msgid "Important dates"
+msgstr ""
+
+#: treeflow/users/apps.py:7
+msgid "Users"
+msgstr ""
+
+#: treeflow/users/forms.py:18 treeflow/users/tests/test_forms.py:39
+msgid "This username has already been taken."
+msgstr ""
+
+#: treeflow/users/models.py:11
+msgid "Name of User"
+msgstr ""
+
+#: treeflow/users/views.py:25
+msgid "Information successfully updated"
+msgstr ""

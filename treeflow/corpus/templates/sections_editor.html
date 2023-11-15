@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="container flex flex-row">
+    <!-- Sidebar with Chapter Information -->
+    <div class="sidebar w-1/4 bg-gray-100 p-4">
+        <h2 class="font-bold text-lg mb-4">Select Section Type</h2>
+        <!-- Dropdown Menu for selecting section type -->
+        <select id="sectionTypeSelector" class="mb-4">
+            {% for section_type in section_types %}
+            <option value="{{ section_type }}">{{ section_type|title }}</option>
+            {% endfor %}
+        </select>
+        <!-- Section List Placeholder -->
+        <div id="sectionList">
+            <!-- Sections will be dynamically loaded here -->
+        </div>
+    </div>
+
+
+    <!-- Content Area for sentences -->
+    <div class="content w-3/4 p-4">
+        <!-- Loop over sections of type 'sentence' -->
+        {% for section in sentence_sections %}
+        <!-- Sentence Block starts -->
+        <div class="sentence mb-2 flex items-center p-2 bg-white shadow rounded">
+            <!-- Display sentence section title or identifier with a fixed width -->
+            <div class="sentence-identifier w-1/8 font-bold mr-1">
+                {{ section.number|default:"Untitled" }}
+            </div>
+            <!-- Sentence content tokens displayed next to the identifier -->
+            <div class="sentence-content w-2/8 flex flex-wrap">
+                {% for token in section.prefetched_tokens %}
+                <span class="token inline-block bg-blue-100 rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}">
+                    {{ token.transcription }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <p>No sentence sections found for this text.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selector = document.getElementById('sectionTypeSelector');
+        const sectionList = document.getElementById('sectionList');
+        let allSections;
+
+        try {
+            allSections = JSON.parse('{{ all_sections|safe }}');
+        } catch (error) {
+            console.error('Error parsing sections data:', error);
+            sectionList.innerHTML = '<p>Error loading sections.</p>';
+            return;
+        }
+
+        function displaySectionsOfType(sectionType) {
+            if (!allSections) return;
+            sectionList.innerHTML = ''; // Clear current list
+            const filteredSections = allSections.filter(s => s.fields.type === sectionType);
+            filteredSections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.classList.add('section-item');
+                sectionDiv.textContent = section.fields.identifier || 'Untitled';
+                sectionList.appendChild(sectionDiv);
+            });
+
+            if (filteredSections.length === 0) {
+                sectionList.innerHTML = '<p>No sections found for this type.</p>';
+            }
+        }
+
+        selector.addEventListener('change', function () {
+            displaySectionsOfType(this.value);
+        });
+
+        if (selector.options.length > 0) {
+            displaySectionsOfType(selector.options[0].value);
+        } else {
+            sectionList.innerHTML = '<p>Please select a section type.</p>';
+        }
+    });
+</script>
+
+
+{% endblock content %}
