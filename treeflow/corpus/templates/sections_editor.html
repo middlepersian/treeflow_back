@@ -45,45 +45,47 @@
     </div>
 </div>
 
-
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const selector = document.getElementById('sectionTypeSelector');
         const sectionList = document.getElementById('sectionList');
+        let allSections;
 
-        // Function to update the section list
-        function updateSectionList(sectionType) {
-            // Clear current list
-            sectionList.innerHTML = '';
+        try {
+            allSections = JSON.parse('{{ all_sections|safe }}');
+        } catch (error) {
+            console.error('Error parsing sections data:', error);
+            sectionList.innerHTML = '<p>Error loading sections.</p>';
+            return;
+        }
 
-            // Get sections for the selected type from the preloaded data
-            const sections = sectionsData[sectionType] || [];
-            sections.forEach(section => {
+        function displaySectionsOfType(sectionType) {
+            if (!allSections) return;
+            sectionList.innerHTML = ''; // Clear current list
+            const filteredSections = allSections.filter(s => s.fields.type === sectionType);
+            filteredSections.forEach(section => {
                 const sectionDiv = document.createElement('div');
-                sectionDiv.classList.add('chapter');
-                sectionDiv.dataset.chapterId = section.id;
-                sectionDiv.textContent = section.identifier;
+                sectionDiv.classList.add('section-item');
+                sectionDiv.textContent = section.fields.identifier || 'Untitled';
                 sectionList.appendChild(sectionDiv);
             });
 
-            // Handle case where no sections are found
-            if (sections.length === 0) {
+            if (filteredSections.length === 0) {
                 sectionList.innerHTML = '<p>No sections found for this type.</p>';
             }
         }
 
-        // Initial load
-        updateSectionList(selector.value);
-
-        // Event listener for dropdown change
         selector.addEventListener('change', function () {
-            updateSectionList(this.value);
+            displaySectionsOfType(this.value);
         });
+
+        if (selector.options.length > 0) {
+            displaySectionsOfType(selector.options[0].value);
+        } else {
+            sectionList.innerHTML = '<p>Please select a section type.</p>';
+        }
     });
 </script>
-
-
 
 
 {% endblock content %}

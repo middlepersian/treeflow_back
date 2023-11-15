@@ -2,28 +2,9 @@ from django.shortcuts import render
 from django.db.models import Prefetch
 from treeflow.corpus.models import Section, Token
 from django.db.models import Count, Prefetch
-
+from django.core import serializers
 
 from collections import defaultdict
-
-def build_tree(sections):
-    tree = defaultdict(list)
-    sections_dict = {section.id: section for section in sections}
-
-    # Organize sections by their container
-    for section in sections:
-        parent_id = section.container_id if section.container else None
-        tree[parent_id].append(section)
-
-    # Sort sections within the same container
-    for parent_id, children in tree.items():
-        sorted_children = sorted(
-            children, 
-            key=lambda x: (x.previous is not None, getattr(x.previous, 'id', None))
-        )
-        tree[parent_id] = sorted_children
-
-    return dict(tree)
 
 
 def sections_editor_view(request, text_id):
@@ -41,21 +22,21 @@ def sections_editor_view(request, text_id):
     )
 
     # Fetch all sections for the given text, applying the Prefetch object conditionally
-    all_sections = Section.objects.filter(text__id=text_id)
-    sentence_sections = all_sections.filter(type='sentence').prefetch_related(tokens_prefetch)
-    other_sections = all_sections.exclude(type='sentence')
+    all_sections = Section.objects.filter(text__id=text_id).prefetch_related(
+        'container'
+    )
 
-    # Build a tree of sections
-    section_tree = build_tree(all_sections)    
+    sentence_sections = all_sections.filter(type='sentence').prefetch_related(tokens_prefetch)
 
     # Get distinct section types
     section_types = Section.objects.order_by('type').values_list('type', flat=True).distinct()
+    #remove "sentence" from the types
+    section_types = [x for x in section_types if x != 'sentence']
     # Pass the sentence_sections with prefetched tokens and other sections to the template
     context = {
         'sentence_sections': sentence_sections,
-        'other_sections': other_sections,
         'section_types': section_types,
-        'section_tree': section_tree,
+        'all_sections': all_sections,
     }
 
     return render(request, 'sections_editor.html', context)
