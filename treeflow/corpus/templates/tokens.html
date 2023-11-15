@@ -72,13 +72,21 @@
           <input type="text" name="transliteration" value="{{ token.transliteration }}"
             class="shadow border rounded py-2 px-3 text-grey-darker">
         </td>
+        <!-- POS Column with Dropdown -->
         <td class="border px-4 py-2">
-          <!-- Display all related POS objects for the token -->
-          {% for pos in token.pos_token.all %}
-            <span>{{ pos.pos }}</span>
-          {% empty %}
-            <span>No POS</span>
-          {% endfor %}
+          <select name="pos_{{ token.id }}" class="shadow border rounded py-2 px-3 text-grey-darker">
+            <!-- Assuming 'pos_choices' is a list of all possible POS tags -->
+            {% for pos_value in pos_choices %}
+              <option value="{{ pos_value }}"
+                      {% for pos in token.pos_token.all %}
+                        {% if pos.pos == pos_value %}
+                          selected
+                        {% endif %}
+                      {% endfor %}>
+                {{ pos_value }}
+              </option>
+            {% endfor %}
+          </select>
         </td>
         <td class="border px-4 py-2">
           <select name="lemmas" multiple class="shadow border rounded py-2 px-3">
