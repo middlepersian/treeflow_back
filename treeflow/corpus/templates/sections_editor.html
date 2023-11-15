@@ -71,6 +71,15 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
                 highlightSectionTokens(tokenIds);
+
+                // Scroll to the first token of this section
+                if (tokenIds.length > 0) {
+                    const firstTokenId = tokenIds[0];
+                    const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
+                    if (firstTokenElement) {
+                        firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
             })
             .catch(error => {
                 console.error('Error fetching tokens for section:', error);
