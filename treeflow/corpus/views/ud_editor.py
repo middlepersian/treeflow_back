@@ -29,7 +29,7 @@ def ud_editor(request, section_id):
         from_token = Token.objects.get(from_token_id)
         to_token = Token.objects.get(to_token_id)
 
-        dep = Dependency.objects.create(token=from_token, head=to_token)
+        dep = Dependency.objects.create(token=from_token_id, head=to_token_id)
         dep.save()
         return HTTPRedirectResponse(".")
     
