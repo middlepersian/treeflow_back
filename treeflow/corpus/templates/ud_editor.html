@@ -238,6 +238,11 @@
   
 
   // Initialize the viewbox
-  setViewBox();
+  const bbox = svg.getBBox();
+    currentX = bbox.x - 10;
+    currentY = bbox.y - 10;
+    currentZoom = 1;
+    setViewBox();
+
 </script>
 {% endblock content %}
