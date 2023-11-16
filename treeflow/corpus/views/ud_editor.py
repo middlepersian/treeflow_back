@@ -5,6 +5,7 @@ from treeflow.corpus.models import (
     Dependency,
     Section,
     SectionToken,
+    POS
 )  # Adjust to your model's import path
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
@@ -41,12 +42,23 @@ def ud_editor(request, section_id):
         .select_related("token", "head")
         .distinct()
     )
-
+    posList = (
+        POS.objects.filter(Q(token__in=tokens)).select_related("token").distinct()
+    )
     token_data = []
     x1 = 0
     for token in tokens:
         token_dependencies = []
+        token_pos = []
         x1, x2 = calculate_positions(len(token.transcription), x1, 12, 10)
+
+        for pos in posList:
+            if pos.token == token:
+                token_pos.append(
+                    {"id":pos.id,
+                     "pos":pos.pos,
+                     "type":pos.type}
+                )
 
         for dep in dependencies:
             if dep.token == token:
@@ -76,8 +88,11 @@ def ud_editor(request, section_id):
                 "xpos": x1 if token.number_in_sentence else 0,
                 "ypos": 50 if token.number_in_sentence else 0,
                 "transcription": token.transcription,
+                "pos_len": len(token_pos),
+                "pos": token_pos,
                 "dep_len": len(token_dependencies),
                 "dependencies": token_dependencies,
+            
             }
         )
         x1 = x2

@@ -1,6 +1,5 @@
 {% extends "base.html" %} {% block content %}
 <div class="flex flex-row w-full gap-2">
-
   <button class="flex p-2 bg-blue-900 rounded text-white font-bold" id="center">
     Center
   </button>
@@ -48,13 +47,26 @@
       fill="white"
       stroke="black"
     />
-    <text x="{{token.xpos}}" y="50" font-family="Verdana" font-size="12">
+    <text
+      class="hover-target"
+      x="{{token.xpos}}"
+      y="50"
+      font-family="Verdana"
+      font-size="12"
+    >
       {{token.transcription}}
+    </text>
+    <text       x="{{token.xpos}}"
+    y="60"
+    font-family="Verdana"
+    font-size="6">
+    {% for pos in token.pos %}  
+    {{pos.pos}}
+    {%endfor%}
     </text>
   </g>
   {% endif %} {% endfor %}
 </svg>
-
 
 {{ tokens | json_script:"tokenData" }}
 <script>
@@ -80,6 +92,7 @@
     document.getElementById("tokenData").textContent
   );
 
+//#region CLICK HANDLE
   document.querySelectorAll("circle").forEach((item) =>
     item.addEventListener("click", (event) => {
       console.log(`Circle ${event.target.id} clicked`);
@@ -122,6 +135,7 @@
       }
     })
   );
+//#endregion
 
   svg.addEventListener("mousemove", (event) => {
     if (!creating) {
@@ -130,11 +144,7 @@
     var loc = cursorPoint(event);
     const mouseX = loc.x;
     const mouseY = loc.y - 5;
-    const pathClass = "temp-path";
-    const tempPaths = document.getElementsByClassName(pathClass);
-    while (tempPaths.length > 0) {
-      tempPaths[0].parentNode.removeChild(tempPaths[0]);
-    }
+    cleanAllElementsWithClass("temp-path")
     const path = document.createElementNS(svgNS, "path");
     const arcDefinition = createBezierArc(
       tokenData.find((e) => e.id === fromTokenId).xpos,
@@ -160,11 +170,27 @@
     return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
   }
 
+  function cleanAllElementsWithClass (className) {
+    const tempPaths = document.getElementsByClassName(className);
+    while (tempPaths.length > 0) {
+      tempPaths[0].parentNode.removeChild(tempPaths[0]);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    console.info(tokenData)
+  
+  })
+
   tokenData.forEach((token) => {
     token.dependencies?.forEach((dep) => {
       if (!dep.to_token_id) {
         return;
       }
+      if (dep.enhanced){
+        return
+      }
+      console.log(dep)
       const depPos = tokenData.find((e) => e.id === dep.to_token_id.id).xpos;
       const path = document.createElementNS(svgNS, "path");
       const arcDefinition = createBezierArc(token.xpos, 32.5, depPos, 32.5);
@@ -176,10 +202,18 @@
       path.setAttribute("marker-end", "url(#arrowhead)");
       path.setAttribute("data-from", token.id);
       path.setAttribute("data-to", dep.to_token_id.id);
+      path.setAttribute("id",dep.id)
+      const text = document.createElementNS(svgNS, "text")
+      text.setAttribute("font-size",8)
+      const textpath = document.createElementNS(svgNS,"textPath")
+      textpath.setAttribute("path",arcDefinition)
+      textpath.innerHTML = dep.rel
+      text.append(textpath)
       path.addEventListener("click", (event) => {
         console.log("Path clicked");
       });
       svg.appendChild(path);
+      svg.appendChild(text)
     });
   });
 
@@ -255,7 +289,10 @@
       const submitButton = document.createElement("input");
       submitButton.setAttribute("type", "submit");
       submitButton.setAttribute("value", "Save Changes");
-      submitButton.setAttribute("class", "flex mx-2 p-2 bg-blue-900 rounded text-white font-bold hover:bg-blue-700 cursor-pointer");
+      submitButton.setAttribute(
+        "class",
+        "flex mx-2 p-2 bg-blue-900 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+      );
       inputContainer.appendChild(submitButton);
     }
 
