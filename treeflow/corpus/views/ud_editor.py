@@ -6,7 +6,9 @@ from treeflow.corpus.models import (
     Section,
     SectionToken,
 )  # Adjust to your model's import path
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
+
 
 def calculate_positions(word_length_1, x1, font_size, gap):
     char_width = font_size * 0.6
@@ -18,7 +20,19 @@ def calculate_positions(word_length_1, x1, font_size, gap):
 
 
 def ud_editor(request, section_id):
+    # Get the section
     section = get_object_or_404(Section, pk=section_id, type="sentence")
+
+    if request.method == "POST" and request.POST.get("dependency"):
+        from_token_id = request.POST.get("from")
+        to_token_id = request.POST.get("to")
+        from_token = Token.objects.get(from_token_id)
+        to_token = Token.objects.get(to_token_id)
+
+        dep = Dependency.objects.create(token=from_token, head=to_token)
+        dep.save()
+        return HTTPRedirectResponse(".")
+    
     section_tokens = section.tokens.all()
     tokens = list(section_tokens)
 
@@ -42,12 +56,8 @@ def ud_editor(request, section_id):
                         "from_token_id": {
                             "id": dep.token.id,
                             "transcription": dep.token.transcription,
-                            "xpos": x1
-                            if dep.token.number_in_sentence
-                            else 0,
-                            "ypos": 50
-                            if dep.token.number_in_sentence
-                            else 0,
+                            "xpos": x1 if dep.token.number_in_sentence else 0,
+                            "ypos": 50 if dep.token.number_in_sentence else 0,
                         },
                         "to_token_id": {
                             "id": dep.head.id,
@@ -63,12 +73,8 @@ def ud_editor(request, section_id):
             {
                 "id": token.id,
                 "number": token.number_in_sentence,
-                "xpos": x1
-                if token.number_in_sentence
-                else 0,
-                "ypos": 50
-                if token.number_in_sentence
-                else 0,
+                "xpos": x1 if token.number_in_sentence else 0,
+                "ypos": 50 if token.number_in_sentence else 0,
                 "transcription": token.transcription,
                 "dep_len": len(token_dependencies),
                 "dependencies": token_dependencies,

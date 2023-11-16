@@ -1,5 +1,14 @@
 {% extends "base.html" %} {% block content %}
-<button class="p-2 bg-blue-900 rounded text-white font-bold" id="center">Center</button>
+<div class="flex flex-row w-full gap-2">
+
+  <button class="flex p-2 bg-blue-900 rounded text-white font-bold" id="center">
+    Center
+  </button>
+  <form class="mx-2" id="form" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="dependency" value="" />
+  </form>
+</div>
 <svg id="svgCanvas" viewbox="0 0 800 600" width="100%" height="100%">
   <defs>
     <marker
@@ -46,7 +55,7 @@
   {% endif %} {% endfor %}
 </svg>
 
-<form id="form"></form>
+
 {{ tokens | json_script:"tokenData" }}
 <script>
   // Variables to hold the current position and scale of the viewbox
@@ -102,24 +111,13 @@
             console.log("Path clicked");
           });
           svg.appendChild(path);
-          const inputField = document.createElement("input");
-          inputField.setAttribute("type", "hidden");
-          inputField.setAttribute("name", "dependencies");
-          inputField.setAttribute(
-            "value",
-            JSON.stringify({
-              from_token_id: fromTokenId,
-              to_token_id: tokenTo,
-            })
-          );
-          form.appendChild(inputField);
+          addNewDependencyRow(fromTokenId, tokenTo);
           creating = false;
           fromTokenId = null;
           const tempPaths = document.getElementsByClassName(pathClass);
           while (tempPaths.length > 0) {
             tempPaths[0].parentNode.removeChild(tempPaths[0]);
           }
-
         }
       }
     })
@@ -235,14 +233,40 @@
     currentZoom = 1;
     setViewBox();
   };
-  
+
+  const addNewDependencyRow = (from, to) => {
+    const inputContainer = document.createElement("div");
+    inputContainer.setAttribute("class", "flex flex-row items-center");
+
+    const inputField = document.createElement("input");
+    inputField.setAttribute("type", "hidden");
+    inputField.setAttribute("name", "from");
+    inputField.setAttribute("value", from);
+    inputContainer.appendChild(inputField);
+
+    const inputField1 = document.createElement("input");
+    inputField1.setAttribute("type", "hidden");
+    inputField1.setAttribute("name", "to");
+    inputField1.setAttribute("value", to);
+    inputContainer.appendChild(inputField1);
+
+    const submit = form.querySelector('input[type="submit"]');
+    if (!submit) {
+      const submitButton = document.createElement("input");
+      submitButton.setAttribute("type", "submit");
+      submitButton.setAttribute("value", "Save Changes");
+      submitButton.setAttribute("class", "flex mx-2 p-2 bg-blue-900 rounded text-white font-bold hover:bg-blue-700 cursor-pointer");
+      inputContainer.appendChild(submitButton);
+    }
+
+    form.appendChild(inputContainer);
+  };
 
   // Initialize the viewbox
   const bbox = svg.getBBox();
-    currentX = bbox.x - 10;
-    currentY = bbox.y - 10;
-    currentZoom = 1;
-    setViewBox();
-
+  currentX = bbox.x - 10;
+  currentY = bbox.y - 10;
+  currentZoom = 1;
+  setViewBox();
 </script>
 {% endblock content %}
