@@ -10,6 +10,7 @@ from treeflow.corpus.views.texts import texts_view
 from treeflow.corpus.views.update_pos_ajax import update_pos_ajax
 from treeflow.corpus.views.sections_editor import sections_editor_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_child_sections, get_tokens_for_section
+from treeflow.corpus.views.create_section import create_section_view
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path('get-sections/<uuid:text_id>/<str:section_type>/', get_sections_by_type, name='get_sections_by_type'),
     path('get-child-sections/<uuid:section_id>/', get_child_sections, name='get_child_sections'),
     path('get-tokens-for-section/<uuid:section_id>/', get_tokens_for_section, name='get_tokens_for_section'),
+    path('create-section/', create_section_view, name='create_section'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),

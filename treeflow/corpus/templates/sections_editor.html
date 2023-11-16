@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
+
 {% block content %}
+<!-- Section Edit -->
+<button id="startTokenSelection" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    data-mode="select">
+    Start Token Selection
+</button>
+
 <div class="container flex flex-row">
     <!-- Sidebar with Chapter Information -->
     <div class="sidebar w-1/4 bg-gray-100 p-4">
@@ -27,142 +34,291 @@
             <div class="sentence-identifier w-1/8 font-bold mr-1">
                 {{ section.number|default:"Untitled" }}
             </div>
-        <!-- Sentence content tokens displayed next to the identifier -->
-        <div class="sentence-content w-2/8 flex flex-wrap">
-            {% for token in section.prefetched_tokens %}
-            <!-- Add data-section-id attribute to each token -->
-            <span class="token inline-block rounded px-1 py-0.5 m-0.5" 
-                data-token-id="{{ token.id }}" 
-                data-section-id="{{ section.id }}"> <!-- Add this line -->
-                {{ token.transcription }}
-            </span>
-            {% endfor %}
-        </div>
+            <!-- Sentence content tokens displayed next to the identifier -->
+            <div class="sentence-content w-2/8 flex flex-wrap">
+                {% for token in section.prefetched_tokens %}
+                <!-- Add data-section-id attribute to each token -->
+                <span class="token inline-block rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}"
+                    data-section-id="{{ section.id }}"> <!-- Add this line -->
+                    {{ token.transcription }}
+                </span>
+                {% endfor %}
+            </div>
 
         </div>
         {% empty %}
         <p>No sentence sections found for this text.</p>
         {% endfor %}
     </div>
+
+    <!-- Scroll to Top -->
+    <div class="fixed bottom-5 right-5 hidden scroll-to-top">
+        <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded" onclick="scrollToTop()">↑</button>
+    </div>
+    <div id="sectionCreationModal" class="modal hidden">
+        <!-- Modal content -->
+        <form id="sectionForm" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="hiddenSelectedTokensField" name="selected_tokens">
+            {{ form.as_p }}
+            <button type="submit">Create Section</button>
+        </form>
+    </div>
+
 </div>
 
+<!-- Script for token selection -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const selector = document.getElementById('sectionTypeSelector');
-    const sectionList = document.getElementById('sectionList');
-    const textId = '{{ text_id }}';
 
 
-    function highlightSectionTokens(tokenIds) {
-        const tokens = document.querySelectorAll('.token');
-        tokens.forEach(token => {
-            if (tokenIds.includes(token.dataset.tokenId)) {
-                token.classList.add('bg-yellow-200', 'text-black');
-            } else {
-                token.classList.remove('bg-yellow-200', 'text-black');
+    document.addEventListener('DOMContentLoaded', function () {
+        let startTokenId = null;
+        let endTokenId = null;
+        let isSelectingTokens = false;
+
+        // Function to get the CSRF token
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+
+        // Function to open the modal and set selected token IDs
+        function openSectionModal(selectedTokenIds) {
+            // Set selected token IDs to the hidden field in the modal
+            document.getElementById('hiddenSelectedTokensField').value = selectedTokenIds;
+            // Make the modal visible by removing the 'hidden' class
+            document.getElementById('sectionCreationModal').classList.remove('hidden');
+        }
+
+        function handleTokenClick(tokenElement) {
+            console.log("Token clicked:", tokenElement.dataset.tokenId);
+            const tokenId = tokenElement.dataset.tokenId;
+
+            if (startTokenId === null) {
+                startTokenId = tokenId;
+                tokenElement.classList.add('bg-green-200'); // Highlighting
+            } else if (endTokenId === null && tokenId !== startTokenId) {
+                endTokenId = tokenId;
+                highlightTokensBetween(startTokenId, endTokenId);
+            }
+        }
+
+        function highlightTokensBetween(startId, endId) {
+            let inRange = false;
+            document.querySelectorAll('.token').forEach(token => {
+                if (token.dataset.tokenId === startId || token.dataset.tokenId === endId) {
+                    inRange = !inRange;
+                    token.classList.add('bg-green-200'); // Highlighting
+                }
+                if (inRange || token.dataset.tokenId === endId) {
+                    token.classList.add('bg-green-200'); // Highlighting
+                }
+            });
+        }
+
+        // Function to add event listeners to tokens
+        function addTokenClickListeners() {
+            document.querySelectorAll('.token').forEach(token => {
+                token.addEventListener('click', function () {
+                    if (isSelectingTokens) {
+                        handleTokenClick(this);
+                    }
+                });
+            });
+        }
+
+        // Add listeners to existing tokens
+        addTokenClickListeners();
+
+        // Event listener for the button
+        document.getElementById('startTokenSelection').addEventListener('click', function () {
+            let mode = this.getAttribute('data-mode');
+
+            if (mode === 'select') {
+                isSelectingTokens = true;
+                this.textContent = 'Finish Token Selection';
+                this.setAttribute('data-mode', 'finish');
+            } else if (mode === 'finish') {
+                isSelectingTokens = false;
+                let selectedTokenIds = Array.from(document.querySelectorAll('.token.bg-green-200'))
+                    .map(token => token.dataset.tokenId)
+                    .join(',');
+
+                // Open the modal with the selected token IDs
+                openSectionModal(selectedTokenIds);
+
+                // Reset the button text and mode
+                this.textContent = 'Start Token Selection';
+                this.setAttribute('data-mode', 'select');
             }
         });
-    }
 
-
-    function fetchAndHighlightSectionTokens(sectionId) {
-        fetch(`/corpus/get-tokens-for-section/${sectionId}`)
-            .then(response => response.json())
-            .then(data => {
-                const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
-                highlightSectionTokens(tokenIds);
-
-                // Scroll to the first token of this section
-                if (tokenIds.length > 0) {
-                    const firstTokenId = tokenIds[0];
-                    const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
-                    if (firstTokenElement) {
-                        firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching tokens for section:', error);
-            });
-    }
-
-    function loadChildSections(sectionId, parentDiv) {
-        // Check if child sections are already loaded
-        const existingChildList = parentDiv.querySelector('.child-section-list');
-        if (existingChildList) {
-            // Remove the child list to 'close' the section
-            parentDiv.removeChild(existingChildList);
-            return; // Exit the function
-        }
-        fetch(`/corpus/get-child-sections/${sectionId}`)
-            .then(response => response.json())
-            .then(childSections => {
-                const childSectionList = document.createElement('div');
-                childSectionList.classList.add('child-section-list');
-
-                childSections.forEach(childSection => {
-                    const childDiv = document.createElement('div');
-                    childDiv.classList.add('child-section-item');
-                    childDiv.textContent = childSection.identifier || 'Untitled';
-                    childDiv.dataset.sectionId = childSection.id;
-
-                    // Add event listener to prevent event bubbling
-                    childDiv.addEventListener('click', function(event) {
-                        event.stopPropagation();
-                        fetchAndHighlightSectionTokens(childSection.id);
+        // Observe for dynamically added tokens
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                    // Check if the added nodes contain tokens
+                    mutation.addedNodes.forEach(function (node) {
+                        if (node.classList && node.classList.contains('token')) {
+                            addTokenClickListeners();
+                        }
                     });
-
-                    childSectionList.appendChild(childDiv);
-                });
-
-                // Check if child sections are already loaded to avoid duplication
-                if (!parentDiv.querySelector('.child-section-list')) {
-                    parentDiv.appendChild(childSectionList);
                 }
-            })
-            .catch(error => {
-                console.error('Error fetching child sections:', error);
             });
+        });
+
+        // Start observing
+        observer.observe(document.body, { childList: true, subtree: true });
+
+
+        // HTMX response event listener
+        htmx.on('htmx:response', function (event) {
+            if (event.detail.status === 200) {
+                let jsonResponse = JSON.parse(event.detail.xhr.responseText);
+                if (jsonResponse.redirect) {
+                    window.location.href = jsonResponse.redirect;
+                }
+            } else {
+                // Handle other statuses or errors
+            }
+        });
+    });
+</script>
+
+
+
+<script>
+    // Scroll to top button
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function loadSectionsOfType(sectionType) {
-        fetch(`/corpus/get-sections/${textId}/${sectionType}`)
-            .then(response => response.json())
-            .then(sections => {
-                sectionList.innerHTML = '';
-                sections.forEach(section => {
-                    const sectionDiv = document.createElement('div');
-                    sectionDiv.classList.add('section-item');
-                    sectionDiv.textContent = section.identifier || 'Untitled';
-                    sectionDiv.dataset.sectionId = section.id;
-                    
-                    // Add event listener to load child sections    
-                    sectionDiv.addEventListener('click', function() {
-                    loadChildSections(section.id, this);
-                    fetchAndHighlightSectionTokens(section.id);
-                });
-
-                    sectionList.appendChild(sectionDiv);
-                });
-
-                if (sections.length === 0) {
-                    sectionList.innerHTML = '<p>No sections found for this type.</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching sections:', error);
-                sectionList.innerHTML = '<p>Error loading sections.</p>';
-            });
-    }
-
-    selector.addEventListener('change', function () {
-        loadSectionsOfType(this.value);
+    window.addEventListener('scroll', function () {
+        const scrollToTopButton = document.querySelector('.scroll-to-top');
+        if (window.scrollY > 200) {
+            scrollToTopButton.classList.remove('hidden');
+        } else {
+            scrollToTopButton.classList.add('hidden');
+        }
     });
 
-    if (selector.options.length > 0) {
-        loadSectionsOfType(selector.options[0].value);
-    }
-});
+    // Highlight tokens when a section is clicked
+    document.addEventListener('DOMContentLoaded', function () {
+        const selector = document.getElementById('sectionTypeSelector');
+        const sectionList = document.getElementById('sectionList');
+        const textId = '{{ text_id }}';
+
+
+        function highlightSectionTokens(tokenIds) {
+            const tokens = document.querySelectorAll('.token');
+            tokens.forEach(token => {
+                if (tokenIds.includes(token.dataset.tokenId)) {
+                    token.classList.add('bg-yellow-200', 'text-black');
+                } else {
+                    token.classList.remove('bg-yellow-200', 'text-black');
+                }
+            });
+        }
+
+
+        function fetchAndHighlightSectionTokens(sectionId) {
+            fetch(`/corpus/get-tokens-for-section/${sectionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
+                    highlightSectionTokens(tokenIds);
+
+                    // Scroll to the first token of this section
+                    if (tokenIds.length > 0) {
+                        const firstTokenId = tokenIds[0];
+                        const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
+                        if (firstTokenElement) {
+                            firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching tokens for section:', error);
+                });
+        }
+
+        function loadChildSections(sectionId, parentDiv) {
+            // Check if child sections are already loaded
+            const existingChildList = parentDiv.querySelector('.child-section-list');
+            if (existingChildList) {
+                // Remove the child list to 'close' the section
+                parentDiv.removeChild(existingChildList);
+                return; // Exit the function
+            }
+            fetch(`/corpus/get-child-sections/${sectionId}`)
+                .then(response => response.json())
+                .then(childSections => {
+                    const childSectionList = document.createElement('div');
+                    childSectionList.classList.add('child-section-list');
+
+                    childSections.forEach(childSection => {
+                        const childDiv = document.createElement('div');
+                        childDiv.classList.add('child-section-item');
+                        childDiv.textContent = childSection.identifier || 'Untitled';
+                        childDiv.dataset.sectionId = childSection.id;
+
+                        // Add event listener to prevent event bubbling
+                        childDiv.addEventListener('click', function (event) {
+                            event.stopPropagation();
+                            fetchAndHighlightSectionTokens(childSection.id);
+                        });
+
+                        childSectionList.appendChild(childDiv);
+                    });
+
+                    // Check if child sections are already loaded to avoid duplication
+                    if (!parentDiv.querySelector('.child-section-list')) {
+                        parentDiv.appendChild(childSectionList);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching child sections:', error);
+                });
+        }
+
+        function loadSectionsOfType(sectionType) {
+            fetch(`/corpus/get-sections/${textId}/${sectionType}`)
+                .then(response => response.json())
+                .then(sections => {
+                    sectionList.innerHTML = '';
+                    sections.forEach(section => {
+                        const sectionDiv = document.createElement('div');
+                        sectionDiv.classList.add('section-item');
+                        sectionDiv.textContent = section.identifier || 'Untitled';
+                        sectionDiv.dataset.sectionId = section.id;
+
+                        // Add event listener to load child sections    
+                        sectionDiv.addEventListener('click', function () {
+                            loadChildSections(section.id, this);
+                            fetchAndHighlightSectionTokens(section.id);
+                        });
+
+                        sectionList.appendChild(sectionDiv);
+                    });
+
+                    if (sections.length === 0) {
+                        sectionList.innerHTML = '<p>No sections found for this type.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sections:', error);
+                    sectionList.innerHTML = '<p>Error loading sections.</p>';
+                });
+        }
+
+        selector.addEventListener('change', function () {
+            loadSectionsOfType(this.value);
+        });
+
+        if (selector.options.length > 0) {
+            loadSectionsOfType(selector.options[0].value);
+        }
+    });
 
 </script>
 
