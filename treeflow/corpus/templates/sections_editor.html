@@ -156,8 +156,6 @@
 
         // Add listeners to existing tokens
         addTokenClickListeners();
-
-        // Event listener for start/finish token selection button
         document.getElementById('startTokenSelection').addEventListener('click', function () {
             let mode = this.getAttribute('data-mode');
 
@@ -169,34 +167,40 @@
             } else if (mode === 'finish') {
                 // Finish selecting tokens logic
                 isSelectingTokens = false;
-                let selectedTokenIds = Array.from(document.querySelectorAll('.token'))
-                    .filter(token => token.style.backgroundColor === 'rgb(187, 247, 208)')
-                    .map(token => token.dataset.tokenId);
-                let selectedTokenIdsStr = selectedTokenIds.join(',');
+                let selectedTokens = Array.from(document.querySelectorAll('.token'))
+                    .filter(token => token.style.backgroundColor === 'rgb(187, 247, 208)');
+                let selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
+                let selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
 
                 // Use HTMX to fetch the modal content with the selected tokens as parameters
                 htmx.ajax('GET', '/corpus/load_section_modal', {
-                    parameters: { tokens: selectedTokenIdsStr },
+                    parameters: { tokens: selectedTokenIds.join(',') },
                     target: '#modalContainer'
                 });
+
+                // Store selected token texts for display in the modal
+                localStorage.setItem('selectedTokenTexts', selectedTokenTexts);
 
                 // Reset the button for a new selection
                 this.textContent = 'Start Token Selection';
                 this.setAttribute('data-mode', 'select');
             }
         });
+
         // Function to show the modal
-
-
         function openModal() {
             // Ensure the modal exists in the DOM
             let modal = document.getElementById('sectionModal');
             if (modal) {
                 modal.style.display = 'block';
+                // Display the selected tokens
+                let selectedTokenTexts = localStorage.getItem('selectedTokenTexts') || 'No tokens selected';
+                document.getElementById('selectedTokensDisplay').textContent = selectedTokenTexts;
             } else {
                 console.error('Modal not found in the DOM.');
             }
         }
+
 
 
         document.body.addEventListener('htmx:afterSwap', function (event) {
