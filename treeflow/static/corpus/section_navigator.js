@@ -20,16 +20,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function highlightSectionTokens(tokenIds) {
+        const stringTokenIds = tokenIds.map(id => id.toString());
         const tokens = document.querySelectorAll('.token');
         tokens.forEach(token => {
-            if (tokenIds.includes(token.dataset.tokenId)) {
-                token.classList.add('bg-yellow-200', 'text-black');
+            if (stringTokenIds.includes(token.dataset.tokenId)) {
+                // Apply styles directly
+                token.style.backgroundColor = '#fde047';
             } else {
-                token.classList.remove('bg-yellow-200', 'text-black');
+                // Reset styles
+                token.style.backgroundColor = '';
             }
         });
     }
-
 
     function fetchAndHighlightSectionTokens(sectionId) {
         fetch(`/corpus/get-tokens-for-section/${sectionId}`)
@@ -104,8 +106,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Add event listener to load child sections    
                     sectionDiv.addEventListener('click', function () {
+                        const isClosingSection = this.querySelector('.child-section-list');
                         loadChildSections(section.id, this);
-                        fetchAndHighlightSectionTokens(section.id);
+                        // Only fetch and highlight tokens if the section is being opened
+                        if (!isClosingSection) {
+                            fetchAndHighlightSectionTokens(section.id);
+                        }
                     });
 
                     sectionList.appendChild(sectionDiv);
