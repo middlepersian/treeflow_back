@@ -87,6 +87,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('startTokenSelection').addEventListener('click', function () {
         let mode = this.getAttribute('data-mode');
 
+        // Log the value of textId
+        console.log("Current textId:", textId);
+
         if (mode === 'select') {
             // Start selecting tokens logic
             isSelectingTokens = true;
@@ -100,10 +103,13 @@ document.addEventListener('DOMContentLoaded', function () {
             let selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
             let selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
 
-            // Use HTMX to fetch the modal content with the selected tokens as parameters
-            htmx.ajax('GET', '/corpus/load_section_modal', {
-                parameters: { tokens: selectedTokenIds.join(',') },
+            let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
+            // Issue a GET request with the constructed query string
+            htmx.ajax('GET', '/corpus/load_section_modal' + queryString, {
                 target: '#modalContainer'
+            }).then(() => {
+                // Code to execute after the content has been inserted
+                console.log('Modal content loaded');
             });
 
             // Store selected token texts for display in the modal

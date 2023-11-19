@@ -16,7 +16,6 @@ window.addEventListener('scroll', function () {
 document.addEventListener('DOMContentLoaded', function () {
     const selector = document.getElementById('sectionTypeSelector');
     const sectionList = document.getElementById('sectionList');
-    //const textId = '{{ text_id }}';
 
 
     function highlightSectionTokens(tokenIds) {
