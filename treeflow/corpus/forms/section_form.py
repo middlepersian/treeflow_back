@@ -21,9 +21,8 @@ class SectionForm(forms.ModelForm):
 
     class Meta:
         model = Section
-        fields = ['identifier', 'type', 'title', 'language', 'number',
+        fields = ['identifier', 'type', 'title', 'language', 
                   'source', 'container', 'insertion_method', 'reference_section']
-        # Define widgets for other fields...
 
     def __init__(self, *args, **kwargs):
         text_id = kwargs.pop('text_id', None)
@@ -36,7 +35,8 @@ class SectionForm(forms.ModelForm):
                 text = Text.objects.get(id=text_id)
                 container_queryset = Section.objects.filter(text=text).exclude(type__in=['sentence', 'line']).order_by('type')
                 self.fields['container'].queryset = container_queryset
-                logger.debug("Container QuerySet: %s", container_queryset.query)  # Debugging statement
+                # set reference_section queryset
+                self.fields['reference_section'].queryset = Section.objects.filter(text=text).exclude(type__in=['sentence', 'line']).order_by('type')
             except Text.DoesNotExist:
                 # Handle the case where text does not exist
                 logger.debug("Text with id %s does not exist", text_id) 
@@ -52,12 +52,25 @@ class SectionForm(forms.ModelForm):
         logger.debug("SectionForm: selected_tokens: %s", selected_tokens)
 
     def save(self, commit=True):
+        logger.debug("Starting to save new section")
+
         insertion_method = self.cleaned_data.get('insertion_method')
         reference_section = self.cleaned_data.get('reference_section')
+        selected_token_ids = self.cleaned_data.get('selected_tokens').split(',')
 
+        logger.debug(f"Insertion Method: {insertion_method}")
+        logger.debug(f"Reference Section ID: {reference_section.id if reference_section else 'None'}")
+        logger.debug(f"Selected Token IDs: {selected_token_ids}")
+
+        # Prepare new section data from cleaned_data
         new_section_data = {
-            # Prepare new section data...
-        }
+            'identifier': self.cleaned_data.get('identifier'),
+            'type': self.cleaned_data.get('type'),
+            'title': self.cleaned_data.get('title'),
+            'language': self.cleaned_data.get('language'),
+            'source': self.cleaned_data.get('source'),
+            'container': self.cleaned_data.get('container'),
+            'text': reference_section.text,        }
 
         if insertion_method == 'before':
             new_section = Section.insert_before(reference_section.id, new_section_data)
@@ -65,5 +78,17 @@ class SectionForm(forms.ModelForm):
             new_section = Section.insert_after(reference_section.id, new_section_data)
         else:
             new_section = super().save(commit=commit)
+
+        logger.debug(f"New section created: {new_section.id} - {new_section.identifier}")
+
+        # Associate selected tokens with the new section, if any
+        if selected_token_ids:
+            for token_id in selected_token_ids:
+                try:
+                    token = Token.objects.get(id=token_id)
+                    new_section.tokens.add(token)
+                    logger.debug(f"Token {token_id} added to section {new_section.id}")
+                except Token.DoesNotExist:
+                    logger.error(f"Token with ID {token_id} does not exist")
 
         return new_section
