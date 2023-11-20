@@ -33,8 +33,7 @@ pyparsing==3.0.7
 pydot==1.4.2
 
 #strawberry
-#strawberry-graphql==0.199.3
-strawberry-graphql-django==0.16.0
+strawberry-graphql-django==0.25.0
 #elastic
 elasticsearch[async]==7.9.1
 # Elasticsearch 7.x
