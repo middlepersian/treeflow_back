@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
-from treeflow.corpus.models import Text, Token
+from treeflow.corpus.models import Text, Token, POS
 
 
 def tokens_view(request):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
+    # get all pos choices    
+    pos_choices = POS.objects.order_by('pos').values_list('pos', flat=True).distinct()
 
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
@@ -15,7 +17,6 @@ def tokens_view(request):
     tokens = Token.objects.prefetch_related(
         'lemmas',  # Prefetch related Lemma objects
         'senses',  # Prefetch related Senses objects
-        'pos_token'  # Prefetch related Part-of-Speech objects
     )
 
     # Filter tokens if a text ID is provided
@@ -31,6 +32,7 @@ def tokens_view(request):
     context = {
         'texts': texts,
         'tokens': tokens_page,
+        'pos_choices': pos_choices,
         'selected_text_id': selected_text_id or '',
     }
 
