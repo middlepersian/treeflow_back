@@ -45,6 +45,7 @@ def process_valid_form(form):
     for token_uuid in token_uuids:
         try:
             token = get_object_or_404(Token, id=token_uuid)
+            logger.debug("Adding token with UUID %s to section", token_uuid)
             section.tokens.add(token)
         except Exception as e:
             logger.error("Error adding token with UUID %s: %s", token_uuid, e)
