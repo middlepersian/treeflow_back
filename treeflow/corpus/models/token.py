@@ -231,4 +231,4 @@ class TokenSense(models.Model):
             models.Index(fields=['token']),
         ]
 
-        ]
+        
