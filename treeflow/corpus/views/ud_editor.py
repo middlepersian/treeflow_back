@@ -1,10 +1,12 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
+from ..enums.deprel_enum import Deprel
 from treeflow.corpus.models import (
     Token,
     Dependency,
     Section,
     SectionToken,
+    Feature,
     POS
 )  # Adjust to your model's import path
 from django.http import HttpResponse, HttpResponseRedirect
@@ -19,20 +21,39 @@ def calculate_positions(word_length_1, x1, font_size, gap):
 
     return x1, x2
 
+def deleteDependency(request):
+    if request.method == "POST":
+        dep_id = request.POST.get("dep_id")
+
+        dep = Dependency.objects.get(id=dep_id)
+        dep.delete()
+
+        return HttpResponseRedirect("/corpus/ud-editor/" + str(request.POST.get("section_id")) + "/")
+    else:
+        return HttpResponse("Error")
+    
+
+def saveNewDependency(request):
+    if request.method == "POST":
+        from_token_id = request.POST.get("from")
+        to_token_id = request.POST.get("to")
+        dep_type = request.POST.get("depType")
+        enhanced = bool(request.POST.get("enhanced"))
+        from_token = Token.objects.get(id=from_token_id)
+        to_token = Token.objects.get(id=to_token_id)
+
+        dep = Dependency.objects.create(token=from_token, head=to_token,rel=Deprel[dep_type], enhanced=enhanced)
+        dep.save()
+        return HttpResponseRedirect("/corpus/ud-editor/" + str(request.POST.get("section_id")) + "/")
+    else:
+        return HttpResponse("Error")
+    
+    
 
 def ud_editor(request, section_id):
     # Get the section
     section = get_object_or_404(Section, pk=section_id, type="sentence")
 
-    if request.method == "POST" and request.POST.get("dependency"):
-        from_token_id = request.POST.get("from")
-        to_token_id = request.POST.get("to")
-        from_token = Token.objects.get(from_token_id)
-        to_token = Token.objects.get(to_token_id)
-
-        dep = Dependency.objects.create(token=from_token_id, head=to_token_id)
-        dep.save()
-        return HTTPRedirectResponse(".")
     
     section_tokens = section.tokens.all()
     tokens = list(section_tokens)
@@ -45,6 +66,9 @@ def ud_editor(request, section_id):
     posList = (
         POS.objects.filter(Q(token__in=tokens)).select_related("token").distinct()
     )
+
+    featureList = (Feature.objects.filter(Q(token__in=tokens)).select_related("token").distinct())
+
     token_data = []
     x1 = 0
     for token in tokens:
@@ -55,10 +79,17 @@ def ud_editor(request, section_id):
         for pos in posList:
             if pos.token == token:
                 token_pos.append(
-                    {"id":pos.id,
+                    {
+                    "id":pos.id,
                      "pos":pos.pos,
-                     "type":pos.type}
+                     "type":pos.type,
+                     "features": [
+                         {"name":feature.feature, "value":feature.feature_value} for feature in featureList if feature.token == token and feature.pos == pos
+                     ]
+                     }
                 )
+
+
 
         for dep in dependencies:
             if dep.token == token:
@@ -91,8 +122,7 @@ def ud_editor(request, section_id):
                 "pos_len": len(token_pos),
                 "pos": token_pos,
                 "dep_len": len(token_dependencies),
-                "dependencies": token_dependencies,
-            
+                "dependencies": token_dependencies,            
             }
         )
         x1 = x2
@@ -101,6 +131,7 @@ def ud_editor(request, section_id):
     context = {
         "section": section,
         "tokens": token_data,
+        "deprel": {d.name: d for d in Deprel},
     }
 
     # Render the template
