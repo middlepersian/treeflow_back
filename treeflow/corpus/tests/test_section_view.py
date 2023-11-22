@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from unittest.mock import patch, MagicMock
 from django.http import HttpRequest
 from treeflow.corpus.views.create_section import create_section_view
@@ -17,6 +17,8 @@ class YourTestCase(TestCase):
         self.mock_get_patcher = patch('treeflow.corpus.models.Token.objects.get')
         self.mock_get = self.mock_get_patcher.start()
         self.mock_get.side_effect = self._mock_get_side_effect
+
+        self.request_factory = RequestFactory()  # Create an instance of RequestFactory
 
     def tearDown(self):
         self.mock_get_patcher.stop()
