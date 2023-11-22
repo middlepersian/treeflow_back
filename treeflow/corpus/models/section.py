@@ -44,6 +44,10 @@ class Section(models.Model):
     def __str__(self) -> str:
         return '{} - {} '.format(self.type, self.identifier)
 
+    @property
+    def has_Enhanced(self) -> bool:
+        return self.tokens.filter(dependency_token__enhanced=True).exists() 
+
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
         if self.identifier:

@@ -1,7 +1,7 @@
 from django.urls import include, path, re_path
 from treeflow.corpus.views.update_token import update_token
 from treeflow.corpus.views.sections import sections_view
-from treeflow.corpus.views.ud_editor import ud_editor
+from treeflow.corpus.views.ud_editor import ud_editor, saveNewDependency, deleteDependency
 from treeflow.corpus.views.tokens import tokens_view
 from treeflow.corpus.views.insert_after_token import insert_after_token_view
 from treeflow.corpus.views.insert_before_token import insert_before_token_view
@@ -19,6 +19,8 @@ urlpatterns = [
     path('update_token/', update_token, name='update_token'),
     path('sections/', sections_view, name='sections_view'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
+    path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
+    path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'), 
     path('tokens/', tokens_view, name='tokens'),
     path('texts/', texts_view, name='texts'),
     path('ajax/update_pos/', update_pos_ajax, name='update_pos_ajax'),  # The AJAX endpoint for updating POS
