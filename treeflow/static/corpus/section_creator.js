@@ -108,7 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
             htmx.ajax('GET', '/corpus/load_section_modal' + queryString, {
                 target: '#modalContainer'
             }).then(() => {
-                // Code to execute after the content has been inserted
+                // After the modal content is loaded, set the value of the hidden input
+                document.getElementById('modalTextId').value = textId;
                 console.log('Modal content loaded');
             });
 
@@ -144,19 +145,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+
     // Start observing
     observer.observe(document.body, { childList: true, subtree: true });
 
-
-    // HTMX response event listener
-    htmx.on('htmx:response', function (event) {
-        if (event.detail.status === 200) {
-            let jsonResponse = JSON.parse(event.detail.xhr.responseText);
-            if (jsonResponse.redirect) {
-                window.location.href = jsonResponse.redirect;
-            }
-        } else {
-            // Handle other statuses or errors
-        }
-    });
 });
