@@ -55,12 +55,40 @@
           <input type="text" name="transliteration" value="{{ token.transliteration }}"
             class="shadow border rounded py-2 px-3 text-grey-darker">
         </td>
+        <!-- POS Dropdown -->
+        <td class="border px-4 py-2">
+          <select name="pos" id="pos-select" class="shadow border rounded py-2 px-3 text-grey-darker">
+            {% for pos_choice in pos_choices %}
+              {% if pos_choice not in token.pos_token.all %}
+                <option value="{{ pos_choice }}">{{ pos_choice }}</option>
+              {% endif %}
+            {% endfor %}
+            {% for pos in token.pos_token.all %}
+              <option value="{{ pos.pos }}" selected>{{ pos.pos }}</option>
+            {% endfor %}
+          </select>
+        </td>
+
+        <!-- Lemmas -->
+        <td class="border px-4 py-2">
+          {% for lemma in token.lemmas.all %}
+            {{ lemma.word }}
+            {% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
+        <!-- Senses -->
+        <td class="border px-4 py-2">
+          {% for sense in token.senses.all %}
+            {{ sense.sense }}
+            {% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
 
         <!-- Save Button -->
-          <td class="border px-4 py-2">
-            <input type="hidden" name="token_id" value="{{ token.id }}">
-            <input type="submit" value="💾 Save" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-          </td>
+        <td class="border px-4 py-2">
+          <input type="hidden" name="token_id" value="{{ token.id }}">
+          <input type="submit" value="💾 Save" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+        </td>
         </form>
         <!-- Insert Before Button -->
         <td class="border px-4 py-2">
