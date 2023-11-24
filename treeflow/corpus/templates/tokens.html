@@ -75,18 +75,23 @@
         </td>
         <!-- POS Dropdown -->
         <td class="border px-4 py-2">
-          <select name="pos" id="pos-select" class="shadow border rounded py-2 px-3 text-grey-darker">
-            {% for pos_choice in pos_choices %}
-              {% if pos_choice not in token.pos_token.all %}
-                <option value="{{ pos_choice }}">{{ pos_choice }}</option>
-              {% endif %}
-            {% endfor %}
-            {% for pos in token.pos_token.all %}
-              <option value="{{ pos.pos }}" selected>{{ pos.pos }}</option>
-            {% endfor %}
-          </select>
+          <div id="posContainer{{ token.id }}">
+            <select name="pos" class="pos-select"
+                    hx-post="{% url 'corpus:update_token' token.id %}"
+                    hx-trigger="change"
+                    hx-swap="outerHTML"
+                    hx-target="#posContainer{{ token.id }}"
+                    hx-indicator="#loadingIndicator{{ token.id }}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="shadow border rounded py-2 px-3 text-grey-darker">
+              {% for pos_choice in pos_choices %}
+                <option value="{{ pos_choice }}" {% if pos_choice == token.pos_token.first.pos %}selected{% endif %}>
+                    {{ pos_choice }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </td>
-
         <!-- Lemmas -->
         <td class="border px-4 py-2">
           {% for lemma in token.lemmas.all %}
@@ -262,14 +267,24 @@ document.body.addEventListener('htmx:beforeRequest', function(event) {
 });
 
 document.body.addEventListener('htmx:afterRequest', function(event) {
-  var indicatorId = event.detail.elt.getAttribute("hx-indicator");
-  var spinner = document.querySelector(indicatorId);
+  // Get the HTML response
+  var response = event.detail.xhr.responseText;
+
+  // Find the dropdown element within the same row as the element that triggered the request
+  var dropdown = event.detail.elt.closest('tr').querySelector('.pos-select');
+  if (dropdown) {
+    // Replace the dropdown's HTML with the new HTML fragment
+    console.log("Updating dropdown HTML: "+ response);
+    dropdown.parentElement.innerHTML = response;
+  }
+  
+  // Hide the spinner
+  var spinner = event.detail.elt.closest('tr').querySelector('.loadingIndicator');
   if (spinner) {
     spinner.style.display = 'none';
   }
 });
 
 </script>
-
 {% endblock content %}
 
