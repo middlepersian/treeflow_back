@@ -44,16 +44,34 @@
     {% for token in tokens %}
     <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
       <!-- Form for the entire row to edit a token -->
-      <form method="post" action="{% url 'corpus:update_token' %}">
+      <form method="post" action="{% url 'corpus:update_token' token.id %}">
         {% csrf_token %}
         <td class="border px-4 py-2">{{ token.number }}</td>
+        <!-- Transcription -->
+
+        <!-- Loading Indicator (hidden initially) -->
+        <div id="loadingIndicator{{ token.id }}" class="hidden">
+          <div class="flex justify-center items-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
+            <span class="ml-2">Saving...</span>
+          </div>
+        </div>
         <td class="border px-4 py-2">
           <input type="text" name="transcription" value="{{ token.transcription }}"
-            class="shadow border rounded py-2 px-3 text-grey-darker">
+          hx-post="{% url 'corpus:update_token' token.id %}"
+          hx-trigger="keyup changed delay:500ms"
+          hx-indicator="#loadingIndicator{{ token.id }}"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          class="shadow border rounded py-2 px-3 text-grey-darker">
         </td>
+        <!-- Transliteration -->
         <td class="border px-4 py-2">
           <input type="text" name="transliteration" value="{{ token.transliteration }}"
-            class="shadow border rounded py-2 px-3 text-grey-darker">
+          hx-post="{% url 'corpus:update_token' token.id %}"
+          hx-trigger="keyup changed delay:500ms"
+          hx-indicator="#loadingIndicator{{ token.id }}"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          class="shadow border rounded py-2 px-3 text-grey-darker">
         </td>
         <!-- POS Dropdown -->
         <td class="border px-4 py-2">
@@ -230,6 +248,28 @@
 
 </script>
 
+<script>
+document.body.addEventListener('htmx:beforeRequest', function(event) {
+  console.log("HTMX Request Started", event);
+  var indicatorId = event.detail.elt.getAttribute("hx-indicator");
+  var spinner = document.querySelector(indicatorId);
+  if (spinner) {
+    spinner.style.display = 'block';
+  }
+  else {
+    console.log("No spinner found for element", event.detail.elt);
+  }
+});
+
+document.body.addEventListener('htmx:afterRequest', function(event) {
+  var indicatorId = event.detail.elt.getAttribute("hx-indicator");
+  var spinner = document.querySelector(indicatorId);
+  if (spinner) {
+    spinner.style.display = 'none';
+  }
+});
+
+</script>
 
 {% endblock content %}
 

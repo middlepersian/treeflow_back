@@ -16,7 +16,7 @@ from treeflow.corpus.views.load_section_modal import load_section_modal
 
 app_name = "treeflow.corpus"
 urlpatterns = [
-    path('update_token/', update_token, name='update_token'),
+    path('update_token/<uuid:token_id>', update_token, name='update_token'),
     path('sections/', sections_view, name='sections_view'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 

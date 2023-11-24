@@ -1,36 +1,36 @@
-from django.shortcuts import redirect, render, get_object_or_404
-from django.forms import inlineformset_factory
-from treeflow.corpus.forms.token_form import TokenForm
-from treeflow.corpus.models import Token, POS
-from treeflow.corpus.forms.pos_form import POSForm  # Make sure to create this form or import if already created
+import logging
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from treeflow.corpus.models import Token
 
-# Create a POSFormSet using the inlineformset_factory
-POSFormSet = inlineformset_factory(Token, POS, form=POSForm, fields=('pos', 'type'), extra=1, can_delete=True)
+# Set up logging
+logger = logging.getLogger(__name__)
 
-def update_token(request, token_id=None):  # You can use token_id as a parameter if you want to
-    token = get_object_or_404(Token, pk=token_id) if token_id else None
+def update_token(request, token_id):
+    logger.debug(f"Request method: {request.method}")
+    logger.debug(f"Token ID: {token_id}")
+    try:
+        token = get_object_or_404(Token, pk=token_id)
 
-    if request.method == 'POST':
-        token_form = TokenForm(request.POST, instance=token, token=token, prefix='token')
-        pos_formset = POSFormSet(request.POST, instance=token, prefix='pos') if token else None
+        if request.method == 'POST':
+            for field in request.POST:
+                if field in ['transcription', 'transliteration', 'pos']:  # Add other fields as needed
+                    # Log the field being updated
+                    logger.info(f"Updating {field} for token with ID {token_id}")
 
-        # Check if both the token form and pos formset are valid
-        if token_form.is_valid() and (pos_formset.is_valid() if pos_formset else True):
-            saved_token = token_form.save()  # Save the token form and get the saved token instance
+                    setattr(token, field, request.POST[field])
+                    token.save(update_fields=[field])
+                    return JsonResponse({'status': 'success', 'message': f'{field} updated successfully'})
+            
+            # Log if no matching field found
+            logger.warning(f"No matching field found in POST data for token ID {token_id}")
+            return JsonResponse({'status': 'error', 'message': 'No matching field found'})
 
-            if pos_formset:
-                pos_formset.instance = saved_token  # Assign the saved token as the instance for the formset
-                pos_formset.save()  # Save the formset to create/update/delete POS instances
+        # Log if not a POST request
+        logger.warning(f"Received a non-POST request for token ID {token_id}")
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
-            return redirect(request.META.get('HTTP_REFERER', 'redirect_if_referer_not_found'))
-    else:
-        token_form = TokenForm(instance=token, prefix='token')
-        pos_formset = POSFormSet(instance=token, prefix='pos') if token else None
-
-    # Pass both the token form and the pos formset to the template
-    context = {
-        'token_form': token_form,
-        'pos_formset': pos_formset,
-        'token_id': token_id
-    }
-    return render(request, 'update_token.html', context)
+    except Exception as e:
+        # Log the exception details
+        logger.error(f"Error in updating token: {e}", exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'An error occurred during update'})
