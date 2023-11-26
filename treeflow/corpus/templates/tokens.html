@@ -48,14 +48,6 @@
         {% csrf_token %}
         <td class="border px-4 py-2">{{ token.number }}</td>
         <!-- Transcription -->
-
-        <!-- Loading Indicator (hidden initially) -->
-        <div id="loadingIndicator{{ token.id }}" class="hidden">
-          <div class="flex justify-center items-center">
-            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
-            <span class="ml-2">Saving...</span>
-          </div>
-        </div>
         <td class="border px-4 py-2">
           <input type="text" name="transcription" value="{{ token.transcription }}"
           hx-post="{% url 'corpus:update_token' token.id %}"
@@ -84,12 +76,15 @@
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                     class="shadow border rounded py-2 px-3 text-grey-darker">
-              {% for pos_choice in pos_choices %}
-                <option value="{{ pos_choice }}" {% if pos_choice == token.pos_token.first.pos %}selected{% endif %}>
-                    {{ pos_choice }}
-                </option>
-              {% endfor %}
-            </select>
+                    {% for pos_choice in pos_choices %}
+                    {% if pos_choice not in token.pos_token.all %}
+                      <option value="{{ pos_choice }}">{{ pos_choice }}</option>
+                    {% endif %}
+                  {% endfor %}
+                  {% for pos in token.pos_token.all %}
+                    <option value="{{ pos.pos }}" selected>{{ pos.pos }}</option>
+                  {% endfor %}
+                </select>
           </div>
         </td>
         <!-- Lemmas -->
@@ -267,21 +262,24 @@ document.body.addEventListener('htmx:beforeRequest', function(event) {
 });
 
 document.body.addEventListener('htmx:afterRequest', function(event) {
-  // Get the HTML response
-  var response = event.detail.xhr.responseText;
-
-  // Find the dropdown element within the same row as the element that triggered the request
-  var dropdown = event.detail.elt.closest('tr').querySelector('.pos-select');
-  if (dropdown) {
-    // Replace the dropdown's HTML with the new HTML fragment
-    console.log("Updating dropdown HTML: "+ response);
-    dropdown.parentElement.innerHTML = response;
+  // Function to change the input field color based on the response status
+  function changeInputFieldColor(inputField, isSuccess) {
+    if (inputField) {
+      inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+      // Reset the color back to original after a delay
+      setTimeout(function() {
+        inputField.style.backgroundColor = ''; // Reset to original color
+      }, 2000); // Adjust delay as needed
+    }
   }
-  
-  // Hide the spinner
-  var spinner = event.detail.elt.closest('tr').querySelector('.loadingIndicator');
-  if (spinner) {
-    spinner.style.display = 'none';
+
+  // Check if the event target is part of the form interaction
+  if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.classList.contains('pos-select')) {
+    // Parse the response
+    var response = JSON.parse(event.detail.xhr.responseText);
+
+    // Change the input field color based on the response
+    changeInputFieldColor(event.detail.elt, response.status === 'success');
   }
 });
 
