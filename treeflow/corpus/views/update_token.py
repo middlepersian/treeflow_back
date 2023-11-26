@@ -32,17 +32,22 @@ def update_token(request, token_id):
                 return HttpResponse(updated_dropdown_html)
 
             # Handling other fields
-            for field in ['transcription', 'transliteration']:  # Add other direct fields of Token as needed
-                logger.info(f"Updating {field} for token with ID {token_id}")
-                setattr(token, field, request.POST[field])
-                token.save(update_fields=[field])
-                return JsonResponse({'status': 'success', 'message': f'{field} updated successfully'})
+            for field in ['transcription', 'transliteration']:
+                if field in request.POST:
+                    logger.info(f"Updating {field} for token with ID {token_id}")
+                    setattr(token, field, request.POST[field])
+                    token.save(update_fields=[field])
+                    return JsonResponse({'status': 'success', 'message': f'{field} updated successfully'})
+                else:
+                    logger.info(f"Field {field} not provided in POST data for token ID {token_id}")
 
+            # If no recognized fields are found
             logger.warning(f"No matching field found in POST data for token ID {token_id}")
             return JsonResponse({'status': 'error', 'message': 'No matching field found'})
 
-        logger.warning(f"Received a non-POST request for token ID {token_id}")
-        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+        else:
+            logger.warning(f"Received a non-POST request for token ID {token_id}")
+            return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
     except Exception as e:
         logger.error(f"Error in updating token: {e}", exc_info=True)
