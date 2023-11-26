@@ -185,14 +185,18 @@
     <div>
       <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
         <!-- Previous Page Link with ID -->
+        <!-- First Page Link -->
         {% if tokens.has_previous %}
-          <a id="prevPageLink" href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
+          <a href="?page=1{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
             class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
             First
           </a>
-          <a href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
+        {% endif %}
+        <!-- Previous Page Link -->
+        {% if tokens.has_previous %}
+          <a href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
             class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 leading-5 hover:bg-gray-50">
-            <span>Previous</span>
+            Previous
           </a>
         {% endif %}
         <!-- Current Page indicator -->
