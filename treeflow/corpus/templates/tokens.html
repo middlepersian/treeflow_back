@@ -29,12 +29,14 @@
   <thead class="bg-gray-800 text-white">
     <tr>
       <th class="px-4 py-2">Number</th>
+      <th class="px-4 py-2">Sentence</th>
+      <th class="px-4 py-2">Line</th>
       <th class="px-4 py-2">Transcription</th>
       <th class="px-4 py-2">Transliteration</th>
       <th class="px-4 py-2">POS</th>
+      <th class="px-4 py-2">Features</th>
       <th class="px-4 py-2">Lemmas</th>
       <th class="px-4 py-2">Senses</th>
-      <th class="px-4 py-2">Save Changes</th>
       <th class="px-4 py-2">Insert Before</th>
       <th class="px-4 py-2">Insert After</th>
       <th class="px-4 py-2">Delete Token</th>
@@ -47,6 +49,26 @@
       <form method="post" action="{% url 'corpus:update_token' token.id %}">
         {% csrf_token %}
         <td class="border px-4 py-2">{{ token.number }}</td>
+
+        <!-- Sentence -->
+        <td class="border px-4 py-2">
+           <!-- Display 'sentence' type sections -->
+           {% for section_token in token.sentence_sections %}
+           {{ section_token.section.number }} <!-- Display the title or other fields -->
+       {% empty %}
+           No sentence sections
+       {% endfor %}
+       </td>
+       <!-- Line -->
+        <td class="border px-4 py-2">
+            <!-- Display 'line' type sections -->
+            {% for section_token in token.line_sections %}
+            {{ section_token.section.number }} <!-- Display the title or other fields -->
+        {% empty %} 
+            No line sections
+        {% endfor %}
+        </td>
+
         <!-- Transcription -->
         <td class="border px-4 py-2">
           <input type="text" name="transcription" value="{{ token.transcription }}"
@@ -87,6 +109,13 @@
                 </select>
           </div>
         </td>
+        <!-- Features -->
+        <td class="border px-4 py-2">
+          {% for feature in token.feature_token.all %}
+            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %}|{% endif %}
+          {% endfor %}
+        </td>
+        
         <!-- Lemmas -->
         <td class="border px-4 py-2">
           {% for lemma in token.lemmas.all %}
@@ -100,12 +129,6 @@
             {{ sense.sense }}
             {% if not forloop.last %}, {% endif %}
           {% endfor %}
-        </td>
-
-        <!-- Save Button -->
-        <td class="border px-4 py-2">
-          <input type="hidden" name="token_id" value="{{ token.id }}">
-          <input type="submit" value="💾 Save" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
         </td>
         </form>
         <!-- Insert Before Button -->
