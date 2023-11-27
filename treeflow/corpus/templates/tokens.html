@@ -29,14 +29,15 @@
   <thead class="bg-gray-800 text-white">
     <tr>
       <th class="px-4 py-2">Number</th>
+      <th class="px-4 py-2">Number in Sentence</th>
       <th class="px-4 py-2">Sentence</th>
       <th class="px-4 py-2">Line</th>
       <th class="px-4 py-2">Transcription</th>
       <th class="px-4 py-2">Transliteration</th>
-      <th class="px-4 py-2">POS</th>
-      <th class="px-4 py-2">Features</th>
       <th class="px-4 py-2">Lemmas</th>
       <th class="px-4 py-2">Senses</th>
+      <th class="px-4 py-2">POS</th>
+      <th class="px-4 py-2">Features</th>
       <th class="px-4 py-2">Insert Before</th>
       <th class="px-4 py-2">Insert After</th>
       <th class="px-4 py-2">Delete Token</th>
@@ -49,7 +50,8 @@
       <form method="post" action="{% url 'corpus:update_token' token.id %}">
         {% csrf_token %}
         <td class="border px-4 py-2">{{ token.number }}</td>
-
+        <!-- Number in Sentence -->
+        <td class="border px-4 py-2">{{ token.number_in_sentence }}</td>
         <!-- Sentence -->
         <td class="border px-4 py-2">
            <!-- Display 'sentence' type sections -->
@@ -87,35 +89,7 @@
           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
           class="shadow border rounded py-2 px-3 text-grey-darker">
         </td>
-        <!-- POS Dropdown -->
-        <td class="border px-4 py-2">
-          <div id="posContainer{{ token.id }}">
-            <select name="pos" class="pos-select"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="change"
-                    hx-swap="outerHTML"
-                    hx-target="#posContainer{{ token.id }}"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="shadow border rounded py-2 px-3 text-grey-darker">
-                    {% for pos_choice in pos_choices %}
-                    {% if pos_choice not in token.pos_token.all %}
-                      <option value="{{ pos_choice }}">{{ pos_choice }}</option>
-                    {% endif %}
-                  {% endfor %}
-                  {% for pos in token.pos_token.all %}
-                    <option value="{{ pos.pos }}" selected>{{ pos.pos }}</option>
-                  {% endfor %}
-                </select>
-          </div>
-        </td>
-        <!-- Features -->
-        <td class="border px-4 py-2">
-          {% for feature in token.feature_token.all %}
-            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %}|{% endif %}
-          {% endfor %}
-        </td>
-        
+                
         <!-- Lemmas -->
         <td class="border px-4 py-2">
           {% for lemma in token.lemmas.all %}
@@ -130,6 +104,39 @@
             {% if not forloop.last %}, {% endif %}
           {% endfor %}
         </td>
+        <!-- POS Dropdown -->
+        <td class="border px-4 py-2">
+          <div id="posContainer{{ token.id }}">
+            <select name="pos" class="pos-select"
+                    hx-post="{% url 'corpus:update_token' token.id %}"
+                    hx-trigger="change"
+                    hx-swap="outerHTML"
+                    hx-target="#posContainer{{ token.id }}"
+                    hx-indicator="#loadingIndicator{{ token.id }}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="shadow border rounded py-2 px-3 text-grey-darker">
+              <!-- Option for no POS -->
+              <option value="--" {% if not token.pos_token.all %}selected{% endif %}>--</option>
+              <!-- List all available POS choices not currently selected -->
+              {% for pos_choice in pos_choices %}
+                {% if pos_choice not in token.pos_token.all %}
+                  <option value="{{ pos_choice }}">{{ pos_choice }}</option>
+                {% endif %}
+              {% endfor %}
+              <!-- List the POS that is currently selected for the token -->
+              {% for pos in token.pos_token.all %}
+                <option value="{{ pos.pos }}" selected>{{ pos.pos }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </td>
+        <!-- Features -->
+        <td class="border px-4 py-2">
+          {% for feature in token.feature_token.all %}
+            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %} {% endif %}
+          {% endfor %}
+        </td>
+
         </form>
         <!-- Insert Before Button -->
         <td class="border px-4 py-2">
@@ -217,7 +224,7 @@
         {% endif %}
         <!-- Previous Page Link -->
         {% if tokens.has_previous %}
-          <a href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
+          <a id="prevPageLink" href="?page={{ tokens.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
             class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 leading-5 hover:bg-gray-50">
             Previous
           </a>

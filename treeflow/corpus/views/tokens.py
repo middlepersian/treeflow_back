@@ -1,14 +1,20 @@
 from django.shortcuts import render
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from treeflow.corpus.models import Text, Token, POS, SectionToken
 from django.db.models import Prefetch
 
-
 def tokens_view(request):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
-    # Get all pos choices
-    pos_choices = POS.objects.order_by('pos').values_list('pos', flat=True).distinct()
+
+    # Check if the POS list is in cache
+    pos_choices = cache.get('pos_choices')
+    
+    # If not in cache, query the database and cache the result
+    if not pos_choices:
+        pos_choices = list(POS.objects.order_by('pos').values_list('pos', flat=True).distinct())
+        cache.set('pos_choices', pos_choices, 3600)  # Cache for 1 hour (3600 seconds)
 
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
