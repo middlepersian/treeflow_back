@@ -5,8 +5,11 @@
 <div class="container mx-auto p-4">
 
 
+
+
 <!-- Form for selecting text -->
 <form action="{% url 'corpus:tokens' %}" method="get" class="mb-4">
+
   <!-- Text selection dropdown -->
   <div class="mb-3">
     <label for="text-select" class="block text-gray-700 text-sm font-bold mb-2">Choose a text:</label>
@@ -17,7 +20,7 @@
       <option value="{{ text.id|stringformat:"s" }}" {% if text.id|stringformat:"s" == selected_text_id|stringformat:"s" %}selected{% endif %}>
         {{ text.title }}
       </option>
-      {% endfor %}mellenthgin 
+      {% endfor %} 
     </select>
   </div>
   <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
@@ -44,6 +47,16 @@
     </tr>
   </thead>
   <tbody>
+    <!-- POS and Feature Modal -->
+    <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="featureModal">
+      <div class="flex items-center justify-center min-h-screen">
+          <div class="bg-white rounded-lg shadow-lg w-96 mx-auto">
+              <!-- Modal content here -->
+              <div id="featureModalContent"></div>
+          </div>
+      </div>
+    </div>
+  
     {% for token in tokens %}
     <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
       <!-- Form for the entire row to edit a token -->
@@ -104,39 +117,25 @@
             {% if not forloop.last %}, {% endif %}
           {% endfor %}
         </td>
-        <!-- POS Dropdown -->
-        <td class="border px-4 py-2">
-          <div id="posContainer{{ token.id }}">
-            <select name="pos" class="pos-select"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="change"
-                    hx-swap="outerHTML"
-                    hx-target="#posContainer{{ token.id }}"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="shadow border rounded py-2 px-3 text-grey-darker">
-              <!-- Option for no POS -->
-              <option value="--" {% if not token.pos_token.all %}selected{% endif %}>--</option>
-              <!-- List all available POS choices not currently selected -->
-              {% for pos_choice in pos_choices %}
-                {% if pos_choice not in token.pos_token.all %}
-                  <option value="{{ pos_choice }}">{{ pos_choice }}</option>
-                {% endif %}
-              {% endfor %}
-              <!-- List the POS that is currently selected for the token -->
-              {% for pos in token.pos_token.all %}
-                <option value="{{ pos.pos }}" selected>{{ pos.pos }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </td>
-        <!-- Features -->
-        <td class="border px-4 py-2">
-          {% for feature in token.feature_token.all %}
-            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %} {% endif %}
+        <!-- POS -->
+        <td id="pos-cell" class="border px-4 py-2" 
+        hx-get="{% url 'corpus:pos_feature_form' token.id %}" 
+        hx-target="#featureModalContent" 
+        hx-trigger="click">
+          <!--show selected POS-->
+          {% for pos in token.pos_token.all %}
+            {{ pos.pos }}
           {% endfor %}
         </td>
-
+        <!-- Features -->
+        <td id="features-cell" class="border px-4 py-2" 
+            hx-get="{% url 'corpus:pos_feature_form' token.id %}" 
+            hx-target="#featureModalContent" 
+            hx-trigger="click">
+          {% for feature in token.feature_token.all %}
+            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
         </form>
         <!-- Insert Before Button -->
         <td class="border px-4 py-2">
@@ -283,17 +282,6 @@
 </script>
 
 <script>
-document.body.addEventListener('htmx:beforeRequest', function(event) {
-  console.log("HTMX Request Started", event);
-  var indicatorId = event.detail.elt.getAttribute("hx-indicator");
-  var spinner = document.querySelector(indicatorId);
-  if (spinner) {
-    spinner.style.display = 'block';
-  }
-  else {
-    console.log("No spinner found for element", event.detail.elt);
-  }
-});
 
 document.body.addEventListener('htmx:afterRequest', function(event) {
   // Function to change the input field color based on the response status
@@ -316,6 +304,49 @@ document.body.addEventListener('htmx:afterRequest', function(event) {
     changeInputFieldColor(event.detail.elt, response.status === 'success');
   }
 });
+
+
+
+function handleFormSuccess(response) {
+    if (response.status === 'success') {
+        console.log("Success response");
+        closeFeatureModal();
+        document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
+        document.querySelector('#features-cell').innerHTML = response.features_data_html;
+    }
+    else {
+        closeFeatureModal();
+    }
+}
+
+
+
+document.body.addEventListener('htmx:response', function(event) {
+  console.log("Response received");
+    if (event.detail.xhr.getResponseHeader("Content-Type").includes("application/json")) {
+        var response = JSON.parse(event.detail.xhr.responseText);
+        handleFormSuccess(response);
+    }
+});
+
+
+function closeFeatureModal() {
+    console.log("Closing Feature Modal");
+    document.getElementById('featureModal').classList.add('hidden');
+}
+
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    if (event.detail.target.id === 'featureModalContent') {
+        console.log("Feature Modal Content Swapped");
+        document.getElementById('featureModal').classList.remove('hidden');
+    }
+});
+
+
+function closeFeatureModal() {
+  document.getElementById('featureModal').classList.add('hidden');
+}
+
 
 </script>
 {% endblock content %}

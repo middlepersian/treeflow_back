@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Form for selecting text and section type -->
 <!-- Form for selecting text and section type with the correct URL pattern for action -->
 <form action="{% url 'corpus:sections_view' %}" method="get">
   <!-- Text selection dropdown -->
@@ -32,11 +31,11 @@
 {% for section in sections %}
 <div class="section-details">
   <!-- Section details here, e.g., title and type -->
-  <p>{{ section.title }} - {{ section.type }}</p>
+  <p>{{ section.identifier }} - {{ section.type }}</p>
 </div>
 <div class="token-list">
   {% for section_token in section.sectiontoken_set.all %}
-    <form method="post" action="{% url 'corpus:update_token' %}">
+    <form method="post" action="{% url 'corpus:update_token' section_token.token.id %}">
       {% csrf_token %}
       <input type="hidden" name="token_id" value="{{ section_token.token.id }}">
       <input type="text" name="transcription" value="{{ section_token.token.transcription }}">

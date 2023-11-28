@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from treeflow.corpus.models import Text, Token, POS, SectionToken
 from django.db.models import Prefetch
+from treeflow.corpus.models import Text, Token, POS, SectionToken
+from treeflow.corpus.forms.feature_forms import FeatureFormSet
 
 def tokens_view(request):
     # Get all Text objects for the dropdowns
@@ -33,6 +34,8 @@ def tokens_view(request):
         to_attr='line_sections'
     )
 
+
+
     # Start with an initial tokens queryset and prefetch related data
     tokens = Token.objects.prefetch_related(
         'lemmas',  # Prefetch related Lemma objects
@@ -43,12 +46,13 @@ def tokens_view(request):
         line_prefetch,  # Prefetch related Line sections
     )
 
+
     # Filter tokens if a text ID is provided
     if selected_text_id:
         tokens = tokens.filter(text__id=selected_text_id)
 
     # Setup paginator
-    paginator = Paginator(tokens, 100)  # Show 100 tokens per page
+    paginator = Paginator(tokens, 150)  # Show 100 tokens per page
     page_number = request.GET.get('page')
     tokens_page = paginator.get_page(page_number)
 
@@ -58,8 +62,6 @@ def tokens_view(request):
         'tokens': tokens_page,
         'pos_choices': pos_choices,
         'selected_text_id': selected_text_id or '',
-
-
     }
 
     # Render response

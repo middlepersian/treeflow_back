@@ -1,0 +1,3 @@
+{% for feature in token.feature_token.all %}
+    {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %}, {% endif %}
+{% endfor %}
