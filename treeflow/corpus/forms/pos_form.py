@@ -18,5 +18,6 @@ class POSForm(forms.ModelForm):
 POSFormSet = inlineformset_factory(
     Token, POS, form=POSForm,
     fields=('pos', 'type'),  # Specify the fields here, the type will be included but hidden
-    can_delete=False  # No delete checkbox
+        can_delete=True,  # No delete checkbox
+    extra=1,  # No extra forms
 )

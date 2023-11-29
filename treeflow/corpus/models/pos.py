@@ -15,8 +15,7 @@ class POS(models.Model):
     
         
     def __str__(self):
-        return '{}'.format(self.pos)    
-
+        return '{} - {} - {}'.format(self.token, self.token.number, self.pos)
     class Meta:
         indexes = [models.Index(fields=['pos'])]
 
@@ -27,4 +26,6 @@ class POS(models.Model):
             # uppercase pos
             self.pos = self.pos.upper()
         super().save(*args, **kwargs)
+
+    
     

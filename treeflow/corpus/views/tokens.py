@@ -8,15 +8,6 @@ from treeflow.corpus.forms.feature_forms import FeatureFormSet
 def tokens_view(request):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
-
-    # Check if the POS list is in cache
-    pos_choices = cache.get('pos_choices')
-    
-    # If not in cache, query the database and cache the result
-    if not pos_choices:
-        pos_choices = list(POS.objects.order_by('pos').values_list('pos', flat=True).distinct())
-        cache.set('pos_choices', pos_choices, 3600)  # Cache for 1 hour (3600 seconds)
-
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
 
@@ -60,7 +51,6 @@ def tokens_view(request):
     context = {
         'texts': texts,
         'tokens': tokens_page,
-        'pos_choices': pos_choices,
         'selected_text_id': selected_text_id or '',
     }
 
