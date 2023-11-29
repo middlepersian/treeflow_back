@@ -1,0 +1,104 @@
+{% load static %}
+<div id="criteria">
+    <section>
+        <h2 class="font-medium text-gray-900 whitespace-normal">Token search</h2>
+        <div id="query-type" class="flex justify-between items-center gap-4">
+            <label>Query type</label>
+            <div class="text-right">
+                {{ form.query_type }}
+            </div>
+        </div>
+        <div id="query-field" class="flex justify-between items-center gap-4">
+            <label>Query field</label>
+            <div class="text-right">
+                {{ form.query_field }}
+            </div>
+        </div>
+        <div id="query-value" class="flex justify-between items-center gap-4">
+            <label>Query value</label>
+            <div class="text-right">
+                {{ form.query_value }}
+            </div>
+        </div>
+        {% comment %} <div id="pos-token" class="flex justify-between items-center gap-4">
+            <label>Part of speech</label>
+            <div class="text-right">
+                {{ form.pos_token }}
+            </div>
+        </div> {% endcomment %}
+    </section>
+    <section>
+        <hr class="my-6" />
+        <div id="stopwords" class="flex justify-between items-center gap-4">
+            <label class="font-medium text-gray-900 whitespace-normal">
+                Exclude stopwords?
+            </label>
+            <div class="text-right">
+                {{ form.remove_stopwords }}
+            </div>
+        </div>
+        {% if not firstForm %}
+        <div id="distance" class="flex justify-between items-center gap-4">
+            <label class="font-medium text-gray-900 whitespace-normal">
+                Distance to previous token
+            </label>
+            <div class="text-right">
+                {{ form.distance }}
+            </div>
+        </div>
+        {% endif %}
+    </section>
+    <hr class="my-6" />
+    <div id="feature-token">
+        <section>
+            <h2 class="font-medium text-gray-900 whitespace-normal">Filter by feature</h2>
+            <div id="feature-token-feature" class="flex justify-between items-center gap-4">
+                <label>Feature type</label>
+                <div class="text-right">
+                    {{ form.feature }}
+                </div>
+            </div>
+            <div id="feature-token-value" class="flex justify-between items-center gap-4">
+                <label>Feature value</label>
+                <div class="text-right">
+                    {{ form.feature_value }}
+                </div>
+            </div>
+        </section>
+    </div>
+    <div id="lemmas">
+        <section>
+            <h2 class="font-medium text-gray-900 whitespace-normal">Lemmas</h2>
+            <div id="lemmas-lemma" class="flex justify-between items-center gap-4">
+                <label>Lemma</label>
+                <div class="text-right">
+                    {{ form.lemma_value }}
+                </div>
+            </div>
+            <div id="lemmas-language" class="flex justify-between items-center gap-4">
+                <label>Language</label>
+                <div class="text-right">
+                    {{ form.lemma_language }}
+                </div>
+            </div>
+        </section>
+    </div>
+    <div id="meanings">
+        <section>
+            <h2 class="font-medium text-gray-900 whitespace-normal">Meanings</h2>
+            <div id="meanings-meaning" class="flex justify-between items-center gap-4">
+                <label>Meaning</label>
+                <div class="text-right">
+                    {{ form.meaning_value }}
+                </div>
+            </div>
+            <div id="meanings-language" class="flex justify-between items-center gap-4">
+                <label>Language</label>
+                <div class="text-right">
+                    {{ form.meaning_language }}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% include 'search/top-buttons.html' %}
