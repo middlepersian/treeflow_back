@@ -15,6 +15,7 @@ from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal import load_section_modal
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
+from treeflow.corpus.views.sentences import sentences_view
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -23,9 +24,9 @@ urlpatterns = [
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
     path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'), 
-    path('tokens/', tokens_view, name='tokens'),
     path('texts/', texts_view, name='texts'),
-    path('ajax/update_pos/', update_pos_ajax, name='update_pos_ajax'),  # The AJAX endpoint for updating POS
+    path('tokens/', tokens_view, name='tokens'),
+    path('sentences/', sentences_view, name='sentences'),
     path('texts/<uuid:text_id>/sections/', sections_editor_view, name='sections-editor-view'),
     path('get-sections/<uuid:text_id>/<str:section_type>/', get_sections_by_type, name='get_sections_by_type'),
     path('get-child-sections/<uuid:section_id>/', get_child_sections, name='get_child_sections'),
@@ -39,3 +40,4 @@ urlpatterns = [
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),
     ]
+

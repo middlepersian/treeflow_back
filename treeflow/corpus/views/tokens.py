@@ -25,8 +25,6 @@ def tokens_view(request):
         to_attr='line_sections'
     )
 
-
-
     # Start with an initial tokens queryset and prefetch related data
     tokens = Token.objects.prefetch_related(
         'lemmas',  # Prefetch related Lemma objects
