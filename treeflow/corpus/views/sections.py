@@ -37,7 +37,7 @@ def sections_view(request):
     context = {
         'texts': texts,
         'section_types': section_types,
-        'sections': sections_page,
+        'sections': sections,
         'selected_text_id': selected_text_id or '',
         'selected_section_type': selected_section_type,
     }

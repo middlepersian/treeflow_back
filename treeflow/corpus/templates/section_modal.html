@@ -3,8 +3,9 @@
     <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-xl p-6 modal-content w-full max-w-md mx-auto">
             <h2 class="text-lg font-bold mb-4">Create New Section</h2>
-            <form id="sectionForm" method="post" action="{% url 'corpus:create_section' %}" class="space-y-4">
+            <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}" method="post" class="space-y-4">
                 {% csrf_token %}
+                <input type="hidden" name="text_id" id="modalTextId" value="">
                 <div class="space-y-2">
                     {{ form.as_p }}
                 </div>
@@ -13,10 +14,12 @@
                     <div id="selectedTokensDisplay"></div>
                 </div>
                 <div class="flex justify-between mt-6">
-                    <button type="button" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none">
+                    <button type="button"
+                        class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none">
                         Cancel
                     </button>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-700 focus:outline-none">
+                    <button type="submit"
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-700 focus:outline-none">
                         Save Section
                     </button>
                 </div>

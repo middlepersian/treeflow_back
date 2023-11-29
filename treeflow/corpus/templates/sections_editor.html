@@ -3,11 +3,14 @@
 
 
 {% block content %}
+
 <!-- Section Edit -->
+{% if request.user.is_authenticated %}
 <button id="startTokenSelection" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
     data-mode="select">
     Start Token Selection
 </button>
+{% endif %}
 
 <div class="container flex flex-row">
     <!-- Sidebar with Chapter Information -->
@@ -71,6 +74,7 @@
 
 
 <script src="{% static 'corpus/section_navigator.js'%}"></script>
+<script src="{% static 'corpus/scroll_to_top.js'%}"></script>
 <script src="{% static 'corpus/section_creator.js'%}"></script>
 
 {% endblock content %}

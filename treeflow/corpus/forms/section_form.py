@@ -1,6 +1,7 @@
 from django import forms
 from treeflow.corpus.models.section import Section
 from treeflow.corpus.models.text import Text
+from treeflow.corpus.models.token import Token
 import logging
 
 logger = logging.getLogger(__name__)

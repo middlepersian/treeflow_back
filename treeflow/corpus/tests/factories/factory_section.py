@@ -10,6 +10,7 @@ class SectionFactory(factory.django.DjangoModelFactory):
     number = factory.Faker("pyfloat", positive=True, left_digits=2, right_digits=2)
     identifier = factory.Faker("pystr", min_chars=1, max_chars=10)
     title = factory.Faker("pystr", min_chars=3, max_chars=20)
+    type = factory.Faker("pystr", min_chars=3, max_chars=20)
     language = factory.Faker("pystr", max_chars=3)
     text = factory.SubFactory("treeflow.corpus.tests.factories.TextFactory")
     source = factory.SubFactory("treeflow.corpus.tests.factories.SourceFactory")

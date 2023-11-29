@@ -37,12 +37,16 @@ class Section(models.Model):
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier')
         ]
-        indexes = [models.Index(fields=['text', 'type']),
+        indexes = [models.Index(fields=['type', 'text']),
                    models.Index(fields=['type']),
                    ]
 
     def __str__(self) -> str:
         return '{} - {} '.format(self.type, self.identifier)
+
+    @property
+    def has_Enhanced(self) -> bool:
+        return self.tokens.filter(dependency_token__enhanced=True).exists()
 
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
@@ -60,75 +64,113 @@ class Section(models.Model):
             self.language = self.language.strip().lower()
         super().save(*args, **kwargs)
 
-    MIN_GAP = 0.01  # Define a class-level constant for the minimum gap
+    @classmethod
+    def find_adjacent_sections(cls, reference_section_id):
+        reference_section = cls.objects.get(id=reference_section_id)
 
-    @staticmethod
-    def find_adjacent_sections(section_number, text_id):
-        previous_section = Section.objects.filter(
-            number__lt=section_number, text_id=text_id).order_by('-number').first()
-        next_section = Section.objects.filter(
-            number__gt=section_number, text_id=text_id).order_by('number').first()
+        # Find the previous section
+        previous_section = reference_section.previous
+
+        # Find the next section by searching for a section that has the current section as its previous
+        next_section = cls.objects.filter(previous_id=reference_section_id).first()
+
         return previous_section, next_section
 
-    @staticmethod
-    def calculate_insert_number(before_number, after_number):
-        return (before_number + after_number) / 2.0
+    @classmethod
+    def calculate_dynamic_gap(cls, reference_section_id):
+        # Fetch the reference, previous, and next sections
+        reference_section = cls.objects.get(id=reference_section_id)
+        previous_section, next_section = cls.find_adjacent_sections(reference_section_id)
 
-    MIN_GAP = 0.01  # Define a class-level constant for the minimum gap
+        # Set a default minimum gap
+        default_min_gap = 0.1  # Adjust this value as needed
 
-    @staticmethod
-    def calculate_insert_number(before_number, after_number):
-        # Assuming we have a standard gap we observe, e.g., 0.1
-        # The logic here finds the midway point between two numbers,
-        # but you could implement a different logic that suits your needs.
-        return (before_number + after_number) / 2.0
+        # If both previous and next sections are available
+        if previous_section and next_section and previous_section.number is not None and next_section.number is not None:
+            gap_before = reference_section.number - previous_section.number
+            gap_after = next_section.number - reference_section.number
+            return min(gap_before, gap_after) / 2.0  # Average of the smaller gap
 
+        # If only previous section is available
+        elif previous_section and previous_section.number is not None:
+            gap_before = reference_section.number - previous_section.number
+            return gap_before / 2.0
+
+        # If only next section is available
+        elif next_section and next_section.number is not None:
+            gap_after = next_section.number - reference_section.number
+            return gap_after / 2.0
+
+        # Fallback to a default minimum gap
+        return default_min_gap
 
     @classmethod
     def insert_before(cls, reference_section_id, new_section_data):
         with transaction.atomic():
             reference_section = cls.objects.select_for_update().get(id=reference_section_id)
-            text_id = reference_section.text_id
-            previous_section, _ = cls.find_adjacent_sections(reference_section.number, text_id)
+            previous_section, _ = cls.find_adjacent_sections(reference_section_id)
 
-            before_number = previous_section.number if previous_section else (reference_section.number - cls.MIN_GAP)
-            after_number = reference_section.number
-            new_number = cls.calculate_insert_number(before_number, after_number)
+            # Create the new section
+            new_section = cls(**new_section_data)
 
-            new_section = cls(number=new_number, text_id=text_id, **new_section_data)
-            new_section.text_id = text_id
+            # Calculate the dynamic gap
+            dynamic_gap = cls.calculate_dynamic_gap(reference_section_id)
 
-            # next section is the reference section
+            # Calculate the number for the new section
+            if previous_section and previous_section.number is not None:
+                # Calculate the number by using the dynamic gap
+                new_section.number = previous_section.number + dynamic_gap
+            elif reference_section.number is not None:
+                # Use the reference section's number minus the dynamic gap
+                new_section.number = reference_section.number - dynamic_gap
+            else:
+                # If the reference section doesn't have a number, set to None or a default value
+                new_section.number = None
+
+            # update the reference section's previous link
             reference_section.previous = new_section
             reference_section.save()
 
-            #unless we are at the beginning of the list
             if previous_section:
+                # Link the new section with the previous section
                 new_section.previous = previous_section
+
+            # Save the new section
             new_section.save()
+
             return new_section
 
     @classmethod
     def insert_after(cls, reference_section_id, new_section_data):
         with transaction.atomic():
             reference_section = cls.objects.select_for_update().get(id=reference_section_id)
-            text_id = reference_section.text_id
-            _, next_section = cls.find_adjacent_sections(reference_section.number, text_id)
+            _, next_section = cls.find_adjacent_sections(reference_section_id)
 
-            before_number = reference_section.number
-            after_number = next_section.number if next_section else (before_number + cls.MIN_GAP)
-            new_number = cls.calculate_insert_number(before_number, after_number)
+            # Create the new section
+            new_section = cls(**new_section_data)
 
-            new_section = cls(number=new_number, text_id=text_id, **new_section_data)
+            # Calculate the dynamic gap
+            dynamic_gap = cls.calculate_dynamic_gap(reference_section_id)
 
-            # if we are not at the ned of the list, update the previous section
+            # Calculate the number for the new section
+            if next_section and next_section.number is not None:
+                # Calculate the number by using the dynamic gap
+                new_section.number = reference_section.number + dynamic_gap
+            elif reference_section.number is not None:
+                # Use the reference section's number plus the dynamic gap
+                new_section.number = reference_section.number + dynamic_gap
+            else:
+                # If the reference section doesn't have a number, set to None or a default value
+                new_section.number = None
+
             if next_section:
+                # Link the new section with the next section
                 next_section.previous = new_section
                 next_section.save()
 
-            # update the next field of the reference section
+            # Link the new section with the reference section
             new_section.previous = reference_section
-            new_section.save()    
+            new_section.save()
 
             return new_section
 
