@@ -15,27 +15,9 @@ def sentences_view(request):
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
 
-    # Custom Prefetch for TokenLemma and TokenSense nested within SectionToken
-    token_lemma_prefetch = Prefetch(
-        'sectiontoken_set__token__tokenlemma_set',
-        queryset=TokenLemma.objects.filter(token__text_id=selected_text_id).select_related('lemma'),
-        to_attr='filtered_token_lemmas'
-    )
-    token_sense_prefetch = Prefetch(
-        'sectiontoken_set__token__tokensense_set',
-        queryset=TokenSense.objects.filter(token__text_id=selected_text_id).select_related('sense'),
-        to_attr='filtered_token_senses'
-    )
 
     # Fetch sentences with optimized prefetch
-    sentences = Section.objects.filter(type='sentence', text__id=selected_text_id).prefetch_related(
-        'sectiontoken_set__token',
-        token_lemma_prefetch,
-        token_sense_prefetch,
-        'sectiontoken_set__token__pos_token',
-        'sectiontoken_set__token__feature_token'
-    )
-
+    sentences = Section.objects.filter(type='sentence', text__id=selected_text_id)
 
         # Setup paginator
     paginator = Paginator(sentences, 20)  # Show 20 sentences per page

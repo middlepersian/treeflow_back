@@ -37,8 +37,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for section_token in sentence.sectiontoken_set.all %}
-        {% with token=section_token.token %}
+      {% for token in sentence.tokens.all %}
 
       <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
         <!-- Form for the entire row to edit a token -->
@@ -63,8 +62,8 @@
           </td>
           <!-- Lemmas -->
           <td class="border px-4 py-2">
-            {% for token_lemma in token.filtered_token_lemmas %}
-            {{ token_lemma.lemma.word }}
+            {% for lemma in token.lemmas.all %}
+            {{ lemma.word }}
             {% if not forloop.last %}, {% endif %}
           {% empty %}
             _
@@ -106,7 +105,6 @@
           </td>
         </form>
       </tr>
-      {% endwith %}
       {% endfor %}
     </tbody>
   </table>
