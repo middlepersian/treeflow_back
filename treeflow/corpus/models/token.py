@@ -62,6 +62,7 @@ class Token(models.Model):
             models.Index(fields=['transcription']),
             models.Index(fields=['transliteration']),
             models.Index(fields=['number']),
+            models.Index(fields=['text']),
         ]
 
     def __str__(self):
