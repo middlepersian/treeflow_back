@@ -50,13 +50,12 @@
     <!-- POS and Feature Modal -->
     <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="featureModal">
       <div class="flex items-center justify-center min-h-screen">
-          <div class="bg-white rounded-lg shadow-lg w-96 mx-auto">
-              <!-- Modal content here -->
-              <div id="featureModalContent"></div>
-          </div>
+        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4"> <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="featureModalContent"></div> <!-- Add p-4 for padding -->
+        </div>
       </div>
     </div>
-  
     {% for token in tokens %}
     <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
       <!-- Form for the entire row to edit a token -->
@@ -122,19 +121,23 @@
         hx-get="{% url 'corpus:pos_feature_form' token.id %}" 
         hx-target="#featureModalContent" 
         hx-trigger="click">
+        <span id="pos-content-{{ token.id }}">
           <!--show selected POS-->
           {% for pos in token.pos_token.all %}
             {{ pos.pos }}
           {% endfor %}
+        </span>
         </td>
         <!-- Features -->
-        <td id="features-cell" class="border px-4 py-2" 
+        <td id="features-cell" class="border px-4 py-2"
             hx-get="{% url 'corpus:pos_feature_form' token.id %}" 
             hx-target="#featureModalContent" 
             hx-trigger="click">
+            <span id="features-content-{{ token.id }}">
           {% for feature in token.feature_token.all %}
             {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %}, {% endif %}
           {% endfor %}
+            </span>
         </td>
         </form>
         <!-- Insert Before Button -->
@@ -308,27 +311,15 @@ document.body.addEventListener('htmx:afterRequest', function(event) {
 
 
 function handleFormSuccess(response) {
+    console.log("Form submission success response received");
     if (response.status === 'success') {
-        console.log("Success response");
         closeFeatureModal();
         document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
         document.querySelector('#features-cell').innerHTML = response.features_data_html;
-    }
-    else {
+    } else {
         closeFeatureModal();
     }
 }
-
-
-
-document.body.addEventListener('htmx:response', function(event) {
-  console.log("Response received");
-    if (event.detail.xhr.getResponseHeader("Content-Type").includes("application/json")) {
-        var response = JSON.parse(event.detail.xhr.responseText);
-        handleFormSuccess(response);
-    }
-});
-
 
 function closeFeatureModal() {
     console.log("Closing Feature Modal");
@@ -336,16 +327,23 @@ function closeFeatureModal() {
 }
 
 document.body.addEventListener('htmx:afterSwap', function(event) {
-    if (event.detail.target.id === 'featureModalContent') {
-        console.log("Feature Modal Content Swapped");
+
+  console.log("htmx:afterSwap event triggered");
+  console.log(event.detail);
+  
+    // Check if the swap is for loading modal content
+    if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+        console.log("Feature Modal Content Loaded");
         document.getElementById('featureModal').classList.remove('hidden');
+    }
+    // Check if the swap is for the feature form
+    if (event.detail.target.id === 'pos-feature-form') {
+        console.log("Feature form submission, closing modal");
+        closeFeatureModal();
     }
 });
 
 
-function closeFeatureModal() {
-  document.getElementById('featureModal').classList.add('hidden');
-}
 
 
 </script>
