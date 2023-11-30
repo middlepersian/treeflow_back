@@ -18,6 +18,7 @@
             <th class="w-1/4 px-4 py-2">Transcription</th>
             <th class="w-1/4 px-4 py-2">Transliteration</th>
             <th class="w-1/6 px-4 py-2">Lemmas</th>
+            <th class="w-1/6 px-4 py-2">Senses</th>
             <th class="w-1/12 px-4 py-2">Insert Before</th>
             <th class="w-1/12 px-4 py-2">Insert After</th>
             <th class="w-1/12 px-4 py-2">Delete Token</th>
@@ -78,7 +79,17 @@
               {% empty %}
               _
               {% endfor %}
-            </td> <!-- Insert Before Button -->
+            </td>
+            <!-- Senses -->
+            <td class="border px-4 py-2">
+              {% for sense in token.senses.all %}
+              {{ sense.sense }}
+              {% if not forloop.last %}, {% endif %}
+              {% empty %}
+              _
+              {% endfor %}
+            </td>
+            <!-- Insert Before Button -->
             <td class="border px-4 py-2">
               <form method="post"
                 action="{% url 'corpus:insert_before_token' token.id %}">
