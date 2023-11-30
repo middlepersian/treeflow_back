@@ -1,130 +1,158 @@
 {% extends "base.html" %}
 {% block content %}
 
-
-<div class="container mx-auto p-4">
+<div class="min-h-screen mx-auto px-4">
   <!-- Text Dropdown -->
-  {% include 'text_dropdown.html' %}
+  <div class="mb-4">{% include 'text_dropdown.html' %}</div>
 
-  <!-- Table for displaying tokens -->
-  <table class="table-fixed w-full">
-    <thead class="bg-gray-800 text-white">
-      <tr>
-        <th class="w-1/8 px-4 py-2">Token Number</th>
-        <th class="w-1/4 px-4 py-2">Transcription</th>
-        <th class="w-1/4 px-4 py-2">Transliteration</th>
-        <th class="w-1/6 px-4 py-2">Lemmas</th>
-        <th class="w-1/12 px-4 py-2">Insert Before</th>
-        <th class="w-1/12 px-4 py-2">Insert After</th>
-        <th class="w-1/12 px-4 py-2">Delete Token</th>
-      </tr>
-    </thead>
-    <tbody>
+  <!-- Flex container for the split view -->
+  <div class="flex flex-row w-full">
 
-      {% for sentence, tokens, senses in sentences_with_tokens %}
-      <!-- Sentence Header Row -->
-      <tr class="bg-blue-100">
-        <td colspan="7" class="px-4 py-2 font-bold">## Identifier: {{ sentence.identifier }}</td>
-      </tr>
-      <tr class="bg-blue-100">
-        <td colspan="7" class="px-4 py-2 font-bold">## ID: {{ sentence.id }}</td>
-      </tr>
-      <tr class="bg-blue-100">
-        <td colspan="7" class="px-4 py-2">
-          <ul> Translations:
-            {% for sense in senses %}
-            <li>{{sense.language}} - {{sense.sense }}</li>
-            {% endfor %}
-          </ul>
-        </td>
-      </tr>
+    <!-- Left Column for Tokens -->
+    <div class="w-1/2 overflow-x-auto">
+      <!-- Table for displaying tokens -->
+      <table class="min-w-full">
+        <thead class="bg-gray-800 text-white">
+          <tr>
+            <th class="w-1/8 px-4 py-2">Token Number</th>
+            <th class="w-1/4 px-4 py-2">Transcription</th>
+            <th class="w-1/4 px-4 py-2">Transliteration</th>
+            <th class="w-1/6 px-4 py-2">Lemmas</th>
+            <th class="w-1/12 px-4 py-2">Insert Before</th>
+            <th class="w-1/12 px-4 py-2">Insert After</th>
+            <th class="w-1/12 px-4 py-2">Delete Token</th>
+          </tr>
+        </thead>
+        <tbody>
 
-      {% for token in sentence.tokens.all %}
+          {% for sentence, tokens, senses in sentences_with_tokens %}
+          <!-- Sentence Header Row -->
+          <tr class="bg-blue-100">
+            <td colspan="7" class="px-4 py-2 font-bold">## Identifier:
+              {{sentence.identifier }}</td>
+          </tr>
+          <tr class="bg-blue-100">
+            <td colspan="7" class="px-4 py-2 font-bold">## ID: {{ sentence.id }}</td>
+          </tr>
+          <tr class="bg-blue-100">
+            <td colspan="7" class="px-4 py-2">
+              <ul> Translations:
+                {% for sense in senses %}
+                <li>{{sense.language}} - {{sense.sense }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
 
-      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden" id="token-{{token.id}}">
-        {% csrf_token %}
-        <td class="border px-4 py-2 text-center">{{ token.number }}</td>
-        <!-- Transcription -->
-        <td class="border px-4 py-2">
-          <input type="text" name="transcription" value="{{ token.transcription }}"
-            hx-post="{% url 'corpus:update_token' token.id %}" hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="shadow border rounded py-2 px-3 text-grey-darker">
-        </td>
-        <!-- Transliteration -->
-        <td class="border px-4 py-2">
-          <input type="text" name="transliteration" value="{{ token.transliteration }}"
-            hx-post="{% url 'corpus:update_token' token.id %}" hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="shadow border rounded py-2 px-3 text-grey-darker">
-        </td>
-        <!-- Lemmas -->
-        <td class="border px-4 py-2">
-          {% for lemma in token.lemmas.all %}
-          {{ lemma.word }}
-          {% if not forloop.last %}, {% endif %}
-          {% empty %}
-          _
+          {% for token in sentence.tokens.all %}
+
+          <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden"
+            id="token-{{token.id}}">
+            {% csrf_token %}
+            <td class="border px-4 py-2 text-center">{{ token.number }}</td>
+            <!-- Transcription -->
+            <td class="border px-4 py-2">
+              <input type="text" name="transcription"
+                value="{{ token.transcription }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+            <!-- Transliteration -->
+            <td class="border px-4 py-2">
+              <input type="text" name="transliteration"
+                value="{{ token.transliteration }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+            <!-- Lemmas -->
+            <td class="border px-4 py-2">
+              {% for lemma in token.lemmas.all %}
+              {{ lemma.word }}
+              {% if not forloop.last %}, {% endif %}
+              {% empty %}
+              _
+              {% endfor %}
+            </td> <!-- Insert Before Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:insert_before_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentences">
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+                <input type="hidden" name="text_id"
+                  value="{{ request.GET.text_id }}">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="⬆️ Insert"
+                  class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+            <!-- Insert After Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:insert_after_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentences">
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+                <input type="hidden" name="text_id"
+                  value="{{ request.GET.text_id }}">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="⬇️ Insert"
+                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+            <!-- Delete Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:delete_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentences">
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+                <input type="hidden" name="text_id"
+                  value="{{ request.GET.text_id }}">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="❌ Delete"
+                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+
+          </tr>
           {% endfor %}
-        </td> <!-- Insert Before Button -->
-        <td class="border px-4 py-2">
-          <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="token_id" value="{{ token.id }}">
-            <input type="hidden" name="source" value="sentences">
-            <input type="hidden" name="page" value="{{ request.GET.page }}">
-            <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
-            <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
-            <input type="submit" value="⬆️ Insert"
-              class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-          </form>
-        </td>
-        <!-- Insert After Button -->
-        <td class="border px-4 py-2">
-          <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="token_id" value="{{ token.id }}">
-            <input type="hidden" name="source" value="sentences">
-            <input type="hidden" name="page" value="{{ request.GET.page }}">
-            <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
-            <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
-            <input type="submit" value="⬇️ Insert"
-              class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-          </form>
-        </td>
-        <!-- Delete Button -->
-        <td class="border px-4 py-2">
-          <form method="post" action="{% url 'corpus:delete_token' token.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="token_id" value="{{ token.id }}">
-            <input type="hidden" name="source" value="sentences">
-            <input type="hidden" name="page" value="{{ request.GET.page }}">
-            <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
-            <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
-            <input type="submit" value="❌ Delete"
-              class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-          </form>
-        </td>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-      </tr>
-      {% endfor %}
-      {% endfor %}
-    </tbody>
-  </table>
+    <!-- Right Column for IIIF Viewer -->
+    <div class="w-1/2 p-4" id="iiif-viewer"></div>
 
-</div>
+  </div>
 
-<!-- POS and Feature Modal (placed outside the loop) -->
-<div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="featureModal">
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
-      <div id="featureModalContent"></div>
+  <!-- POS and Feature Modal (placed outside the loop) -->
+  <div
+    class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    id="featureModal">
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+        <div id="featureModalContent"></div>
+      </div>
     </div>
   </div>
+
+  <!-- Include the pagination template with the required context variable -->
+  {% include 'pagination.html' %}
+
 </div>
-
-
-<!-- Include the pagination template with the required context variable -->
-{% include 'pagination.html' %}
 
 {% endblock %}
