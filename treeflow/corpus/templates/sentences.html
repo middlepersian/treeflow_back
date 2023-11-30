@@ -22,28 +22,35 @@
     <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
   </form>
 
-  {% for sentence in sentences %}
-  <h3>Sentence ID: {{ sentence.id }}</h3>
-  <table>
+
+  <table class="table-fixed w-full">
     <thead class="bg-gray-800 text-white">
       <tr>
-        <th class="px-4 py-2">Number</th>
-        <th class="px-4 py-2">Transcription</th>
-        <th class="px-4 py-2">Transliteration</th>
-        <th class="px-4 py-2">Lemmas</th>
-        <th class="px-4 py-2">Insert Before</th>
-        <th class="px-4 py-2">Insert After</th>
-        <th class="px-4 py-2">Delete Token</th>
+        <th class="w-1/8 px-4 py-2">Token Number</th>
+        <th class="w-1/4 px-4 py-2">Transcription</th>
+        <th class="w-1/4 px-4 py-2">Transliteration</th>
+        <th class="w-1/6 px-4 py-2">Lemmas</th>
+        <th class="w-1/12 px-4 py-2">Insert Before</th>
+        <th class="w-1/12 px-4 py-2">Insert After</th>
+        <th class="w-1/12 px-4 py-2">Delete Token</th>
       </tr>
     </thead>
     <tbody>
+
+
+    {% for sentence in sentences %}
+    <!-- Sentence Header Row -->
+    <tr class="bg-blue-100">
+      <td colspan="7" class="px-4 py-2 font-bold">Sentence ID: {{ sentence.identifier }}</td>
+    </tr>
+    <tr class="bg-blue-100">
+      <td colspan="7" class="px-4 py-2 font-bold">Sentence Translation: {{ sentence.senses.0 }}</td>
+    </tr>
       {% for token in sentence.tokens.all %}
 
       <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
-        <!-- Form for the entire row to edit a token -->
-        <form method="post" action="{% url 'corpus:update_token' token.id %}">
-          {% csrf_token %}
-          <td class="border px-4 py-2">{{ token.number }}</td>
+        {% csrf_token %}
+          <td class="border px-4 py-2 text-center">{{ token.number }}</td>
           <!-- Transcription -->
           <td class="border px-4 py-2">
             <input type="text" name="transcription" value="{{ token.transcription }}"
@@ -60,7 +67,7 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="shadow border rounded py-2 px-3 text-grey-darker">
           </td>
-          <!-- Lemmas -->
+          <!-- Lemmas --> 
           <td class="border px-4 py-2">
             {% for lemma in token.lemmas.all %}
             {{ lemma.word }}
@@ -68,8 +75,7 @@
           {% empty %}
             _
           {% endfor %}
-          </td>
-          <!-- Insert Before Button -->
+          </td>          <!-- Insert Before Button -->
           <td class="border px-4 py-2">
             <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
               {% csrf_token %}
@@ -103,12 +109,13 @@
                 class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
             </form>
           </td>
-        </form>
+
       </tr>
+      {% endfor %}
       {% endfor %}
     </tbody>
   </table>
-  {% endfor %}
+
 </div>
 
 <!-- POS and Feature Modal (placed outside the loop) -->
@@ -121,73 +128,8 @@
 </div>
     
 
-<!-- Pagination controls -->
-<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-    <div class="flex flex-1 justify-between sm:hidden">
-      {% if sentences.has_previous %}
-        <a href="?page={{ sentences.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
-          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
-      {% else %}
-        <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
-      {% endif %}
-      {% if sentences.has_next %}
-        <a href="?page={{ sentences.next_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
-          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
-      {% else %}
-        <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
-      {% endif %}
-    </div>
-    
-    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-      <div>
-        <p class="text-sm text-gray-700">
-          Showing
-          <span class="font-medium">{{ sentences.start_index }}</span>
-          to
-          <span class="font-medium">{{ sentences.end_index }}</span>
-          of
-          <span class="font-medium">{{ sentences.paginator.count }}</span>
-          results
-        </p>
-      </div>
-      <div>
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-          <!-- Previous Page Link with ID -->
-          <!-- First Page Link -->
-          {% if sentences.has_previous %}
-            <a href="?page=1{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
-              class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-              First
-            </a>
-          {% endif %}
-          <!-- Previous Page Link -->
-          {% if sentences.has_previous %}
-            <a id="prevPageLink" href="?page={{ sentences.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
-              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 leading-5 hover:bg-gray-50">
-              Previous
-            </a>
-          {% endif %}
-          <!-- Current Page indicator -->
-          <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300">
-            Page {{ sentences.number }} of {{ sentences.paginator.num_pages }}.
-          </span>
-          <!-- Next Page Link with ID -->
-          {% if sentences.has_next %}
-            <a id="nextPageLink" href="?page={{ sentences.next_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
-              class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-              Next
-            </a>
-            <a href="?page={{ sentences.paginator.num_pages }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
-              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:bg-gray-50">
-              <span>Last</span>
-            </a>
-          {% endif %}
-        </nav>
-      </div>
-    </div>
-  </div>
-  
-
+<!-- Include the pagination template with the required context variable -->
+{% include 'pagination.html' %}
 
 {% endblock %}
 

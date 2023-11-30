@@ -18,8 +18,7 @@ def sections_view(request):
         'sectiontoken_set__token__lemmas',  # Prefetch lemmas through TokenLemma
         'sectiontoken_set__token__senses',  # Prefetch meanings through TokenSense
         'sectiontoken_set__token__pos_token'  # Prefetch related POS objects
-    ).order_by('number')
-
+    )
     # Filter sections if a text ID is provided
     if selected_text_id:
         sections = sections.filter(text__id=selected_text_id)

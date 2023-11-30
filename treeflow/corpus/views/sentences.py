@@ -1,37 +1,46 @@
 from django.shortcuts import render
-from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Prefetch
-from treeflow.corpus.models import Text, Token, POS, SectionToken, Section, TokenLemma, TokenSense
-from treeflow.dict.models import Lemma
+from treeflow.corpus.models import Text, Section
 import logging
-from django.db.models import Prefetch
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 def sentences_view(request):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
+    page_number = int(request.GET.get('page', 1))
 
+    # Define the number of sentences per page
+    sentences_per_page = 10
 
-    # Fetch sentences with optimized prefetch
-    sentences = Section.objects.filter(type='sentence', text__id=selected_text_id)
+    # Get the total count of sentences
+    total_sentences_count = Section.objects.filter(type='sentence', text__id=selected_text_id).count()
 
-        # Setup paginator
-    paginator = Paginator(sentences, 20)  # Show 20 sentences per page
-    page_number = request.GET.get('page')
-    sentences_page = paginator.get_page(page_number)
+    # Setup paginator with the total count
+    paginator = Paginator(range(total_sentences_count), sentences_per_page)
+    sentences_page = paginator.page(page_number)
+
+    # Calculate the starting and ending points for the query
+    start = (page_number - 1) * sentences_per_page
+    end = start + sentences_per_page
+
+    # Fetch only the sentences for the current page
+    sentences = Section.objects.filter(type='sentence', text__id=selected_text_id).only('type', 'text', 'id', 'identifier').prefetch_related(
+        'sectiontoken_set__token__lemmas',
+        'sectiontoken_set__token__senses',
+        'sectiontoken_set__token__pos_token'
+    )[start:end]
 
     logger.debug(sentences.query)
-    # print the numbers of sentences
     logger.debug(len(sentences))
 
     # Prepare context for rendering
     context = {
         'texts': texts,
-        'sentences': sentences_page,
+        'sentences': sentences,
+        'page_obj': sentences_page,
         'selected_text_id': selected_text_id or '',
     }
 
