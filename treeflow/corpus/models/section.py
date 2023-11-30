@@ -37,7 +37,7 @@ class Section(models.Model):
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier')
         ]
-        indexes = [models.Index(fields=['text', 'type']),
+        indexes = [models.Index(fields=['type', 'text']),
                    models.Index(fields=['type']),
                    ]
 
@@ -63,7 +63,6 @@ class Section(models.Model):
             # process language
             self.language = self.language.strip().lower()
         super().save(*args, **kwargs)
-
 
     @classmethod
     def find_adjacent_sections(cls, reference_section_id):
@@ -105,7 +104,6 @@ class Section(models.Model):
         # Fallback to a default minimum gap
         return default_min_gap
 
-
     @classmethod
     def insert_before(cls, reference_section_id, new_section_data):
         with transaction.atomic():
@@ -131,16 +129,14 @@ class Section(models.Model):
 
             # update the reference section's previous link
             reference_section.previous = new_section
-            reference_section.save()    
+            reference_section.save()
 
             if previous_section:
                 # Link the new section with the previous section
                 new_section.previous = previous_section
 
-
-            # Save the new section 
+            # Save the new section
             new_section.save()
-
 
             return new_section
 
@@ -175,7 +171,7 @@ class Section(models.Model):
             # Link the new section with the reference section
             new_section.previous = reference_section
             new_section.save()
-            
+
             return new_section
 
 
