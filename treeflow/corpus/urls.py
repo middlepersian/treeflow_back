@@ -7,7 +7,6 @@ from treeflow.corpus.views.insert_after_token import insert_after_token_view
 from treeflow.corpus.views.insert_before_token import insert_before_token_view
 from treeflow.corpus.views.delete_token import delete_token_view
 from treeflow.corpus.views.texts import texts_view
-from treeflow.corpus.views.update_pos_ajax import update_pos_ajax
 from treeflow.corpus.views.sections_editor import sections_editor_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_child_sections, get_tokens_for_section
 from treeflow.corpus.views.create_section import create_section_view
