@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.db import transaction
 from django.urls import reverse
 from treeflow.corpus.models.token import Token
+from treeflow.corpus.models.section import Section
 
 def insert_after_token_view(request, token_id):
     if request.method == "POST":
