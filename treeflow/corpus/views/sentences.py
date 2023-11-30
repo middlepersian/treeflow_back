@@ -12,7 +12,13 @@ def sentences_view(request):
     texts = Text.objects.all()
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
-
+        # Set default text identifier if none is selected
+    if not selected_text_id:
+        logger.info("No text ID provided, using default text")
+        default_text = Text.objects.filter(identifier="DMX-L19-01").first()
+        if default_text:
+            selected_text_id = default_text.id
+            logger.info("Using default text ID: %s", selected_text_id)  
 
     # Retrieve all sentences (sections of type 'sentence')
     sentences = Section.objects.filter(type='sentence')

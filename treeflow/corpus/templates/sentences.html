@@ -6,6 +6,7 @@
   <!-- Text Dropdown -->
   {% include 'text_dropdown.html' %}
 
+  <!-- Table for displaying tokens -->
   <table class="table-fixed w-full">
     <thead class="bg-gray-800 text-white">
       <tr>
@@ -40,7 +41,7 @@
 
       {% for token in sentence.tokens.all %}
 
-      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
+      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden" id="token-{{token.id}}">
         {% csrf_token %}
         <td class="border px-4 py-2 text-center">{{ token.number }}</td>
         <!-- Transcription -->
@@ -70,8 +71,10 @@
           <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
             {% csrf_token %}
             <input type="hidden" name="token_id" value="{{ token.id }}">
+            <input type="hidden" name="source" value="sentences">
             <input type="hidden" name="page" value="{{ request.GET.page }}">
             <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
+            <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
             <input type="submit" value="⬆️ Insert"
               class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
           </form>
@@ -81,9 +84,10 @@
           <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
             {% csrf_token %}
             <input type="hidden" name="token_id" value="{{ token.id }}">
-            <!-- Add hidden inputs for 'page' and 'text_id' -->
+            <input type="hidden" name="source" value="sentences">
             <input type="hidden" name="page" value="{{ request.GET.page }}">
             <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
+            <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
             <input type="submit" value="⬇️ Insert"
               class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
           </form>
@@ -93,8 +97,10 @@
           <form method="post" action="{% url 'corpus:delete_token' token.id %}">
             {% csrf_token %}
             <input type="hidden" name="token_id" value="{{ token.id }}">
+            <input type="hidden" name="source" value="sentences">
             <input type="hidden" name="page" value="{{ request.GET.page }}">
             <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
+            <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
             <input type="submit" value="❌ Delete"
               class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
           </form>
