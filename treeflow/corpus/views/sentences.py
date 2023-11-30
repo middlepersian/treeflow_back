@@ -47,7 +47,9 @@ def sentences_view(request):
             'lemmas', 'senses', 'pos_token', 'feature_token',  # Prefetch related objects
             sentence_prefetch, line_prefetch
         )
-        tokens_by_sentence.append((sentence, tokens))
+         # Fetch senses for each sentence
+        senses = sentence.senses.all()
+        tokens_by_sentence.append((sentence, tokens, senses))
 
     # Prepare context for rendering
     context = {
