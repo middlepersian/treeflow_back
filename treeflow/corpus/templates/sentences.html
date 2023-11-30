@@ -14,7 +14,7 @@
         <option value="">Select a text...</option>
         {% for text in texts %}
         <option value="{{ text.id|stringformat:'s' }}" {% if text.id|stringformat:'s' == selected_text_id|stringformat:'s' %} selected {% endif %}>
-          {{ text.title }}
+          {{ text.title }} - {{ text.identifier }}
         </option>
         {% endfor %}
       </select>
@@ -38,13 +38,16 @@
     <tbody>
 
 
-    {% for sentence in sentences %}
+    {% for sentence, tokens in sentences_with_tokens %}
     <!-- Sentence Header Row -->
     <tr class="bg-blue-100">
-      <td colspan="7" class="px-4 py-2 font-bold">Sentence ID: {{ sentence.identifier }}</td>
+      <td colspan="7" class="px-4 py-2 font-bold">Sentence Identifier: {{ sentence.identifier }}</td>
     </tr>
     <tr class="bg-blue-100">
       <td colspan="7" class="px-4 py-2 font-bold">Sentence Translation: {{ sentence.senses.0 }}</td>
+    </tr>
+    <tr class="bg-blue-100">
+      <td colspan="7" class="px-4 py-2 font-bold">Sentence ID: {{ sentence.id }}</td>
     </tr>
       {% for token in sentence.tokens.all %}
 
