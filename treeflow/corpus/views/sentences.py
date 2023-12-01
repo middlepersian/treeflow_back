@@ -20,50 +20,37 @@ def sentences_view(request):
             selected_text_id = default_text.id
             logger.info("Using default text ID: %s", selected_text_id)  
 
-    # Retrieve all sentences (sections of type 'sentence')
-    sentences = Section.objects.filter(type='sentence')
-    # Prefetch for sections of type 'sentence'
-    sentence_prefetch = Prefetch(
-        'sectiontoken_set',
-        queryset=SectionToken.objects.filter(section__type='sentence').select_related('section'),
-        to_attr='sentence_sections'
+    # Prefetch objects for tokens with related POS, Features, and Lemmas
+    token_prefetch = Prefetch(
+        'tokens', 
+        queryset=Token.objects.all().prefetch_related(
+            'pos_token', 'feature_token', 'lemmas', 'senses'
+        )
     )
 
-    # Prefetch for sections of type 'line'
-    line_prefetch = Prefetch(
-        'sectiontoken_set',
-        queryset=SectionToken.objects.filter(section__type='line').select_related('section'),
-        to_attr='line_sections'
-    )
-    # If a text ID is provided, filter sentences by this text
-    if selected_text_id:
-        sentences = sentences.filter(text__id=selected_text_id)
+    # Query for sentences with selected text ID and prefetch related tokens
+    sentences = Section.objects.filter(
+        type='sentence', text=selected_text_id
+    ).prefetch_related(token_prefetch)
 
     # Setup paginator for sentences
     paginator = Paginator(sentences, 10)  # Adjust the number of sentences per page as needed
     page_number = request.GET.get('page')
     sentences_page = paginator.get_page(page_number)
 
-    # Retrieve tokens for each sentence in the current page
-    tokens_by_sentence = []
-    for sentence in sentences_page:
-        tokens = Token.objects.filter(
-            sectiontoken__section=sentence
-        ).prefetch_related(
-            'lemmas', 'senses', 'pos_token', 'feature_token',  # Prefetch related objects
-            sentence_prefetch, line_prefetch
-        )
-         # Fetch senses for each sentence
-        senses = sentence.senses.all()
-        tokens_by_sentence.append((sentence, tokens, senses))
+    # log the number of sentences
+    logger.info("Found %s sentences", sentences.count())
+    # log the number of tokens
+    #logger.info("Found %s tokens", sentences.tokens.count())
+    # how many tokens in the first sentence?
+    logger.info("First sentence has %s tokens", sentences[0].tokens.count())
 
     # Prepare context for rendering
     context = {
         'texts': texts,
-        'sentences_with_tokens': tokens_by_sentence,
         'selected_text_id': selected_text_id or '',
         'page_obj': sentences_page,  # Include the page object for pagination controls
     }
 
-        # Render response
+    # Render response
     return render(request, 'sentences.html', context)
