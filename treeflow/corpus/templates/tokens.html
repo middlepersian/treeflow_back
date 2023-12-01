@@ -41,8 +41,10 @@
 
         {% csrf_token %}
         <td class=" border px-4 py-2">{{ token.number }}</td>
+
         <!-- Number in Sentence -->
         <td class="border px-4 py-2">{{ token.number_in_sentence }}</td>
+
         <!-- Sentence -->
         <td class="border px-4 py-2">
           <!-- Display 'sentence' type sections -->
@@ -52,6 +54,7 @@
           No sentence sections
           {% endfor %}
         </td>
+
         <!-- Line -->
         <td class="border px-4 py-2">
           <!-- Display 'line' type sections -->
@@ -95,6 +98,7 @@
           _
           {% endfor %}
         </td>
+        
         <!-- POS -->
         <td id="pos-cell" class="border px-4 py-2" hx-get="{% url 'corpus:pos_feature_form' token.id %}"
           hx-target="#featureModalContent" hx-trigger="click">
@@ -110,6 +114,7 @@
             {% endfor %}
           </span>
         </td>
+
         <!-- Features -->
         <td id="features-cell" class="border px-4 py-2" hx-get="{% url 'corpus:pos_feature_form' token.id %}"
           hx-target="#featureModalContent" hx-trigger="click">
@@ -276,7 +281,6 @@
   </script>
 
   <script>
-
     document.body.addEventListener('htmx:afterRequest', function (event) {
       // Function to change the input field color based on the response status
       function changeInputFieldColor(inputField, isSuccess) {
@@ -333,9 +337,7 @@
         closeFeatureModal();
       }
     });
-
-
-
-
   </script>
+
+
   {% endblock content %}

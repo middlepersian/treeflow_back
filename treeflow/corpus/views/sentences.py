@@ -7,24 +7,33 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def sentences_view(request):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
     # Retrieve GET parameters
     selected_text_id = request.GET.get('text_id')
-        # Set default text identifier if none is selected
+    # Set default text identifier if none is selected
     if not selected_text_id:
         logger.info("No text ID provided, using default text")
         default_text = Text.objects.filter(identifier="DMX-L19-01").first()
         if default_text:
             selected_text_id = default_text.id
-            logger.info("Using default text ID: %s", selected_text_id)  
+            logger.info("Using default text ID: %s", selected_text_id)
+
+
+    # Prefetch for sections of type 'line'
+    line_prefetch = Prefetch(
+        'sectiontoken_set',
+        queryset=SectionToken.objects.filter(section__type='line').select_related('section'),
+        to_attr='line_sections'
+    )
 
     # Prefetch objects for tokens with related POS, Features, and Lemmas
     token_prefetch = Prefetch(
-        'tokens', 
-        queryset=Token.objects.all().prefetch_related(
-            'pos_token', 'feature_token', 'lemmas', 'senses'
+        'tokens',
+        queryset=Token.objects.all().select_related('image').prefetch_related(
+            'pos_token', 'feature_token', 'lemmas', 'senses', line_prefetch
         )
     )
 
@@ -40,10 +49,7 @@ def sentences_view(request):
 
     # log the number of sentences
     logger.info("Found %s sentences", sentences.count())
-    # log the number of tokens
-    #logger.info("Found %s tokens", sentences.tokens.count())
-    # how many tokens in the first sentence?
-    logger.info("First sentence has %s tokens", sentences[0].tokens.count())
+
 
     # Prepare context for rendering
     context = {
