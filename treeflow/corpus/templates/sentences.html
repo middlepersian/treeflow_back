@@ -31,14 +31,14 @@
           {% for sentence in page_obj %}
           <!-- Sentence Header Row -->
           <tr class="bg-blue-100">
-            <td colspan="8" class="px-4 py-2">## Identifier:
+            <td colspan="13" class="px-4 py-2">## Identifier:
               {{sentence.identifier }}</td>
           </tr>
           <tr class="bg-blue-100">
-            <td colspan="8" class="px-4 py-2">## ID: {{ sentence.id }}</td>
+            <td colspan="13" class="px-4 py-2">## ID: {{ sentence.id }}</td>
           </tr>
           <tr class="bg-blue-100">
-            <td colspan="8" class="px-4 py-2">
+            <td colspan="13" class="px-4 py-2">
               <ul> Translations:
                 {% for sense in sentence.senses.all %}
                 <li>{{sense.language}} - <span class="text-bold"> {{sense.sense}} </span></li>
