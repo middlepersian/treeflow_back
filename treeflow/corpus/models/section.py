@@ -37,7 +37,7 @@ class Section(models.Model):
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier')
         ]
-        indexes = [models.Index(fields=['type', 'text']),
+        indexes = [models.Index(fields=['type', 'text', 'identifier']),
                    models.Index(fields=['type']),
                    ]
 
