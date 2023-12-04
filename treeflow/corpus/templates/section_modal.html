@@ -14,7 +14,7 @@
                     <div id="selectedTokensDisplay"></div>
                 </div>
                 <div class="flex justify-between mt-6">
-                    <button type="button"
+                    <button type="button" onclick="closeModal()"
                         class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none">
                         Cancel
                     </button>
@@ -27,3 +27,15 @@
         </div>
     </div>
 </div>
+
+
+
+<script>
+    function closeModal() {
+        console.log('close modal');
+        var modal = document.getElementById('sectionModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
