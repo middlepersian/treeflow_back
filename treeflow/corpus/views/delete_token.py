@@ -25,10 +25,9 @@ def delete_token_view(request, token_id):
 
             # Determine the redirect URL based on the source
             if source == 'sentences':
-                redirect_url = reverse('corpus:sentences') + f'?page={current_page}&text_id={text_id}' + f'#token-{previous_token_id}'
+                redirect_url = reverse('corpus:sentences', kwargs={'text_id': text_id}) + f'?page={current_page}#token-{previous_token_id}'
             else:
-                redirect_url = reverse('corpus:tokens') + f'?page={current_page}&text_id={text_id}' + f'#token-{previous_token_id}'
-
+                redirect_url = reverse('corpus:tokens', kwargs={'text_id': text_id}) + f'?page={current_page}#token-{previous_token_id}'
 
             return HttpResponseRedirect(redirect_url)
     else:

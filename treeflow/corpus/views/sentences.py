@@ -8,18 +8,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def sentences_view(request):
+def sentences_view(request, text_id=None):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
-    # Retrieve GET parameters
-    selected_text_id = request.GET.get('text_id')
-    # Set default text identifier if none is selected
-    if not selected_text_id:
-        logger.info("No text ID provided, using default text")
-        default_text = Text.objects.filter(identifier="DMX-L19-01").first()
-        if default_text:
-            selected_text_id = default_text.id
-            logger.info("Using default text ID: %s", selected_text_id)
+    if text_id:
+        selected_text_id = text_id
+    else: 
+        selected_text_id = request.GET.get('text_id')
 
 
     # Prefetch for sections of type 'line'
@@ -55,7 +50,8 @@ def sentences_view(request):
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
-        'page_obj': sentences_page,  # Include the page object for pagination controls
+        'page_obj': sentences_page,  
+        'current_view': 'corpus:sentences',
     }
 
     # Render response

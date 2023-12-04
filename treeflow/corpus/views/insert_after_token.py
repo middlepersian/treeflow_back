@@ -24,9 +24,9 @@ def insert_after_token_view(request, token_id):
                 sentence = get_object_or_404(Section.objects.select_for_update(), id=sentence_id)
                 sentence.tokens.add(new_token)
                 sentence.save()
-                redirect_url = reverse('corpus:sentences') + f'?page={current_page}&text_id={text_id}' + f'#token-{new_token.id}'
+                redirect_url = reverse('corpus:sentences', kwargs={'text_id': text_id}) + f'?page={current_page}#token-{new_token.id}'
             else:
-                redirect_url = reverse('corpus:tokens') + f'?page={current_page}&text_id={text_id}' + f'#token-{new_token.id}'
+                redirect_url = reverse('corpus:tokens', kwargs={'text_id': text_id}) + f'?page={current_page}#token-{new_token.id}'
 
 
             return HttpResponseRedirect(redirect_url)
