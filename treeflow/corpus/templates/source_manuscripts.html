@@ -1,0 +1,36 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<h1>Manuscript Table</h1>
+
+{% if manuscripts %}
+<table class="table-auto md:mx-auto">
+  <thead>
+    <tr>
+      <th class="border p-2">Identifier</th>
+      <th class="border p-2">View</th>
+      <th class="border p-2">page</th>
+      <th class="border p-2">Related Sources</th>
+      <th class="border p-2">Number</th>
+      <th class="border p-2">Edit</th>
+      <th class="border p-2">Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% regroup manuscripts by source.id as regrouped_manuscripts %}
+    {% for manuscript in manuscripts %}
+    <tr>
+      <td class="border p-2">{{ manuscript.identifier }}</td>
+      <td class="border p-2">View</td>
+      <td class="border p-2">{{ manuscript.page }}</td>
+      <td class="border p-2">{{ manuscript.source }}</td>
+      <td class="border p-2">{{ manuscript.number }}</td>
+      <td class="border p-2">Edit</td>
+      <td hx-post="{% url 'corpus:delete_image' image_id=manuscript.id %}" class="border p-2">Delete</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+<p>No Manuscripts are available.</p>
+{% endif %} {% endblock %}

@@ -3,7 +3,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import \
     Corpus, Text,\
     Feature, Dependency,\
-    Token, BibEntry, Comment, Section, SectionToken, POS
+    Token, BibEntry, Comment, Section, SectionToken, POS, Source
 
 class TokenHistoryAdmin(SimpleHistoryAdmin):
     list_display = ["transcription", "transliteration",  "previous"]
@@ -19,7 +19,10 @@ class SectionAdmin(admin.ModelAdmin):
     list_filter = ('type', 'text',)
     search_fields = ['title']
     
-
+class SourceAdmin(admin.ModelAdmin):
+    list_display = ('identifier', 'type')
+    list_filter = ('type',)
+    search_fields = ['identifier']
     
 
 #DependencyAdmin
@@ -39,3 +42,4 @@ admin.site.register(Comment)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(SectionToken)
 admin.site.register(POS)
+admin.site.register(Source, SourceAdmin)

@@ -1,0 +1,25 @@
+<!-- bibentry_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Bibliography</h1>
+
+
+  <table class="table-auto">
+    <tr>
+      <th>Key</th>
+      <th>Title</th>
+    </tr>
+    {% for zotero_entry in zotero_entries %}
+      <tr>
+        <td>
+          <a href="{% url 'corpus:bibliography-detail' bibEntry_id=zotero_entry.bibentry.pk %}">{{ zotero_entry.bibentry.key}}</a>
+        </td>
+        <td>
+          {% if zotero_entry.zotero_entry %} {{zotero_entry.zotero_entry.data.title | safe}} {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

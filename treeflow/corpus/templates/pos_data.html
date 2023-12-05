@@ -1,7 +1,3 @@
 {% for pos in token.pos_token.all %}
-    {% if pos.pos %}
-        {{ pos.pos }}
-    {% endif %}
-{% empty %}
-    _
+    {{ pos.pos }}
 {% endfor %}

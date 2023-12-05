@@ -15,6 +15,13 @@ from treeflow.corpus.views.load_section_modal import load_section_modal
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
 from treeflow.corpus.views.sentences import sentences_view
+from treeflow.corpus.views.bib_edit import BibEntryListView, BibEntryCreateView
+from treeflow.corpus.views.get_feature_formset import get_feature_formset
+from treeflow.corpus.views.pos_feature_form import pos_feature_form
+from treeflow.corpus.views.sentences import sentences_view
+from treeflow.corpus.views.bib_edit import BibEntryCreateView
+from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
+from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -34,7 +41,17 @@ urlpatterns = [
     path('create_section/', create_section_view, name='create_section'),
     path('display_tokens/', display_tokens_view, name='display_tokens'),
     path('load_section_modal/', load_section_modal, name='load_section_modal'),
+    path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('pos_feature_form/<uuid:token_id>/', pos_feature_form, name='pos_feature_form'),
+    path('bibliography/', BibEntryListView.as_view(), name='bibliography'),
+    path('bibliography/<uuid:bibEntry_id>/', BibEntryDetailView.as_view(), name='bibliography-detail'),
+    path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
+    path('sources/', SourceTableView.as_view(), name='sources'),
+    path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='source_edit'),
+    path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
+    path('sources/add/', create_source, name='source_add'),
+    path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
+    path('sources/manuscripts/delete/<uuid:image_id>/', delete_image, name="delete_image"),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),
