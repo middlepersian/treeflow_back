@@ -1,0 +1,9 @@
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_table }}
+    {{ form.bibentry_forms.management_form }}
+    {% for bibentry_form in form.bibentry_forms %}
+        {{ bibentry_form.as_modal }}
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>

@@ -53,7 +53,7 @@ def saveNewDependency(request):
 def ud_editor(request, section_id):
     # Get the section
     section = get_object_or_404(Section, pk=section_id, type="sentence")
-
+    prev, next = section.find_adjacent_sections(section_id)
     
     section_tokens = section.tokens.all()
     tokens = list(section_tokens)
@@ -130,6 +130,8 @@ def ud_editor(request, section_id):
     # Prepare context for the template
     context = {
         "section": section,
+        "prev" : prev,
+        "next" : next,
         "tokens": token_data,
         "deprel": {d.name: d for d in Deprel},
     }
