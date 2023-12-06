@@ -13,11 +13,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
 
 
-def calculate_positions(word_length_1, x1, font_size, gap):
+# Adjust this function to account for a dynamic gap between tokens
+def calculate_positions(word_length_1, x1, font_size, gap, additional_space):
     char_width = font_size * 0.6
     word_width_1 = word_length_1 * char_width
 
-    x2 = x1 + word_width_1 + gap
+    # Add the additional space to the gap
+    x2 = x1 + word_width_1 + gap + additional_space
 
     return x1, x2
 
@@ -56,10 +58,8 @@ def ud_editor(request, section_id):
     # Get the section
     section = get_object_or_404(Section, pk=section_id, type="sentence")
     prev, next = section.find_adjacent_sections(section_id)
-    
     section_tokens = section.tokens.all()
     tokens = list(section_tokens)
-
     dependencies = (
         Dependency.objects.filter(Q(token__in=tokens) | Q(head__in=tokens))
         .select_related("token", "head")
@@ -68,18 +68,17 @@ def ud_editor(request, section_id):
     posList = (
         POS.objects.filter(Q(token__in=tokens)).select_related("token").distinct()
     )
-
     featureList = (Feature.objects.filter(Q(token__in=tokens)).select_related("token").distinct())
-
     token_data = []
+    additional_space = 20
     x1 = 0
+
     for token in tokens:
         token_dependencies = []
         token_pos = []
         # Check if transcription is None or an empty string before calling len()
         transcription_length = 0 if token.transcription is None else len(token.transcription)
-        x1, x2 = calculate_positions(transcription_length, x1, 12, 10)
-
+        x1, x2 = calculate_positions(transcription_length, x1, 12, 10, additional_space)
         for pos in posList:
             if pos.token == token:
                 token_pos.append(

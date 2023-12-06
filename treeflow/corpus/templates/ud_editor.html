@@ -74,6 +74,7 @@
           <polygon points="0 0, 10 3.5, 0 7" />
         </marker>
       </defs>
+
       {% for token in tokens %} {% if token.number != null %}
       <g class="p-2 rounded fill-slate-900 hover:fill-green-500 cursor-pointer"
         id="{{token.id}}">
@@ -102,7 +103,6 @@
           {% endfor %}
           {% endfor %}
         </text>
-
       </g>
       {% endif %} {% endfor %}
     </svg>
@@ -110,8 +110,6 @@
 
   </div>
 </div>
-
-
 
 <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 <script>
