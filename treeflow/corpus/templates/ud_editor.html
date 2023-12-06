@@ -123,6 +123,16 @@ const tokenData = JSON.parse(
 );
 
 
+// Initialize the viewbox (can be placed in the DOMContentLoaded event)
+function initializeViewbox() {
+  const bbox = svg.getBBox();
+  currentX = bbox.x;
+  currentY = bbox.y;
+  currentZoom = 1;
+  setViewBox(currentX, currentY, bbox.width, bbox.height);
+}
+
+
 const deprelData = JSON.parse(document.getElementById("deprel").textContent);
 
 function clearFocusDep() {
@@ -167,8 +177,8 @@ function showEnhancedPaths() {
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
-  const bbox = svg.getBBox();
-  setViewBox(bbox.x, bbox.y, bbox.width, bbox.height);
+  initializeViewbox();
+
   // add event listener to the enhanced button
   document.getElementById("enhanced").addEventListener("click", (event) => {
     if (enhancedEnabled) {
@@ -352,49 +362,51 @@ function setViewBox(x, y, width, height) {
   svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
 }
 
-// Function to handle mouse movement
-function onMouseMove(event) {
-  if (isPanning) {
-    // Calculate the new coordinates, adjusted for the zoom level
-    const dx = (event.clientX - startX) / currentZoom;
-    const dy = (event.clientY - startY) / currentZoom;
 
-    // Subtract the distances from the current viewbox position
+// Central function to update the viewbox
+function updateViewBox(x, y, zoom) {
+  currentX = x;
+  currentY = y;
+  currentZoom = zoom;
+  setViewBox(currentX, currentY, svg.clientWidth / currentZoom, svg.clientHeight / currentZoom);
+}
+
+svg.onmousedown = function (event) {
+  event.preventDefault(); // Prevent default behavior like text selection
+  isPanning = true;       // Indicate that panning is active
+
+  // Calculate the current mouse position relative to the SVG
+  const mouseStartPos = cursorPoint(event);
+
+  // Function to handle mouse movement during panning
+  function onMouseMove(event) {
+    // Calculate new mouse position relative to the SVG
+    const newMousePos = cursorPoint(event);
+
+    // Calculate the change in mouse position
+    const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
+    const dy = (newMousePos.y - mouseStartPos.y) / currentZoom;
+
+    // Update currentX and currentY based on the change in mouse position
     currentX -= dx;
     currentY -= dy;
 
-    // Update the viewbox with the new position
+    // Update the viewbox with the new values
     setViewBox(currentX, currentY, svg.clientWidth / currentZoom, svg.clientHeight / currentZoom);
 
-    // Update the starting X and Y positions for the next movement
-    startX = event.clientX;
-    startY = event.clientY;
+    // Update the reference mouse position for the next movement
+    mouseStartPos.x = newMousePos.x;
+    mouseStartPos.y = newMousePos.y;
   }
-}
 
-// Function to handle the end of mouse movement
-function onMouseUp() {
-  // Unset the panning flag
-  isPanning = false;
+  // Function to handle the end of mouse movement
+  function onMouseUp() {
+    isPanning = false;
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  }
 
-  // Remove the event listeners
-  document.removeEventListener("mousemove", onMouseMove);
-  document.removeEventListener("mouseup", onMouseUp);
-}
-
-// The mousedown event to initiate panning
-svg.onmousedown = function (event) {
-  // Prevent default behavior (like selecting text)
-  event.preventDefault();
-
-  // Set the panning flag
-  isPanning = true;
-
-  // Store the starting X and Y positions
-  startX = event.clientX;
-  startY = event.clientY;
-
-  // Add the event listeners for mousemove and mouseup
+  // Attach event listeners for mouse movement and release
   document.addEventListener("mousemove", onMouseMove);
   document.addEventListener("mouseup", onMouseUp);
 };
@@ -403,45 +415,28 @@ svg.onmousedown = function (event) {
 svg.onwheel = function (event) {
   event.preventDefault();
 
-  // Zoom intensity determines the rate of zooming
-  const zoomIntensity = 0.1;
-
-  // Determine the direction of the scroll (up for zoom in, down for zoom out)
+  const zoomIntensity = 0.05;
   const wheelDelta = event.deltaY < 0 ? 1 : -1;
+  const zoomFactor = Math.exp(wheelDelta * zoomIntensity);
 
-  // Calculate the zoom factor
-  const zoom = Math.exp(wheelDelta * zoomIntensity);
+  // Calculate the mouse position relative to the SVG
+  const mousePos = cursorPoint(event);
 
-  // Calculate the center of the current viewbox
-  const viewboxCenterX = currentX + (svg.clientWidth / currentZoom) / 2;
-  const viewboxCenterY = currentY + (svg.clientHeight / currentZoom) / 2;
-
-  // Adjust the currentX and currentY to zoom towards the center of the current viewbox
-  currentX -= (viewboxCenterX - currentX) * (zoom - 1);
-  currentY -= (viewboxCenterY - currentY) * (zoom - 1);
+  // Adjust currentX and currentY based on the zoom centered on the mouse position
+  currentX = mousePos.x - (mousePos.x - currentX) * zoomFactor;
+  currentY = mousePos.y - (mousePos.y - currentY) * zoomFactor;
 
   // Update the zoom level
-  currentZoom *= zoom;
+  currentZoom *= zoomFactor;
 
-  // Update the SVG viewbox to reflect the new zoom level and position
+  // Update the viewbox with the new values
   setViewBox(currentX, currentY, svg.clientWidth / currentZoom, svg.clientHeight / currentZoom);
 };
 
+
 document.getElementById('center').onclick = function () {
-  // Get the initial bounding box of the SVG content
-  const bbox = svg.getBBox();
-
-  // Set the current X and Y to the top-left corner of the bounding box
-  // Adjust these values as needed to align with your specific layout
-  currentX = bbox.x;
-  currentY = bbox.y;
-
-  // Reset the zoom level to its initial state, typically 1
-  currentZoom = 1;
-
-  // Update the SVG viewbox to center the content
-  // The width and height should be set according to your initial viewbox or the SVG's bounding box
-  setViewBox(currentX, currentY, bbox.width, bbox.height);
+  // Use the initial bounding box values to center
+  initializeViewbox();
 };
 
 function calculateZoomLevel() {
