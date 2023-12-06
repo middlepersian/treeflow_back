@@ -387,9 +387,15 @@ svg.onmousedown = function (event) {
     isPanning = true;       // Indicate that panning is active
 
     let mouseStartPos = cursorPoint(event);
+    let lastMouseMoveTime = Date.now();
 
     function onMouseMove(event) {
         if (!isPanning) return;
+
+        const now = Date.now();
+        // Control the update rate (e.g., 50ms)
+        if (now - lastMouseMoveTime < 50) return;
+        lastMouseMoveTime = now;
 
         const newMousePos = cursorPoint(event);
         const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
@@ -412,7 +418,6 @@ svg.onmousedown = function (event) {
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
 };
-
 
 
 svg.onwheel = function (event) {
