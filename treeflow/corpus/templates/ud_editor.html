@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
 <div class="flex flex-col h-screen">
@@ -7,16 +8,19 @@
   <div class="flex flex-row gap-2 mt-2 mb-4">
 
     <!--Next and Previous Buttons-->
+    <!--Previous Button-->
     {% if prev %}
     <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
-      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center">
-      ← Prev
+      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center"
+      id="prevPageLink"> ← Prev
     </a>
     {% endif %}
+
+    <!--Next Button-->
     {% if next %}
     <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
-      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center">
-      Next →
+      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center"
+      id="nextPageLink"> Next →
     </a>
     {% endif %}
 
@@ -464,6 +468,30 @@ svg.onwheel = function (event) {
 };
 
 
+
+svg.ondblclick = function(event) {
+    event.preventDefault();
+
+    const dblClickZoomIntensity = 2; // Adjust zoom intensity for double-click
+    const newZoom = currentZoom * dblClickZoomIntensity;
+
+    // Calculate the mouse position relative to the SVG
+    const mousePos = cursorPoint(event);
+
+    // Calculate new viewbox parameters to center the zoom on the double-click position
+    const newWidth = svg.clientWidth / newZoom;
+    const newHeight = svg.clientHeight / newZoom;
+    const newX = mousePos.x - (newWidth / 2);
+    const newY = mousePos.y - (newHeight / 2);
+
+    // Update current viewbox parameters
+    currentX = newX;
+    currentY = newY;
+    currentZoom = newZoom;
+
+    updateViewBox(currentX, currentY, currentZoom);
+  };
+
 document.getElementById('center').onclick = function () {
   // Use the initial bounding box values to center
   initializeViewbox();
@@ -669,4 +697,39 @@ function calculateZoomLevel() {
   currentZoom = 1;
   setViewBox();
 </script>
+
+<!--import pag navigation-->
+<script>
+  function logEventDetails(event) {
+    console.log(`Event Triggered: ${event.type}`);
+    console.log(`Control Key: ${event.ctrlKey}`);
+    console.log(`Meta Key: ${event.metaKey}`);
+    console.log(`Key: ${event.key}`);
+  }
+
+  document.addEventListener('DOMContentLoaded', (event) => {
+    console.log('DOMContentLoaded, adding keydown event listener.');
+
+    document.addEventListener('keydown', function (event) {
+      switch (event.key) {
+        case 'ArrowLeft': // User pressed the left arrow key
+          var prevPageLink = document.getElementById('prevPageLink');
+          if (prevPageLink) {
+            window.location.href = prevPageLink.href;
+          }
+          break;
+        case 'ArrowRight': // User pressed the right arrow key
+          var nextPageLink = document.getElementById('nextPageLink');
+          if (nextPageLink) {
+            window.location.href = nextPageLink.href;
+          }
+          break;
+      }
+    });
+  });
+
+</script>
+
+
+
 {% endblock content %}
