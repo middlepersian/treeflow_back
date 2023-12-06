@@ -101,8 +101,6 @@ const form = document.getElementById("form");
 const pt = svg.createSVGPoint();
 let focusDep = null;
 let isPanning = false;
-let startX = 0;
-let startY = 0;
 let creating = false;
 let currentX = 0;
 let currentY = 0;
@@ -127,13 +125,21 @@ function setViewBox(x, y, width, height) {
   svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
 }
 
-// Initialize the viewbox (can be placed in the DOMContentLoaded event)
 function initializeViewbox() {
   const bbox = svg.getBBox();
-  currentX = bbox.x;
-  currentY = bbox.y;
-  currentZoom = 1;
-  setViewBox(currentX, currentY, bbox.width, bbox.height);
+  const margin = 20; // Margin value; adjust as needed
+
+  // Adjust x and y to add margin
+  currentX = bbox.x - margin;
+  currentY = bbox.y - margin;
+
+  // Increase width and height by twice the margin value to account for both sides
+  const width = bbox.width + 2 * margin;
+  const height = bbox.height + 2 * margin;
+
+  currentZoom = 1; // Reset the zoom level
+
+  setViewBox(currentX, currentY, width, height);
 }
 
 function updateViewBox(x, y, zoom) {
