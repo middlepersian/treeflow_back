@@ -1,9 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
 <div class="flex flex-col w-full h-screen">
   <!-- Text Dropdown -->
-  <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
+  <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with
+    text_id=selected_text_id %}</div>
   <!-- Flex container for the split view -->
   <div class="flex-grow flex w-full">
     <!-- Left Column for Tokens -->
@@ -70,10 +72,10 @@
             <!-- UD -->
             <td class="border px-4 py-2">
               <a href="{% url 'corpus:ud_editor' sentence.id %}"
-              class="text-blue-500 hover:text-blue-700">
-              View Details
-           </a>
-           
+                class="text-blue-500 hover:text-blue-700">
+                View Details
+              </a>
+
             </td>
 
             <!-- Image -->
@@ -240,8 +242,10 @@
   <!-- Include the pagination template with the required context variable -->
   <div class="flex justify-center py-4">{% include 'pagination.html' %}</div>
 
-<!-- close main div-->
+  <!-- close main div-->
 </div>
+
+<script src="{% static 'corpus/prev_next_navigator.js'%}"></script>
 
 <!---Javascript for the POS and Feature Modal --->
 <script>
