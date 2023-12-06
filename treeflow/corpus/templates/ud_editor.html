@@ -1,97 +1,119 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="flex flex-row gap-2 mt-2">
-  {% if prev %}
-  <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
-    class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-    ← Prev
-  </a>
-  {% endif %}
-  {% if next %}
-  <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
-    class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-    Next →
-  </a>
-  {% endif %}
 
-  <button class="p-2 bg-blue-900 rounded text-white font-bold" id="enhanced">
-    Hide Enhanced UD
-  </button>
-  <button class="flex p-2 bg-blue-900 rounded text-white font-bold" id="center">
-    Center
-  </button>
-  <form class="mx-2" id="form" action="../saveNewDependency/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="dependency" value />
-    <input type="hidden" name="section_id" value="{{section.id}}" />
-    <select id="depType" name="depType" class="hidden" required>
-      {% for d in deprel %}
-      <option value="{{d}}">{{d}}</option>
-      {%endfor%}
-    </select>
-    <input type="checkbox" name="enhanced" value="true" id="enhanced"
-      class="hidden" />
-  </form>
-  <form class="mx-2" id="updateDep" action="../updateDependency" method="post">
-    <select id="selectedDepType" name="depType" class="hidden">
-      {% for d in deprel %}
-      <option value="{{d}}">{{d}}</option>
-      {%endfor%}
-    </select>
-  </form>
-  <form class="mx-2" id="deleteDep" action="../deleteDependency/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="section_id" value="{{section.id}}" />
-  </form>
+<div class="flex flex-col h-screen">
+
+  <!-- Buttons and Forms -->
+  <div class="flex flex-row gap-2 mt-2 mb-4">
+
+    <!--Next and Previous Buttons-->
+    {% if prev %}
+    <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
+      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center">
+      ← Prev
+    </a>
+    {% endif %}
+    {% if next %}
+    <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
+      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center">
+      Next →
+    </a>
+    {% endif %}
+
+    <!--Enhanced Button-->
+    <button class="p-2 bg-blue-900 rounded text-white font-bold" id="enhanced">
+      Hide Enhanced UD
+    </button>
+    <!--Center Button-->
+    <button class="flex p-2 bg-blue-900 rounded text-white font-bold"
+      id="center">
+      Center
+    </button>
+
+    <!-- Edit form-->
+    <form class="mx-2" id="form" action="../saveNewDependency/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="dependency" value />
+      <input type="hidden" name="section_id" value="{{section.id}}" />
+      <select id="depType" name="depType" class="hidden" required>
+        {% for d in deprel %}
+        <option value="{{d}}">{{d}}</option>
+        {%endfor%}
+      </select>
+      <input type="checkbox" name="enhanced" value="true" id="enhanced"
+        class="hidden" />
+    </form>
+    <form class="mx-2" id="updateDep" action="../updateDependency" method="post">
+      <select id="selectedDepType" name="depType" class="hidden">
+        {% for d in deprel %}
+        <option value="{{d}}">{{d}}</option>
+        {%endfor%}
+      </select>
+    </form>
+    <form class="mx-2" id="deleteDep" action="../deleteDependency/"
+      method="post">
+      {% csrf_token %}
+      <input type="hidden" name="section_id" value="{{section.id}}" />
+    </form>
+
+  </div>
+
+  <!-- SVG Container -->
+  <div class="flex-grow">
+    <p id="depDetails"></p>
+    <svg id="svgCanvas" viewbox="0 0 800 600" width="100%" height="100%">
+      <defs>
+        <marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30"
+          markerUnits="strokeWidth" markerWidth="5"
+          markerHeight="5" orient="auto">
+          <path d="M 0 0 L 60 30 L 0 60 z" fill="#800000" />
+        </marker>
+        <marker id="arrowhead" markerWidth="4" markerHeight="5" refX="60"
+          refY="3.5"
+          orient="a">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+      </defs>
+      {% for token in tokens %} {% if token.number != null %}
+      <g class="p-2 rounded fill-slate-900 hover:fill-green-500 cursor-pointer"
+        id="{{token.id}}">
+        <circle id="{{token.id}}" cx="{{token.xpos}}" cy="35"
+          class="hover:fill-black hover:stroke-none" r="2.5"
+          fill="white" stroke="black" />
+        <text class="hover-target token" data-tokenId="{{token.id}}"
+          x="{{token.xpos}}" y="50" font-family="Verdana"
+          font-size="12">
+          {% if token.transcription %}
+          {{token.transcription}}
+          {% else %}
+          null
+          {% endif %}
+        </text>
+        <text x="{{token.xpos}}" y="60" font-family="Verdana" font-size="6">
+          {% for pos in token.pos %}
+          <tspan>{{pos.pos}}</tspan>
+          {% for feat in pos.features %}
+          {% if feat.value != null %}
+          <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:</tspan>
+          <tspan x="{{token.xpos}}" dy="6" dx="10">{{feat.value}}</tspan>
+          <tspan x="{{token.xpos}}" dy="6" dx="15">|</tspan>
+          <!-- Increase dx for spacing -->
+          {% endif %}
+          {% endfor %}
+          {% endfor %}
+        </text>
+
+      </g>
+      {% endif %} {% endfor %}
+    </svg>
+    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }}
+
+  </div>
 </div>
-<p id="depDetails"></p>
-<svg id="svgCanvas" viewbox="0 0 800 600" width="100%" height="100%">
-  <defs>
-    <marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30"
-      markerUnits="strokeWidth" markerWidth="5"
-      markerHeight="5" orient="auto">
-      <path d="M 0 0 L 60 30 L 0 60 z" fill="#800000" />
-    </marker>
-    <marker id="arrowhead" markerWidth="4" markerHeight="5" refX="60" refY="3.5"
-      orient="a">
-      <polygon points="0 0, 10 3.5, 0 7" />
-    </marker>
-  </defs>
-  {% for token in tokens %} {% if token.number != null %}
-  <g class="p-2 rounded fill-slate-500 hover:fill-slate-900 cursor-pointer"
-    id="{{token.id}}">
-    <circle id="{{token.id}}" cx="{{token.xpos}}" cy="35"
-      class="hover:fill-black hover:stroke-none" r="2.5"
-      fill="white" stroke="black" />
-    <text class="hover-target token" data-tokenId="{{token.id}}"
-      x="{{token.xpos}}" y="50" font-family="Verdana"
-      font-size="12">
-      {% if token.transcription %}
-      {{token.transcription}}
-      {% else %}
-      null
-      {% endif %}
-    </text>
-    <text x="{{token.xpos}}" y="60" font-family="Verdana" font-size="6">
-      {% for pos in token.pos %}
-      <tspan>{{pos.pos}}</tspan>
-      {% for feat in pos.features %}
-      {% if feat.value != null %}
-      <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:</tspan>
-      <tspan x="{{token.xpos}}" dy="6" dx="10">{{feat.value}}</tspan>
-      <tspan x="{{token.xpos}}" dy="6" dx="15">|</tspan>
-      <!-- Increase dx for spacing -->
-      {% endif %}
-      {% endfor %}
-      {% endfor %}
-    </text>
 
-  </g>
-  {% endif %} {% endfor %}
-</svg>
 
-{{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }}
 
+<!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 <script>
 
 // Variables to hold the current position and scale of the viewbox
