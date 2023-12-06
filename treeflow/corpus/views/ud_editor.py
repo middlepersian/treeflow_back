@@ -21,6 +21,8 @@ def calculate_positions(word_length_1, x1, font_size, gap):
 
     return x1, x2
 
+
+
 def deleteDependency(request):
     if request.method == "POST":
         dep_id = request.POST.get("dep_id")
@@ -74,7 +76,9 @@ def ud_editor(request, section_id):
     for token in tokens:
         token_dependencies = []
         token_pos = []
-        x1, x2 = calculate_positions(len(token.transcription), x1, 12, 10)
+        # Check if transcription is None or an empty string before calling len()
+        transcription_length = 0 if token.transcription is None else len(token.transcription)
+        x1, x2 = calculate_positions(transcription_length, x1, 12, 10)
 
         for pos in posList:
             if pos.token == token:
