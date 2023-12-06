@@ -21,4 +21,3 @@ POSFormSet = inlineformset_factory(
         can_delete=True,  # No delete checkbox
     extra=1,  # No extra forms
 )
-

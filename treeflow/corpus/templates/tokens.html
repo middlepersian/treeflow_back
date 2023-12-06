@@ -5,60 +5,40 @@
 <div class="container mx-auto p-4">
 
 
-<!-- Form for selecting text -->
-<form action="{% url 'corpus:tokens' %}" method="get" class="mb-4">
+  {% include "text_dropdown.html" %}
 
-  <!-- Text selection dropdown -->
-  <div class="mb-3">
-    <label for="text-select" class="block text-gray-700 text-sm font-bold mb-2">Choose a text:</label>
-    <select name="text_id" id="text-select" onchange="this.form.submit()"
-      class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-      <option value="">Select a text...</option>
-      {% for text in texts %}
-      <option value="{{ text.id|stringformat:"s" }}" {% if text.id|stringformat:"s" == selected_text_id|stringformat:"s" %}selected{% endif %}>
-        {{ text.title }}
-      </option>
-      {% endfor %} 
-    </select>
-  </div>
-  <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
-</form>
-
-
-<!-- Table for displaying tokens -->
-<table class="min-w-full bg-white mt-6">
-  <thead class="bg-gray-800 text-white">
-    <tr>
-      <th class="px-4 py-2">Number</th>
-      <th class="px-4 py-2">Number in Sentence</th>
-      <th class="px-4 py-2">Sentence</th>
-      <th class="px-4 py-2">Line</th>
-      <th class="px-4 py-2">Transcription</th>
-      <th class="px-4 py-2">Transliteration</th>
-      <th class="px-4 py-2">Lemmas</th>
-      <th class="px-4 py-2">Senses</th>
-      <th class="px-4 py-2">POS</th>
-      <th class="px-4 py-2">Features</th>
-      <th class="px-4 py-2">Insert Before</th>
-      <th class="px-4 py-2">Insert After</th>
-      <th class="px-4 py-2">Delete Token</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- POS and Feature Modal -->
-    <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="featureModal">
-      <div class="flex items-center justify-center min-h-screen">
-          <div class="bg-white rounded-lg shadow-lg w-96 mx-auto">
-              <!-- Modal content here -->
-              <div id="featureModalContent"></div>
+  <!-- Table for displaying tokens -->
+  <table class="min-w-full bg-white mt-6">
+    <thead class="bg-gray-800 text-white">
+      <tr>
+        <th class="px-4 py-2">Number</th>
+        <th class="px-4 py-2">Number in Sentence</th>
+        <th class="px-4 py-2">Sentence</th>
+        <th class="px-4 py-2">Line</th>
+        <th class="px-4 py-2">Transcription</th>
+        <th class="px-4 py-2">Transliteration</th>
+        <th class="px-4 py-2">Lemmas</th>
+        <th class="px-4 py-2">Senses</th>
+        <th class="px-4 py-2">POS</th>
+        <th class="px-4 py-2">Features</th>
+        <th class="px-4 py-2">Insert Before</th>
+        <th class="px-4 py-2">Insert After</th>
+        <th class="px-4 py-2">Delete Token</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- POS and Feature Modal -->
+      <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="featureModal">
+        <div class="flex items-center justify-center min-h-screen">
+          <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4"> <!-- Add p-4 for padding -->
+            <!-- Modal content here -->
+            <div id="featureModalContent"></div> <!-- Add p-4 for padding -->
           </div>
+        </div>
       </div>
-    </div>
-  
-    {% for token in tokens %}
-    <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
-      <!-- Form for the entire row to edit a token -->
-      <form method="post" action="{% url 'corpus:update_token' token.id %}">
+      {% for token in tokens %}
+      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden" id="token-{{ token.id }}">
+
         {% csrf_token %}
         <td class=" border px-4 py-2">{{ token.number }}</td>
 
@@ -118,27 +98,35 @@
           _
           {% endfor %}
         </td>
+        
         <!-- POS -->
-        <td id="pos-cell" class="border px-4 py-2" 
-        hx-get="{% url 'corpus:pos_feature_form' token.id %}" 
-        hx-target="#featureModalContent" 
-        hx-trigger="click">
-          <!--show selected POS-->
-          {% for pos in token.pos_token.all %}
+        <td id="pos-cell" class="border px-4 py-2" hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+          hx-target="#featureModalContent" hx-trigger="click">
+          <span id="pos-content-{{ token.id }}">
+            <!--show selected POS-->
+            <!-- Show selected POS if available -->
+            {% for pos in token.pos_token.all %}
+            {% if pos.pos %}
             {{ pos.pos }}
-          {% endfor %}
+            {% endif %}
+            {% empty %}
+            _
+            {% endfor %}
+          </span>
         </td>
 
         <!-- Features -->
-        <td id="features-cell" class="border px-4 py-2" 
-            hx-get="{% url 'corpus:pos_feature_form' token.id %}" 
-            hx-target="#featureModalContent" 
-            hx-trigger="click">
-          {% for feature in token.feature_token.all %}
-            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %}, {% endif %}
-          {% endfor %}
+        <td id="features-cell" class="border px-4 py-2" hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+          hx-target="#featureModalContent" hx-trigger="click">
+          <span id="features-content-{{ token.id }}">
+            {% for feature in token.feature_token.all %}
+            {{ feature.feature }}={{ feature.feature_value }}{% if not forloop.last %} | {% endif %}
+            {% empty %}
+            _
+            {% endfor %}
+          </span>
         </td>
-        </form>
+
         <!-- Insert Before Button -->
         <td class="border px-4 py-2">
           <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
@@ -292,72 +280,28 @@
 
   </script>
 
-<script>
-
-document.body.addEventListener('htmx:afterRequest', function(event) {
-  // Function to change the input field color based on the response status
-  function changeInputFieldColor(inputField, isSuccess) {
-    if (inputField) {
-      inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
-      // Reset the color back to original after a delay
-      setTimeout(function() {
-        inputField.style.backgroundColor = ''; // Reset to original color
-      }, 2000); // Adjust delay as needed
-    }
-  }
+  <script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+      // Function to change the input field color based on the response status
+      function changeInputFieldColor(inputField, isSuccess) {
+        if (inputField) {
+          inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+          // Reset the color back to original after a delay
+          setTimeout(function () {
+            inputField.style.backgroundColor = ''; // Reset to original color
+          }, 2000); // Adjust delay as needed
+        }
+      }
 
       // Check if the event target is part of the form interaction
       if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.classList.contains('pos-select')) {
         // Parse the response
         var response = JSON.parse(event.detail.xhr.responseText);
 
-    // Change the input field color based on the response
-    changeInputFieldColor(event.detail.elt, response.status === 'success');
-  }
-});
-
-
-
-function handleFormSuccess(response) {
-    if (response.status === 'success') {
-        console.log("Success response");
-        closeFeatureModal();
-        document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
-        document.querySelector('#features-cell').innerHTML = response.features_data_html;
-    }
-    else {
-        closeFeatureModal();
-    }
-}
-
-
-
-document.body.addEventListener('htmx:response', function(event) {
-  console.log("Response received");
-    if (event.detail.xhr.getResponseHeader("Content-Type").includes("application/json")) {
-        var response = JSON.parse(event.detail.xhr.responseText);
-        handleFormSuccess(response);
-    }
-});
-
-
-function closeFeatureModal() {
-    console.log("Closing Feature Modal");
-    document.getElementById('featureModal').classList.add('hidden');
-}
-
-document.body.addEventListener('htmx:afterSwap', function(event) {
-    if (event.detail.target.id === 'featureModalContent') {
-        console.log("Feature Modal Content Swapped");
-        document.getElementById('featureModal').classList.remove('hidden');
-    }
-});
-
-
-function closeFeatureModal() {
-  document.getElementById('featureModal').classList.add('hidden');
-}
-
+        // Change the input field color based on the response
+        changeInputFieldColor(event.detail.elt, response.status === 'success');
+      }
+    });
 
 
 

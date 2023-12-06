@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from treeflow.corpus.models import Text, Section, Token, SectionToken
+from django.core.paginator import Paginator, EmptyPage
 from django.core.cache import cache
-from django.core.paginator import Paginator
+from django.shortcuts import render
 from django.db.models import Prefetch
-from treeflow.corpus.models import Text, Token, POS, SectionToken, Section
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -48,10 +49,10 @@ def sentences_view(request, text_id=None):
     # Prepare context for rendering
     context = {
         'texts': texts,
-        'sentences': sentences,
         'selected_text_id': selected_text_id or '',
         'page_obj': sentences_page,  
         'current_view': 'corpus:sentences',
     }
 
+    # Render response
     return render(request, 'sentences.html', context)
