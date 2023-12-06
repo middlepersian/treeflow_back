@@ -11,7 +11,7 @@
     <!--Previous Button-->
     {% if prev %}
     <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
-      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center"
+      class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm text-center"
       id="prevPageLink"> ← Prev
     </a>
     {% endif %}
@@ -19,7 +19,7 @@
     <!--Next Button-->
     {% if next %}
     <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
-      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-center"
+      class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm text-center"
       id="nextPageLink"> Next →
     </a>
     {% endif %}
@@ -59,6 +59,19 @@
       {% csrf_token %}
       <input type="hidden" name="section_id" value="{{section.id}}" />
     </form>
+
+    <!-- Sentence and Text Information -->
+    <div
+      class="sentence-info-container mx-2 my-4 p-3 bg-gray-100 rounded-lg shadow">
+      {% if section %}
+      <p class="sentence-text font-semibold">
+        <strong>Sentence:</strong> {{ section.identifier }}
+      </p>
+      <p class="additional-text mt-2">
+        <strong>Text:</strong> {{ section.text.identifier }}
+      </p>
+      {% endif %}
+    </div>
 
   </div>
 
@@ -729,7 +742,5 @@ function calculateZoomLevel() {
   });
 
 </script>
-
-
 
 {% endblock content %}
