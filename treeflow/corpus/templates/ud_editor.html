@@ -90,14 +90,12 @@
           null
           {% endif %}
         </text>
-        <text x="{{token.xpos}}" y="60" font-family="Verdana" font-size="6">
+        <text x="{{token.xpos}}" y="65" font-family="Verdana" font-size="6">
           {% for pos in token.pos %}
           <tspan>{{pos.pos}}</tspan>
           {% for feat in pos.features %}
           {% if feat.value != null %}
-          <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:</tspan>
-          <tspan x="{{token.xpos}}" dy="6" dx="10">{{feat.value}}</tspan>
-          <tspan x="{{token.xpos}}" dy="6" dx="15">|</tspan>
+          <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:{{feat.value}}</tspan>
           <!-- Increase dx for spacing -->
           {% endif %}
           {% endfor %}

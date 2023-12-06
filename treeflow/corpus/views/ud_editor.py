@@ -70,7 +70,7 @@ def ud_editor(request, section_id):
     )
     featureList = (Feature.objects.filter(Q(token__in=tokens)).select_related("token").distinct())
     token_data = []
-    additional_space = 20
+    additional_space = 30
     x1 = 0
 
     for token in tokens:
