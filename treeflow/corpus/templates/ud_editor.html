@@ -5,13 +5,13 @@
 <div class="flex flex-col h-screen">
 
   <!-- Buttons and Forms -->
-  <div class="flex flex-row gap-2 mt-2 mb-4">
+  <div class="flex flex-row gap-2 mt-2 mb-4 h-8">
 
     <!--Next and Previous Buttons-->
     <!--Previous Button-->
     {% if prev %}
     <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
-      class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm text-center"
+      class="flex items-center justify-center p-2 bg-blue-600 rounded text-white font-bold"
       id="prevPageLink"> ← Prev
     </a>
     {% endif %}
@@ -19,17 +19,17 @@
     <!--Next Button-->
     {% if next %}
     <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
-      class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm text-center"
+      class="flex items-center justify-center p-2 bg-blue-600 rounded text-white font-bold"
       id="nextPageLink"> Next →
     </a>
     {% endif %}
 
     <!--Enhanced Button-->
-    <button class="p-2 bg-blue-900 rounded text-white font-bold" id="enhanced">
+    <button class="flex items-center justify-center p-2 bg-green-600 rounded text-white font-bold" id="enhanced">
       Hide Enhanced UD
     </button>
     <!--Center Button-->
-    <button class="flex p-2 bg-blue-900 rounded text-white font-bold"
+    <button class="flex items-center justify-center p-2 bg-blue-800 rounded text-white font-bold"
       id="center">
       Center
     </button>
@@ -61,17 +61,17 @@
     </form>
 
     <!-- Sentence and Text Information -->
-    <div
-      class="sentence-info-container mx-2 my-4 p-3 bg-gray-100 rounded-lg shadow">
+    <div class="flex-grow">
       {% if section %}
-      <p class="sentence-text font-semibold">
-        <strong>Sentence:</strong> {{ section.identifier }}
-      </p>
-      <p class="additional-text mt-2">
-        <strong>Text:</strong> {{ section.text.identifier }}
-      </p>
+      <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg shadow-lg">
+        <span class="font-semibold text-gray-700">Sentence:</span>
+        <span class="text-gray-600">{{ section.identifier }}</span>
+        <span class="font-semibold text-gray-700">Text:</span>
+        <span class="text-gray-600">{{ section.text.identifier }}</span>
+      </div>
       {% endif %}
     </div>
+
 
   </div>
 
