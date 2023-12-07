@@ -13,19 +13,32 @@
       <th class="border p-2">Type</th>
       <th class="border p-2">Related Sources</th>
       <th class="border p-2">Zotero Keys</th>
-      <th class="border p-2">Edit</th>
       <th class="border p-2">Delete</th>
     </tr>
   </thead>
   <tbody>
     {% for source in sources %}
     <tr>
-      <td class="border p-2">{{ source.identifier }}</td>
-      <td class="border p-2">{{ source.description }}</td>
-      <td class="border p-2">{{ source.type }}</td>
-      <td class="border p-2">{{ source.sources.all }}</td>
-      <td class="border p-2">{{ source.references.all }}</td>
-      <td class="border p-2"><a class="p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer" href="{%url 'corpus:source_edit' source_id=source.id %}">Edit</a></td>
+      <td class="border p-2">
+        <input type="text" name="identifier" value="{{ source.identifier }}"
+            hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
+            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+      </td>
+      <td class="border p-2">
+        <input type="text" name="description" value="{{ source.description }}"
+            hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
+            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+        </td>
+      <td class="border p-2">
+        <input type="text" name="type" value="{{ source.type }}"
+            hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
+            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            class="shadow border rounded py-2 px-3 text-grey-darker">
+      </td>
+      <td class="border p-2">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
+      <td class="border p-2">{%for ref in source.references.all %}{{ref}}{%endfor%}</td> 
       <td class="border p-2"><a class="p-2 rounded bg-red-800 text-white hover:bg-red-700 cursor-pointer" href="{%url 'corpus:source_delete' source_id=source.id %}">Delete</a></td>
     
     </tr>
@@ -33,5 +46,64 @@
   </tbody>
 </table>
 <a class="p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer mt-2 mx-auto" href="{%url 'corpus:source_add'%}">Add New</a>
+
+<script>
+  document.body.addEventListener('htmx:afterRequest', function (event) {
+    // Function to change the input field color based on the response status
+    function changeInputFieldColor(inputField, isSuccess) {
+      if (inputField) {
+        inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+        // Reset the color back to original after a delay
+        setTimeout(function () {
+          inputField.style.backgroundColor = ''; // Reset to original color
+        }, 2000); // Adjust delay as needed
+      }
+    }
+
+    // Check if the event target is part of the form interaction
+    if (event.detail.elt.name === 'identifier' || event.detail.elt.name === 'description' || event.detail.elt.name === 'type') {
+      // Parse the response
+      var response = JSON.parse(event.detail.xhr.responseText);
+
+      // Change the input field color based on the response
+      changeInputFieldColor(event.detail.elt, response.status === 'success');
+    }
+  });
+
+
+
+  function handleFormSuccess(response) {
+    console.log("Form submission success response received");
+    if (response.status === 'success') {
+      closeFeatureModal();
+      document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
+      document.querySelector('#features-cell').innerHTML = response.features_data_html;
+    } else {
+      closeFeatureModal();
+    }
+  }
+
+  function closeFeatureModal() {
+    console.log("Closing Feature Modal");
+    document.getElementById('featureModal').classList.add('hidden');
+  }
+
+  document.body.addEventListener('htmx:afterSwap', function (event) {
+
+    console.log("htmx:afterSwap event triggered");
+    console.log(event.detail);
+
+    // Check if the swap is for loading modal content
+    if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Feature Modal Content Loaded");
+      document.getElementById('featureModal').classList.remove('hidden');
+    }
+    // Check if the swap is for the feature form
+    if (event.detail.target.id === 'pos-feature-form') {
+      console.log("Feature form submission, closing modal");
+      closeFeatureModal();
+    }
+  });
+</script>
 
 {% endblock %}

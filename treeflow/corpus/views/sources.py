@@ -3,6 +3,7 @@ from django import forms
 from django.views.generic.edit import FormView
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
 
 from ..forms import SourceForm
 
@@ -82,6 +83,17 @@ def create_source(request):
 def source_manuscripts(request):
     # get all sources that are manuscripts
     images = Image.objects.all().prefetch_related('source')
+    
+    Paginator = Paginator(images, 150)
+    page = request.GET.get('page')
+    images = Paginator.get_page(page)
+
+    context = {
+        'images': images,
+        'page_title': 'Manuscripts',
+        
+    }
+
     return render(request, 'source_manuscripts.html', {'manuscripts': images})
 
 def delete_image(request):
