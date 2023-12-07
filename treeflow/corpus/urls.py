@@ -1,5 +1,6 @@
 from django.urls import include, path, re_path
 from treeflow.corpus.views.update_token import update_token
+from treeflow.corpus.views.update_text import update_text
 from treeflow.corpus.views.sections import sections_view
 from treeflow.corpus.views.ud_editor import ud_editor, saveNewDependency, deleteDependency
 from treeflow.corpus.views.tokens import tokens_view
@@ -26,6 +27,7 @@ from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , 
 app_name = "treeflow.corpus"
 urlpatterns = [
     path('update_token/<uuid:token_id>', update_token, name='update_token'),
+    path('update_text/<uuid:text_id>/', update_text, name='update_text'),
     path('sections/', sections_view, name='sections_view'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
