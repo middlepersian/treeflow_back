@@ -1,11 +1,14 @@
 <!-- section_modal.html -->
-<div id="sectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
+<div id="sectionModal"
+    class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white rounded-lg shadow-xl p-6 modal-content w-full max-w-md mx-auto">
+        <div
+            class="bg-white rounded-lg shadow-xl p-6 modal-content w-full max-w-md mx-auto">
             <h2 class="text-lg font-bold mb-4">Create New Section</h2>
-            <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}" method="post" class="space-y-4">
+            <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}"
+                method="post" class="space-y-4">
                 {% csrf_token %}
-                <input type="hidden" name="text_id" id="modalTextId" value="">
+                <input type="hidden" name="text_id" id="modalTextId" value>
                 <div class="space-y-2">
                     {{ form.as_p }}
                 </div>
@@ -27,15 +30,3 @@
         </div>
     </div>
 </div>
-
-
-
-<script>
-    function closeModal() {
-        console.log('close modal');
-        var modal = document.getElementById('sectionModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-</script>

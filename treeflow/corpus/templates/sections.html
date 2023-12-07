@@ -1,50 +1,95 @@
 {% extends "base.html" %}
+{% load static tailwind_tags %}
 
 {% block content %}
-<!-- Form for selecting text and section type with the correct URL pattern for action -->
-<form action="{% url 'corpus:sections_view' %}" method="get">
-  <!-- Text selection dropdown -->
-  <label for="text-select">Choose a text:</label>
-  <select name="text_id" id="text-select" onchange="this.form.submit()">
-    <option value="">Select a text...</option>
-    {% for text in texts %}
-    <option value="{{ text.id }}" {% if text.id == selected_text_id %} selected="selected" {% endif %}>
-      {{ text.title }}
-    </option>
-    {% endfor %}
-  </select>
 
-  <!-- Type selection dropdown -->
-  <label for="type-select">Choose a type:</label>
-  <select name="section_type" id="type-select" onchange="this.form.submit()">
-    <option value="">Select a type...</option>
-    {% for type in section_types %}
-    <option value="{{ type }}" {% if type == selected_section_type %} selected {% endif %}>
-      {{ type }}
-    </option>
-    {% endfor %}
-  </select>
-  <noscript><input type="submit" value="Filter"></noscript>
-</form>
+<!-- Content block starts here -->
+<!-- Assuming the navbar height is automatically adjusted and you don't want to manually calculate it -->
+<div class="flex flex-col w-full">
 
-<!-- Section and Token display -->
-{% for section in sections %}
-<div class="section-details">
-  <!-- Section details here, e.g., title and type -->
-  <p>{{ section.identifier }} - {{ section.type }}</p>
+    <!-- Main content and sidebar container -->
+    <div class="flex-grow grid grid-cols-4 min-h-0">
+
+        <!-- Sidebar -->
+        <div
+            class="sticky top-[4rem] h-[calc(100vh-4rem)] overflow-y-auto col-span-1 bg-gray-100 p-4 z-10">
+
+            <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
+            {% if request.user.is_authenticated %}
+            <button id="startTokenSelection"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+                data-mode="select">
+                Start Token Selection
+            </button>
+            {% endif %}
+            <!-- Sidebar Content Including Edit Button -->
+            <div class="bg-gray-200 px-4 py-2 shadow-md z-10">
+                <h2 class="font-bold text-lg mb-4">Select Section Type</h2>
+                <!-- Dropdown Menu for selecting section type -->
+                <select id="sectionTypeSelector" class="mb-4">
+                    {% for section_type in section_types %}
+                    <option value="{{ section_type }}">{{ section_type|title }}</option>
+                    {% endfor %}
+                </select>
+                <!-- Section List Placeholder -->
+                <div id="sectionList">
+                    <!-- Sections will be dynamically loaded here -->
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Content Area for sentences -->
+        <div class="overflow-y-auto col-span-3">
+            <!-- Loop over sections of type 'sentence' -->
+            {% for section in sentence_sections %}
+            <!-- Sentence Block starts -->
+            <div
+                class="sentence mb-2 flex items-center p-2 bg-white shadow rounded">
+                <!-- Display sentence section title or identifier with a fixed width -->
+                <div class="sentence-identifier w-1/8 font-bold mr-1">
+                    {{ section.number|default:"Untitled" }}
+                </div>
+                <!-- Sentence content tokens displayed next to the identifier -->
+                <div class="sentence-content w-2/8 flex flex-wrap">
+                    {% for token in section.prefetched_tokens %}
+                    <!-- Add data-section-id attribute to each token -->
+                    <span class="token inline-block rounded px-1 py-0.5 m-0.5"
+                        data-token-id="{{ token.id }}"
+                        data-section-id="{{ section.id }}">
+                        <!-- Add this line -->
+                        {{ token.transcription }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+            </div>
+            {% empty %}
+            <p>No sentence sections found for this text.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <input type="hidden" id="id_selected_tokens" name="selected_tokens" value>
+
+    <!-- Scroll to Top -->
+    <div class="fixed bottom-5 right-5 hidden scroll-to-top">
+        <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+            onclick="scrollToTop()">↑</button>
+    </div>
+
+    <div id="modalContainer"></div>
+
 </div>
-<div class="token-list">
-  {% for section_token in section.sectiontoken_set.all %}
-    <form method="post" action="{% url 'corpus:update_token' section_token.token.id %}">
-      {% csrf_token %}
-      <input type="hidden" name="token_id" value="{{ section_token.token.id }}">
-      <input type="text" name="transcription" value="{{ section_token.token.transcription }}">
-      <input type="text" name="transliteration" value="{{ section_token.token.transliteration }}">
-      <input type="submit" value="Save Changes">
-    </form>
-  {% endfor %}
-</div>
-{% empty %}
-<p>No sections available for the selected text or type.</p>
-{% endfor %}
+
+<script>
+    var textId = '{{ text_id }}';
+</script>
+
+<script src="{% static 'corpus/section_navigator.js'%}"></script>
+<script src="{% static 'corpus/scroll_to_top.js'%}"></script>
+<script src="{% static 'corpus/section_creator.js'%}"></script>
+
 {% endblock content %}

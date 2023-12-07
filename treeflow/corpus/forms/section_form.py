@@ -22,7 +22,7 @@ class SectionForm(forms.ModelForm):
 
     class Meta:
         model = Section
-        fields = ['identifier', 'type', 'title', 'language', 
+        fields = ['identifier', 'type', 'title', 
                   'source', 'container', 'insertion_method', 'reference_section']
 
     def __init__(self, *args, **kwargs):

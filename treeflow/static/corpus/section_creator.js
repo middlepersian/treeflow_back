@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', function () {
     let startTokenId = null;
     let endTokenId = null;
     let isSelectingTokens = false;
+    let selectedTokens = []; // Array to hold selected tokens
+    let selectedTokenIds = []; // Array to hold selected token IDs
+    let selectedTokenTexts = ''; // String to hold selected token texts
+
 
     var csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
     if (csrfTokenMeta) {
@@ -41,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
     // Observer to observe the addition of new tokens
     function handleTokenClick(tokenElement) {
         console.log("Token clicked:", tokenElement.dataset.tokenId);
@@ -49,27 +54,29 @@ document.addEventListener('DOMContentLoaded', function () {
         // When the first token is clicked, highlight it immediately
         if (startTokenId === null) {
             startTokenId = tokenId;
-            tokenElement.style.backgroundColor = '#bbf7d0'; // Highlight the first token
+            tokenElement.classList.add('bg-green-200'); // Highlight the first token using Tailwind class
         }
         // When the second token is clicked, highlight the range
         else if (endTokenId === null && tokenId !== startTokenId) {
             endTokenId = tokenId;
-            highlightTokensBetween(startTokenId, endTokenId); // Highlight tokens between the range
+            highlightTokensBetween(startTokenId, endTokenId); // Highlight tokens between the range using Tailwind class
         }
     }
+
 
     function highlightTokensBetween(startId, endId) {
         let inRange = false;
         document.querySelectorAll('.token').forEach(token => {
             if (token.dataset.tokenId === startId || token.dataset.tokenId === endId) {
                 inRange = !inRange;
-                token.style.backgroundColor = '#bbf7d0';
+                token.classList.add('bg-green-200');
             }
             if (inRange || token.dataset.tokenId === endId) {
-                token.style.backgroundColor = '#bbf7d0';
+                token.classList.add('bg-green-200');
             }
         });
     }
+
 
     // Function to add event listeners to tokens
     function addTokenClickListeners() {
@@ -98,11 +105,11 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (mode === 'finish') {
             // Finish selecting tokens logic
             isSelectingTokens = false;
-            let selectedTokens = Array.from(document.querySelectorAll('.token'))
-                .filter(token => token.style.backgroundColor === 'rgb(187, 247, 208)');
-            let selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
-            let selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
-
+            selectedTokens = Array.from(document.querySelectorAll('.token'))
+                .filter(token => token.classList.contains('bg-green-200'));
+            selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
+            selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
+    
             let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
             // Issue a GET request with the constructed query string
             htmx.ajax('GET', '/corpus/load_section_modal' + queryString, {
@@ -112,14 +119,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modalTextId').value = textId;
                 console.log('Modal content loaded');
             });
-
-            // Store selected token texts for display in the modal
-            localStorage.setItem('selectedTokenTexts', selectedTokenTexts);
-
+        
             // Reset the button for a new selection
             this.textContent = 'Start Token Selection';
             this.setAttribute('data-mode', 'select');
         }
+
     });
 
     // Function to show the modal
@@ -129,24 +134,52 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modal) {
             modal.style.display = 'block';
             // Display the selected tokens
-            let selectedTokenTexts = localStorage.getItem('selectedTokenTexts') || 'No tokens selected';
-            document.getElementById('selectedTokensDisplay').textContent = selectedTokenTexts;
+            document.getElementById('selectedTokensDisplay').textContent = selectedTokenTexts || 'No tokens selected';
         } else {
             console.error('Modal not found in the DOM.');
         }
     }
 
 
+    function deselectAllTokens() {
+        document.querySelectorAll('.token').forEach(token => {
+            token.classList.remove('bg-green-200'); // Reset the token using Tailwind class
+        });
+        startTokenId = null; // Reset start token ID
+        endTokenId = null;   // Reset end token ID
+        selectedTokenIds = []; // Reset selected token IDs
+    }
+
+
+    function closeModal() {
+        console.log('Closing modal');
+        var modal = document.getElementById('sectionModal');
+        if (modal) {
+            modal.style.display = 'none';
+            deselectAllTokens(); // Deselect tokens when closing the modal
+            isSelectingTokens = false; // Reset the token selection flag
+            selectedTokenTexts = ''; // Reset the selected token texts
+        }
+    }
+    
 
     document.body.addEventListener('htmx:afterSwap', function (event) {
+        console.log('htmx:afterSwap event triggered', event);
         if (event.target.id === 'modalContainer') {
             // Show the modal
             openModal();
+            // Bind closeModal to the Cancel button in the modal
+            const cancelButton = document.querySelector('#sectionModal button[onclick="closeModal()"]');
+            if (cancelButton) {
+                cancelButton.onclick = closeModal; // Bind closeModal function
+
+            } else {
+                console.error('Cancel button not found in the modal.');
+            }
         }
     });
 
-
     // Start observing
     observer.observe(document.body, { childList: true, subtree: true });
-
+  
 });
