@@ -1,71 +1,83 @@
+import uuid as uuid_lib
 from django.db import models
+from django.conf import settings
 
 
 class SearchCriteria(models.Model):
+    # Options
     QUERY_TYPE_CHOICES = [
         ("exact", "Exact"),
         ("fuzzy", "Fuzzy"),
     ]
 
     FIELD_CHOICES = [
+        ("id", "ID"),
+        ("number", "Number"),
+        ("numberInSentence", "Number in sentence"),
+        ("root", "Root"),
+        # ("text", "Text"),
+        ("language", "Language"),
         ("transcription", "Transcription"),
         ("transliteration", "Transliteration"),
-        ("gloss", "Gloss"),
         ("avestan", "Avestan"),
-        ("language", "Language"),
-        ("root", "Root"),
-        ("number", "Number"),
-        ("numberInSentence", "Number In Sentence"),
-        ("id", "ID"),
-        ("text", "Text"),
+        ("gloss", "Gloss"),
+        ("created_at", "Created"),
     ]
 
     LANGUAGE_CHOICES = [
         ("", "All"),
-        ("Middle_Persian", "Middle Persian"),
-        ("Imperial_Aramaic", "Imperial Aramaic"),
-        ("Avestan", "Avestan"),
-        ("Ancient_Greek", "Ancient Greek"),
-        ("Parthian", "Parthian"),
-        ("Parsi", "Parsi"),
-        ("Arabic", "Arabic"),
-        ("Gujarati", "Gujarati"),
-        ("Sanskrit", "Sanskrit"),
-        ("English", "English"),
-        ("French", "French"),
-        ("German", "German"),
-        ("Italian", "Italian"),
-        ("Spanish", "Spanish"),
+        ("pal", "Middle Persian"),
+        ("arc", "Imperial Aramaic"),
+        ("ave", "Avestan"),
+        ("grc", "Ancient Greek"),
+        ("xpr", "Parthian"),
+        ("prp", "Parsi"),
+        ("ara", "Arabic"),
+        ("guj", "Gujarati"),
+        ("san", "Sanskrit"),
+        ("eng", "English"),
+        ("fra", "French"),
+        ("deu", "German"),
+        ("ita", "Italian"),
+        ("spa", "Spanish"),
     ]
 
+    DISTANCE_TYPE_CHOICES = [
+        ("both", "Search on both sides"),
+        ("left", "Before anchor"),
+        ("right", "After anchor"),
+    ]
+
+    user = user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+
+    query = models.CharField(blank=False, max_length=255, default="")
     query_type = models.CharField(
-        max_length=20, choices=QUERY_TYPE_CHOICES, default="exact"
+        blank=False, choices=QUERY_TYPE_CHOICES, default="exact"
     )
-
     query_field = models.CharField(
-        max_length=20, choices=FIELD_CHOICES, default="transcription"
+        blank=False, choices=FIELD_CHOICES, default="transcription"
     )
-
-    query_value = models.CharField(max_length=255, default="")
-
-    pos_token = models.CharField(max_length=255, blank=True, default="")
-
-    remove_stopwords = models.BooleanField(default=False)
 
     distance = models.IntegerField(blank=True, null=True, default=0)
-
-    feature = models.CharField(max_length=255, blank=True, default="")
-
-    feature_value = models.CharField(max_length=255, blank=True, default="")
-
-    lemma_language = models.CharField(
-        max_length=20, blank=True, choices=LANGUAGE_CHOICES, default=""
+    distance_type = models.CharField(
+        blank=True,
+        choices=DISTANCE_TYPE_CHOICES,
+        default="both",
     )
 
-    lemma_value = models.CharField(max_length=255, blank=True, default="")
-
-    meaning_language = models.CharField(
-        max_length=20, blank=True, choices=LANGUAGE_CHOICES, default=""
+    logical_operator = models.CharField(
+        blank=True, choices=[("AND", "AND"), ("OR", "OR")], default="AND",
     )
 
-    meaning_value = models.CharField(max_length=255, blank=True, default="")
+    # TODO: Missing fields
+    # lemmas
+    # senses
+    # pos
+    # features
+
+class ResultFilter(models.Model):
+    text = models.ForeignKey("corpus.Text", null=True, blank=True, on_delete=models.CASCADE)
+    section = models.ForeignKey(
+        "corpus.Section", null=True, blank=True, on_delete=models.CASCADE
+    )
+    remove_stopwords = models.BooleanField(default=False)

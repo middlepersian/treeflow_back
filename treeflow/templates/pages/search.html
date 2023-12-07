@@ -2,73 +2,37 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block extend_head %}
-  <link rel="stylesheet" href="{% static 'search/search.css' %}" />
-  <script src="{% static 'search/forms.js' %}"></script>
+<link rel="stylesheet" href="{% static 'search/search.css' %}" />
+<script src="{% static 'search/forms.js' %}"></script>
 {% endblock %}
 {% block title %}
-  Search
+treeflow - Search
 {% endblock %}
 
 {% block content %}
-  <div class="w-full flex flex-row justify-center">
+<div class="flex flex-col">
     <div id="search" class="flex flex-col">
-      <button id="toggle-search" class="h-12 font-semibold"><h3>Search</h3></button>
-      <div id="search-forms" class="overflow-x-auto">
-        <form id="form-set" method="post">
-          {% csrf_token %}
-          {% if formset.non_form_errors %}
-            <div>
-              {% for error in formset.non_form_errors %}
-                <div class="text-red-500">{{ error }}</div>
-              {% endfor %}
-            </div>
-          {% endif %}
-          <div class="cards">
-            {{ formset.management_form }}
-            <div id="empty-form" style="display:none">
-              <div class="card relative">
-                {% include 'search/form.html' with form=formset.empty_form firstForm=False %}
-              </div>
-            </div>
-            {% for form in formset %}
-              <div id="form-initial" class="card relative">
-                {% include 'search/form.html' with form=form firstForm=forloop.first %}
-              </div>
-            {% endfor %}
-          </div>
-        </form>
-        <input form="form-set" type="submit" value="Search" class="w-[10%] min-w-fit max-w-full p-2 mb-4 text-center text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-md focus:shadow-outline hover:bg-indigo-800 cursor-pointer" />
-      </div>
-    </div>
-    {% comment %} <div id="results">
-      <button id="toggle-results" class="h-12 font-semibold"><h3>Results</h3></button>
-      <div class="flex">
-        <div className="w-full">
-          <div className="text-lg font-bold text-indigo-600">Total number of results: {{ results|length }}</div>
-          {% if (results|length) > 0 %}
-            <table className="table-fixed">
-              <thead>
-                <tr>
-                  <th className="w-[200px] text-sm">Text</th>
-                  <th className="w-[200px] text-sm">ID</th>
-                  <th className="w-max text-sm">Section</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for result in results %}
-                  <tr>
-                    <td className="text-sm">{{ result.text }}</td>
-                    <td className="text-sm">{{ result.id }}</td>
-                    <td className="text-sm">{{ result.section }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          {% else %}
-            <div className="text-lg font-bold text-indigo-600">No results found</div>
-          {% endif %}
+        <button id="toggle-search" class="h-12 font-semibold">
+            <h1>Search</h1>
+        </button>
+        <div id="search-type" class="flex gap-4">
+            <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:change_search_type' %}"
+                hx-target="#search-forms" hx-swap="innerHTML">
+                <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
+                <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
+            </select>
         </div>
-      </div>
-    </div> {% endcomment %}
-  </div>
+        <div id="search-forms" class="overflow-x-auto text-center">
+            {% include "search/formset.html" %}
+        </div>
+    </div>
+    <div id="results" class="flex flex-col">
+        <button id="toggle-results" class="h-12 font-semibold">
+            <h1>Results</h1>
+        </button>
+        <div id="results-list">
+            {% include "search/results.html" with queries=queries %}
+        </div>
+    </div>
+</div>
 {% endblock %}

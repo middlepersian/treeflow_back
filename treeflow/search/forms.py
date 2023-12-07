@@ -1,20 +1,42 @@
 from django.forms import modelformset_factory
-from .models import SearchCriteria
+from django import forms
+from .models import SearchCriteria, ResultFilter
+from treeflow.corpus.models import Token
 
 
-SearchFormSet = modelformset_factory(
-    SearchCriteria, fields=(
-        "query_type",
-        "query_field",
-        "query_value",
-        "pos_token",
-        "remove_stopwords",
-        "distance",
-        "feature",
-        "feature_value",
-        "lemma_language",
-        "lemma_value",
-        "meaning_language",
-        "meaning_value",
-    )
-)
+class DistanceForm(forms.ModelForm):
+    class Meta:
+        model = SearchCriteria
+        fields = (
+            "query",
+            "query_type",
+            "query_field",
+            "distance",
+            "distance_type",
+        )
+
+
+class LogicalForm(forms.ModelForm):
+    class Meta:
+        model = SearchCriteria
+        fields = (
+            "query",
+            "query_type",
+            "query_field",
+            "logical_operator",
+        )
+
+
+class ResultFilterForm(forms.ModelForm):
+    class Meta:
+        model = ResultFilter
+        fields = (
+            "text",
+            "section",
+            "remove_stopwords",
+        )
+
+
+DistanceFormSet = modelformset_factory(SearchCriteria, form=DistanceForm, extra=1)
+
+LogicalFormSet = modelformset_factory(SearchCriteria, form=LogicalForm, extra=1)

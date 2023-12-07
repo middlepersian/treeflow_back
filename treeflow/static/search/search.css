@@ -19,6 +19,7 @@ label {
 .cards {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
     width: 100%;
     gap: 2em;
@@ -41,14 +42,18 @@ label {
     margin-top: .5rem;
 }
 
-.card input,
-.card select {
-    border-radius: 0.25rem;
+input,
+select {
+    border-radius: 0.25rem !important;
+}
+
+input[type="number"]  {
+    width: 20%;
 }
 
 .card input[type="text"],
 .card select {
-    max-width: 90%;
+    max-width: 80%;
 }
 
 .card input,
