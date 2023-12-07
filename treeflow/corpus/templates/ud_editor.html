@@ -129,6 +129,64 @@
 <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 <script>
 
+
+function getArcHeight(distance) {
+  const minHeight = 10; // The minimum height of an arc
+  const heightFactor = 0.05; // Factor to control growth rate of the arc height based on distance squared
+  const maxHeight = 75; // Increase maximum height if needed
+
+  // Quadratic growth based on the distance
+  let arcHeight = minHeight + heightFactor * Math.pow(distance, 2);
+
+  // Ensure the arcHeight does not exceed the maximum value
+  return Math.min(arcHeight, maxHeight);
+}
+
+
+let arcRegistry = {};
+
+function registerArc(fromTokenId, toTokenId) {
+  const key = `${fromTokenId}-${toTokenId}`;
+  if (!arcRegistry[key]) {
+    arcRegistry[key] = 0;
+  }
+  arcRegistry[key] += 1;
+  return arcRegistry[key];
+}
+
+function createBezierArc(x1, y1, x2, y2, fromTokenId, toTokenId) {
+  // Calculate the distance between the start and end tokens
+  const distance = Math.abs(x2 - x1);
+
+  // Get the index of the arc to determine its order among multiple arcs between the same tokens
+  const arcIndex = registerArc(fromTokenId, toTokenId);
+
+  // Base height of the arc is set as a fraction of the distance between tokens
+  // Adjust the 0.4 factor to control the height of the shortest arc
+  const baseArcHeight = distance * 0.4;
+  
+  // Increment height for each additional arc to avoid overlap
+  // Adjust the 20 constant to control the additional height for overlapping arcs
+  const arcHeightIncrement = 20;
+
+  // Calculate the total height of the arc by adding the base height and additional height for overlapping arcs
+  let arcHeight = baseArcHeight + ((arcIndex - 1) * arcHeightIncrement);
+  
+  // Determine the direction of the arc based on token positions
+  const upwardArc = x1 < x2;
+
+  // Control points are set to create the arc's curve
+  // If the arc is not the first one, increase the height of the control points
+  const cp1x = x1;
+  const cp2x = x2;
+  const cp1y = y1 - (upwardArc ? arcHeight : -arcHeight);
+  const cp2y = y2 - (upwardArc ? arcHeight : -arcHeight);
+
+  // Construct the SVG path for the arc
+  return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+}
+
+
 // Variables to hold the current position and scale of the viewbox
 const svgNS = "http://www.w3.org/2000/svg";
 const svg = document.getElementById("svgCanvas");
@@ -265,12 +323,10 @@ document.querySelectorAll("circle").forEach((item) =>
       if (tokenTo) {
         const path = document.createElementNS(svgNS, "path");
         const arcDefinition = createBezierArc(
-          tokenData.find((e) => e.id === fromTokenId).xpos,
-          32.5,
-          tokenData.find((e) => e.id === tokenTo).xpos,
-          32.5
+          fromToken.xpos, 32.5, 
+          toToken.xpos, 32.5, 
+          fromTokenId, toTokenId 
         );
-
         path.setAttribute("d", arcDefinition);
         path.setAttribute("fill", "none");
         path.setAttribute("stroke", "black");
@@ -306,11 +362,17 @@ svg.addEventListener("mousemove", (event) => {
   const mouseY = loc.y - 5;
   cleanAllElementsWithClass("temp-path");
   const path = document.createElementNS(svgNS, "path");
+  // Use fromTokenId for the starting token
+  // Create a dynamic ID for the mouse position
+  const mouseTokenId = `mouse-${mouseX}-${mouseY}`;
+
   const arcDefinition = createBezierArc(
-    tokenData.find((e) => e.id === fromTokenId).xpos,
-    35,
-    mouseX,
-    mouseY
+    tokenData.find((e) => e.id === fromTokenId).xpos, // X position of the starting token
+    35, // Y position for the arc
+    mouseX, // Current mouse X position
+    mouseY, // Current mouse Y position
+    fromTokenId, // ID of the starting token
+    mouseTokenId // Temporary ID for the mouse position
   );
   path.setAttribute("d", arcDefinition);
   path.setAttribute("fill", "none");
@@ -322,14 +384,6 @@ svg.addEventListener("mousemove", (event) => {
 });
 //#endregion
 
-function createBezierArc(x1, y1, x2, y2, upwards = true) {
-  const cp1x = x1;
-  const cp2x = x2;
-  const arcHeight = Math.abs(x1 - x2)*0.4;
-  const cp1y = y1 - (upwards ? arcHeight : -arcHeight);
-  const cp2y = y2 - (upwards ? arcHeight : -arcHeight);
-  return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
-}
 
 function cleanAllElementsWithClass(className) {
   const tempPaths = document.getElementsByClassName(className);
@@ -354,7 +408,14 @@ tokenData.forEach((token) => {
     g.setAttribute("data-enhanced",dep.enhanced)
     g.setAttribute("data-id",dep.id)
     const path = document.createElementNS(svgNS, "path");
-    const arcDefinition = createBezierArc(token.xpos, 32.5, depPos, 32.5);
+
+    // Updated arcDefinition call with fromTokenId and toTokenId
+    const arcDefinition = createBezierArc(
+      token.xpos, 32.5, // X and Y positions of the starting token
+      depPos, 32.5,    // X and Y positions of the ending token
+      token.id,        // ID of the starting token
+      dep.to_token_id.id  // ID of the ending token
+    );
     path.setAttribute("d", arcDefinition);
     path.setAttribute("fill", "none");
     path.setAttribute("stroke", pathColor);
