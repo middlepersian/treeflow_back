@@ -323,9 +323,11 @@ document.querySelectorAll("circle").forEach((item) =>
       if (tokenTo) {
         const path = document.createElementNS(svgNS, "path");
         const arcDefinition = createBezierArc(
-          fromToken.xpos, 32.5, 
-          toToken.xpos, 32.5, 
-          fromTokenId, toTokenId 
+          tokenData.find((e) => e.id === fromTokenId).xpos,
+          32.5,
+          tokenData.find((e) => e.id === tokenTo).xpos,
+          32.5,
+          fromTokenId, tokenTo.id 
         );
         path.setAttribute("d", arcDefinition);
         path.setAttribute("fill", "none");
@@ -377,7 +379,7 @@ svg.addEventListener("mousemove", (event) => {
   path.setAttribute("d", arcDefinition);
   path.setAttribute("fill", "none");
   path.setAttribute("stroke", "black");
-  path.setAttribute("stroke-width", "1");
+  path.setAttribute("stroke-width",  "1");
   path.setAttribute("marker-end", "url(#arrowhead)");
   path.classList.add("temp-path");
   svg.appendChild(path);
@@ -426,16 +428,19 @@ tokenData.forEach((token) => {
     path.setAttribute("data-to", dep.to_token_id.id);
     path.setAttribute("data-enhanced", dep.enhanced);
     path.setAttribute("id", dep.id);
+
+    //Path Label
     const text = document.createElementNS(svgNS, "text");
-    text.setAttribute("font-size", 8);
+    text.setAttribute("font-size", 10);
+    text.setAttribute("fill", "red");
     const textpath = document.createElementNS(svgNS, "textPath");
     textpath.setAttribute("path", arcDefinition);
     if(token.xpos > depPos){
-      textpath.setAttribute("startOffset", "55%");
+      textpath.setAttribute("startOffset", "50%");
       textpath.setAttribute("side", "right");
 
     }
-    textpath.setAttribute("startOffset", "45%");
+    textpath.setAttribute("startOffset", "40%");
     textpath.innerHTML = dep.rel;
     text.append(textpath);
     path.addEventListener("click", (event) => {
