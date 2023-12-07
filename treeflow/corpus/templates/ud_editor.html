@@ -13,7 +13,7 @@
     {% if prev %}
     <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
       class="flex items-center justify-center p-2 bg-blue-700 rounded text-white font-bold"
-      id="prevPageLink"> ← Prev
+      id="prevPageLink"> ←
     </a>
     {% endif %}
 
@@ -21,7 +21,7 @@
     {% if next %}
     <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
       class="flex items-center justify-center p-2 bg-blue-700 rounded text-white font-bold"
-      id="nextPageLink"> Next →
+      id="nextPageLink"> →
     </a>
     {% endif %}
 
@@ -491,26 +491,22 @@ svg.onmousedown = function (event) {
     isPanning = true;       // Indicate that panning is active
 
     let mouseStartPos = cursorPoint(event);
-    let lastMouseMoveTime = Date.now();
 
     function onMouseMove(event) {
         if (!isPanning) return;
 
-        const now = Date.now();
-        // Control the update rate (e.g., 50ms)
-        if (now - lastMouseMoveTime < 50) return;
-        lastMouseMoveTime = now;
+        requestAnimationFrame(() => {
+            const newMousePos = cursorPoint(event);
+            const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
+            const dy = (newMousePos.y - mouseStartPos.y) / currentZoom;
 
-        const newMousePos = cursorPoint(event);
-        const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
-        const dy = (newMousePos.y - mouseStartPos.y) / currentZoom;
+            currentX -= dx;
+            currentY -= dy;
 
-        currentX -= dx;
-        currentY -= dy;
+            updateViewBox(currentX, currentY, currentZoom);
 
-        updateViewBox(currentX, currentY, currentZoom);
-
-        mouseStartPos = newMousePos;
+            mouseStartPos = newMousePos;
+        });
     }
 
     function onMouseUp() {
@@ -524,6 +520,7 @@ svg.onmousedown = function (event) {
 };
 
 
+// scroll to zoom
 svg.onwheel = function (event) {
     event.preventDefault();
 
@@ -531,26 +528,30 @@ svg.onwheel = function (event) {
     const wheelDelta = event.deltaY < 0 ? 1 : -1;
     const zoomFactor = Math.exp(wheelDelta * zoomIntensity);
 
-    // Calculate the mouse position relative to the SVG
+    // Get the current mouse position relative to the SVG
     const mousePos = cursorPoint(event);
 
-    // Adjust viewBox based on zoom centered on the mouse position
+    // Calculate the new zoom level
     const newZoom = currentZoom * zoomFactor;
+
+    // Calculate the viewbox dimensions at the new zoom level
     const newWidth = svg.clientWidth / newZoom;
     const newHeight = svg.clientHeight / newZoom;
+
+    // Calculate new viewbox origin to keep the mouse position stable relative to the content
     const newX = mousePos.x - (mousePos.x - currentX) * zoomFactor;
     const newY = mousePos.y - (mousePos.y - currentY) * zoomFactor;
 
-    // Update current viewbox parameters
+    // Update the current viewbox parameters
     currentX = newX;
     currentY = newY;
     currentZoom = newZoom;
 
-    updateViewBox(currentX, currentY, currentZoom);
+    updateViewBox(currentX, currentY, newZoom);
 };
 
 
-
+//double click to zoom in
 svg.ondblclick = function(event) {
     event.preventDefault();
 
