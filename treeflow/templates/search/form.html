@@ -1,7 +1,7 @@
 {% load static %}
 
 <div id="criteria" class="text-left">
-    <h2 class="font-medium text-gray-900 whitespace-normal">Search token</h2>
+    <h4 class="font-bold text-gray-900 whitespace-normal">Search token</h4>
     <div id="query-type" class="flex justify-between items-center gap-4">
         <label>Query type</label>
         <div class="text-right">
@@ -33,13 +33,13 @@
                 <line x1="12" y1="22" x2="12" y2="8"></line>
                 <path d="M5 12H2a10 10 0 0 0 20 0h-3"></path>
             </svg>
-            <h3 title="(All search queries are made relative to this token.)">Anchor token</h3>
+            <h4 title="(All search queries are made relative to this token.)" class="text-sm font-semibold">Anchor token</h4>
         </div>
     {% endif %}
 
     {% if layout == "distance" and not firstForm %}
         <div id="distance-values" class="flex flex-col pt-4">
-            <label class="font-medium text-gray-900">
+            <label class="text-sm font-semibold text-gray-900">
                 Distance to anchor in steps
             </label>
             <div class="flex flex-row gap-4 justify-between">

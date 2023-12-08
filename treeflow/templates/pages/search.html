@@ -13,7 +13,7 @@ treeflow - Search
 <div class="flex flex-col">
     <div id="search" class="flex flex-col">
         <button id="toggle-search" class="h-12 font-semibold">
-            <h1>Search</h1>
+            <h3>Search</h3>
         </button>
         <div id="search-type" class="flex gap-4">
             <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:change_search_type' %}"
@@ -28,7 +28,7 @@ treeflow - Search
     </div>
     <div id="results" class="flex flex-col">
         <button id="toggle-results" class="h-12 font-semibold">
-            <h1>Results</h1>
+            <h3>Results</h3>
         </button>
         <div id="results-list">
             {% include "search/results.html" %}
