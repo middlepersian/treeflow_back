@@ -6,6 +6,8 @@
 <!-- Content block starts here -->
 <!-- Assuming the navbar height is automatically adjusted and you don't want to manually calculate it -->
 <div class="flex flex-col w-full">
+      <!-- Text Dropdown -->
+  <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
 
     <!-- Main content and sidebar container -->
     <div class="flex-grow grid grid-cols-8 min-h-0">

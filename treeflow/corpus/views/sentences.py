@@ -1,13 +1,15 @@
-from treeflow.corpus.models import Text, Section, Token, SectionToken
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
 from django.core.cache import cache
 from django.shortcuts import render
 from django.db.models import Prefetch
 import logging
+from treeflow.corpus.models import Text, Section, Token, SectionToken
+
 
 logger = logging.getLogger(__name__)
 
-
+@login_required
 def sentences_view(request, text_id=None):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
