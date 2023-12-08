@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block content %}
+  {% include 'components/hero.html' %}
+  <div className="flex flex-col">
+    <div className="flex flex-col w-full pb-20">
+      <div class="flex flex-row mt-8 mb-20">
+        <div class="sticky border-r-2 smartphone:hidden sm:block h-fit border-sb-gray opacity-60">
+          <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
+            <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">{% trans 'PUBLICATIONS' %}</h1>
+          </div>
+        </div>
+        <div class="flex flex-col w-full smartphone:px-4 sm:pr-32 sm:pl-16">
+          <div class="w-full h-full animate-fade-up">
+            {% for publication_group in publications %}
+              <div>
+                <h2 class="text-left uppercase text-h2-gray">{{ publication_group.name }}</h2>
+                {% for publication in publication_group.data %}
+                  <div class="flex flex-col items-start justify-start">
+                    <span class="flex flex-row my-1 text-xs lg:text-base md:text-sm sm:text-xs">{{ publication.bib|safe }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+              {% if not forloop.last %}
+                <hr class="mt-8" />
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% include 'components/footer.html' %}
+    </div>
+  </div>
+{% endblock %}

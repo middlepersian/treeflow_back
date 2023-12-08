@@ -1,80 +1,177 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
-
 <div class="overflow-x-auto">
-    <table class="min-w-full bg-white">
-      <thead class="bg-gray-800 text-white">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Title
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Identifier
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Language
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Sigle
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Genre
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Version
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Stage
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Created At
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-700">
-        {% for text in texts %}
+  <table class="min-w-full bg-white">
+    <thead class="bg-gray-800 text-white">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Title</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Identifier</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Sigle</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Sources</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Genre</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Version</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Stage</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Sentences View</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Sections View</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Tokens View</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Created At</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="text-gray-700">
+      {% for text in texts %}
+        {% csrf_token %}
         <tr class="border-b">
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="title_{{ text.id }}" value="{{ text.title }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+        <!-- Title -->
+        <td class="px-6 py-4 whitespace-nowrap">
+          {% if request.user.is_authenticated %}
+            <input type="text" name="title"
+              value="{{ text.title }}"
+              hx-post="{% url 'corpus:update_text' text.id %}"
+              hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ text.id }}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="form-input rounded-md shadow-sm mt-1 block w-full text-center" />
+          {% else %}
+            <span>{{ text.title }}</span>
+          {% endif %}
+
+
+           <!-- Identifier -->
+        <td class="px-6 py-4 whitespace-nowrap">
+          {% if request.user.is_authenticated %}
+            <input type="text" name="identifier"
+              value="{{ text.identifier }}"
+              hx-post="{% url 'corpus:update_text' text.id %}"
+              hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ text.id }}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="form-input rounded-md shadow-sm mt-1 block w-full text-center" />
+          {% else %}
+            <span>{{ text.identifier }}</span>
+          {% endif %}
+        </td>
+
+        <!-- Sigle -->
+        <td class="px-6 py-4 whitespace-nowrap">
+          {% if request.user.is_authenticated %}
+            <input type="text" name="series"
+              value="{{ text.series }}"
+              hx-post="{% url 'corpus:update_text' text.id %}"
+              hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ text.id }}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="form-input rounded-md shadow-sm mt-1 block w-full text-center" />
+          {% else %}
+            <span>{{ text.series }}</span>
+          {% endif %}
+        </td>
+          <!-- Sources -->
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            {{ text.sources.all|join:", " }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="identifier_{{ text.id }}" value="{{ text.identifier }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+
+        <!-- Genre -->
+        <td class="px-6 py-4 whitespace-nowrap">
+          {% if request.user.is_authenticated %}
+            <input type="text" name="label"
+              value="{{ text.label }}"
+              hx-post="{% url 'corpus:update_text' text.id %}"
+              hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ text.id }}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="form-input rounded-md shadow-sm mt-1 block w-full text-center" />
+          {% else %}
+            <span>{{ text.label }}</span>
+          {% endif %}
+        </td>
+
+        <!-- Version -->
+        <td class="px-6 py-4 whitespace-nowrap">
+          {% if request.user.is_authenticated %}
+            <input type="text" name="version"
+              value="{{ text.version }}"
+              hx-post="{% url 'corpus:update_text' text.id %}"
+              hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ text.id }}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="form-input rounded-md shadow-sm mt-1 block w-full text-center" />
+          {% else %}
+            <span>{{ text.version }}</span>
+          {% endif %}
+        </td>
+        <!-- Stage -->
+        <td class="px-6 py-4 whitespace-nowrap">
+          {% if request.user.is_authenticated %}
+            <input type="text" name="stage"
+              value="{{ text.stage }}"
+              hx-post="{% url 'corpus:update_text' text.id %}"
+              hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ text.id }}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="form-input rounded-md shadow-sm mt-1 block w-full text-center" />
+          {% else %}
+            <span>{{ text.stage }}</span>
+          {% endif %}
+        </td>
+
+          <!-- Sentences View-->
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <a href="{% url 'corpus:sentences' text_id=text.id %}">&#128065;</a>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="language_{{ text.id }}" value="{{ text.language|join:', ' }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          <!-- Sections View-->
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <a href="{% url 'corpus:sections' text_id=text.id %}">&#128065;</a>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="series_{{ text.id }}" value="{{ text.series }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
+          <!-- Tokens View-->
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <a href="{% url 'corpus:tokens' text_id=text.id %}">&#128065;</a>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="label_{{ text.id }}" value="{{ text.label }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="version_{{ text.id }}" value="{{ text.version }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <input type="text" name="stage_{{ text.id }}" value="{{ text.stage }}" class="form-input rounded-md shadow-sm mt-1 block w-full"/>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            {{ text.created_at|date:"Y-m-d H:i" }} <!-- assuming this is not editable -->
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <button type="submit" name="action" value="save_{{ text.id }}" class="text-indigo-600 hover:text-indigo-900">Save</button>
+          <!-- Created At -->
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            {{ text.created_at|date:"Y-m-d H:i" }}
           </td>
         </tr>
-        {% endfor %}
-        {% if texts|length == 0 %}
-        <tr>
-          <td colspan="9" class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-            No texts available.
-          </td>
-        </tr>
-        {% endif %}
-      </tbody>
-    </table>
-  </div>
-  {% endblock %}
+      {% endfor %}
+      {% if texts|length == 0 %}
+      <tr>
+        <td colspan="11" class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">No texts available.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+
+
+
+<script>
+
+document.body.addEventListener('htmx:afterRequest', function (event) {
+    // Function to change the input field color based on the response status
+    function changeInputFieldColor(inputField, isSuccess) {
+      if (inputField) {
+        inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+        // Reset the color back to original after a delay
+        setTimeout(function () {
+          inputField.style.backgroundColor = ''; // Reset to original color
+        }, 2000); // Adjust delay as needed
+      }
+    }
+
+    // Check if the event target is part of the form interaction
+    if (event.detail.elt.name === 'title' || event.detail.elt.name === 'identifier' || event.detail.elt.name === 'series' || event.detail.elt.name === 'label' || event.detail.elt.name === 'version' || event.detail.elt.name === 'stage') {
+      // Parse the response
+      var response = JSON.parse(event.detail.xhr.responseText);
+
+      // Change the input field color based on the response
+      changeInputFieldColor(event.detail.elt, response.status === 'success');
+    }
+  });
+
+
+</script>
+
+{% endblock %}

@@ -9,14 +9,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const tokens = document.querySelectorAll('.token');
         tokens.forEach(token => {
             if (stringTokenIds.includes(token.dataset.tokenId)) {
-                // Apply styles directly
-                token.style.backgroundColor = '#fde047';
+                // Apply Tailwind class for highlighted tokens
+                token.classList.add('bg-yellow-300'); // Tailwind class for yellow background
             } else {
-                // Reset styles
-                token.style.backgroundColor = '';
+                // Remove Tailwind class for non-highlighted tokens
+                token.classList.remove('bg-yellow-300');
             }
         });
     }
+    
 
     function fetchAndHighlightSectionTokens(sectionId) {
         fetch(`/corpus/get-tokens-for-section/${sectionId}`)

@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block content %}
+  {% include 'components/subbar.html' %}
+  {% include 'components/hero.html' %}
+  <div class="flex flex-row w-full mt-8 mb-20">
+    <div class="sticky border-r-2 smartphone:hidden sm:block h-fit border-sb-gray opacity-60">
+      <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
+        <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">{% trans 'Resources' %}</h1>
+      </div>
+    </div>
+    <div class="flex flex-col items-start gap-2 pl-16 pr-20 smartphone:px-4 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
+      <h2 id="handbooks" class="text-left text-h2-gray scroll-mt-24">{% trans 'Handbooks' %}</h2>
+      <h3 class="text-left text-h2-gray">Handbook Text encoding</h3>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Text%20encoding" target="_blank">“Handbook Text encoding”</a> describes the workflow from manuscript to the digital form of the text. It explains how the data is transferred into a table structure, which is the temporary means of processing data. This includes the indication of text structure, transliteration &amp; transcription as well as special encodings (e.g. of diacritics or typos).
+      </p>
+      <h3 class="text-left text-h2-gray">Handbook Morphology</h3>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Morphology" target="_blank">“Handbook Morphology”</a> describes the annotation of part-of-speech and grammatical features following the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://universaldependencies.org/guidelines.html" target="_blank">Standard of Universal Dependencies (UD)</a> . Sorted by part-of-speech, the handbook gives a detailed overview of Middle Persian word forms and their corresponding tags.
+      </p>
+      <h3 class="text-left text-h2-gray">Handbook Syntax</h3>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Syntax" target="_blank">“Handbook Syntax”</a> explains the basic principles of the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://universaldependencies.org/guidelines.html" target="_blank">Dependencies Standard (UD)</a> for syntactic annotation. It lists various syntactic structures and exemplifies the adaptation of UD to Middle Persian.
+      </p>
+      <hr class="w-full -mb-5" />
+      <h2 id="kosh" class="text-left text-h2-gray scroll-mt-24">{% trans 'Kosh' %}</h2>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">To facilitate our lexicographical work, we began with the digitization of the more important available Middle Persian dictionaries and glossaries already before the start of the project. To make this material machine-readable, it was subsequently transformed into a simple XML format. The use of Kosh, a framework developed by CCeH, allows the user to search through several dictionaries and glossaries in one combined query.</p>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">As is well-known to anyone engaged in the philology of Pahlavi, the past century has seen the use of several conflicting systems of transcribing the Pahlavi script. The dictionaries and glossaries digitized for MPCD have therefore been supplied with a transcription according to the MPCD standard, which essentially follows MacKenzie’s Concise Pahlavi Dictionary (London 1971). Thanks to this, the users may now search through all of the digitized dictionaries without having to take into account the diverging transcription systems used by the respective authors.</p>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        The digitized materials coupled with Kosh constitute an important tool for our work. In order to allow a broader public to benefit from this tool, we have made some of the dictionaries and glossaries accessible to the scholarly community (<a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://dicts.uni-koeln.de/" target="_blank">https://dicts.uni-koeln.de/</a>). The following digitized works have so far been added to the publicly accessible section of Kosh. We seek to expand this list in the future:
+      </p>
+      <div>
+        <table class="w-2/3 m-auto my-3 border border-collapse table-auto">
+          <tr>
+            <td class="p-1 text-xs text-center border">AWN</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Ardā wirāz nāmag by Fereydun Vahman (1986)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">DMX</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Dādestān ī mēnōy ī xrad by Ahmad Tafazzoli (1348)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">GBd</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Great Bundahišn by Mehrdād Bahār (1345)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">GPV</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Pahlavi Wīdēwdād by Dinshah D. Kapadia (1953)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">LFV</td>
+            <td class="p-1 text-xs text-center border">List of Finite Verbs Compiled by Jügel (2015) and Cemile Çelebi and Narges Eskandarnia (2019-2021)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">PYV</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Pahlavi Yasna &amp; Visparad by Ervad Bamanji Nasarvanji Dhabhar (1949)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">ŠnŠ</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Šāyest nē-šāyest by Maḥmūd Ṭāvūsī (1365)</td>
+          </tr>
+          <tr>
+            <td class="p-1 text-xs text-center border">WZ</td>
+            <td class="p-1 text-xs text-center border">Glossary of the Wizīdagīhā ī Zādspram by Philippe Gignoux and Ahmad Tafazzoli (1993)</td>
+          </tr>
+        </table>
+      </div>
+      <h3 class="text-left text-h2-gray">Bibliography</h3>
+      <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        <ul class="flex flex-col w-full p-4">
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Bahār, Mehrdād. 1345. <i>Važenāme-ye Bondaheš (Glossary of Pahlavi Bundahesh)</i> . 17 vols. Tehran: Entešārāt-e Bonyād-e Farhang-e Irān.
+          </li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Dhabhar, Bamanji Nasarvanji. 1949. <i>Pahlavi Yasna and Visperad</i>. Bombay: The Trustees of the Parsee Punchayet Funds and Properties.
+          </li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Gignoux, Philippe, and Ahmad Tafazzoli. 1993. <i>Anthologie de Zādspram. Édition critique du texte pehlevi traduit et commenté</i> . Cahiers de Studia Iranica 13. Paris: Association pour l’Avancement des Études Iraniennes.
+          </li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">Jügel, Thomas, Narges Eskandarnia, and Cemile Çelebi. 2022. “List of Finite Verbs.” n/a.</li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Kapadia, Dinshah D. 1953. <i>Glossary of Pahlavi Vendidad</i> . Bombay.
+          </li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Tafazzoli, Ahmad. 1348. <i>Vāženāme-Ye Mīnū-Ye Xerad</i>. Entešārāt-e Bonyād-e Farhang-e Īrān 63. Tehran: Bonyād-e Farhang-e Īrān.
+          </li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Tāvūsī, Maḥmūd. 1365. <i>Vāženāme-Ye Šāyast Našāyast</i> . Teherān.
+          </li>
+          <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+            Vahman, Fereydun. 1986. Ardā Wirāz Nāmag. <i>The Iranian ‘Divina Commedia.’</i> Scandinavian Institute of Asian Studies Monograph Series 53. London: Curzon Press.
+          </li>
+        </ul>
+      </div>
+      <h3 class="text-left text-h2-gray">Using Kosh</h3>
+      <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        <ul class="flex flex-col w-full p-4">
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">First, the user has to select the dictionaries to be searched. The simplest approach is to select all of them.</li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">Next, one has to select the specific field that is to be searched. In most cases, the relevant field will be “trc” (transcription), but other fields such as “sense” (meaning) are searchable as well.</li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">Under “Query Type”, the most relevant options to be chosen are “wildcard” and “regexp” (regular expressions).</li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">Through the drop-down menu “Query Size”, the results shown may be restricted to a certain number.</li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">By entering a keyword (e.g., a Middle Persian word in transcription, optionally enlarged by wildcards) into the “Search”-field, followed by a click on “Search”, the search is initiated.</li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">One is further able to define the fields to be shown in the search result: identifier (“id”), transcription (“trc”), transliteration (“trl”), meaning (“sense”), morphological features (“gramm”), attestations (“attest”), etc.</li>
+        </ul>
+      </div>
+      <hr class="w-full -mb-5" />
+      <h2 id="zotero" class="text-left text-h2-gray scroll-mt-24">{% trans 'Zotero' %}</h2>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        We are compiling an extensive bibliography on publications related to MPCD in a <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://www.zotero.org/groups/2116388/mpcd/library" target="_blank">Zotero database</a>.
+      </p>
+      <hr class="w-full -mb-5" />
+      <h2 id="manuscripts" class="text-left text-h2-gray scroll-mt-24">{% trans 'Manuscripts' %}</h2>
+      <h3 class="text-left text-h2-gray">Timeline of Manuscripts</h3>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        <img alt="" src="{% static 'images/schematics/MPCD_mss_timeline.png' %}" class="w-2/3 m-auto mt-2 mb-5" />
+      </p>
+      <hr class="w-full -mb-5" />
+      <h2 id="texts" class="text-left text-h2-gray scroll-mt-24">{% trans 'Texts' %}</h2>
+      <div class="flex justify-center w-full mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        <table class="w-2/3 m-auto my-3 border border-collapse table-auto">
+          <thead>
+            <tr>
+              <th class="p-1 text-xs text-center border">Sigle</th>
+              <th class="p-1 text-xs text-center border">Title</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-1 text-xs text-center border">AAM</td>
+              <td class="p-1 text-xs text-center border">Andarz ī anōšag ruwan ādurbād māraspandān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">AOD</td>
+              <td class="p-1 text-xs text-center border">Andarz ī ōšnar ī dānāg</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Aog.</td>
+              <td class="p-1 text-xs text-center border">Aogǝmadaecā</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ASS</td>
+              <td class="p-1 text-xs text-center border">Abdīhā ud sahīgīhā ī sīstān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">AWM</td>
+              <td class="p-1 text-xs text-center border">Ayadgār ī wuzurg-mihr</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">AWN</td>
+              <td class="p-1 text-xs text-center border">Ardā wirāz nāmag</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">AZ</td>
+              <td class="p-1 text-xs text-center border">Ayādgār ī zarērān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ČHP</td>
+              <td class="p-1 text-xs text-center border">Čīdag handarz ī pōryōtkēšān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">DA</td>
+              <td class="p-1 text-xs text-center border">Draxt ī āsūrīg</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dd.</td>
+              <td class="p-1 text-xs text-center border">Dādestān ī dēnīg</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk3</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 3</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk4</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 4</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk5</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 5</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk6</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 6</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk7</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 7</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk8</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 8</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Dk9</td>
+              <td class="p-1 text-xs text-center border">Dēnkard 9</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">DkC</td>
+              <td class="p-1 text-xs text-center border">Dēnkard Colophon</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">DMX</td>
+              <td class="p-1 text-xs text-center border">Dādestān ī mēnōy ī xrad</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ENN</td>
+              <td class="p-1 text-xs text-center border">Ēwēnag nāmag nibēsišnīh</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">GA</td>
+              <td class="p-1 text-xs text-center border">Mādīgān ī gizistag abālīš</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">GBd.</td>
+              <td class="p-1 text-xs text-center border">Great Bundahišn</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Hēr.</td>
+              <td class="p-1 text-xs text-center border">Hērbedestān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">HKR</td>
+              <td class="p-1 text-xs text-center border">Husraw ī kawādān ud rēdag-ēw</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">HN</td>
+              <td class="p-1 text-xs text-center border">Hādōxt Nask</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">IndBd.</td>
+              <td class="p-1 text-xs text-center border">Indian Bundahišn</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">KAP</td>
+              <td class="p-1 text-xs text-center border">Kārnāmag ī ardašīr ī pābagān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">MFRH</td>
+              <td class="p-1 text-xs text-center border">Māh frawardīn rōz hordād</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">MHD</td>
+              <td class="p-1 text-xs text-center border">Mādayān ī hazār dādestān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">MK-Andarz</td>
+              <td class="p-1 text-xs text-center border">Didactic texts from ms. MK</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">MYF</td>
+              <td class="p-1 text-xs text-center border">Mādayān ī yōšt ī friyān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">N.</td>
+              <td class="p-1 text-xs text-center border">Nērangestān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">NM</td>
+              <td class="p-1 text-xs text-center border">Nāmagīhā ī manuščihr</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">OHD</td>
+              <td class="p-1 text-xs text-center border">Ohrmazd ī harwisp-dānāg</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">P.</td>
+              <td class="p-1 text-xs text-center border">Pursišnīhā</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">PahlRivDd.</td>
+              <td class="p-1 text-xs text-center border">Pahlavi rivāyat ī dādestān ī dēnīg</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">PV</td>
+              <td class="p-1 text-xs text-center border">Pahlavi Wīdēwdād</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">PY</td>
+              <td class="p-1 text-xs text-center border">Pahlavi Yasna</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">RAF</td>
+              <td class="p-1 text-xs text-center border">Pahlavi Rivāyat of Ādurfarrbay and Farrbay-srōš</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">RĒA</td>
+              <td class="p-1 text-xs text-center border">Rivāyat ī ēmēd ašawahištān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ŠGW</td>
+              <td class="p-1 text-xs text-center border">Škand gumānīg wizār</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ŠiĒ</td>
+              <td class="p-1 text-xs text-center border">Šahrestānīhā ī ērān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ŠnŠ</td>
+              <td class="p-1 text-xs text-center border">Šāyest nē šāyest</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">PVr.</td>
+              <td class="p-1 text-xs text-center border">Pahlavi Visparad</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">Vyt.</td>
+              <td class="p-1 text-xs text-center border">Vištāsp Yašt</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">WČNA</td>
+              <td class="p-1 text-xs text-center border">Wizārišn ī čatrang ud nēw-ardaxšīr</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">WD</td>
+              <td class="p-1 text-xs text-center border">Wizirgerd ī dēnīg</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">WDWM</td>
+              <td class="p-1 text-xs text-center border">Wizīrīhā ī dēn ī weh ī mazdēsnān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">WZ</td>
+              <td class="p-1 text-xs text-center border">Wizīdagīhā ī zādspram</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">XD</td>
+              <td class="p-1 text-xs text-center border">Xēšm ud dēwān</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">XAv.</td>
+              <td class="p-1 text-xs text-center border">Ḫorde Avestā</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ZFJ</td>
+              <td class="p-1 text-xs text-center border">Zand ī fragard ī jud-dēwdād</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">ZWY</td>
+              <td class="p-1 text-xs text-center border">Zand ī wahman yasn</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% include 'components/footer.html' %}
+{% endblock %}

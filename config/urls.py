@@ -6,18 +6,25 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from treeflow.views.publications import zotero_view
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
+    path("contact/", TemplateView.as_view(template_name="pages/contact.html"), name="contact"),
+    path("publications/",zotero_view, name="publications"),
+    path("methodology/", TemplateView.as_view(template_name="pages/methodology.html"), name="methodology"),
+    path("resources/", TemplateView.as_view(template_name="pages/resources.html"), name="resources"),
+    path("team/", TemplateView.as_view(template_name="pages/team.html"), name="team"),
     path('corpus/', include('treeflow.corpus.urls', namespace='corpus')),
     path("search/", include("treeflow.search.urls", namespace="search")),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+
 
     # Your stuff: custom urls includes go here
 

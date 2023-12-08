@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Sources</h1>
+    {% for source in object_list %}
+        <li>{{source.id}} - {{ source.type }}</li>
+    {% empty %}
+        <li>No sources yet.</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block content %}
+  {% include 'components/subbar.html' %}
+  {% include 'components/hero.html' %}
+  <div class="flex flex-row mt-8 mb-20">
+    <div class="sticky border-r-2 smartphone:hidden sm:block h-fit border-sb-gray opacity-60">
+      <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
+        <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">{% trans 'Team' %}</h1>
+      </div>
+    </div>
+    <div class="flex flex-col items-start gap-2 pl-16 pr-20 smartphone:px-4 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
+      <div class="flex flex-col mb-4">
+        <h2 id="iranianStudies" class="text-left smartphone:text-center text-h2-gray scroll-mt-24">Iranian Studies</h2>
+        <div class="flex flex-row flex-wrap items-start w-full mt-8 smartphone-xs:h-1/6 h-1/5 smartphone:justify-center">
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://ceres.rub.de/de/personen/kianoosh-rezania/" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Rezania.jpg' %}" alt="Prof. Dr. Kianoosh Rezania" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Prof. Dr. Kianoosh Rezania</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Principal Investigator
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">kianoosh.rezania[at]rub.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://ceres.rub.de/de/personen/icolditz/" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Colditz.jpg' %}" alt="Dr. Iris Colditz" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Dr. Iris Colditz</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Associate
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">iris.colditz[at]rub.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://ceres.rub.de/en/people/tjuegel/" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Jügel.jpg' %}" alt="Dr. Thomas Jügel" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Dr. Thomas Jügel</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Associate
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">thomas.juegel[at]rub.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://bulbul.sk/" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Ceplö.JPG' %}" alt="Dr. Slavomír Čéplö" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Dr. Slavomír Čéplö</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Associate
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">bulbul[at]bulbul.sk</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://ceres.rub.de/de/personen/ashamsaei/" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Shamsaei.jpg' %}" alt="BA Anahita Shamsaei" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">BA Anahita Shamsaei</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Student Assistant
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">anahita.shamsai[at]gmail.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Eskandarnia.jpg' %}" alt="BA Narges Eskandarnia" />
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">BA Narges Eskandarnia</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Student Assistant
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">narjes_eskandarnia[at]yahoo.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Goldstrass.jpg' %}" alt="Allegra Goldstrass" />
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Allegra Goldstrass</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Student Assistant
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">allegra.goldstrass[at]ruhr-uni-bochum.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/csalt_mpcd_logo_scaled.png' %}" alt="Fatemeh S. Musavi" />
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Fatemeh S. Musavi</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Assistant
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">seyyedehfatemeh.musavi[at]rub.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://www.geschkult.fu-berlin.de/e/iranistik/mitarbeiter/professoren/cantera/index.html" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Cantera.png' %}" alt="Prof. Dr. Alberto Cantera" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Prof. Dr. Alberto Cantera</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Principal Investigator
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">alberto.cantera[at]fu-berlin.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://www.geschkult.fu-berlin.de/e/iranistik/mitarbeiter/drittmittel/Peschl/index.html" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Peschl.jpg' %}" alt="Dr. Benedikt Peschl" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Dr. Benedikt Peschl</h3>
+                <h4 class="text-base sm:text-base">Ruhr University Bochum</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Associate
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">benedikt.peschl[at]fu-berlin.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://www.academy.ac.il/Index2/Entry.aspx?nodeId=809&entryId=18361" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Shaked.jpg' %}" alt="Prof. Dr. Shaul Shaked ✟" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Prof. Dr. Shaul Shaked ✟</h3>
+                <h4 class="text-base sm:text-base">The Hebrew University of Jerusalem</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Principal Investigator
+                  <br />
+                  1933-2021
+                </div>
+                <p class="text-xs text-justify text-gray-600">The staff of MPCD mourns the loss of their project partner Prof. Dr. Shaul Shaked (Hebrew University Jerusalem), who passed away on October 27, 2021. Shaul Shaked was an Emeritus Professor at the Hebrew University of Jerusalem, specializing in Iranian Studies, Religious Studies, Aramaic, and conducting research on magic in Late Antiquity, among other topics. He was a member of the Israel Academy of Arts and Sciences and one of the world's most respected scholars in his field. With his extensive preliminary work, he laid the foundation for the Dictionary of Middle Persian. We will honor his memory in the project.</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://www.geschkult.fu-berlin.de/en/e/iranistik/mitarbeiter/ehemalige/zeini/index.html" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Zeini.jpg' %}" alt="Dr. Arash Zeini" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Dr. Arash Zeini</h3>
+                <h4 class="text-base sm:text-base">Freie Universität Berlin</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Associate
+                  <br />
+                  1active until February 2022
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col mb-4">
+        <h2 id="digitalHumanities" class="text-left smartphone:text-center text-h2-gray scroll-mt-24">Digital Humanities</h2>
+        <div class="flex flex-row flex-wrap items-start w-full mt-8 smartphone-xs:h-1/6 h-1/5 smartphone:justify-center">
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://dh.phil-fak.uni-koeln.de/en/mitarbeiterinnen/professorinnen/prof-dr-yvind-eide" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Eide.png' %}" alt="Prof. Dr. Øyvind Eide" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Prof. Dr. Øyvind Eide</h3>
+                <h4 class="text-base sm:text-base">University of Cologne</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Principal Investigator
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">oeide[at]uni-koeln.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <a href="https://cceh.uni-koeln.de/personen/claes-neuefeind/" target="_blank" rel="noopener noreferrer"><img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Neuefeind.png' %}" alt="Dr. Claes Neuefeind" /></a>
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Dr. Claes Neuefeind</h3>
+                <h4 class="text-base sm:text-base">University of Cologne</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Principal Investigator
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">c.neuefeind[at]uni-koeln.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Mondaca.png' %}" alt="MA Francisco Mondaca" />
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">MA Francisco Mondaca</h3>
+                <h4 class="text-base sm:text-base">University of Cologne</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Associate
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">f.mondaca[at]uni-koeln.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Esser.jpg' %}" alt="BA Moritz Esser" />
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">BA Moritz Esser</h3>
+                <h4 class="text-base sm:text-base">University of Cologne</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Research Assistant
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">moritz.esser[at]uni-koeln.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+            <div class="flex flex-col items-center rounded">
+              <div class="border-8 border-white border-solid">
+                <div class="border-8 border-white border-solid">
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Rudius.jpg' %}" alt="Malte Rudius" />
+                </div>
+              </div>
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Malte Rudius</h3>
+                <h4 class="text-base sm:text-base">University of Cologne</h4>
+                <div class="text-gray-400 font-Helvetica">
+                  Student Assistant
+                  <br />
+                  <p class="text-sm text-blue-500 font-Helvetica">m.rudius[at]uni-koeln.de</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col mb-4">
+        <h2 id="cooperationPartners" class="text-left smartphone:text-center text-h2-gray scroll-mt-24">Cooperation Partners</h2>
+        <div class="flex flex-col pb-10">
+          <div class="flex flex-wrap items-start w-full h-1/5 smartphone:justify-center">
+            <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Middle Persian Dictionary Project (MPDP)</h3>
+              </div>
+            </div>
+            <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Corpus Avesticum Berolinense (CAB)</h3><p class="text-gray-400">
+                  <a class="text-blue-500" href="https://cab.geschkult.fu-berlin.de/" target="_blank">https://cab.geschkult.fu-berlin.de/</a>
+                </p>
+              </div>
+            </div>
+            <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Thesaurus Indogermanischer Text- und Sprachmaterialien (TITUS)</h3><p class="text-gray-400">
+                  <a class="text-blue-500" href="https://titus.uni-frankfurt.de/indexd.htm" target="_blank">https://titus.uni-frankfurt.de/indexd.htm</a>
+                </p>
+              </div>
+            </div>
+            <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Domenico Agostini</h3><p class="text-gray-400">Tel Aviv University (Tel Aviv, Israel)</p>
+              </div>
+            </div>
+            <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
+              <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
+                <h3 class="text-base md:text-xl sm:text-base">Mateusz Kłagisz</h3><p class="text-gray-400">Jagiellonian University (Kraków, Poland)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include 'components/footer.html' %}
+{% endblock %}

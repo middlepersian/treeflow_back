@@ -1,194 +1,309 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
-<div class="container mx-auto p-4">
+<div class="flex flex-col w-full h-screen">
+  <!-- Text Dropdown -->
+  <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
+  <!-- Flex container for the split view -->
+  <div class="flex-grow flex w-full">
+    <!-- Left Column for Tokens -->
+    <div class="w-8/12 overflow-x-auto">
+      <!-- Table for displaying tokens -->
+      <table class="min-w-full">
+        <thead class="bg-gray-800 text-white">
+          <tr>
+            <th class="px-4 py-2">Number in Text</th>
+            <th class="px-4 py-2">Number in Sentence</th>
+            <th class="px-4 py-2">UD</th>
+            <th class="px-4 py-2">Image</th>
+            <th class="px-4 py-2">Line</th>
+            <th class="px-4 py-2">Transcription</th>
+            <th class="px-4 py-2">Transliteration</th>
+            <th class="px-4 py-2">Lemmas</th>
+            <th class="px-4 py-2">Senses</th>
+            <th class="px-4 py-2">POS</th>
+            <th class="px-4 py-2">Features</th>
+            <th class="px-4 py-2">Insert Before</th>
+            <th class="px-4 py-2">Insert After</th>
+            <th class="px-4 py-2">Delete Token</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sentence in page_obj %}
+          <!-- Sentence Header Row -->
+          <tr class="bg-blue-100">
+            <td colspan="13" class="px-4 py-2">## Identifier:
+              {{sentence.identifier }}</td>
+          </tr>
+          <tr class="bg-blue-100">
+            <td colspan="13" class="px-4 py-2">## ID: {{ sentence.id }}</td>
+          </tr>
+          <tr class="bg-blue-100">
+            <td colspan="13" class="px-4 py-2">
+              <ul> Translations:
+                {% for sense in sentence.senses.all %}
+                <li>{{sense.language}} - <span class="text-bold">
+                    {{sense.sense}} </span></li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+          {% for token in sentence.tokens.all %}
+          <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden"
+            id="token-{{token.id}}">
+            {% csrf_token %}
 
-  <!-- Form for selecting text -->
-  <form action="{% url 'corpus:sentences' %}" method="get" class="mb-4">
+            <!-- Number in Text -->
+            <td class="border px-4 py-2 text-center">{{ token.number }}</td>
 
-    <!-- Text selection dropdown -->
-    <div class="mb-3">
-      <label for="text-select" class="block text-gray-700 text-sm font-bold mb-2">Choose a text:</label>
-      <select name="text_id" id="text-select" onchange="this.form.submit()"
-        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-        <option value="">Select a text...</option>
-        {% for text in texts %}
-        <option value="{{ text.id|stringformat:'s' }}" {% if text.id|stringformat:'s' == selected_text_id|stringformat:'s' %} selected {% endif %}>
-          {{ text.title }}
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-    <noscript><input type="submit" value="Filter" class="btn btn-primary"></noscript>
-  </form>
+            <!-- Number in Sentence -->
+            <td class="border px-4 py-2">
+              <input type="text" name="number_in_sentence"
+                value="{{ token.number_in_sentence }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
 
-  {% for sentence in sentences %}
-  <h3>Sentence ID: {{ sentence.id }}</h3>
-  <table>
-    <thead class="bg-gray-800 text-white">
-      <tr>
-        <th class="px-4 py-2">Number</th>
-        <th class="px-4 py-2">Transcription</th>
-        <th class="px-4 py-2">Transliteration</th>
-        <th class="px-4 py-2">Lemmas</th>
-        <th class="px-4 py-2">Insert Before</th>
-        <th class="px-4 py-2">Insert After</th>
-        <th class="px-4 py-2">Delete Token</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for token in sentence.tokens.all %}
+            <!-- UD -->
+            <td class="border px-4 py-2">
+              <a href="{% url 'corpus:ud_editor' sentence.id %}"
+                class="text-blue-500 hover:text-blue-700">
+                &#128065;
+              </a>
 
-      <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden">
-        <!-- Form for the entire row to edit a token -->
-        <form method="post" action="{% url 'corpus:update_token' token.id %}">
-          {% csrf_token %}
-          <td class="border px-4 py-2">{{ token.number }}</td>
-          <!-- Transcription -->
-          <td class="border px-4 py-2">
-            <input type="text" name="transcription" value="{{ token.transcription }}"
-              hx-post="{% url 'corpus:update_token' token.id %}" hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ token.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="shadow border rounded py-2 px-3 text-grey-darker">
-          </td>
-          <!-- Transliteration -->
-          <td class="border px-4 py-2">
-            <input type="text" name="transliteration" value="{{ token.transliteration }}"
-              hx-post="{% url 'corpus:update_token' token.id %}" hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ token.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="shadow border rounded py-2 px-3 text-grey-darker">
-          </td>
-          <!-- Lemmas -->
-          <td class="border px-4 py-2">
-            {% for lemma in token.lemmas.all %}
-            {{ lemma.word }}
-            {% if not forloop.last %}, {% endif %}
-          {% empty %}
-            _
+            </td>
+
+            <!-- Image -->
+            <td class="border px-4 py-2">
+              {{ token.image.identifier }}
+            </td>
+
+            <!-- Line -->
+            <td class="border px-4 py-2">
+              <!-- Display 'line' type sections -->
+              {% for section_token in token.line_sections %}
+              {{ section_token.section.number }}
+              <!-- Display the title or other fields -->
+              {% empty %}
+              No line sections
+              {% endfor %}
+            </td>
+
+            <!-- Transcription -->
+            <td class="border px-4 py-2">
+              <input type="text" name="transcription"
+                value="{{ token.transcription }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+
+            <!-- Transliteration -->
+            <td class="border px-4 py-2">
+              <input type="text" name="transliteration"
+                value="{{ token.transliteration }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+
+            <!-- Lemmas -->
+            <td class="border px-4 py-2">
+              {% for lemma in token.lemmas.all %}
+              {{ lemma.word }}
+              {% if not forloop.last %}, {% endif %}
+              {% empty %}
+              _
+              {% endfor %}
+            </td>
+
+            <!-- Senses -->
+            <td class="border px-4 py-2">
+              {% for sense in token.senses.all %}
+              {{ sense.sense }}
+              {% if not forloop.last %}, {% endif %}
+              {% empty %}
+              _
+              {% endfor %}
+            </td>
+
+            <!-- POS -->
+            <td id="pos-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+              hx-target="#featureModalContent" hx-trigger="click">
+              <span id="pos-content-{{ token.id }}">
+                <!--show selected POS-->
+                <!-- Show selected POS if available -->
+                {% for pos in token.pos_token.all %}
+                {% if pos.pos %}
+                {{ pos.pos }}
+                {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
+
+            <!-- Features -->
+            <td id="features-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+              hx-target="#featureModalContent" hx-trigger="click">
+              <span id="features-content-{{ token.id }}">
+                {% for feature in token.feature_token.all %}
+                {{ feature.feature }}={{ feature.feature_value }}
+                {% if not forloop.last %} | {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
+
+            <!-- Insert Before Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:insert_before_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentences">
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+                <input type="hidden" name="text_id"
+                  value="{{ selected_text_id }}">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="⬆️ Insert"
+                  class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+
+            <!-- Insert After Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:insert_after_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentences">
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+                <input type="hidden" name="text_id"
+                  value="{{ selected_text_id }}">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="⬇️ Insert"
+                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+
+            <!-- Delete Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:delete_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentences">
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+                <input type="hidden" name="text_id"
+                  value="{{ selected_text_id }}">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="Delete"
+                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+          </tr>
           {% endfor %}
-          </td>
-          <!-- Insert Before Button -->
-          <td class="border px-4 py-2">
-            <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="token_id" value="{{ token.id }}">
-              <input type="hidden" name="page" value="{{ request.GET.page }}">
-              <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
-              <input type="submit" value="⬆️ Insert"
-                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-            </form>
-          </td>
-          <!-- Insert After Button -->
-          <td class="border px-4 py-2">
-            <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="token_id" value="{{ token.id }}">
-              <!-- Add hidden inputs for 'page' and 'text_id' -->
-              <input type="hidden" name="page" value="{{ request.GET.page }}">
-              <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
-              <input type="submit" value="⬇️ Insert"
-                class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-            </form>
-          </td>
-          <!-- Delete Button -->
-          <td class="border px-4 py-2">
-            <form method="post" action="{% url 'corpus:delete_token' token.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="token_id" value="{{ token.id }}">
-              <input type="hidden" name="page" value="{{ request.GET.page }}">
-              <input type="hidden" name="text_id" value="{{ request.GET.text_id }}">
-              <input type="submit" value="❌ Delete"
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-            </form>
-          </td>
-        </form>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% endfor %}
-</div>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-<!-- POS and Feature Modal (placed outside the loop) -->
-<div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="featureModal">
-    <div class="flex items-center justify-center min-h-screen">
+    <!-- Right Column for Image -->
+    <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
+
+    <!-- POS and Feature Modal (placed outside the loop) -->
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="featureModal">
+      <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
-            <div id="featureModalContent"></div>
+          <div id="featureModalContent"></div>
         </div>
+      </div>
     </div>
-</div>
-    
 
-<!-- Pagination controls -->
-<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-    <div class="flex flex-1 justify-between sm:hidden">
-      {% if sentences.has_previous %}
-        <a href="?page={{ sentences.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
-          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
-      {% else %}
-        <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
-      {% endif %}
-      {% if sentences.has_next %}
-        <a href="?page={{ sentences.next_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
-          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
-      {% else %}
-        <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
-      {% endif %}
-    </div>
-    
-    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-      <div>
-        <p class="text-sm text-gray-700">
-          Showing
-          <span class="font-medium">{{ sentences.start_index }}</span>
-          to
-          <span class="font-medium">{{ sentences.end_index }}</span>
-          of
-          <span class="font-medium">{{ sentences.paginator.count }}</span>
-          results
-        </p>
-      </div>
-      <div>
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-          <!-- Previous Page Link with ID -->
-          <!-- First Page Link -->
-          {% if sentences.has_previous %}
-            <a href="?page=1{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
-              class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-              First
-            </a>
-          {% endif %}
-          <!-- Previous Page Link -->
-          {% if sentences.has_previous %}
-            <a id="prevPageLink" href="?page={{ sentences.previous_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
-              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 leading-5 hover:bg-gray-50">
-              Previous
-            </a>
-          {% endif %}
-          <!-- Current Page indicator -->
-          <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300">
-            Page {{ sentences.number }} of {{ sentences.paginator.num_pages }}.
-          </span>
-          <!-- Next Page Link with ID -->
-          {% if sentences.has_next %}
-            <a id="nextPageLink" href="?page={{ sentences.next_page_number }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}" 
-              class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-              Next
-            </a>
-            <a href="?page={{ sentences.paginator.num_pages }}{% if selected_text_id %}&text_id={{ selected_text_id }}{% endif %}"
-              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:bg-gray-50">
-              <span>Last</span>
-            </a>
-          {% endif %}
-        </nav>
-      </div>
-    </div>
   </div>
-  
+  <!-- Include the pagination template with the required context variable -->
+  <div class="flex justify-center py-4">{% include 'pagination.html' %}</div>
+
+  <!-- close main div-->
+</div>
+
+<script src="{% static 'corpus/prev_next_navigator.js'%}"></script>
+
+<!---Javascript for the POS and Feature Modal --->
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+      // Function to change the input field color based on the response status
+      function changeInputFieldColor(inputField, isSuccess) {
+        if (inputField) {
+          inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+          // Reset the color back to original after a delay
+          setTimeout(function () {
+            inputField.style.backgroundColor = ''; // Reset to original color
+          }, 2000); // Adjust delay as needed
+        }
+      }
+
+      // Check if the event target is part of the form interaction
+      if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.classList.contains('pos-select')) {
+        // Parse the response
+        var response = JSON.parse(event.detail.xhr.responseText);
+
+        // Change the input field color based on the response
+        changeInputFieldColor(event.detail.elt, response.status === 'success');
+      }
+    });
 
 
-{% endblock %}
 
+    function handleFormSuccess(response) {
+      console.log("Form submission success response received");
+      if (response.status === 'success') {
+        closeFeatureModal();
+        document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
+        document.querySelector('#features-cell').innerHTML = response.features_data_html;
+      } else {
+        closeFeatureModal();
+      }
+    }
 
+    function closeFeatureModal() {
+      console.log("Closing Feature Modal");
+      document.getElementById('featureModal').classList.add('hidden');
+    }
+
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+
+      console.log("htmx:afterSwap event triggered");
+      console.log(event.detail);
+
+      // Check if the swap is for loading modal content
+      if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+        console.log("Feature Modal Content Loaded");
+        document.getElementById('featureModal').classList.remove('hidden');
+      }
+      // Check if the swap is for the feature form
+      if (event.detail.target.id === 'pos-feature-form') {
+        console.log("Feature form submission, closing modal");
+        closeFeatureModal();
+      }
+    });
+  </script>
+
+{% endblock content %}

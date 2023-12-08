@@ -1,46 +1,42 @@
 from django.shortcuts import render
-from django.core.paginator import Paginator
-from treeflow.corpus.models import Text, Section
+from django.db.models import Prefetch
+from treeflow.corpus.models import Section, Token
+from django.db.models import Count, Prefetch
+from django.core import serializers
+
+from collections import defaultdict
 
 
-def sections_view(request):
-    # Get all Text and Section types for the dropdowns
-    texts = Text.objects.all()
+def sections_view(request, text_id):
+    # Define the queryset for tokens that prefetches the related section tokens for 'sentence' type sections
+    token_queryset = Token.objects.filter(
+        sectiontoken__section__text_id=text_id,
+        sectiontoken__section__type='sentence'
+    ).order_by('sectiontoken__section__number', 'number_in_sentence')
+
+    # Create a Prefetch object for 'tokens' related to 'sentence' type sections
+    tokens_prefetch = Prefetch(
+        'tokens', 
+        queryset=token_queryset,
+        to_attr='prefetched_tokens'
+    )
+
+    # Fetch all sections for the given text, applying the Prefetch object conditionally
+    all_sections = Section.objects.filter(text__id=text_id).prefetch_related(
+        'container'
+    )
+
+    sentence_sections = all_sections.filter(type='sentence').prefetch_related(tokens_prefetch)
+
+    # Get distinct section types
     section_types = Section.objects.order_by('type').values_list('type', flat=True).distinct()
-
-    # Retrieve GET parameters
-    selected_text_id = request.GET.get('text_id')
-    selected_section_type = request.GET.get('section_type')
-
-    # Start with an initial sections queryset
-    # and prefetch related data to minimize database hits
-    sections = Section.objects.prefetch_related(
-        'sectiontoken_set__token__lemmas',  # Prefetch lemmas through TokenLemma
-        'sectiontoken_set__token__senses',  # Prefetch meanings through TokenSense
-        'sectiontoken_set__token__pos_token'  # Prefetch related POS objects
-    ).order_by('number')
-
-    # Filter sections if a text ID is provided
-    if selected_text_id:
-        sections = sections.filter(text__id=selected_text_id)
-
-    # Filter sections if a section type is provided
-    if selected_section_type:
-        sections = sections.filter(type=selected_section_type)
-
-    # Setup paginator
-    paginator = Paginator(sections, 10)  # Show 10 sections per page
-    page_number = request.GET.get('page')
-    sections_page = paginator.get_page(page_number)
-
-    # Prepare context for rendering
+    #remove "sentence" from the types
+    section_types = [x for x in section_types if x != 'sentence']
+    # Pass the sentence_sections with prefetched tokens and other sections to the template
     context = {
-        'texts': texts,
+        'sentence_sections': sentence_sections,
         'section_types': section_types,
-        'sections': sections,
-        'selected_text_id': selected_text_id or '',
-        'selected_section_type': selected_section_type,
+        'text_id': text_id,
     }
 
-    # Render response
     return render(request, 'sections.html', context)

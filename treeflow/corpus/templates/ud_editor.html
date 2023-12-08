@@ -1,357 +1,617 @@
-{% extends "base.html" %} {% block content %}
-<div class="flex flex-row w-full gap-2">
-  <button class="p-2 bg-blue-900 rounded text-white font-bold" id="enhanced">
-    hide enhanced
-  </button>
-  <button class="flex p-2 bg-blue-900 rounded text-white font-bold" id="center">
-    Center
-  </button>
-  <form class="mx-2" id="form" action="../saveNewDependency/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="dependency" value="" />
-    <input type="hidden" name="section_id" value="{{section.id}}" />
-    <select id="depType" name="depType" class="hidden" required>
-      {% for d in deprel %}
-      <option value="{{d}}">{{d}}</option>
-      {%endfor%}
-    </select>
-    <input type="checkbox" name="enhanced" value="true" id="enhanced" class="hidden" />
-  </form>
-  <form class="mx-2" id="updateDep" action="../updateDependency" method="post">
-    <select id="selectedDepType" name="depType" class="hidden">
-      {% for d in deprel %}
-      <option value="{{d}}">{{d}}</option>
-      {%endfor%}
-    </select>
-  </form>
-  <form class="mx-2" id="deleteDep" action="../deleteDependency/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="section_id" value="{{section.id}}" />
-  </form>
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="flex flex-col h-screen">
+
+  <!-- Buttons and Forms -->
+  <div class="flex flex-row gap-2 mt-2 mb-4 items-center">
+    <!-- Added items-center for vertical alignment -->
+
+    <!--Next and Previous Buttons-->
+    <!--Previous Button-->
+    {% if prev %}
+    <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
+      class="flex items-center justify-center p-2 bg-blue-700 rounded text-white font-bold"
+      id="prevPageLink"> ←
+    </a>
+    {% endif %}
+
+    <!--Next Button-->
+    {% if next %}
+    <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
+      class="flex items-center justify-center p-2 bg-blue-700 rounded text-white font-bold"
+      id="nextPageLink"> →
+    </a>
+    {% endif %}
+
+    <!--Enhanced Button-->
+    <button
+      class="flex items-center justify-center p-2 bg-green-700 rounded text-white font-bold"
+      id="enhanced">
+      Hide Enhanced UD
+    </button>
+    <!--Center Button-->
+    <button
+      class="flex items-center justify-center p-2 bg-blue-800 rounded text-white font-bold"
+      id="center">
+      Center
+    </button>
+
+    <!-- Edit form-->
+    <form class="mx-2" id="form" action="../saveNewDependency/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="dependency" value />
+      <input type="hidden" name="section_id" value="{{section.id}}" />
+      <select id="depType" name="depType" class="hidden" required>
+        {% for d in deprel %}
+        <option value="{{d}}">{{d}}</option>
+        {%endfor%}
+      </select>
+      <input type="checkbox" name="enhanced" value="true" id="enhanced"
+        class="hidden" />
+    </form>
+    <form class="mx-2" id="updateDep" action="../updateDependency" method="post">
+      <select id="selectedDepType" name="depType" class="hidden">
+        {% for d in deprel %}
+        <option value="{{d}}">{{d}}</option>
+        {%endfor%}
+      </select>
+    </form>
+    <form class="mx-2" id="deleteDep" action="../deleteDependency/"
+      method="post">
+      {% csrf_token %}
+      <input type="hidden" name="section_id" value="{{section.id}}" />
+    </form>
+
+    <!-- Sentence and Text Information -->
+    <div
+      class="flex items-center gap-2 bg-gray-300 rounded-lg shadow-lg flex-grow">
+      <!-- Adjusted flex-grow -->
+      {% if section %}
+      <div class="p-2">
+        <span class="font-semibold text-gray-700">Sentence Identifier:</span>
+        <span class="text-gray-600">{{ section.identifier }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- SVG Container -->
+  <div class="flex-grow">
+    <p id="depDetails"></p>
+    <svg id="svgCanvas" viewbox="0 0 800 600" width="100%" height="100%">
+      <defs>
+        <marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30"
+          markerUnits="strokeWidth" markerWidth="5"
+          markerHeight="5" orient="auto">
+          <path d="M 0 0 L 60 30 L 0 60 z" fill="#800000" />
+        </marker>
+        <marker id="arrowhead" markerWidth="4" markerHeight="5" refX="60"
+          refY="3.5"
+          orient="a">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+      </defs>
+
+      {% for token in tokens %} {% if token.number != null %}
+      <g class="p-2 rounded fill-slate-900 hover:fill-green-500 cursor-pointer"
+        id="{{token.id}}">
+        <circle id="{{token.id}}" cx="{{token.xpos}}" cy="35"
+          class="hover:fill-black hover:stroke-none" r="2.5"
+          fill="white" stroke="black" />
+        <text class="hover-target token" data-tokenId="{{token.id}}"
+          x="{{token.xpos}}" y="50" font-family="Verdana"
+          font-size="12">
+          {% if token.transcription %}
+          {{token.transcription}}
+          {% else %}
+          null
+          {% endif %}
+        </text>
+        <text x="{{token.xpos}}" y="65" font-family="Verdana" font-size="6">
+          {% for pos in token.pos %}
+          <tspan>{{pos.pos}}</tspan>
+          {% for feat in pos.features %}
+          {% if feat.value != null %}
+          <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:{{feat.value}}</tspan>
+          <!-- Increase dx for spacing -->
+          {% endif %}
+          {% endfor %}
+          {% endfor %}
+        </text>
+      </g>
+      {% endif %} {% endfor %}
+    </svg>
+    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }}
+
+  </div>
 </div>
-<p id="depDetails"></p>
-<svg id="svgCanvas" viewbox="0 0 800 600" width="100%" height="100%">
-  <defs>
-    <marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30" markerUnits="strokeWidth" markerWidth="5"
-      markerHeight="5" orient="auto">
-      <path d="M 0 0 L 60 30 L 0 60 z" fill="#800000" />
-    </marker>
-    <marker id="arrowhead" markerWidth="4" markerHeight="5" refX="60" refY="3.5" orient="a">
-      <polygon points="0 0, 10 3.5, 0 7" />
-    </marker>
-    ^
-  </defs>
-  {% for token in tokens %} {% if token.number != null %}
-  <g class="p-2 rounded fill-slate-500 hover:fill-slate-900 cursor-pointer" id="{{token.id}}">
-    <circle id="{{token.id}}" cx="{{token.xpos}}" cy="35" class="hover:fill-black hover:stroke-none" r="2.5"
-      fill="white" stroke="black" />
-    <text class="hover-target token" data-tokenId="{{token.id}}" x="{{token.xpos}}" y="50" font-family="Verdana"
-      font-size="12">
-      {{token.transcription}}
-    </text>
-    <text x="{{token.xpos}}" y="60" font-family="Verdana" font-size="6">
-      {% for pos in token.pos %}
-      <tspan>{{pos.pos}}</tspan>
-      {% for feat in pos.features %} {% if feat.value != null %}
-      <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:</tspan>
-      <tspan x="{{token.xpos}}" dy="6" dx="4">-> {{feat.value}}</tspan>
-      {% endif %} {% endfor %} {% endfor %}
-    </text>
-  </g>
-  {% endif %} {% endfor %}
-</svg>
 
-{{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }}
-
+<!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 <script>
-  // Variables to hold the current position and scale of the viewbox
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.getElementById("svgCanvas");
-  const form = document.getElementById("form");
-  const pt = svg.createSVGPoint();
-  let focusDep = null;
-  let panning = true;
-  let creating = false;
-  let currentX = 0;
-  let currentY = 0;
-  let currentZoom = 1;
-  let fromTokenId = null;
-  let pathColor = "#264d73";
-  let enhancedPathColor = "#008060";
-  let enhancedEnabled = true;
 
-  function cursorPoint(evt) {
-    pt.x = evt.clientX;
-    pt.y = evt.clientY;
-    return pt.matrixTransform(svg.getScreenCTM().inverse());
+
+function getArcHeight(distance) {
+  const minHeight = 10; // The minimum height of an arc
+  const heightFactor = 0.05; // Factor to control growth rate of the arc height based on distance squared
+  const maxHeight = 75; // Increase maximum height if needed
+
+  // Quadratic growth based on the distance
+  let arcHeight = minHeight + heightFactor * Math.pow(distance, 2);
+
+  // Ensure the arcHeight does not exceed the maximum value
+  return Math.min(arcHeight, maxHeight);
+}
+
+
+let arcRegistry = {};
+
+function registerArc(fromTokenId, toTokenId) {
+  const key = `${fromTokenId}-${toTokenId}`;
+  if (!arcRegistry[key]) {
+    arcRegistry[key] = 0;
+  }
+  arcRegistry[key] += 1;
+  return arcRegistry[key];
+}
+
+function createBezierArc(x1, y1, x2, y2, fromTokenId, toTokenId) {
+  // Calculate the distance between the start and end tokens
+  const distance = Math.abs(x2 - x1);
+
+  // Get the index of the arc to determine its order among multiple arcs between the same tokens
+  const arcIndex = registerArc(fromTokenId, toTokenId);
+
+  // Base height of the arc is set as a fraction of the distance between tokens
+  // Adjust the 0.4 factor to control the height of the shortest arc
+  const baseArcHeight = distance * 0.4;
+  
+  // Increment height for each additional arc to avoid overlap
+  // Adjust the 20 constant to control the additional height for overlapping arcs
+  const arcHeightIncrement = 20;
+
+  // Calculate the total height of the arc by adding the base height and additional height for overlapping arcs
+  let arcHeight = baseArcHeight + ((arcIndex - 1) * arcHeightIncrement);
+  
+  // Determine the direction of the arc based on token positions
+  const upwardArc = x1 < x2;
+
+  // Control points are set to create the arc's curve
+  // If the arc is not the first one, increase the height of the control points
+  const cp1x = x1;
+  const cp2x = x2;
+  const cp1y = y1 - (upwardArc ? arcHeight : -arcHeight);
+  const cp2y = y2 - (upwardArc ? arcHeight : -arcHeight);
+
+  // Construct the SVG path for the arc
+  return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+}
+
+
+// Variables to hold the current position and scale of the viewbox
+const svgNS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("svgCanvas");
+const form = document.getElementById("form");
+const pt = svg.createSVGPoint();
+let focusDep = null;
+let isPanning = false;
+let creating = false;
+let currentX = 0;
+let currentY = 0;
+let currentZoom = 1;
+let fromTokenId = null;
+let pathColor = "#264d73";
+let enhancedPathColor = "#008060";
+let enhancedEnabled = true;
+
+function cursorPoint(evt) {
+  pt.x = evt.clientX;
+  pt.y = evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+const tokenData = JSON.parse(
+  document.getElementById("tokenData").textContent
+);
+
+
+function setViewBox(x, y, width, height) {
+  svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+}
+
+function initializeViewbox() {
+  const bbox = svg.getBBox();
+  const margin = 20; // Margin value; adjust as needed
+
+  // Adjust x and y to add margin
+  currentX = bbox.x - margin;
+  currentY = bbox.y - margin;
+
+  // Increase width and height by twice the margin value to account for both sides
+  const width = bbox.width + 2 * margin;
+  const height = bbox.height + 2 * margin;
+
+  currentZoom = 1; // Reset the zoom level
+
+  setViewBox(currentX, currentY, width, height);
+}
+
+function updateViewBox(x, y, zoom) {
+  currentX = x;
+  currentY = y;
+  currentZoom = zoom;
+
+  // Calculate new width and height based on the initial SVG dimensions
+  const newWidth = svg.getBBox().width / currentZoom;
+  const newHeight = svg.getBBox().height / currentZoom;
+
+  setViewBox(currentX, currentY, newWidth, newHeight);
+}
+
+
+const deprelData = JSON.parse(document.getElementById("deprel").textContent);
+
+function clearFocusDep() {
+  // remove delete button
+  const form = document.getElementById("deleteDep");
+  while (form.querySelector('input[type="submit"]')) {
+    form.removeChild(form[0]);
   }
 
-  const tokenData = JSON.parse(
-    document.getElementById("tokenData").textContent
-  );
+  // remove the red stroke from the path
+  const oldFocusPath = document.getElementById(focusDep);
+  oldFocusPath.setAttribute("stroke", "none");
 
-  const deprelData = JSON.parse(document.getElementById("deprel").textContent);
+  focusDep = null;
+  // clear all information about the dependency and the corresponding tokens in the p tag
+  const depDetails = document.getElementById("depDetails");
+  depDetails.innerHTML = ``;
+}
 
-  function clearFocusDep() {
-    // remove delete button
-    const form = document.getElementById("deleteDep");
-    while (form.querySelector('input[type="submit"]')) {
-      form.removeChild(form[0]);
+function hideEnhancedPaths() {
+  const groups = document.querySelectorAll("g[data-enhanced='true']");
+  // check if the focusDep is an enhanced path and if so, do not hide it
+  if (focusDep) {
+    const focusPath = document.getElementById(focusDep);
+    if (focusPath.getAttribute("data-enhanced") == "true") {
+      clearFocusDep();
     }
-
-    // remove the red stroke from the path
-    const oldFocusPath = document.getElementById(focusDep);
-    oldFocusPath.setAttribute("stroke", "none");
-
-    focusDep = null;
-    // clear all information about the dependency and the corresponding tokens in the p tag
-    const depDetails = document.getElementById("depDetails");
-    depDetails.innerHTML = ``;
   }
-
-  function hideEnhancedPaths() {
-    const paths = document.querySelectorAll("path[data-enhanced='true']");
-    // check if the focusDep is an enhanced path and if so, do not hide it
-    if (focusDep) {
-      const focusPath = document.getElementById(focusDep);
-      if (focusPath.getAttribute("data-enhanced") == "true") {
-        clearFocusDep();
-      }
+  groups.forEach((group) => {
+    if (group.getAttribute("data-enhanced") == "true") {
+      group.classList.add("hidden");
     }
-    paths.forEach((path) => {
-      if (path.getAttribute("stroke") == enhancedPathColor) {
-        path.setAttribute("stroke", "none");
-      }
-    });
-  }
-
-  function showEnhancedPaths() {
-    const paths = document.querySelectorAll("path[data-enhanced='true']");
-    paths.forEach((path) => {
-      if (path.getAttribute("stroke") == "none") {
-        path.setAttribute("stroke", enhancedPathColor);
-      }
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", (event) => {
-    document.getElementById("enhanced").addEventListener("click", (event) => {
-      if (enhancedEnabled) {
-        enhancedEnabled = false;
-        event.target.innerHTML = "show enhanced";
-        hideEnhancedPaths();
-      } else {
-        enhancedEnabled = true;
-        event.target.innerHTML = "hide enhanced";
-        showEnhancedPaths();
-      }
-      console.log(enhancedEnabled);
-    });
   });
+}
 
-  //#region CLICK HANDLE
-  document.querySelectorAll("circle").forEach((item) =>
-    item.addEventListener("click", (event) => {
-      if (!creating) {
-        creating = true;
-        fromTokenId = event.target.id;
-        hideFocusDep();
-        return;
-      }
-      if (creating) {
-        const tokenTo = event.target.id;
-        if (tokenTo) {
-          const path = document.createElementNS(svgNS, "path");
-          const arcDefinition = createBezierArc(
-            tokenData.find((e) => e.id === fromTokenId).xpos,
-            32.5,
-            tokenData.find((e) => e.id === tokenTo).xpos,
-            32.5
-          );
+function showEnhancedPaths() {
+  const groups = document.querySelectorAll("g[data-enhanced='true']");
+  groups.forEach((group) => {
+    group.classList.remove("hidden");
+  });
+}
 
-          path.setAttribute("d", arcDefinition);
-          path.setAttribute("fill", "none");
-          path.setAttribute("stroke", "black");
-          path.setAttribute("stroke-width", "1.5");
-          path.setAttribute("marker-end", "url(#arrowhead)");
-          path.setAttribute("data-from", fromTokenId);
-          path.setAttribute("data-to", tokenTo.id);
-          path.addEventListener("click", (event) => {
-            focusDep = event.target.id;
-            const focusPath = document.getElementById(focusDep);
-            focusPath.removeAttribute("stroke");
-            focusPath.setAttribute("stroke", "red");
-            console.log("Path clicked");
-          });
-          svg.appendChild(path);
-          addNewDependencyRow(fromTokenId, tokenTo);
-          creating = false;
-          fromTokenId = null;
-          cleanAllElementsWithClass("temp-path");
-        }
-      }
-    })
-  );
-  //#endregion
+document.addEventListener("DOMContentLoaded", (event) => {
 
-  //#region create temp path
-  svg.addEventListener("mousemove", (event) => {
+  initializeViewbox();
+
+  // add event listener to the enhanced button
+  document.getElementById("enhanced").addEventListener("click", (event) => {
+    if (enhancedEnabled) {
+      enhancedEnabled = false;
+      event.target.innerHTML = "Show Enhanced UD";
+      hideEnhancedPaths();
+    } else {
+      enhancedEnabled = true;
+      event.target.innerHTML = "Hide Enhanced UD";
+      showEnhancedPaths();
+    }
+    console.log(enhancedEnabled);
+  });
+});
+
+//#region CLICK HANDLE
+document.querySelectorAll("circle").forEach((item) =>
+  item.addEventListener("click", (event) => {
     if (!creating) {
+      creating = true;
+      fromTokenId = event.target.id;
+      hideFocusDep();
       return;
     }
-    var loc = cursorPoint(event);
-    const mouseX = loc.x;
-    const mouseY = loc.y - 5;
-    cleanAllElementsWithClass("temp-path");
+    if (creating) {
+      const tokenTo = event.target.id;
+      if (tokenTo) {
+        const path = document.createElementNS(svgNS, "path");
+        const arcDefinition = createBezierArc(
+          tokenData.find((e) => e.id === fromTokenId).xpos,
+          32.5,
+          tokenData.find((e) => e.id === tokenTo).xpos,
+          32.5,
+          fromTokenId, tokenTo.id 
+        );
+        path.setAttribute("d", arcDefinition);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "black");
+        path.setAttribute("stroke-width", "1.5");
+        path.setAttribute("marker-end", "url(#arrowhead)");
+        path.setAttribute("data-from", fromTokenId);
+        path.setAttribute("data-to", tokenTo.id);
+        path.addEventListener("click", (event) => {
+          focusDep = event.target.id;
+          const focusPath = document.getElementById(focusDep);
+          focusPath.removeAttribute("stroke");
+          focusPath.setAttribute("stroke", "red");
+          console.log("Path clicked");
+        });
+        svg.appendChild(path);
+        addNewDependencyRow(fromTokenId, tokenTo);
+        creating = false;
+        fromTokenId = null;
+        cleanAllElementsWithClass("temp-path");
+      }
+    }
+  })
+);
+//#endregion
+
+//#region create temp path
+svg.addEventListener("mousemove", (event) => {
+  if (!creating) {
+    return;
+  }
+  var loc = cursorPoint(event);
+  const mouseX = loc.x;
+  const mouseY = loc.y - 5;
+  cleanAllElementsWithClass("temp-path");
+  const path = document.createElementNS(svgNS, "path");
+  // Use fromTokenId for the starting token
+  // Create a dynamic ID for the mouse position
+  const mouseTokenId = `mouse-${mouseX}-${mouseY}`;
+
+  const arcDefinition = createBezierArc(
+    tokenData.find((e) => e.id === fromTokenId).xpos, // X position of the starting token
+    35, // Y position for the arc
+    mouseX, // Current mouse X position
+    mouseY, // Current mouse Y position
+    fromTokenId, // ID of the starting token
+    mouseTokenId // Temporary ID for the mouse position
+  );
+  path.setAttribute("d", arcDefinition);
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "black");
+  path.setAttribute("stroke-width",  "1");
+  path.setAttribute("marker-end", "url(#arrowhead)");
+  path.classList.add("temp-path");
+  svg.appendChild(path);
+});
+//#endregion
+
+
+function cleanAllElementsWithClass(className) {
+  const tempPaths = document.getElementsByClassName(className);
+  while (tempPaths.length > 0) {
+    tempPaths[0].parentNode.removeChild(tempPaths[0]);
+  }
+}
+
+tokenData.forEach((token) => {
+  token.dependencies?.forEach((dep) => {
+    if (!dep.to_token_id) {
+      return;
+    }
+    if (dep.enhanced) {
+      if (!enhancedEnabled) {
+        return;
+      }
+      pathColor = enhancedPathColor;
+    }
+    const depPos = tokenData.find((e) => e.id === dep.to_token_id.id).xpos;
+    const g = document.createElementNS(svgNS,"g");
+    g.setAttribute("data-enhanced",dep.enhanced)
+    g.setAttribute("data-id",dep.id)
     const path = document.createElementNS(svgNS, "path");
+
+    // Updated arcDefinition call with fromTokenId and toTokenId
     const arcDefinition = createBezierArc(
-      tokenData.find((e) => e.id === fromTokenId).xpos,
-      35,
-      mouseX,
-      mouseY
+      token.xpos, 32.5, // X and Y positions of the starting token
+      depPos, 32.5,    // X and Y positions of the ending token
+      token.id,        // ID of the starting token
+      dep.to_token_id.id  // ID of the ending token
     );
     path.setAttribute("d", arcDefinition);
     path.setAttribute("fill", "none");
-    path.setAttribute("stroke", "black");
-    path.setAttribute("stroke-width", "1");
+    path.setAttribute("stroke", pathColor);
+    path.setAttribute("stroke-width", "1.5");
+    path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
     path.setAttribute("marker-end", "url(#arrowhead)");
-    path.classList.add("temp-path");
-    svg.appendChild(path);
-  });
-  //#endregion
+    path.setAttribute("data-from", token.id);
+    path.setAttribute("data-to", dep.to_token_id.id);
+    path.setAttribute("data-enhanced", dep.enhanced);
+    path.setAttribute("id", dep.id);
 
-  function createBezierArc(x1, y1, x2, y2, upwards = true) {
-    const cp1x = x1;
-    const cp2x = x2;
-    const arcHeight = Math.abs(x1 - x2);
-    const cp1y = y1 - (upwards ? arcHeight : -arcHeight);
-    const cp2y = y2 - (upwards ? arcHeight : -arcHeight);
-    return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
-  }
+    //Path Label
+    const text = document.createElementNS(svgNS, "text");
+    text.setAttribute("font-size", 10);
+    text.setAttribute("fill", "red");
+    const textpath = document.createElementNS(svgNS, "textPath");
+    textpath.setAttribute("path", arcDefinition);
+    if(token.xpos > depPos){
+      textpath.setAttribute("startOffset", "50%");
+      textpath.setAttribute("side", "right");
 
-  function cleanAllElementsWithClass(className) {
-    const tempPaths = document.getElementsByClassName(className);
-    while (tempPaths.length > 0) {
-      tempPaths[0].parentNode.removeChild(tempPaths[0]);
     }
-  }
+    textpath.setAttribute("startOffset", "40%");
+    textpath.innerHTML = dep.rel;
+    text.append(textpath);
+    path.addEventListener("click", (event) => {
+      hideFocusDep();
+      focusDep = event.target.id;
+      const focusPath = document.getElementById(focusDep);
+      focusPath.removeAttribute("stroke");
+      focusPath.setAttribute("stroke", "red");
+      const form = document.getElementById("deleteDep");
+      const inputDep = document.createElement("input");
+      inputDep.setAttribute("type", "hidden");
+      inputDep.setAttribute("name", "dep_id");
+      inputDep.setAttribute("value", focusDep);
+      form.appendChild(inputDep);
 
-  tokenData.forEach((token) => {
-    token.dependencies?.forEach((dep) => {
-      if (!dep.to_token_id) {
-        return;
+      // only add the submit button if it is not already there
+      const submit = document.createElement("input");
+      submit.setAttribute("type", "submit");
+      submit.setAttribute("value", "Delete");
+      submit.setAttribute(
+        "class",
+        "flex mx-2 p-2 bg-red-500 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+      );
+      if (!form.querySelector('input[type="submit"]')) {
+        form.appendChild(submit);
       }
-      if (dep.enhanced) {
-        if (!enhancedEnabled) {
-          return;
-        }
-        pathColor = enhancedPathColor;
-      }
-      const depPos = tokenData.find((e) => e.id === dep.to_token_id.id).xpos;
-      const path = document.createElementNS(svgNS, "path");
-      const arcDefinition = createBezierArc(token.xpos, 32.5, depPos, 32.5);
-      path.setAttribute("d", arcDefinition);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", pathColor);
-      path.setAttribute("stroke-width", "1.5");
-      path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
-      path.setAttribute("marker-end", "url(#arrowhead)");
-      path.setAttribute("data-from", token.id);
-      path.setAttribute("data-to", dep.to_token_id.id);
-      path.setAttribute("data-enhanced", dep.enhanced);
-      path.setAttribute("id", dep.id);
-      const text = document.createElementNS(svgNS, "text");
-      text.setAttribute("font-size", 8);
-      const textpath = document.createElementNS(svgNS, "textPath");
-      textpath.setAttribute("path", arcDefinition);
-      textpath.innerHTML = dep.rel;
-      text.append(textpath);
-      path.addEventListener("click", (event) => {
-        hideFocusDep();
-        focusDep = event.target.id;
-        const focusPath = document.getElementById(focusDep);
-        focusPath.removeAttribute("stroke");
-        focusPath.setAttribute("stroke", "red");
-        const form = document.getElementById("deleteDep");
-        const inputDep = document.createElement("input");
-        inputDep.setAttribute("type", "hidden");
-        inputDep.setAttribute("name", "dep_id");
-        inputDep.setAttribute("value", focusDep);
-        form.appendChild(inputDep);
+      // display all information about the dependency and the corresponding tokens in the p tag
+      const depDetails = document.getElementById("depDetails");
+      depDetails.innerHTML = `From: ${token.transcription ? token.transcription : null}<br>To: ${tokenData.find((e) => e.id === dep.to_token_id.id).transcription
+        }<br>Relation: ${dep.rel}`;
 
-        // only add the submit button if it is not already there
-        const submit = document.createElement("input");
-        submit.setAttribute("type", "submit");
-        submit.setAttribute("value", "Delete");
-        submit.setAttribute(
-          "class",
-          "flex mx-2 p-2 bg-red-500 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
-        );
-        if (!form.querySelector('input[type="submit"]')) {
-          form.appendChild(submit);
-        }
-        // display all information about the dependency and the corresponding tokens in the p tag
-        const depDetails = document.getElementById("depDetails");
-        depDetails.innerHTML = `From: ${token.transcription}<br>To: ${tokenData.find((e) => e.id === dep.to_token_id.id).transcription
-          }<br>Relation: ${dep.rel}`;
-
-        console.log("Path clicked");
-      });
-      svg.appendChild(path);
-      svg.appendChild(text);
-      pathColor = "#264d73";
+      console.log("Path clicked");
     });
+    g.appendChild(path);
+    g.appendChild(text);
+    svg.appendChild(g)
+    pathColor = "#264d73";
   });
+});
 
-  function setViewBox() {
-    if (!panning) {
-      return;
-    }
-    svg.setAttribute(
-      "viewBox",
-      `${currentX} ${currentY} ${800 / currentZoom} ${600 / currentZoom}`
-    );
-  }
 
-  svg.onmousedown = function (event) {
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startViewBoxX = currentX;
-    const startViewBoxY = currentY;
+
+svg.onmousedown = function (event) {
+    event.preventDefault(); // Prevent default behavior like text selection
+    isPanning = true;       // Indicate that panning is active
+
+    let mouseStartPos = cursorPoint(event);
 
     function onMouseMove(event) {
-      currentX =
-        startViewBoxX + (event.clientX - startX) * currentZoom * (1 / 3);
-      currentY =
-        startViewBoxY + (event.clientY - startY) * currentZoom * (1 / 3);
-      setViewBox();
+        if (!isPanning) return;
+
+        requestAnimationFrame(() => {
+            const newMousePos = cursorPoint(event);
+            const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
+            const dy = (newMousePos.y - mouseStartPos.y) / currentZoom;
+
+            currentX -= dx;
+            currentY -= dy;
+
+            updateViewBox(currentX, currentY, currentZoom);
+
+            mouseStartPos = newMousePos;
+        });
     }
 
     function onMouseUp() {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
+        isPanning = false;
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
     }
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-  };
+};
 
-  svg.onwheel = function (event) {
+
+// scroll to zoom
+svg.onwheel = function (event) {
     event.preventDefault();
-    const zoomIntensity = 0.1;
+
+    const zoomIntensity = 0.05;
     const wheelDelta = event.deltaY < 0 ? 1 : -1;
-    const zoom = Math.exp(wheelDelta * zoomIntensity);
-    currentZoom *= zoom;
-    setViewBox();
+    const zoomFactor = Math.exp(wheelDelta * zoomIntensity);
+
+    // Get the current mouse position relative to the SVG
+    const mousePos = cursorPoint(event);
+
+    // Calculate the new zoom level
+    const newZoom = currentZoom * zoomFactor;
+
+    // Calculate the viewbox dimensions at the new zoom level
+    const newWidth = svg.clientWidth / newZoom;
+    const newHeight = svg.clientHeight / newZoom;
+
+    // Calculate new viewbox origin to keep the mouse position stable relative to the content
+    const newX = mousePos.x - (mousePos.x - currentX) * zoomFactor;
+    const newY = mousePos.y - (mousePos.y - currentY) * zoomFactor;
+
+    // Update the current viewbox parameters
+    currentX = newX;
+    currentY = newY;
+    currentZoom = newZoom;
+
+    updateViewBox(currentX, currentY, newZoom);
+};
+
+
+//double click to zoom in
+svg.ondblclick = function(event) {
+    event.preventDefault();
+
+    const dblClickZoomIntensity = 2; // Adjust zoom intensity for double-click
+    const newZoom = currentZoom * dblClickZoomIntensity;
+
+    // Calculate the mouse position relative to the SVG
+    const mousePos = cursorPoint(event);
+
+    // Calculate new viewbox parameters to center the zoom on the double-click position
+    const newWidth = svg.clientWidth / newZoom;
+    const newHeight = svg.clientHeight / newZoom;
+    const newX = mousePos.x - (newWidth / 2);
+    const newY = mousePos.y - (newHeight / 2);
+
+    // Update current viewbox parameters
+    currentX = newX;
+    currentY = newY;
+    currentZoom = newZoom;
+
+    updateViewBox(currentX, currentY, currentZoom);
   };
 
-  document.getElementById("center").onclick = function () {
-    const bbox = svg.getBBox();
-    currentX = bbox.x - 10;
-    currentY = bbox.y - 10;
-    currentZoom = 1;
-    setViewBox();
-  };
+document.getElementById('center').onclick = function () {
+  // Use the initial bounding box values to center
+  initializeViewbox();
+};
+
+function calculateZoomLevel() {
+    const svgContainer = document.getElementById("svgContainer");
+
+    const elements = svg.getElementsByTagName("*");
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      const bbox = element.getBBox();
+      minX = Math.min(minX, bbox.x);
+      minY = Math.min(minY, bbox.y);
+      maxX = Math.max(maxX, bbox.x + bbox.width);
+      maxY = Math.max(maxY, bbox.y + bbox.height);
+    }
+
+    const viewBoxWidth = maxX - minX;
+    const viewBoxHeight = maxY - minY;
+
+    const containerWidth = svgContainer.clientWidth;
+    const containerHeight = svgContainer.clientHeight;
+
+    const zoomX = containerWidth / viewBoxWidth;
+    const zoomY = containerHeight / viewBoxHeight;
+
+    const zoomLevel = Math.min(zoomX, zoomY);
+
+    return zoomLevel;
+  }
+
 
   const addNewDependencyRow = (from, to) => {
     const inputContainer = document.createElement("div");
@@ -520,4 +780,37 @@
   currentZoom = 1;
   setViewBox();
 </script>
+
+<!--import pag navigation-->
+<script>
+  function logEventDetails(event) {
+    console.log(`Event Triggered: ${event.type}`);
+    console.log(`Control Key: ${event.ctrlKey}`);
+    console.log(`Meta Key: ${event.metaKey}`);
+    console.log(`Key: ${event.key}`);
+  }
+
+  document.addEventListener('DOMContentLoaded', (event) => {
+    console.log('DOMContentLoaded, adding keydown event listener.');
+
+    document.addEventListener('keydown', function (event) {
+      switch (event.key) {
+        case 'ArrowLeft': // User pressed the left arrow key
+          var prevPageLink = document.getElementById('prevPageLink');
+          if (prevPageLink) {
+            window.location.href = prevPageLink.href;
+          }
+          break;
+        case 'ArrowRight': // User pressed the right arrow key
+          var nextPageLink = document.getElementById('nextPageLink');
+          if (nextPageLink) {
+            window.location.href = nextPageLink.href;
+          }
+          break;
+      }
+    });
+  });
+
+</script>
+
 {% endblock content %}
