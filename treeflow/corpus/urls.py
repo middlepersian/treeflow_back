@@ -14,7 +14,6 @@ from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal import load_section_modal
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
-from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryListView, BibEntryCreateView
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
@@ -22,6 +21,7 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
+from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -34,6 +34,7 @@ urlpatterns = [
     path('tokens/<uuid:text_id>', tokens_view, name='tokens'),
     path('sentences/<uuid:text_id>', sentences_view, name='sentences'),
     path('sections/<uuid:text_id>', sections_view, name='sections'),
+    path('dropdown_redirect/', dropdown_redirect, name='dropdown_redirect'),
     path('get-sections/<uuid:text_id>/<str:section_type>/', get_sections_by_type, name='get_sections_by_type'),
     path('get-child-sections/<uuid:section_id>/', get_child_sections, name='get_child_sections'),
     path('get-tokens-for-section/<uuid:section_id>/', get_tokens_for_section, name='get_tokens_for_section'),

@@ -14,7 +14,7 @@ class Section(models.Model):
     identifier = models.CharField(max_length=100, blank=True, null=True)
     type = models.CharField(max_length=25, blank=True, null=True)
     title = models.CharField(max_length=100, blank=True, null=True)
-    language = models.CharField(max_length=3, blank=True)
+    language = models.CharField(max_length=3, blank=True, null=True)
     source = models.ForeignKey('Source', on_delete=models.SET_NULL,
                                related_name='section_source', null=True, blank=True)
     tokens = models.ManyToManyField('Token', related_name='section_tokens', through='SectionToken')

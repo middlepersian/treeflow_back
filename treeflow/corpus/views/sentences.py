@@ -9,20 +9,25 @@ from treeflow.corpus.models import Text, Section, Token, SectionToken
 
 logger = logging.getLogger(__name__)
 
+
 @login_required
 def sentences_view(request, text_id=None):
+
+    # log text id
+    logger.info('text_id : %s', text_id)
+
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()
     if text_id:
         selected_text_id = text_id
-    else: 
+    else:
         selected_text_id = request.GET.get('text_id')
-
 
     # Prefetch for sections of type 'line'
     line_prefetch = Prefetch(
         'sectiontoken_set',
-        queryset=SectionToken.objects.filter(section__type='line').select_related('section'),
+        queryset=SectionToken.objects.filter(
+            section__type='line').select_related('section'),
         to_attr='line_sections'
     )
 
@@ -40,19 +45,19 @@ def sentences_view(request, text_id=None):
     ).prefetch_related(token_prefetch)
 
     # Setup paginator for sentences
-    paginator = Paginator(sentences, 10)  # Adjust the number of sentences per page as needed
+    # Adjust the number of sentences per page as needed
+    paginator = Paginator(sentences, 10)
     page_number = request.GET.get('page')
     sentences_page = paginator.get_page(page_number)
 
     # log the number of sentences
     logger.info("Found %s sentences", sentences.count())
 
-
     # Prepare context for rendering
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
-        'page_obj': sentences_page,  
+        'page_obj': sentences_page,
         'current_view': 'corpus:sentences',
     }
 
