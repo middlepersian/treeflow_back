@@ -3,8 +3,6 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
-  local_elastic_data: {}
-  local_redis_data: {}
 
 services:
   django:
@@ -28,81 +26,26 @@ services:
       - "8000:8000"
     command: /start
 
+  node:
+    image: node:latest
+    container_name: node_tailwind_builder
+    depends_on:
+      - django
+    working_dir: /app/theme/static_src # Make sure this path matches your local structure
+    volumes:
+      - .:/app:z 
+    command: /bin/sh -c "npm install && npm run dev"
+    tty: true 
+    
   postgres:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: treeflow_production_postgres
     container_name: postgres
-    depends_on:
-      - elastic
     volumes:
       - local_postgres_data:/var/lib/postgresql/data:Z
       - local_postgres_data_backups:/backups:z
     env_file:
       - ./.envs/.local/.postgres
 
-  elastic:
-    image: elasticsearch:7.17.9
-    environment:
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - logger.level=error
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - "9200:9200"
-    volumes:
-      - local_elastic_data:/usr/share/elasticsearch/data
-    healthcheck:
-      interval: 5s
-      retries: 500
-      test: curl -s 127.0.0.1:9200 &>/dev/null  
-
-  redis:
-    image: redis:latest
-    container_name: redis
-    volumes:
-      - local_redis_data:/data
-    ports:
-      - "6379:6379"
-  
-  celery_worker:
-    build:
-      context: .
-      dockerfile: ./compose/local/django/Dockerfile
-    image: treeflow_local_django
-    container_name: celery_worker
-    depends_on:
-      - django
-      - redis
-    volumes:
-      - .:/app:z
-    env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    command: celery -A treeflow worker --loglevel=info
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.local  # or treeflow.settings.production
-
-  celery_beat:
-    build:
-      context: .
-      dockerfile: ./compose/local/django/Dockerfile
-    image: treeflow_local_django
-    container_name: celery_beat
-    depends_on:
-      - django
-      - redis
-    volumes:
-      - .:/app:z
-    env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    command: celery -A treeflow beat --loglevel=info
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.local  # or treeflow.settings.production
-      - CELERY_BEAT=true

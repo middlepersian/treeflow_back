@@ -1,0 +1,13 @@
+<!-- partials/pos_dropdown.html -->
+<select name="pos" class="pos-select"
+        hx-post="{% url 'corpus:update_token' token.id %}"
+        hx-trigger="change"
+        hx-indicator="#loadingIndicator{{ token.id }}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        class="shadow border rounded py-2 px-3 text-grey-darker">
+    {% for pos_choice in pos_choices %}
+        <option value="{{ pos_choice }}" {% if pos_choice == token.pos_token.first.pos %}selected{% endif %}>
+            {{ pos_choice }}
+        </option>
+    {% endfor %}
+</select>

@@ -13,7 +13,7 @@ class Source(models.Model):
 
     identifier = models.CharField(max_length=20, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    references = models.ManyToManyField(BibEntry, blank=True)
+    references = models.ManyToManyField(BibEntry, blank=True, related_name='source_references')
 
     # a 'source' might have another sources as a source
     sources = models.ManyToManyField('self',blank=True, related_name='source_sources')

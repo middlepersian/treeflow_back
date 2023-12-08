@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<h1>Source Table</h1>
+
+<table class="table-auto md:mx-auto">
+  <thead>
+    <tr>
+      <th class="border p-2">Identifier</th>
+      <th class="border p-2">Description</th>
+      <th class="border p-2">Type</th>
+      <th class="border p-2">Related Sources</th>
+      <th class="border p-2">Zotero Keys</th>
+      <th class="border p-2">Edit</th>
+      <th class="border p-2">Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for source in sources %}
+    <tr>
+      <td class="border p-2">{{ source.identifier }}</td>
+      <td class="border p-2">{{ source.description }}</td>
+      <td class="border p-2">{{ source.type }}</td>
+      <td class="border p-2">{{ source.sources.all }}</td>
+      <td class="border p-2">{{ source.references.all }}</td>
+      <td class="border p-2"><a class="p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer" href="{%url 'corpus:source_edit' source_id=source.id %}">Edit</a></td>
+      <td class="border p-2"><a class="p-2 rounded bg-red-800 text-white hover:bg-red-700 cursor-pointer" href="{%url 'corpus:source_delete' source_id=source.id %}">Delete</a></td>
+    
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a class="p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer mt-2 mx-auto" href="{%url 'corpus:source_add'%}">Add New</a>
+
+{% endblock %}

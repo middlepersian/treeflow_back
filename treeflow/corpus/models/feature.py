@@ -18,7 +18,7 @@ class Feature(models.Model):
 
 
     class Meta:
-        pass
+        indexes = [models.Index(fields=['feature', 'feature_value'])]
     
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving

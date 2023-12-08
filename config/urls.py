@@ -6,24 +6,24 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from treeflow.views.publications import zotero_view
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
-from treeflow.schema import schema
-#from schema import schema
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
-    path(
-        "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
-    ),
-    # Django Admin, use {% url 'admin:index' %}
+    path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
+    path("contact/", TemplateView.as_view(template_name="pages/contact.html"), name="contact"),
+    path("publications/",zotero_view, name="publications"),
+    path("methodology/", TemplateView.as_view(template_name="pages/methodology.html"), name="methodology"),
+    path("resources/", TemplateView.as_view(template_name="pages/resources.html"), name="resources"),
+    path("team/", TemplateView.as_view(template_name="pages/team.html"), name="team"),
+    path('corpus/', include('treeflow.corpus.urls', namespace='corpus')),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    # graphql
-    #path('graphql_sync/', GraphQLView.as_view(schema=schema)),
-    path('graphql/', AsyncGraphQLView.as_view(schema=schema)),
+
 
     # Your stuff: custom urls includes go here
 
@@ -52,6 +52,9 @@ if settings.DEBUG:
             kwargs={"exception": Exception("Page not Found")},
         ),
         path("500/", default_views.server_error),
+        #django browser reload
+        path("__reload__/", include("django_browser_reload.urls")),
+
     ]
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar

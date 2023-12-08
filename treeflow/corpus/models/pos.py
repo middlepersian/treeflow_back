@@ -15,10 +15,9 @@ class POS(models.Model):
     
         
     def __str__(self):
-        return '{}'.format(self.pos)    
-
+        return '{} - {} - {}'.format(self.token, self.token.number, self.pos)
     class Meta:
-        pass
+        indexes = [models.Index(fields=['pos'])]
 
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
@@ -27,4 +26,6 @@ class POS(models.Model):
             # uppercase pos
             self.pos = self.pos.upper()
         super().save(*args, **kwargs)
+
+    
     

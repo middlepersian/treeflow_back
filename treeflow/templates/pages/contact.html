@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block content %}
+  {% include 'components/hero.html' %}
+  <div class="flex flex-row mt-8 mb-20">
+    <div class="sticky border-r-2 smartphone:hidden sm:block h-fit border-sb-gray opacity-60">
+      <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
+        <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">{% trans 'Contact' %}</h1>
+      </div>
+    </div>
+    <div class="flex flex-col items-start gap-2 pl-16 pr-20 smartphone:px-4 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
+      <h2 class="text-left text-h2-gray scroll-mt-24">{% trans 'Contact' %}</h2>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        For any enquiries or remarks relating to the project, please contact us via the following email address:<a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="mailTo:contact-mpcd@uni-koeln.de">contact-mpcd@uni-koeln.de</a>
+      </p>
+      <h2 class="text-left text-h2-gray scroll-mt-24">{% trans 'Privacy Protection Statement' %}</h2>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        Generally, the<a href="https://portal.uni-koeln.de/en/privacy-protection-statement" class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" target="_blank">privacy policy of the University of Cologne</a>applies to this project; with the specific additions stated below:
+      </p>
+      <h2 class="text-left text-h2-gray scroll-mt-24">{% trans 'Responsible for the content of this website' %}</h2>
+      <div class="flex flex-col gap-10">
+        <p class="flex flex-col mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+          <span class="mb-5 text-sm text-justify text-p-gray lg:text-sm md:text-xs sm:text-xs">Prof. Dr. Kianoosh Rezania (Bochum),</span><span class="mb-5 text-sm text-justify text-p-gray lg:text-sm md:text-xs sm:text-xs">Prof. Dr. Alberto Cantera (Berlin),</span><span class="mb-5 text-sm text-justify text-p-gray lg:text-sm md:text-xs sm:text-xs">Prof. Dr. Øyvind Eide / Dr. Claes Neuefeind (Cologne)</span>
+        </p>
+        <p class="flex flex-col mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+          <span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">Middle-Persian Corpus and Dictionary (MPCD)</span><span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">Cologne Center for eHumanities</span><span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">University of Cologne</span><span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">Albertus-Magnus-Platz</span><span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">D-50923 Köln</span>
+        </p>
+        <p class="flex flex-col mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+          <span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">Project number (DFG): 452473565</span><span class="text-sm text-justify lg:text-lg md:text-base sm:text-sm text-p-gray">VAT identification number (University of Cologne): DE 123486767</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  {% include 'components/footer.html' %}
+{% endblock %}

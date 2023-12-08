@@ -13,7 +13,7 @@ from treeflow.corpus.models import (
     Comment,
     POS,
 )
-from treeflow.dict.models import Lemma, Meaning
+from treeflow.dict.models import Lemma, Sense
 from treeflow.images.models import Image
 from django.conf import settings
 from treeflow.utils.normalize import strip_and_normalize
@@ -189,8 +189,8 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                         translation = translation[1]
                         if translation:
                             try:
-                                meaning_obj, created = Meaning.objects.get_or_create(
-                                    meaning=strip_and_normalize("NFC", translation),
+                                sense_obj, created = Sense.objects.get_or_create(
+                                    sense=strip_and_normalize("NFC", translation),
                                     language="deu",
                                     lemma_related=False,
                                 )
@@ -200,10 +200,10 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                         df.index[i] + 2, row["id"], str(e)
                                     )
                                 )
-                                meaning_obj = None
+                                sense_obj = None
 
-                    if meaning_obj:
-                        sentence_obj.meanings.add(meaning_obj)
+                    if sense_obj:
+                        sentence_obj.senses.add(sense_obj)
                         sentence_obj.save()
                         continue
 
@@ -359,7 +359,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                     dependencies.append(dependency_obj)
                     continue
         # process lemmas
-        # we need to be aware of MWEs. In the case of MWEs, only lemmas and meanings are present in the row
+        # we need to be aware of MWEs. In the case of MWEs, only lemmas and senses are present in the row
         if row["lemma"] != "_" and pd.notna(row["lemma"]):
             lemma = row["lemma"]
             if "$" != lemma and lemma != "," and lemma != "$":
@@ -395,22 +395,22 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                 for x in term_tech.split(",")
                             ]
                             lemma_obj.categories = term_tech_list
-                        # add meaning
+                        # add sense
                         if (
                             row["meaning"]
                             and row["meaning"] != "_"
                             and pd.notna(row["meaning"])
                         ):
-                            meaning = row["meaning"]
-                            if "," in meaning:
-                                meaning = meaning.split(",")
-                                for m in meaning:
+                            sense = row["meaning"]
+                            if "," in sense:
+                                sense = sense.split(",")
+                                for m in sense:
                                     try:
                                         (
                                             m_obj,
                                             m_obj_created,
-                                        ) = Meaning.objects.get_or_create(
-                                            meaning=strip_and_normalize("NFC", m),
+                                        ) = Sense.objects.get_or_create(
+                                            sense=strip_and_normalize("NFC", m),
                                             language="eng",
                                         )
                                     except IntegrityError as e:
@@ -421,14 +421,14 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                         )
                                         m_obj = None
                                     if m_obj:
-                                        lemma_obj.related_meanings.add(m_obj)
+                                        lemma_obj.related_senses.add(m_obj)
                             else:
                                 try:
                                     (
-                                        meaning_obj,
-                                        meaning_obj_created,
-                                    ) = Meaning.objects.get_or_create(
-                                        meaning=strip_and_normalize("NFC", meaning),
+                                        sense_obj,
+                                        sense_obj_created,
+                                    ) = Sense.objects.get_or_create(
+                                        sense=strip_and_normalize("NFC", sense),
                                         language="eng",
                                     )
                                 except IntegrityError as e:
@@ -437,10 +437,10 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                             df.index[i] + 2, row["meaning"], e
                                         )
                                     )
-                                    meaning_obj = None
-                                if meaning_obj:
-                                        lemma_obj.related_meanings.add(meaning_obj)
-                                        token.meanings.add(meaning_obj)
+                                    sense_obj = None
+                                if sense_obj:
+                                        lemma_obj.related_senses.add(sense_obj)
+                                        token.senses.add(sense_obj)
                         # save lemma
                         lemma_obj.save()
                         lemmas.append(lemma_obj)
@@ -463,18 +463,18 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                         # if new set mwe to True
                         if lemma_obj_created:
                             lemma_obj.multiword_expression = True
-                        # add meaning
+                        # add sense
                         if row["meaning"] != "_" and pd.notna(row["meaning"]):
-                            meaning = row["meaning"]
-                            if "," in meaning:
-                                meaning = meaning.split(",")
-                                for m in meaning:
+                            sense = row["meaning"]
+                            if "," in sense:
+                                sense = sense.split(",")
+                                for m in sense:
                                     try:
                                         (
                                             m_obj,
                                             m_obj_created,
-                                        ) = Meaning.objects.get_or_create(
-                                            meaning=strip_and_normalize("NFC", m),
+                                        ) = Sense.objects.get_or_create(
+                                            sense=strip_and_normalize("NFC", m),
                                             language="eng",
                                         )
                                     except IntegrityError as e:
@@ -485,14 +485,14 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                         )
                                         m_obj = None
                                     if m_obj:
-                                        lemma_obj.related_meanings.add(m_obj)
+                                        lemma_obj.related_senses.add(m_obj)
                             else:
                                 try:
                                     (
                                         m_obj,
                                         m_obj_created,
-                                    ) = Meaning.objects.get_or_create(
-                                        meaning=strip_and_normalize("NFC", meaning),
+                                    ) = Sense.objects.get_or_create(
+                                        sense=strip_and_normalize("NFC", sense),
                                         language="eng",
                                     )
                                 except IntegrityError as e:
@@ -503,7 +503,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                     )
                                     m_obj = None
                                 if m_obj:
-                                    lemma_obj.related_meanings.add(m_obj)
+                                    lemma_obj.related_senses.add(m_obj)
                         # save lemma
                         lemma_obj.save()
                         mwes.append(lemma_obj)
@@ -878,9 +878,6 @@ class Command(BaseCommand):
         text_title = kwargs["text_title"]
         text_version = kwargs["text_version"]
 
-        settings.ELASTICSEARCH_DSL_AUTOSYNC = False
-        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = False
-
         tokens, images, lines = import_annotated_file(
             csv_file=csv_file,
             manuscript_id=manuscript_id,
@@ -890,8 +887,6 @@ class Command(BaseCommand):
 
         )
 
-        settings.ELASTICSEARCH_DSL_AUTOSYNC = True
-        settings.ELASTICSEARCH_DSL_AUTO_REFRESH = True
 
         self.stdout.write(
             self.style.SUCCESS("Successfully imported {} tokens".format(len(tokens)))
