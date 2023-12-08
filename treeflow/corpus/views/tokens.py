@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -5,7 +6,7 @@ from django.db.models import Prefetch
 from treeflow.corpus.models import Text, Token, POS, SectionToken
 from treeflow.corpus.forms.feature_forms import FeatureFormSet
 
-
+@login_required
 def tokens_view(request, text_id=None):
     # Get all Text objects for the dropdowns
     texts = Text.objects.all()

@@ -39,7 +39,7 @@ def process_valid_form(request, form):
     section = form.save()  # This will also handle adding tokens to the section
 
     logger.debug("Section created with ID: %s", section.id)
-    relative_url = reverse('corpus:sections-editor-view', kwargs={'text_id': section.text.id})
+    relative_url = reverse('corpus:sections', kwargs={'text_id': section.text.id})
 
     response = HttpResponse('')
     response['HX-Redirect'] = relative_url  
