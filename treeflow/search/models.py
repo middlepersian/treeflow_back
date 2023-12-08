@@ -43,12 +43,12 @@ class SearchCriteria(models.Model):
     ]
 
     DISTANCE_TYPE_CHOICES = [
-        ("both", "Search on both sides"),
-        ("left", "Before anchor"),
-        ("right", "After anchor"),
+        ("both", "On either side of anchor"),
+        ("before", "Preceding anchor"),
+        ("after", "Following anchor"),
     ]
 
-    user = user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     query = models.CharField(blank=False, max_length=255, default="")
     query_type = models.CharField(
@@ -58,7 +58,7 @@ class SearchCriteria(models.Model):
         blank=False, choices=FIELD_CHOICES, default="transcription"
     )
 
-    distance = models.IntegerField(blank=True, null=True, default=0)
+    distance = models.PositiveIntegerField(blank=True, null=True, default=0)
     distance_type = models.CharField(
         blank=True,
         choices=DISTANCE_TYPE_CHOICES,

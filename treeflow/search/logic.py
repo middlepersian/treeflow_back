@@ -1,5 +1,5 @@
 from typing import Dict, List
-from django.db.models import F
+from django.db.models import Q
 from treeflow.corpus.models import Section, Token
 
 
@@ -23,6 +23,8 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
         tokens = Token.objects.filter(
             **{f"{criteria['query_field']}__icontains": criteria["query"]}
         )
+
+    # TODO: istartswith, regexp, fuzzy
 
     return tokens
 
@@ -56,64 +58,66 @@ def filter_sections_by_logic(
     """
 
     for token_search_input in token_search_inputs:
-        tokens = retrieve_tokens(token_search_input)
-        sections = identify_sections(list(tokens))
+        filter_tokens = retrieve_tokens(token_search_input)
+        filter_sections = identify_sections(filter_tokens)
 
         if token_search_input["logical_operator"] == "AND":
-            candidate_sections &= sections
+            candidate_sections &= filter_sections
         else:  # OR
-            candidate_sections |= sections
+            candidate_sections |= filter_sections
 
     return candidate_sections
 
 
 def filter_sections_by_distance(
-    anchors, candidate_sections: List, token_search_inputs: List[Dict]
-):
+    anchor_tokens: List[Token],
+    candidate_sections: List[Section],
+    token_search_inputs: List[Dict],
+) -> List[Section]:
     """
     Filter sections by distance.
     """
+
     filtered_sections = set()
 
     for token_search_input in token_search_inputs:
-        distance_type = token_search_input["distance_type"]
-        distance = token_search_input["distance"]
+        filter_tokens = retrieve_tokens(token_search_input)
+        filter_sections = identify_sections(filter_tokens)
+        candidate_sections &= filter_sections
+        ids = [token.id for token in filter_tokens]
 
-        if distance == 0:
-            return candidate_sections
+        distance = token_search_input["distance"]
+        distance_type = token_search_input["distance_type"]
 
         for section in candidate_sections:
-            for anchor in anchors:
+            q_objects = Q()
+
+            for anchor in anchor_tokens:
                 if distance_type == "both":
-                    tokens = section.tokens.filter(
-                        number__gte=anchor.number - distance,
-                        number__lte=anchor.number + distance,
-                    ).exclude(id=anchor.id)
+                    q_objects |= Q(number__range=(anchor.number - distance, anchor.number + distance))
                 elif distance_type == "before":
-                    tokens = section.tokens.filter(
-                        number__gte=anchor.number - distance,
-                        number__lt=anchor.number,
-                    ).exclude(id=anchor.id)
+                    q_objects |= Q(number__range=(anchor.number - distance, anchor.number))
                 elif distance_type == "after":
-                    tokens = section.tokens.filter(
-                        number__gt=anchor.number,
-                        number__lte=anchor.number + distance,
-                    ).exclude(id=anchor.id)
+                    q_objects |= Q(number__range=(anchor.number, anchor.number + distance))
 
-                if tokens.exists():
-                    filtered_sections.add(section)
+            tokens = section.tokens.filter(q_objects, id__in=ids)
 
-    return filtered_sections
+            if tokens.exists():
+                filtered_sections.add(section)
 
+    return list(filtered_sections)
 
 def get_results(criteria: List):
-    anchor = criteria[0]
-    tokens = retrieve_tokens(anchor)
-    sections = identify_sections(tokens)
+    anchor_criterium = criteria[0]
+    filters = criteria[1:]
+    anchor_tokens = retrieve_tokens(anchor_criterium)
+    sections = identify_sections(anchor_tokens)
 
-    if "logical_operator" in anchor:
-        sections = filter_sections_by_logic(sections, criteria[1:])
-    elif "distance" in anchor:
-        sections = filter_sections_by_distance(tokens, sections, criteria[1:])
+    if len(criteria) == 1:
+        return sections
+    elif "logical_operator" in anchor_criterium:
+        sections = filter_sections_by_logic(sections, filters)
+    elif "distance" in anchor_criterium:
+        sections = filter_sections_by_distance(anchor_tokens, sections, filters)
 
     return sections
