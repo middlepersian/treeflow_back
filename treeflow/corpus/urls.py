@@ -21,6 +21,7 @@ from treeflow.corpus.views.pos_feature_form import pos_feature_form
 from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
+from treeflow.corpus.views.comments import comments_view
 from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
 
 app_name = "treeflow.corpus"
@@ -46,6 +47,7 @@ urlpatterns = [
     path('bibliography/', BibEntryListView.as_view(), name='bibliography'),
     path('bibliography/<uuid:bibEntry_id>/', BibEntryDetailView.as_view(), name='bibliography-detail'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
+    path('comments/<uuid:related_model_id>/', comments_view, name='comments'),    
     path('sources/', SourceTableView.as_view(), name='sources'),
     path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='source_edit'),
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),

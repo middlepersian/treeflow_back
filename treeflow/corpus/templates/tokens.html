@@ -24,9 +24,11 @@
             <th class="px-4 py-2">Senses</th>
             <th class="px-4 py-2">POS</th>
             <th class="px-4 py-2">Features</th>
+            <th class="px-4 py-2">Comments</th>
             <th class="px-4 py-2">Insert Before</th>
             <th class="px-4 py-2">Insert After</th>
             <th class="px-4 py-2">Delete Token</th>
+
           </tr>
         </thead>
         <tbody>
@@ -133,7 +135,20 @@
                 {% endfor %}
               </span>
             </td>
-
+            <!-- Comments -->
+            <td class="border px-4 py-2"  hx-get="{% url 'corpus:comments' token.id %}/?related_model_type=Token"
+            hx-target="#commentModalContainer"
+            hx-trigger="click"
+            onclick="document.getElementById('commentModal').classList.remove('hidden');">
+              <span id="features-content-{{ token.id }}">
+                {% for comment in token.comment_token.all %}
+                {{ comment.comment }}
+                {% if not forloop.last %} | {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
             <!-- Insert Before Button -->
             <td class="border px-4 py-2">
               <form method="post"
@@ -179,10 +194,12 @@
                   class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
               </form>
             </td>
+
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6" class="text-center py-4">No tokens available for the
+            <td colspan="6" class="text-center py-4">No tokens available for
+              the
               selected text.</td>
           </tr>
           {% endfor %}
@@ -192,6 +209,11 @@
 
     <!-- Right Column for Image -->
     <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
+
+    <!-- Close button -->
+
+    <!-- Modal container -->
+    <div id="commentModalContainer"></div>
 
     <!-- POS and Feature Modal -->
     <div
@@ -211,7 +233,6 @@
 
   <!-- Pagination controls -->
   <div class="lex justify-center py-4"> {% include 'pagination.html' with page_obj=tokens %}</div>
-
   <!-- close main div-->
 </div>
 
@@ -276,4 +297,4 @@
   });
 </script>
 
-  {% endblock content %}
+{% endblock content %}
