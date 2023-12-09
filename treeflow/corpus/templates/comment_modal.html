@@ -1,0 +1,26 @@
+<!-- comment_modal.html -->
+<div
+    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    id="commentModal">
+    <div
+        class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <form method="post" hx-post="/path-to-comment-form-handler/"
+            hx-target="#commentModal">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            {% for form in formset %}
+            {{ form.as_p }}
+            {{ form.related_model_id }} <!-- This is the id of the related model -->
+            {% endfor %}
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
+            <!-- Close button -->
+            <button
+                onclick="document.getElementById('commentModal').classList.add('hidden');"
+                class="text-black">
+                Close
+            </button>
+
+        </form>
+    </div>
+</div>
