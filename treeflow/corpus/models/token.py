@@ -125,7 +125,7 @@ class Token(models.Model):
                 before_number, after_number)
 
             # Create a new token with the determined number and other data
-            new_token = cls(number=new_number, **new_token_data)
+            new_token = cls(**new_token_data)
             new_token.text_id = text_id
 
             # next token (reference)
@@ -135,6 +135,14 @@ class Token(models.Model):
             # unless we are at the beginning of the text
             if previous_token:
                 new_token.previous = previous_token
+                new_token.number = new_number
+                logger.info('previous token exists')
+                # log the previous token number
+                logger.info('previous token number: {}'.format(previous_token.number))
+            else:
+                new_token.number = reference_token.number - 1
+                logger.info('previous token does not exist')
+                logger.info('new token number: {}'.format(new_token.number))
 
             new_token.save()
             return new_token
@@ -154,12 +162,21 @@ class Token(models.Model):
             new_number = cls.calculate_insert_number(before_number, after_number)
 
             # Create the new token with the proper number and additional data provided.
-            new_token = cls.objects.create(number=new_number, text_id=reference_token.text_id, **new_token_data)
+            new_token = cls.objects.create(text_id=reference_token.text_id, **new_token_data)
 
             # If we are not at the end of the text, update the 'previous' field of the next token to point to the new token.
             if next_token:
                 next_token.previous = new_token
                 next_token.save()
+                logger.info('next token exists')
+                # add the number of the new token
+                logger.info('new token number: {}'.format(new_token.number))
+                new_token.number = new_number
+
+            else:
+                logger.info('next token does not exist')
+                logger.info('new token number: {}'.format(reference_token.number + 1))
+                new_token.number = reference_token.number + 1
 
             # Update the 'next' field of the reference token to point to the new token.
             new_token.previous = reference_token
