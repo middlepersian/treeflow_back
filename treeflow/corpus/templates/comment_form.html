@@ -1,0 +1,18 @@
+<!-- comment_form.html -->
+<div class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full p-4">
+        <form method="post" hx-post="{% url 'corpus:comment_form' related_model_type related_model_id %}" hx-trigger="submit" hx-swap="none">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <!-- Static test content -->
+                <div style="border: 1px solid red; padding: 10px; margin-bottom: 10px;">
+                    Test Content
+                </div>
+                {{ form.as_p }}
+            {% endfor %}
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
+            <!-- Close button -->
+        </form>
+    </div>
+</div>
