@@ -69,6 +69,28 @@ COPY --chown=django:django ./compose/production/django/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 
+# Install Node.js
+RUN apt-get update && apt-get install -y curl \
+    && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    # Clean up
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory for Node.js operations
+WORKDIR /app/theme/static_src
+
+# Copy package.json and other relevant files
+COPY package*.json ./
+
+# Install Node.js dependencies
+RUN npm install
+
+# Run Node.js build tasks
+RUN npm run build:tailwind
+
+# Reset the working directory for the rest of the Dockerfile operations
+WORKDIR ${APP_HOME}
 
 # copy application code to WORKDIR
 COPY --chown=django:django . ${APP_HOME}
