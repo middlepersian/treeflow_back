@@ -331,3 +331,8 @@ STRAWBERRY_DJANGO = {
 }
 
 TAILWIND_APP_NAME = 'theme'
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-trusted-origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://dev.mpcd.uni-koeln.de",
+]
