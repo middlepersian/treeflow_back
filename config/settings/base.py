@@ -289,12 +289,7 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 # ------------------------------------------------------------------------------
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://localhost:3000",
-    "http://localhost:4000",
-    "https://localhost:4000",
-    "http://localhost:4001",
-    "https://localhost:4001",
+    "https://dev.mpcd.uni-koeln.de"
 ]
 
 CORS_ALLOW_HEADERS = [
