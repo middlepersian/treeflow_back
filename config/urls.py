@@ -53,12 +53,9 @@ if settings.DEBUG:
         ),
         path("500/", default_views.server_error),
         #django browser reload
-        # path("__reload__/", include("django_browser_reload.urls")),
+        path("__reload__/", include("django_browser_reload.urls")),
 
     ]
-    if "django_browser_reload" in settings.INSTALLED_APPS:
-        urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]
-
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
 
