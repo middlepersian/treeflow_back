@@ -83,10 +83,6 @@ def create_source(request):
 def source_manuscripts(request):
     # get all sources that are manuscripts
     images = Image.objects.all().prefetch_related('source')
-    
-    Paginator = Paginator(images, 150)
-    page = request.GET.get('page')
-    images = Paginator.get_page(page)
 
     context = {
         'images': images,
