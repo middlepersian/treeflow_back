@@ -22,10 +22,12 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
+from treeflow.corpus.views.update_source import update_source
 
 app_name = "treeflow.corpus"
 urlpatterns = [
     path('update_token/<uuid:token_id>', update_token, name='update_token'),
+    path('update_source/<uuid:source_id>', update_source, name='api_update_source'),
     path('update_text/<uuid:text_id>/', update_text, name='update_text'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
@@ -47,7 +49,7 @@ urlpatterns = [
     path('bibliography/<uuid:bibEntry_id>/', BibEntryDetailView.as_view(), name='bibliography-detail'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('sources/', SourceTableView.as_view(), name='sources'),
-    path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='source_edit'),
+    path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='update_source'),
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
     path('sources/add/', create_source, name='source_add'),
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),

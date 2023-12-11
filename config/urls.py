@@ -52,6 +52,8 @@ if settings.DEBUG:
             kwargs={"exception": Exception("Page not Found")},
         ),
         path("500/", default_views.server_error),
+        #django browser reload
+        path("__reload__/", include("django_browser_reload.urls")),
 
     ]
 
