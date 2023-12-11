@@ -5,10 +5,10 @@ set -o pipefail
 set -o nounset
 
 # Wait for Node.js to complete
-while [ ! -f /app/theme/static/css/dist/node_complete ]; do
-  echo "Waiting for Node.js container to finish..."
-  sleep 5
-done
+#while [ ! -f /app/theme/static/css/dist/node_complete ]; do
+#  echo "Waiting for Node.js container to finish..."
+#  sleep 5
+#done
 
 # Now it's safe to collect static files
 python /app/manage.py collectstatic --noinput
