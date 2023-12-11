@@ -4,9 +4,15 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-python /app/manage.py tailwind install
-python /app/manage.py tailwind build
-python /app/manage.py collectstatic --noinput
-python /app/manage.py migrate
+# Wait for Node.js to complete
+while [ ! -f /app/theme/static/css/dist/node_complete ]; do
+  echo "Waiting for Node.js container to finish..."
+  sleep 5
+done
 
-uvicorn config.asgi:application --host 0.0.0.0 --port 5000 
+# Now it's safe to collect static files
+python /app/manage.py collectstatic --noinput
+
+# Continue with the rest of the startup process
+python /app/manage.py migrate
+uvicorn config.asgi:application --host 0.0.0.0 --port 5000
