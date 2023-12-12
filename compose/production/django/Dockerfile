@@ -1,9 +1,26 @@
+ARG NODE_VERSION=21-alpine
 ARG PYTHON_VERSION=3.11-slim-buster
 
 
+# define an alias for the specfic python version used in this file.
+FROM node:${NODE_VERSION} as node
 
 # define an alias for the specfic python version used in this file.
 FROM python:${PYTHON_VERSION} as python
+
+
+# Node build stage
+FROM node as node-build-stage
+
+ARG APP_HOME=/app
+ARG NODE_ENVIRONMENT=production
+
+COPY --chown=node:node . ${APP_HOME}
+
+WORKDIR ${APP_HOME}/theme/static_src
+
+RUN npm install && npm run build:tailwind
+
 
 # Python build stage
 FROM python as python-build-stage
@@ -50,6 +67,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
+
+# Copy pre-built static assets
+COPY --from=node-build-stage ${APP_HOME}/theme/static ${APP_HOME}/theme/static
 
 # All absolute dir copies ignore workdir instruction. All relative dir copies are wrt to the workdir instruction
 # copy python dependency wheels from python-build-stage
