@@ -74,13 +74,13 @@ def comment_form(request, related_model_id=None):
 
                 logger.info("Comment formset saved successfully.")
                 # update queryset from database
-                comments_queryset.refresh_from_db()
+                #comments_queryset.refresh_from_db()
 
                 # Prepare and return the response
                 context = {
                     'related_model_type': related_model_type,
                     'related_model_id': related_model_id,
-                    'comment_data': render_to_string('comment_data.html', {'comments': comments_queryset})
+                    #'comment_data': render_to_string('comment_data.html', {'comments': comments_queryset})
                 }
                 return render(request, 'comment_update.html', context)
 
