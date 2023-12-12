@@ -61,6 +61,11 @@ def comment_form(request, related_model_id=None):
                             instance.save()
                             logger.info(f"Saved Comment instance: {instance} with ID: {instance.pk}")
 
+                        else:
+                            # log comments that are not changed
+                            logger.info(f"Skipping save for unchanged Comment instance: {form.instance.pk}")
+                            logger.info(f"Form data unchanged: {form.cleaned_data}")    
+
                 logger.info("Comment formset saved successfully.")
             else:
                 logger.error("Formset is not valid. Errors: {}".format(formset.errors))
