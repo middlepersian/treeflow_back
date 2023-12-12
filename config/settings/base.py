@@ -333,3 +333,10 @@ STRAWBERRY_DJANGO = {
 }
 
 TAILWIND_APP_NAME = 'theme'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://dev.mpcd.uni-koeln.de",
+    "https://mpcd.uni-koeln.de",
+    "https://mpcorpus.org",
+    "https://www.mpcorpus.org",
+]
