@@ -136,11 +136,10 @@
               </span>
             </td>
             <!-- Comments -->
-            <td class="border px-4 py-2"  hx-get="{% url 'corpus:comments' token.id %}/?related_model_type=Token"
-            hx-target="#commentModalContainer"
-            hx-trigger="click"
-            onclick="document.getElementById('commentModal').classList.remove('hidden');">
-              <span id="features-content-{{ token.id }}">
+            <td class="border px-4 py-2"  hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
+            hx-target="#commentModalContent"
+            hx-trigger="click">
+              <span id="comment-content-{{ token.id }}">
                 {% for comment in token.comment_token.all %}
                 {{ comment.comment }}
                 {% if not forloop.last %} | {% endif %}
@@ -213,7 +212,18 @@
     <!-- Close button -->
 
     <!-- Modal container -->
-    <div id="commentModalContainer"></div>
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="commentModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="commentModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
 
     <!-- POS and Feature Modal -->
     <div
@@ -264,14 +274,32 @@
 
 
   function handleFormSuccess(response) {
-    console.log("Form submission success response received");
-    if (response.status === 'success') {
-      closeFeatureModal();
-      document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
-      document.querySelector('#features-cell').innerHTML = response.features_data_html;
-    } else {
-      closeFeatureModal();
-    }
+  console.log("Form submission success response received");
+
+  // Check for success response for feature form
+  if (response.status === 'success' && response.form_type === 'feature') {
+    closeFeatureModal();
+    document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
+    document.querySelector('#features-cell').innerHTML = response.features_data_html;
+  }
+  // Check for success response for comment form
+  else if (response.status === 'success' && response.form_type === 'comment') {
+    closeCommentModal();
+    // Update necessary elements or perform other actions specific to comment form success
+  }
+  else {
+    // Handling other cases or closing modals if no specific actions are needed
+    closeFeatureModal();
+    closeCommentModal();
+  }
+}
+
+
+
+  // Function to close the comment modal
+  function closeCommentModal() {
+    console.log("Closing Comment Modal");
+    document.getElementById('commentModal').classList.add('hidden');
   }
 
   function closeFeatureModal() {
@@ -284,6 +312,11 @@
     console.log("htmx:afterSwap event triggered");
     console.log(event.detail);
 
+    // Add logic for comment modal
+    if (event.detail.target.id === 'commentModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Comment Modal Content Loaded");
+      document.getElementById('commentModal').classList.remove('hidden');
+    }
     // Check if the swap is for loading modal content
     if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
       console.log("Feature Modal Content Loaded");

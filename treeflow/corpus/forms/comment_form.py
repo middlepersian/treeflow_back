@@ -11,6 +11,7 @@ class SingleCharField(forms.CharField):
 
 class CommentForm(forms.ModelForm):
     related_model_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    is_new = forms.BooleanField(widget=forms.HiddenInput(), required=False, initial=True)  # New field to track if the instance is new
     
     class Meta:
         model = Comment
@@ -20,6 +21,11 @@ class CommentForm(forms.ModelForm):
         related_model_type = kwargs.pop('related_model_type', None)
         related_model_id = kwargs.pop('related_model_id', None)
         super().__init__(*args, **kwargs)
+        # Explicitly set a flag to identify new instances
+        if not self.instance.pk:
+            self.initial['is_new'] = True
+        else:
+            self.initial['is_new'] = False
 
         if related_model_type == 'Token':
             self.fields['uncertain'] = SingleCharField(widget=forms.TextInput(), required=False)
@@ -39,4 +45,4 @@ class CommentForm(forms.ModelForm):
         return list(filter(None, data.split(',')))
 
 # Usage of formset in your view
-CommentFormSet = modelformset_factory(Comment, form=CommentForm, extra=1)
+CommentFormSet = modelformset_factory(Comment, form=CommentForm, extra=1, can_delete=True)
