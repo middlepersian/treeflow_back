@@ -48,36 +48,55 @@ def comment_form(request, related_model_id=None):
                     for form in formset:
                         if form.cleaned_data.get('DELETE', False) and form.instance.pk:
                             form.instance.delete()
-                            logger.info(f"Deleted Comment instance: {form.instance.pk}")
+                            logger.info(
+                                f"Deleted Comment instance: {form.instance.pk}")
                         elif form.has_changed():
                             instance = form.save(commit=False)
 
-                            setattr(instance, related_model_type.lower(), related_model)
-                            logger.info(f"Assigning {related_model_type}: {related_model_id} to Comment instance")    
+                            setattr(
+                                instance, related_model_type.lower(), related_model)
+                            logger.info(
+                                f"Assigning {related_model_type}: {related_model_id} to Comment instance")
                             # Assign user to the comment
                             instance.user = request.user
-                            logger.info(f"Assigning user: {request.user} to Comment instance")
+                            logger.info(
+                                f"Assigning user: {request.user} to Comment instance")
 
                             instance.save()
-                            logger.info(f"Saved Comment instance: {instance} with ID: {instance.pk}")
+                            logger.info(
+                                f"Saved Comment instance: {instance} with ID: {instance.pk}")
 
                         else:
                             # log comments that are not changed
-                            logger.info(f"Skipping save for unchanged Comment instance: {form.instance.pk}")
-                            logger.info(f"Form data unchanged: {form.cleaned_data}")    
+                            logger.info(
+                                f"Skipping save for unchanged Comment instance: {form.instance.pk}")
+                            logger.info(f"Form data: {form.cleaned_data}")
 
                 logger.info("Comment formset saved successfully.")
-            else:
-                logger.error("Formset is not valid. Errors: {}".format(formset.errors))
+                # update queryset from database
+                comments_queryset.refresh_from_db()
 
-        else:
+                # Prepare and return the response
+                context = {
+                    'related_model_type': related_model_type,
+                    'related_model_id': related_model_id,
+                    'comment_data': render_to_string('comment_data.html', {'comments': comments_queryset})
+                }
+                return render(request, 'comment_update.html', context)
+
+            else:
+                logger.error(
+                    "Formset is not valid. Errors: {}".format(formset.errors))
+
+        elif request.method == 'GET':
             # Handle GET request
             formset = CommentFormSet(queryset=comments_queryset)
             logger.info("Handling GET request")
 
-        context = {'formset': formset, 'related_model_type': related_model_type,
-                   'related_model_id': related_model_id}
-        return render(request, 'comment_form.html', context)
+            context = {'formset': formset, 'related_model_type': related_model_type,
+                       'related_model_id': related_model_id}
+
+            return render(request, 'comment_form.html', context)
 
     except Exception as e:
         logger.exception(f"Exception in comments_form: {e}")

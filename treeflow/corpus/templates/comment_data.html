@@ -1,0 +1,6 @@
+{% for comment in token.comment_token.all %}
+{{ comment.comment }}
+{% if not forloop.last %} | {% endif %}
+{% empty %}
+_
+{% endfor %}
