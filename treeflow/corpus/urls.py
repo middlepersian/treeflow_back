@@ -10,6 +10,7 @@ from treeflow.corpus.views.texts import texts_view
 from treeflow.corpus.views.sections import sections_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_child_sections, get_tokens_for_section
 from treeflow.corpus.views.create_section import create_section_view
+from treeflow.corpus.views.section_editor import section_editor_form_view
 from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal import load_section_modal
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
@@ -24,6 +25,7 @@ from treeflow.corpus.views.comment_form import comment_form
 from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
+
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -43,6 +45,8 @@ urlpatterns = [
     path('get-tokens-for-section/<uuid:section_id>/', get_tokens_for_section, name='get_tokens_for_section'),
     path('get-feature-formset/<uuid:token_id>/', get_feature_formset, name='get_feature_formset'),
     path('create_section/', create_section_view, name='create_section'),
+    path('section_form/', section_editor_form_view, name='section_editor_form_create'),
+    path('section_form/<uuid:section_id>/', section_editor_form_view, name='section_editor_form_edit'),
     path('display_tokens/', display_tokens_view, name='display_tokens'),
     path('load_section_modal/', load_section_modal, name='load_section_modal'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
