@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
     
             let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
+            console.log("Query string:", queryString);
             // Issue a GET request with the constructed query string
             htmx.ajax('GET', '/corpus/load_section_modal' + queryString, {
                 target: '#modalContainer'
@@ -131,8 +132,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function openModal() {
         // Ensure the modal exists in the DOM
         let modal = document.getElementById('sectionModal');
+        console.log('Opening modal');
         if (modal) {
-            modal.style.display = 'block';
+            modal.classList.remove('hidden'); // Remove the 'hidden' class to show the modal            
             // Display the selected tokens
             document.getElementById('selectedTokensDisplay').textContent = selectedTokenTexts || 'No tokens selected';
         } else {
@@ -155,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Closing modal');
         var modal = document.getElementById('sectionModal');
         if (modal) {
-            modal.style.display = 'none';
+            modal.classList.add('hidden'); // Add the 'hidden' class to hide the modal            
             deselectAllTokens(); // Deselect tokens when closing the modal
             isSelectingTokens = false; // Reset the token selection flag
             selectedTokenTexts = ''; // Reset the selected token texts
@@ -165,20 +167,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.body.addEventListener('htmx:afterSwap', function (event) {
         console.log('htmx:afterSwap event triggered', event);
+    
+        // Log details about the event target
+        console.log('Event target:', event.target);
+        console.log('Event target ID:', event.target.id);
+    
         if (event.target.id === 'modalContainer') {
-            // Show the modal
+            console.log('Preparing to open modal based on htmx:afterSwap in #modalContainer');
+    
+            // Attempt to open the modal
             openModal();
-            // Bind closeModal to the Cancel button in the modal
+    
+            // Try to find and bind the closeModal function to the Cancel button
             const cancelButton = document.querySelector('#sectionModal button[onclick="closeModal()"]');
             if (cancelButton) {
-                cancelButton.onclick = closeModal; // Bind closeModal function
-
+                console.log('Cancel button found in the modal, binding closeModal function');
+                cancelButton.onclick = closeModal;
             } else {
                 console.error('Cancel button not found in the modal.');
             }
         }
     });
-
+    
     // Start observing
     observer.observe(document.body, { childList: true, subtree: true });
   

@@ -14,6 +14,9 @@
         <div
             class="sticky top-[4rem] h-[calc(100vh-4rem)] overflow-y-auto col-span-1 bg-gray-100 p-4 z-10">
 
+            <!-- Text Dropdown -->
+            <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
+
             <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
             {% if request.user.is_authenticated %}
             <button id="startTokenSelection"
@@ -85,7 +88,7 @@
 </div>
 
 <script>
-    var textId = '{{ text_id }}';
+    var textId = '{{ selected_text_id }}';
 </script>
 
 <script src="{% static 'corpus/section_navigator.js'%}"></script>
