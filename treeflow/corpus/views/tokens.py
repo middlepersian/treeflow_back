@@ -35,9 +35,11 @@ def tokens_view(request, text_id=None):
         'senses',  # Prefetch related Senses objects
         'pos_token',  # Prefetch related POS objects
         'feature_token',  # Prefetch related Feature objects,
+        'comment_token',  # Prefetch related Comment objects,
         sentence_prefetch,  # Prefetch related Sentence sections
         line_prefetch,  # Prefetch related Line sections
     )
+
 
     # Filter tokens if a text ID is provided
     if selected_text_id:

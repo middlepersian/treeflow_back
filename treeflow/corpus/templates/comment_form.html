@@ -1,0 +1,45 @@
+<!-- comment_form.html -->
+<div
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div
+        class="bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
+        <!-- Modal content here -->
+        <form id="comment-form" method="post"
+            hx-post="{% url 'corpus:comment_form' related_model_id %}?related_model_type={{ related_model_type }}"
+            hx-trigger="submit" hx-swap="none">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            {% for form in formset %}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                {{ form.id }}
+                {{ form.comment.label_tag }} {{ form.comment }}
+                {{ form.DELETE.label_tag }} {{ form.DELETE }}
+
+                <!-- Render 'uncertain', 'to_discuss', and 'new_suggestion' fields if 'Token' is the related model -->
+                {% if form.fields.uncertain %}
+                <div>
+                    {{ form.uncertain.label_tag }} {{ form.uncertain }}
+                </div>
+                {% endif %}
+                {% if form.fields.to_discuss %}
+                <div>
+                    {{ form.to_discuss.label_tag }} {{ form.to_discuss }}
+                </div>
+                {% endif %}
+                {% if form.fields.new_suggestion %}
+                <div>
+                    {{ form.new_suggestion.label_tag }} {{ form.new_suggestion}}
+                </div>
+                {% endif %}
+                <!-- Render the is_new hidden field -->
+                {{ form.is_new.as_hidden }}
+            </div>
+            {% endfor %}
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
+            <button type="button"
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                onclick="closeCommentModal()">Close</button>
+        </form>
+    </div>
+</div>
