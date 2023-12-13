@@ -4,7 +4,7 @@
     <div
         class="bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <!-- Modal content here -->
-        <form method="post"
+        <form id="comment-form" method="post"
             hx-post="{% url 'corpus:comment_form' related_model_id %}?related_model_type={{ related_model_type }}"
             hx-trigger="submit" hx-swap="none">
             {% csrf_token %}

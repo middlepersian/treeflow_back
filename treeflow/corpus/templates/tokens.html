@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load comment_tags %}
 {% block content %}
 
 <div class="flex flex-col w-full h-screen">
@@ -136,16 +137,11 @@
               </span>
             </td>
             <!-- Comments -->
-            <td class="border px-4 py-2"  hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
+            <td id="comments-cell"class="border px-4 py-2"  hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
             hx-target="#commentModalContent"
             hx-trigger="click">
               <span id="comment-content-{{ token.id }}">
-                {% for comment in token.comment_token.all %}
-                {{ comment.comment }}
-                {% if not forloop.last %} | {% endif %}
-                {% empty %}
-                _
-                {% endfor %}
+                {% render_comments_for_model token %}              
               </span>
             </td>
             <!-- Insert Before Button -->
@@ -285,7 +281,7 @@
   // Check for success response for comment form
   else if (response.status === 'success' && response.form_type === 'comment') {
     closeCommentModal();
-    // Update necessary elements or perform other actions specific to comment form success
+    document.querySelector('#comments-cell').innerHTML = response.comment_data_html;
   }
   else {
     // Handling other cases or closing modals if no specific actions are needed
@@ -326,6 +322,11 @@
     if (event.detail.target.id === 'pos-feature-form') {
       console.log("Feature form submission, closing modal");
       closeFeatureModal();
+    }
+    // Check if the swap is for the comment form
+    if (event.detail.target.id === 'comment-form') {
+      console.log("Comment form submission, closing modal");
+      closeCommentModal();
     }
   });
 </script>

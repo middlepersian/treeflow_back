@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, Http404
+from django.template.loader import render_to_string
 from django.db import transaction
 from treeflow.corpus.models import Dependency, Section, Source, Token, Text, Comment
 from treeflow.images.models import Image
@@ -73,14 +74,15 @@ def comment_form(request, related_model_id=None):
                             logger.info(f"Form data: {form.cleaned_data}")
 
                 logger.info("Comment formset saved successfully.")
-                # update queryset from database
-                #comments_queryset.refresh_from_db()
+                # Re-query the database to get the updated comments
+                comments_queryset = Comment.objects.filter(**{f'{related_model_type.lower()}': related_model})
+                logger.info(f"Refreshed comments queryset for {related_model_type}: {related_model_id}")
 
                 # Prepare and return the response
                 context = {
                     'related_model_type': related_model_type,
                     'related_model_id': related_model_id,
-                    #'comment_data': render_to_string('comment_data.html', {'comments': comments_queryset})
+                    'comment_data': render_to_string('comment_data.html', {'comments': comments_queryset})
                 }
                 return render(request, 'comment_update.html', context)
 

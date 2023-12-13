@@ -1,6 +1,7 @@
-{% for comment in token.comment_token.all %}
-{{ comment.comment }}
-{% if not forloop.last %} | {% endif %}
+<!-- comments/comment_data.html -->
+{% for comment in comments %}
+    {{ comment.comment }}
+    {% if not forloop.last %} | {% endif %}
 {% empty %}
-_
+    -
 {% endfor %}
