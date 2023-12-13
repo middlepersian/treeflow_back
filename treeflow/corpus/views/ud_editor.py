@@ -78,12 +78,7 @@ def ud_editor(request, section_id):
         token_pos = []
         # Check if transcription is None or an empty string before calling len()
         transcription_length = 0 if token.transcription is None else len(token.transcription)
-<<<<<<< HEAD
-        x1, x2 = calculate_positions(transcription_length, x1, 12, 10)
-
-=======
         x1, x2 = calculate_positions(transcription_length, x1, 12, 10, additional_space)
->>>>>>> fcb66249ae0b810c47475db2c1a77de861e5d670
         for pos in posList:
             if pos.token == token:
                 token_pos.append(
