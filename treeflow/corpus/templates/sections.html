@@ -14,12 +14,9 @@
         <div
             class="sticky top-[4rem] h-[calc(100vh-4rem)] overflow-y-auto col-span-1 bg-gray-100 p-4 z-10">
 
-<<<<<<< HEAD
-=======
             <!-- Text Dropdown -->
             <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
 
->>>>>>> forms
             <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
             {% if request.user.is_authenticated %}
             <button id="startTokenSelection"
