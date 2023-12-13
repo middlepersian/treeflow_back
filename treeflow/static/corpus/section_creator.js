@@ -109,21 +109,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 .filter(token => token.classList.contains('bg-green-200'));
             selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
             selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
-
+    
             let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
             console.log("Query string:", queryString);
             // Issue a GET request with the constructed query string
-            htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, {
+            htmx.ajax('GET', '/corpus/load_section_modal' + queryString, {
                 target: '#modalContainer'
             }).then(() => {
-                console.log('Modal content loaded into #modalContainer');
-                openModal();
-                initializeModal();
-
-            }).catch(error => {
-                console.error('Error loading modal content:', error);
+                // After the modal content is loaded, set the value of the hidden input
+                document.getElementById('modalTextId').value = textId;
+                console.log('Modal content loaded');
             });
-
+        
             // Reset the button for a new selection
             this.textContent = 'Start Token Selection';
             this.setAttribute('data-mode', 'select');
@@ -131,34 +128,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    // Function to deselect all tokens
-    function deselectAllTokens() {
-        document.querySelectorAll('.token').forEach(token => {
-            token.classList.remove('bg-green-200'); // Reset the token using Tailwind class
-        });
-        startTokenId = null; // Reset start token ID
-        endTokenId = null;   // Reset end token ID
-        selectedTokenIds = []; // Reset selected token IDs
-    }
-
-
-
-    // Function to initialize or reinitialize event listeners and scripts for modal
-    function initializeModal() {
-        let modalTextInput = document.getElementById('modalTextId');
-        if (modalTextInput) {
-            modalTextInput.value = textId;
-            console.log('Modal content loaded, textId set:', textId);
-        } else {
-            console.error('Modal text input not found');
-        }
-
-        // Initialize other event listeners or scripts specific to modal here
-        const cancelButton = document.querySelector('#sectionModal button[onclick="closeModal()"]');
-        if (cancelButton) {
-            cancelButton.onclick = closeModal;
-        }
-    }
     // Function to show the modal
     function openModal() {
         // Ensure the modal exists in the DOM
@@ -174,6 +143,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    function deselectAllTokens() {
+        document.querySelectorAll('.token').forEach(token => {
+            token.classList.remove('bg-green-200'); // Reset the token using Tailwind class
+        });
+        startTokenId = null; // Reset start token ID
+        endTokenId = null;   // Reset end token ID
+        selectedTokenIds = []; // Reset selected token IDs
+    }
+
+
     function closeModal() {
         console.log('Closing modal');
         var modal = document.getElementById('sectionModal');
@@ -184,21 +163,21 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedTokenTexts = ''; // Reset the selected token texts
         }
     }
-
+    
 
     document.body.addEventListener('htmx:afterSwap', function (event) {
         console.log('htmx:afterSwap event triggered', event);
-
+    
         // Log details about the event target
         console.log('Event target:', event.target);
         console.log('Event target ID:', event.target.id);
-
+    
         if (event.target.id === 'modalContainer') {
             console.log('Preparing to open modal based on htmx:afterSwap in #modalContainer');
-
+    
             // Attempt to open the modal
             openModal();
-
+    
             // Try to find and bind the closeModal function to the Cancel button
             const cancelButton = document.querySelector('#sectionModal button[onclick="closeModal()"]');
             if (cancelButton) {
@@ -209,8 +188,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
-
+    
     // Start observing
     observer.observe(document.body, { childList: true, subtree: true });
-
+  
 });
