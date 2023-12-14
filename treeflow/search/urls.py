@@ -5,5 +5,5 @@ app_name = "treeflow.search"
 
 urlpatterns = [
     path("", views.search_page, name="search"),
-    path("change_search_type/", views.change_search_type, name="change_search_type"),
+    path("toggle_type/", views.change_search_type, name="toggle_type"),
 ]
