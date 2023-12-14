@@ -1,6 +1,6 @@
-<form id="form-set" method="post">
+<form id="form-set" hx-post="{% url "search:results" %}" hx-target="#results-list">
     {% csrf_token %}
-    <input type="hidden" name="formset-type" value="{{ layout_selection }}">
+    <input type="hidden" name="layout_selection" value="{{ layout_selection }}">
     {% if formset.non_form_errors %}
         <div id="formset-errors">
             {% for error in formset.non_form_errors %}
@@ -12,7 +12,7 @@
         {{ formset.management_form }}
         <div id="empty-form" style="display:none">
             <div class="card relative">
-              {% include 'search/form.html' with form=formset.empty_form firstForm=False layout=layout_selection %}
+                {% include 'search/form.html' with form=formset.empty_form firstForm=False layout=layout_selection %}
             </div>
         </div>
         {% for form in formset %}

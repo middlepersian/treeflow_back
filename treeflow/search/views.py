@@ -1,9 +1,12 @@
+import logging
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from treeflow.corpus.models import Section
 from .forms import DistanceFormSet, LogicalFormSet, ResultFilterForm
 from .models import SearchCriteria
 from .logic import get_results
+
+logger = logging.getLogger(__name__)
 
 
 def change_search_type(request):
@@ -22,54 +25,53 @@ def change_search_type(request):
     )
 
 
-def search_page(request):
-    formset = DistanceFormSet(queryset=SearchCriteria.objects.none())
-    layout_selection = "distance"
-    results = []
-    queries = []
-    page_number = request.GET.get("page")
-
+def results_view(request):
     if request.method == "POST":
-        layout_selection = request.POST.get("formset-type")
-
-        if layout_selection == "logical":
-            formset = LogicalFormSet(request.POST)
-        elif layout_selection == "distance":
-            formset = DistanceFormSet(request.POST)
+        page_number = 1
+        layout_selection = request.POST.get("layout_selection", "distance")
+        formset = (
+            LogicalFormSet(request.POST)
+            if layout_selection == "logical"
+            else DistanceFormSet(request.POST)
+        )
 
         if formset.is_valid():
-            formset.save()
-            results = get_results(formset.cleaned_data)
-            queries = [form.cleaned_data["query"] for form in formset]
-            
-            request.session["form_data"] = request.POST
-            request.session["queries"] = queries
-            request.session["results"] = [str(result.id) for result in results]
-            return redirect('search:search_page')
-        else:
-            results = Section.objects.none()
+            data = formset.cleaned_data
+            logger.debug(f"Submitted data: {data}")
 
-    else:
-        if "results" in request.session:
-            results = Section.objects.filter(id__in=request.session["results"])
-        if "queries" in request.session:
-            queries = request.session["queries"]
-        if "form_data" in request.session:
-            data = request.session["form_data"]
-            layout_selection = data.get("formset-type")
-            if layout_selection == "logical":
-                formset = LogicalFormSet(data)
-            elif layout_selection == "distance":
-                formset = DistanceFormSet(data)
+            results = get_results(data)
+            logger.debug(f"Results: {results}")
+
+            queries = [form.cleaned_data["query"] for form in formset]
+            section_ids = list(results.values_list("id", flat=True))
+
+            # TODO Save session data
+
+    elif request.method == "GET":
+        # TODO Load session data
+
+        page_number = request.GET.get("page", 1)
+        results = Section.objects.none()
 
     paginator = Paginator(results, 10) if results else None
     page_obj = paginator.get_page(page_number) if paginator else None
 
+    return render(
+        request,
+        "search/results.html",
+        {
+            "page_obj": page_obj,
+            "queries": queries,
+        },
+    )
+
+def search_page(request):
+    formset = DistanceFormSet(queryset=SearchCriteria.objects.none())
+    layout_selection = request.GET.get("layout_selection", "distance")
+
     context = {
         "formset": formset,
         "layout_selection": layout_selection,
-        "page_obj": page_obj,
-        "queries": queries,
     }
 
     return render(request, "pages/search.html", context)
