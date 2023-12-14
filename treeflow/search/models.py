@@ -1,5 +1,7 @@
+import uuid
 from django.db import models
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 
 
 class SearchCriteria(models.Model):
@@ -47,7 +49,9 @@ class SearchCriteria(models.Model):
         ("after", "Following anchor"),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
 
     query = models.CharField(blank=False, max_length=255, default="")
     query_type = models.CharField(
@@ -65,7 +69,9 @@ class SearchCriteria(models.Model):
     )
 
     logical_operator = models.CharField(
-        blank=True, choices=[("AND", "AND"), ("OR", "OR")], default="AND",
+        blank=True,
+        choices=[("AND", "AND"), ("OR", "OR")],
+        default="AND",
     )
 
     # TODO: Missing fields
@@ -74,8 +80,29 @@ class SearchCriteria(models.Model):
     # pos
     # features
 
+
+class SearchSession(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, null=False, unique=True
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
+    )
+    session_id = models.CharField(max_length=255, null=True, blank=True)
+    formset = models.ManyToManyField(SearchCriteria, blank=True)
+    results = ArrayField(models.UUIDField(default=uuid.uuid4), null=True, blank=True)
+
+    class Meta:
+        unique_together = (
+            "user",
+            "session_id",
+        )
+
+
 class ResultFilter(models.Model):
-    text = models.ForeignKey("corpus.Text", null=True, blank=True, on_delete=models.CASCADE)
+    text = models.ForeignKey(
+        "corpus.Text", null=True, blank=True, on_delete=models.CASCADE
+    )
     section = models.ForeignKey(
         "corpus.Section", null=True, blank=True, on_delete=models.CASCADE
     )

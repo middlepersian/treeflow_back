@@ -18,19 +18,23 @@
 
     <div id="pagination" class="flex flex-row mt-6 items-center justify-between border-t border-gray-200 bg-white px-4 py-3 gap-4">
         <div class="flex flex-1 justify-between max-w-[20%]">
-          {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}"
-              class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
-          {% else %}
-            <span class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
-          {% endif %}
-          <span id="current-page" class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">{{ page_obj.number }}</span>
-          {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}"
-              class=" inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
-          {% else %}
-            <span class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
-          {% endif %}
+            {% if page_obj.has_previous %}
+                <a 
+                    hx-get="{% url "search:results" %}?page={{ page_obj.previous_page_number }}&layout_selection={{ layout_selection }}"
+                    hx-target="#results-list"
+                    class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+            {% else %}
+                <span class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
+            {% endif %}
+            <span id="current-page" class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">{{ page_obj.number }}</span>
+            {% if page_obj.has_next %}
+                <a 
+                    hx-get="{% url "search:results" %}?page={{ page_obj.next_page_number }}&layout_selection={{ layout_selection }}"
+                    hx-target="#results-list"
+                    class=" inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+            {% else %}
+                <span class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
+            {% endif %}
         </div>
         
         <div id="result-count" class="flex flex-col">
