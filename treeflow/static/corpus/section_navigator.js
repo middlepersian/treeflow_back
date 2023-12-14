@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
 
     function fetchAndHighlightSectionTokens(sectionId) {
-        fetch(`/corpus/get-tokens-for-section/${sectionId}`)
+        fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
             .then(response => response.json())
             .then(data => {
                 const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
             parentDiv.removeChild(existingChildList);
             return; // Exit the function
         }
-        fetch(`/corpus/get-child-sections/${sectionId}`)
+        fetch(`/corpus/get-child-sections/${sectionId}/`)
             .then(response => response.json())
             .then(childSections => {
                 const childSectionList = document.createElement('div');
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadSectionsOfType(sectionType) {
-        fetch(`/corpus/get-sections/${textId}/${sectionType}`)
+        fetch(`/corpus/get-sections/${textId}/${sectionType}/`)
             .then(response => response.json())
             .then(sections => {
                 sectionList.innerHTML = '';
