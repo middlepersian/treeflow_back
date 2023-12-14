@@ -74,7 +74,8 @@ THIRD_PARTY_APPS = [
     "simple_history",
     "tailwind",
     "theme",
-    "strawberry.django"
+    "strawberry.django", 
+    "django_select2",
 ]
 
 LOCAL_APPS = [
@@ -265,6 +266,20 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
+
+redis_url = env('REDIS_URL', default='redis://redis:6379/0')  # Use 'redis' as hostname
+
+# Redis cache configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': redis_url,  # Change the URL according to your Redis server
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+SELECT2_CACHE_BACKEND = "default"
 
 # django-allauth
 # ------------------------------------------------------------------------------

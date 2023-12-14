@@ -23,6 +23,7 @@ urlpatterns = [
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    path("select2/", include("django_select2.urls")),
 
 
     # Your stuff: custom urls includes go here

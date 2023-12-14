@@ -3,6 +3,7 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
+  local_redis_data: {}
 
 services:
   django:
@@ -49,3 +50,11 @@ services:
     env_file:
       - ./.envs/.local/.postgres
 
+  redis:
+    image: "redis:latest"
+    container_name: redis
+    volumes:
+      - local_redis_data:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
