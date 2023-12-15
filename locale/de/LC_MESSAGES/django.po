@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-15 14:00+0000\n"
+"POT-Creation-Date: 2023-12-15 14:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -445,6 +445,7 @@ msgid "About"
 msgstr "Home"
 
 #: treeflow/templates/components/navbar.html:11
+#: treeflow/templates/pages/publications.html:11
 msgid "Publications"
 msgstr "Publikationen"
 
@@ -546,21 +547,54 @@ msgstr "Digital Humanities"
 msgid "Cooperation Partners"
 msgstr "Kooperationspartner"
 
+#: treeflow/templates/pages/contact.html:15
+msgid ""
+"For any enquiries or remarks relating to the project, please contact us via "
+"the following email address:<a class=\"text-sm lg:text-sm md:text-xs sm:text-"
+"xs text-off hover:text-action\" href=\"mailTo:contact-mpcd@uni-koeln.de"
+"\">contact-mpcd@uni-koeln.de</a>"
+msgstr ""
+"Für Anfragen und Anregungen zum Projekt können Sie uns gerne über folgende "
+"Email-Adresse kontaktieren: <a class=\"text-sm lg:text-sm md:text-xs sm:text-"
+"xs text-off hover:text-action\" href=\"mailTo:contact-mpcd@uni-koeln.de"
+"\">contact-mpcd@uni-koeln.de</a>"
+
 #: treeflow/templates/pages/contact.html:17
 msgid "Privacy Protection Statement"
+msgstr "Datenschutzerklärung"
+
+#: treeflow/templates/pages/contact.html:19
+msgid ""
+"Generally, the <a href=\"https://portal.uni-koeln.de/en/privacy-protection-"
+"statement\" class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:"
+"text-action\" target=\"_blank\">privacy policy of the University of Cologne</"
+"a> applies to this project; with the specific additions stated below:"
 msgstr ""
+"Es gilt die <a href=\"https://portal.uni-koeln.de/en/privacy-protection-"
+"statement\" class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:"
+"text-action\" target=\"_blank\">Datenschutzerklärung der Universität zu "
+"Köln</a> und zusätzlich gilt:"
 
 #: treeflow/templates/pages/contact.html:21
 msgid "Responsible for the content of this website"
-msgstr ""
+msgstr "Verantwortlich für die Inhalte dieser Webseite"
+
+#: treeflow/templates/pages/contact.html:27
+#: treeflow/templates/pages/contact.html:30
+msgid "University of Cologne"
+msgstr "Universität zu Köln"
+
+#: treeflow/templates/pages/contact.html:30
+msgid "Project number"
+msgstr "Projektnummer"
+
+#: treeflow/templates/pages/contact.html:30
+msgid "VAT identification number"
+msgstr "Steueridentifikationsnummer"
 
 #: treeflow/templates/pages/methodology.html:10
 msgid "METHODOLOGY"
-msgstr ""
-
-#: treeflow/templates/pages/publications.html:11
-msgid "PUBLICATIONS"
-msgstr ""
+msgstr "METHODIK"
 
 #: treeflow/users/admin.py:18
 msgid "Personal info"
@@ -589,6 +623,24 @@ msgstr "Benutzername"
 #: treeflow/users/views.py:25
 msgid "Information successfully updated"
 msgstr "Inforationen erfolgreich aktualisiert."
+
+#~ msgid "PUBLICATIONS"
+#~ msgstr "PUBLIKATIONEN"
+
+#~ msgid "Preliminary Publications"
+#~ msgstr "Einleitende Publikationen"
+
+#~ msgid "Project Publications"
+#~ msgstr "Projekt-Publikationen"
+
+#~ msgid "Related Publications"
+#~ msgstr "Verwandte Publikationen"
+
+#~ msgid "Presentations"
+#~ msgstr "Präsentationen"
+
+#~ msgid "Related Presentations"
+#~ msgstr "Verwandte Präsentationen"
 
 #~ msgid "My Profile"
 #~ msgstr "Mein Profil"
