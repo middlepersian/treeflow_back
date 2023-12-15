@@ -90,7 +90,7 @@ def results_view(request):
             logger.debug(f"Search session could not be found: {e}")
 
     queries = [form["query"] for form in formset] if formset else []
-    paginator = Paginator(results, 10) if results else None
+    paginator = Paginator(results.prefetch_related('sectiontoken_set', 'sectiontoken_set__token'), 10)
     page_obj = paginator.get_page(page_number) if paginator else None
 
     return render(
