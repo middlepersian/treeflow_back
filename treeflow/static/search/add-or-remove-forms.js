@@ -1,5 +1,5 @@
 const addForm = (buttonElement) => {
-  console.log(buttonElement.parentElement.parentElement.id)
+  console.log("Button pressed on form:", buttonElement.parentElement.parentElement.id)
   const currentForm = buttonElement.parentElement.parentElement.id
   // const formSet = document.getElementById('form_set')
 
@@ -7,7 +7,7 @@ const addForm = (buttonElement) => {
   const formsCount = parseInt(formsCountElement.value)
 
   const emptyFormHtml = document.getElementById('empty-form').innerHTML
-  const uniqueId = Date.now() + Math.random().toString(36).substr(2, 9);
+  const uniqueId = Date.now() + Math.random().toString(36).substring(2, 11);
 
   let newFormHtml = emptyFormHtml
     .replace(/__prefix__/g, formsCount)

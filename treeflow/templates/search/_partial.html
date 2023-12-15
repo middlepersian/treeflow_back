@@ -3,7 +3,7 @@
         <button id="toggle-search" class="h-12 font-semibold">
             <h3>Search</h3>
         </button>
-        <div id="search-type" class="flex flex-row gap-4 items-center">
+        <div id="search-type" class="flex flex-row gap-4 items-center m-4">
             <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:search' %}" hx-target="#search-page-container" hx-swap="innerHTML">
                 <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
                 <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
