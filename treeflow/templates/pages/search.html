@@ -10,28 +10,5 @@ treeflow - Search
 {% endblock %}
 
 {% block content %}
-<div class="flex flex-col">
-    <div id="search" class="flex flex-col">
-        <button id="toggle-search" class="h-12 font-semibold">
-            <h3>Search</h3>
-        </button>
-        <div id="search-type" class="flex gap-4">
-            <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:search' %}"
-                hx-target="#search-forms" hx-swap="innerHTML">
-                <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
-                <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
-            </select>
-        </div>
-        <div id="search-forms" class="overflow-x-auto text-center">
-            {% include "search/formset.html" %}
-        </div>
-    </div>
-    <div id="results" class="flex flex-col">
-        <button id="toggle-results" class="h-12 font-semibold">
-            <h3>Results</h3>
-        </button>
-        <div id="results-list">
-        </div>
-    </div>
-</div>
+    {% include "search/_partial.html" %}
 {% endblock %}

@@ -97,6 +97,7 @@ def results_view(request):
 @require_GET
 def search_page(request):
     queryset = SearchCriteria.objects.none()
+    results = Section.objects.none()
     layout_selection = request.GET.get("layout_selection", "logical")
     formset = (
         LogicalFormSet(queryset=queryset)
@@ -106,9 +107,10 @@ def search_page(request):
     context = {
         "formset": formset,
         "layout_selection": layout_selection,
+        "results": results,
     }
 
-    if request.method == "GET" and "layout_selection" in request.GET:
-        return render(request, "search/formset.html", context)
+    if request.headers.get('HX-Request'):
+        return render(request, "search/_partial.html", context)
 
     return render(request, "pages/search.html", context)
