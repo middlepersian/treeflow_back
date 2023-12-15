@@ -3,11 +3,15 @@
         <button id="toggle-search" class="h-12 font-semibold">
             <h3>Search</h3>
         </button>
-        <div id="search-type" class="flex gap-4">
+        <div id="search-type" class="flex flex-row gap-4 items-center">
             <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:search' %}" hx-target="#search-page-container" hx-swap="innerHTML">
-                <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
                 <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
+                <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
             </select>
+            <label class="font-bold text-gray-900 whitespace-normal">Search tokens
+                {% if layout_selection == "distance" %}by looking for entries with a specific distance between them{% endif %}
+                {% if layout_selection == "logical" %}by combining queries using logical operators{% endif %}
+            </label>
         </div>
         <div id="search-forms" class="overflow-x-auto text-center">
             {% include "search/formset.html" %}
