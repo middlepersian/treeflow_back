@@ -17,7 +17,6 @@
         </div>
         {% for form in formset %}
             <div id="form-initial" class="card relative">
-                {{layout}}
                 {% include 'search/form.html' with form=form firstForm=forloop.first layout=layout_selection %}
             </div>
         {% endfor %}
