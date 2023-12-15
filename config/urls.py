@@ -23,6 +23,8 @@ urlpatterns = [
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    # i18n
+    path('i18n/setlang/', set_language, name='set_language'),
 
 
     # Your stuff: custom urls includes go here

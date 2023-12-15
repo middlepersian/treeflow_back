@@ -310,7 +310,7 @@ msgstr ""
 
 #: treeflow/templates/base.html:70
 msgid "Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)"
-msgstr ""
+msgstr "Zorro und die sieben Testzwerge"
 
 #: treeflow/templates/base.html:72
 msgid ""
