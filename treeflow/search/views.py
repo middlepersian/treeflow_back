@@ -26,7 +26,7 @@ def change_search_type(request):
 
 
 def results_view(request):
-    user = request.user.id
+    user = request.user if request.user.is_authenticated else request.user.id
     session_id = request.session.session_key
 
     if request.method == "POST":
@@ -39,11 +39,15 @@ def results_view(request):
         )
 
         if formset.is_valid():
-            instances = formset.save(commit=False)
             data = formset.cleaned_data
             logger.debug(f"Submitted data: {data}")
 
-            results = get_results(data)
+            try:
+                results = get_results(data)
+            except Exception as e:
+                logger.debug(f"Could not retrieve results: {e}")
+                results = Section.objects.none()
+                
             logger.debug(f"Results: {results}")
 
             section_ids = list(results.values_list("id", flat=True))
@@ -55,12 +59,14 @@ def results_view(request):
                 results=section_ids,
             )
 
-            for instance in instances:
-                instance.save()
-                search_session.formset.add(instance)
-
-            search_session.save()
-            logger.debug(f"Search session updated: {search_session}")
+            if not created:
+                search_session.results = section_ids
+                instances = formset.save(commit=False)
+                for instance in instances:
+                    instance.save()
+                    search_session.formset.add(instance)
+                search_session.save()
+                logger.debug(f"Search session created: {search_session}")
 
         except Exception as e:
             logger.debug(f"Session could not be created: {e}")
@@ -104,7 +110,7 @@ def results_view(request):
 
 def search_page(request):
     formset = DistanceFormSet(queryset=SearchCriteria.objects.none())
-    layout_selection = request.GET.get("layout_selection", "distance")
+    layout_selection = "distance"
 
     context = {
         "formset": formset,

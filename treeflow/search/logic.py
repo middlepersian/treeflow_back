@@ -1,6 +1,9 @@
+import logging
 from typing import Dict, List
 from django.db.models import Q
 from treeflow.corpus.models import Section, Token
+
+logger = logging.getLogger(__name__)
 
 
 def retrieve_tokens(criteria: Dict) -> List[Token]:
@@ -13,18 +16,17 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
 
     """
 
-    tokens = Token.objects.none()
-
-    if criteria["query_type"] == "exact":
-        tokens = Token.objects.filter(
-            **{f"{criteria['query_field']}__iexact": criteria["query"]}
-        )
-    elif criteria["query_type"] == "fuzzy":
-        tokens = Token.objects.filter(
-            **{f"{criteria['query_field']}__icontains": criteria["query"]}
-        )
-
     # TODO: istartswith, regexp, fuzzy
+    query = (
+        Q(**{f"{criteria['query_field']}__iexact": criteria["query"]})
+        if criteria["query_type"] == "exact"
+        else Q(**{f"{criteria['query_field']}__icontains": criteria["query"]})
+    )
+
+    tokens = Token.objects.filter(query)
+
+    logger.debug(f"Retrieved {len(tokens)} tokens.")
+    logger.debug(tokens.query)
 
     return tokens
 
@@ -37,15 +39,22 @@ def identify_sections(tokens: List[Token]) -> List[Section]:
     :return: A list of unique Section objects that are associated with the tokens.
     """
 
-    sections = Section.objects.none()
-    section_ids = set()
+    token_ids = [token.id for token in tokens]
 
-    for token in tokens:
-        section_tokens = token.sectiontoken_set.all()
-        for section_token in section_tokens:
-            section_ids.add(section_token.section_id)
+    sections = (
+        Section.objects.filter(
+            sectiontoken__token_id__in=token_ids,
+            type="sentence",
+        )
+        .prefetch_related(
+            "sectiontoken_set",  # Prefetch related SectionToken objects
+            "sectiontoken_set__token",  # Prefetch related Token objects through SectionToken
+        )
+        .distinct()
+    )
 
-    sections = Section.objects.filter(id__in=section_ids, type="sentence")
+    logger.debug(f"Identified {len(sections)} sections.")
+    logger.debug(sections.query)
 
     return sections
 
@@ -107,6 +116,8 @@ def filter_sections_by_distance(
 
     return list(filtered_sections)
 
+
+
 def get_results(criteria: List):
     anchor_criterium = criteria[0]
     filters = criteria[1:]
@@ -114,6 +125,7 @@ def get_results(criteria: List):
     sections = identify_sections(anchor_tokens)
 
     if len(criteria) == 1:
+        logger.debug("Only anchor token provided, returning sections.")
         return sections
     elif "logical_operator" in anchor_criterium:
         sections = filter_sections_by_logic(sections, filters)
