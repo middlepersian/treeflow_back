@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-27 11:10+0000\n"
+"POT-Creation-Date: 2023-12-15 14:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -308,11 +308,12 @@ msgstr ""
 "<strong>Anmerkung:</strong> Sie können Ihre E-Mail Adresse immer noch <a "
 "href=\"%(email_url)s\">ändern</a>."
 
-#: treeflow/templates/base.html:70
+#: treeflow/templates/base.html:68
 msgid "Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)"
-msgstr "Das zoroastrische Mittelpersische: Digitales Corpus und Wörterbuch (MPCD)"
+msgstr ""
+"Das zoroastrische Mittelpersische: Digitales Corpus und Wörterbuch (MPCD)"
 
-#: treeflow/templates/base.html:72
+#: treeflow/templates/base.html:70
 msgid ""
 "Resulting from its status as the official language of the Sasanian Empire "
 "(3rd–7th centuries CE), the Middle Persian language played a prominent "
@@ -320,12 +321,13 @@ msgid ""
 "early Islamic period. Besides serving as a medium of communication between "
 "the linguistically and culturally diverse areas of Western and Eastern Iran, "
 "it was employed as a literary language by several religious traditions."
-msgstr "Das Mittelpersische war als Amts- und Verkehrssprache insbesondere des Sasanidenreiches "
-"(3.–7. Jh. u. Z.) von überkultureller und -religiöser Bedeutung. Von der Spätantike bis zur "
-"frühislamischen Zeit verbindet es die sprachlich und kulturell diversen Räume des iranischen "
-"Ostens und Westens."
+msgstr ""
+"Das Mittelpersische war als Amts- und Verkehrssprache insbesondere des "
+"Sasanidenreiches (3.–7. Jh. u. Z.) von überkultureller und -religiöser "
+"Bedeutung. Von der Spätantike bis zur frühislamischen Zeit verbindet es die "
+"sprachlich und kulturell diversen Räume des iranischen Ostens und Westens."
 
-#: treeflow/templates/base.html:75
+#: treeflow/templates/base.html:73
 msgid ""
 "The Middle Persian corpus consists of Zoroastrian, Manichaean, narrative, "
 "administrative and epigraphic sub-corpora. The Zoroastrian Middle Persian "
@@ -334,47 +336,77 @@ msgid ""
 "digital corpus of Zoroastrian Middle Persian texts in Pahlavi script (in "
 "short: Pahlavi texts) as well as at the development of a comprehensive "
 "dictionary covering that corpus."
-msgstr "Das mittelpersische Korpus besteht selbst aus zoroastrischen, manichäischen, narrativen, administrativen und inschriftlichen Subkorpora. Das zoroastrisch-mittelpersische Korpus stellt dabei mit Abstand das größte dieser Subkorpora dar und ist bis heute nur partiell erschlossen. Unser Projekt zielt deshalb einerseits auf die Erstellung eines digitalen Korpus zoroastrisch-mittelpersischer Texte in Pahlavi-Schrift (kurz: Pahlavi-Texte), andererseits auf die Entwicklung eines hierauf basierten Korpuswörterbuchs."
+msgstr ""
+"Das mittelpersische Korpus besteht selbst aus zoroastrischen, manichäischen, "
+"narrativen, administrativen und inschriftlichen Subkorpora. Das zoroastrisch-"
+"mittelpersische Korpus stellt dabei mit Abstand das größte dieser Subkorpora "
+"dar und ist bis heute nur partiell erschlossen. Unser Projekt zielt deshalb "
+"einerseits auf die Erstellung eines digitalen Korpus zoroastrisch-"
+"mittelpersischer Texte in Pahlavi-Schrift (kurz: Pahlavi-Texte), "
+"andererseits auf die Entwicklung eines hierauf basierten Korpuswörterbuchs."
 
-#: treeflow/templates/base.html:79
+#: treeflow/templates/base.html:77
 msgid ""
 "The corpus consists of roughly 50 texts, containing some 705,000 tokens. As "
 "its point of departure, the project relies on the ca. 20 oldest Pahlavi "
 "codices (from the 13th–17th centuries CE). The texts contained in those "
 "codices will be supplied with several layers of annotation:"
-msgstr "Das Korpus besteht aus ca. 50 Texten und etwa 705.000 Tokens. Der Ausgangspunkt des Projekts sind die ca. 20 ältesten Pahlavi-Kodizes (aus dem 13.–17. Jh.), deren enthaltene Texte auf mehreren Ebenen annotiert werden:"
+msgstr ""
+"Das Korpus besteht aus ca. 50 Texten und etwa 705.000 Tokens. Der "
+"Ausgangspunkt des Projekts sind die ca. 20 ältesten Pahlavi-Kodizes (aus dem "
+"13.–17. Jh.), deren enthaltene Texte auf mehreren Ebenen annotiert werden:"
 
-#: treeflow/templates/base.html:83
+#: treeflow/templates/base.html:81
 msgid "1. orthographical (transliteration) and phonographical (transcription)"
 msgstr "1. orthographisch (Transliteration) und phonographisch (Transkription)"
 
-#: treeflow/templates/base.html:86
+#: treeflow/templates/base.html:84
 msgid "2. grammatical (morpho-syntactic)"
 msgstr "2. grammatikalisch (morphosyntaktisch)"
 
-#: treeflow/templates/base.html:89
+#: treeflow/templates/base.html:87
 msgid "3. semantic (semasiological and onomasiological)"
 msgstr "3. semantisch (sema- und onomasiologisch)"
 
-#: treeflow/templates/base.html:92
+#: treeflow/templates/base.html:90
 msgid "4. intertextual (linking Zand texts with their Avestan original)"
-msgstr "4. intertextuell (Verlinkung von Zand-Texten zu ihren avestischen Originalen)"
+msgstr ""
+"4. intertextuell (Verlinkung von Zand-Texten zu ihren avestischen Originalen)"
 
-#: treeflow/templates/base.html:97
+#: treeflow/templates/base.html:96
+#, fuzzy, python-format
+#| msgid ""
+#| "Within the overall structure of the project, the corpus and dictionary "
+#| "function as closely interrelated analytical tools even though their focal "
+#| "points differ (syntax vs. semantics). Their technical integration also "
+#| "plays an essential role in the general <a class=\"text-sm lg:text-sm md:"
+#| "text-xs sm:text-xs text-off hover:text-action\" href=\"/methodology"
+#| "\">workflow</a> of the project. For this purpose, the project employs a "
+#| "web-based working environment that facilitates the collaborative work on "
+#| "the corpus and dictionary. The same environment will also provide a "
+#| "public user interface for enquiries into those resources that have "
+#| "already been processed at a given point in time."
 msgid ""
 "Within the overall structure of the project, the corpus and dictionary "
 "function as closely interrelated analytical tools even though their focal "
 "points differ (syntax vs. semantics). Their technical integration also plays "
-"an essential role in the general <a class=\"text-sm lg:text-sm md:text-xs sm:"
-"text-xs text-off hover:text-action\" href=\"/methodology\">workflow</a> of "
-"the project. For this purpose, the project employs a web-based working "
-"environment that facilitates the collaborative work on the corpus and "
-"dictionary. The same environment will also provide a public user interface "
-"for enquiries into those resources that have already been processed at a "
-"given point in time."
-msgstr "Auf Grundlage des Korpus wird anschließend ein digitales mittelpersisch-englisches Wörterbuch erstellt. Der Eintrag eines Lemmas setzt sich, soweit angemessen, u.a. aus folgenden Informationen zusammen: orthographische und phonetische Varianten, grammatische Kategorien (Wortarten), hierarchisierte Bedeutungen, Belegstellen, Syno- und Antonyme, Valenz und Phraseologie, intertextuelle Verweise, taxonomische Kategorien sowie eine Bibliographie. Die entsprechenden Informationen werden teils aus dem Korpus entnommen und teils im Zuge der Ausarbeitung des Wörterbuchs ergänzt."
+"an essential role in the general <a href=\"%(url_methodology)s\" class=""\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action"
+"\">workflow</a> of the project. For this purpose, the project employs a web-"
+"based working environment that facilitates the collaborative work on the "
+"corpus and dictionary. The same environment will also provide a public user "
+"interface for enquiries into those resources that have already been "
+"processed at a given point in time.'"
+msgstr ""
+"Auf Grundlage des Korpus wird anschließend ein digitales mittelpersisch-"
+"englisches Wörterbuch erstellt. Der Eintrag eines Lemmas setzt sich, soweit "
+"angemessen, u.a. aus folgenden Informationen zusammen: orthographische und "
+"phonetische Varianten, grammatische Kategorien (Wortarten), hierarchisierte "
+"Bedeutungen, Belegstellen, Syno- und Antonyme, Valenz und Phraseologie, "
+"intertextuelle Verweise, taxonomische Kategorien sowie eine Bibliographie. "
+"Die entsprechenden Informationen werden teils aus dem Korpus entnommen und "
+"teils im Zuge der Ausarbeitung des Wörterbuchs ergänzt."
 
-#: treeflow/templates/base.html:100
+#: treeflow/templates/base.html:99
 msgid ""
 "The project intends to create a platform that may in the future also be used "
 "for the remaining Middle Persian sub-corpora, as well as for the corpora of "
@@ -382,9 +414,14 @@ msgid ""
 "eventual creation of a complete dictionary of Middle Persian (incorporating "
 "all of its sub-corpora) as well as to an expansion of the corpus into the "
 "domains of other Middle Iranian languages."
-msgstr "Das Projekt beabsichtigt eine Plattform zu schaffen, die in Zukunft auch für die übrigen mittelpersischen und darüber hinaus für andere mitteliranische Korpora verwendet werden kann. Somit zielt es längerfristig auf ein vollständiges Korpuswörterbuch des Mittelpersischen sowie auf eine Ausdehnung des Korpus auf andere mitteliranische Sprachen ab."
+msgstr ""
+"Das Projekt beabsichtigt eine Plattform zu schaffen, die in Zukunft auch für "
+"die übrigen mittelpersischen und darüber hinaus für andere mitteliranische "
+"Korpora verwendet werden kann. Somit zielt es längerfristig auf ein "
+"vollständiges Korpuswörterbuch des Mittelpersischen sowie auf eine "
+"Ausdehnung des Korpus auf andere mitteliranische Sprachen ab."
 
-#: treeflow/templates/base.html:103
+#: treeflow/templates/base.html:102
 msgid ""
 "The project is a cooperation between three universities: <a class=\"text-sm "
 "lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"/team"
@@ -394,13 +431,136 @@ msgid ""
 "projekt/452473565?language=en\" target=\"_blank\">Deutsche "
 "Forschungsgemeinschaft (DFG)</a> and designed as a “Langfristvorhaben” (Long-"
 "Term Project, 2021–2030)."
-msgstr "Das Projekt ist eine Kooperation zwischen drei Universitäten: <a class=\"text-sm "
-"lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"/team"
-"\">der Ruhr-Universität Bochum, der Freien Universität Berlin und der Universität zu Köln</a> "
-"Es wird von der <a class=\"text-sm lg:text-sm md:text-xs sm:"
-"text-xs text-off hover:text-action\" href=\"https://gepris.dfg.de/gepris/"
-"projekt/452473565?language=en\" target=\"_blank\">Deutschen "
-"Forschungsgemeinschaft (DFG)</a> gefördert und ist als ein Langfristvorhaben (2021–2030) angelegt."
+msgstr ""
+"Das Projekt ist eine Kooperation zwischen drei Universitäten: <a class=""\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href="
+"\"/team\">der Ruhr-Universität Bochum, der Freien Universität Berlin und der "
+"Universität zu Köln</a> Es wird von der <a class=\"text-sm lg:text-sm md:"
+"text-xs sm:text-xs text-off hover:text-action\" href=\"https://gepris.dfg.de/"
+"gepris/projekt/452473565?language=en\" target=\"_blank\">Deutschen "
+"Forschungsgemeinschaft (DFG)</a> gefördert und ist als ein Langfristvorhaben "
+"(2021–2030) angelegt."
+
+#: treeflow/templates/components/navbar.html:10
+msgid "About"
+msgstr "Home"
+
+#: treeflow/templates/components/navbar.html:11
+msgid "Publications"
+msgstr "Publikationen"
+
+#: treeflow/templates/components/navbar.html:12
+#: treeflow/templates/components/subbar.html:32
+#: treeflow/templates/pages/resources.html:120
+msgid "Texts"
+msgstr "Texte"
+
+#: treeflow/templates/components/navbar.html:13
+#: treeflow/templates/components/subbar.html:31
+#: treeflow/templates/pages/resources.html:114
+msgid "Manuscripts"
+msgstr "Manuskripte"
+
+#: treeflow/templates/components/navbar.html:14
+msgid "Sources"
+msgstr "Sources"
+
+#: treeflow/templates/components/navbar.html:15
+msgid "Search"
+msgstr "Suche"
+
+#: treeflow/templates/components/navbar.html:16
+#: treeflow/templates/components/subbar.html:13
+#: treeflow/templates/pages/methodology.html:271
+msgid "Dictionary"
+msgstr "Wörterbuch"
+
+#: treeflow/templates/components/navbar.html:17
+#: treeflow/templates/pages/contact.html:9
+#: treeflow/templates/pages/contact.html:13
+msgid "Contact"
+msgstr "Kontakt"
+
+#: treeflow/templates/components/subbar.html:6
+msgid "Methodology"
+msgstr "Methodik"
+
+#: treeflow/templates/components/subbar.html:8
+#: treeflow/templates/pages/methodology.html:14
+msgid "Workflow"
+msgstr "Workflow"
+
+#: treeflow/templates/components/subbar.html:9
+#: treeflow/templates/pages/methodology.html:23
+msgid "Orthographic Annotation"
+msgstr "Orthographische Annotation"
+
+#: treeflow/templates/components/subbar.html:10
+#: treeflow/templates/pages/methodology.html:64
+msgid "Grammatical Annotation"
+msgstr "Grammatische Annotation"
+
+#: treeflow/templates/components/subbar.html:11
+#: treeflow/templates/pages/methodology.html:144
+msgid "Semantic Annotation"
+msgstr "Semantische Annotation"
+
+#: treeflow/templates/components/subbar.html:12
+#: treeflow/templates/pages/methodology.html:151
+msgid "Intertextuality"
+msgstr "Intertextualität"
+
+#: treeflow/templates/components/subbar.html:26
+#: treeflow/templates/pages/resources.html:10
+msgid "Resources"
+msgstr "Material"
+
+#: treeflow/templates/components/subbar.html:28
+#: treeflow/templates/pages/resources.html:14
+msgid "Handbooks"
+msgstr "Handbücher"
+
+#: treeflow/templates/components/subbar.html:29
+#: treeflow/templates/pages/resources.html:28
+msgid "Kosh"
+msgstr "Kosh"
+
+#: treeflow/templates/components/subbar.html:30
+#: treeflow/templates/pages/resources.html:109
+msgid "Zotero"
+msgstr "Zotero"
+
+#: treeflow/templates/components/subbar.html:36
+#: treeflow/templates/pages/team.html:10
+msgid "Team"
+msgstr "Team"
+
+#: treeflow/templates/components/subbar.html:38
+msgid "Iranian Studies"
+msgstr "Iranistik"
+
+#: treeflow/templates/components/subbar.html:39
+msgid "Digital Humanities"
+msgstr "Digital Humanities"
+
+#: treeflow/templates/components/subbar.html:40
+msgid "Cooperation Partners"
+msgstr "Kooperationspartner"
+
+#: treeflow/templates/pages/contact.html:17
+msgid "Privacy Protection Statement"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:21
+msgid "Responsible for the content of this website"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:10
+msgid "METHODOLOGY"
+msgstr ""
+
+#: treeflow/templates/pages/publications.html:11
+msgid "PUBLICATIONS"
+msgstr ""
 
 #: treeflow/users/admin.py:18
 msgid "Personal info"

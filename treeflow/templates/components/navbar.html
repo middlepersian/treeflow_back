@@ -7,14 +7,14 @@
       <img src="{% static 'images/MPCD-Logo-Final_transparent_ohne-Schriftzug_web.png' %}" class="object-contain h-16" alt="MPCD-Logo" />
       <div class="absolute top-12 left-20 -rotate-45 text-xs font-semibold text-main-dark [text-shadow:0_2px_4px_rgb(0_0_0_/_40%)]">BETA</div>
     </a>
-    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">About</a>
-    <a href="{% url 'publications' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Publications</a>
-    <a href="{% url 'corpus:texts' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Texts</a>
-    <a href="{% url 'corpus:manuscripts' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Manuscripts</a>
-    <a href="{% url 'corpus:sources' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Sources</a>
-    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Search</a>
-    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Dictionary</a>
-    <a href="{% url 'contact' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Contact</a>
+    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'About' %}</a>
+    <a href="{% url 'publications' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Publications' %}</a>
+    <a href="{% url 'corpus:texts' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Texts' %}</a>
+    <a href="{% url 'corpus:manuscripts' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Manuscripts' %}</a>
+    <a href="{% url 'corpus:sources' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Sources' %}</a>
+    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Search' %}</a>
+    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Dictionary' %}</a>
+    <a href="{% url 'contact' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Contact' %}</a>
     <div class="inline-block overflow-hidden text-center group">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="w-6 h-6 cursor-pointer fill-main-dark hover:fill-off">
         <path fill-rule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 003.13-3.733 18.992 18.992 0 01-1.487-2.494 1 1 0 111.79-.89c.234.47.489.928.764 1.372.417-.934.752-1.913.997-2.927H3a1 1 0 110-2h3V3a1 1 0 011-1zm6 6a1 1 0 01.894.553l2.991 5.982a.869.869 0 01.02.037l.99 1.98a1 1 0 11-1.79.895L15.383 16h-4.764l-.724 1.447a1 1 0 11-1.788-.894l.99-1.98.019-.038 2.99-5.982A1 1 0 0113 8zm-1.382 6h2.764L13 11.236 11.618 14z" clip-rule="evenodd"></path>
@@ -48,8 +48,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  console.log("English URL: {% url 'set_language' %}?language=en")
-  console.log("German URL: {% url 'set_language' %}?language=de")
-</script>
