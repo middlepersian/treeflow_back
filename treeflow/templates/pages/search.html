@@ -16,7 +16,7 @@ treeflow - Search
             <h3>Search</h3>
         </button>
         <div id="search-type" class="flex gap-4">
-            <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:toggle_type' %}"
+            <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:search' %}"
                 hx-target="#search-forms" hx-swap="innerHTML">
                 <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
                 <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
