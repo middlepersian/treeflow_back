@@ -31,7 +31,7 @@ def results_view(request):
 
     if request.method == "POST":
         page_number = 1
-        layout_selection = request.POST.get("layout_selection", "distance")
+        layout_selection = request.POST.get("layout_selection", "logical")
         formset = (
             LogicalFormSet(request.POST)
             if layout_selection == "logical"
@@ -72,7 +72,7 @@ def results_view(request):
             logger.debug(f"Session could not be created: {e}")
 
     elif request.method == "GET" and "page" in request.GET:
-        layout_selection = request.GET.get("layout_selection", "distance")
+        layout_selection = request.GET.get("layout_selection", "logical")
         page_number = request.GET.get("page", 1)
         results = Section.objects.none()
 
@@ -109,8 +109,8 @@ def results_view(request):
     )
 
 def search_page(request):
-    formset = DistanceFormSet(queryset=SearchCriteria.objects.none())
-    layout_selection = "distance"
+    formset = LogicalFormSet(queryset=SearchCriteria.objects.none())
+    layout_selection = "logical"
 
     context = {
         "formset": formset,
