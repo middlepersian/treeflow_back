@@ -19,10 +19,11 @@ class SectionEditorForm(forms.ModelForm):
         fields = ['text', 'number', 'identifier', 'type', 'title',
                   'language', 'source', 'tokens', 'previous',
                   'container', 'senses']
-
         widgets = {
-            'senses': SenseWidget,
+            'senses': s2forms.ModelSelect2MultipleWidget(
+                model='treeflow.dict.models.Sense', 
+                search_fields=['sense__icontains'] 
+            ),
         }
-
     def __init__(self, *args, **kwargs):
         super(SectionEditorForm, self).__init__(*args, **kwargs)

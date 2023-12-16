@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from treeflow.corpus.models import Section
 from treeflow.corpus.forms.section_editor_form import SectionEditorForm
+from treeflow.dict.forms.sense_form import SenseForm  # Import the SenseForm
 import logging
+
 logger = logging.getLogger(__name__)
 
 def section_editor_form_view(request, section_id=None):
@@ -14,8 +16,11 @@ def section_editor_form_view(request, section_id=None):
     else:
         form = SectionEditorForm(request.POST or None)
 
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+    sense_form = SenseForm()  # Create an instance of SenseForm
 
-    return render(request, 'section_editor_form.html', {'form': form})
+    if request.method == 'POST' and 'submit_section' in request.POST:
+        if form.is_valid():
+            form.save()
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    return render(request, 'section_editor_form.html', {'form': form, 'sense_form': sense_form})

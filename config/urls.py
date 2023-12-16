@@ -19,6 +19,7 @@ urlpatterns = [
     path("resources/", TemplateView.as_view(template_name="pages/resources.html"), name="resources"),
     path("team/", TemplateView.as_view(template_name="pages/team.html"), name="team"),
     path('corpus/', include('treeflow.corpus.urls', namespace='corpus')),
+    path('dict/', include('treeflow.dict.urls', namespace='dict')),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
