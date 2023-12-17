@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-17 12:08+0000\n"
+"POT-Creation-Date: 2023-12-17 14:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -368,13 +368,13 @@ msgstr ""
 
 #: treeflow/templates/components/navbar.html:12
 #: treeflow/templates/components/subbar.html:32
-#: treeflow/templates/pages/resources.html:120
+#: treeflow/templates/pages/resources.html:136
 msgid "Texts"
 msgstr ""
 
 #: treeflow/templates/components/navbar.html:13
 #: treeflow/templates/components/subbar.html:31
-#: treeflow/templates/pages/resources.html:114
+#: treeflow/templates/pages/resources.html:130
 msgid "Manuscripts"
 msgstr ""
 
@@ -444,7 +444,7 @@ msgid "Kosh"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:30
-#: treeflow/templates/pages/resources.html:109
+#: treeflow/templates/pages/resources.html:125
 msgid "Zotero"
 msgstr ""
 
@@ -454,14 +454,17 @@ msgid "Team"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:38
+#: treeflow/templates/pages/team.html:14
 msgid "Iranian Studies"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:39
+#: treeflow/templates/pages/team.html:237
 msgid "Digital Humanities"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:40
+#: treeflow/templates/pages/team.html:332
 msgid "Cooperation Partners"
 msgstr ""
 
@@ -820,6 +823,151 @@ msgid ""
 "lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"https://"
 "cab.geschkult.fu-berlin.de/\" target=\"_blank\">“Corpus Avesticum "
 "Berolinense”</a>), and bibliographical references."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:15
+msgid "Handbook Text encoding"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:17
+#, python-format
+msgid ""
+"The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/"
+"Handbook%%20Text%%20encoding\" target=\"_blank\">“Handbook Text encoding”</"
+"a> describes the workflow from manuscript to the digital form of the text. "
+"It explains how the data is transferred into a table structure, which is the "
+"temporary means of processing data. This includes the indication of text "
+"structure, transliteration &amp; transcription as well as special encodings "
+"(e.g. of diacritics or typos)."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:19
+msgid "Handbook Morphology"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:21
+#, python-format
+msgid ""
+"The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/"
+"Handbook%%20Morphology\" target=\"_blank\">“Handbook Morphology”</a> "
+"describes the annotation of part-of-speech and grammatical features "
+"following the <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off "
+"hover:text-action\" href=\"https://universaldependencies.org/guidelines.html"
+"\" target=\"_blank\">Standard of Universal Dependencies (UD)</a> . Sorted by "
+"part-of-speech, the handbook gives a detailed overview of Middle Persian "
+"word forms and their corresponding tags."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:23
+msgid "Handbook Syntax"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:25
+#, python-format
+msgid ""
+"The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/"
+"Handbook%%20Syntax\" target=\"_blank\">“Handbook Syntax”</a> explains the "
+"basic principles of the <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
+"text-off hover:text-action\" href=\"https://universaldependencies.org/"
+"guidelines.html\" target=\"_blank\">Dependencies Standard (UD)</a> for "
+"syntactic annotation. It lists various syntactic structures and exemplifies "
+"the adaptation of UD to Middle Persian."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:30
+msgid ""
+"To facilitate our lexicographical work, we began with the digitization of "
+"the more important available Middle Persian dictionaries and glossaries "
+"already before the start of the project. To make this material machine-"
+"readable, it was subsequently transformed into a simple XML format. The use "
+"of Kosh, a framework developed by CCeH, allows the user to search through "
+"several dictionaries and glossaries in one combined query."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:33
+msgid ""
+"As is well-known to anyone engaged in the philology of Pahlavi, the past "
+"century has seen the use of several conflicting systems of transcribing the "
+"Pahlavi script. The dictionaries and glossaries digitized for MPCD have "
+"therefore been supplied with a transcription according to the MPCD standard, "
+"which essentially follows MacKenzie’s Concise Pahlavi Dictionary (London "
+"1971). Thanks to this, the users may now search through all of the digitized "
+"dictionaries without having to take into account the diverging transcription "
+"systems used by the respective authors."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:36
+msgid ""
+"The digitized materials coupled with Kosh constitute an important tool for "
+"our work. In order to allow a broader public to benefit from this tool, we "
+"have made some of the dictionaries and glossaries accessible to the "
+"scholarly community (<a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
+"text-off hover:text-action\" href=\"https://dicts.uni-koeln.de/\" target="
+"\"_blank\">https://dicts.uni-koeln.de/</a>). The following digitized works "
+"have so far been added to the publicly accessible section of Kosh. We seek "
+"to expand this list in the future:"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:74
+msgid "Bibliography"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:101
+msgid "Using Kosh"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:105
+msgid ""
+"First, the user has to select the dictionaries to be searched. The simplest "
+"approach is to select all of them."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:108
+msgid ""
+"Next, one has to select the specific field that is to be searched. In most "
+"cases, the relevant field will be “trc” (transcription), but other fields "
+"such as “sense” (meaning) are searchable as well."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:111
+msgid ""
+"Under “Query Type”, the most relevant options to be chosen are “wildcard” "
+"and “regexp” (regular expressions)."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:114
+msgid ""
+"Through the drop-down menu “Query Size”, the results shown may be restricted "
+"to a certain number."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:117
+msgid ""
+"By entering a keyword (e.g., a Middle Persian word in transcription, "
+"optionally enlarged by wildcards) into the “Search”-field, followed by a "
+"click on “Search”, the search is initiated."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:120
+msgid ""
+"One is further able to define the fields to be shown in the search result: "
+"identifier (“id”), transcription (“trc”), transliteration (“trl”), meaning "
+"(“sense”), morphological features (“gramm”), attestations (“attest”), etc."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:127
+msgid ""
+"We are compiling an extensive bibliography on publications related to MPCD "
+"in a <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://www.zotero.org/groups/2116388/mpcd/library\" target="
+"\"_blank\">Zotero database</a>."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:131
+msgid "Timeline of Manuscripts"
 msgstr ""
 
 #: treeflow/users/admin.py:18
