@@ -24,10 +24,6 @@
         @apply text-sm text-center md:text-base sm:text-sm;
     }
 
-    input:focus {
-        @apply ring-main !important;
-    }
-
 }
 
 * {
