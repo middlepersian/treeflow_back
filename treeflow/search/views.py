@@ -10,12 +10,38 @@ from .logic import get_results
 logger = logging.getLogger(__name__)
 
 
-def results_view(request):
-    user = request.user if request.user.is_authenticated else request.user.id
+def get_or_create_session(request, queries=None, results=None):
+    user = request.user if request.user.is_authenticated else None
     session_id = request.session.session_key
 
     if request.method == "POST":
-        page_number = 1
+        search_session, created = SearchSession.objects.get_or_create(
+            user=user,
+            session_id=session_id,
+            queries=queries,
+            defaults={"results": results},
+        )
+
+        if created:
+            logger.debug(f"Created new search session: {search_session.id}")
+        else:
+            logger.debug(f"Updated existing search session: {search_session.id}")
+
+    else:
+        search_session = SearchSession.objects.filter(
+            user=user, session_id=session_id, queries=queries
+        ).first()
+
+    return search_session
+
+
+def results_view(request):
+    page_number = 1
+    queries = []
+    results = Section.objects.none()
+    search_session = SearchSession.objects.none()
+
+    if request.method == "POST":
         layout_selection = request.POST.get("layout_selection", "logical")
         formset = (
             LogicalFormSet(request.POST)
@@ -29,56 +55,28 @@ def results_view(request):
 
             try:
                 results = get_results(data)
+                logger.debug(f"Found {len(results)} results.")
             except Exception as e:
                 logger.debug(f"Could not retrieve results: {e}")
-                results = Section.objects.none()
 
-            logger.debug(f"Results: {results}")
+            queries = [form["query"] for form in data]
+            section_ids = list(results.values_list("id", flat=True).distinct())
 
-            section_ids = list(results.values_list("id", flat=True))
-
-        try:
-            search_session, created = SearchSession.objects.get_or_create(
-                user=user,
-                session_id=session_id,
-                results=section_ids,
-            )
-
-            if not created:
-                search_session.results = section_ids
-                instances = formset.save(commit=False)
-                for instance in instances:
-                    instance.save()
-                    search_session.formset.add(instance)
-                search_session.save()
-                logger.debug(f"Search session created: {search_session}")
-
-        except Exception as e:
-            logger.debug(f"Session could not be created: {e}")
+            search_session = get_or_create_session(request, queries, section_ids)
 
     elif request.method == "GET" and "page" in request.GET:
-        layout_selection = request.GET.get("layout_selection", "logical")
         page_number = request.GET.get("page", 1)
-        results = Section.objects.none()
+        queries = request.GET.getlist("query", [])
 
         try:
-            search_session = SearchSession.objects.get(user=user, session_id=session_id)
-            formset_data = search_session.formset.all()
-            # TODO: Remove layout/formset from results
-            formset = (
-                LogicalFormSet(queryset=formset_data)
-                if layout_selection == "logical"
-                else DistanceFormSet(queryset=formset_data)
-            )
+            search_session = get_or_create_session(request, queries)
             results = Section.objects.filter(id__in=search_session.results)
 
-            logger.debug(f"Search session found: {search_session}")
-            logger.debug(f"Loaded the following results: {results}")
+            logger.debug(f"Search session found: {search_session.id}")
 
         except Exception as e:
             logger.debug(f"Search session could not be found: {e}")
 
-    queries = [form["query"] for form in formset] if formset else []
     paginator = Paginator(
         results.prefetch_related("sectiontoken_set", "sectiontoken_set__token"), 10
     )
@@ -110,7 +108,7 @@ def search_page(request):
         "results": results,
     }
 
-    if request.headers.get('HX-Request'):
+    if request.headers.get("HX-Request"):
         return render(request, "search/_partial.html", context)
 
     return render(request, "pages/search.html", context)

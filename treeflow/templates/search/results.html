@@ -20,18 +20,19 @@
         <div class="flex flex-1 justify-between max-w-[20%]">
             {% if page_obj.has_previous %}
                 <a 
-                    hx-get="{% url "search:results" %}?page={{ page_obj.previous_page_number }}&layout_selection={{ layout_selection }}"
+                    hx-get="{% url "search:results" %}?page={{ page_obj.previous_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
                     hx-target="#results-list"
-                    class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
             {% else %}
-                <span class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
+                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
             {% endif %}
-            <span id="current-page" class=" inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">{{ page_obj.number }}</span>
+            {% comment %} TODO: Turn this into an input field {% endcomment %}
+            <span id="current-page" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">{{ page_obj.number }}</span>
             {% if page_obj.has_next %}
                 <a 
-                    hx-get="{% url "search:results" %}?page={{ page_obj.next_page_number }}&layout_selection={{ layout_selection }}"
+                    hx-get="{% url "search:results" %}?page={{ page_obj.next_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
                     hx-target="#results-list"
-                    class=" inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+                    class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
             {% else %}
                 <span class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
             {% endif %}

@@ -1,6 +1,6 @@
 const addForm = (buttonElement) => {
-  console.log("Button pressed on form:", buttonElement.parentElement.parentElement.id)
   const currentForm = buttonElement.parentElement.parentElement.id
+  // console.log("Button pressed on form:", currentForm)
   // const formSet = document.getElementById('form_set')
 
   const formsCountElement = document.getElementById('id_form-TOTAL_FORMS')

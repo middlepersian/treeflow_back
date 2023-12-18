@@ -91,11 +91,13 @@ class SearchSession(models.Model):
     session_id = models.CharField(max_length=255, null=True, blank=True)
     formset = models.ManyToManyField(SearchCriteria, blank=True)
     results = ArrayField(models.UUIDField(default=uuid.uuid4), null=True, blank=True)
+    queries = ArrayField(models.CharField(blank=True, default=""), null=True, blank=True)
 
     class Meta:
         unique_together = (
             "user",
             "session_id",
+            "queries",
         )
 
 

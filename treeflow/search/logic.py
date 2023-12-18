@@ -87,7 +87,7 @@ def filter_sections_by_distance(
     Filter sections by distance.
     """
 
-    filtered_sections = set()
+    section_ids = []
 
     for token_search_input in token_search_inputs:
         filter_tokens = retrieve_tokens(token_search_input)
@@ -111,10 +111,12 @@ def filter_sections_by_distance(
 
             tokens = section.tokens.filter(q_objects, id__in=ids)
 
-            if tokens.exists():
-                filtered_sections.add(section)
+            if tokens:
+                section_ids.append(section.id)
 
-    return list(filtered_sections)
+    sections = Section.objects.filter(id__in=section_ids)
+
+    return sections
 
 
 
