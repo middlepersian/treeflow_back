@@ -96,11 +96,11 @@
               _
               {% endfor %}
             </td>
+
+
             <!-- Senses -->
-            
-            
             <td id="sense-cell" class="border px-4 py-2"
-            hx-get="{% url 'corpus:token_sense' token.id %}"
+            hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
             hx-target="#senseModalContent" hx-trigger="click">
             <span id="sense-content-{{ token.id }}">
               {% for sense in token.senses.all %}
@@ -212,18 +212,16 @@
     <!-- Right Column for Image -->
     <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
 
-    <!-- Sense Modal-->
-    <div
-      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
-      id="senseModal">
+    <!-- Sense Modal -->
+    <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="senseModal">
       <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
-          <!-- Add p-4 for padding -->
+        <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+        <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
           <!-- Modal content here -->
           <div id="senseModalContent"></div>
-          <!-- Add p-4 for padding -->
         </div>
       </div>
+    </div>
 
 
     <!-- POS and Feature Modal -->
@@ -278,7 +276,7 @@
     }
 
     // Check if the event target is part of the form interaction
-    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.classList.contains('pos-select')) {
+    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration') {
       // Parse the response
       var response = JSON.parse(event.detail.xhr.responseText);
 
@@ -309,8 +307,6 @@
     closeCommentModal();
   }
 }
-
-
 
   // Function to close the comment modal
   function closeCommentModal() {

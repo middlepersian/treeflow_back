@@ -25,7 +25,8 @@ from treeflow.corpus.views.comment_form import comment_form
 from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
-from treeflow.corpus.views.token_sense import token_sense_view
+from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
+from treeflow.corpus.views.save_token import save_token
 
 
 app_name = "treeflow.corpus"
@@ -62,7 +63,8 @@ urlpatterns = [
     path('sources/add/', create_source, name='source_add'),
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
     path('sources/manuscripts/delete/<uuid:image_id>/', delete_image, name="delete_image"),
-    path('token_sense/<uuid:token_id>/', token_sense_view, name='token_sense'),
+    path('token_lemma_sense/<uuid:token_id>/', token_lemma_sense_view, name='token_lemma_sense'),
+    path('save_token/', save_token, name='save_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),
