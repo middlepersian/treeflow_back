@@ -22,7 +22,7 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
-from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source
+from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
@@ -61,6 +61,8 @@ urlpatterns = [
     path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='update_source'),
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
     path('sources/add/', create_source, name='source_add'),
+    path('sources/add_related_source/<uuid:source_id>/', add_related_source, name='add_related_source'),
+    path('sources/add_related_bib/<uuid:source_id>/', add_related_bib, name='add_related_bib'),
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
     path('token_lemma_sense/<uuid:token_id>/', token_lemma_sense_view, name='token_lemma_sense'),
     path('save_token/<uuid:token_id>/', save_token, name='save_token'),

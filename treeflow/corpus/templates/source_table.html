@@ -38,10 +38,10 @@
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
             class="shadow border rounded py-2 px-3 text-gray-700">
       </td>
-      <td class="border p-2">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
+      <td class="border p-2">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 rounded bg-main hover:bg-main-graded-600 text-white cursor-pointer">Edit</a></td>
       <td class="border p-2">
         {%for ref in source.references.all %}{{ref}}{%endfor%}
-        <button class="p-2 rounded bg-blue-500 text-white hover:bg-blue-700 cursor-pointer" data-toggle="modal" data-target="#addZoteroKeyModal">Add</button>
+        <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 rounded bg-main hover:bg-main-graded-600 text-white cursor-pointer">Edit</a>
       </td> 
       <td class="border p-2"><a class="p-2 rounded bg-red-800 text-white hover:bg-red-700 cursor-pointer" href="{%url 'corpus:source_delete' source_id=source.id %}">Delete</a></td>
     
@@ -66,9 +66,7 @@
 {% endif %}
 
 <!-- Modal -->
-<div class="absolute hidden inset-0 bg-black bg-opacity-70 flex justify-center items-center">
-  <div class="bg-white rounded min-w-[50%] min-h-[50%]"></div>
-</div>
+<div id="modalContainer"></div>
 
 <script>
   document.body.addEventListener('htmx:afterRequest', function (event) {
