@@ -2,10 +2,10 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django import forms
 from django.views.generic.edit import FormView
 from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 
-from ..forms import SourceForm
+from ..forms import SourceForm, BibEntryForm
 
 from ..enums.deprel_enum import Deprel
 from treeflow.corpus.models import (
@@ -13,9 +13,13 @@ from treeflow.corpus.models import (
     Source
 ) 
 
+import logging
+
 from treeflow.images.models import Image
 
-    
+# Set up logging
+logger = logging.getLogger(__name__)
+
 # create a generic detail view for source
 class SourceDetailView(DetailView):
     model = Source
@@ -74,6 +78,7 @@ def create_source(request):
         if form.is_valid():
             form.save()
             # Redirect to a success page or do something else
+            return redirect('/corpus/sources/')
     else:
         form = SourceForm()
 
@@ -95,3 +100,45 @@ def source_manuscripts(request):
 
     return render(request, 'source_manuscripts.html', {'manuscripts': images})
 
+def add_related_source(request,source_id):
+    source = get_object_or_404(Source, id=source_id)
+
+    if request.method == 'POST':
+        # Handle the form submission here if needed
+        # You can manually update the sources based on the request data
+        selected_sources_ids = request.POST.getlist('sources')
+        source.sources.set(selected_sources_ids)
+        source.save()
+        return redirect('/corpus/sources/')  # Redirect to a success page
+
+    available_sources = Source.objects.exclude(id=source_id)
+    return render(request, 'source_related_source.html', {'source': source, 'available_sources': available_sources})
+
+def add_related_bib(request,source_id):
+    source = get_object_or_404(Source, id=source_id)
+    bibs = BibEntry.objects.filter(source_references=source_id)
+    if request.method == 'POST':
+        # Check which form is submitted based on the button name or any other identifier
+        if 'add_new' in request.POST:
+            # Handle the form for adding a new BibEntry
+            logger.debug('add_new')
+            bib_form = BibEntryForm(request.POST)
+            if bib_form.is_valid():
+                new_bib_entry = bib_form.save(commit=False)
+                new_bib_entry.save()
+                source.references.add(new_bib_entry)
+                source.save()
+                return redirect('corpus:sources')
+
+        elif 'add_existing' in request.POST:
+            # Handle the form for adding an existing BibEntry
+            selected_bibs_ids = request.POST.getlist('bibs')
+            source.references.set(selected_bibs_ids)
+            source.save()
+            return redirect('corpus:sources')
+
+    
+    bib_form = BibEntryForm
+    available_bibs = BibEntry.objects.all()
+    
+    return render(request, 'source_related_bibentry.html', {'source': source,'bib_form': bib_form, 'available_bibs': available_bibs, 'bibs': bibs})
