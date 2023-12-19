@@ -5,9 +5,11 @@ from django.urls import include, path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.i18n import set_language
 
 from treeflow.views.publications import zotero_view
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
+
 
 
 urlpatterns = [
@@ -24,6 +26,8 @@ urlpatterns = [
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    # i18n
+    path('i18n/setlang/', set_language, name='set_language'),
 
 
     # Your stuff: custom urls includes go here

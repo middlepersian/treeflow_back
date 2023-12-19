@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-27 11:10+0000\n"
+"POT-Creation-Date: 2023-12-17 14:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -271,11 +271,11 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: treeflow/templates/base.html:70
+#: treeflow/templates/base.html:68
 msgid "Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)"
 msgstr ""
 
-#: treeflow/templates/base.html:72
+#: treeflow/templates/base.html:70
 msgid ""
 "Resulting from its status as the official language of the Sasanian Empire "
 "(3rd–7th centuries CE), the Middle Persian language played a prominent "
@@ -285,7 +285,7 @@ msgid ""
 "it was employed as a literary language by several religious traditions."
 msgstr ""
 
-#: treeflow/templates/base.html:75
+#: treeflow/templates/base.html:73
 msgid ""
 "The Middle Persian corpus consists of Zoroastrian, Manichaean, narrative, "
 "administrative and epigraphic sub-corpora. The Zoroastrian Middle Persian "
@@ -296,7 +296,7 @@ msgid ""
 "dictionary covering that corpus."
 msgstr ""
 
-#: treeflow/templates/base.html:79
+#: treeflow/templates/base.html:77
 msgid ""
 "The corpus consists of roughly 50 texts, containing some 705,000 tokens. As "
 "its point of departure, the project relies on the ca. 20 oldest Pahlavi "
@@ -304,37 +304,38 @@ msgid ""
 "codices will be supplied with several layers of annotation:"
 msgstr ""
 
-#: treeflow/templates/base.html:83
+#: treeflow/templates/base.html:81
 msgid "1. orthographical (transliteration) and phonographical (transcription)"
 msgstr ""
 
-#: treeflow/templates/base.html:86
+#: treeflow/templates/base.html:84
 msgid "2. grammatical (morpho-syntactic)"
 msgstr ""
 
-#: treeflow/templates/base.html:89
+#: treeflow/templates/base.html:87
 msgid "3. semantic (semasiological and onomasiological)"
 msgstr ""
 
-#: treeflow/templates/base.html:92
+#: treeflow/templates/base.html:90
 msgid "4. intertextual (linking Zand texts with their Avestan original)"
 msgstr ""
 
-#: treeflow/templates/base.html:97
+#: treeflow/templates/base.html:96
+#, python-format
 msgid ""
 "Within the overall structure of the project, the corpus and dictionary "
 "function as closely interrelated analytical tools even though their focal "
 "points differ (syntax vs. semantics). Their technical integration also plays "
-"an essential role in the general <a class=\"text-sm lg:text-sm md:text-xs sm:"
-"text-xs text-off hover:text-action\" href=\"/methodology\">workflow</a> of "
-"the project. For this purpose, the project employs a web-based working "
-"environment that facilitates the collaborative work on the corpus and "
-"dictionary. The same environment will also provide a public user interface "
-"for enquiries into those resources that have already been processed at a "
-"given point in time."
+"an essential role in the general <a href=\"%(url_methodology)s\" class="
+"\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action"
+"\">workflow</a> of the project. For this purpose, the project employs a web-"
+"based working environment that facilitates the collaborative work on the "
+"corpus and dictionary. The same environment will also provide a public user "
+"interface for enquiries into those resources that have already been "
+"processed at a given point in time.'"
 msgstr ""
 
-#: treeflow/templates/base.html:100
+#: treeflow/templates/base.html:99
 msgid ""
 "The project intends to create a platform that may in the future also be used "
 "for the remaining Middle Persian sub-corpora, as well as for the corpora of "
@@ -344,7 +345,7 @@ msgid ""
 "domains of other Middle Iranian languages."
 msgstr ""
 
-#: treeflow/templates/base.html:103
+#: treeflow/templates/base.html:102
 msgid ""
 "The project is a cooperation between three universities: <a class=\"text-sm "
 "lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"/team"
@@ -354,6 +355,619 @@ msgid ""
 "projekt/452473565?language=en\" target=\"_blank\">Deutsche "
 "Forschungsgemeinschaft (DFG)</a> and designed as a “Langfristvorhaben” (Long-"
 "Term Project, 2021–2030)."
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:10
+msgid "About"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:11
+#: treeflow/templates/pages/publications.html:11
+msgid "Publications"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:12
+#: treeflow/templates/components/subbar.html:32
+#: treeflow/templates/pages/resources.html:136
+msgid "Texts"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:13
+#: treeflow/templates/components/subbar.html:31
+#: treeflow/templates/pages/resources.html:130
+msgid "Manuscripts"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:14
+msgid "Sources"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:15
+msgid "Search"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:16
+#: treeflow/templates/components/subbar.html:13
+#: treeflow/templates/pages/methodology.html:318
+msgid "Dictionary"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:17
+#: treeflow/templates/pages/contact.html:9
+#: treeflow/templates/pages/contact.html:13
+msgid "Contact"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:6
+#: treeflow/templates/pages/methodology.html:10
+msgid "Methodology"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:8
+#: treeflow/templates/pages/methodology.html:14
+msgid "Workflow"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:9
+#: treeflow/templates/pages/methodology.html:25
+msgid "Orthographic Annotation"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:10
+#: treeflow/templates/pages/methodology.html:66
+msgid "Grammatical Annotation"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:11
+#: treeflow/templates/pages/methodology.html:158
+msgid "Semantic Annotation"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:12
+#: treeflow/templates/pages/methodology.html:169
+msgid "Intertextuality"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:26
+#: treeflow/templates/pages/resources.html:10
+msgid "Resources"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:28
+#: treeflow/templates/pages/resources.html:14
+msgid "Handbooks"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:29
+#: treeflow/templates/pages/resources.html:28
+msgid "Kosh"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:30
+#: treeflow/templates/pages/resources.html:125
+msgid "Zotero"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:36
+#: treeflow/templates/pages/team.html:10
+msgid "Team"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:38
+#: treeflow/templates/pages/team.html:14
+msgid "Iranian Studies"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:39
+#: treeflow/templates/pages/team.html:237
+msgid "Digital Humanities"
+msgstr ""
+
+#: treeflow/templates/components/subbar.html:40
+#: treeflow/templates/pages/team.html:332
+msgid "Cooperation Partners"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:15
+msgid ""
+"For any enquiries or remarks relating to the project, please contact us via "
+"the following email address:<a class=\"text-sm lg:text-sm md:text-xs sm:text-"
+"xs text-off hover:text-action\" href=\"mailTo:contact-mpcd@uni-koeln.de"
+"\">contact-mpcd@uni-koeln.de</a>"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:17
+msgid "Privacy Protection Statement"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:19
+msgid ""
+"Generally, the <a href=\"https://portal.uni-koeln.de/en/privacy-protection-"
+"statement\" class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:"
+"text-action\" target=\"_blank\">privacy policy of the University of Cologne</"
+"a> applies to this project; with the specific additions stated below:"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:21
+msgid "Responsible for the content of this website"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:27
+#: treeflow/templates/pages/contact.html:30
+msgid "University of Cologne"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:30
+msgid "Project number"
+msgstr ""
+
+#: treeflow/templates/pages/contact.html:30
+msgid "VAT identification number"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:16
+msgid ""
+"Among the goals of MPCD is an exact representation of the texts as they "
+"appear in the selected manuscripts. Although the manuscripts are "
+"transliterated and transcribed in a thorough fashion <a class=\"text-sm lg:"
+"text-sm md:text-xs sm:text-xs text-off hover:text-action\" href="
+"\"#orthographicAnnotation\">[Orthographic and Phonographic Annotation]</a>, "
+"the annotation work does not start from scratch. To accelerate the process, "
+"a pre-existing transcription is used as a basis for the annotation work. "
+"Proceeding from this transcription, a preliminarily annotated text is "
+"prepared by means of a module that we refer to as 'pre-annotation'. Through "
+"'pre-annotation', the transcribed text is tokenized and the individual "
+"tokens are lemmatized. Moreover, a default transliteration, a morphological "
+"annotation and a default meaning are assigned to each token. The current "
+"rule-based pre-annotation, which relies on preexisting glossaries, will be "
+"replaced by a neuronal, semi-automated annotation in the course of the "
+"project."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:19
+msgid ""
+"Following pre-annotation, the work of the philologists sets in, who cross-"
+"check the pre-annotated text against the manuscript. Transliteration and "
+"transcription are carefully adapted to the data found in the actual "
+"manuscript <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off "
+"hover:text-action\" href=\"#orthographicAnnotation\">[Orthographic and "
+"Phonographic Annotation]</a>. Subsequently, the morphological and semantic "
+"annotation <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off "
+"hover:text-action\" href=\"#grammaticalAnnotation\">[Grammatical Annotation, "
+"Semantic Annotation]</a> are adapted according to the context. A few "
+"selected texts also receive a manually prepared syntactic annotation. The "
+"annotations, especially on the semantic level, form the basis for our "
+"lexicographical work <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
+"text-off hover:text-action\" href=\"#dictionary\">[Dictionary]</a>."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:22
+msgid ""
+"By means of the texts that have been provided with a syntactic annotation, "
+"supported by the philologist’ reviewing of the automatically produced "
+"output, the tool employed for the semi-automated annotation will be "
+"continually improved. Automatically and manually produced annotations are "
+"kept strictly separate, and the distinction between them will be fully "
+"transparent to the end user."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:27
+msgid ""
+"Each token is provided with a transliteration and a transcription. The "
+"<b>transliteration</b> depicts all kinds of spelling variation found in the "
+"manuscripts, taking into account diacritics as well as errors and other "
+"abnormal spellings of words. This will allow for an exact digital "
+"representation of the manuscript and provide a basis for codicological and "
+"stemmatological analyses."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:30
+#, python-format
+msgid ""
+"The <b>transcription</b> represents a phonemic (phonographic) interpretation "
+"of a given token. It essentially follows common views on the phonology of "
+"Sasanian-period Middle Persian as established in the works of authors such "
+"as <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://www.zotero.org/groups/2116388/mpcd/search/mackenzie"
+"%%20197/titleCreatorYear/items/KZSUAB3Q/item-list\" target=\"_blank"
+"\">MacKenzie 1971 (<i>A Concise Pahlavi Dictionary</i>)</a> and <a class="
+"\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href="
+"\"https://www.zotero.org/groups/2116388/mpcd/search/Durkin-Meisterernst"
+"%%202004/titleCreatorYear/items/ZRDIZ9BA/item-list\" target=\"_blank"
+"\">Durkin-Meisterernst 2004 (<i>Dictionary of Manichaean Middle Persian and "
+"Parthian</i>)</a>. But at the same time, it also takes into account certain "
+"peculiar spellings as found in the manuscript at hand, as long as they seem "
+"to depict genuine phonetic by-forms. In this way, the transcription also "
+"depicts some of the diachronic and diatopic variation that is reflected in "
+"the manuscripts."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:33
+msgid ""
+"Finally, each token is attributed to an abstract <b>lemma</b>, which shows "
+"neither spelling nor phonemic-phonetic variation."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:41
+msgid "transliteration"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:44
+msgid "transcription"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:47
+msgid "lemma"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:68
+msgid ""
+"Each token receives a morphological and a syntactic annotation based on the "
+"standard <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:"
+"text-action\" href=\"https://universaldependencies.org/\" target=\"_blank"
+"\">‘Universal Dependencies’</a>. As with the <a class=\"text-sm lg:text-sm "
+"md:text-xs sm:text-xs text-off hover:text-action\" href=\"#semanticAnnotation"
+"\">semantic annotation</a>, we disambiguate form and function depending on "
+"the context:"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:71
+msgid ""
+"abar ‘up, above’ as ‘Adverb’ with the feature “AdvType=Loc” (i.e. local "
+"adverbial)"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:74
+msgid ""
+"abar ‘on, over’ as ‘Adposition’ with the feature “AdpType=Prep” (i.e. "
+"preposition)"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:77
+msgid ""
+"The syntactic annotation indicates the syntactic role of a token as well as "
+"its dependency in the sentence (see the following figure regarding Dēnkard "
+"6, Kap. 1, 166)."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:144
+msgid ""
+"“and there are some things in religion, for which self-abandonment is to be "
+"done”"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:152
+msgid ""
+"“Head” or “Root” of the sentence is the verb of the main clause “(be) "
+"inside”. The head of each phrase (subject, adpositional expression, "
+"subclause, etc.) is related to the head of the main clause. The dependencies "
+"are identified according to the Universal Dependencies Standard (for "
+"instance, adpositions are related by “case” to their complement)."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:155
+msgid ""
+"By means of queries that combine both morphological and syntactic "
+"information, we are able to give quantitative analyses of Middle Persian "
+"grammar, set up text-specific grammars and identify diachronic as well as "
+"dialectal differences. In combination with the semantic analysis, the morpho-"
+"syntactic annotation can be used for historical analysis, e.g. which words "
+"can be plural? Which concepts can be realized as subjects?"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:160
+msgid ""
+"The semantic annotation of the texts is carried out on two levels. On the "
+"lexical level, each token is assigned a meaning in accordance with the given "
+"context. If the required meaning is already available in the provisional "
+"lemma entry of the dictionary, the philologist is able to select it from a "
+"list of proposed meanings. If it is not yet available, the new meaning is "
+"first added to the existing ones to be then selected by the annotator in the "
+"usual way."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:163
+msgid ""
+"Particular attention is given to technical terms, that is, words that show a "
+"special meaning when used in a specific semantic context, in which case they "
+"cannot be rendered literally. In preparation of their future lexicographical "
+"processing, technical terms are gathered in a separate list already during "
+"the annotation work. There, they are assigned to one or several semantic "
+"categories (legal, theological, ritual, astronomical, etc.). They are, "
+"moreover, supplied with a definition and various further indications (e.g. "
+"regarding their etymology), as well as with cross-links to other lemmata and "
+"references to the relevant secondary literature. This serves as a "
+"preliminary step to the future taxonomic categorisation of the lemmata in "
+"the dictionary. As the meaning of a technical term, we either retain the "
+"Middle Persian term itself, or we choose or coin an equivalent English "
+"technical term."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:166
+msgid ""
+"On the sentence level, the annotator provides each sentence with a working "
+"translation. However, this translation is primarily meant to be used "
+"internally during the later stages of the lexicographical work (<a class="
+"\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href="
+"\"#dictionary\">Dictionary</a>). In most cases, it will not be shown to the "
+"end user."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:171
+msgid ""
+"In Zand texts, i.e., Middle Persian (MP) texts translated from Avestan "
+"(Av.), the annotation involves a matching of MP words with their underlying "
+"Av. forms and lemmata. See the following example from Yasna 9.1:"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:176
+msgid "MP transcription"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:212
+msgid "and"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:215
+msgid "he"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:218
+msgid "from"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:221
+msgid "him"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:224
+msgid "asked"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:227
+msgid "Zarathustra"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:230
+msgid "that"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:233
+msgid "who"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:236
+msgid "man"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:239
+msgid "you are"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:296
+msgid "And he, Zarathustra, asked him: “who are you, O man?”"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:303
+msgid ""
+"Through their shared passage IDs, the Zand texts incorporated in the MPCD "
+"database are linked up with their Av. base texts as presented in the "
+"database of the CAB project (<a class=\"text-sm lg:text-sm md:text-xs sm:"
+"text-xs text-off hover:text-action\" href=\"https://cab.geschkult.fu-berlin."
+"de/\" target=\"_blank\">“Corpus Avesticum Berolinense”</a>, FU Berlin)."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:306
+msgid ""
+"The linking-up of the MP and Av. texts will provide opportunities for "
+"various kinds of queries into the correspondences between the MP and Av. "
+"lexicon and vice-versa."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:309
+msgid ""
+"Often the mutual relation between the MP text and its Av. basis cannot be "
+"fully captured on the word level, but it requires taking into account the "
+"phrase level (cf. MP <i>az ōy</i> : Av. <i>dim</i> in the example above). "
+"Based on the annotation of the MP text according to Universal Dependencies, "
+"the attribution of entire MP phrases to a given Av. form will also be "
+"possible. This will provide a basis for enquiries such as “which types of MP "
+"adpositional constructions are used to render which Av. case forms?”"
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:312
+msgid ""
+"Parallel passages within the Zand corpus are also going to be linked up, so "
+"that it will become possible to evaluate diverging meanings of similar or "
+"mutually identical Av. passages."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:315
+msgid ""
+"Moreover, the incorporation of the Zand texts into the corpus of MPCD will "
+"enable the identification of Zand-specific vocabulary in the context of our "
+"<a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"#dictionary\">dictionary</a>."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:320
+msgid ""
+"Work on the dictionary consists of two basic steps. The first one takes "
+"place in the form of the <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
+"text-off hover:text-action\" href=\"/methodology#semanticAnnotation"
+"\">semantic annotation</a> that is done during the processing of the corpus. "
+"In the course of the annotation, each token is assigned to a lemma as well "
+"as to a specific meaning, which enables the user to retrieve the "
+"attestations of that specific meaning. The semantics and usage of technical "
+"terms receive special attention already during the annotation work."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:323
+msgid ""
+"The second step in the preparation of the dictionary will be initiated in "
+"the second half of the runtime of the project and focuses on the "
+"lexicographical work on the dictionary articles. For this purpose, the "
+"meanings of each lemma will be hierarchically arranged and linked to a "
+"taxonomic concept. This procedure allows for a usage of the dictionary from "
+"an onomasiological perspective, which will be particularly useful for "
+"researchers coming from other fields."
+msgstr ""
+
+#: treeflow/templates/pages/methodology.html:326
+msgid ""
+"A typical dictionary entry will comprise the following types of information: "
+"hierarchically arranged meanings, conceptual categories, orthographic and "
+"phonological variants, PoS, attestations, cross-links to other lemmata "
+"((members of) compounds, synonyms and antonyms), valency and phraseology, "
+"external cross-links (e.g. to Avestan equivalents in the <a class=\"text-sm "
+"lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"https://"
+"cab.geschkult.fu-berlin.de/\" target=\"_blank\">“Corpus Avesticum "
+"Berolinense”</a>), and bibliographical references."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:15
+msgid "Handbook Text encoding"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:17
+#, python-format
+msgid ""
+"The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/"
+"Handbook%%20Text%%20encoding\" target=\"_blank\">“Handbook Text encoding”</"
+"a> describes the workflow from manuscript to the digital form of the text. "
+"It explains how the data is transferred into a table structure, which is the "
+"temporary means of processing data. This includes the indication of text "
+"structure, transliteration &amp; transcription as well as special encodings "
+"(e.g. of diacritics or typos)."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:19
+msgid "Handbook Morphology"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:21
+#, python-format
+msgid ""
+"The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/"
+"Handbook%%20Morphology\" target=\"_blank\">“Handbook Morphology”</a> "
+"describes the annotation of part-of-speech and grammatical features "
+"following the <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off "
+"hover:text-action\" href=\"https://universaldependencies.org/guidelines.html"
+"\" target=\"_blank\">Standard of Universal Dependencies (UD)</a> . Sorted by "
+"part-of-speech, the handbook gives a detailed overview of Middle Persian "
+"word forms and their corresponding tags."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:23
+msgid "Handbook Syntax"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:25
+#, python-format
+msgid ""
+"The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/"
+"Handbook%%20Syntax\" target=\"_blank\">“Handbook Syntax”</a> explains the "
+"basic principles of the <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
+"text-off hover:text-action\" href=\"https://universaldependencies.org/"
+"guidelines.html\" target=\"_blank\">Dependencies Standard (UD)</a> for "
+"syntactic annotation. It lists various syntactic structures and exemplifies "
+"the adaptation of UD to Middle Persian."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:30
+msgid ""
+"To facilitate our lexicographical work, we began with the digitization of "
+"the more important available Middle Persian dictionaries and glossaries "
+"already before the start of the project. To make this material machine-"
+"readable, it was subsequently transformed into a simple XML format. The use "
+"of Kosh, a framework developed by CCeH, allows the user to search through "
+"several dictionaries and glossaries in one combined query."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:33
+msgid ""
+"As is well-known to anyone engaged in the philology of Pahlavi, the past "
+"century has seen the use of several conflicting systems of transcribing the "
+"Pahlavi script. The dictionaries and glossaries digitized for MPCD have "
+"therefore been supplied with a transcription according to the MPCD standard, "
+"which essentially follows MacKenzie’s Concise Pahlavi Dictionary (London "
+"1971). Thanks to this, the users may now search through all of the digitized "
+"dictionaries without having to take into account the diverging transcription "
+"systems used by the respective authors."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:36
+msgid ""
+"The digitized materials coupled with Kosh constitute an important tool for "
+"our work. In order to allow a broader public to benefit from this tool, we "
+"have made some of the dictionaries and glossaries accessible to the "
+"scholarly community (<a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
+"text-off hover:text-action\" href=\"https://dicts.uni-koeln.de/\" target="
+"\"_blank\">https://dicts.uni-koeln.de/</a>). The following digitized works "
+"have so far been added to the publicly accessible section of Kosh. We seek "
+"to expand this list in the future:"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:74
+msgid "Bibliography"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:101
+msgid "Using Kosh"
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:105
+msgid ""
+"First, the user has to select the dictionaries to be searched. The simplest "
+"approach is to select all of them."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:108
+msgid ""
+"Next, one has to select the specific field that is to be searched. In most "
+"cases, the relevant field will be “trc” (transcription), but other fields "
+"such as “sense” (meaning) are searchable as well."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:111
+msgid ""
+"Under “Query Type”, the most relevant options to be chosen are “wildcard” "
+"and “regexp” (regular expressions)."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:114
+msgid ""
+"Through the drop-down menu “Query Size”, the results shown may be restricted "
+"to a certain number."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:117
+msgid ""
+"By entering a keyword (e.g., a Middle Persian word in transcription, "
+"optionally enlarged by wildcards) into the “Search”-field, followed by a "
+"click on “Search”, the search is initiated."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:120
+msgid ""
+"One is further able to define the fields to be shown in the search result: "
+"identifier (“id”), transcription (“trc”), transliteration (“trl”), meaning "
+"(“sense”), morphological features (“gramm”), attestations (“attest”), etc."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:127
+msgid ""
+"We are compiling an extensive bibliography on publications related to MPCD "
+"in a <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
+"action\" href=\"https://www.zotero.org/groups/2116388/mpcd/library\" target="
+"\"_blank\">Zotero database</a>."
+msgstr ""
+
+#: treeflow/templates/pages/resources.html:131
+msgid "Timeline of Manuscripts"
 msgstr ""
 
 #: treeflow/users/admin.py:18

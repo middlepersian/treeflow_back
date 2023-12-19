@@ -5,6 +5,7 @@ set -o pipefail
 set -o nounset
 
 # Now it's safe to collect static files
+python /app/manage.py compilemessages
 python /app/manage.py collectstatic --noinput
 
 # Continue with the rest of the startup process
