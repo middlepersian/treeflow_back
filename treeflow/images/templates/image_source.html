@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="POST" class="mx-auto p-4 flex flex-col gap-4" action="{% url 'images:change_source_for_image' image_id=image.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="image_id" value="{{ image_id }}">
+        <label for="source">Select a source:</label>
+        <select name="source_id" id="source">
+            {% for source in sources %}
+                <option value="{{ source.id }}">{{ source.identifier }}</option>
+            {% endfor %}
+        </select>
+        <button class="rounded p-2 bg-main text-white hover:bg-main-600 font-bold cursor-pointer" type="submit">Submit</button>
+    </form>
+{% endblock %}
