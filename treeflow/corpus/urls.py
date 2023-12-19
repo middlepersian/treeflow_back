@@ -21,7 +21,7 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
-from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
+from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
 
@@ -56,7 +56,6 @@ urlpatterns = [
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
     path('sources/add/', create_source, name='source_add'),
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
-    path('sources/manuscripts/delete/<uuid:image_id>/', delete_image, name="delete_image"),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),

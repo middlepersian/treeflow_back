@@ -18,7 +18,7 @@
     <tbody>
       {% if request.user.is_authenticated %}
       <tr><td colspan="6" class="p-1">
-        <button
+        <a href="{% url 'images:create_image' %}"
         class="flex rounded bg-main text-white font-bold w-full p-2 hover:bg-main-graded-600"
         >Add New</button>
       </td></tr>
@@ -71,7 +71,9 @@
             class="shadow border rounded py-2 px-3 text-gray-700"
           />
         </td>
-        <td class="border p-2">{{ manuscript.source }}</td>
+        <td class="border">
+          <div id="">{{ manuscript.source }}</div><a href="{% url 'images:change_source_for_image' image_id=manuscript.id %}" class="p-1 m-2 rounded bg-main text-white cursor-pointer hover:bg-main-graded-600">Change</button>
+        </td>
         <td class="border p-2">
           <input
             type="text"
@@ -87,8 +89,7 @@
         <td
           
           class="border p-2"
-        ><button hx-post="{% url 'corpus:delete_image' image_id=manuscript.id %}" hx-trigger="" class="p-2 rounded text-white bg-red-800 hover:bg-red-600">
-
+        ><button hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="{% url 'images:delete_image' image_id=manuscript.id %}" hx-trigger="" class="p-2 rounded text-white bg-red-800 hover:bg-red-600">
           Delete
         </button>
         </td>
@@ -122,9 +123,7 @@
         <td class="border p-2">{{ manuscript.page }}</td>
         <td class="border p-2">{{ manuscript.source }}</td>
         <td class="border p-2">{{ manuscript.number }}</td>
-        <!-- <td class="border p-2">Edit</td>
-      <td hx-post="{% url 'corpus:delete_image' image_id=manuscript.id %}" class="border p-2">Delete</td> -->
-      </tr>
+       </tr>
       {% endfor %} {% endif %}
     </tbody>
   </table>

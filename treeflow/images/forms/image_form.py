@@ -1,17 +1,16 @@
-# create a django formset for images
 from django import forms
+from django.forms import modelformset_factory
 from ..models import Image
+from treeflow.corpus.models import Source
 
 class ImageForm(forms.ModelForm):
     class Meta:
         model = Image
-        fields = ['identifier', 'page', 'number', 'source', 'previous']
-
+        fields = '__all__'
+        
     def __init__(self, *args, **kwargs):
         super(ImageForm, self).__init__(*args, **kwargs)
-        # Customize form widget attributes if needed
-        self.fields['identifier'].widget.attrs.update({'class': 'form-control'})
-        self.fields['page'].widget.attrs.update({'class': 'form-control'})
-        self.fields['number'].widget.attrs.update({'class': 'form-control'})
-        self.fields['source'].widget.attrs.update({'class': 'form-control'})
-        self.fields['previous'].widget.attrs.update({'class': 'form-control'})
+        # Customize the 'source' field to be a dropdown of available sources
+        self.fields['source'].queryset = Source.objects.all()
+
+ImageFormSet = modelformset_factory(Image, form=ImageForm, extra=1)
