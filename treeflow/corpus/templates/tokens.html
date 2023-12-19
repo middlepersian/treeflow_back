@@ -67,8 +67,8 @@
             </td>
 
             <!-- Transcription -->
-            <td class="border px-4 py-2">
-              <input type="text" name="transcription"
+            <td id ="transcription-cell" class="border px-4 py-2">
+              <input id="transcription-content-{{ token.id }}"  type="text" name="transcription"
                 value="{{ token.transcription }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
@@ -77,8 +77,8 @@
                 class="shadow border rounded py-2 px-3 text-grey-darker">
             </td>
             <!-- Transliteration -->
-            <td class="border px-4 py-2">
-              <input type="text" name="transliteration"
+            <td id ="transliteration-cell" class="border px-4 py-2">
+              <input id="transliteration-content-{{ token.id }}" type="text" name="transliteration"
                 value="{{ token.transliteration }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
@@ -88,15 +88,19 @@
             </td>
 
             <!-- Lemmas -->
-            <td class="border px-4 py-2">
+            <td id="lemmas-cell" class="border px-4 py-2"
+            hx-get="{% url 'corpus:token_lemma_sense' token.id %}" 
+            hx-target="#senseModalContent"
+            hx-trigger="click">
+            <span id="lemma-content-{{ token.id }}">
               {% for lemma in token.lemmas.all %}
               {{ lemma.word }}
               {% if not forloop.last %}, {% endif %}
               {% empty %}
               _
               {% endfor %}
+            </span>
             </td>
-
 
             <!-- Senses -->
             <td id="sense-cell" class="border px-4 py-2"
@@ -110,7 +114,7 @@
               _
               {% endfor %}
             </span>
-          </td>
+            </td>
 
             <!-- POS -->
             <td id="pos-cell" class="border px-4 py-2"
@@ -212,7 +216,7 @@
     <!-- Right Column for Image -->
     <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
 
-    <!-- Sense Modal -->
+    <!-- Token Lemma Sense Modal -->
     <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="senseModal">
       <div class="flex items-center justify-center min-h-screen">
         <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
@@ -301,6 +305,26 @@
     closeCommentModal();
     document.querySelector('#comments-cell').innerHTML = response.comment_data_html;
   }
+
+  //Check for success response for sense form
+  else if (response.status === 'success' && response.form_type === 'sense') {
+    closeSenseModal();
+    document.querySelector('#sense-cell').innerHTML = response.sense_data_html;
+  }
+
+  // Check for success response for lemma form
+  else if (response.status === 'success' && response.form_type === 'lemma') {
+    closeLemmaModal();
+    document.querySelector('#lemmas-cell').innerHTML = response.lemma_data_html;
+  }
+
+  // Check for success response for token form
+  else if (response.status === 'success' && response.form_type === 'token') {
+    closeTokenModal();
+    document.querySelector('#transcription-cell').innerHTML = response.transcription_data_html;
+    document.querySelector('#transliteration-cell').innerHTML = response.transliteration_data_html;
+  }
+
   else {
     // Handling other cases or closing modals if no specific actions are needed
     closeFeatureModal();

@@ -1,0 +1,6 @@
+{% for sense in token.senses.all %}
+{{ sense.sense }}
+{% if not forloop.last %}, {% endif %}
+{% empty %}
+_
+{% endfor %}

@@ -1,48 +1,46 @@
 import logging
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
-# Import your TokenForm here
-from treeflow.corpus.forms.token_form import TokenForm  # Import the TokenForm
+from treeflow.corpus.forms.token_form import TokenForm  
+from treeflow.corpus.models import Token
 
 # Configure logger
 logger = logging.getLogger(__name__)
 
-def save_token(request):
+def save_token(request, token_id=None):
+    # Initialize the form with the token data if token_id is provided
+    if token_id:
+        try:
+            token = Token.objects.get(id=token_id)
+            form = TokenForm(request.POST or None, instance=token)
+        except Token.DoesNotExist:
+            logger.error(f"Token with ID {token_id} does not exist.")
+            return HttpResponseNotFound("Token not found.")
+    else:
+        form = TokenForm(request.POST or None)
+
     if request.method == 'POST':
-        form = TokenForm(request.POST)
+        logger.debug("POST")
 
         if form.is_valid():
+            logger.debug("Form is valid.")
             token = form.save()
-            # save m2m
-            form.save_m2m()
-            logger.info(f"Token object with ID {token.id} was created successfully.")
+            logger.debug(f"Token object with ID {token.id} was created/updated successfully.")
+            # Refresh the token instance from the database
+            token.refresh_from_db()
+            # Prepare and return the response
 
-            if 'HX-Request' in request.headers:
-                logger.info("HTMX request for token creation.")
-                new_form = TokenForm()  # Return a new, empty form
-                # Send a custom JSON response
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Token saved successfully',
-                    'token_id': token.id
-                })
-            else:
-                # Handle non-HTMX request
-                logger.info("Non-HTMX request for token creation.")
-                # Redirect or handle as necessary
-                # return redirect('some_view')
-
+            context = {
+                'token_id': token.id,
+                'transcription_data': render_to_string('transcription_data.html', {'token': token}),
+                'transliteration_data': render_to_string('transliteration_data.html', {'token': token}),
+                'lemma_data': render_to_string('lemma_data.html', {'token': token}),
+                'sense_data': render_to_string('sense_data.html', {'token': token})
+            }
+            return render(request, 'token_lemma_sense_update.html', context)
         else:
-            logger.error(f"Form errors: {form.errors}")
-            if 'HX-Request' in request.headers:
-                logger.info("HTMX request with form errors.")
-                # Return the form with errors for HTMX requests
-                return render(request, 'token_lemma_sense.html', {'token_form': form})
-            else:
-                # Handle non-HTMX request with form errors
-                logger.info("Non-HTMX request with form errors.")
-                # Return or handle as necessary
-                # return render(request, 'your_template_with_errors.html', {'form': form})
+            logger.info("Non-HTMX request with valid form.")
+            # Return or handle as necessary
 
     else:
         logger.warning("Received non-POST request on save_token view.")
