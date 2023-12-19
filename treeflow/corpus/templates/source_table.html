@@ -66,9 +66,7 @@
 {% endif %}
 
 <!-- Modal -->
-<div class="absolute hidden inset-0 bg-black bg-opacity-70 flex justify-center items-center">
-  <div class="bg-white rounded min-w-[50%] min-h-[50%]"></div>
-</div>
+<div id="modalContainer"></div>
 
 <script>
   document.body.addEventListener('htmx:afterRequest', function (event) {
