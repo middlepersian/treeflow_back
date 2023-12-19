@@ -22,7 +22,7 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
-from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, delete_image
+from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view

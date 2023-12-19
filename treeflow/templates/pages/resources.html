@@ -12,24 +12,28 @@
     </div>
     <div class="flex flex-col items-start gap-2 pl-16 pr-20 smartphone:px-4 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
       <h2 id="handbooks" class="text-left text-h2-gray scroll-mt-24">{% trans 'Handbooks' %}</h2>
-      <h3 class="text-left text-h2-gray">Handbook Text encoding</h3>
+      <h3 class="text-left text-h2-gray">{% trans 'Handbook Text encoding' %}</h3>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Text%20encoding" target="_blank">“Handbook Text encoding”</a> describes the workflow from manuscript to the digital form of the text. It explains how the data is transferred into a table structure, which is the temporary means of processing data. This includes the indication of text structure, transliteration &amp; transcription as well as special encodings (e.g. of diacritics or typos).
+        {% blocktrans %}The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Text%20encoding" target="_blank">“Handbook Text encoding”</a> describes the workflow from manuscript to the digital form of the text. It explains how the data is transferred into a table structure, which is the temporary means of processing data. This includes the indication of text structure, transliteration &amp; transcription as well as special encodings (e.g. of diacritics or typos).{% endblocktrans %}
       </p>
-      <h3 class="text-left text-h2-gray">Handbook Morphology</h3>
+      <h3 class="text-left text-h2-gray">{% trans 'Handbook Morphology' %}</h3>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Morphology" target="_blank">“Handbook Morphology”</a> describes the annotation of part-of-speech and grammatical features following the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://universaldependencies.org/guidelines.html" target="_blank">Standard of Universal Dependencies (UD)</a> . Sorted by part-of-speech, the handbook gives a detailed overview of Middle Persian word forms and their corresponding tags.
+        {% blocktrans %}The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Morphology" target="_blank">“Handbook Morphology”</a> describes the annotation of part-of-speech and grammatical features following the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://universaldependencies.org/guidelines.html" target="_blank">Standard of Universal Dependencies (UD)</a> . Sorted by part-of-speech, the handbook gives a detailed overview of Middle Persian word forms and their corresponding tags.{% endblocktrans %}
       </p>
-      <h3 class="text-left text-h2-gray">Handbook Syntax</h3>
+      <h3 class="text-left text-h2-gray">{% trans 'Handbook Syntax' %}</h3>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Syntax" target="_blank">“Handbook Syntax”</a> explains the basic principles of the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://universaldependencies.org/guidelines.html" target="_blank">Dependencies Standard (UD)</a> for syntactic annotation. It lists various syntactic structures and exemplifies the adaptation of UD to Middle Persian.
+        {% blocktrans %}The <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gitlab.cceh.uni-koeln.de/mpcd/handbooks/-/wikis/Handbook%20Syntax" target="_blank">“Handbook Syntax”</a> explains the basic principles of the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://universaldependencies.org/guidelines.html" target="_blank">Dependencies Standard (UD)</a> for syntactic annotation. It lists various syntactic structures and exemplifies the adaptation of UD to Middle Persian.{% endblocktrans %}
       </p>
       <hr class="w-full -mb-5" />
       <h2 id="kosh" class="text-left text-h2-gray scroll-mt-24">{% trans 'Kosh' %}</h2>
-      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">To facilitate our lexicographical work, we began with the digitization of the more important available Middle Persian dictionaries and glossaries already before the start of the project. To make this material machine-readable, it was subsequently transformed into a simple XML format. The use of Kosh, a framework developed by CCeH, allows the user to search through several dictionaries and glossaries in one combined query.</p>
-      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">As is well-known to anyone engaged in the philology of Pahlavi, the past century has seen the use of several conflicting systems of transcribing the Pahlavi script. The dictionaries and glossaries digitized for MPCD have therefore been supplied with a transcription according to the MPCD standard, which essentially follows MacKenzie’s Concise Pahlavi Dictionary (London 1971). Thanks to this, the users may now search through all of the digitized dictionaries without having to take into account the diverging transcription systems used by the respective authors.</p>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        The digitized materials coupled with Kosh constitute an important tool for our work. In order to allow a broader public to benefit from this tool, we have made some of the dictionaries and glossaries accessible to the scholarly community (<a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://dicts.uni-koeln.de/" target="_blank">https://dicts.uni-koeln.de/</a>). The following digitized works have so far been added to the publicly accessible section of Kosh. We seek to expand this list in the future:
+        {% trans 'To facilitate our lexicographical work, we began with the digitization of the more important available Middle Persian dictionaries and glossaries already before the start of the project. To make this material machine-readable, it was subsequently transformed into a simple XML format. The use of Kosh, a framework developed by CCeH, allows the user to search through several dictionaries and glossaries in one combined query.' %}
+      </p>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        {% trans 'As is well-known to anyone engaged in the philology of Pahlavi, the past century has seen the use of several conflicting systems of transcribing the Pahlavi script. The dictionaries and glossaries digitized for MPCD have therefore been supplied with a transcription according to the MPCD standard, which essentially follows MacKenzie’s Concise Pahlavi Dictionary (London 1971). Thanks to this, the users may now search through all of the digitized dictionaries without having to take into account the diverging transcription systems used by the respective authors.' %}
+      </p>
+      <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        {% blocktrans %}The digitized materials coupled with Kosh constitute an important tool for our work. In order to allow a broader public to benefit from this tool, we have made some of the dictionaries and glossaries accessible to the scholarly community (<a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://dicts.uni-koeln.de/" target="_blank">https://dicts.uni-koeln.de/</a>). The following digitized works have so far been added to the publicly accessible section of Kosh. We seek to expand this list in the future:{% endblocktrans %}
       </p>
       <div>
         <table class="w-2/3 m-auto my-3 border border-collapse table-auto">
@@ -67,7 +71,7 @@
           </tr>
         </table>
       </div>
-      <h3 class="text-left text-h2-gray">Bibliography</h3>
+      <h3 class="text-left text-h2-gray">{% trans 'Bibliography' %}</h3>
       <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
         <ul class="flex flex-col w-full p-4">
           <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
@@ -94,25 +98,37 @@
           </li>
         </ul>
       </div>
-      <h3 class="text-left text-h2-gray">Using Kosh</h3>
+      <h3 class="text-left text-h2-gray">{% trans 'Using Kosh' %}</h3>
       <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
         <ul class="flex flex-col w-full p-4">
-          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">First, the user has to select the dictionaries to be searched. The simplest approach is to select all of them.</li>
-          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">Next, one has to select the specific field that is to be searched. In most cases, the relevant field will be “trc” (transcription), but other fields such as “sense” (meaning) are searchable as well.</li>
-          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">Under “Query Type”, the most relevant options to be chosen are “wildcard” and “regexp” (regular expressions).</li>
-          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">Through the drop-down menu “Query Size”, the results shown may be restricted to a certain number.</li>
-          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">By entering a keyword (e.g., a Middle Persian word in transcription, optionally enlarged by wildcards) into the “Search”-field, followed by a click on “Search”, the search is initiated.</li>
-          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">One is further able to define the fields to be shown in the search result: identifier (“id”), transcription (“trc”), transliteration (“trl”), meaning (“sense”), morphological features (“gramm”), attestations (“attest”), etc.</li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">
+            {% trans 'First, the user has to select the dictionaries to be searched. The simplest approach is to select all of them.' %}
+          </li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">
+            {% trans 'Next, one has to select the specific field that is to be searched. In most cases, the relevant field will be “trc” (transcription), but other fields such as “sense” (meaning) are searchable as well.' %}
+          </li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">
+            {% trans 'Under “Query Type”, the most relevant options to be chosen are “wildcard” and “regexp” (regular expressions).' %}
+          </li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">
+            {% trans 'Through the drop-down menu “Query Size”, the results shown may be restricted to a certain number.' %}
+          </li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">
+            {% trans 'By entering a keyword (e.g., a Middle Persian word in transcription, optionally enlarged by wildcards) into the “Search”-field, followed by a click on “Search”, the search is initiated.' %}
+          </li>
+          <li class="flex lg:text-sm md:text-xs sm:text-xs text-xs text-justify before:content-['-'] before:pr-2">
+            {% trans 'One is further able to define the fields to be shown in the search result: identifier (“id”), transcription (“trc”), transliteration (“trl”), meaning (“sense”), morphological features (“gramm”), attestations (“attest”), etc.' %}
+          </li>
         </ul>
       </div>
       <hr class="w-full -mb-5" />
       <h2 id="zotero" class="text-left text-h2-gray scroll-mt-24">{% trans 'Zotero' %}</h2>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        We are compiling an extensive bibliography on publications related to MPCD in a <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://www.zotero.org/groups/2116388/mpcd/library" target="_blank">Zotero database</a>.
+        {% blocktrans %}We are compiling an extensive bibliography on publications related to MPCD in a <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://www.zotero.org/groups/2116388/mpcd/library" target="_blank">Zotero database</a>.{% endblocktrans %}
       </p>
       <hr class="w-full -mb-5" />
       <h2 id="manuscripts" class="text-left text-h2-gray scroll-mt-24">{% trans 'Manuscripts' %}</h2>
-      <h3 class="text-left text-h2-gray">Timeline of Manuscripts</h3>
+      <h3 class="text-left text-h2-gray">{% trans 'Timeline of Manuscripts' %}</h3>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
         <img alt="" src="{% static 'images/schematics/MPCD_mss_timeline.png' %}" class="w-2/3 m-auto mt-2 mb-5" />
       </p>
