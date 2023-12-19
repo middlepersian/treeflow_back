@@ -62,7 +62,6 @@ urlpatterns = [
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
     path('sources/add/', create_source, name='source_add'),
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
-    path('sources/manuscripts/delete/<uuid:image_id>/', delete_image, name="delete_image"),
     path('token_lemma_sense/<uuid:token_id>/', token_lemma_sense_view, name='token_lemma_sense'),
     path('save_token/<uuid:token_id>/', save_token, name='save_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
