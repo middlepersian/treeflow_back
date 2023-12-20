@@ -8,7 +8,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.i18n import set_language
 
 from treeflow.views.publications import zotero_view
-from treeflow.views.kosh import kosh_view
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
 
