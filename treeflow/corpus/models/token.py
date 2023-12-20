@@ -170,13 +170,15 @@ class Token(models.Model):
                 next_token.save()
                 logger.info('next token exists')
                 # add the number of the new token
-                logger.info('new token number: {}'.format(new_token.number))
                 new_token.number = new_number
+                logger.info('new token number: {}'.format(new_token.number))
+
 
             else:
                 logger.info('next token does not exist')
-                logger.info('new token number: {}'.format(reference_token.number + 1))
                 new_token.number = reference_token.number + 1
+                logger.info('new token number: {}'.format(reference_token.number + 1))
+
 
             # Update the 'next' field of the reference token to point to the new token.
             new_token.previous = reference_token

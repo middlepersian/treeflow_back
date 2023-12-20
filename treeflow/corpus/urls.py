@@ -10,6 +10,7 @@ from treeflow.corpus.views.texts import texts_view
 from treeflow.corpus.views.sections import sections_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_child_sections, get_tokens_for_section
 from treeflow.corpus.views.create_section import create_section_view
+from treeflow.corpus.views.section_editor import section_editor_form_view
 from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal import load_section_modal
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
@@ -24,6 +25,9 @@ from treeflow.corpus.views.comment_form import comment_form
 from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
+from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
+from treeflow.corpus.views.save_token import save_token
+
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -37,6 +41,8 @@ urlpatterns = [
     path('tokens/<uuid:text_id>', tokens_view, name='tokens'),
     path('sentences/<uuid:text_id>', sentences_view, name='sentences'),
     path('sections/<uuid:text_id>', sections_view, name='sections'),
+    path('section/', section_editor_form_view, name='section'),
+    path('section/<uuid:section_id>', section_editor_form_view, name='section'),
     path('dropdown_redirect/', dropdown_redirect, name='dropdown_redirect'),
     path('get-sections/<uuid:text_id>/<str:section_type>/', get_sections_by_type, name='get_sections_by_type'),
     path('get-child-sections/<uuid:section_id>/', get_child_sections, name='get_child_sections'),
@@ -58,6 +64,8 @@ urlpatterns = [
     path('sources/add_related_source/<uuid:source_id>/', add_related_source, name='add_related_source'),
     path('sources/add_related_bib/<uuid:source_id>/', add_related_bib, name='add_related_bib'),
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
+    path('token_lemma_sense/<uuid:token_id>/', token_lemma_sense_view, name='token_lemma_sense'),
+    path('save_token/<uuid:token_id>/', save_token, name='save_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),

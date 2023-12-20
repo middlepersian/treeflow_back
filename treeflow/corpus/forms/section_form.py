@@ -12,8 +12,8 @@ class SectionForm(forms.ModelForm):
 
     # Define choices for insertion method
     INSERTION_CHOICES = [
-        ('before', 'Insert Before Selected Section'),
-        ('after', 'Insert After Selected Section'),
+        ('before', 'Before Reference Section'),
+        ('after', 'After Reference Section'),
     ]
     insertion_method = forms.ChoiceField(choices=INSERTION_CHOICES, required=True)
 
@@ -23,7 +23,7 @@ class SectionForm(forms.ModelForm):
     class Meta:
         model = Section
         fields = ['identifier', 'type', 'title', 
-                  'source', 'container', 'insertion_method', 'reference_section']
+                  'source', 'container', 'reference_section', 'insertion_method' ]
 
     def __init__(self, *args, **kwargs):
         text_id = kwargs.pop('text_id', None)

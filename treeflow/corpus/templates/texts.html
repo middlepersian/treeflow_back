@@ -13,8 +13,8 @@
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Genre</th>
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Version</th>
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Stage</th>
+        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Main Text View</th>
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Sentences View</th>
-        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Sections View</th>
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Tokens View</th>
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Created At</th>
         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-center">Actions</th>
@@ -116,15 +116,17 @@
             <span>{{ text.stage }}</span>
           {% endif %}
         </td>
+          <!-- Sections View-->
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <a href="{% url 'corpus:sections' text_id=text.id %}">&#128065;</a>
+          </td>
+
 
           <!-- Sentences View-->
           <td class="px-6 py-4 whitespace-nowrap text-center">
             <a href="{% url 'corpus:sentences' text_id=text.id %}">&#128065;</a>
           </td>
-          <!-- Sections View-->
-          <td class="px-6 py-4 whitespace-nowrap text-center">
-            <a href="{% url 'corpus:sections' text_id=text.id %}">&#128065;</a>
-          </td>
+
           <!-- Tokens View-->
           <td class="px-6 py-4 whitespace-nowrap text-center">
             <a href="{% url 'corpus:tokens' text_id=text.id %}">&#128065;</a>

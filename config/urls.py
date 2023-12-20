@@ -20,13 +20,16 @@ urlpatterns = [
     path("methodology/", TemplateView.as_view(template_name="pages/methodology.html"), name="methodology"),
     path("resources/", TemplateView.as_view(template_name="pages/resources.html"), name="resources"),
     path("team/", TemplateView.as_view(template_name="pages/team.html"), name="team"),
+    path('kosh/', TemplateView.as_view(template_name="index.html"), name="kosh"),
     path('corpus/', include('treeflow.corpus.urls', namespace='corpus')),
+    path('dict/', include('treeflow.dict.urls', namespace='dict')),
     path('images/',include('treeflow.images.urls', namespace='images')),
     path("search/", include("treeflow.search.urls", namespace="search")),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("treeflow.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    path("select2/", include("django_select2.urls")),
     # i18n
     path('i18n/setlang/', set_language, name='set_language'),
 

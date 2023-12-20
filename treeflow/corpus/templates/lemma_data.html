@@ -1,0 +1,6 @@
+{% for lemma in token.lemmas.all %}
+{{ lemma.word }}
+{% if not forloop.last %}, {% endif %}
+{% empty %}
+_
+{% endfor %}
