@@ -3,6 +3,7 @@ from django.http import HttpResponseBadRequest, HttpResponseNotFound, JsonRespon
 from django.shortcuts import render
 from treeflow.corpus.forms.token_form import TokenForm  
 from treeflow.corpus.models import Token
+from django.template.loader import render_to_string
 
 # Configure logger
 logger = logging.getLogger(__name__)

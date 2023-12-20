@@ -267,6 +267,25 @@
 <script src="{% static 'corpus/prev_next_navigator.js'%}"></script>
 
 <script>
+
+
+  // Function to close the comment modal
+  function closeCommentModal() {
+    console.log("Closing Comment Modal");
+    document.getElementById('commentModal').classList.add('hidden');
+  }
+
+  function closeFeatureModal() {
+    console.log("Closing Feature Modal");
+    document.getElementById('featureModal').classList.add('hidden');
+  }
+
+  function closeSenseModal() {
+    console.log("Closing Sense Modal");
+    document.getElementById('senseModal').classList.add('hidden');
+  }
+
+  
   document.body.addEventListener('htmx:afterRequest', function (event) {
     // Function to change the input field color based on the response status
     function changeInputFieldColor(inputField, isSuccess) {
@@ -314,13 +333,13 @@
 
   // Check for success response for lemma form
   else if (response.status === 'success' && response.form_type === 'lemma') {
-    closeLemmaModal();
+    closeSenseModal();
     document.querySelector('#lemmas-cell').innerHTML = response.lemma_data_html;
   }
 
   // Check for success response for token form
   else if (response.status === 'success' && response.form_type === 'token') {
-    closeTokenModal();
+    closeSenseModal();
     document.querySelector('#transcription-cell').innerHTML = response.transcription_data_html;
     document.querySelector('#transliteration-cell').innerHTML = response.transliteration_data_html;
   }
@@ -331,17 +350,6 @@
     closeCommentModal();
   }
 }
-
-  // Function to close the comment modal
-  function closeCommentModal() {
-    console.log("Closing Comment Modal");
-    document.getElementById('commentModal').classList.add('hidden');
-  }
-
-  function closeFeatureModal() {
-    console.log("Closing Feature Modal");
-    document.getElementById('featureModal').classList.add('hidden');
-  }
 
   document.body.addEventListener('htmx:afterSwap', function (event) {
 
@@ -373,6 +381,12 @@
     if (event.detail.target.id === 'comment-form') {
       console.log("Comment form submission, closing modal");
       closeCommentModal();
+    }
+
+    // Check if the swap is for the sense form
+    if (event.detail.target.id === 'token-form') {
+      console.log("Sense form submission, closing modal");
+      closeSenseModal();
     }
   });
 </script>
