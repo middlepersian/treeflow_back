@@ -13,7 +13,9 @@
     <a href="{% url 'corpus:manuscripts' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Manuscripts</a>
     <a href="{% url 'corpus:sources' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Sources</a>
     <a href="{% url 'search:search' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Search</a>
-    <a href="{% url 'home' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Dictionary</a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'kosh' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Glossaries</a>
+    {% endif %}
     <a href="{% url 'contact' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">Contact</a>
     <div class="inline-block overflow-hidden text-center group">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="w-6 h-6 cursor-pointer fill-main-dark hover:fill-off">
