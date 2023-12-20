@@ -8,6 +8,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.i18n import set_language
 
 from treeflow.views.publications import zotero_view
+from treeflow.views.kosh import kosh_view
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
 
@@ -20,7 +21,7 @@ urlpatterns = [
     path("methodology/", TemplateView.as_view(template_name="pages/methodology.html"), name="methodology"),
     path("resources/", TemplateView.as_view(template_name="pages/resources.html"), name="resources"),
     path("team/", TemplateView.as_view(template_name="pages/team.html"), name="team"),
-    path('kosh/', TemplateView.as_view(template_name='pages/kosh.html'), name='kosh'),
+    path('kosh/', kosh_view, name='kosh'),
     path('corpus/', include('treeflow.corpus.urls', namespace='corpus')),
     path('dict/', include('treeflow.dict.urls', namespace='dict')),
     path('images/',include('treeflow.images.urls', namespace='images')),
