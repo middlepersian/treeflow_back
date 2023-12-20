@@ -1,0 +1,30 @@
+<!-- bibentry_detail.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-2 flex flex-col gap-10">
+  <h2>{{ zotero_entry.data.title|safe }}</h2>
+  <div class="p-2 -mt-10">
+
+    <p><strong>Author:</strong>
+      {%for author in zotero_entry.data.creators%}
+      {{ author.firstName }} {{ author.lastName }}
+      {%if not forloop.last%}
+      ,
+      {%endif%}
+      {%endfor%}
+    </p>
+    <p><strong>Year:</strong> {{ zotero_entry.data.date }}</p>
+  </div>
+    
+    <!-- Display the error or the fetched Zotero entry -->
+  {% if 'error' in zotero_entry %}
+    <p><strong>Error:</strong> {{ zotero_entry.error }}</p>
+  {% endif %}
+
+  <!-- Add additional details or actions as needed -->
+
+  <a class="font-bold hover:text-main-graded-900" href="{% url 'corpus:bibliography' %}">← Back to Bibliography</a>
+</div>
+{% endblock %} 

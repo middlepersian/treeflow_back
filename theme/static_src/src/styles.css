@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    * {
+        @apply font-['Helvetica'] scroll-smooth
+    }
+
+    h1 {
+        @apply my-2 text-3xl font-black text-center lg:text-6xl lg:my-9 md:text-5xl md:my-5 sm:text-3xl sm:my-2 drop-shadow-md;
+    }
+
+    h2 {
+        @apply my-2 text-xl font-black text-center lg:text-4xl lg:my-9 md:text-2xl md:my-5 sm:text-xl sm:my-2;
+    }
+
+    h3 {
+        @apply text-lg text-center md:text-xl sm:text-lg;
+    }
+
+    h4 {
+        @apply text-sm text-center md:text-base sm:text-sm;
+    }
+
+}
+
+* {
+    font-family: 'Helvetica', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* Search */
+#search-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
+}
+
+#search-page-container #search,
+#search-page-container #results {
+    width: 100%;
+    border-width: 1px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+#search-page-container button#toggle-search,
+#search-page-container button#toggle-results {
+    width: 100%;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+#search-page-container label {
+    white-space: nowrap;
+}
+
+#search-page-container .cards {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    gap: 2em;
+    padding: 1em 0 1em 0;
+}
+
+#search-page-container .card {
+    display: flex;
+    flex-direction: column;
+    width: min-content;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    border-color: #E5E7EB;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    padding: 2rem;
+}
+
+#search-page-container .card div#criteria div {
+    margin-top: .5rem;
+}
+
+#search-page-container input,
+#search-page-container select {
+    border-radius: 0.25rem !important;
+
+}
+
+#search-page-container input[type="number"] {
+    width: 20%;
+}
+
+#search-page-container .card input[type="text"],
+#search-page-container .card select {
+    max-width: 80%;
+}
+
+#search-page-container .card input,
+#search-page-container .card select,
+#search-page-container .card textarea {
+    -ms-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+}
+
+#search-page-container .card .top-right-button {
+    display: grid;
+    position: absolute;
+    top: -0.75em;
+    right: -0.75em;
+}
+
+#search-page-container .card .top-right-button button svg {
+    pointer-events: none;
+}

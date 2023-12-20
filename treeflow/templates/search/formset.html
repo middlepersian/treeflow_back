@@ -1,0 +1,26 @@
+<form id="form-set" hx-post="{% url "search:results" %}" hx-target="#results-list">
+    {% csrf_token %}
+    <input type="hidden" name="layout_selection" value="{{ layout_selection }}">
+    {% if formset.non_form_errors %}
+        <div id="formset-errors">
+            {% for error in formset.non_form_errors %}
+                <div class="text-red-500">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="cards">
+        {{ formset.management_form }}
+        <div id="empty-form" style="display:none">
+            <div class="card relative">
+                {% include 'search/form.html' with form=formset.empty_form firstForm=False layout=layout_selection %}
+            </div>
+        </div>
+        {% for form in formset %}
+            <div id="form-initial" class="card relative">
+                {% include 'search/form.html' with form=form firstForm=forloop.first layout=layout_selection %}
+            </div>
+        {% endfor %}
+    </div>
+</form>
+<input form="form-set" type="submit" value="Search"
+        class="w-[10%] p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer mt-2 mb-4 text-center transition-colors duration-150" />

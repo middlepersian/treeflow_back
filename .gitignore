@@ -286,3 +286,6 @@ treeflow.png
 *.json
 *.sql
 *.csv
+
+
+celerybeat-schedule

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tokens Display</title>
+</head>
+<body>
+    <h1>Selected Tokens</h1>
+    <ul>
+        {% for token in tokens %}
+            <li>{{ token }}</li> <!-- Customize as per your Token model -->
+        {% empty %}
+            <li>No tokens selected.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

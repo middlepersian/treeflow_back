@@ -1,0 +1,20 @@
+<!-- change_sources.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Edit Sources for {{ source }}</h2>
+  <form class="mx-auto flex flex-col gap-4 " method="post" action="{% url 'corpus:add_related_source' source.id %}">
+    {% csrf_token %}
+    
+    {# Render select box for available sources #}
+    <select name="sources" multiple>
+      {% for available_source in available_sources %}
+        <option value="{{ available_source.id }}" {% if available_source in source.sources.all %}selected{% endif %}>
+          {{ available_source }}
+        </option>
+      {% endfor %}
+    </select>
+    
+    <button class="p-2 rounded bg-main hover:bg-main-graded-600 text-white font-bold" type="submit">Save changes</button>
+  </form>
+{% endblock %}

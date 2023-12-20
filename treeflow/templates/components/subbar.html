@@ -1,0 +1,42 @@
+{% load static i18n %}
+{% load static tailwind_tags %}
+
+<div class="flex w-full h-12 min-h-[3rem] bg-white">
+  <div class="inline-block px-2 m-auto overflow-hidden text-center cursor-pointer group">
+    <a href="{% url 'methodology' %}" class="p-2 text-center cursor-pointer group-hover:text-off font-Helvetica text-main-dark hover:text-off">{% trans 'Methodology' %}</a>
+    <div class="group-hover:flex absolute hidden z-[1] flex-col bg-white border-[1px] rounded-md">
+      <a href="{% url 'methodology' %}#workflow" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Workflow' %}</a>
+      <a href="{% url 'methodology' %}#orthographicAnnotation" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Orthographic Annotation' %}</a>
+      <a href="{% url 'methodology' %}#grammaticalAnnotation" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Grammatical Annotation' %}</a>
+      <a href="{% url 'methodology' %}#semanticAnnotation" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Semantic Annotation' %}</a>
+      <a href="{% url 'methodology' %}#intertextuality" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Intertextuality' %}</a>
+      <a href="{% url 'methodology' %}#dictionary" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Dictionary' %}</a>
+    </div>
+  </div>
+  {% comment %} <div class="inline-block px-2 m-auto overflow-hidden text-center cursor-pointer group">
+    <a class="p-2 text-center cursor-pointer group-hover:text-off font-Helvetica text-main-dark hover:text-off">Technology</a>
+    <div class="group-hover:flex absolute hidden z-[1] flex-col bg-white border-[1px] rounded-md">
+      <a class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">Technical Infrastructure</a>
+      <a class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">System Overview</a>
+      <a class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">Editor</a>
+    </div>
+  </div> {% endcomment %}
+  <div class="inline-block px-2 m-auto overflow-hidden text-center cursor-pointer group">
+    <a href="{% url 'resources' %}" class="p-2 text-center cursor-pointer group-hover:text-off font-Helvetica text-main-dark hover:text-off">{% trans 'Resources' %}</a>
+    <div class="group-hover:flex absolute hidden z-[1] flex-col bg-white border-[1px] rounded-md">
+      <a href="{% url 'resources' %}#handbooks" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Handbooks' %}</a>
+      <a href="{% url 'resources' %}#kosh" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Kosh' %}</a>
+      <a href="{% url 'resources' %}#zotero" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Zotero' %}</a>
+      <a href="{% url 'resources' %}#manuscripts" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Manuscripts' %}</a>
+      <a href="{% url 'resources' %}#texts" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Texts' %}</a>
+    </div>
+  </div>
+  <div class="inline-block px-2 m-auto overflow-hidden text-center cursor-pointer group">
+    <a href="{% url 'team' %}" class="p-2 text-center cursor-pointer group-hover:text-off font-Helvetica text-main-dark hover:text-off">{% trans 'Team' %}</a>
+    <div class="group-hover:flex absolute hidden z-[1] flex-col bg-white border-[1px] rounded-md">
+      <a href="{% url 'team' %}#iranianStudies" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Iranian Studies' %}</a>
+      <a href="{% url 'team' %}#digitalHumanities" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Digital Humanities' %}</a>
+      <a href="{% url 'team' %}#cooperationPartners" class="p-2 text-center cursor-pointer font-Helvetica text-main-dark hover:text-off">{% trans 'Cooperation Partners' %}</a>
+    </div>
+  </div>
+</div>

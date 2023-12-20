@@ -1,0 +1,53 @@
+{% load static %}
+<div class="top-right-button space-y-1">
+  <button type="button"
+    class="inline-flex items-center justify-center w-8 h-8 rounded bg-main text-white hover:bg-main-dark cursor-pointer transition-colors duration-150"
+    onclick="addForm(this)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
+  {% if not firstForm %}
+    <button type="button"
+      class="inline-flex items-center justify-center w-8 h-8 rounded bg-main text-white hover:bg-main-dark cursor-pointer transition-colors duration-150"
+      onclick="removeForm(this)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-minus">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+  {% endif %}
+</div>
+<script>
+  const addForm = (buttonElement) => {
+    const currentForm = buttonElement.parentElement.parentElement.id
+    // console.log("Button pressed on form:", currentForm)
+    // const formSet = document.getElementById('form_set')
+  
+    const formsCountElement = document.getElementById('id_form-TOTAL_FORMS')
+    const formsCount = parseInt(formsCountElement.value)
+  
+    const emptyFormHtml = document.getElementById('empty-form').innerHTML
+    const uniqueId = Date.now() + Math.random().toString(36).substring(2, 11);
+  
+    let newFormHtml = emptyFormHtml
+      .replace(/__prefix__/g, formsCount)
+      .replace('<div', `<div id="form-${uniqueId}"`)
+  
+    document.getElementById(currentForm).insertAdjacentHTML('afterend', newFormHtml)          
+    formsCountElement.value = formsCount + 1
+  }
+  
+  const removeForm = (buttonElement) => {
+    const formToRemove = buttonElement.parentElement.parentElement;
+    const formsCountElement = document.getElementById('id_form-TOTAL_FORMS');
+    const formsCount = parseInt(formsCountElement.value);
+    
+    if (formsCount > 1) {
+      formToRemove.remove();
+      formsCountElement.value = formsCount - 1;
+    }
+  }
+</script>

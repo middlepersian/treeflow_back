@@ -1,0 +1,48 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Zotero Keys</h2>
+<div
+  class="mx-auto p-4 rounded border border-slate-400 flex flex-col gap-10 divide-y-2 divide-y-slate-300"
+>
+  <form
+    class="flex flex-col gap-2 py-6"
+    action="{% url 'corpus:add_related_bib' source.id %}"
+    method="POST"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="add_new" id="add_new" value="add_new" />
+    {{bib_form.as_table}}
+    <input
+      class="rounded bg-main hover:bg-main-graded-600 text-white p-2 cursor-pointer font-bold"
+      type="submit"
+      value="Add New"
+    />
+  </form>
+  <form
+    class="flex flex-col gap-2 py-6"
+    method="post"
+    action="{% url 'corpus:add_related_bib' source.id %}"
+  >
+    {% csrf_token %}
+    <input
+      type="hidden"
+      name="add_existing"
+      id="add_existing"
+      value="add_existing"
+    />
+    {# Render select box for available bibs #}
+    <select id="bibs" name="bibs" multiple>
+      {% for bib in available_bibs %}
+      <option {% if bib in bibs%} selected{%endif%} value="{{ bib.id }}">
+        {{ bib }}
+      </option>
+      {% endfor %}
+    </select>
+    <input
+      id="submitExisting"
+      class="rounded bg-main hover:bg-main-graded-600 text-white p-2 cursor-pointer font-bold"
+      type="submit"
+      value="Change Existing"
+    />
+  </form>
+</div>
+{% endblock %}

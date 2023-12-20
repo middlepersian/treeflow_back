@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Update source{% endblock %}
+
+{% block content %}
+
+<h1>Update source</h1>
+
+<form action="{% url 'corpus:update_source' source_id=source.id %}" method="post">
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+  </table>
+  <input type="submit" value="Update source">
+
+</form>
+
+<a href="{% url 'corpus:sources' %}">Back to source table</a>
+
+{% endblock %}
