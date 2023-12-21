@@ -52,8 +52,12 @@
                 class="sentence mb-2 flex items-center p-2 bg-white shadow rounded">
                 <!-- Display sentence section title or identifier with a fixed width -->
                 <div class="sentence-identifier w-1/8 font-bold mr-1">
-                    {{ section.number|default:"Untitled" }}
+                    <a href="{% url 'corpus:ud_editor' section.id %}"
+                    class="text-blue-500 hover:text-blue-700">
+                    {{ section.number|default:"Untitled" }} 
+                  </a>
                 </div>
+
                 <!-- Sentence content tokens displayed next to the identifier -->
                 <div class="sentence-content w-2/8 flex flex-wrap">
                     {% for token in section.prefetched_tokens %}
