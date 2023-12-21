@@ -66,7 +66,7 @@
     </form>
     {% else %}
         <!-- Content for users who are not authenticated -->
-        <p>You must be logged in to edit this form.</p>
+        <p></p>
     {% endif %}
 
 
@@ -333,6 +333,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 //#region CLICK HANDLE
+// only for registered users
+
 document.querySelectorAll("circle").forEach((item) =>
   item.addEventListener("click", (event) => {
     if (!creating) {
