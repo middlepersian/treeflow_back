@@ -64,18 +64,32 @@
       <input type="hidden" name="section_id" value="{{section.id}}" />
     </form>
 
-    <!-- Sentence and Text Information -->
-    <div
-      class="flex items-center gap-2 bg-gray-300 rounded-lg shadow-lg flex-grow">
-      <!-- Adjusted flex-grow -->
+    <div class="bg-gray-100 rounded-lg shadow-sm flex-grow p-4">
       {% if section %}
-      <div class="p-2">
-        <span class="font-semibold text-gray-700">Sentence Identifier:</span>
-        <span class="text-gray-600">{{ section.identifier }}</span>
-      </div>
+        <div class="text-left">
+          <div class="font-semibold text-gray-800">Sentence Identifier:</div>
+          <p class="text-gray-700">{{ section.identifier }}</p>
+          <div class="font-semibold text-gray-800"> Tokens: </div>
+            {% for token in section.tokens.all %}
+              <span class="text-gray-700">{{ token.transcription }}</span>
+            {% endfor %}
+
+          <div class="font-semibold text-gray-800">Senses:</div>
+          <ul class="list-disc pl-5">
+            {% for sense in section.senses.all %}
+              <li class="text-gray-700">{{ sense.sense }}</li>
+            {% endfor %}
+          </ul>
+
+        </div>
       {% endif %}
     </div>
-
+    
+    
+    
+    
+    
+      
   </div>
 
   <!-- SVG Container -->

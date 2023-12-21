@@ -33,14 +33,14 @@
           {% for sentence in page_obj %}
           <!-- Sentence Header Row -->
           <tr class="bg-blue-100">
-            <td colspan="13" class="px-4 py-2">## Identifier:
+            <td colspan="14" class="px-4 py-2">## Identifier:
               {{sentence.identifier }}</td>
           </tr>
           <tr class="bg-blue-100">
-            <td colspan="13" class="px-4 py-2">## ID: {{ sentence.id }}</td>
+            <td colspan="14" class="px-4 py-2">## ID: {{ sentence.id }}</td>
           </tr>
           <tr class="bg-blue-100">
-            <td colspan="13" class="px-4 py-2">
+            <td colspan="14" class="px-4 py-2">
               <ul> Translations:
                 {% for sense in sentence.senses.all %}
                 <li>{{sense.language}} - <span class="text-bold">
@@ -72,7 +72,7 @@
             <td class="border px-4 py-2">
               <a href="{% url 'corpus:ud_editor' sentence.id %}"
                 class="text-blue-500 hover:text-blue-700">
-                &#128065;
+                UD
               </a>
 
             </td>
@@ -93,46 +93,54 @@
               {% endfor %}
             </td>
 
+
             <!-- Transcription -->
-            <td class="border px-4 py-2">
-              <input type="text" name="transcription"
+            <td id ="transcription-cell" class="border px-4 py-2">
+              <input id="transcription-content-{{ token.id }}"  type="text" name="transcription"
                 value="{{ token.transcription }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+                class="shadow border rounded py-2 px-3 text-grey-darker">
             </td>
-
             <!-- Transliteration -->
-            <td class="border px-4 py-2">
-              <input type="text" name="transliteration"
+            <td id ="transliteration-cell" class="border px-4 py-2">
+              <input id="transliteration-content-{{ token.id }}" type="text" name="transliteration"
                 value="{{ token.transliteration }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+                class="shadow border rounded py-2 px-3 text-grey-darker">
             </td>
-
             <!-- Lemmas -->
-            <td class="border px-4 py-2">
+            <td id="lemmas-cell" class="border px-4 py-2"
+            hx-get="{% url 'corpus:token_lemma_sense' token.id %}" 
+            hx-target="#senseModalContent"
+            hx-trigger="click">
+            <span id="lemma-content-{{ token.id }}">
               {% for lemma in token.lemmas.all %}
               {{ lemma.word }}
               {% if not forloop.last %}, {% endif %}
               {% empty %}
               _
               {% endfor %}
+            </span>
             </td>
 
             <!-- Senses -->
-            <td class="border px-4 py-2">
+            <td id="sense-cell" class="border px-4 py-2"
+            hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+            hx-target="#senseModalContent" hx-trigger="click">
+            <span id="sense-content-{{ token.id }}">
               {% for sense in token.senses.all %}
               {{ sense.sense }}
               {% if not forloop.last %}, {% endif %}
               {% empty %}
               _
               {% endfor %}
+            </span>
             </td>
 
             <!-- POS -->
@@ -222,88 +230,183 @@
         </tbody>
       </table>
     </div>
-
     <!-- Right Column for Image -->
     <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
 
-    <!-- POS and Feature Modal (placed outside the loop) -->
+    <!-- Token Lemma Sense Modal -->
+    <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="senseModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+        <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+          <!-- Modal content here -->
+          <div id="senseModalContent"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- POS and Feature Modal -->
     <div
       class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
       id="featureModal">
       <div class="flex items-center justify-center min-h-screen">
         <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
           <div id="featureModalContent"></div>
+          <!-- Add p-4 for padding -->
         </div>
       </div>
     </div>
 
-  </div>
-  <!-- Include the pagination template with the required context variable -->
-  <div class="flex justify-center py-4">{% include 'pagination.html' %}</div>
+    <!-- Comment Modal -->
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="commentModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="commentModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
 
+
+  </div>
+
+  <!-- Pagination controls -->
+  <div class="lex justify-center py-4"> {% include 'pagination.html' with page_obj=tokens %}</div>
   <!-- close main div-->
 </div>
 
 <script src="{% static 'corpus/prev_next_navigator.js'%}"></script>
 
-<!---Javascript for the POS and Feature Modal --->
 <script>
-    document.body.addEventListener('htmx:afterRequest', function (event) {
-      // Function to change the input field color based on the response status
-      function changeInputFieldColor(inputField, isSuccess) {
-        if (inputField) {
-          inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
-          // Reset the color back to original after a delay
-          setTimeout(function () {
-            inputField.style.backgroundColor = ''; // Reset to original color
-          }, 2000); // Adjust delay as needed
-        }
-      }
-
-      // Check if the event target is part of the form interaction
-      if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.classList.contains('pos-select')) {
-        // Parse the response
-        var response = JSON.parse(event.detail.xhr.responseText);
-
-        // Change the input field color based on the response
-        changeInputFieldColor(event.detail.elt, response.status === 'success');
-      }
-    });
 
 
+  // Function to close the comment modal
+  function closeCommentModal() {
+    console.log("Closing Comment Modal");
+    document.getElementById('commentModal').classList.add('hidden');
+  }
 
-    function handleFormSuccess(response) {
-      console.log("Form submission success response received");
-      if (response.status === 'success') {
-        closeFeatureModal();
-        document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
-        document.querySelector('#features-cell').innerHTML = response.features_data_html;
-      } else {
-        closeFeatureModal();
+  function closeFeatureModal() {
+    console.log("Closing Feature Modal");
+    document.getElementById('featureModal').classList.add('hidden');
+  }
+
+  function closeSenseModal() {
+    console.log("Closing Sense Modal");
+    document.getElementById('senseModal').classList.add('hidden');
+  }
+
+  
+  document.body.addEventListener('htmx:afterRequest', function (event) {
+    // Function to change the input field color based on the response status
+    function changeInputFieldColor(inputField, isSuccess) {
+      if (inputField) {
+        inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+        // Reset the color back to original after a delay
+        setTimeout(function () {
+          inputField.style.backgroundColor = ''; // Reset to original color
+        }, 2000); // Adjust delay as needed
       }
     }
 
-    function closeFeatureModal() {
-      console.log("Closing Feature Modal");
-      document.getElementById('featureModal').classList.add('hidden');
+    // Check if the event target is part of the form interaction
+    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration') {
+      // Parse the response
+      var response = JSON.parse(event.detail.xhr.responseText);
+
+      // Change the input field color based on the response
+      changeInputFieldColor(event.detail.elt, response.status === 'success');
+    }
+  });
+
+
+
+  function handleFormSuccess(response) {
+  console.log("Form submission success response received");
+
+  // Check for success response for feature form
+  if (response.status === 'success' && response.form_type === 'feature') {
+    closeFeatureModal();
+    document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
+    document.querySelector('#features-cell').innerHTML = response.features_data_html;
+  }
+  // Check for success response for comment form
+  else if (response.status === 'success' && response.form_type === 'comment') {
+    closeCommentModal();
+    document.querySelector('#comments-cell').innerHTML = response.comment_data_html;
+  }
+
+  //Check for success response for sense form
+  else if (response.status === 'success' && response.form_type === 'sense') {
+    closeSenseModal();
+    document.querySelector('#sense-cell').innerHTML = response.sense_data_html;
+  }
+
+  // Check for success response for lemma form
+  else if (response.status === 'success' && response.form_type === 'lemma') {
+    closeSenseModal();
+    document.querySelector('#lemmas-cell').innerHTML = response.lemma_data_html;
+  }
+
+  // Check for success response for token form
+  else if (response.status === 'success' && response.form_type === 'token') {
+    closeSenseModal();
+    document.querySelector('#transcription-cell').innerHTML = response.transcription_data_html;
+    document.querySelector('#transliteration-cell').innerHTML = response.transliteration_data_html;
+  }
+
+  else {
+    // Handling other cases or closing modals if no specific actions are needed
+    closeFeatureModal();
+    closeCommentModal();
+  }
+}
+
+  document.body.addEventListener('htmx:afterSwap', function (event) {
+
+    console.log("htmx:afterSwap event triggered");
+    console.log(event.detail);
+
+    // add logic for sense modal
+    if (event.detail.target.id === 'senseModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Sense Modal Content Loaded");
+      document.getElementById('senseModal').classList.remove('hidden');
     }
 
-    document.body.addEventListener('htmx:afterSwap', function (event) {
+    // Add logic for comment modal
+    if (event.detail.target.id === 'commentModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Comment Modal Content Loaded");
+      document.getElementById('commentModal').classList.remove('hidden');
+    }
+    // Check if the swap is for loading modal content
+    if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Feature Modal Content Loaded");
+      document.getElementById('featureModal').classList.remove('hidden');
+    }
+    // Check if the swap is for the feature form
+    if (event.detail.target.id === 'pos-feature-form') {
+      console.log("Feature form submission, closing modal");
+      closeFeatureModal();
+    }
+    // Check if the swap is for the comment form
+    if (event.detail.target.id === 'comment-form') {
+      console.log("Comment form submission, closing modal");
+      closeCommentModal();
+    }
 
-      console.log("htmx:afterSwap event triggered");
-      console.log(event.detail);
+    // Check if the swap is for the sense form
+    if (event.detail.target.id === 'token-form') {
+      console.log("Sense form submission, closing modal");
+      closeSenseModal();
+    }
+  });
+</script>
 
-      // Check if the swap is for loading modal content
-      if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-        console.log("Feature Modal Content Loaded");
-        document.getElementById('featureModal').classList.remove('hidden');
-      }
-      // Check if the swap is for the feature form
-      if (event.detail.target.id === 'pos-feature-form') {
-        console.log("Feature form submission, closing modal");
-        closeFeatureModal();
-      }
-    });
-  </script>
 
 {% endblock content %}
