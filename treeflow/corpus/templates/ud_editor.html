@@ -38,6 +38,7 @@
       Center
     </button>
 
+    {% if user.is_authenticated %}
     <!-- Edit form-->
     <form class="mx-2" id="form" action="../saveNewDependency/" method="post">
       {% csrf_token %}
@@ -63,6 +64,11 @@
       {% csrf_token %}
       <input type="hidden" name="section_id" value="{{section.id}}" />
     </form>
+    {% else %}
+        <!-- Content for users who are not authenticated -->
+        <p></p>
+    {% endif %}
+
 
     <div class="bg-gray-100 rounded-lg shadow-sm flex-grow p-4">
       {% if section %}
@@ -327,6 +333,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 //#region CLICK HANDLE
+// only for registered users
+
 document.querySelectorAll("circle").forEach((item) =>
   item.addEventListener("click", (event) => {
     if (!creating) {
