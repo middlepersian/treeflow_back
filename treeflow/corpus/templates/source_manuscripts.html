@@ -1,7 +1,23 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
-<div class="flex flex-row w-full p-0">
-  {% if manuscripts %}
-  <table class="table-auto">
+{% extends 'base.html' %} 
+{% load static %} 
+{% block content %}
+
+
+<div class="flex flex-col w-full h-screen">
+
+
+  <!-- Header or top space (adjust the height accordingly) -->
+  <div class="h-25"> <!-- This is a placeholder for the header, adjust the class as needed -->
+    <!-- Your header content goes here -->
+  </div>
+
+  <!-- Flex container for the split view -->
+  <div class="flex flex-grow overflow-hidden">
+    
+  <!-- Left Column for the Table -->
+  <div class="w-1/2 overflow-auto">
+          {% if manuscripts %}
+  <table class="min-w-full bg-white mt-6">
     <thead>
       <tr>
         <th class="border p-2">Identifier</th>
@@ -23,7 +39,8 @@
         >Add New</button>
       </td></tr>
       {% endif %}
-      {% if request.user.is_authenticated %} {% for manuscript in manuscripts %}
+      {% if request.user.is_authenticated %} 
+      {% for manuscript in manuscripts %}
       <tr id="{{manuscript.identifier}}">
         <td class="border p-2">
           <input
@@ -94,7 +111,10 @@
         </button>
         </td>
       </tr>
-      {% endfor %} {% else %} {% for manuscript in manuscripts %}
+      {% endfor %} 
+      <!--  if logged in-->
+      {% else %} 
+      {% for manuscript in manuscripts %}
 
       <tr id="{{manuscript.identifier}}">
         <td class="border p-2">{{ manuscript.identifier}}</td>
@@ -127,13 +147,30 @@
       {% endfor %} {% endif %}
     </tbody>
   </table>
-
   {% else %}
   <p>No Manuscripts are available.</p>
-  {% endif %}
-  <div id="openseadragon1" style="width: 800px; height: 600px"></div>
+  {% endif %}</div>
+
+    <!-- Image Viewer - Adjust the top value if your header height changes -->
+    <div id="openseadragon1" class="w-1/2 h-full flex justify-center items-center fixed right-0 top-0"> </div>
+
+
+  </div>
+  <!-- Pagination controls -->
+
+  <div class="w-full flex justify-center py-4 absolute bottom-0"> {% include 'source_pagination.html' with page_obj=manuscripts %}</div>
+
+
+</div>
+
+
+
+  <!-- JS -->
+
   <script src="{% static 'openseadragon/openseadragon.min.js' %}"></script>
+
   <script type="text/javascript">
+    let viewer;
     let currentImage = "";
 
     function test(event) {
@@ -144,18 +181,33 @@
       }
       currentImage = event;
       document.getElementById(currentImage).classList.add("bg-main")
-      var viewerElement = document.getElementById("openseadragon1");
-      if (viewerElement && viewerElement.innerHTML !== "") {
-        viewerElement.innerHTML = ""; // Clear the viewer element
-      }
-      var viewer = OpenSeadragon({
-        id: "openseadragon1",
-        prefixUrl: "//openseadragon.github.io/openseadragon/images/",
-        tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
-      });
+
+    // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
+    if (!viewer) {
+          viewer = OpenSeadragon({
+            id: "openseadragon1",
+            prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+            tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
+
+            // Options to show the controls
+            showNavigator: true,  // Displays a small navigator window
+            showNavigationControl: true, // Displays the navigation controls
+            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
+                        // Additional zoom options
+            minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
+            maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
+            visibilityRatio: 1, // Part of the image must stay visible
+            constrainDuringPan: true, // Image constrained during panning
+            zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
+          });
+        } 
+      viewer.open(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`);
+  
+
+
     }
   </script>
-</div>
+
 
 <script>
   document.body.addEventListener("htmx:afterRequest", function (event) {

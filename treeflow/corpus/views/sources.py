@@ -88,17 +88,19 @@ def create_source(request):
 def source_manuscripts(request):
     # get all sources that are manuscripts
     images = Image.objects.all().prefetch_related('source')
+
+    #setup paginator
     paginator = Paginator(images, 50)
     page_number = request.GET.get('page')
     images_page = paginator.get_page(page_number)
+    logger.debug('images_page: %s', images_page)
     context = {
-        'images': images,
-        'page_obj': images_page,
+        'manuscripts': images_page,
         'page_title': 'Manuscripts',
         
     }
 
-    return render(request, 'source_manuscripts.html', {'manuscripts': images})
+    return render(request, 'source_manuscripts.html',context)
 
 def add_related_source(request,source_id):
     source = get_object_or_404(Source, id=source_id)
