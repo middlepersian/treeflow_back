@@ -1,0 +1,66 @@
+<!-- Pagination controls -->
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <div class="flex flex-1 justify-between sm:hidden">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}"
+          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+      {% else %}
+        <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}"
+          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+      {% else %}
+        <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
+      {% endif %}
+    </div>
+    
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-700">
+          Showing
+          <span class="font-medium">{{ page_obj.start_index }}</span>
+          to
+          <span class="font-medium">{{ page_obj.end_index }}</span>
+          of
+          <span class="font-medium">{{ page_obj.paginator.count }}</span>
+          results
+        </p>
+      </div>
+      <div>
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          <!-- Previous Page Link with ID -->
+          <!-- First Page Link -->
+          {% if page_obj.has_previous %}
+            <a href="?page=1" 
+              class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+              First
+            </a>
+          {% endif %}
+          <!-- Previous Page Link -->
+          {% if page_obj.has_previous %}
+            <a id="prevPageLink" href="?page={{ page_obj.previous_page_number }}" 
+              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 leading-5 hover:bg-gray-50">
+              Previous
+            </a>
+          {% endif %}
+          <!-- Current Page indicator -->
+          <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+          </span>
+          <!-- Next Page Link with ID -->
+          {% if page_obj.has_next %}
+            <a id="nextPageLink" href="?page={{ page_obj.next_page_number }}" 
+              class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+              Next
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}"
+              class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:bg-gray-50">
+              <span>Last</span>
+            </a>
+          {% endif%}
+          </nav>
+        </div>
+      </div>
+    </div>
+    
