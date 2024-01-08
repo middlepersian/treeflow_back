@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load comment_tags %}
 {% block content %}
 
 <div class="flex flex-col w-full h-screen">
@@ -24,6 +25,7 @@
             <th class="px-4 py-2">Senses</th>
             <th class="px-4 py-2">POS</th>
             <th class="px-4 py-2">Features</th>
+            <th class="px-4 py-2">Comments</th>
             <th class="px-4 py-2">Insert Before</th>
             <th class="px-4 py-2">Insert After</th>
             <th class="px-4 py-2">Delete Token</th>
@@ -31,24 +33,22 @@
         </thead>
         <tbody>
           {% for sentence in page_obj %}
-          <!-- Sentence Header Row -->
-          <tr class="bg-blue-100">
-            <td colspan="14" class="px-4 py-2">## Identifier:
-              {{sentence.identifier }}</td>
-          </tr>
-          <tr class="bg-blue-100">
-            <td colspan="14" class="px-4 py-2">## ID: {{ sentence.id }}</td>
-          </tr>
-          <tr class="bg-blue-100">
-            <td colspan="14" class="px-4 py-2">
-              <ul> Translations:
-                {% for sense in sentence.senses.all %}
-                <li>{{sense.language}} - <span class="text-bold">
-                    {{sense.sense}} </span></li>
-                {% endfor %}
-              </ul>
-            </td>
-          </tr>
+        <!-- Sentence Header Row -->
+        <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+          <td colspan="15" class="px-4 py-2">## Identifier: {{ sentence.identifier }}</td>
+        </tr>
+        <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+          <td colspan="15" class="px-4 py-2">## ID: {{ sentence.id }}</td>
+        </tr>
+        <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+          <td colspan="15" class="px-4 py-2">
+            <ul> Translations:
+              {% for sense in sentence.senses.all %}
+              <li>{{sense.language}} - <span class="text-bold">{{sense.sense}} </span></li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
           {% for token in sentence.tokens.all %}
           <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden"
             id="token-{{token.id}}">
@@ -93,10 +93,10 @@
               {% endfor %}
             </td>
 
-
             <!-- Transcription -->
-            <td id ="transcription-cell" class="border px-4 py-2">
-              <input id="transcription-content-{{ token.id }}"  type="text" name="transcription"
+            <td id="transcription-cell" class="border px-4 py-2">
+              <input id="transcription-content-{{ token.id }}" type="text"
+                name="transcription"
                 value="{{ token.transcription }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
@@ -105,8 +105,9 @@
                 class="shadow border rounded py-2 px-3 text-grey-darker">
             </td>
             <!-- Transliteration -->
-            <td id ="transliteration-cell" class="border px-4 py-2">
-              <input id="transliteration-content-{{ token.id }}" type="text" name="transliteration"
+            <td id="transliteration-cell" class="border px-4 py-2">
+              <input id="transliteration-content-{{ token.id }}" type="text"
+                name="transliteration"
                 value="{{ token.transliteration }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
@@ -116,31 +117,31 @@
             </td>
             <!-- Lemmas -->
             <td id="lemmas-cell" class="border px-4 py-2"
-            hx-get="{% url 'corpus:token_lemma_sense' token.id %}" 
-            hx-target="#senseModalContent"
-            hx-trigger="click">
-            <span id="lemma-content-{{ token.id }}">
-              {% for lemma in token.lemmas.all %}
-              {{ lemma.word }}
-              {% if not forloop.last %}, {% endif %}
-              {% empty %}
-              _
-              {% endfor %}
-            </span>
+              hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+              hx-target="#senseModalContent"
+              hx-trigger="click">
+              <span id="lemma-content-{{ token.id }}">
+                {% for lemma in token.lemmas.all %}
+                {{ lemma.word }}
+                {% if not forloop.last %}, {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
             </td>
 
             <!-- Senses -->
             <td id="sense-cell" class="border px-4 py-2"
-            hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
-            hx-target="#senseModalContent" hx-trigger="click">
-            <span id="sense-content-{{ token.id }}">
-              {% for sense in token.senses.all %}
-              {{ sense.sense }}
-              {% if not forloop.last %}, {% endif %}
-              {% empty %}
-              _
-              {% endfor %}
-            </span>
+              hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+              hx-target="#senseModalContent" hx-trigger="click">
+              <span id="sense-content-{{ token.id }}">
+                {% for sense in token.senses.all %}
+                {{ sense.sense }}
+                {% if not forloop.last %}, {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
             </td>
 
             <!-- POS -->
@@ -171,6 +172,16 @@
                 {% empty %}
                 _
                 {% endfor %}
+              </span>
+            </td>
+
+            <!-- Comments -->
+            <td id="comments-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
+              hx-target="#commentModalContent"
+              hx-trigger="click">
+              <span id="comment-content-{{ token.id }}">
+                {% render_comments_for_model token %}
               </span>
             </td>
 
@@ -233,8 +244,26 @@
     <!-- Right Column for Image -->
     <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
 
+
+    <!-- Sentence senses modal -->
+  <div
+    class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    id="sentenceSensesModal">
+    <div class="flex items-center justify-center min-h-screen">
+      <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+      <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+        <!-- Modal content here -->
+        <div id="sentenceSensesModalContent"></div>
+      </div>
+    </div>
+
+    
+  </div>
+
     <!-- Token Lemma Sense Modal -->
-    <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="senseModal">
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="senseModal">
       <div class="flex items-center justify-center min-h-screen">
         <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
         <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
@@ -243,7 +272,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- POS and Feature Modal -->
     <div
@@ -273,11 +301,10 @@
       </div>
     </div>
 
-
   </div>
 
   <!-- Pagination controls -->
-  <div class="lex justify-center py-4"> {% include 'pagination.html' with page_obj=tokens %}</div>
+  <div class="lex justify-center py-4"> {% include 'pagination.html' %}</div>
   <!-- close main div-->
 </div>
 
@@ -405,8 +432,14 @@
       console.log("Sense form submission, closing modal");
       closeSenseModal();
     }
+
+    // Check if the swap is for loading sentence senses modal content
+    if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Sentence Senses Modal Content Loaded");
+      document.getElementById('sentenceSensesModal').classList.remove('hidden');
+    }
+
   });
 </script>
-
 
 {% endblock content %}
