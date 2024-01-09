@@ -18,9 +18,4 @@ def section_editor_form_view(request, section_id=None):
 
     sense_form = SenseForm()  # Create an instance of SenseForm
 
-    if request.method == 'POST' and 'submit_section' in request.POST:
-        if form.is_valid():
-            form.save()
-            return redirect(request.META.get('HTTP_REFERER', '/'))
-
-    return render(request, 'section_editor_form.html', {'form': form, 'sense_form': sense_form})
+    return render(request, 'section_editor_form.html', {'form': form, 'sense_form': sense_form, 'section_id': section_id})

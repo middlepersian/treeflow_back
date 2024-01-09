@@ -34,19 +34,21 @@
         <tbody>
           {% for sentence in page_obj %}
         <!-- Sentence Header Row -->
-        <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
-          <td colspan="15" class="px-4 py-2">## Identifier: {{ sentence.identifier }}</td>
+        <tr  class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+          <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">## Identifier: {{ sentence.identifier }}</span></td>
         </tr>
         <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
-          <td colspan="15" class="px-4 py-2">## ID: {{ sentence.id }}</td>
+          <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">## ID: {{ sentence.id }}</span></td>
         </tr>
         <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
-          <td colspan="15" class="px-4 py-2">
+          <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
+            <span id="sentence-senses-{{sentence.id}}">
             <ul> Translations:
               {% for sense in sentence.senses.all %}
               <li>{{sense.language}} - <span class="text-bold">{{sense.sense}} </span></li>
               {% endfor %}
             </ul>
+            </span>
           </td>
         </tr>
           {% for token in sentence.tokens.all %}
@@ -329,6 +331,10 @@
     document.getElementById('senseModal').classList.add('hidden');
   }
 
+  function closeSentenceSensesModal() {
+    console.log("Closing Sentence Senses Modal");
+    document.getElementById('sentenceSensesModal').classList.add('hidden');
+  }
   
   document.body.addEventListener('htmx:afterRequest', function (event) {
     // Function to change the input field color based on the response status
@@ -388,6 +394,11 @@
     document.querySelector('#transliteration-cell').innerHTML = response.transliteration_data_html;
   }
 
+  else if (response.status === 'success' && response.form_type === 'section') {
+    closeSentenceSensesModal();
+    document.querySelector('#sentence-senses-cell').innerHTML = response.section_sense_data_html;
+  }
+
   else {
     // Handling other cases or closing modals if no specific actions are needed
     closeFeatureModal();
@@ -399,13 +410,16 @@
 
     console.log("htmx:afterSwap event triggered");
     console.log(event.detail);
-
+    // Check if the swap is for loading sentence senses modal content
+    if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Sentence Senses Modal Content Loaded");
+      document.getElementById('sentenceSensesModal').classList.remove('hidden');
+    }
     // add logic for sense modal
     if (event.detail.target.id === 'senseModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
       console.log("Sense Modal Content Loaded");
       document.getElementById('senseModal').classList.remove('hidden');
     }
-
     // Add logic for comment modal
     if (event.detail.target.id === 'commentModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
       console.log("Comment Modal Content Loaded");
@@ -433,11 +447,12 @@
       closeSenseModal();
     }
 
-    // Check if the swap is for loading sentence senses modal content
-    if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-      console.log("Sentence Senses Modal Content Loaded");
-      document.getElementById('sentenceSensesModal').classList.remove('hidden');
+    if (event.detail.target.id === 'section-form') {
+      console.log("Section form submission, closing modal");
+      closeSentenceSensesModal();
     }
+
+
 
   });
 </script>
