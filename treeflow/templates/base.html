@@ -9,7 +9,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <title>
       {% block title %}
-        treeflow
+        MPCD - Middle Persian Corpus Dictionary
       {% endblock %}
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,43 +18,15 @@
     <meta name="csrf-token" content="{{ csrf_token }}" />
     <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" />
     <script src="{% static 'htmx/htmx.min.js' %}"></script>
-    {% block extra_head %}{% endblock %}
+    {% block extra_head %}
 
+    {% endblock %}
   </head>
 
   <body>
     <div class="flex flex-col w-full bg-white h-screen">
       <nav>
         {% include 'components/navbar.html' %}
-        {% comment %} <div class="container flex flex-wrap items-center justify-between mx-auto">
-          <a href="{% url 'home' %}" class="flex items-center"><span class="self-center text-xl font-semibold whitespace-nowrap">treeflow</span></a>
-          <button data-collapse-toggle="navbarSupportedContent" type="button" class="inline-flex items-center p-2 ml-3 text-sm text-gray-700 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200" aria-controls="navbarSupportedContent" aria-expanded="false">
-            <span class="sr-only">Open main menu</span>
-            <!-- Icon for menu button here -->
-          </button>
-          <div class="hidden w-full md:block md:w-auto" id="navbarSupportedContent">
-            <ul class="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
-              <li>
-                <a href="{% url 'home' %}" class="block py-2 pl-3 pr-4 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0" aria-current="page">Home</a>
-              </li>
-              <li>
-                <a href="{% url 'about' %}" class="block py-2 pl-3 pr-4 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">About</a>
-              </li>
-              {% if request.user.is_authenticated %}
-                <li>
-                  <a href="{% url 'users:detail' request.user.username %}" class="block py-2 pl-3 pr-4 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">{% trans 'My Profile' %}</a>
-                </li>
-                <li>
-                  <a href="{% url 'account_logout' %}" class="block py-2 pl-3 pr-4 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">{% trans 'Sign Out' %}</a>
-                </li>
-              {% else %}
-                <li>
-                  <a href="{% url 'account:account_login' %}" class="block py-2 pl-3 pr-4 text-gray-700 rounded md:bg-transparent md:text-gray-700 md:p-0">{% trans 'Sign In' %}</a>
-                </li>
-              {% endif %}
-            </ul>
-          </div>
-        </div> {% endcomment %}
       </nav>
       {% block content %}
         {% include 'components/subbar.html' %}
