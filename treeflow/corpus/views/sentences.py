@@ -76,6 +76,7 @@ def sentences_view(request, text_id=None):
         'selected_text_id': selected_text_id or '',
         'page_obj': page_obj,
         'current_view': 'corpus:sentences',
+        'sentence_id': sentence_id if sentence_id else None
     }
 
     return render(request, 'sentences.html', context)
