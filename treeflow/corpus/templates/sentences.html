@@ -33,10 +33,10 @@
         <tbody>
           {% for sentence in page_obj %}
         <!-- Sentence Header Row -->
-        <tr  class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+        <tr  class="bg-blue-100 sentence-header-row">
           <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">## Identifier: {{ sentence.identifier }}</span></td>
         </tr>
-        <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+        <tr class="bg-blue-100 sentence-header-row">
           <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">## ID: {{ sentence.id }}</span></td>
         </tr>
         <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
