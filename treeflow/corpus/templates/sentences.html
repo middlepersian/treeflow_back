@@ -34,17 +34,17 @@
           {% for sentence in page_obj %}
         <!-- Sentence Header Row -->
         <tr  class="bg-blue-100 sentence-header-row">
-          <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">## Identifier: {{ sentence.identifier }}</span></td>
+          <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">Identifier: {{ sentence.identifier }}</span></td>
         </tr>
         <tr class="bg-blue-100 sentence-header-row">
-          <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">## ID: {{ sentence.id }}</span></td>
+          <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID: {{ sentence.id }}</span></td>
         </tr>
         <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
           <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
             <span id="sentence-senses-{{sentence.id}}">
             <ul> Translations:
               {% for sense in sentence.senses.all %}
-              <li>{{sense.language}} - <span class="font-bold">{{sense.sense}} </span></li>
+              <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
               {% endfor %}
             </ul>
             </span>
@@ -359,53 +359,6 @@
     }
   });
 
-
-
-  function handleFormSuccess(response) {
-  console.log("Form submission success response received");
-
-  // Check for success response for feature form
-  if (response.status === 'success' && response.form_type === 'feature') {
-    closeFeatureModal();
-    document.querySelector('#pos-cell').innerHTML = response.pos_data_html;
-    document.querySelector('#features-cell').innerHTML = response.features_data_html;
-  }
-  // Check for success response for comment form
-  else if (response.status === 'success' && response.form_type === 'comment') {
-    closeCommentModal();
-    document.querySelector('#comments-cell').innerHTML = response.comment_data_html;
-  }
-
-  //Check for success response for sense form
-  else if (response.status === 'success' && response.form_type === 'sense') {
-    closeSenseModal();
-    document.querySelector('#sense-cell').innerHTML = response.sense_data_html;
-  }
-
-  // Check for success response for lemma form
-  else if (response.status === 'success' && response.form_type === 'lemma') {
-    closeSenseModal();
-    document.querySelector('#lemmas-cell').innerHTML = response.lemma_data_html;
-  }
-
-  // Check for success response for token form
-  else if (response.status === 'success' && response.form_type === 'token') {
-    closeSenseModal();
-    document.querySelector('#transcription-cell').innerHTML = response.transcription_data_html;
-    document.querySelector('#transliteration-cell').innerHTML = response.transliteration_data_html;
-  }
-
-  else if (response.status === 'success' && response.form_type === 'section') {
-    closeSentenceSensesModal();
-    document.querySelector('#sentence-senses-cell').innerHTML = response.section_sense_data_html;
-  }
-
-  else {
-    // Handling other cases or closing modals if no specific actions are needed
-    closeFeatureModal();
-    closeCommentModal();
-  }
-}
 
   document.body.addEventListener('htmx:afterSwap', function (event) {
 
