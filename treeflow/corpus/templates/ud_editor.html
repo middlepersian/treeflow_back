@@ -91,6 +91,12 @@
     <div class="bg-gray-100 rounded-lg shadow-sm flex-grow p-4">
       {% if section %}
       <div class="text-left">
+        {% if user.is_authenticated %}
+        <div class="mb-2">
+          <!-- TODO: Back to Section -->
+          <a href="" class="rounded p-2 bg-main text-white hover:bg-main-graded-600">Go to section</a>
+        </div>
+        {% endif %}
         <div class="font-semibold text-gray-800">Sentence Identifier:</div>
         <p class="text-gray-700">{{ section.identifier }}</p>
         <div class="font-semibold text-gray-800">Tokens:</div>
