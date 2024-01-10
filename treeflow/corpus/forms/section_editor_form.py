@@ -17,9 +17,8 @@ class SectionEditorForm(forms.ModelForm):
     tokens_display = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'readonly': True}), required=False)
     class Meta:
         model = Section
-        fields = ['text', 'number', 'identifier', 'type', 'title',
-                  'language', 'source', 'previous',
-                  'container', 'senses']
+        fields = ['number', 'identifier', 'type', 'title',
+                  'language', 'senses']
         widgets = {
             'senses': s2forms.ModelSelect2MultipleWidget(
                 model='treeflow.dict.models.Sense', 
