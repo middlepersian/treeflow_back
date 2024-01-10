@@ -177,18 +177,12 @@
           font-family="Verdana"
           font-size="12"
         >
-          {% if token.transcription %}
-          <tspan>{{token.transcription}}</tspan>
-          {% if token.transliteration %}
-          <tspan y="40" x="{{token.xpos}}" class="transcription hidden">
-            {{token.transliteration}}
-          </tspan>
+          {% if token.transcription %} {{token.transcription}} {% else %} null
           {% endif %}
-          {% else %} null {% endif %}
         </text>
         <text x="{{token.xpos}}" y="60" font-family="Verdana" font-size="10">
           {% for sense in token.senses %}
-          <tspan>{{sense}}</tspan>
+          <tspan class="italic">{{sense}}</tspan>
           {% endfor %}
         </text>
         <text x="{{token.xpos}}" y="70" font-family="Verdana" font-size="6">
@@ -202,7 +196,7 @@
       </g>
       {% endif %} {% endfor %}
     </svg>
-    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }}
+    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }} {{ user.is_authenticated | json_script:"authenticated" }}
   </div>
 
 
@@ -423,6 +417,8 @@
   document.querySelectorAll("circle").forEach((item) =>
     item.addEventListener("click", (event) => {
       if (!creating) {
+        cleanAllElementsWithClass("temp-path");
+        cleanAllElementsWithClass("not_saved_path");
         creating = true;
         fromTokenId = event.target.id;
         hideFocusDep();
@@ -440,6 +436,7 @@
             fromTokenId,
             tokenTo.id
           );
+          path.setAttribute("class", "not_saved_path");
           path.setAttribute("d", arcDefinition);
           path.setAttribute("fill", "none");
           path.setAttribute("stroke", "black");
@@ -727,7 +724,15 @@
   }
 
   const addNewDependencyRow = (from, to) => {
+    if (document.getElementById("input-container")) {
+      console.log("removing", form, document.getElementById("input-container"));
+
+      form.removeChild(document.getElementById("input-container"));
+    } else {
+      console.log("nothign to remove");
+    }
     const inputContainer = document.createElement("div");
+    inputContainer.setAttribute("id", "input-container");
     inputContainer.setAttribute("class", "flex flex-row items-center");
 
     const inputField = document.createElement("input");
@@ -794,27 +799,37 @@
   function createArcPath(from, to) {}
 
   function hoverCard(event) {
-    // only one hover card at a time
+    console.log("hovering");
+    let targetElement = event.target;
+    // Remove existing hover card
     const oldHoverCard = document.getElementById("hover-card");
     if (oldHoverCard) {
       document.body.removeChild(oldHoverCard);
     }
 
-    console.log("hovering");
-    //get the x and y coordinates of the mouse
     const x = event.clientX;
     const y = event.clientY;
-    //get the element that is hovered
-    const hoveredElement = document.elementFromPoint(x, y);
-    // create the hover card
+    const hoveredElement = event.target; // Directly use event.target
+    
+    // Create hover card
     const hoverCard = document.createElement("div");
     hoverCard.setAttribute("class", "hover-card");
     hoverCard.setAttribute("id", "hover-card");
+    document.body.appendChild(hoverCard);
+
+    // Set initial position
+    setPosition(hoverCard, x, y);
 
     // get the token data
     const token = tokenData.find(
       (e) => e.id === hoveredElement.getAttribute("data-tokenid")
     );
+
+    if (!token) {
+      console.log("no token found");
+      return;
+    }
+
     const tokenInfo = document.createElement("p");
     // map the pos tags to a string
     const pos = token.pos
@@ -837,17 +852,22 @@
       .join(", ");
 
     tokenInfo.innerHTML = `${token.transcription}
-    <br>
-    ${pos}
-    `;
+      <br>
+      ${token.transliteration}
+      <br>
+      ${token.senses.map((e) => e.sense).join(", ")}
+      <br>
+      ${pos}
+      `;
 
-    // add the token info to the hover card
-
+    // Append token info to hover card
     hoverCard.appendChild(tokenInfo);
 
-    // append the hover card to the body
-    document.body.appendChild(hoverCard);
-    // set the position of the hover card
+    // Adjust position if out of bounds
+    adjustPositionIfOutOfBounds(hoverCard);
+  }
+
+  function setPosition(hoverCard, x, y) {
     hoverCard.style.top = `${y}px`;
     hoverCard.style.left = `${x}px`;
     hoverCard.style.backgroundColor = "white";
@@ -856,12 +876,11 @@
     // min width and height
     hoverCard.style.minWidth = "100px";
     hoverCard.style.minHeight = "50px";
+  }
 
-    // get the bounding box of the hover card
+  function adjustPositionIfOutOfBounds(hoverCard) {
     const hoverCardBBox = hoverCard.getBoundingClientRect();
-    // get the bounding box of the svg
     const svgBBox = svg.getBoundingClientRect();
-    // check if the hover card is outside of the svg
     if (hoverCardBBox.right > svgBBox.right) {
       hoverCard.style.left = `${x - (hoverCardBBox.right - svgBBox.right)}px`;
     }
@@ -870,40 +889,34 @@
     }
   }
 
-  function removeHoverCard() {
-    setTimeout(() => {
-      const hoverCard = document.getElementById("hover-card");
-      if (hoverCard) {
-        document.body.removeChild(hoverCard);
-      }
-    }, 100); // Delay of 1 second (1000 milliseconds)
-  }
-
-  // add event listeners to all text elements with the class token
 
   document.querySelectorAll(".token").forEach((item) => {
-    item.addEventListener("mouseenter", (event) => {
-      hoverCard(event);
-    });
-    item.addEventListener("mouseleave", (event) => {
-      removeHoverCard();
-    });
-    item.addEventListener("click", (event) => {
-      console.log(event.target);
-      if (event.target.classList.contains("transcription")) {
-        event.target.classList.toggle("hidden");
-      } else if (event.target.nextElementSibling.classList.contains("transcription")){
-        event.target.nextElementSibling.classList.toggle("hidden");
+    
+    item.addEventListener("mouseenter", hoverCard);
+    item.addEventListener("mouseleave", () => {
+      const oldHoverCard = document.getElementById("hover-card");
+      if (oldHoverCard) {
+        document.body.removeChild(oldHoverCard);
       }
-     
     });
   });
+
+  function removeHoverCard() {
+    const oldHoverCard = document.getElementById("hover-card");
+    if (oldHoverCard) {
+      document.body.removeChild(oldHoverCard);
+    }
+  }
+
+
   // Initialize the viewbox
   const bbox = svg.getBBox();
   currentX = bbox.x - 10;
   currentY = bbox.y - 10;
   currentZoom = 1;
   setViewBox();
+
+
 </script>
 
 <!--import pag navigation-->
