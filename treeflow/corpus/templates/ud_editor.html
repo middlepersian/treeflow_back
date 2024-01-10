@@ -93,8 +93,7 @@
       <div class="text-left">
         {% if user.is_authenticated %}
         <div class="mb-2">
-          <!-- TODO: Back to Section -->
-          <a href="{% url 'corpus:sentences' section.text.id %}?sentence_id={{ section.id }}" class="rounded p-2 bg-main text-white hover:bg-main-graded-600">Edit Sentence</a>
+          <a href="{% url 'corpus:sentence' section.id %}" class="rounded p-2 bg-main text-white hover:bg-main-graded-600">Edit Sentence</a>
         </div>
         {% endif %}
         <div class="text-gray-800">Identifier:</div>
