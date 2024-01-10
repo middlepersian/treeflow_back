@@ -19,6 +19,7 @@ from treeflow.corpus.views.pos_feature_form import pos_feature_form
 from treeflow.corpus.views.bib_edit import BibEntryListView, BibEntryCreateView
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
+from treeflow.corpus.views.sentence import sentence_view
 from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
@@ -40,6 +41,8 @@ urlpatterns = [
     path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'), 
     path('texts/', texts_view, name='texts'),
     path('tokens/<uuid:text_id>', tokens_view, name='tokens'),
+    path('tokens/<uuid:text_id>/<uuid:section_id>', tokens_view, name='tokens'),
+    path('sentence/<uuid:sentence_id>', sentence_view, name='sentence'),
     path('sentences/<uuid:text_id>', sentences_view, name='sentences'),
     path('sections/<uuid:text_id>', sections_view, name='sections'),
     path('section/', section_editor_form_view, name='section'),

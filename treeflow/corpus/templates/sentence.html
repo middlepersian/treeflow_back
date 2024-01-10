@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+{% load static %}
+{% load comment_tags %}
+{% block content %}
+
+<div class="flex flex-col w-full h-screen">
+
+  <!-- Flex container for the split view -->
+  <div class="flex-grow flex w-full">
+    <!-- Left Column for Tokens -->
+    <div class="w-8/12 overflow-x-auto">
+      <!-- Table for displaying tokens -->
+      <table class="min-w-full">
+        <thead class="bg-gray-800 text-white">
+          <tr>
+            <th class="px-4 py-2">Number in Text</th>
+            <th class="px-4 py-2">Number in Sentence</th>
+            <th class="px-4 py-2">Image</th>
+            <th class="px-4 py-2">Line</th>
+            <th class="px-4 py-2">Transcription</th>
+            <th class="px-4 py-2">Transliteration</th>
+            <th class="px-4 py-2">Lemmas</th>
+            <th class="px-4 py-2">Senses</th>
+            <th class="px-4 py-2">POS</th>
+            <th class="px-4 py-2">Features</th>
+            <th class="px-4 py-2">Comments</th>
+            <th class="px-4 py-2">Insert Before</th>
+            <th class="px-4 py-2">Insert After</th>
+            <th class="px-4 py-2">Delete Token</th>
+          </tr>
+        </thead>
+        <tbody>
+   
+        <!-- Sentence Header Row -->
+        <tr  class="bg-blue-100 sentence-header-row">
+          <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">Identifier: {{ sentence.identifier }}</span></td>
+        </tr>
+        <tr class="bg-blue-100 sentence-header-row">
+          <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID: {{ sentence.id }}</span></td>
+        </tr>
+        <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+          <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
+            <span id="sentence-senses-{{sentence.id}}">
+            <ul> Translations:
+              {% for sense in sentence.senses.all %}
+              <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
+              {% endfor %}
+            </ul>
+            </span>
+          </td>
+        </tr>
+
+        <!-- UD -->
+        <tr class="bg-blue-100 sentence-header-row"">
+          <td  id="sentence-ud-cell" colspan="15" class="px-4 py-2 text-blue-500 hover:text-blue-700 font-bold">
+           <a href="{% url 'corpus:ud_editor' sentence.id %}">Edit Universal Dependencies
+          </td>
+        </td>
+
+        </tr>
+
+          {% for token in sentence.tokens.all %}
+          <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden"
+            id="token-{{token.id}}">
+            {% csrf_token %}
+
+            <!-- Number in Text -->
+            <td class="border px-4 py-2 text-center">{{ token.number }}</td>
+
+            <!-- Number in Sentence -->
+            <td class="border px-4 py-2">
+              <input type="text" name="number_in_sentence"
+                value="{{ token.number_in_sentence }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+
+
+            <!-- Image -->
+            <td class="border px-4 py-2">
+              {{ token.image.identifier }}
+            </td>
+
+            <!-- Line -->
+            <td class="border px-4 py-2">
+              <!-- Display 'line' type sections -->
+              {% for section_token in token.line_sections %}
+              {{ section_token.section.number }}
+              <!-- Display the title or other fields -->
+              {% empty %}
+              No line sections
+              {% endfor %}
+            </td>
+
+            <!-- Transcription -->
+            <td id="transcription-cell" class="border px-4 py-2">
+              <input id="transcription-content-{{ token.id }}" type="text"
+                name="transcription"
+                value="{{ token.transcription }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+            <!-- Transliteration -->
+            <td id="transliteration-cell" class="border px-4 py-2">
+              <input id="transliteration-content-{{ token.id }}" type="text"
+                name="transliteration"
+                value="{{ token.transliteration }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+            <!-- Lemmas -->
+            <td id="lemmas-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+              hx-target="#senseModalContent"
+              hx-trigger="click">
+              <span id="lemma-content-{{ token.id }}">
+                {% for lemma in token.lemmas.all %}
+                {{ lemma.word }}
+                {% if not forloop.last %}, {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
+
+            <!-- Senses -->
+            <td id="sense-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+              hx-target="#senseModalContent" hx-trigger="click">
+              <span id="sense-content-{{ token.id }}">
+                {% for sense in token.senses.all %}
+                {{ sense.sense }}
+                {% if not forloop.last %}, {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
+
+            <!-- POS -->
+            <td id="pos-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+              hx-target="#featureModalContent" hx-trigger="click">
+              <span id="pos-content-{{ token.id }}">
+                <!--show selected POS-->
+                <!-- Show selected POS if available -->
+                {% for pos in token.pos_token.all %}
+                {% if pos.pos %}
+                {{ pos.pos }}
+                {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
+
+            <!-- Features -->
+            <td id="features-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+              hx-target="#featureModalContent" hx-trigger="click">
+              <span id="features-content-{{ token.id }}">
+                {% for feature in token.feature_token.all %}
+                {{ feature.feature }}={{ feature.feature_value }}
+                {% if not forloop.last %} | {% endif %}
+                {% empty %}
+                _
+                {% endfor %}
+              </span>
+            </td>
+
+            <!-- Comments -->
+            <td id="comments-cell" class="border px-4 py-2"
+              hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
+              hx-target="#commentModalContent"
+              hx-trigger="click">
+              <span id="comment-content-{{ token.id }}">
+                {% render_comments_for_model token %}
+              </span>
+            </td> 
+
+            <!-- Insert Before Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:insert_before_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentence">
+                <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
+                <input type="submit" value="⬆️ Insert"
+                  class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+
+            <!-- Insert After Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:insert_after_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentence">
+                <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
+                <input type="submit" value="⬇️ Insert"
+                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+
+            <!-- Delete Button -->
+            <td class="border px-4 py-2">
+              <form method="post"
+                action="{% url 'corpus:delete_token' token.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <input type="hidden" name="source" value="sentence">
+                <input type="hidden" name="sentence_id"
+                  value="{{ sentence.id }}">
+                <input type="submit" value="Delete"
+                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    <!-- Right Column for Image -->
+    <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
+
+
+    <!-- Sentence senses modal -->
+  <div
+    class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    id="sentenceSensesModal">
+    <div class="flex items-center justify-center min-h-screen">
+      <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+      <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+        <!-- Modal content here -->
+        <div id="sentenceSensesModalContent"></div>
+      </div>
+    </div>
+
+    
+  </div>
+
+    <!-- Token Lemma Sense Modal -->
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="senseModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+        <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+          <!-- Modal content here -->
+          <div id="senseModalContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POS and Feature Modal -->
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="featureModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="featureModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div
+      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      id="commentModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="commentModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+<script>
+
+
+  // Function to close the comment modal
+  function closeCommentModal() {
+    console.log("Closing Comment Modal");
+    document.getElementById('commentModal').classList.add('hidden');
+  }
+
+  function closeFeatureModal() {
+    console.log("Closing Feature Modal");
+    document.getElementById('featureModal').classList.add('hidden');
+  }
+
+  function closeSenseModal() {
+    console.log("Closing Sense Modal");
+    document.getElementById('senseModal').classList.add('hidden');
+  }
+
+  function closeSentenceSensesModal() {
+    console.log("Closing Sentence Senses Modal");
+    document.getElementById('sentenceSensesModal').classList.add('hidden');
+  }
+  
+  document.body.addEventListener('htmx:afterRequest', function (event) {
+    // Function to change the input field color based on the response status
+    function changeInputFieldColor(inputField, isSuccess) {
+      if (inputField) {
+        inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
+        // Reset the color back to original after a delay
+        setTimeout(function () {
+          inputField.style.backgroundColor = ''; // Reset to original color
+        }, 2000); // Adjust delay as needed
+      }
+    }
+
+    // Check if the event target is part of the form interaction
+    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration') {
+      // Parse the response
+      var response = JSON.parse(event.detail.xhr.responseText);
+
+      // Change the input field color based on the response
+      changeInputFieldColor(event.detail.elt, response.status === 'success');
+    }
+  });
+
+
+  document.body.addEventListener('htmx:afterSwap', function (event) {
+
+    console.log("htmx:afterSwap event triggered");
+    console.log(event.detail);
+    // Check if the swap is for loading sentence senses modal content
+    if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Sentence Senses Modal Content Loaded");
+      document.getElementById('sentenceSensesModal').classList.remove('hidden');
+    }
+    // add logic for sense modal
+    if (event.detail.target.id === 'senseModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Sense Modal Content Loaded");
+      document.getElementById('senseModal').classList.remove('hidden');
+    }
+    // Add logic for comment modal
+    if (event.detail.target.id === 'commentModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Comment Modal Content Loaded");
+      document.getElementById('commentModal').classList.remove('hidden');
+    }
+    // Check if the swap is for loading modal content
+    if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log("Feature Modal Content Loaded");
+      document.getElementById('featureModal').classList.remove('hidden');
+    }
+    // Check if the swap is for the feature form
+    if (event.detail.target.id === 'pos-feature-form') {
+      console.log("Feature form submission, closing modal");
+      closeFeatureModal();
+    }
+    // Check if the swap is for the comment form
+    if (event.detail.target.id === 'comment-form') {
+      console.log("Comment form submission, closing modal");
+      closeCommentModal();
+    }
+
+    // Check if the swap is for the sense form
+    if (event.detail.target.id === 'token-form') {
+      console.log("Sense form submission, closing modal");
+      closeSenseModal();
+    }
+
+    if (event.detail.target.id === 'section-form') {
+      console.log("Section form submission, closing modal");
+      closeSentenceSensesModal();
+    }
+
+  });
+
+
+</script>
+
+{% endblock content %}
