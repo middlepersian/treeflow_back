@@ -41,7 +41,6 @@ urlpatterns = [
     path('texts/', texts_view, name='texts'),
     path('tokens/<uuid:text_id>', tokens_view, name='tokens'),
     path('sentences/<uuid:text_id>', sentences_view, name='sentences'),
-    path('sentences/<uuid:text_id>/<uuid:sentence_id>', sentences_view, name='sentences'),
     path('sections/<uuid:text_id>', sections_view, name='sections'),
     path('section/', section_editor_form_view, name='section'),
     path('section/<uuid:section_id>', section_editor_form_view, name='section'),

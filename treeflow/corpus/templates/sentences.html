@@ -178,7 +178,7 @@
               </span>
             </td>
 
-            <!-- Comments 
+            <!-- Comments -->
             <td id="comments-cell" class="border px-4 py-2"
               hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
               hx-target="#commentModalContent"
@@ -186,7 +186,7 @@
               <span id="comment-content-{{ token.id }}">
                 {% render_comments_for_model token %}
               </span>
-            </td> -->
+            </td> 
 
             <!-- Insert Before Button -->
             <td class="border px-4 py-2">

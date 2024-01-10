@@ -9,76 +9,72 @@ from treeflow.corpus.models import Text, Section, Token, SectionToken
 
 logger = logging.getLogger(__name__)
 
-
 @login_required
-def sentences_view(request, text_id=None, sentence_id=None):
+def sentences_view(request, text_id=None):
     logger.info('text_id : %s', text_id)
 
-    # Cache key base for sentences and texts
-    cache_base_key_sentences = f"sentences_page_{text_id}_"
+    # Fetching or caching texts
     cache_key_texts = "all_texts"
-
-    # Check cache for texts
     texts = cache.get(cache_key_texts)
     if not texts:
         texts = Text.objects.all()
-        cache.set(cache_key_texts, texts, 300)  # Cache for 5 minutes
+        cache.set(cache_key_texts, texts, 300)
         logger.info("Cache miss for texts")
 
     selected_text_id = text_id if text_id else request.GET.get('text_id')
 
-    line_prefetch = Prefetch(
-        'sectiontoken_set',
-        queryset=SectionToken.objects.filter(
-            section__type='line').select_related('section'),
-        to_attr='line_sections'
-    )
+    # Building the cache key for sentences
+    cache_key_sentences = f"sentences_{selected_text_id}"
+    sentences = cache.get(cache_key_sentences)
 
-    # Prefetch for tokens with necessary related objects
-    tokens_prefetch = Prefetch(
-        'tokens',
-        queryset=Token.objects.select_related('image')
-        .prefetch_related('pos_token', 'feature_token', 'lemmas', 'senses', 'comment_token', line_prefetch)
-        .only('id', 'image')  # Adjust fields as per your requirement
-    )
-
-    # Sentence query with optimized prefetching
-    sentences = Section.objects.filter(type='sentence', text=selected_text_id) \
-        .prefetch_related(tokens_prefetch) \
-        .only('id', 'number', 'identifier', 'title', 'language')  # Only fetch necessary fields
-
-    # Setup paginator for sentences
-    paginator = Paginator(sentences, 10)
-
-    # Check if sentence_id is provided
-    if sentence_id:
-        # Calculate page_number based on sentence_id
-        try:
-            sentence_number = sentences.get(id=sentence_id).number
-            sentence_index = sentences.filter(number__lte=sentence_number).count()
-            page_number = (sentence_index - 1) // paginator.per_page + 1
-        except Section.DoesNotExist:
-            page_number = 1
-    else:
-        page_number = request.GET.get('page', 1)
-
-    # Generate cache key for sentences
-    cache_key_sentences = f"{cache_base_key_sentences}{page_number}"
-
-    # Check cache for sentences page
-    sentences_page = cache.get(cache_key_sentences)
-    if not sentences_page:
-        sentences_page = paginator.get_page(page_number)
-        cache.set(cache_key_sentences, sentences_page, 300)  # Cache for 5 minutes
+    if sentences is None:
+        # Fetch and cache sentences if not cached
+        sentences = Section.objects.filter(type='sentence', text=selected_text_id) \
+            .prefetch_related(
+                Prefetch(
+                    'sectiontoken_set',
+                    queryset=SectionToken.objects.filter(section__type='line').select_related('section'),
+                    to_attr='line_sections'
+                ),
+                Prefetch(
+                    'tokens',
+                    queryset=Token.objects.select_related('image')
+                    .prefetch_related('pos_token', 'feature_token', 'lemmas', 'senses', 'comment_token')
+                    .only('id', 'image')
+                )
+            ) \
+            .only('id', 'number', 'identifier', 'title', 'language')
+        cache.set(cache_key_sentences, list(sentences), 300)
         logger.info("Cache miss for sentences")
 
-    logger.info("Found %s sentences", sentences.count())
+    # Paginator setup
+    paginator = Paginator(sentences, 10)
 
-    # Pass 'prepared_data' to the template
+    # Handling sentence_id to find the right page
+    sentence_id = request.GET.get('sentence_id')
+    page_number = request.GET.get('page', 1)  # Default to first page or query parameter
+
+    # Check if the page query parameter is not provided
+    if not request.GET.get('page') and sentence_id:
+        try:
+            sentence = Section.objects.get(id=sentence_id)
+            sentence_number = sentence.number
+            sentence_index = list(sentences).index(sentence)
+            page_number = (sentence_index // paginator.per_page) + 1
+        except (Section.DoesNotExist, ValueError):
+            logger.error("Invalid sentence_id or sentence not found in text")
+            # Optional: Redirect to a default page or show an error message
+
+
+    # Fetching the correct page based on either the sentence_id or the page query parameter
+    page_obj = paginator.get_page(page_number)
+    logger.info("Page number: %s", page_number)
+
+
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
-        'page_obj': sentences_page,
+        'page_obj': page_obj,
         'current_view': 'corpus:sentences',
     }
 
