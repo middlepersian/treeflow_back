@@ -22,7 +22,8 @@ class SectionEditorForm(forms.ModelForm):
         widgets = {
             'senses': s2forms.ModelSelect2MultipleWidget(
                 model='treeflow.dict.models.Sense', 
-                search_fields=['sense__icontains'] 
+                search_fields=['sense__icontains'], 
+                attrs={'style': 'width: 100%; min-height: 100px;'}  # Adjusted style
             ),
         }
 
