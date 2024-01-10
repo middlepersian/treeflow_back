@@ -9,6 +9,7 @@ from treeflow.corpus.models import (
     Feature,
     POS
 )  # Adjust to your model's import path
+from treeflow.dict.models import Sense, Lemma
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
 
@@ -60,6 +61,7 @@ def ud_editor(request, section_id):
     prev, next = section.find_adjacent_sections(section_id)
     section_tokens = section.tokens.all()
     tokens = list(section_tokens)
+    senses = Sense.objects.filter(token_senses__in=tokens).select_related("token_senses").distinct()
     dependencies = (
         Dependency.objects.filter(Q(token__in=tokens) | Q(head__in=tokens))
         .select_related("token", "head")
@@ -122,6 +124,9 @@ def ud_editor(request, section_id):
                 "xpos": x1 if token.number_in_sentence else 0,
                 "ypos": 50 if token.number_in_sentence else 0,
                 "transcription": token.transcription,
+                "lemma": [lemma.word for lemma in token.lemmas.all()],
+                "transliteration": token.transliteration,
+                "senses": [sense.sense for sense in token.senses.all()],
                 "pos_len": len(token_pos),
                 "pos": token_pos,
                 "dep_len": len(token_dependencies),
