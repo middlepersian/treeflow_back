@@ -16,7 +16,6 @@
           <tr>
             <th class="px-4 py-2">Number in Text</th>
             <th class="px-4 py-2">Number in Sentence</th>
-            <th class="px-4 py-2">UD</th>
             <th class="px-4 py-2">Image</th>
             <th class="px-4 py-2">Line</th>
             <th class="px-4 py-2">Transcription</th>
@@ -45,12 +44,22 @@
             <span id="sentence-senses-{{sentence.id}}">
             <ul> Translations:
               {% for sense in sentence.senses.all %}
-              <li>{{sense.language}} - <span class="text-bold">{{sense.sense}} </span></li>
+              <li>{{sense.language}} - <span class="font-bold">{{sense.sense}} </span></li>
               {% endfor %}
             </ul>
             </span>
           </td>
         </tr>
+
+        <!-- UD -->
+        <tr class="bg-blue-100 sentence-header-row"">
+          <td  id="sentence-ud-cell" colspan="15" class="px-4 py-2 text-blue-500 hover:text-blue-700 font-bold">
+           <a href="{% url 'corpus:ud_editor' sentence.id %}">Edit Universal Dependencies
+          </td>
+        </td>
+
+        </tr>
+
           {% for token in sentence.tokens.all %}
           <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden"
             id="token-{{token.id}}">
@@ -70,14 +79,6 @@
                 class="w-full shadow border rounded py-2 px-3 text-grey-darker">
             </td>
 
-            <!-- UD -->
-            <td class="border px-4 py-2">
-              <a href="{% url 'corpus:ud_editor' sentence.id %}"
-                class="text-blue-500 hover:text-blue-700">
-                UD
-              </a>
-
-            </td>
 
             <!-- Image -->
             <td class="border px-4 py-2">
@@ -177,7 +178,7 @@
               </span>
             </td>
 
-            <!-- Comments -->
+            <!-- Comments 
             <td id="comments-cell" class="border px-4 py-2"
               hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
               hx-target="#commentModalContent"
@@ -185,7 +186,7 @@
               <span id="comment-content-{{ token.id }}">
                 {% render_comments_for_model token %}
               </span>
-            </td>
+            </td> -->
 
             <!-- Insert Before Button -->
             <td class="border px-4 py-2">
@@ -452,9 +453,19 @@
       closeSentenceSensesModal();
     }
 
-
-
   });
+
+
+  window.onload = function() {
+    var sentenceId = "{{ sentence_id }}";
+    if (sentenceId) {
+        var element = document.getElementById('sentence-' + sentenceId);
+        if (element) {
+            element.scrollIntoView();
+        }
+    }
+};
+
 </script>
 
 {% endblock content %}

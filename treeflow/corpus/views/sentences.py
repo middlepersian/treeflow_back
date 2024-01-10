@@ -1,29 +1,32 @@
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage
+from django.core.paginator import Paginator
 from django.core.cache import cache
 from django.shortcuts import render
 from django.db.models import Prefetch
+import uuid
 import logging
 from treeflow.corpus.models import Text, Section, Token, SectionToken
-
 
 logger = logging.getLogger(__name__)
 
 
 @login_required
-def sentences_view(request, text_id=None):
-
-    # log text id
+def sentences_view(request, text_id=None, sentence_id=None):
     logger.info('text_id : %s', text_id)
 
-    # Get all Text objects for the dropdowns
-    texts = Text.objects.all()
-    if text_id:
-        selected_text_id = text_id
-    else:
-        selected_text_id = request.GET.get('text_id')
+    # Cache key base for sentences and texts
+    cache_base_key_sentences = f"sentences_page_{text_id}_"
+    cache_key_texts = "all_texts"
 
-    # Prefetch for sections of type 'line'
+    # Check cache for texts
+    texts = cache.get(cache_key_texts)
+    if not texts:
+        texts = Text.objects.all()
+        cache.set(cache_key_texts, texts, 300)  # Cache for 5 minutes
+        logger.info("Cache miss for texts")
+
+    selected_text_id = text_id if text_id else request.GET.get('text_id')
+
     line_prefetch = Prefetch(
         'sectiontoken_set',
         queryset=SectionToken.objects.filter(
@@ -31,29 +34,47 @@ def sentences_view(request, text_id=None):
         to_attr='line_sections'
     )
 
-    # Prefetch objects for tokens with related POS, Features, and Lemmas
-    token_prefetch = Prefetch(
+    # Prefetch for tokens with necessary related objects
+    tokens_prefetch = Prefetch(
         'tokens',
-        queryset=Token.objects.all().select_related('image').prefetch_related(
-            'pos_token', 'feature_token', 'lemmas', 'senses', line_prefetch
-        )
+        queryset=Token.objects.select_related('image')
+        .prefetch_related('pos_token', 'feature_token', 'lemmas', 'senses', 'comment_token', line_prefetch)
+        .only('id', 'image')  # Adjust fields as per your requirement
     )
 
-    # Query for sentences with selected text ID and prefetch related tokens
-    sentences = Section.objects.filter(
-        type='sentence', text=selected_text_id
-    ).prefetch_related(token_prefetch)
+    # Sentence query with optimized prefetching
+    sentences = Section.objects.filter(type='sentence', text=selected_text_id) \
+        .prefetch_related(tokens_prefetch) \
+        .only('id', 'number', 'identifier', 'title', 'language')  # Only fetch necessary fields
 
     # Setup paginator for sentences
-    # Adjust the number of sentences per page as needed
     paginator = Paginator(sentences, 10)
-    page_number = request.GET.get('page')
-    sentences_page = paginator.get_page(page_number)
 
-    # log the number of sentences
+    # Check if sentence_id is provided
+    if sentence_id:
+        # Calculate page_number based on sentence_id
+        try:
+            sentence_number = sentences.get(id=sentence_id).number
+            sentence_index = sentences.filter(number__lte=sentence_number).count()
+            page_number = (sentence_index - 1) // paginator.per_page + 1
+        except Section.DoesNotExist:
+            page_number = 1
+    else:
+        page_number = request.GET.get('page', 1)
+
+    # Generate cache key for sentences
+    cache_key_sentences = f"{cache_base_key_sentences}{page_number}"
+
+    # Check cache for sentences page
+    sentences_page = cache.get(cache_key_sentences)
+    if not sentences_page:
+        sentences_page = paginator.get_page(page_number)
+        cache.set(cache_key_sentences, sentences_page, 300)  # Cache for 5 minutes
+        logger.info("Cache miss for sentences")
+
     logger.info("Found %s sentences", sentences.count())
 
-    # Prepare context for rendering
+    # Pass 'prepared_data' to the template
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
@@ -61,5 +82,4 @@ def sentences_view(request, text_id=None):
         'current_view': 'corpus:sentences',
     }
 
-    # Render response
     return render(request, 'sentences.html', context)
