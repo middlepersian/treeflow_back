@@ -62,6 +62,13 @@
         class="hidden"
       />
     </form>
+
+    <!-- Root Toggle -->
+    <form class "mx-2" id="saveNewRoot" action="../setNewRoot/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="section_id" value="{{section.id}}" />
+    </form>
+
     <form
       class="mx-2"
       id="updateDep"
@@ -93,14 +100,20 @@
       <div class="text-left">
         {% if user.is_authenticated %}
         <div class="mb-2">
-          <a href="{% url 'corpus:sentence' section.id %}" class="rounded p-2 bg-main text-white hover:bg-main-graded-600">Edit Sentence</a>
+          <a
+            href="{% url 'corpus:sentence' section.id %}"
+            class="rounded p-2 bg-main text-white hover:bg-main-graded-600"
+            >Edit Sentence</a
+          >
         </div>
         {% endif %}
         <div class="text-gray-800">Identifier:</div>
-        <p class="font-semibold  text-gray-700">{{ section.identifier }}</p>
+        <p class="font-semibold text-gray-700">{{ section.identifier }}</p>
         <div class="text-gray-800">Tokens:</div>
         {% for token in section.tokens.all %}
-        <span class="font-semibold text-gray-700">{{ token.transcription }}</span>
+        <span class="font-semibold text-gray-700"
+          >{{ token.transcription }}</span
+        >
         {% endfor %}
 
         <div id="sentence-senses-cell" class="text-gray-800"   
@@ -119,8 +132,11 @@
       {% endif %}
     </div>
   </div>
-    <!-- Sentence senses modal -->
-    <div class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="sentenceSensesModal">
+  <!-- Sentence senses modal -->
+  <div
+    class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    id="sentenceSensesModal"
+  >
     <div class="flex items-center justify-center min-h-screen">
       <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
       <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
@@ -173,7 +189,7 @@
           stroke="black"
         />
         <text
-          class="hover-target token"
+          class="hover-target token cursor-pointer hover:fill-off"
           data-tokenId="{{token.id}}"
           x="{{token.xpos}}"
           y="50"
@@ -199,43 +215,45 @@
       </g>
       {% endif %} {% endfor %}
     </svg>
-    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }} {{ user.is_authenticated | json_script:"authenticated" }}
+    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }} 
+    {% if user.is_authenticated %}
+    <script>
+      const loggedIn = true;
+    </script>
+    {% else %}
+    <script>
+      const loggedIn = false;
+    </script>
+
+    {%endif%}
   </div>
-
-
-
-
 </div>
 
 <!-- Senses Modal -->
 <script>
-
   function closeSentenceSensesModal() {
-      console.log("Closing Sentence Senses Modal");
-      document.getElementById('sentenceSensesModal').classList.add('hidden');
-  }
-  
-  document.body.addEventListener('htmx:afterSwap', function (event) {
-  
-  console.log("htmx:afterSwap event triggered");
-  console.log(event.detail);
-  // Check if the swap is for loading sentence senses modal content
-  if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-    console.log("Sentence Senses Modal Content Loaded");
-    document.getElementById('sentenceSensesModal').classList.remove('hidden');
+    console.log("Closing Sentence Senses Modal");
+    document.getElementById("sentenceSensesModal").classList.add("hidden");
   }
 
-  if (event.detail.target.id === "section-form") {
+  document.body.addEventListener("htmx:afterSwap", function (event) {
+    console.log("htmx:afterSwap event triggered");
+    console.log(event.detail);
+    // Check if the swap is for loading sentence senses modal content
+    if (
+      event.detail.target.id === "sentenceSensesModalContent" &&
+      !event.detail.target.querySelector("[hx-swap-oob]")
+    ) {
+      console.log("Sentence Senses Modal Content Loaded");
+      document.getElementById("sentenceSensesModal").classList.remove("hidden");
+    }
+
+    if (event.detail.target.id === "section-form") {
       console.log("Response for form#section-form:", event.detail);
       closeSentenceSensesModal();
-  }
-});
-
-  
-  
-  </script>
-
-
+    }
+  });
+</script>
 
 <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 <script>
@@ -303,6 +321,7 @@
   let focusDep = null;
   let isPanning = false;
   let creating = false;
+  let rooting = false;
   let currentX = 0;
   let currentY = 0;
   let currentZoom = 1;
@@ -310,6 +329,7 @@
   let pathColor = "#264d73";
   let enhancedPathColor = "#008060";
   let enhancedEnabled = true;
+  const dampeningFactor = 0.2; // Adjust this value to control the panning speed
 
   function cursorPoint(evt) {
     pt.x = evt.clientX;
@@ -356,22 +376,7 @@
 
   const deprelData = JSON.parse(document.getElementById("deprel").textContent);
 
-  function clearFocusDep() {
-    // remove delete button
-    const form = document.getElementById("deleteDep");
-    while (form.querySelector('input[type="submit"]')) {
-      form.removeChild(form[0]);
-    }
 
-    // remove the red stroke from the path
-    const oldFocusPath = document.getElementById(focusDep);
-    oldFocusPath.setAttribute("stroke", "none");
-
-    focusDep = null;
-    // clear all information about the dependency and the corresponding tokens in the p tag
-    const depDetails = document.getElementById("depDetails");
-    depDetails.innerHTML = ``;
-  }
 
   function hideEnhancedPaths() {
     const groups = document.querySelectorAll("g[data-enhanced='true']");
@@ -416,60 +421,92 @@
 
   //#region CLICK HANDLE
   // only for registered users
-
-  document.querySelectorAll("circle").forEach((item) =>
-    item.addEventListener("click", (event) => {
-      if (!creating) {
-        cleanAllElementsWithClass("temp-path");
-        cleanAllElementsWithClass("not_saved_path");
-        creating = true;
-        fromTokenId = event.target.id;
-        hideFocusDep();
-        return;
-      }
-      if (creating) {
-        const tokenTo = event.target.id;
-        if (tokenTo) {
-          const path = document.createElementNS(svgNS, "path");
-          const arcDefinition = createBezierArc(
-            tokenData.find((e) => e.id === fromTokenId).xpos,
-            32.5,
-            tokenData.find((e) => e.id === tokenTo).xpos,
-            32.5,
-            fromTokenId,
-            tokenTo.id
-          );
-          path.setAttribute("class", "not_saved_path");
-          path.setAttribute("d", arcDefinition);
-          path.setAttribute("fill", "none");
-          path.setAttribute("stroke", "black");
-          path.setAttribute("stroke-width", "1.5");
-          path.setAttribute("marker-end", "url(#arrowhead)");
-          path.setAttribute("data-from", fromTokenId);
-          path.setAttribute("data-to", tokenTo.id);
-          path.addEventListener("click", (event) => {
-            focusDep = event.target.id;
-            const focusPath = document.getElementById(focusDep);
-            focusPath.removeAttribute("stroke");
-            focusPath.setAttribute("stroke", "red");
-            console.log("Path clicked");
-          });
-          svg.appendChild(path);
-          addNewDependencyRow(fromTokenId, tokenTo);
-          creating = false;
-          fromTokenId = null;
+  if (loggedIn)
+    document.querySelectorAll("circle").forEach((item) =>
+    {
+        item.addEventListener("click", (event) => {
+        if (!creating && !rooting) {
           cleanAllElementsWithClass("temp-path");
+          cleanAllElementsWithClass("not_saved_path");
+          creating = true;
+          fromTokenId = event.target.id;
+          hideFocusDep();
+          return;
         }
-      }
-    })
-  );
+        if (creating) {
+          const tokenTo = event.target.id;
+          if (tokenTo) {
+            const path = document.createElementNS(svgNS, "path");
+            const arcDefinition = createBezierArc(
+              tokenData.find((e) => e.id === fromTokenId).xpos,
+              32.5,
+              tokenData.find((e) => e.id === tokenTo).xpos,
+              32.5,
+              fromTokenId,
+              tokenTo.id
+            );
+            path.setAttribute("class", "not_saved_path");
+            path.setAttribute("d", arcDefinition);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "black");
+            path.setAttribute("stroke-width", "1.5");
+            path.setAttribute("marker-end", "url(#arrowhead)");
+            path.setAttribute("data-from", fromTokenId);
+            path.setAttribute("data-to", tokenTo.id);
+            path.addEventListener("click", (event) => {
+              focusDep = event.target.id;
+              const focusPath = document.getElementById(focusDep);
+              focusPath.removeAttribute("stroke");
+              focusPath.setAttribute("stroke", "red");
+              console.log("Path clicked");
+            });
+            svg.appendChild(path);
+            addNewDependencyRow(fromTokenId, tokenTo);
+            creating = false;
+            fromTokenId = null;
+            cleanAllElementsWithClass("temp-path");
+          }
+        }
+        if (rooting){
+          // remove temp path
+          let rootPath = document.getElementsByClassName("temp-path")[0];
+          rootPath.classList.remove("temp-path");
+          rootPath.classList.add("not_saved_path");
+          cleanAllElementsWithClass("temp-path");
+          cleanNewRootForm();
+          const tokenTo = event.target.id;
+          const saveNewRootForm = document.getElementById("saveNewRoot");
+         
+          const inputToken = document.createElement("input");
+          inputToken.setAttribute("type", "hidden");
+          inputToken.setAttribute("name", "token_id");
+          inputToken.setAttribute("value", tokenTo);
+
+          const submit = document.createElement("input");
+          submit.setAttribute("type", "submit");
+          submit.setAttribute("value", "Save");
+          submit.setAttribute("id", "rootToggleSave")
+          submit.setAttribute(
+            "class",
+            "flex mx-2 p-2 bg-blue-900 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+          );
+
+          saveNewRootForm.appendChild(inputToken);
+          saveNewRootForm.appendChild(submit);
+          rooting = false;
+
+        }
+      })}
+    );
   //#endregion
+
 
   //#region create temp path
   svg.addEventListener("mousemove", (event) => {
-    if (!creating) {
+    if (!creating && !rooting) {
       return;
     }
+
     var loc = cursorPoint(event);
     const mouseX = loc.x;
     const mouseY = loc.y - 3;
@@ -479,6 +516,14 @@
     // Create a dynamic ID for the mouse position
     const mouseTokenId = `mouse-${mouseX}-${mouseY}`;
 
+
+    if (rooting){
+      let tokenHandle = document.getElementById("rootToggle").querySelector(`circle`);
+      const lineDefinition = `M ${tokenHandle.getAttribute("cx")},${tokenHandle.getAttribute("cy")}  L ${mouseX},${mouseY} `;
+      path.setAttribute("d", lineDefinition);
+    }
+
+    if (creating){
     const arcDefinition = createBezierArc(
       tokenData.find((e) => e.id === fromTokenId).xpos, // X position of the starting token
       35, // Y position for the arc
@@ -488,27 +533,92 @@
       mouseTokenId // Temporary ID for the mouse position
     );
     path.setAttribute("d", arcDefinition);
+    }
     path.setAttribute("fill", "none");
     path.setAttribute("stroke", "black");
     path.setAttribute("stroke-width", "1");
     path.setAttribute("marker-end", "url(#arrowhead)");
     path.classList.add("temp-path");
-    svg.appendChild(path);
+    svg.appendChild(path); 
   });
   //#endregion
+
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && creating) {
+    if (event.key === "Escape" && (creating || rooting)) {
       creating = false;
+      rooting = false;
       fromTokenId = null;
       cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+    else if(event.key === "Escape" && document.getElementById("input-container")){
+      cleanNewDependencyForm();
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+    else if(event.key === "Escape" && document.getElementById("saveNewRoot").querySelector('input[type="submit"]')){
+      cleanNewRootForm();
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+    else if(event.key === "Escape" && focusDep){
+      clearFocusDep();
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
     }
   });
+
+  function cleanNewDependencyForm(){
+    const form = document.getElementById("form");
+    const inputContainer = document.getElementById("input-container");
+    const depContainer = document.getElementById("depType");
+    depContainer.classList.toggle("hidden");
+    form.removeChild(inputContainer);
+    cleanAllElementsWithClass("not_saved_path");
+  }
+
+
+  function cleanNewRootForm(){
+    const saveNewRootForm = document.getElementById("saveNewRoot");
+    if (saveNewRootForm.querySelector('input[name="token_id"]')) {
+      saveNewRootForm.removeChild(
+        saveNewRootForm.querySelector('input[name="token_id"]')
+      );
+    }
+    if (saveNewRootForm.querySelector('input[type="submit"]')) {
+      saveNewRootForm.removeChild(
+        saveNewRootForm.querySelector('input[type="submit"]')
+      );
+    }
+  }
 
   function cleanAllElementsWithClass(className) {
     const tempPaths = document.getElementsByClassName(className);
     while (tempPaths.length > 0) {
       tempPaths[0].parentNode.removeChild(tempPaths[0]);
     }
+  }
+
+  function clearFocusDep() {
+    // remove delete button
+    const form = document.getElementById("deleteDep");
+    while (form.querySelector('input[type="submit"]')) {
+      form.removeChild(form[0]);
+    }
+
+    // remove the red stroke from the path
+    const oldFocusPath = document.getElementById(focusDep);
+    oldFocusPath.setAttribute("stroke", "none");
+    // restore stroke to previous color
+    if (oldFocusPath.getAttribute("data-enhanced") == "true") {
+      oldFocusPath.setAttribute("stroke", enhancedPathColor);
+    } else {
+      oldFocusPath.setAttribute("stroke", pathColor);
+    }
+    focusDep = null;
+    // clear all information about the dependency and the corresponding tokens in the p tag
+    const depDetails = document.getElementById("depDetails");
+    depDetails.innerHTML = ``;
   }
 
   tokenData.forEach((token) => {
@@ -607,14 +717,17 @@
     isPanning = true; // Indicate that panning is active
 
     let mouseStartPos = cursorPoint(event);
+    let frameRequested = false;
 
     function onMouseMove(event) {
-      if (!isPanning) return;
+      if (!isPanning || frameRequested ) return;
 
+      frameRequested = true;
       requestAnimationFrame(() => {
+        frameRequested = false;
         const newMousePos = cursorPoint(event);
-        const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
-        const dy = (newMousePos.y - mouseStartPos.y) / currentZoom;
+        const dx = (newMousePos.x - mouseStartPos.x) * dampeningFactor / currentZoom;
+        const dy = (newMousePos.y - mouseStartPos.y) * dampeningFactor / currentZoom;
 
         currentX -= dx;
         currentY -= dy;
@@ -813,7 +926,7 @@
     const x = event.clientX;
     const y = event.clientY;
     const hoveredElement = event.target; // Directly use event.target
-    
+
     // Create hover card
     const hoverCard = document.createElement("div");
     hoverCard.setAttribute("class", "hover-card");
@@ -871,8 +984,8 @@
   }
 
   function setPosition(hoverCard, x, y) {
-    hoverCard.style.top = `${y}px`;
-    hoverCard.style.left = `${x}px`;
+    hoverCard.style.top = `${y+2}px`;
+    hoverCard.style.left = `${x+2}px`;
     hoverCard.style.backgroundColor = "white";
     hoverCard.style.border = "1px solid black";
     hoverCard.style.position = "absolute";
@@ -892,25 +1005,18 @@
     }
   }
 
-
-  document.querySelectorAll(".token").forEach((item) => {
-    
-    item.addEventListener("mouseenter", hoverCard);
-    item.addEventListener("mouseleave", () => {
-      const oldHoverCard = document.getElementById("hover-card");
-      if (oldHoverCard) {
-        document.body.removeChild(oldHoverCard);
-      }
-    });
-  });
+  
 
   function removeHoverCard() {
     const oldHoverCard = document.getElementById("hover-card");
     if (oldHoverCard) {
-      document.body.removeChild(oldHoverCard);
+      setTimeout(() => {
+        if (!oldHoverCard.matches(":hover")) {
+          document.body.removeChild(oldHoverCard);
+        }
+      }, 100);
     }
   }
-
 
   // Initialize the viewbox
   const bbox = svg.getBBox();
@@ -919,7 +1025,133 @@
   currentZoom = 1;
   setViewBox();
 
+  function findRootDependencyID(){
+    const root = tokenData.find((e) => e.root);
+    if(root){
+      const rootDependency = root.dependencies.find((e) => e.rel === "root");
+      if(rootDependency)
+        return rootDependency.id;
+    }
 
+    return null;
+  }
+
+  function checkForRoot(){
+    const root = tokenData.find((e) => e.root);
+    if(root){
+      return root.id;
+    }
+    return null;
+  }
+
+  function createRootToggle(x,y,root){
+    const rootToggle = document.createElementNS(svgNS,"g");
+    rootToggle.setAttribute("id", "rootToggle");
+    
+    // get xpos of root or set it to X
+    if(root){
+      let tokenHandle = root.querySelector(`circle`);
+      x = tokenHandle.getAttribute("cx");
+
+    }
+    else{
+      x = 0;
+    }
+
+    dependencyID = findRootDependencyID();
+
+
+    const ToggleHandle = document.createElementNS(svgNS,"circle");
+    ToggleHandle.setAttribute("cx", `${x}`);
+    ToggleHandle.setAttribute("cy", `${y}`);
+    ToggleHandle.setAttribute("r", "2.5");
+    ToggleHandle.setAttribute("fill", "red");
+    ToggleHandle.setAttribute("stroke", "black");
+    ToggleHandle.setAttribute("stroke-width", "1");
+    ToggleHandle.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
+
+    ToggleHandle.addEventListener("click",(event)=>{
+      console.log("root clicked");
+      if (!rooting){
+        cleanAllElementsWithClass("temp-path");
+        cleanAllElementsWithClass("not_saved_path");
+        rooting = true;
+        fromTokenId = event.target.id;
+        hideFocusDep();
+        return;
+      }
+    })
+
+    const ToggleText = document.createElementNS(svgNS,"text");
+    ToggleText.setAttribute("x", x);
+    ToggleText.setAttribute("y", y);
+    ToggleText.setAttribute("font-size", "10");
+    ToggleText.setAttribute("fill", "red");
+    ToggleText.innerHTML = "root";
+
+    // create a path from ToggleHandle to rootHandle
+    if(root){
+      let tokenHandle = root.querySelector(`circle`);
+      console.log(tokenHandle)
+
+      const path = document.createElementNS(svgNS, "path");
+      
+      // use line instead of arc
+      const lineDefinition = `M ${x},${y} L ${tokenHandle.getAttribute("cx")},${tokenHandle.getAttribute("cy")}`;
+      
+      path.setAttribute("d", lineDefinition);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "red");
+      path.setAttribute("stroke-width", "1.5");
+      path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
+      path.setAttribute("marker-end", "url(#arrowhead)");
+      path.setAttribute("data-from", "rootnode");
+      path.setAttribute("data-to", root.id);
+      path.setAttribute("data-enhanced", "false");
+      if (dependencyID){
+        path.setAttribute("id", dependencyID);
+      }
+      else{
+        path.setAttribute("id", "rootnode");
+      }
+      path.addEventListener("click", (event) => {
+        hideFocusDep();
+        focusDep = event.target.id;
+        const focusPath = event.target;
+        focusPath.removeAttribute("stroke");
+        focusPath.setAttribute("stroke", "red");
+        const form = document.getElementById("deleteDep");
+        const inputDep = document.createElement("input");
+        inputDep.setAttribute("type", "hidden");
+        inputDep.setAttribute("name", "dep_id");
+        inputDep.setAttribute("value", focusDep);
+        form.appendChild(inputDep);
+
+        // only add the submit button if it is not already there
+        const submit = document.createElement("input");
+        submit.setAttribute("type", "submit");
+        submit.setAttribute("value", "Delete");
+        submit.setAttribute(
+          "class",
+          "flex mx-2 p-2 bg-red-500 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+        );
+        if (!form.querySelector('input[type="submit"]')) {
+          form.appendChild(submit);
+        }
+        console.log("Path clicked");
+      });
+      if (path){
+        rootToggle.appendChild(path);
+      }
+
+    }
+
+
+    rootToggle.appendChild(ToggleHandle);
+    rootToggle.appendChild(ToggleText);
+   
+    svg.appendChild(rootToggle);
+  }
 </script>
 
 <!--import pag navigation-->
@@ -933,6 +1165,14 @@
 
   document.addEventListener("DOMContentLoaded", (event) => {
     console.log("DOMContentLoaded, adding keydown event listener.");
+    
+    createRootToggle(0,currentY+10,document.getElementById(checkForRoot()));
+    
+    document.querySelectorAll(".token").forEach((item) => {
+      item.addEventListener("mouseenter", hoverCard);
+      item.addEventListener("mouseleave", removeHoverCard);
+
+    });
 
     document.addEventListener("keydown", function (event) {
       switch (event.key) {
@@ -952,8 +1192,5 @@
     });
   });
 </script>
-
-
-
 
 {% endblock content %}
