@@ -103,7 +103,10 @@
         <span class="font-semibold text-gray-700">{{ token.transcription }}</span>
         {% endfor %}
 
-        <div id="sentence-senses-cell" class="text-gray-800" hx-get="{% url 'corpus:section' section.id %}"hx-target="#sentenceSensesModalContent" hx-trigger="click">
+        <div id="sentence-senses-cell" class="text-gray-800"   
+        {% if request.user.is_authenticated %} 
+        hx-get="{% url 'corpus:section' section.id %}"hx-target="#sentenceSensesModalContent" hx-trigger="click"
+        {% endif %}>
         <span id="sentence-senses-{{section.id}}">
           <ul> Translations:
             {% for sense in section.senses.all %}
@@ -111,7 +114,7 @@
             {% endfor %}
         </ul>
         </span>
-      </div>
+        </div>
       </div>
       {% endif %}
     </div>
