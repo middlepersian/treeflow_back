@@ -1,7 +1,7 @@
 from django.urls import include, path, re_path
 from treeflow.corpus.views.update_token import update_token
 from treeflow.corpus.views.update_text import update_text
-from treeflow.corpus.views.ud_editor import ud_editor, saveNewDependency, deleteDependency
+from treeflow.corpus.views.ud_editor import ud_editor, saveNewDependency, deleteDependency, setNewRoot
 from treeflow.corpus.views.tokens import tokens_view
 from treeflow.corpus.views.insert_after_token import insert_after_token_view
 from treeflow.corpus.views.insert_before_token import insert_before_token_view
@@ -38,7 +38,8 @@ urlpatterns = [
     path('update_text/<uuid:text_id>/', update_text, name='update_text'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
-    path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'), 
+    path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'),
+    path('ud-editor/setNewRoot/', setNewRoot, name='setNewRoot'),
     path('texts/', texts_view, name='texts'),
     path('tokens/<uuid:text_id>', tokens_view, name='tokens'),
     path('tokens/<uuid:text_id>/<uuid:section_id>', tokens_view, name='tokens'),
