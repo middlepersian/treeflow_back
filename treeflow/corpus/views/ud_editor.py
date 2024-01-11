@@ -29,14 +29,33 @@ def calculate_positions(word_length_1, x1, font_size, gap, additional_space):
 def deleteDependency(request):
     if request.method == "POST":
         dep_id = request.POST.get("dep_id")
-
         dep = Dependency.objects.get(id=dep_id)
+        
+        # also check if other dependencies for that token have the Root relation
+        # if not, set the token.root to True
+        if dep.rel == Deprel.ROOT:
+            token = dep.token
+            other_deps = Dependency.objects.filter(token=token).exclude(id=dep_id)
+            if not other_deps.filter(rel=Deprel.ROOT).exists():
+                token.root = False
+                token.save()
         dep.delete()
 
         return HttpResponseRedirect("/corpus/ud-editor/" + str(request.POST.get("section_id")) + "/")
     else:
         return HttpResponse("Error")
-    
+
+def setNewRoot(request):
+    if request.method == "POST":
+        token_id = request.POST.get("token_id")
+        token = Token.objects.get(id=token_id)
+        newDep = Dependency.objects.create(token=token, rel=Deprel.ROOT)
+        newDep.save()
+        token.root = True
+        token.save()
+        return HttpResponseRedirect("/corpus/ud-editor/" + str(request.POST.get("section_id")) + "/")
+    else:
+        return HttpResponse("Error")    
 
 def saveNewDependency(request):
     if request.method == "POST":
@@ -121,6 +140,7 @@ def ud_editor(request, section_id):
             {
                 "id": token.id,
                 "number": token.number_in_sentence,
+                "root": token.root,
                 "xpos": x1 if token.number_in_sentence else 0,
                 "ypos": 50 if token.number_in_sentence else 0,
                 "transcription": token.transcription,
