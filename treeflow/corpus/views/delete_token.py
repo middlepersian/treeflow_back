@@ -23,11 +23,14 @@ def delete_token_view(request, token_id):
             # Perform the delete operation
             Token.delete_token(token_to_delete.id)
 
-            # Determine the redirect URL based on the source
-            if source == 'sentences':
+            if source == 'sentence':
+                sentence_id = request.POST.get('sentence_id')
+                redirect_url = reverse('corpus:sentence', kwargs={'sentence_id': sentence_id})
+            elif source == 'sentences':
                 redirect_url = reverse('corpus:sentences', kwargs={'text_id': text_id}) + f'?page={current_page}#token-{previous_token_id}'
             else:
                 redirect_url = reverse('corpus:tokens', kwargs={'text_id': text_id}) + f'?page={current_page}#token-{previous_token_id}'
+
 
             return HttpResponseRedirect(redirect_url)
     else:
