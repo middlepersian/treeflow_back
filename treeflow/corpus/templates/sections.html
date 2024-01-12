@@ -51,7 +51,7 @@
             <div
                 class="sentence mb-2 flex items-center p-2 bg-white shadow rounded">
                 <!-- Display sentence section title or identifier with a fixed width -->
-                <div class="sentence-identifier w-1/8 font-bold mr-1">
+                <div id="{{ section.id }}" class="sentence-identifier w-1/8 font-bold mr-1">
                     <a href="{% url 'corpus:ud_editor' section.id %}"
                     class="text-blue-500 hover:text-blue-700">
                     {{ section.number|default:"Untitled" }} 
