@@ -21,7 +21,7 @@ def calculate_positions(word_length_1, x1, font_size, gap, additional_space):
     # Add the additional space to the gap
     x2 = x1 + word_width_1 + gap + additional_space
 
-    return x1, x2
+    return int(x1), int(x2)
 
 
 
