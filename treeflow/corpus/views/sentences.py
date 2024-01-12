@@ -43,40 +43,23 @@ def sentences_view(request, text_id=None):
                     .only('id', 'image')
                 )
             ) \
-            .only('id', 'number', 'identifier', 'title', 'language')
+            .only('id', 'number', 'identifier')
         cache.set(cache_key_sentences, list(sentences), 300)
         logger.info("Cache miss for sentences")
 
     # Paginator setup
     paginator = Paginator(sentences, 10)
 
-    # Handling sentence_id to find the right page
-    sentence_id = request.GET.get('sentence_id')
+    # Fetching the correct page based on the page query parameter
     page_number = request.GET.get('page', 1)  # Default to first page or query parameter
-
-    # Check if the page query parameter is not provided
-    if not request.GET.get('page') and sentence_id:
-        try:
-            sentence = Section.objects.get(id=sentence_id)
-            sentence_number = sentence.number
-            sentence_index = list(sentences).index(sentence)
-            page_number = (sentence_index // paginator.per_page) + 1
-        except (Section.DoesNotExist, ValueError):
-            logger.error("Invalid sentence_id or sentence not found in text")
-            # Optional: Redirect to a default page or show an error message
-
-
-    # Fetching the correct page based on either the sentence_id or the page query parameter
     page_obj = paginator.get_page(page_number)
     logger.info("Page number: %s", page_number)
-
 
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
         'page_obj': page_obj,
-        'current_view': 'corpus:sentences',
-        'sentence_id': sentence_id if sentence_id else None
+        'current_view': 'corpus:sentences'
     }
 
     return render(request, 'sentences.html', context)

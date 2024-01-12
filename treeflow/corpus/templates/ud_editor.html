@@ -69,6 +69,13 @@
     <input type="hidden" name="section_id" value="{{section.id}}" />
     </form>
 
+
+    <!-- Root Toggle -->
+    <form class "mx-2" id="saveNewRoot" action="../setNewRoot/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="section_id" value="{{section.id}}" />
+    </form>
+
     <form
       class="mx-2"
       id="updateDep"
@@ -168,7 +175,7 @@
           markerHeight="5"
           refX="60"
           refY="3.5"
-          orient="a"
+          orient="auto"
         >
           <polygon points="0 0, 10 3.5, 0 7" />
         </marker>
@@ -342,7 +349,13 @@
   );
 
   function setViewBox(x, y, width, height) {
-    svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+    if(x && y && width && height){
+
+      svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+    }
+    else{
+      svg.setAttribute("viewBox", `0 0 800 600`);
+    }
   }
 
   function initializeViewbox() {
@@ -1072,7 +1085,7 @@
 
     ToggleHandle.addEventListener("click",(event)=>{
       console.log("root clicked");
-      if (!rooting){
+      if (!rooting && !creating && loggedIn ){
         cleanAllElementsWithClass("temp-path");
         cleanAllElementsWithClass("not_saved_path");
         rooting = true;
