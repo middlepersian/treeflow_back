@@ -21,6 +21,7 @@
             <th class="px-4 py-2">Line</th>
             <th class="px-4 py-2">Transcription</th>
             <th class="px-4 py-2">Transliteration</th>
+            <th class="px-4 py-2">Avestan</th>
             <th class="px-4 py-2">Lemmas</th>
             <th class="px-4 py-2">Senses</th>
             <th class="px-4 py-2">POS</th>
@@ -80,6 +81,17 @@
             <td id ="transliteration-cell" class="border px-4 py-2">
               <input id="transliteration-content-{{ token.id }}" type="text" name="transliteration"
                 value="{{ token.transliteration }}"
+                hx-post="{% url 'corpus:update_token' token.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ token.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="shadow border rounded py-2 px-3 text-grey-darker">
+            </td>
+            <!-- Avestan -->
+            <td id="avestan-cell" class="border px-4 py-2">
+              <input id="avestan-content-{{ token.id }}" type="text"
+                name="avestan"
+                value="{{ token.avestan }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
@@ -299,7 +311,7 @@
     }
 
     // Check if the event target is part of the form interaction
-    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration') {
+    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.name === 'avestan' || event.detail.elt.name === 'number_in_sentence') {
       // Parse the response
       var response = JSON.parse(event.detail.xhr.responseText);
 

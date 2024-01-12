@@ -32,7 +32,7 @@ def update_token(request, token_id):
                 return HttpResponse(updated_dropdown_html)
 
             # Handling other fields
-            for field in ['transcription', 'transliteration', 'number_in_sentence']:
+            for field in ['transcription', 'transliteration', 'number_in_sentence', 'avestan']:
                 if field in request.POST:
                     logger.info(f"Updating {field} for token with ID {token_id}")
                     setattr(token, field, request.POST[field])
