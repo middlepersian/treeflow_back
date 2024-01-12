@@ -58,6 +58,7 @@
                   </a>
                 </div>
 
+
                 <!-- Sentence content tokens displayed next to the identifier -->
                 <div class="sentence-content w-2/8 flex flex-wrap">
                     {% for token in section.prefetched_tokens %}
@@ -71,6 +72,15 @@
                     {% endfor %}
                 </div>
 
+                {% if request.user.is_authenticated %}
+                <div class="sentence-identifier w-1/8 font-bold mr-1">
+                    <a href="{% url 'corpus:sentence' section.id %}"
+                    class="text-green-500 hover:text-yellow-700 text-xl font-bold"> <!-- Use text-size classes like text-sm, text-lg, text-xl, etc. -->
+                    &#x270F; <!-- Unicode pencil icon -->
+                    </a>
+                </div>
+                {% endif %}
+                
             </div>
             {% empty %}
             <p>No sentence sections found for this text.</p>
