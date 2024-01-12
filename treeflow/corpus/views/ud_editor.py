@@ -9,6 +9,7 @@ from treeflow.corpus.models import (
     Feature,
     POS
 )  # Adjust to your model's import path
+from treeflow.dict.models import Sense, Lemma
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
 
@@ -28,14 +29,33 @@ def calculate_positions(word_length_1, x1, font_size, gap, additional_space):
 def deleteDependency(request):
     if request.method == "POST":
         dep_id = request.POST.get("dep_id")
-
         dep = Dependency.objects.get(id=dep_id)
+        
+        # also check if other dependencies for that token have the Root relation
+        # if not, set the token.root to True
+        if dep.rel == Deprel.ROOT:
+            token = dep.token
+            other_deps = Dependency.objects.filter(token=token).exclude(id=dep_id)
+            if not other_deps.filter(rel=Deprel.ROOT).exists():
+                token.root = False
+                token.save()
         dep.delete()
 
         return HttpResponseRedirect("/corpus/ud-editor/" + str(request.POST.get("section_id")) + "/")
     else:
         return HttpResponse("Error")
-    
+
+def setNewRoot(request):
+    if request.method == "POST":
+        token_id = request.POST.get("token_id")
+        token = Token.objects.get(id=token_id)
+        newDep = Dependency.objects.create(token=token, rel=Deprel.ROOT)
+        newDep.save()
+        token.root = True
+        token.save()
+        return HttpResponseRedirect("/corpus/ud-editor/" + str(request.POST.get("section_id")) + "/")
+    else:
+        return HttpResponse("Error")    
 
 def saveNewDependency(request):
     if request.method == "POST":
@@ -60,6 +80,7 @@ def ud_editor(request, section_id):
     prev, next = section.find_adjacent_sections(section_id)
     section_tokens = section.tokens.all()
     tokens = list(section_tokens)
+    senses = Sense.objects.filter(token_senses__in=tokens).select_related("token_senses").distinct()
     dependencies = (
         Dependency.objects.filter(Q(token__in=tokens) | Q(head__in=tokens))
         .select_related("token", "head")
@@ -119,9 +140,13 @@ def ud_editor(request, section_id):
             {
                 "id": token.id,
                 "number": token.number_in_sentence,
+                "root": token.root,
                 "xpos": x1 if token.number_in_sentence else 0,
                 "ypos": 50 if token.number_in_sentence else 0,
                 "transcription": token.transcription,
+                "lemma": [lemma.word for lemma in token.lemmas.all()],
+                "transliteration": token.transliteration,
+                "senses": [sense.sense for sense in token.senses.all()],
                 "pos_len": len(token_pos),
                 "pos": token_pos,
                 "dep_len": len(token_dependencies),

@@ -1,9 +1,6 @@
-{% extends "base.html" %}
-{% load static %}
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block content %}
 
 <div class="flex flex-col h-screen">
-
   <!-- Buttons and Forms -->
   <div class="flex flex-row gap-2 mt-2 mb-4 items-center">
     <!-- Added items-center for vertical alignment -->
@@ -11,30 +8,38 @@
     <!--Next and Previous Buttons-->
     <!--Previous Button-->
     {% if prev %}
-    <a href="{% url 'corpus:ud_editor' section_id=prev.id %}"
+    <a
+      href="{% url 'corpus:ud_editor' section_id=prev.id %}"
       class="flex items-center justify-center p-2 bg-blue-700 rounded text-white font-bold"
-      id="prevPageLink"> ←
+      id="prevPageLink"
+    >
+      ←
     </a>
     {% endif %}
 
     <!--Next Button-->
     {% if next %}
-    <a href="{% url 'corpus:ud_editor' section_id=next.id %}"
+    <a
+      href="{% url 'corpus:ud_editor' section_id=next.id %}"
       class="flex items-center justify-center p-2 bg-blue-700 rounded text-white font-bold"
-      id="nextPageLink"> →
+      id="nextPageLink"
+    >
+      →
     </a>
     {% endif %}
 
     <!--Enhanced Button-->
     <button
       class="flex items-center justify-center p-2 bg-green-700 rounded text-white font-bold"
-      id="enhanced">
+      id="enhanced"
+    >
       Hide Enhanced UD
     </button>
     <!--Center Button-->
     <button
       class="flex items-center justify-center p-2 bg-blue-800 rounded text-white font-bold"
-      id="center">
+      id="center"
+    >
       Center
     </button>
 
@@ -49,501 +54,702 @@
         <option value="{{d}}">{{d}}</option>
         {%endfor%}
       </select>
-      <input type="checkbox" name="enhanced" value="true" id="enhanced"
-        class="hidden" />
+      <input
+        type="checkbox"
+        name="enhanced"
+        value="true"
+        id="enhanced"
+        class="hidden"
+      />
     </form>
-    <form class="mx-2" id="updateDep" action="../updateDependency" method="post">
+
+    <!-- Root Toggle -->
+    <form class "mx-2" id="saveNewRoot" action="../setNewRoot/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="section_id" value="{{section.id}}" />
+    </form>
+
+    <form
+      class="mx-2"
+      id="updateDep"
+      action="../updateDependency"
+      method="post"
+    >
       <select id="selectedDepType" name="depType" class="hidden">
         {% for d in deprel %}
         <option value="{{d}}">{{d}}</option>
         {%endfor%}
       </select>
     </form>
-    <form class="mx-2" id="deleteDep" action="../deleteDependency/"
-      method="post">
+    <form
+      class="mx-2"
+      id="deleteDep"
+      action="../deleteDependency/"
+      method="post"
+    >
       {% csrf_token %}
       <input type="hidden" name="section_id" value="{{section.id}}" />
     </form>
     {% else %}
-        <!-- Content for users who are not authenticated -->
-        <p></p>
+    <!-- Content for users who are not authenticated -->
+    <p></p>
     {% endif %}
-
 
     <div class="bg-gray-100 rounded-lg shadow-sm flex-grow p-4">
       {% if section %}
-        <div class="text-left">
-          <div class="font-semibold text-gray-800">Sentence Identifier:</div>
-          <p class="text-gray-700">{{ section.identifier }}</p>
-          <div class="font-semibold text-gray-800"> Tokens: </div>
-            {% for token in section.tokens.all %}
-              <span class="text-gray-700">{{ token.transcription }}</span>
-            {% endfor %}
-
-          <div class="font-semibold text-gray-800">Senses:</div>
-          <ul class="list-disc pl-5">
-            {% for sense in section.senses.all %}
-              <li class="text-gray-700">{{ sense.sense }}</li>
-            {% endfor %}
-          </ul>
-
+      <div class="text-left">
+        {% if user.is_authenticated %}
+        <div class="mb-2">
+          <a
+            href="{% url 'corpus:sentence' section.id %}"
+            class="rounded p-2 bg-main text-white hover:bg-main-graded-600"
+            >Edit Sentence</a
+          >
         </div>
+        {% endif %}
+        <div class="text-gray-800">Identifier:</div>
+        <p class="font-semibold text-gray-700">{{ section.identifier }}</p>
+        <div class="text-gray-800">Tokens:</div>
+        {% for token in section.tokens.all %}
+        <span class="font-semibold text-gray-700"
+          >{{ token.transcription }}</span
+        >
+        {% endfor %}
+
+        <div id="sentence-senses-cell" class="text-gray-800"   
+        {% if request.user.is_authenticated %} 
+        hx-get="{% url 'corpus:section' section.id %}"hx-target="#sentenceSensesModalContent" hx-trigger="click"
+        {% endif %}>
+        <span id="sentence-senses-{{section.id}}">
+          <ul> Translations:
+            {% for sense in section.senses.all %}
+            <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
+            {% endfor %}
+        </ul>
+        </span>
+        </div>
+      </div>
       {% endif %}
     </div>
-    
-    
-    
-    
-    
-      
   </div>
-
+  <!-- Sentence senses modal -->
+  <div
+    class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    id="sentenceSensesModal"
+  >
+    <div class="flex items-center justify-center min-h-screen">
+      <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+      <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+        <!-- Modal content here -->
+        <div id="sentenceSensesModalContent"></div>
+      </div>
+    </div>
+  </div>
   <!-- SVG Container -->
   <div class="flex-grow">
     <p id="depDetails"></p>
     <svg id="svgCanvas" viewbox="0 0 800 600" width="100%" height="100%">
       <defs>
-        <marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30"
-          markerUnits="strokeWidth" markerWidth="5"
-          markerHeight="5" orient="auto">
+        <marker
+          id="arrowhead"
+          viewBox="0 0 60 60"
+          refX="60"
+          refY="30"
+          markerUnits="strokeWidth"
+          markerWidth="5"
+          markerHeight="5"
+          orient="auto"
+        >
           <path d="M 0 0 L 60 30 L 0 60 z" fill="#800000" />
         </marker>
-        <marker id="arrowhead" markerWidth="4" markerHeight="5" refX="60"
+        <marker
+          id="arrowhead"
+          markerWidth="4"
+          markerHeight="5"
+          refX="60"
           refY="3.5"
-          orient="a">
+          orient="a"
+        >
           <polygon points="0 0, 10 3.5, 0 7" />
         </marker>
       </defs>
 
       {% for token in tokens %} {% if token.number != null %}
-      <g class="p-2 rounded fill-slate-900 hover:fill-green-500 cursor-pointer"
-        id="{{token.id}}">
-        <circle id="{{token.id}}" cx="{{token.xpos}}" cy="35"
-          class="hover:fill-black hover:stroke-none" r="2.5"
-          fill="white" stroke="black" />
-        <text class="hover-target token" data-tokenId="{{token.id}}"
-          x="{{token.xpos}}" y="50" font-family="Verdana"
-          font-size="12">
-          {% if token.transcription %}
-          {{token.transcription}}
-          {% else %}
-          null
+      <g
+        class="p-2 rounded fill-slate-900 hover:fill-green-500 cursor-pointer"
+        id="{{token.id}}"
+      >
+        <circle
+          id="{{token.id}}"
+          cx="{{token.xpos}}"
+          cy="35"
+          class="hover:fill-black hover:stroke-none"
+          r="2.5"
+          fill="white"
+          stroke="black"
+        />
+        <text
+          class="hover-target token cursor-pointer hover:fill-off"
+          data-tokenId="{{token.id}}"
+          x="{{token.xpos}}"
+          y="50"
+          font-family="Verdana"
+          font-size="12"
+        >
+          {% if token.transcription %} {{token.transcription}} {% else %} null
           {% endif %}
         </text>
-        <text x="{{token.xpos}}" y="65" font-family="Verdana" font-size="6">
+        <text x="{{token.xpos}}" y="60" font-family="Verdana" font-size="10">
+          {% for sense in token.senses %}
+          <tspan class="italic">{{sense}}</tspan>
+          {% endfor %}
+        </text>
+        <text x="{{token.xpos}}" y="70" font-family="Verdana" font-size="6">
           {% for pos in token.pos %}
           <tspan>{{pos.pos}}</tspan>
-          {% for feat in pos.features %}
-          {% if feat.value != null %}
+          {% for feat in pos.features %} {% if feat.value != null %}
           <tspan x="{{token.xpos}}" dy="6">{{feat.name}}:{{feat.value}}</tspan>
           <!-- Increase dx for spacing -->
-          {% endif %}
-          {% endfor %}
-          {% endfor %}
+          {% endif %} {% endfor %} {% endfor %}
         </text>
       </g>
       {% endif %} {% endfor %}
     </svg>
-    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }}
+    {{ tokens | json_script:"tokenData"}} {{ deprel | json_script:"deprel" }} 
+    {% if user.is_authenticated %}
+    <script>
+      const loggedIn = true;
+    </script>
+    {% else %}
+    <script>
+      const loggedIn = false;
+    </script>
 
+    {%endif%}
   </div>
 </div>
 
+<!-- Senses Modal -->
+<script>
+  function closeSentenceSensesModal() {
+    console.log("Closing Sentence Senses Modal");
+    document.getElementById("sentenceSensesModal").classList.add("hidden");
+  }
+
+  document.body.addEventListener("htmx:afterSwap", function (event) {
+    console.log("htmx:afterSwap event triggered");
+    console.log(event.detail);
+    // Check if the swap is for loading sentence senses modal content
+    if (
+      event.detail.target.id === "sentenceSensesModalContent" &&
+      !event.detail.target.querySelector("[hx-swap-oob]")
+    ) {
+      console.log("Sentence Senses Modal Content Loaded");
+      document.getElementById("sentenceSensesModal").classList.remove("hidden");
+    }
+
+    if (event.detail.target.id === "section-form") {
+      console.log("Response for form#section-form:", event.detail);
+      closeSentenceSensesModal();
+    }
+  });
+</script>
+
 <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 <script>
+  function getArcHeight(distance) {
+    const minHeight = 10; // The minimum height of an arc
+    const heightFactor = 0.05; // Factor to control growth rate of the arc height based on distance squared
+    const maxHeight = 75; // Increase maximum height if needed
+    // Quadratic growth based on the distance
+    let arcHeight = minHeight + heightFactor * Math.pow(distance, 2);
 
-
-function getArcHeight(distance) {
-  const minHeight = 10; // The minimum height of an arc
-  const heightFactor = 0.05; // Factor to control growth rate of the arc height based on distance squared
-  const maxHeight = 75; // Increase maximum height if needed
-
-  // Quadratic growth based on the distance
-  let arcHeight = minHeight + heightFactor * Math.pow(distance, 2);
-
-  // Ensure the arcHeight does not exceed the maximum value
-  return Math.min(arcHeight, maxHeight);
-}
-
-
-let arcRegistry = {};
-
-function registerArc(fromTokenId, toTokenId) {
-  const key = `${fromTokenId}-${toTokenId}`;
-  if (!arcRegistry[key]) {
-    arcRegistry[key] = 0;
-  }
-  arcRegistry[key] += 1;
-  return arcRegistry[key];
-}
-
-function createBezierArc(x1, y1, x2, y2, fromTokenId, toTokenId) {
-  // Calculate the distance between the start and end tokens
-  const distance = Math.abs(x2 - x1);
-
-  // Get the index of the arc to determine its order among multiple arcs between the same tokens
-  const arcIndex = registerArc(fromTokenId, toTokenId);
-
-  // Base height of the arc is set as a fraction of the distance between tokens
-  // Adjust the 0.4 factor to control the height of the shortest arc
-  const baseArcHeight = distance * 0.4;
-  
-  // Increment height for each additional arc to avoid overlap
-  // Adjust the 20 constant to control the additional height for overlapping arcs
-  const arcHeightIncrement = 20;
-
-  // Calculate the total height of the arc by adding the base height and additional height for overlapping arcs
-  let arcHeight = baseArcHeight + ((arcIndex - 1) * arcHeightIncrement);
-  
-  // Determine the direction of the arc based on token positions
-  const upwardArc = x1 < x2;
-
-  // Control points are set to create the arc's curve
-  // If the arc is not the first one, increase the height of the control points
-  const cp1x = x1;
-  const cp2x = x2;
-  const cp1y = y1 - (upwardArc ? arcHeight : -arcHeight);
-  const cp2y = y2 - (upwardArc ? arcHeight : -arcHeight);
-
-  // Construct the SVG path for the arc
-  return `M ${x1},${y1} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
-}
-
-
-// Variables to hold the current position and scale of the viewbox
-const svgNS = "http://www.w3.org/2000/svg";
-const svg = document.getElementById("svgCanvas");
-const form = document.getElementById("form");
-const pt = svg.createSVGPoint();
-let focusDep = null;
-let isPanning = false;
-let creating = false;
-let currentX = 0;
-let currentY = 0;
-let currentZoom = 1;
-let fromTokenId = null;
-let pathColor = "#264d73";
-let enhancedPathColor = "#008060";
-let enhancedEnabled = true;
-
-function cursorPoint(evt) {
-  pt.x = evt.clientX;
-  pt.y = evt.clientY;
-  return pt.matrixTransform(svg.getScreenCTM().inverse());
-}
-
-const tokenData = JSON.parse(
-  document.getElementById("tokenData").textContent
-);
-
-
-function setViewBox(x, y, width, height) {
-  svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
-}
-
-function initializeViewbox() {
-  const bbox = svg.getBBox();
-  const margin = 20; // Margin value; adjust as needed
-
-  // Adjust x and y to add margin
-  currentX = bbox.x - margin;
-  currentY = bbox.y - margin;
-
-  // Increase width and height by twice the margin value to account for both sides
-  const width = bbox.width + 2 * margin;
-  const height = bbox.height + 2 * margin;
-
-  currentZoom = 1; // Reset the zoom level
-
-  setViewBox(currentX, currentY, width, height);
-}
-
-function updateViewBox(x, y, zoom) {
-  currentX = x;
-  currentY = y;
-  currentZoom = zoom;
-
-  // Calculate new width and height based on the initial SVG dimensions
-  const newWidth = svg.getBBox().width / currentZoom;
-  const newHeight = svg.getBBox().height / currentZoom;
-
-  setViewBox(currentX, currentY, newWidth, newHeight);
-}
-
-
-const deprelData = JSON.parse(document.getElementById("deprel").textContent);
-
-function clearFocusDep() {
-  // remove delete button
-  const form = document.getElementById("deleteDep");
-  while (form.querySelector('input[type="submit"]')) {
-    form.removeChild(form[0]);
+    // Ensure the arcHeight does not exceed the maximum value
+    return Math.min(arcHeight, maxHeight);
   }
 
-  // remove the red stroke from the path
-  const oldFocusPath = document.getElementById(focusDep);
-  oldFocusPath.setAttribute("stroke", "none");
+  let arcRegistry = {};
 
-  focusDep = null;
-  // clear all information about the dependency and the corresponding tokens in the p tag
-  const depDetails = document.getElementById("depDetails");
-  depDetails.innerHTML = ``;
-}
-
-function hideEnhancedPaths() {
-  const groups = document.querySelectorAll("g[data-enhanced='true']");
-  // check if the focusDep is an enhanced path and if so, do not hide it
-  if (focusDep) {
-    const focusPath = document.getElementById(focusDep);
-    if (focusPath.getAttribute("data-enhanced") == "true") {
-      clearFocusDep();
+  function registerArc(fromTokenId, toTokenId) {
+    const key = `${fromTokenId}-${toTokenId}`;
+    if (!arcRegistry[key]) {
+      arcRegistry[key] = 0;
     }
+    arcRegistry[key] += 1;
+    return arcRegistry[key];
   }
-  groups.forEach((group) => {
-    if (group.getAttribute("data-enhanced") == "true") {
-      group.classList.add("hidden");
-    }
-  });
-}
 
-function showEnhancedPaths() {
-  const groups = document.querySelectorAll("g[data-enhanced='true']");
-  groups.forEach((group) => {
-    group.classList.remove("hidden");
-  });
-}
+  function createBezierArc(x1, y1, x2, y2, fromTokenId, toTokenId) {
+    // Calculate the distance between the start and end tokens
+    const distance = Math.abs(x2 - x1);
 
-document.addEventListener("DOMContentLoaded", (event) => {
+    // Get the index of the arc to determine its order among multiple arcs between the same tokens
+    const arcIndex = registerArc(fromTokenId, toTokenId);
 
-  initializeViewbox();
+    // Base height of the arc is set as a fraction of the distance between tokens
+    // Adjust the 0.4 factor to control the height of the shortest arc
+    const baseArcHeight = distance * 0.4;
 
-  // add event listener to the enhanced button
-  document.getElementById("enhanced").addEventListener("click", (event) => {
-    if (enhancedEnabled) {
-      enhancedEnabled = false;
-      event.target.innerHTML = "Show Enhanced UD";
-      hideEnhancedPaths();
-    } else {
-      enhancedEnabled = true;
-      event.target.innerHTML = "Hide Enhanced UD";
-      showEnhancedPaths();
-    }
-    console.log(enhancedEnabled);
-  });
-});
+    // Increment height for each additional arc to avoid overlap
+    // Adjust the 20 constant to control the additional height for overlapping arcs
+    const arcHeightIncrement = 20;
 
-//#region CLICK HANDLE
-// only for registered users
+    // Calculate the total height of the arc by adding the base height and additional height for overlapping arcs
+    let arcHeight = baseArcHeight + (arcIndex - 1) * arcHeightIncrement;
 
-document.querySelectorAll("circle").forEach((item) =>
-  item.addEventListener("click", (event) => {
-    if (!creating) {
-      creating = true;
-      fromTokenId = event.target.id;
-      hideFocusDep();
-      return;
-    }
-    if (creating) {
-      const tokenTo = event.target.id;
-      if (tokenTo) {
-        const path = document.createElementNS(svgNS, "path");
-        const arcDefinition = createBezierArc(
-          tokenData.find((e) => e.id === fromTokenId).xpos,
-          32.5,
-          tokenData.find((e) => e.id === tokenTo).xpos,
-          32.5,
-          fromTokenId, tokenTo.id 
-        );
-        path.setAttribute("d", arcDefinition);
-        path.setAttribute("fill", "none");
-        path.setAttribute("stroke", "black");
-        path.setAttribute("stroke-width", "1.5");
-        path.setAttribute("marker-end", "url(#arrowhead)");
-        path.setAttribute("data-from", fromTokenId);
-        path.setAttribute("data-to", tokenTo.id);
-        path.addEventListener("click", (event) => {
-          focusDep = event.target.id;
-          const focusPath = document.getElementById(focusDep);
-          focusPath.removeAttribute("stroke");
-          focusPath.setAttribute("stroke", "red");
-          console.log("Path clicked");
-        });
-        svg.appendChild(path);
-        addNewDependencyRow(fromTokenId, tokenTo);
-        creating = false;
-        fromTokenId = null;
-        cleanAllElementsWithClass("temp-path");
-      }
-    }
-  })
-);
-//#endregion
+    // Determine the direction of the arc based on token positions
+    const upwardArc = x1 < x2;
 
-//#region create temp path
-svg.addEventListener("mousemove", (event) => {
-  if (!creating) {
-    return;
+    // Control points are set to create the arc's curve
+    // If the arc is not the first one, increase the height of the control points
+    const cp1x = x1;
+    const cp2x = x2;
+    const cp1y = y1 - (upwardArc ? arcHeight : -arcHeight);
+    const cp2y = y2 - (upwardArc ? arcHeight : -arcHeight);
+
+    // Construct the SVG path for the arc
+    return `M ${x1},${
+      upwardArc ? y1 : y1 + 5
+    } C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${upwardArc ? y2 : y2 + 5}`;
   }
-  var loc = cursorPoint(event);
-  const mouseX = loc.x;
-  const mouseY = loc.y - 5;
-  cleanAllElementsWithClass("temp-path");
-  const path = document.createElementNS(svgNS, "path");
-  // Use fromTokenId for the starting token
-  // Create a dynamic ID for the mouse position
-  const mouseTokenId = `mouse-${mouseX}-${mouseY}`;
 
-  const arcDefinition = createBezierArc(
-    tokenData.find((e) => e.id === fromTokenId).xpos, // X position of the starting token
-    35, // Y position for the arc
-    mouseX, // Current mouse X position
-    mouseY, // Current mouse Y position
-    fromTokenId, // ID of the starting token
-    mouseTokenId // Temporary ID for the mouse position
+  // Variables to hold the current position and scale of the viewbox
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("svgCanvas");
+  const form = document.getElementById("form");
+  const pt = svg.createSVGPoint();
+  let focusDep = null;
+  let isPanning = false;
+  let creating = false;
+  let rooting = false;
+  let currentX = 0;
+  let currentY = 0;
+  let currentZoom = 1;
+  let fromTokenId = null;
+  let pathColor = "#264d73";
+  let enhancedPathColor = "#008060";
+  let enhancedEnabled = true;
+  const dampeningFactor = 0.2; // Adjust this value to control the panning speed
+
+  function cursorPoint(evt) {
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  const tokenData = JSON.parse(
+    document.getElementById("tokenData").textContent
   );
-  path.setAttribute("d", arcDefinition);
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "black");
-  path.setAttribute("stroke-width",  "1");
-  path.setAttribute("marker-end", "url(#arrowhead)");
-  path.classList.add("temp-path");
-  svg.appendChild(path);
-});
-//#endregion
 
-
-function cleanAllElementsWithClass(className) {
-  const tempPaths = document.getElementsByClassName(className);
-  while (tempPaths.length > 0) {
-    tempPaths[0].parentNode.removeChild(tempPaths[0]);
+  function setViewBox(x, y, width, height) {
+    svg.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
   }
-}
 
-tokenData.forEach((token) => {
-  token.dependencies?.forEach((dep) => {
-    if (!dep.to_token_id) {
+  function initializeViewbox() {
+    const bbox = svg.getBBox();
+    const margin = 20; // Margin value; adjust as needed
+
+    // Adjust x and y to add margin
+    currentX = bbox.x - margin;
+    currentY = bbox.y - margin;
+
+    // Increase width and height by twice the margin value to account for both sides
+    const width = bbox.width + 2 * margin;
+    const height = bbox.height + 2 * margin;
+
+    currentZoom = 1; // Reset the zoom level
+
+    setViewBox(currentX, currentY, width, height);
+  }
+
+  function updateViewBox(x, y, zoom) {
+    currentX = x;
+    currentY = y;
+    currentZoom = zoom;
+
+    // Calculate new width and height based on the initial SVG dimensions
+    const newWidth = svg.getBBox().width / currentZoom;
+    const newHeight = svg.getBBox().height / currentZoom;
+
+    setViewBox(currentX, currentY, newWidth, newHeight);
+  }
+
+  const deprelData = JSON.parse(document.getElementById("deprel").textContent);
+
+
+
+  function hideEnhancedPaths() {
+    const groups = document.querySelectorAll("g[data-enhanced='true']");
+    // check if the focusDep is an enhanced path and if so, do not hide it
+    if (focusDep) {
+      const focusPath = document.getElementById(focusDep);
+      if (focusPath.getAttribute("data-enhanced") == "true") {
+        clearFocusDep();
+      }
+    }
+    groups.forEach((group) => {
+      if (group.getAttribute("data-enhanced") == "true") {
+        group.classList.add("hidden");
+      }
+    });
+  }
+
+  function showEnhancedPaths() {
+    const groups = document.querySelectorAll("g[data-enhanced='true']");
+    groups.forEach((group) => {
+      group.classList.remove("hidden");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", (event) => {
+    initializeViewbox();
+
+    // add event listener to the enhanced button
+    document.getElementById("enhanced").addEventListener("click", (event) => {
+      if (enhancedEnabled) {
+        enhancedEnabled = false;
+        event.target.innerHTML = "Show Enhanced UD";
+        hideEnhancedPaths();
+      } else {
+        enhancedEnabled = true;
+        event.target.innerHTML = "Hide Enhanced UD";
+        showEnhancedPaths();
+      }
+      console.log(enhancedEnabled);
+    });
+  });
+
+  //#region CLICK HANDLE
+  // only for registered users
+  if (loggedIn)
+    document.querySelectorAll("circle").forEach((item) =>
+    {
+        item.addEventListener("click", (event) => {
+        if (!creating && !rooting) {
+          cleanAllElementsWithClass("temp-path");
+          cleanAllElementsWithClass("not_saved_path");
+          creating = true;
+          fromTokenId = event.target.id;
+          hideFocusDep();
+          return;
+        }
+        if (creating) {
+          const tokenTo = event.target.id;
+          if (tokenTo) {
+            const path = document.createElementNS(svgNS, "path");
+            const arcDefinition = createBezierArc(
+              tokenData.find((e) => e.id === fromTokenId).xpos,
+              32.5,
+              tokenData.find((e) => e.id === tokenTo).xpos,
+              32.5,
+              fromTokenId,
+              tokenTo.id
+            );
+            path.setAttribute("class", "not_saved_path");
+            path.setAttribute("d", arcDefinition);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "black");
+            path.setAttribute("stroke-width", "1.5");
+            path.setAttribute("marker-end", "url(#arrowhead)");
+            path.setAttribute("data-from", fromTokenId);
+            path.setAttribute("data-to", tokenTo.id);
+            path.addEventListener("click", (event) => {
+              focusDep = event.target.id;
+              const focusPath = document.getElementById(focusDep);
+              focusPath.removeAttribute("stroke");
+              focusPath.setAttribute("stroke", "red");
+              console.log("Path clicked");
+            });
+            svg.appendChild(path);
+            addNewDependencyRow(fromTokenId, tokenTo);
+            creating = false;
+            fromTokenId = null;
+            cleanAllElementsWithClass("temp-path");
+          }
+        }
+        if (rooting){
+          // remove temp path
+          let rootPath = document.getElementsByClassName("temp-path")[0];
+          rootPath.classList.remove("temp-path");
+          rootPath.classList.add("not_saved_path");
+          cleanAllElementsWithClass("temp-path");
+          cleanNewRootForm();
+          const tokenTo = event.target.id;
+          const saveNewRootForm = document.getElementById("saveNewRoot");
+         
+          const inputToken = document.createElement("input");
+          inputToken.setAttribute("type", "hidden");
+          inputToken.setAttribute("name", "token_id");
+          inputToken.setAttribute("value", tokenTo);
+
+          const submit = document.createElement("input");
+          submit.setAttribute("type", "submit");
+          submit.setAttribute("value", "Save");
+          submit.setAttribute("id", "rootToggleSave")
+          submit.setAttribute(
+            "class",
+            "flex mx-2 p-2 bg-blue-900 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+          );
+
+          saveNewRootForm.appendChild(inputToken);
+          saveNewRootForm.appendChild(submit);
+          rooting = false;
+
+        }
+      })}
+    );
+  //#endregion
+
+
+  //#region create temp path
+  svg.addEventListener("mousemove", (event) => {
+    if (!creating && !rooting) {
       return;
     }
-    if (dep.enhanced) {
-      if (!enhancedEnabled) {
-        return;
-      }
-      pathColor = enhancedPathColor;
-    }
-    const depPos = tokenData.find((e) => e.id === dep.to_token_id.id).xpos;
-    const g = document.createElementNS(svgNS,"g");
-    g.setAttribute("data-enhanced",dep.enhanced)
-    g.setAttribute("data-id",dep.id)
-    const path = document.createElementNS(svgNS, "path");
 
-    // Updated arcDefinition call with fromTokenId and toTokenId
+    var loc = cursorPoint(event);
+    const mouseX = loc.x;
+    const mouseY = loc.y - 3;
+    cleanAllElementsWithClass("temp-path");
+    const path = document.createElementNS(svgNS, "path");
+    // Use fromTokenId for the starting token
+    // Create a dynamic ID for the mouse position
+    const mouseTokenId = `mouse-${mouseX}-${mouseY}`;
+
+
+    if (rooting){
+      let tokenHandle = document.getElementById("rootToggle").querySelector(`circle`);
+      const lineDefinition = `M ${tokenHandle.getAttribute("cx")},${tokenHandle.getAttribute("cy")}  L ${mouseX},${mouseY} `;
+      path.setAttribute("d", lineDefinition);
+    }
+
+    if (creating){
     const arcDefinition = createBezierArc(
-      token.xpos, 32.5, // X and Y positions of the starting token
-      depPos, 32.5,    // X and Y positions of the ending token
-      token.id,        // ID of the starting token
-      dep.to_token_id.id  // ID of the ending token
+      tokenData.find((e) => e.id === fromTokenId).xpos, // X position of the starting token
+      35, // Y position for the arc
+      mouseX, // Current mouse X position
+      mouseY, // Current mouse Y position
+      fromTokenId, // ID of the starting token
+      mouseTokenId // Temporary ID for the mouse position
     );
     path.setAttribute("d", arcDefinition);
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke", pathColor);
-    path.setAttribute("stroke-width", "1.5");
-    path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
-    path.setAttribute("marker-end", "url(#arrowhead)");
-    path.setAttribute("data-from", token.id);
-    path.setAttribute("data-to", dep.to_token_id.id);
-    path.setAttribute("data-enhanced", dep.enhanced);
-    path.setAttribute("id", dep.id);
-
-    //Path Label
-    const text = document.createElementNS(svgNS, "text");
-    text.setAttribute("font-size", 10);
-    text.setAttribute("fill", "red");
-    const textpath = document.createElementNS(svgNS, "textPath");
-    textpath.setAttribute("path", arcDefinition);
-    if(token.xpos > depPos){
-      textpath.setAttribute("startOffset", "50%");
-      textpath.setAttribute("side", "right");
-
     }
-    textpath.setAttribute("startOffset", "40%");
-    textpath.innerHTML = dep.rel;
-    text.append(textpath);
-    path.addEventListener("click", (event) => {
-      hideFocusDep();
-      focusDep = event.target.id;
-      const focusPath = document.getElementById(focusDep);
-      focusPath.removeAttribute("stroke");
-      focusPath.setAttribute("stroke", "red");
-      const form = document.getElementById("deleteDep");
-      const inputDep = document.createElement("input");
-      inputDep.setAttribute("type", "hidden");
-      inputDep.setAttribute("name", "dep_id");
-      inputDep.setAttribute("value", focusDep);
-      form.appendChild(inputDep);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "black");
+    path.setAttribute("stroke-width", "1");
+    path.setAttribute("marker-end", "url(#arrowhead)");
+    path.classList.add("temp-path");
+    svg.appendChild(path); 
+  });
+  //#endregion
 
-      // only add the submit button if it is not already there
-      const submit = document.createElement("input");
-      submit.setAttribute("type", "submit");
-      submit.setAttribute("value", "Delete");
-      submit.setAttribute(
-        "class",
-        "flex mx-2 p-2 bg-red-500 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && (creating || rooting)) {
+      creating = false;
+      rooting = false;
+      fromTokenId = null;
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+    else if(event.key === "Escape" && document.getElementById("input-container")){
+      cleanNewDependencyForm();
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+    else if(event.key === "Escape" && document.getElementById("saveNewRoot").querySelector('input[type="submit"]')){
+      cleanNewRootForm();
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+    else if(event.key === "Escape" && focusDep){
+      clearFocusDep();
+      cleanAllElementsWithClass("temp-path");
+      cleanAllElementsWithClass("not_saved_path");
+    }
+  });
+
+  function cleanNewDependencyForm(){
+    const form = document.getElementById("form");
+    const inputContainer = document.getElementById("input-container");
+    const depContainer = document.getElementById("depType");
+    depContainer.classList.toggle("hidden");
+    form.removeChild(inputContainer);
+    cleanAllElementsWithClass("not_saved_path");
+  }
+
+
+  function cleanNewRootForm(){
+    const saveNewRootForm = document.getElementById("saveNewRoot");
+    if (saveNewRootForm.querySelector('input[name="token_id"]')) {
+      saveNewRootForm.removeChild(
+        saveNewRootForm.querySelector('input[name="token_id"]')
       );
-      if (!form.querySelector('input[type="submit"]')) {
-        form.appendChild(submit);
+    }
+    if (saveNewRootForm.querySelector('input[type="submit"]')) {
+      saveNewRootForm.removeChild(
+        saveNewRootForm.querySelector('input[type="submit"]')
+      );
+    }
+  }
+
+  function cleanAllElementsWithClass(className) {
+    const tempPaths = document.getElementsByClassName(className);
+    while (tempPaths.length > 0) {
+      tempPaths[0].parentNode.removeChild(tempPaths[0]);
+    }
+  }
+
+  function clearFocusDep() {
+    // remove delete button
+    const form = document.getElementById("deleteDep");
+    while (form.querySelector('input[type="submit"]')) {
+      form.removeChild(form[0]);
+    }
+
+    // remove the red stroke from the path
+    const oldFocusPath = document.getElementById(focusDep);
+    oldFocusPath.setAttribute("stroke", "none");
+    // restore stroke to previous color
+    if (oldFocusPath.getAttribute("data-enhanced") == "true") {
+      oldFocusPath.setAttribute("stroke", enhancedPathColor);
+    } else {
+      oldFocusPath.setAttribute("stroke", pathColor);
+    }
+    focusDep = null;
+    // clear all information about the dependency and the corresponding tokens in the p tag
+    const depDetails = document.getElementById("depDetails");
+    depDetails.innerHTML = ``;
+  }
+
+  tokenData.forEach((token) => {
+    token.dependencies?.forEach((dep) => {
+      if (!dep.to_token_id) {
+        return;
       }
-      // display all information about the dependency and the corresponding tokens in the p tag
-      const depDetails = document.getElementById("depDetails");
-      depDetails.innerHTML = `From: ${token.transcription ? token.transcription : null}<br>To: ${tokenData.find((e) => e.id === dep.to_token_id.id).transcription
+      if (dep.enhanced) {
+        if (!enhancedEnabled) {
+          return;
+        }
+        pathColor = enhancedPathColor;
+      }
+      const depPos = tokenData.find((e) => e.id === dep.to_token_id.id).xpos;
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("data-enhanced", dep.enhanced);
+      g.setAttribute("data-id", dep.id);
+      const path = document.createElementNS(svgNS, "path");
+
+      // Updated arcDefinition call with fromTokenId and toTokenId
+      const arcDefinition = createBezierArc(
+        token.xpos,
+        32.5, // X and Y positions of the starting token
+        depPos,
+        32.5, // X and Y positions of the ending token
+        token.id, // ID of the starting token
+        dep.to_token_id.id // ID of the ending token
+      );
+      path.setAttribute("d", arcDefinition);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", pathColor);
+      path.setAttribute("stroke-width", "1.5");
+      path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
+      path.setAttribute("marker-end", "url(#arrowhead)");
+      path.setAttribute("data-from", token.id);
+      path.setAttribute("data-to", dep.to_token_id.id);
+      path.setAttribute("data-enhanced", dep.enhanced);
+      path.setAttribute("id", dep.id);
+
+      //Path Label
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("font-size", 10);
+      text.setAttribute("fill", "red");
+      const textpath = document.createElementNS(svgNS, "textPath");
+      textpath.setAttribute("path", arcDefinition);
+      if (token.xpos > depPos) {
+        textpath.setAttribute("startOffset", "50%");
+        textpath.setAttribute("side", "right");
+      }
+      textpath.setAttribute("startOffset", "40%");
+      textpath.innerHTML = dep.rel;
+      text.append(textpath);
+      path.addEventListener("click", (event) => {
+        hideFocusDep();
+        focusDep = event.target.id;
+        const focusPath = document.getElementById(focusDep);
+        focusPath.removeAttribute("stroke");
+        focusPath.setAttribute("stroke", "red");
+        const form = document.getElementById("deleteDep");
+        const inputDep = document.createElement("input");
+        inputDep.setAttribute("type", "hidden");
+        inputDep.setAttribute("name", "dep_id");
+        inputDep.setAttribute("value", focusDep);
+        form.appendChild(inputDep);
+
+        // only add the submit button if it is not already there
+        const submit = document.createElement("input");
+        submit.setAttribute("type", "submit");
+        submit.setAttribute("value", "Delete");
+        submit.setAttribute(
+          "class",
+          "flex mx-2 p-2 bg-red-500 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+        );
+        if (!form.querySelector('input[type="submit"]')) {
+          form.appendChild(submit);
+        }
+        // display all information about the dependency and the corresponding tokens in the p tag
+        const depDetails = document.getElementById("depDetails");
+        depDetails.innerHTML = `From: ${
+          token.transcription ? token.transcription : null
+        }<br>To: ${
+          tokenData.find((e) => e.id === dep.to_token_id.id).transcription
         }<br>Relation: ${dep.rel}`;
 
-      console.log("Path clicked");
+        console.log("Path clicked");
+      });
+      g.appendChild(path);
+      g.appendChild(text);
+      svg.appendChild(g);
+      pathColor = "#264d73";
     });
-    g.appendChild(path);
-    g.appendChild(text);
-    svg.appendChild(g)
-    pathColor = "#264d73";
   });
-});
 
-
-
-svg.onmousedown = function (event) {
+  svg.onmousedown = function (event) {
     event.preventDefault(); // Prevent default behavior like text selection
-    isPanning = true;       // Indicate that panning is active
+    isPanning = true; // Indicate that panning is active
 
     let mouseStartPos = cursorPoint(event);
+    let frameRequested = false;
 
     function onMouseMove(event) {
-        if (!isPanning) return;
+      if (!isPanning || frameRequested ) return;
 
-        requestAnimationFrame(() => {
-            const newMousePos = cursorPoint(event);
-            const dx = (newMousePos.x - mouseStartPos.x) / currentZoom;
-            const dy = (newMousePos.y - mouseStartPos.y) / currentZoom;
+      frameRequested = true;
+      requestAnimationFrame(() => {
+        frameRequested = false;
+        const newMousePos = cursorPoint(event);
+        const dx = (newMousePos.x - mouseStartPos.x) * dampeningFactor / currentZoom;
+        const dy = (newMousePos.y - mouseStartPos.y) * dampeningFactor / currentZoom;
 
-            currentX -= dx;
-            currentY -= dy;
+        currentX -= dx;
+        currentY -= dy;
 
-            updateViewBox(currentX, currentY, currentZoom);
+        updateViewBox(currentX, currentY, currentZoom);
 
-            mouseStartPos = newMousePos;
-        });
+        mouseStartPos = newMousePos;
+      });
     }
 
     function onMouseUp() {
-        isPanning = false;
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
+      isPanning = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
     }
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-};
+  };
 
-
-// scroll to zoom
-svg.onwheel = function (event) {
+  // scroll to zoom
+  svg.onwheel = function (event) {
     event.preventDefault();
 
     const zoomIntensity = 0.05;
@@ -570,11 +776,10 @@ svg.onwheel = function (event) {
     currentZoom = newZoom;
 
     updateViewBox(currentX, currentY, newZoom);
-};
+  };
 
-
-//double click to zoom in
-svg.ondblclick = function(event) {
+  //double click to zoom in
+  svg.ondblclick = function (event) {
     event.preventDefault();
 
     const dblClickZoomIntensity = 2; // Adjust zoom intensity for double-click
@@ -586,8 +791,8 @@ svg.ondblclick = function(event) {
     // Calculate new viewbox parameters to center the zoom on the double-click position
     const newWidth = svg.clientWidth / newZoom;
     const newHeight = svg.clientHeight / newZoom;
-    const newX = mousePos.x - (newWidth / 2);
-    const newY = mousePos.y - (newHeight / 2);
+    const newX = mousePos.x - newWidth / 2;
+    const newY = mousePos.y - newHeight / 2;
 
     // Update current viewbox parameters
     currentX = newX;
@@ -597,12 +802,12 @@ svg.ondblclick = function(event) {
     updateViewBox(currentX, currentY, currentZoom);
   };
 
-document.getElementById('center').onclick = function () {
-  // Use the initial bounding box values to center
-  initializeViewbox();
-};
+  document.getElementById("center").onclick = function () {
+    // Use the initial bounding box values to center
+    initializeViewbox();
+  };
 
-function calculateZoomLevel() {
+  function calculateZoomLevel() {
     const svgContainer = document.getElementById("svgContainer");
 
     const elements = svg.getElementsByTagName("*");
@@ -634,9 +839,16 @@ function calculateZoomLevel() {
     return zoomLevel;
   }
 
-
   const addNewDependencyRow = (from, to) => {
+    if (document.getElementById("input-container")) {
+      console.log("removing", form, document.getElementById("input-container"));
+
+      form.removeChild(document.getElementById("input-container"));
+    } else {
+      console.log("nothign to remove");
+    }
     const inputContainer = document.createElement("div");
+    inputContainer.setAttribute("id", "input-container");
     inputContainer.setAttribute("class", "flex flex-row items-center");
 
     const inputField = document.createElement("input");
@@ -700,107 +912,246 @@ function calculateZoomLevel() {
     }
   }
 
-  function createArcPath(from, to) { }
+  function createArcPath(from, to) {}
 
   function hoverCard(event) {
-    // only one hover card at a time
+    console.log("hovering");
+    let targetElement = event.target;
+    // Remove existing hover card
     const oldHoverCard = document.getElementById("hover-card");
     if (oldHoverCard) {
       document.body.removeChild(oldHoverCard);
     }
 
-    console.log("hovering");
-    //get the x and y coordinates of the mouse
     const x = event.clientX;
     const y = event.clientY;
-    //get the element that is hovered
-    const hoveredElement = document.elementFromPoint(x, y);
-    // create the hover card
+    const hoveredElement = event.target; // Directly use event.target
+
+    // Create hover card
     const hoverCard = document.createElement("div");
     hoverCard.setAttribute("class", "hover-card");
     hoverCard.setAttribute("id", "hover-card");
+    document.body.appendChild(hoverCard);
+
+    // Set initial position
+    setPosition(hoverCard, x, y);
 
     // get the token data
-    const token = tokenData.find((e) => e.id === hoveredElement.getAttribute("data-tokenid"));
+    const token = tokenData.find(
+      (e) => e.id === hoveredElement.getAttribute("data-tokenid")
+    );
+
+    if (!token) {
+      console.log("no token found");
+      return;
+    }
+
     const tokenInfo = document.createElement("p");
     // map the pos tags to a string
-    const pos = token.pos.map((e) => {
-      // map the features to a string
-      const features = e.features.map((f) => {
-        if (f.value) {
-          return `${f.name}: ${f.value}`
+    const pos = token.pos
+      .map((e) => {
+        // map the features to a string
+        const features = e.features
+          .map((f) => {
+            if (f.value) {
+              return `${f.name}: ${f.value}`;
+            }
+            return `${f.name}`;
+          })
+          .join(", ");
+        // return the pos tag with the features
+        if (features) {
+          return `${e.pos} (${features})`;
         }
-        return `${f.name}`
-      }).join(", ");
-      // return the pos tag with the features
-      if (features) {
-        return `${e.pos} (${features})`
-      }
-      return `${e.pos}`
-    }
-    ).join(", ");
+        return `${e.pos}`;
+      })
+      .join(", ");
 
     tokenInfo.innerHTML = `${token.transcription}
-    <br>
-    ${pos}
-    `;
+      <br>
+      ${token.transliteration}
+      <br>
+      ${token.senses.map((e) => e.sense).join(", ")}
+      <br>
+      ${pos}
+      `;
 
-    // add the token info to the hover card
-
+    // Append token info to hover card
     hoverCard.appendChild(tokenInfo);
 
+    // Adjust position if out of bounds
+    adjustPositionIfOutOfBounds(hoverCard);
+  }
 
-    // append the hover card to the body
-    document.body.appendChild(hoverCard);
-    // set the position of the hover card
-    hoverCard.style.top = `${y}px`;
-    hoverCard.style.left = `${x}px`;
+  function setPosition(hoverCard, x, y) {
+    hoverCard.style.top = `${y+2}px`;
+    hoverCard.style.left = `${x+2}px`;
     hoverCard.style.backgroundColor = "white";
     hoverCard.style.border = "1px solid black";
     hoverCard.style.position = "absolute";
     // min width and height
     hoverCard.style.minWidth = "100px";
     hoverCard.style.minHeight = "50px";
+  }
 
-    // get the bounding box of the hover card
+  function adjustPositionIfOutOfBounds(hoverCard) {
     const hoverCardBBox = hoverCard.getBoundingClientRect();
-    // get the bounding box of the svg
     const svgBBox = svg.getBoundingClientRect();
-    // check if the hover card is outside of the svg
     if (hoverCardBBox.right > svgBBox.right) {
       hoverCard.style.left = `${x - (hoverCardBBox.right - svgBBox.right)}px`;
     }
     if (hoverCardBBox.bottom > svgBBox.bottom) {
       hoverCard.style.top = `${y - (hoverCardBBox.bottom - svgBBox.bottom)}px`;
     }
-
   }
+
+  
 
   function removeHoverCard() {
-    setTimeout(() => {
-      const hoverCard = document.getElementById("hover-card");
-      if (hoverCard) {
-        document.body.removeChild(hoverCard);
-      }
-    }, 100); // Delay of 1 second (1000 milliseconds)
+    const oldHoverCard = document.getElementById("hover-card");
+    if (oldHoverCard) {
+      setTimeout(() => {
+        if (!oldHoverCard.matches(":hover")) {
+          document.body.removeChild(oldHoverCard);
+        }
+      }, 100);
+    }
   }
 
-  // add event listeners to all text elements with the class token
-
-  document.querySelectorAll(".token").forEach((item) => {
-    item.addEventListener("mouseenter", (event) => {
-      hoverCard(event);
-    });
-    item.addEventListener("mouseleave", (event) => {
-      removeHoverCard();
-    });
-  });
   // Initialize the viewbox
   const bbox = svg.getBBox();
   currentX = bbox.x - 10;
   currentY = bbox.y - 10;
   currentZoom = 1;
   setViewBox();
+
+  function findRootDependencyID(){
+    const root = tokenData.find((e) => e.root);
+    if(root){
+      const rootDependency = root.dependencies.find((e) => e.rel === "root");
+      if(rootDependency)
+        return rootDependency.id;
+    }
+
+    return null;
+  }
+
+  function checkForRoot(){
+    const root = tokenData.find((e) => e.root);
+    if(root){
+      return root.id;
+    }
+    return null;
+  }
+
+  function createRootToggle(x,y,root){
+    const rootToggle = document.createElementNS(svgNS,"g");
+    rootToggle.setAttribute("id", "rootToggle");
+    
+    // get xpos of root or set it to X
+    if(root){
+      let tokenHandle = root.querySelector(`circle`);
+      x = tokenHandle.getAttribute("cx");
+
+    }
+    else{
+      x = 0;
+    }
+
+    dependencyID = findRootDependencyID();
+
+
+    const ToggleHandle = document.createElementNS(svgNS,"circle");
+    ToggleHandle.setAttribute("cx", `${x}`);
+    ToggleHandle.setAttribute("cy", `${y}`);
+    ToggleHandle.setAttribute("r", "2.5");
+    ToggleHandle.setAttribute("fill", "red");
+    ToggleHandle.setAttribute("stroke", "black");
+    ToggleHandle.setAttribute("stroke-width", "1");
+    ToggleHandle.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
+
+    ToggleHandle.addEventListener("click",(event)=>{
+      console.log("root clicked");
+      if (!rooting){
+        cleanAllElementsWithClass("temp-path");
+        cleanAllElementsWithClass("not_saved_path");
+        rooting = true;
+        fromTokenId = event.target.id;
+        hideFocusDep();
+        return;
+      }
+    })
+
+    const ToggleText = document.createElementNS(svgNS,"text");
+    ToggleText.setAttribute("x", x);
+    ToggleText.setAttribute("y", y);
+    ToggleText.setAttribute("font-size", "10");
+    ToggleText.setAttribute("fill", "red");
+    ToggleText.innerHTML = "root";
+
+    // create a path from ToggleHandle to rootHandle
+    if(root){
+      let tokenHandle = root.querySelector(`circle`);
+      console.log(tokenHandle)
+
+      const path = document.createElementNS(svgNS, "path");
+      
+      // use line instead of arc
+      const lineDefinition = `M ${x},${y} L ${tokenHandle.getAttribute("cx")},${tokenHandle.getAttribute("cy")}`;
+      
+      path.setAttribute("d", lineDefinition);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "red");
+      path.setAttribute("stroke-width", "1.5");
+      path.setAttribute("class", "hover:stroke-red-500 cursor-pointer");
+      path.setAttribute("marker-end", "url(#arrowhead)");
+      path.setAttribute("data-from", "rootnode");
+      path.setAttribute("data-to", root.id);
+      path.setAttribute("data-enhanced", "false");
+      if (dependencyID){
+        path.setAttribute("id", dependencyID);
+      }
+      else{
+        path.setAttribute("id", "rootnode");
+      }
+      path.addEventListener("click", (event) => {
+        hideFocusDep();
+        focusDep = event.target.id;
+        const focusPath = event.target;
+        focusPath.removeAttribute("stroke");
+        focusPath.setAttribute("stroke", "red");
+        const form = document.getElementById("deleteDep");
+        const inputDep = document.createElement("input");
+        inputDep.setAttribute("type", "hidden");
+        inputDep.setAttribute("name", "dep_id");
+        inputDep.setAttribute("value", focusDep);
+        form.appendChild(inputDep);
+
+        // only add the submit button if it is not already there
+        const submit = document.createElement("input");
+        submit.setAttribute("type", "submit");
+        submit.setAttribute("value", "Delete");
+        submit.setAttribute(
+          "class",
+          "flex mx-2 p-2 bg-red-500 rounded text-white font-bold hover:bg-blue-700 cursor-pointer"
+        );
+        if (!form.querySelector('input[type="submit"]')) {
+          form.appendChild(submit);
+        }
+        console.log("Path clicked");
+      });
+      if (path){
+        rootToggle.appendChild(path);
+      }
+
+    }
+
+
+    rootToggle.appendChild(ToggleHandle);
+    rootToggle.appendChild(ToggleText);
+   
+    svg.appendChild(rootToggle);
+  }
 </script>
 
 <!--import pag navigation-->
@@ -812,19 +1163,27 @@ function calculateZoomLevel() {
     console.log(`Key: ${event.key}`);
   }
 
-  document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOMContentLoaded, adding keydown event listener.');
+  document.addEventListener("DOMContentLoaded", (event) => {
+    console.log("DOMContentLoaded, adding keydown event listener.");
+    
+    createRootToggle(0,currentY+10,document.getElementById(checkForRoot()));
+    
+    document.querySelectorAll(".token").forEach((item) => {
+      item.addEventListener("mouseenter", hoverCard);
+      item.addEventListener("mouseleave", removeHoverCard);
 
-    document.addEventListener('keydown', function (event) {
+    });
+
+    document.addEventListener("keydown", function (event) {
       switch (event.key) {
-        case 'ArrowLeft': // User pressed the left arrow key
-          var prevPageLink = document.getElementById('prevPageLink');
+        case "ArrowLeft": // User pressed the left arrow key
+          var prevPageLink = document.getElementById("prevPageLink");
           if (prevPageLink) {
             window.location.href = prevPageLink.href;
           }
           break;
-        case 'ArrowRight': // User pressed the right arrow key
-          var nextPageLink = document.getElementById('nextPageLink');
+        case "ArrowRight": // User pressed the right arrow key
+          var nextPageLink = document.getElementById("nextPageLink");
           if (nextPageLink) {
             window.location.href = nextPageLink.href;
           }
@@ -832,7 +1191,6 @@ function calculateZoomLevel() {
       }
     });
   });
-
 </script>
 
 {% endblock content %}

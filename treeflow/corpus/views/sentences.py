@@ -1,65 +1,65 @@
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage
+from django.core.paginator import Paginator
 from django.core.cache import cache
 from django.shortcuts import render
 from django.db.models import Prefetch
+import uuid
 import logging
 from treeflow.corpus.models import Text, Section, Token, SectionToken
 
-
 logger = logging.getLogger(__name__)
-
 
 @login_required
 def sentences_view(request, text_id=None):
-
-    # log text id
     logger.info('text_id : %s', text_id)
 
-    # Get all Text objects for the dropdowns
-    texts = Text.objects.all()
-    if text_id:
-        selected_text_id = text_id
-    else:
-        selected_text_id = request.GET.get('text_id')
+    # Fetching or caching texts
+    cache_key_texts = "all_texts"
+    texts = cache.get(cache_key_texts)
+    if not texts:
+        texts = Text.objects.all()
+        cache.set(cache_key_texts, texts, 300)
+        logger.info("Cache miss for texts")
 
-    # Prefetch for sections of type 'line'
-    line_prefetch = Prefetch(
-        'sectiontoken_set',
-        queryset=SectionToken.objects.filter(
-            section__type='line').select_related('section'),
-        to_attr='line_sections'
-    )
+    selected_text_id = text_id if text_id else request.GET.get('text_id')
 
-    # Prefetch objects for tokens with related POS, Features, and Lemmas
-    token_prefetch = Prefetch(
-        'tokens',
-        queryset=Token.objects.all().select_related('image').prefetch_related(
-            'pos_token', 'feature_token', 'lemmas', 'senses', line_prefetch
-        )
-    )
+    # Building the cache key for sentences
+    cache_key_sentences = f"sentences_{selected_text_id}"
+    sentences = cache.get(cache_key_sentences)
 
-    # Query for sentences with selected text ID and prefetch related tokens
-    sentences = Section.objects.filter(
-        type='sentence', text=selected_text_id
-    ).prefetch_related(token_prefetch)
+    if sentences is None:
+        # Fetch and cache sentences if not cached
+        sentences = Section.objects.filter(type='sentence', text=selected_text_id) \
+            .prefetch_related(
+                Prefetch(
+                    'sectiontoken_set',
+                    queryset=SectionToken.objects.filter(section__type='line').select_related('section'),
+                    to_attr='line_sections'
+                ),
+                Prefetch(
+                    'tokens',
+                    queryset=Token.objects.select_related('image')
+                    .prefetch_related('pos_token', 'feature_token', 'lemmas', 'senses', 'comment_token')
+                    .only('id', 'image')
+                )
+            ) \
+            .only('id', 'number', 'identifier')
+        cache.set(cache_key_sentences, list(sentences), 300)
+        logger.info("Cache miss for sentences")
 
-    # Setup paginator for sentences
-    # Adjust the number of sentences per page as needed
+    # Paginator setup
     paginator = Paginator(sentences, 10)
-    page_number = request.GET.get('page')
-    sentences_page = paginator.get_page(page_number)
 
-    # log the number of sentences
-    logger.info("Found %s sentences", sentences.count())
+    # Fetching the correct page based on the page query parameter
+    page_number = request.GET.get('page', 1)  # Default to first page or query parameter
+    page_obj = paginator.get_page(page_number)
+    logger.info("Page number: %s", page_number)
 
-    # Prepare context for rendering
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
-        'page_obj': sentences_page,
-        'current_view': 'corpus:sentences',
+        'page_obj': page_obj,
+        'current_view': 'corpus:sentences'
     }
 
-    # Render response
     return render(request, 'sentences.html', context)

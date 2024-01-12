@@ -1,0 +1,5 @@
+<ul> Translations:
+    {% for sense in section.senses.all %}
+    <li>{{sense.language}} - <span class="font-bold">{{sense.sense}} </span></li>
+    {% endfor %}
+</ul>

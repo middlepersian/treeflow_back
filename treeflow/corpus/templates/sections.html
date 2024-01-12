@@ -51,12 +51,13 @@
             <div
                 class="sentence mb-2 flex items-center p-2 bg-white shadow rounded">
                 <!-- Display sentence section title or identifier with a fixed width -->
-                <div class="sentence-identifier w-1/8 font-bold mr-1">
+                <div id="{{ section.id }}" class="sentence-identifier w-1/8 font-bold mr-1">
                     <a href="{% url 'corpus:ud_editor' section.id %}"
                     class="text-blue-500 hover:text-blue-700">
                     {{ section.number|default:"Untitled" }} 
                   </a>
                 </div>
+
 
                 <!-- Sentence content tokens displayed next to the identifier -->
                 <div class="sentence-content w-2/8 flex flex-wrap">
@@ -71,6 +72,15 @@
                     {% endfor %}
                 </div>
 
+                {% if request.user.is_authenticated %}
+                <div class="sentence-identifier w-1/8 font-bold mr-1">
+                    <a href="{% url 'corpus:sentence' section.id %}"
+                    class="text-green-500 hover:text-yellow-700 text-xl font-bold"> <!-- Use text-size classes like text-sm, text-lg, text-xl, etc. -->
+                    &#x270F; <!-- Unicode pencil icon -->
+                    </a>
+                </div>
+                {% endif %}
+                
             </div>
             {% empty %}
             <p>No sentence sections found for this text.</p>
