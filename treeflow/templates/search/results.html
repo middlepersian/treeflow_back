@@ -3,7 +3,16 @@
         {% for section in page_obj %}
             <div id="section" class="mt-6">
                 <div id="section-details" class="font-bold">
-                <p>{{ section.identifier }} in {{ section.text }} <a href="{% url 'corpus:sections' text_id=section.text.id %}#{{ section.id }}">&#x1F50D; </a></p>
+                <p><a href="{% url 'corpus:sections' text_id=section.text.id %}#{{ section.id }}">&#x1F50D; </a>  <!-- Unicode magnifying glass icon -->
+
+                    {{ section.identifier }} in {{ section.text }} 
+                    {% if request.user.is_authenticated %}
+                    <!-- HTML with Tailwind CSS classes for styling the pencil icon -->
+          
+                        <a href="{% url 'corpus:sentence' section.id %}" class="text-green-500 hover:text-yellow-700 text-xl font-bold"> &#x270F;</a>
+            
+                    {% endif %}
+                </p>
                 </div>
                 <div id="sentence">
                     {% for section_token in section.sectiontoken_set.all %}
