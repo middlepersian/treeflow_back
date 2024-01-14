@@ -116,3 +116,11 @@
 #search-page-container .card .top-right-button button svg {
     pointer-events: none;
 }
+
+#search-page-container .loading-indicator, #search-page-container .htmx-request ~ #results-list {
+    display: none;
+}
+
+#search-page-container .htmx-request.loading-indicator {
+    display: flex;
+}
