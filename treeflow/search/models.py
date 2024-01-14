@@ -64,7 +64,7 @@ class SearchCriteria(models.Model):
     )
     case_sensitive = models.BooleanField(blank=False, default=False)
 
-    distance = models.PositiveIntegerField(blank=True, null=True, default=0)
+    distance = models.PositiveIntegerField(blank=True, null=True, default=1)
     distance_type = models.CharField(
         blank=True,
         choices=DISTANCE_TYPE_CHOICES,
