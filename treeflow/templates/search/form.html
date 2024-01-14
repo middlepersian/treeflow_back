@@ -20,6 +20,13 @@
             {% endif %}
         </div>
     </div>
+    <div id="case-sensitivity" class="flex justify-between items-center gap-4">
+        <label class="font-medium text-gray-900 whitespace-normal">Case sensitive?</label>
+        <div class="text-right">
+            {{ form.case_sensitive }}
+        </div>
+    </div>
+
 
     {% if firstForm %}
         <div id="form-initial-marker" class="flex flex-row gap-4 pt-4">

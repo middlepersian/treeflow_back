@@ -16,11 +16,21 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
 
     """
 
-    # TODO: istartswith, regexp, fuzzy
+    query = criteria["query"]
+    qfield = criteria["query_field"]
+    qtype = criteria["query_type"]
+    i = "" if criteria["case_sensitive"] else "i"
+
     query = (
-        Q(**{f"{criteria['query_field']}__iexact": criteria["query"]})
-        if criteria["query_type"] == "exact"
-        else Q(**{f"{criteria['query_field']}__icontains": criteria["query"]})
+        Q(**{f"{qfield}__{i}exact": query})
+        if qtype == "exact"
+        else Q(**{f"{qfield}__{i}startswith": query})
+        if qtype == "prefix"
+        else Q(**{f"{qfield}__{i}endswith": query})
+        if qtype == "suffix"
+        else Q(**{f"{qfield}__{i}regex": query})
+        if qtype == "regex"
+        else Q(**{f"{qfield}__{i}contains": query})
     )
 
     tokens = Token.objects.filter(query)

@@ -11,6 +11,7 @@ class DistanceForm(forms.ModelForm):
             "query",
             "query_type",
             "query_field",
+            "case_sensitive",
             "distance",
             "distance_type",
         )
@@ -23,6 +24,7 @@ class LogicalForm(forms.ModelForm):
             "query",
             "query_type",
             "query_field",
+            "case_sensitive",
             "logical_operator",
         )
 

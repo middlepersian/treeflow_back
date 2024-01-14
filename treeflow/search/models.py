@@ -5,10 +5,12 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class SearchCriteria(models.Model):
-    # Options
     QUERY_TYPE_CHOICES = [
         ("exact", "Exact"),
-        ("fuzzy", "Fuzzy"),
+        ("contains", "Contains"),
+        ("prefix", "Prefix"),
+        ("suffix", "Suffix"),
+        ("regex", "Regex"),
     ]
 
     FIELD_CHOICES = [
@@ -60,6 +62,7 @@ class SearchCriteria(models.Model):
     query_field = models.CharField(
         blank=False, choices=FIELD_CHOICES, default="transcription"
     )
+    case_sensitive = models.BooleanField(blank=False, default=False)
 
     distance = models.PositiveIntegerField(blank=True, null=True, default=0)
     distance_type = models.CharField(
