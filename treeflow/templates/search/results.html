@@ -17,7 +17,7 @@
     </div>
 
     <div id="pagination" class="flex flex-row mt-6 items-center justify-between border-t border-gray-200 bg-white px-4 py-3 gap-4">
-        <div class="flex flex-1 justify-between max-w-[20%]">
+        <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="flex flex-1 justify-between max-w-[20%]">
             {% if page_obj.has_previous %}
                 <a 
                     hx-get="{% url "search:results" %}?page={{ page_obj.previous_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
