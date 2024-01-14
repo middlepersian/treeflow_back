@@ -3,12 +3,12 @@
         {% for section in page_obj %}
             <div id="section" class="mt-6">
                 <div id="section-details" class="font-bold">
-                    <p>{{ section.identifier }} in {{ section.text }}</p>
+                    <p>{{ section.identifier }} in {{ section.text }} (<a class="text-off cursor-pointer font-bold hover:text-main-graded-900 underline" href="/corpus/ud-editor/{{section.id}}">UD-Editor</a>)</p>
                 </div>
                 <div id="sentence">
                     {% for section_token in section.sectiontoken_set.all %}
                         {% if section_token.token.transcription %}
-                            <span id="token" {% if section_token.token.transcription in queries %}class="text-indigo-700 font-bold"{% endif %}>{{ section_token.token.transcription }}</span>
+                            <span id="token" {% if section_token.token.transcription in queries %}class="bg-main text-white rounded font-bold px-1 mx-1 inline-flex"{% endif %}>{{ section_token.token.transcription }}</span>
                         {% endif %}                   
                     {% endfor %}
                 </div>
