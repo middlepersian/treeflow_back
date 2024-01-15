@@ -15,16 +15,11 @@ class SearchCriteria(models.Model):
 
     FIELD_CHOICES = [
         ("id", "ID"),
-        ("number", "Number"),
-        ("numberInSentence", "Number in sentence"),
-        ("root", "Root"),
-        # ("text", "Text"),
-        ("language", "Language"),
         ("transcription", "Transcription"),
         ("transliteration", "Transliteration"),
         ("avestan", "Avestan"),
         ("gloss", "Gloss"),
-        ("created_at", "Created"),
+        # ("created_at", "Created"),
     ]
 
     LANGUAGE_CHOICES = [
@@ -62,7 +57,13 @@ class SearchCriteria(models.Model):
     query_field = models.CharField(
         blank=False, choices=FIELD_CHOICES, default="transcription"
     )
+    is_root = models.BooleanField(blank=False, default=False)
+    language = models.CharField(
+        blank=True, choices=LANGUAGE_CHOICES, default=""
+    )
+
     case_sensitive = models.BooleanField(blank=False, default=False)
+
 
     distance = models.PositiveIntegerField(blank=True, null=True, default=1)
     distance_type = models.CharField(

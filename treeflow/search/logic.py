@@ -16,24 +16,27 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
 
     """
 
-    query = criteria["query"]
+    q = criteria["query"]
     qfield = criteria["query_field"]
     qtype = criteria["query_type"]
     i = "" if criteria["case_sensitive"] else "i"
+    lang = criteria["language"]
 
     query = (
-        Q(**{f"{qfield}__{i}exact": query})
+        Q(**{f"{qfield}__{i}exact": q})
         if qtype == "exact"
-        else Q(**{f"{qfield}__{i}startswith": query})
+        else Q(**{f"{qfield}__{i}startswith": q})
         if qtype == "prefix"
-        else Q(**{f"{qfield}__{i}endswith": query})
+        else Q(**{f"{qfield}__{i}endswith": q})
         if qtype == "suffix"
-        else Q(**{f"{qfield}__{i}regex": query})
+        else Q(**{f"{qfield}__{i}regex": q})
         if qtype == "regex"
-        else Q(**{f"{qfield}__{i}contains": query})
+        else Q(**{f"{qfield}__{i}contains": q})
     )
 
-    tokens = Token.objects.filter(query)
+    tokens = Token.objects.filter(query, Q(root=criteria["is_root"]))
+    if lang:
+        tokens &= tokens.filter(Q(language=lang))
 
     logger.debug(f"Retrieved {len(tokens)} tokens.")
     logger.debug(tokens.query)
@@ -127,7 +130,6 @@ def filter_sections_by_distance(
     sections = Section.objects.filter(id__in=section_ids)
 
     return sections
-
 
 
 def get_results(criteria: List):

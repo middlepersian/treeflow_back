@@ -20,6 +20,19 @@
             {% endif %}
         </div>
     </div>
+    <div id="is-root" class="flex justify-between items-center gap-4">
+        <label class="font-medium text-gray-900 whitespace-normal">Root?</label>
+        <div class="text-right">
+            {{ form.is_root }}
+        </div>
+    </div>
+    <div id="case-sensitivity" class="flex justify-between items-center gap-4">
+        <label class="font-medium text-gray-900 whitespace-normal">Language</label>
+        <div class="text-right">
+            {{ form.language }}
+        </div>
+    </div>
+    <hr class="h-px my-4 bg-gray-200 border-0 text-gray-700">
     <div id="case-sensitivity" class="flex justify-between items-center gap-4">
         <label class="font-medium text-gray-900 whitespace-normal">Case sensitive?</label>
         <div class="text-right">
