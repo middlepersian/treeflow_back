@@ -4,6 +4,10 @@ Base settings to build other settings files upon.
 from pathlib import Path
 import environ
 
+#celery
+# Add these imports
+from kombu import Exchange, Queue
+import os
 
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -366,3 +370,17 @@ CSRF_TRUSTED_ORIGINS = [
     "https://mpcorpus.org",
     "https://www.mpcorpus.org",
 ]
+#celery
+
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Define default and custom queues
+CELERY_QUEUES = (
+    Queue('default', Exchange('default'), routing_key='default'),
+    # Define other queues here
+)

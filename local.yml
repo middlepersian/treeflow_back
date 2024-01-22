@@ -58,3 +58,33 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: treeflow_local_django
+    container_name: celery_worker
+    depends_on:
+      - django
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: celery -A config.celery_app worker -l info
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: treeflow_local_django
+    container_name: celery_beat
+    depends_on:
+      - django
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: celery -A config.celery_app beat -l info
