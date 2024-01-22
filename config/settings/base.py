@@ -8,7 +8,7 @@ import environ
 # Add these imports
 from kombu import Exchange, Queue
 import os
-from datetime import timedelta
+from celery.schedules import crontab
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # treeflow/
@@ -386,13 +386,13 @@ CELERY_QUEUES = (
 
 CELERY_BEAT_SCHEDULE = {
     'update_zotero_data_every_hour': {
-        'task': 'treeflow.tasks.update_zotero_data_in_cache',
-        'schedule': timedelta(hours=1),
-        'options': {'queue': 'high_priority'},  # Assign to the high_priority queue
+        'task': 'treeflow.datafeed.tasks.update_zotero_data_in_cache',
+        'schedule': crontab(minute=0, hour='*/1'),
+        'options': {'queue': 'high_priority'},
     },
     'cache_all_texts_every_hour': {
-        'task': 'treeflow.tasks.cache_all_texts',
-        'schedule': timedelta(hours=1),
-        'options': {'queue': 'high_priority'},  # Assign to the high_priority queue
+        'task': 'treeflow.datafeed.tasks.cache_all_texts',
+        'schedule': crontab(minute=0, hour='*/1'),
+        'options': {'queue': 'high_priority'},
     },
 }

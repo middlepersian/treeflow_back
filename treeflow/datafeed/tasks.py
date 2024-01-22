@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def update_zotero_data_in_cache():
+    logger.info("Running update_zotero_data_in_cache task")
     collection_keys = {
     "Preliminary Publications": "4DBIWSQG",
     "Project Publications": "B3BHZEGW",
@@ -28,14 +29,17 @@ def update_zotero_data_in_cache():
     current_cache = cache.get(cache_key)
 
     if not current_cache:
+        logger.info("Cache miss for publications - Publications have been updated in the cache.")
         cache.set(cache_key, publications['collections'], timeout=3600)  # Set a 1-hour timeout
     else:
+        logger.info("Cache hit for publications - Publications have not been updated in the cache.")
         cache.set(cache_key, current_cache, timeout=None)  # Set no timeout
 
 
 
 @shared_task
 def cache_all_texts():
+    logger.info("Running cache_all_texts task")
     cache_key_texts = "all_texts"
     current_cache = cache.get(cache_key_texts)
 

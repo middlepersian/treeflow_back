@@ -1,7 +1,7 @@
 # views.py
 from django.shortcuts import render
 from django.core.cache import cache
-from treeflow.tasks import update_zotero_data_in_cache  # Import the shared task
+from treeflow.datafeed.tasks import update_zotero_data_in_cache  # Import the shared task
 
 def zotero_view(request):
     publications = cache.get('zotero_publications')

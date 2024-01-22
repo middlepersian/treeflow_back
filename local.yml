@@ -74,7 +74,8 @@ services:
       - ./.envs/.local/.postgres
     command: celery -A treeflow worker --loglevel=info
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.local 
+      - DJANGO_SETTINGS_MODULE=config.settings.local 
+
   celery_beat:
     build:
       context: .
@@ -93,3 +94,4 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.local
       - CELERY_BEAT=true
+

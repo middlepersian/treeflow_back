@@ -5,6 +5,9 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from treeflow.corpus.models import Text, Token, POS, SectionToken
 from treeflow.corpus.forms.feature_forms import FeatureFormSet
+from treeflow.datafeed.tasks import cache_all_texts  # Import the Celery task
+
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -17,7 +20,8 @@ def tokens_view(request, text_id=None):
         logger.info("Cache miss for texts - Fetching texts from database.")
         cache_all_texts.apply()  # Trigger the Celery task to update cache
         logger.info("Cache miss for texts - Triggered Celery task to update cache.")
-        
+        texts = cache.get(cache_key_texts)
+
     selected_text_id = text_id
 
     # Prefetch for sections of type 'sentence'

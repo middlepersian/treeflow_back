@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.core.cache import cache
 from django.db.models import Prefetch
 from treeflow.corpus.models import Section, Token, Text
-from treeflow.tasks import cache_all_texts  # Import the Celery task
+from treeflow.datafeed.tasks import cache_all_texts  # Import the Celery task
 from django.core import serializers
 import logging
 logger = logging.getLogger(__name__)
@@ -16,7 +16,8 @@ def sections_view(request, text_id=None):
         logger.info("Cache miss for texts - Fetching texts from database.")
         cache_all_texts.apply()  # Trigger the Celery task to update cache
         logger.info("Cache miss for texts - Triggered Celery task to update cache.")
-
+        texts = cache.get(cache_key_texts)
+        
     if text_id:
         selected_text_id = text_id
     else:
