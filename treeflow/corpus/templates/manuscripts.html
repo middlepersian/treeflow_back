@@ -39,6 +39,9 @@
           </svg>
           <span>{{manuscript}}</span>
           {% if user.is_authenticated %}
+          <a
+            href="{% url 'corpus:manuscript_images_table' manuscript.id %}"
+            class="hover:text-off-graded-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -52,6 +55,7 @@
               d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z"
             />
           </svg>
+        </a>
 
           {%endif%}
         </div>
