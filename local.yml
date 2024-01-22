@@ -72,8 +72,9 @@ services:
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
-    command: celery -A config.celery_app worker -l info
-
+    command: celery -A treeflow worker --loglevel=info
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local 
   celery_beat:
     build:
       context: .
@@ -82,9 +83,13 @@ services:
     container_name: celery_beat
     depends_on:
       - django
+      - redis
     volumes:
       - .:/app:z
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
-    command: celery -A config.celery_app beat -l info
+    command: celery -A treeflow beat --loglevel=info
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.local
+      - CELERY_BEAT=true

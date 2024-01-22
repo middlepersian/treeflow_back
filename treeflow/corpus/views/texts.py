@@ -2,6 +2,8 @@ from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404
 from treeflow.corpus.forms.text_form import TextForm
 from treeflow.corpus.models import Text
+from treeflow.tasks import cache_all_texts  # Import the Celery task
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,11 +11,11 @@ logger = logging.getLogger(__name__)
 def texts_view(request):
     cache_key_texts = "all_texts"
     texts = cache.get(cache_key_texts)
-    if not texts:
-        texts = Text.objects.all()
-        cache.set(cache_key_texts, texts, 300)
-        logger.info("Cache miss for texts")
 
+    if not texts:
+        logger.info("Cache miss for texts - Fetching texts from database.")
+        cache_all_texts.apply()  # Trigger the Celery task to update cache
+        logger.info("Cache miss for texts - Triggered Celery task to update cache.")
     logger.debug("request method: %s", request.method)
 
     if request.method == 'POST':

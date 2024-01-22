@@ -1,27 +1,15 @@
+# views.py
 from django.shortcuts import render
-from treeflow.corpus.utils.zotero import request_zotero_api_for_collection
+from django.core.cache import cache
+from treeflow.tasks import update_zotero_data_in_cache  # Import the shared task
 
 def zotero_view(request):
-    # Connect to Zotero API
+    publications = cache.get('zotero_publications')
+    
+    if not publications:
+        update_zotero_data_in_cache.apply()  # Call the task to update cache
+        # Optionally, wait for the task to complete and then fetch from cache
+        # or handle the waiting period appropriately in your view
 
-    collectionKeys = {
-    "Preliminary Publications": "4DBIWSQG",
-    "Project Publications": "B3BHZEGW",
-    "Related Publications": "8VFMBB74",
-    "Presentations": "YZX3G3DF",
-    "Related Presentations": "2DNQXANE",
-    }
-
-    publications = {
-        'group_key': 2116388,
-        'collections' : []
-    }
-    # Get Zotero data
-
-    for key, value in collectionKeys.items():
-
-        zotero_data,_ = request_zotero_api_for_collection(publications["group_key"],value)
-        publications["collections"].append({"name":key,"data":zotero_data})
-
-    # Render template with Zotero data
-    return render(request, 'pages/publications.html', {'publications': publications['collections']})
+    publications = cache.get('zotero_publications', [])  # Attempt to fetch from cache again
+    return render(request, 'pages/publications.html', {'publications': publications})

@@ -8,7 +8,7 @@ import environ
 # Add these imports
 from kombu import Exchange, Queue
 import os
-
+from datetime import timedelta
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # treeflow/
@@ -281,16 +281,15 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
-
-redis_url = env('REDIS_URL', default='redis://redis:6379/0')  # Use 'redis' as hostname
-
 # Redis cache configuration
+redis_url = env('REDIS_URL', default='redis://redis:6379/0')  # Use 'redis' as hostname
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': redis_url,  # Change the URL according to your Redis server
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'TIMEOUT': 3600,  # Cache timeout in seconds (1 hour)
         }
     }
 }
@@ -382,5 +381,18 @@ CELERY_TIMEZONE = 'UTC'
 # Define default and custom queues
 CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
-    # Define other queues here
+    Queue('high_priority', Exchange('high_priority'), routing_key='high_priority'),
 )
+
+CELERY_BEAT_SCHEDULE = {
+    'update_zotero_data_every_hour': {
+        'task': 'treeflow.tasks.update_zotero_data_in_cache',
+        'schedule': timedelta(hours=1),
+        'options': {'queue': 'high_priority'},  # Assign to the high_priority queue
+    },
+    'cache_all_texts_every_hour': {
+        'task': 'treeflow.tasks.cache_all_texts',
+        'schedule': timedelta(hours=1),
+        'options': {'queue': 'high_priority'},  # Assign to the high_priority queue
+    },
+}
