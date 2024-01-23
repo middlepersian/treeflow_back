@@ -27,8 +27,8 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = "treeflow"
-copyright = """2021, Francisco Mondaca"""
-author = "Francisco Mondaca"
+copyright = """2024, Francisco Mondaca, Moritz Esser, Luke Günther and Malte Rudius - University of Cologne"""
+author = "Francisco Mondaca, Moritz Esser, Luke Günther and Malte Rudius - University of Cologne - 2024"
 
 
 # -- General configuration ---------------------------------------------------
