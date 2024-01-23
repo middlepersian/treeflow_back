@@ -60,3 +60,22 @@ def get_images_for_manuscript(request,manuscript_id=None):
             "images":images,
         },
     )
+
+def get_images_for_manuscript_table(request,manuscript_id=None):
+    manuscript = get_object_or_404(Source, id=manuscript_id)
+
+    # get all images for the manuscript
+    images = Image.objects.filter(source=manuscript).order_by("number")
+
+    #setup paginator
+    paginator = Paginator(images, 50)
+    page_number = request.GET.get('page')
+    images_page = paginator.get_page(page_number)
+    logger.debug('images_page: %s', images_page)
+    context = {
+        'manuscripts': images_page,
+        'page_title': 'Manuscripts',
+        
+    }
+
+    return render(request, 'source_manuscripts.html',context)
