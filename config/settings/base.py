@@ -3,12 +3,8 @@ Base settings to build other settings files upon.
 """
 from pathlib import Path
 import environ
-
-#celery
-# Add these imports
-from kombu import Exchange, Queue
 import os
-from celery.schedules import crontab
+
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # treeflow/
@@ -85,6 +81,7 @@ THIRD_PARTY_APPS = [
     "theme",
     "strawberry.django", 
     "django_select2",
+    "huey.contrib.djhuey"
 ]
 
 LOCAL_APPS = [
@@ -369,30 +366,29 @@ CSRF_TRUSTED_ORIGINS = [
     "https://mpcorpus.org",
     "https://www.mpcorpus.org",
 ]
-#celery
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-
-# Define default and custom queues
-CELERY_QUEUES = (
-    Queue('default', Exchange('default'), routing_key='default'),
-    Queue('high_priority', Exchange('high_priority'), routing_key='high_priority'),
-)
-
-CELERY_BEAT_SCHEDULE = {
-    'update_zotero_data_every_hour': {
-        'task': 'treeflow.datafeed.tasks.update_zotero_data_in_cache',
-        'schedule': crontab(minute=0, hour='*/1'),
-        'options': {'queue': 'high_priority'},
+# settings.py
+HUEY = {
+    'huey_class': 'huey.RedisHuey',  # Huey implementation to use.
+    'url': redis_url,  # Use 'redis' as hostname.
+    'name': 'my-app',
+    'results': True,  # Store return values of tasks.
+    'store_none': False,  # If a task returns None, do not save to results.
+    'immediate': DEBUG,  # If DEBUG=True, run synchronously.
+    'utc': True,  # Use UTC for all times internally.
+    'blocking': True,  # Perform blocking pop rather than poll Redis.
+    'consumer': {
+        'workers': 1,
+        'worker_type': 'thread',
+        'initial_delay': 0.1,  # Smallest polling interval, same as -d.
+        'backoff': 1.15,  # Exponential backoff using this rate, -b.
+        'max_delay': 10.0,  # Max possible polling interval, -m.
+        'scheduler_interval': 1,  # Check schedule every second, -s.
+        'periodic': True,  # Enable crontab feature.
+        'check_worker_health': True,  # Enable worker health checks.
+        'health_check_interval': 1,  # Check worker health every second.
     },
-    'cache_all_texts_every_hour': {
-        'task': 'treeflow.datafeed.tasks.cache_all_texts',
-        'schedule': crontab(minute=0, hour='*/1'),
-        'options': {'queue': 'high_priority'},
+    'connection': {
+        'url': redis_url,  # Redis instance address.
     },
 }

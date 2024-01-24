@@ -1,14 +1,18 @@
 from django.core.management.base import BaseCommand
-from treeflow.tasks import update_zotero_data_in_cache, cache_all_texts
+from django.core.cache import cache
+from treeflow.datafeed.cache import update_zotero_data_in_cache, cache_all_texts
 import logging
 
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Initializes the cache'
+    help = 'Manually clean cache and trigger tasks'
 
     def handle(self, *args, **kwargs):
-        logger.info('Initializing cache with Zotero data')
-        update_zotero_data_in_cache.apply()
-        logger.info('Initializing cache with texts')
-        cache_all_texts.apply()
+        # Clean the cache
+        cache.clear()
+        logger.debug("Cache has been cleared")
+        # Call Huey tasks
+        update_zotero_data_in_cache()
+        cache_all_texts()
+        logger.debug("Text and Zotero data have been updated in the cache")
