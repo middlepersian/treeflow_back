@@ -19,7 +19,3 @@ def periodic_cache_all_texts():
     logger.info("Running periodic_cache_all_texts task")
     cache_all_texts()
         
-@db_periodic_task(crontab(minute='*/1'))
-def every_min():
-    logger.info("Running every min task")
-    pass
