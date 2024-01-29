@@ -1,15 +1,16 @@
 <!-- bibentry_list.html -->
 
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
-<h1>Bibliography</h1>
+<h1>{% trans 'Bibliography' %}</h1>
 
 
   <table class="table-auto">
     <tr>
-      <th>Key</th>
-      <th>Title</th>
+      <th>{% trans 'Key' %}</th>
+      <th>{% trans 'Title' %}</th>
     </tr>
     {% for zotero_entry in zotero_entries %}
       <tr>

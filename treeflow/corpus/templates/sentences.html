@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 {% load comment_tags %}
 {% block content %}
 
@@ -7,35 +7,35 @@
   <!-- Text Dropdown -->
   <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
   <!-- Flex container for the split view -->
-  <div class="flex-grow flex w-full">
+  <div class="flex flex-grow w-full">
     <!-- Left Column for Tokens -->
     <div class="w-8/12 overflow-x-auto">
       <!-- Table for displaying tokens -->
       <table class="min-w-full">
-        <thead class="bg-gray-800 text-white">
+        <thead class="text-white bg-gray-800">
           <tr>
-            <th class="px-4 py-2">Number in Text</th>
-            <th class="px-4 py-2">Number in Sentence</th>
-            <th class="px-4 py-2">Image</th>
-            <th class="px-4 py-2">Line</th>
-            <th class="px-4 py-2">Transcription</th>
-            <th class="px-4 py-2">Transliteration</th>
-            <th class="px-4 py-2">Avestan</th>
-            <th class="px-4 py-2">Lemmas</th>
-            <th class="px-4 py-2">Senses</th>
-            <th class="px-4 py-2">POS</th>
-            <th class="px-4 py-2">Features</th>
-            <th class="px-4 py-2">Comments</th>
-            <th class="px-4 py-2">Insert Before</th>
-            <th class="px-4 py-2">Insert After</th>
-            <th class="px-4 py-2">Delete Token</th>
+            <th class="px-4 py-2">{% trans 'Number in Text' %}</th>
+            <th class="px-4 py-2">{% trans 'Number in Sentence' %}</th>
+            <th class="px-4 py-2">{% trans 'Image' %}</th>
+            <th class="px-4 py-2">{% trans 'Line' %}</th>
+            <th class="px-4 py-2">{% trans 'Transcription' %}</th>
+            <th class="px-4 py-2">{% trans 'Transliteration' %}</th>
+            <th class="px-4 py-2">{% trans 'Avestan' %}</th>
+            <th class="px-4 py-2">{% trans 'Lemmas' %}</th>
+            <th class="px-4 py-2">{% trans 'Senses' %}</th>
+            <th class="px-4 py-2">{% trans 'POS' %}</th>
+            <th class="px-4 py-2">{% trans 'Features' %}</th>
+            <th class="px-4 py-2">{% trans 'Comments' %}</th>
+            <th class="px-4 py-2">{% trans 'Insert Before' %}</th>
+            <th class="px-4 py-2">{% trans 'Insert After' %}</th>
+            <th class="px-4 py-2">{% trans 'Delete Token' %}</th>
           </tr>
         </thead>
         <tbody>
           {% for sentence in page_obj %}
         <!-- Sentence Header Row -->
         <tr  class="bg-blue-100 sentence-header-row">
-          <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">Identifier: {{ sentence.identifier }}</span></td>
+          <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">{% trans 'Identifier' %}: {{ sentence.identifier }}</span></td>
         </tr>
         <tr class="bg-blue-100 sentence-header-row">
           <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID: {{ sentence.id }}</span></td>
@@ -43,7 +43,7 @@
         <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
           <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
             <span id="sentence-senses-{{sentence.id}}">
-            <ul> Translations:
+            <ul> {% trans 'Translations' %}:
               {% for sense in sentence.senses.all %}
               <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
               {% endfor %}
@@ -53,52 +53,52 @@
         </tr>
 
         <!-- UD -->
-        <tr class="bg-blue-100 sentence-header-row"">
-          <td  id="sentence-ud-cell" colspan="15" class="px-4 py-2 text-blue-500 hover:text-blue-700 font-bold">
-           <a href="{% url 'corpus:ud_editor' sentence.id %}">Edit Universal Dependencies
+        <tr class="bg-blue-100 sentence-header-row">
+          <td  id="sentence-ud-cell" colspan="15" class="px-4 py-2 font-bold text-blue-500 hover:text-blue-700">
+           <a href="{% url 'corpus:ud_editor' sentence.id %}">{% trans 'Edit Universal Dependencies' %}
           </td>
         </td>
 
         </tr>
 
           {% for token in sentence.tokens.all %}
-          <tr class="bg-white shadow-lg rounded mb-4 overflow-hidden"
+          <tr class="mb-4 overflow-hidden bg-white rounded shadow-lg"
             id="token-{{token.id}}">
             {% csrf_token %}
 
             <!-- Number in Text -->
-            <td class="border px-4 py-2 text-center">{{ token.number }}</td>
+            <td class="px-4 py-2 text-center border">{{ token.number }}</td>
 
             <!-- Number in Sentence -->
-            <td class="border px-4 py-2">
+            <td class="px-4 py-2 border">
               <input type="text" name="number_in_sentence"
                 value="{{ token.number_in_sentence }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="w-full shadow border rounded py-2 px-3 text-grey-darker">
+                class="w-full px-3 py-2 border rounded shadow text-grey-darker">
             </td>
 
 
             <!-- Image -->
-            <td class="border px-4 py-2">
+            <td class="px-4 py-2 border">
               {{ token.image.identifier }}
             </td>
 
             <!-- Line -->
-            <td class="border px-4 py-2">
+            <td class="px-4 py-2 border">
               <!-- Display 'line' type sections -->
               {% for section_token in token.line_sections %}
               {{ section_token.section.number }}
               <!-- Display the title or other fields -->
               {% empty %}
-              No line sections
+              {% trans 'No line sections' %}
               {% endfor %}
             </td>
 
             <!-- Transcription -->
-            <td id="transcription-cell" class="border px-4 py-2">
+            <td id="transcription-cell" class="px-4 py-2 border">
               <input id="transcription-content-{{ token.id }}" type="text"
                 name="transcription"
                 value="{{ token.transcription }}"
@@ -106,10 +106,10 @@
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="shadow border rounded py-2 px-3 text-grey-darker">
+                class="px-3 py-2 border rounded shadow text-grey-darker">
             </td>
             <!-- Transliteration -->
-            <td id="transliteration-cell" class="border px-4 py-2">
+            <td id="transliteration-cell" class="px-4 py-2 border">
               <input id="transliteration-content-{{ token.id }}" type="text"
                 name="transliteration"
                 value="{{ token.transliteration }}"
@@ -117,11 +117,11 @@
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="shadow border rounded py-2 px-3 text-grey-darker">
+                class="px-3 py-2 border rounded shadow text-grey-darker">
             </td>
 
             <!-- Avestan -->
-            <td id="avestan-cell" class="border px-4 py-2">
+            <td id="avestan-cell" class="px-4 py-2 border">
               <input id="avestan-content-{{ token.id }}" type="text"
                 name="avestan"
                 value="{{ token.avestan }}"
@@ -129,10 +129,10 @@
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="shadow border rounded py-2 px-3 text-grey-darker">
+                class="px-3 py-2 border rounded shadow text-grey-darker">
             </td>
             <!-- Lemmas -->
-            <td id="lemmas-cell" class="border px-4 py-2"
+            <td id="lemmas-cell" class="px-4 py-2 border"
               hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
               hx-target="#senseModalContent"
               hx-trigger="click">
@@ -147,7 +147,7 @@
             </td>
 
             <!-- Senses -->
-            <td id="sense-cell" class="border px-4 py-2"
+            <td id="sense-cell" class="px-4 py-2 border"
               hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
               hx-target="#senseModalContent" hx-trigger="click">
               <span id="sense-content-{{ token.id }}">
@@ -161,7 +161,7 @@
             </td>
 
             <!-- POS -->
-            <td id="pos-cell" class="border px-4 py-2"
+            <td id="pos-cell" class="px-4 py-2 border"
               hx-get="{% url 'corpus:pos_feature_form' token.id %}"
               hx-target="#featureModalContent" hx-trigger="click">
               <span id="pos-content-{{ token.id }}">
@@ -178,7 +178,7 @@
             </td>
 
             <!-- Features -->
-            <td id="features-cell" class="border px-4 py-2"
+            <td id="features-cell" class="px-4 py-2 border"
               hx-get="{% url 'corpus:pos_feature_form' token.id %}"
               hx-target="#featureModalContent" hx-trigger="click">
               <span id="features-content-{{ token.id }}">
@@ -192,7 +192,7 @@
             </td>
 
             <!-- Comments -->
-            <td id="comments-cell" class="border px-4 py-2"
+            <td id="comments-cell" class="px-4 py-2 border"
               hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
               hx-target="#commentModalContent"
               hx-trigger="click">
@@ -202,7 +202,7 @@
             </td> 
 
             <!-- Insert Before Button -->
-            <td class="border px-4 py-2">
+            <td class="px-4 py-2 border">
               <form method="post"
                 action="{% url 'corpus:insert_before_token' token.id %}">
                 {% csrf_token %}
@@ -213,13 +213,13 @@
                   value="{{ selected_text_id }}">
                 <input type="hidden" name="sentence_id"
                   value="{{ sentence.id }}">
-                <input type="submit" value="⬆️ Insert"
-                  class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                <input type="submit" value={% trans 'Insert' %}
+                  class="px-2 py-1 font-bold text-white rounded cursor-pointer bg-action hover:bg-action-graded-700 focus:outline-none focus:shadow-outline">
               </form>
             </td>
 
             <!-- Insert After Button -->
-            <td class="border px-4 py-2">
+            <td class="px-4 py-2 border">
               <form method="post"
                 action="{% url 'corpus:insert_after_token' token.id %}">
                 {% csrf_token %}
@@ -230,13 +230,13 @@
                   value="{{ selected_text_id }}">
                 <input type="hidden" name="sentence_id"
                   value="{{ sentence.id }}">
-                <input type="submit" value="⬇️ Insert"
-                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                <input type="submit" value={% trans 'Insert' %}
+                  class="px-2 py-1 font-bold text-white rounded cursor-pointer bg-off hover:bg-off-dark focus:outline-none focus:shadow-outline">
               </form>
             </td>
 
             <!-- Delete Button -->
-            <td class="border px-4 py-2">
+            <td class="px-4 py-2 border">
               <form method="post"
                 action="{% url 'corpus:delete_token' token.id %}">
                 {% csrf_token %}
@@ -247,8 +247,8 @@
                   value="{{ selected_text_id }}">
                 <input type="hidden" name="sentence_id"
                   value="{{ sentence.id }}">
-                <input type="submit" value="Delete"
-                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                <input type="submit" value={% trans 'Delete' %}
+                  class="px-2 py-1 font-bold text-white bg-red-500 rounded cursor-pointer hover:bg-red-700 focus:outline-none focus:shadow-outline">
               </form>
             </td>
           </tr>
@@ -263,11 +263,11 @@
 
     <!-- Sentence senses modal -->
   <div
-    class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+    class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50"
     id="sentenceSensesModal">
     <div class="flex items-center justify-center min-h-screen">
       <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
-      <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+      <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
         <!-- Modal content here -->
         <div id="sentenceSensesModalContent"></div>
       </div>
@@ -278,11 +278,11 @@
 
     <!-- Token Lemma Sense Modal -->
     <div
-      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50"
       id="senseModal">
       <div class="flex items-center justify-center min-h-screen">
         <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
-        <div class="bg-white rounded-lg shadow-lg w-3/4 mx-auto p-4">
+        <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
           <!-- Modal content here -->
           <div id="senseModalContent"></div>
         </div>
@@ -291,10 +291,10 @@
 
     <!-- POS and Feature Modal -->
     <div
-      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50"
       id="featureModal">
       <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+        <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
           <!-- Add p-4 for padding -->
           <!-- Modal content here -->
           <div id="featureModalContent"></div>
@@ -305,10 +305,10 @@
 
     <!-- Comment Modal -->
     <div
-      class="hidden fixed inset-0 z-50 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50"
       id="commentModal">
       <div class="flex items-center justify-center min-h-screen">
-        <div class="bg-white rounded-lg shadow-lg w-96 mx-auto p-4">
+        <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
           <!-- Add p-4 for padding -->
           <!-- Modal content here -->
           <div id="commentModalContent"></div>
@@ -320,7 +320,7 @@
   </div>
 
   <!-- Pagination controls -->
-  <div class="lex justify-center py-4"> {% include 'pagination.html' %}</div>
+  <div class="justify-center py-4 lex"> {% include 'pagination.html' %}</div>
   <!-- close main div-->
 </div>
 

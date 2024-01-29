@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load i18n%}
 
 {% block content %}
-        <form class="flex flex-col justify-center items-center h-screen" method="post" action="">
+        <form class="flex flex-col items-center justify-center h-screen" method="post" action="">
             {% csrf_token %}
             {{ form.as_table }}
             {{ form.bibentry_forms.management_form }}
             {% for bibentry_form in form.bibentry_forms %}
                 {{ bibentry_form.as_modal }}
             {% endfor %}
-            <input type="submit" value="Submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <input type="submit" value={% trans 'Submit' %} class="px-4 py-2 font-bold text-white rounded bg-main hover:bg-main-dark">
         </form>
 {% endblock %}

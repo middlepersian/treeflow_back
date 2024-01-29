@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Update source{% endblock %}
+{% block title %}{% trans 'Update source' %}{% endblock %}
 
 {% block content %}
 
-<h1>Update source</h1>
+<h1>{% trans 'Update source' %}</h1>
 
 <form action="{% url 'corpus:update_source' source_id=source.id %}" method="post">
   {% csrf_token %}
@@ -15,6 +16,6 @@
 
 </form>
 
-<a href="{% url 'corpus:sources' %}">Back to source table</a>
+<a href="{% url 'corpus:sources' %}">{% trans 'Back to source table' %}</a>
 
 {% endblock %}
