@@ -6,7 +6,7 @@ shared_fields = (
     "query",
     "query_type",
     "query_field",
-    "is_root",
+    "root",
     "language",
     "case_sensitive",
 )

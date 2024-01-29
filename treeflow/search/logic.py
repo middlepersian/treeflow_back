@@ -34,7 +34,7 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
         else Q(**{f"{qfield}__{i}contains": q})
     )
 
-    tokens = Token.objects.filter(query, Q(root=criteria["is_root"]))
+    tokens = Token.objects.filter(query, Q(root=criteria["root"]))
     if lang:
         tokens &= tokens.filter(Q(language=lang))
 

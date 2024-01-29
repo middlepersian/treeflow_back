@@ -57,7 +57,7 @@ class SearchCriteria(models.Model):
     query_field = models.CharField(
         blank=False, choices=FIELD_CHOICES, default="transcription"
     )
-    is_root = models.BooleanField(blank=False, default=False)
+    root = models.BooleanField(blank=False, default=False)
     language = models.CharField(
         blank=True, choices=LANGUAGE_CHOICES, default=""
     )
