@@ -33,4 +33,20 @@ class SectionEditorForm(forms.ModelForm):
             tokens = list(self.instance.tokens.all()) if self.instance.tokens.exists() else []
             self.fields['tokens_display'].initial = ', '.join(str(token) for token in tokens)
             self.fields['tokens_display'].widget.attrs['readonly'] = True
-            self.fields['tokens_display'].widget.attrs['style'] = 'width: 100%;'
+            self.fields['tokens_display'].widget.attrs['style'] = 'max-height: 200px; resize: vertical; width: 100%; border-radius: 5px;'
+
+        self.fields['number'].widget.attrs.update({
+            'style': 'border-radius: 5px;',
+        })
+        self.fields['identifier'].widget.attrs.update({
+            'style': 'border-radius: 5px;',
+        })
+        self.fields['type'].widget.attrs.update({
+            'style': 'border-radius: 5px;',
+        })
+        self.fields['title'].widget.attrs.update({
+            'style': 'border-radius: 5px;',
+        })
+        self.fields['language'].widget.attrs.update({
+            'style': 'border-radius: 5px;',
+        })

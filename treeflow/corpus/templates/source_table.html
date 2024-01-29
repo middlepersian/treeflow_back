@@ -1,68 +1,68 @@
 {% extends 'base.html' %}
-
+{% load static i18n %} 
 
 {% block content %}
 
-<h1 class="text-2xl font-bold">Source Table</h1>
+<h1 class="text-2xl font-bold">{% trans 'Source Table' %}</h1>
 
-<table class="table-auto mx-auto">
+<table class="mx-auto table-auto">
   <thead>
     <tr>
-      <th class="border p-2">Identifier</th>
-      <th class="border p-2">Description</th>
-      <th class="border p-2">Type</th>
-      <th class="border p-2">Related Sources</th>
-      <th class="border p-2">Zotero Keys</th>
-      <th class="border p-2">Delete</th>
+      <th class="p-2 border">{% trans 'Identifier' %}</th>
+      <th class="p-2 border">{% trans 'Description' %}</th>
+      <th class="p-2 border">{% trans 'Type' %}</th>
+      <th class="p-2 border">{% trans 'Related Sources' %}</th>
+      <th class="p-2 border">{% trans 'Zotero Keys' %}</th>
+      <th class="p-2 border">{% trans 'Delete' %}</th>
     </tr>
   </thead>
   <tbody>
     {% if request.user.is_authenticated %}
     {% for source in sources %}
     <tr>
-      <td class="border p-2">
+      <td class="p-2 border">
         <input type="text" name="identifier" value="{{ source.identifier }}"
             hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="shadow border rounded py-2 px-3 text-gray-700">
+            class="px-3 py-2 text-gray-700 border rounded shadow">
       </td>
-      <td class="border p-2">
+      <td class="p-2 border">
         <input type="text" name="description" value="{{ source.description }}"
             hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="shadow border rounded py-2 px-3 text-gray-700">
+            class="px-3 py-2 text-gray-700 border rounded shadow">
         </td>
-      <td class="border p-2">
+      <td class="p-2 border">
         <input type="text" name="type" value="{{ source.type }}"
             hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="shadow border rounded py-2 px-3 text-gray-700">
+            class="px-3 py-2 text-gray-700 border rounded shadow">
       </td>
-      <td class="border p-2">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 rounded bg-main hover:bg-main-graded-600 text-white cursor-pointer">Edit</a></td>
-      <td class="border p-2">
+      <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a></td>
+      <td class="p-2 border">
         {%for ref in source.references.all %}{{ref}}{%endfor%}
-        <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 rounded bg-main hover:bg-main-graded-600 text-white cursor-pointer">Edit</a>
+        <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a>
       </td> 
-      <td class="border p-2"><a class="p-2 rounded bg-red-800 text-white hover:bg-red-700 cursor-pointer" href="{%url 'corpus:source_delete' source_id=source.id %}">Delete</a></td>
+      <td class="p-2 border"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
     
     </tr>
     {% endfor %}
     {% else %}
     {% for source in sources %}
     <tr>
-      <td class="border p-2">{{ source.identifier }}</td>
-      <td class="border p-2">{{ source.description }}</td>
-      <td class="border p-2">{{ source.type }}</td>
-      <td class="border p-2">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
-      <td class="border p-2">{%for ref in source.references.all %}{{ref}}{%endfor%}</td> 
-      <td class="border p-2"> - </td>
+      <td class="p-2 border">{{ source.identifier }}</td>
+      <td class="p-2 border">{{ source.description }}</td>
+      <td class="p-2 border">{{ source.type }}</td>
+      <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
+      <td class="p-2 border">{%for ref in source.references.all %}{{ref}}{%endfor%}</td> 
+      <td class="p-2 border"> - </td>
     </tr>
     {% endfor %}
     {% endif %}
   </tbody>
 </table>
 {% if request.user.is_authenticated %} 
-<a class="p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer mt-2 mx-auto" href="{%url 'corpus:source_add'%}">Add New</a>
+<a class="p-2 mx-auto mt-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark" href="{%url 'corpus:source_add'%}">{% trans 'Add New' %}</a>
 {% endif %}
 
 <!-- Modal -->

@@ -16,3 +16,10 @@ class TokenForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         token = kwargs.pop('token', None)
         super(TokenForm, self).__init__(*args, **kwargs)
+
+        self.fields['transcription'].widget.attrs.update({
+            'style': 'max-height: 200px; resize: vertical; width: 100%; border-radius: 5px;',
+        })
+        self.fields['transliteration'].widget.attrs.update({
+            'style': 'max-height: 200px; resize: vertical; width: 100%; border-radius: 5px;',
+        })

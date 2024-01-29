@@ -1,10 +1,12 @@
 <!-- section_modal.html -->
+{% load i18n %}
+
 <div id="sectionModal"
     class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen">
         <div
-            class="bg-white rounded-lg shadow-xl p-6 modal-content w-full max-w-md mx-auto">
-            <h2 class="text-lg font-bold mb-4">Create New Section</h2>
+            class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
+            <h2 class="mb-4 text-lg font-bold">Create New Section</h2>
             <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}"
                 method="post" class="space-y-4">
                 {% csrf_token %}
@@ -12,18 +14,18 @@
                 <div class="space-y-2">
                     {{ form.as_p }}
                 </div>
-                <div class="selected-tokens-list my-4">
+                <div class="my-4 selected-tokens-list">
                     <h3 class="font-semibold">Selected Tokens:</h3>
                     <div id="selectedTokensDisplay"></div>
                 </div>
                 <div class="flex justify-between mt-6">
                     <button type="button" onclick="closeModal()"
-                        class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none">
-                        Cancel
+                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none">
+                        {% trans 'Cancel' %}
                     </button>
                     <button type="submit"
-                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-700 focus:outline-none">
-                        Save Section
+                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-500 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
+                        {% trans 'Save Section' %}
                     </button>
                 </div>
             </form>

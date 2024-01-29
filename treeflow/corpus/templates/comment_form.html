@@ -1,8 +1,8 @@
 <!-- comment_form.html -->
 <div
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    class="fixed inset-0 flex items-center justify-center w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
     <div
-        class="bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
+        class="p-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:max-w-lg sm:w-full">
         <!-- Modal content here -->
         <form id="comment-form" method="post"
             hx-post="{% url 'corpus:comment_form' related_model_id %}?related_model_type={{ related_model_type }}"
@@ -36,10 +36,10 @@
             </div>
             {% endfor %}
             <button type="submit"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
+                class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700">{% trans 'Submit' %}</button>
             <button type="button"
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                onclick="closeCommentModal()">Close</button>
+                class="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700"
+                onclick="closeCommentModal()">{% trans 'Close' %}</button>
         </form>
     </div>
 </div>
