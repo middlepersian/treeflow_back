@@ -26,6 +26,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
     prev_chapter = None
     prev_section = None
     prev_subsection = None
+    prev_subsubsection = None
     previous_folio_obj = None  # Initialize the previous_folio_obj variable
     previous_line_obj = None  # Initialize the previous_line_obj variable
     previous_token_obj = None  # Initialize the previous_token_obj variable
@@ -95,6 +96,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
     chapter_number = 1
     section_number = 1
     subsection_number = 1
+    subsubsection_number = 1
 
     # read csv file
     df = pd.read_csv(csv_file, sep="\t", encoding="utf-8", header=0)
@@ -108,6 +110,8 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         pos = None
         postfeatures = None
         newpart = None
+        avestan = None
+        gloss = None
 
         if sentence_obj:
             # check if at the end of the sentence
@@ -232,8 +236,17 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
         if row["transliteration"] != "_" and pd.notna(row["transliteration"]):
             transliteration = row["transliteration"]
 
+        # check if transcription value present
         if row["transcription"] != "_" and pd.notna(row["transliteration"]):
             transcription = row["transcription"]
+
+        # check if avestan value present
+        if row["avestan"] != "_" and pd.notna(row["avestan"]):
+            avestan = row["avestan"]
+
+        # check if gloss present
+        if row["gloss"] != "_" and pd.notna(row["gloss"]):
+            gloss = row["gloss"]
 
         if (
             row["postag"] != "_"
@@ -259,7 +272,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                 logger.error(
                     "Row {} - {} - {}".format(df.index[i] + 2, row["token_lang"], str(e))
                 )
-            # increase token numbe
+            # increase token number
             if transliteration:
                 token.transliteration = transliteration
                 assert token.transliteration == transliteration
@@ -269,6 +282,10 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
             if transcription:
                 token.transcription = transcription
                 # print("token.transcription", token.transcription)
+            if avestan:
+                token.avestan = avestan
+            if gloss:
+                token.gloss = gloss
             # add upos
 
             # if there is a number_in_sentence, then it is a word token
@@ -697,7 +714,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                             source, chapter, section, subsection = newpart.split("_")
                             chapter = chapter.strip()
                             section = section.strip()
-                            subsection = subsection.strip()                        
+                            subsection = subsection.strip()
                             chapter_human = chapter.replace("ch", "chapter ")
                             section_human = section.replace("sec", "section ")
                             subsection_human = subsection.replace("subsec", "subsection ")
@@ -785,6 +802,142 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                 prev_chapter = chapter_obj
                                 prev_section = section_obj
                                 prev_subsection = subsection_obj
+                        # newpart text_ch001_sec001_subsec001_subsubsec001
+                        # only Berlin texts
+                        elif newpart_type == 5:
+                            source, chapter, section, subsection, subsubsection = newpart.split("_")
+                            chapter = chapter.strip()
+                            section = section.strip()
+                            subsection = subsection.strip()
+                            subsubsection = subsubsection.strip()
+                            chapter_human = chapter.replace("ch", "chapter ")
+                            section_human = section.replace("sec", "section ")
+                            subsection_human = subsection.replace("subsec", "subsection ")
+                            subsubsection_human = subsubsection # to do
+                            logger.error(f"{text_identifier}, {chapter_human}, {section_human}, {subsection_human}, {subsubsection_human}")
+                            # get or create the chapter object
+                            chapter_identifier = source + "_" + chapter
+                            assert chapter_identifier is not None
+                            if token:
+                                (
+                                    chapter_obj,
+                                    chapter_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="chapter",
+                                    identifier=chapter_identifier,
+                                    title=chapter_human,
+                                    text=text_object,
+                                )
+
+                                if chapter_obj_created:
+                                    chapter_obj.number = chapter_number
+                                    chapter_number += 1
+                                    # chapter_obj.tokens.add(token)
+                                    # if the current chapter is not the same as the previous chapter
+                                    if prev_chapter:
+                                        if chapter_obj != prev_chapter:
+                                            # set the current chapter as the previous chapter for the next iteration
+                                            chapter_obj.previous = prev_chapter
+
+                                # get or create the section object
+                                section_identifier = source + "_" + chapter + "_" + section
+                                assert section_identifier is not None
+                                (
+                                    section_obj,
+                                    section_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="section",
+                                    identifier=section_identifier,
+                                    title=section_human,
+                                    text=text_object,
+                                )
+                                if section_obj_created:
+                                    section_obj.number = section_number
+                                    section_number += 1
+                                    # if the current section is not the same as the previous section and belong to the same chapter
+                                    if prev_section:
+                                        if (
+                                            section_obj != prev_section
+                                            and prev_section.container == chapter_obj
+                                        ):
+                                            # set the current section as the previous section for the next iteration
+                                            section_obj.previous = prev_section
+                                # get or create the subsection object
+                                subsection_identifier = source + "_" + chapter + "_" + section + "_" + subsection
+                                assert subsection_identifier is not None
+                                (
+                                    subsection_obj,
+                                    subsection_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="subsection",
+                                    identifier=subsection_identifier,
+                                    title=subsection_human,
+                                    text=text_object,
+                                )
+                                if subsection_obj_created:
+                                    subsection_obj.number = subsection_number
+                                    subsection_number += 1
+                                    # if the current section is not the same as the previous section and belong to the same chapter
+                                    if prev_subsection:
+                                        if (
+                                            subsection_obj != prev_subsection
+                                            and prev_subsection.container == section_obj
+                                        ):
+                                            # set the current section as the previous section for the next iteration
+                                            subsection_obj.previous = prev_subsection
+
+                                subsection_obj.container = section_obj
+                                section_obj.container = chapter_obj
+                                chapter_obj.tokens.add(token)
+                                section_obj.tokens.add(token)
+                                subsection_obj.tokens.add(token)
+                                subsection_obj.save()
+                                section_obj.save()
+                                chapter_obj.save()
+                                # update previous chapter and section
+                                prev_chapter = chapter_obj
+                                prev_section = section_obj
+                                prev_subsection = subsection_obj
+                                # get or create the subsubsection object
+                                subsubsection_identifier = source + "_" + chapter + "_" + section + "_" + subsection + "_" + subsubsection
+                                assert subsubsection_identifier is not None
+                                (
+                                    subsubsection_obj,
+                                    subsubsection_obj_created,
+                                ) = Section.objects.get_or_create(
+                                    type="subsubsection",
+                                    identifier=subsubsection_identifier,
+                                    title=subsubsection_human,
+                                    text=text_object,
+                                )
+                                if subsubsection_obj_created:
+                                    subsubsection_obj.number = subsubsection_number
+                                    subsubsection_number += 1
+                                    # if the current section is not the same as the previous subsubsection and belong to the same chapter
+                                    if prev_subsubsection:
+                                        if (
+                                            subsubsection_obj != prev_subsubsection
+                                            and prev_subsubsection.container == subsection_obj
+                                        ):
+                                            # set the current section as the previous section for the next iteration
+                                            subsubsection_obj.previous = prev_subsubsection
+
+                                subsubsection_obj.container = subsection_obj
+                                subsection_obj.container = section_obj
+                                section_obj.container = chapter_obj
+                                chapter_obj.tokens.add(token)
+                                section_obj.tokens.add(token)
+                                subsection_obj.tokens.add(token)
+                                subsubsection_obj.tokens.add(token)
+                                subsubsection_obj.save()
+                                subsection_obj.save()
+                                section_obj.save()
+                                chapter_obj.save()
+                                # update previous chapter and section
+                                prev_chapter = chapter_obj
+                                prev_section = section_obj
+                                prev_subsection = subsection_obj
+                                prev_subsubsection = subsubsection_obj
                 else:
                     # no new part
                     # add token to previous section
