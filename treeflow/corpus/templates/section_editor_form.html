@@ -1,6 +1,8 @@
+{% load static i18n %}
+
 {% block content %}
 
-<div class="container mx-auto mt-10">
+<div class="container mx-auto">
     <!-- Load jQuery -->
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -11,11 +13,10 @@
 
     <div class="flex flex-wrap -mx-3">
         <!-- Section Form Column -->
-        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-            <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="w-full px-3 mb-6 md:w-1/2 md:mb-0">
+            <div class="p-6 bg-white rounded-lg shadow-md">
                 {{ form.media.css }}
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Section
-                    Form</h2>
+                <h2 class="mb-4 text-lg font-semibold text-main-dark">Section Form</h2>
                 <form method="post" class="space-y-4" id="section-form"
                     hx-post="{% url 'corpus:save_section' section_id=section_id %}"
                     hx-target="#section-form" hx-swap="outerHTML">
@@ -23,20 +24,20 @@
                     {% for field in form %}
                     <div>
                         <label for="{{ field.id_for_label }}"
-                            class="block text-sm font-medium text-gray-700">{{field.label}}</label>
+                            class="block text-sm font-medium text-p-gray-graded-800">{{field.label}}</label>
                         {{ field }}
                         {% if field.help_text %}
                         <p class="mt-2 text-sm text-gray-600">{{
                             field.help_text}}</p>
                         {% endif %}
                         {% for error in field.errors %}
-                        <p class="text-sm text-red-600">{{ error }}</p>
+                        <p class="text-sm text-error">{{ error }}</p>
                         {% endfor %}
                     </div>
                     {% endfor %}
                     <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Save
+                        class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-main hover:bg-main-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-main-dark">
+                        {% trans 'Save' %}
                     </button>
                 </form>
                 {{ form.media.js }}
@@ -44,31 +45,30 @@
         </div>
 
         <!-- Sense Form Column -->
-        <div class="w-full md:w-1/2 px-3">
-            <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="w-full px-3 md:w-1/2">
+            <div class="p-6 bg-white rounded-lg shadow-md">
                 {{ sense_form.media.css }}
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Sense
-                    Form</h2>
+                <h2 class="mb-4 text-lg font-semibold text-main-dark">Sense Form</h2>
                 <form id="sense-form" method="post"
                     hx-post="{% url 'dict:save_sense' %}"
                     hx-target="#sense-form" hx-swap="outerHTML">
                     {% csrf_token %}
                     {% for field in sense_form %}
-                    <div>
+                    <div class="mb-4">
                         <label for="{{ field.id_for_label }}"
-                            class="block text-sm font-medium text-gray-700">{{field.label}}</label>
+                            class="block text-sm font-medium text-p-gray-graded-800">{{field.label}}</label>
                         {{ field }}
                         {% if field.help_text %}
                         <p class="mt-2 text-sm text-gray-600">{{ field.help_text}}</p>
                         {% endif %}
                         {% for error in field.errors %}
-                        <p class="text-sm text-red-600">{{ error }}</p>
+                        <p class="text-sm text-error">{{ error }}</p>
                         {% endfor %}
                     </div>
                     {% endfor %}
                     <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        Add Sense
+                        class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-off hover:bg-off-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-off-dark">
+                        {% trans 'Add Sense' %}
                     </button>
                 </form>
                 {{ sense_form.media.js }}
@@ -81,8 +81,8 @@
     <!-- Close Modal Button -->
 <div class="flex justify-end">
     <button onclick="closeSentenceSensesModal()"
-        class="mt-4 px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-700">
-        Close
+        class="px-4 py-2 mt-4 font-bold text-white rounded bg-error-graded-600 hover:bg-error-graded-800">
+        {% trans 'Close' %}
     </button>
 </div>
 </div>

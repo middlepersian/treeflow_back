@@ -1,9 +1,10 @@
 <!-- change_sources.html -->
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
-  <h2>Edit Sources for {{ source }}</h2>
-  <form class="mx-auto flex flex-col gap-4 " method="post" action="{% url 'corpus:add_related_source' source.id %}">
+  <h2>{% trans 'Edit Sources for' %} {{ source }}</h2>
+  <form class="flex flex-col gap-4 mx-auto " method="post" action="{% url 'corpus:add_related_source' source.id %}">
     {% csrf_token %}
     
     {# Render select box for available sources #}
@@ -15,6 +16,6 @@
       {% endfor %}
     </select>
     
-    <button class="p-2 rounded bg-main hover:bg-main-graded-600 text-white font-bold" type="submit">Save changes</button>
+    <button class="p-2 font-bold text-white rounded bg-main hover:bg-main-dark" type="submit">{% trans 'Save changes' %}</button>
   </form>
 {% endblock %}

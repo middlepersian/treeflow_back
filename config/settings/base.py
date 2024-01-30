@@ -3,7 +3,7 @@ Base settings to build other settings files upon.
 """
 from pathlib import Path
 import environ
-
+import os
 
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -81,6 +81,7 @@ THIRD_PARTY_APPS = [
     "theme",
     "strawberry.django", 
     "django_select2",
+    "huey.contrib.djhuey"
 ]
 
 LOCAL_APPS = [
@@ -277,16 +278,15 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
-
-redis_url = env('REDIS_URL', default='redis://redis:6379/0')  # Use 'redis' as hostname
-
 # Redis cache configuration
+redis_url = env('REDIS_URL', default='redis://redis:6379/0')  # Use 'redis' as hostname
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': redis_url,  # Change the URL according to your Redis server
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'TIMEOUT': 3600,  # Cache timeout in seconds (1 hour)
         }
     }
 }
@@ -366,3 +366,29 @@ CSRF_TRUSTED_ORIGINS = [
     "https://mpcorpus.org",
     "https://www.mpcorpus.org",
 ]
+
+# settings.py
+HUEY = {
+    'huey_class': 'huey.RedisHuey',  # Huey implementation to use.
+    'url': redis_url,  # Use 'redis' as hostname.
+    'name': 'my-app',
+    'results': True,  # Store return values of tasks.
+    'store_none': False,  # If a task returns None, do not save to results.
+    'immediate': DEBUG,  # If DEBUG=True, run synchronously.
+    'utc': True,  # Use UTC for all times internally.
+    'blocking': True,  # Perform blocking pop rather than poll Redis.
+    'consumer': {
+        'workers': 1,
+        'worker_type': 'thread',
+        'initial_delay': 0.1,  # Smallest polling interval, same as -d.
+        'backoff': 1.15,  # Exponential backoff using this rate, -b.
+        'max_delay': 10.0,  # Max possible polling interval, -m.
+        'scheduler_interval': 1,  # Check schedule every second, -s.
+        'periodic': True,  # Enable crontab feature.
+        'check_worker_health': True,  # Enable worker health checks.
+        'health_check_interval': 1,  # Check worker health every second.
+    },
+    'connection': {
+        'url': redis_url,  # Redis instance address.
+    },
+}

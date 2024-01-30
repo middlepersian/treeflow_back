@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load static i18n %}
 
 {% block content %}
-    <form method="POST" action="{% url 'images:create_image' %}" enctype="multipart/form-data" class="max-w-md mx-auto flex flex-col gap-4 p-4 justify-between items-start">
+    <form method="POST" action="{% url 'images:create_image' %}" enctype="multipart/form-data" class="flex flex-col items-start justify-between max-w-md gap-4 p-4 mx-auto">
         {% csrf_token %}
       {{ form }}
-      <input type="submit" value="Submit" class="flex rounded bg-main text-white font-bold w-full p-2 hover:bg-main-graded-600" />
+      <input type="submit" value={% trans 'Submit' %} class="flex w-full p-2 font-bold text-white rounded bg-main hover:bg-main-graded-600" />
     </form>
 {% endblock %}

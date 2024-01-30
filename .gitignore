@@ -289,3 +289,5 @@ treeflow.png
 
 
 celerybeat-schedule
+
+*.ipynb

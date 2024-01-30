@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
 
-<div class="container mx-auto px-4 py-2">
-  <h1 class="text-2xl font-semibold mb-6">Edit Token</h1>
+<div class="container px-4 py-2 mx-auto">
+  <h1 class="mb-6 text-2xl font-semibold">{% trans 'Edit Token' %}</h1>
 
   {% if form.errors %}
-  <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
-    There was a problem with your submission.
+  <div class="px-4 py-2 font-bold text-white bg-red-500 rounded-t">
+    {% trans 'There was a problem with your submission.' %}
   </div>
-  <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+  <div class="px-4 py-3 text-red-700 bg-red-100 border border-t-0 border-red-400 rounded-b">
     <ul>
       {% for field in form %}
       {% for error in field.errors %}
@@ -24,15 +25,15 @@
 
     {% for field in form %}
     <div class="mb-4">
-      <label for="{{ field.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+      <label for="{{ field.id_for_label }}" class="block mb-2 text-sm font-bold text-gray-700">
         {{ field.label }}
       </label>
       <!-- Here you need to manually construct the form field element -->
       <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}"
         value="{{ field.value|default_if_none:"" }}"
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+        class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline" />
       {% if field.help_text %}
-      <p class="text-gray-600 text-xs italic">{{ field.help_text }}</p>
+      <p class="text-xs italic text-gray-600">{{ field.help_text }}</p>
       {% endif %}DoesNotExist
       {% endif %}
     </div>
@@ -44,12 +45,12 @@
     {% endif %}
 
     <button type="submit"
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-      Save changes
+      class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline">
+      {% trans 'Save changes' %}
     </button>
   </form>
 
-  <a href="{% url 'corpus:tokens' %}" class="text-blue-700 hover:underline mt-4 inline-block">Back to token list</a>
+  <a href="{% url 'corpus:tokens' %}" class="inline-block mt-4 text-blue-700 hover:underline">{% trans 'Back to token list' %}</a>
 </div>
 
 {% endblock content %}

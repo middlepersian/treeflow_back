@@ -1,7 +1,9 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Zotero Keys</h2>
+{% extends 'base.html' %} 
+{% load i18n %}
+{% block content %}
+<h2>{% trans 'Zotero Keys' %}</h2>
 <div
-  class="mx-auto p-4 rounded border border-slate-400 flex flex-col gap-10 divide-y-2 divide-y-slate-300"
+  class="flex flex-col gap-10 p-4 mx-auto border divide-y-2 rounded border-slate-400 divide-y-slate-300"
 >
   <form
     class="flex flex-col gap-2 py-6"
@@ -12,9 +14,9 @@
     <input type="hidden" name="add_new" id="add_new" value="add_new" />
     {{bib_form.as_table}}
     <input
-      class="rounded bg-main hover:bg-main-graded-600 text-white p-2 cursor-pointer font-bold"
+      class="p-2 font-bold text-white rounded cursor-pointer bg-main hover:bg-main-dark"
       type="submit"
-      value="Add New"
+      value={% blocktrans %}"Add New"{% endblocktrans %}
     />
   </form>
   <form
@@ -39,9 +41,9 @@
     </select>
     <input
       id="submitExisting"
-      class="rounded bg-main hover:bg-main-graded-600 text-white p-2 cursor-pointer font-bold"
+      class="p-2 font-bold text-white rounded cursor-pointer bg-main hover:bg-main-dark"
       type="submit"
-      value="Change Existing"
+      value={% blocktrans %}"Change Existing"{% endblocktrans %}
     />
   </form>
 </div>
