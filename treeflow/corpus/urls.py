@@ -24,7 +24,7 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
-from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib
+from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib, sources
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
@@ -64,7 +64,7 @@ urlpatterns = [
     path('bibliography/<uuid:bibEntry_id>/', BibEntryDetailView.as_view(), name='bibliography-detail'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('comment_form/<uuid:related_model_id>/', comment_form, name='comment_form'),    
-    path('sources/', SourceTableView.as_view(), name='sources'),
+    path('sources/',sources, name='sources'),
     path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='update_source'),
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
     path('sources/add/', create_source, name='source_add'),

@@ -13,6 +13,7 @@
       <th class="p-2 border">{% trans 'Type' %}</th>
       <th class="p-2 border">{% trans 'Related Sources' %}</th>
       <th class="p-2 border">{% trans 'Zotero Keys' %}</th>
+      <th class="border p-2">{% trans 'Zotero Entry' %}</th>
       <th class="p-2 border">{% trans 'Delete' %}</th>
     </tr>
   </thead>
@@ -40,9 +41,14 @@
       </td>
       <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a></td>
       <td class="p-2 border">
-        {%for ref in source.references.all %}{{ref}}{%endfor%}
+        <ul>
+          {%for ref in source.references.all %}
+          <li>{{ref}}</li>
+          {%endfor%}
+        </ul>
         <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a>
       </td> 
+      <td class="border p-2">{%for key,val in references.items%}{{key}} - {{val|safe|urlize}}{%endfor%}</td>
       <td class="p-2 border"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
     
     </tr>
@@ -54,7 +60,13 @@
       <td class="p-2 border">{{ source.description }}</td>
       <td class="p-2 border">{{ source.type }}</td>
       <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
-      <td class="p-2 border">{%for ref in source.references.all %}{{ref}}{%endfor%}</td> 
+      <td class="p-2 border">
+        <ul>
+          {%for ref in source.references.all %}
+          <li>{{ref}}</li>
+          {%endfor%}
+        </ul></td> 
+      <td class="border p-2">{%for key,val in references.items%}{{key}} - {{val|safe|urlize}}{%endfor%}</td>
       <td class="p-2 border"> - </td>
     </tr>
     {% endfor %}
