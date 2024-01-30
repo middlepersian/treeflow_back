@@ -1,9 +1,13 @@
+from typing import Any
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django import forms
 from django.views.generic.edit import FormView
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from ..utils.zotero import request_zotero_api_for_collection
+from django.core.cache import cache
+from treeflow.datafeed.cache import update_zotero_data_in_cache, cache_all_zotero_sources
 
 from ..forms import SourceForm, BibEntryForm
 
@@ -29,22 +33,38 @@ class SourceDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = 'Source'
         return context
-    
+
 # create a generic table view for source
 class SourceTableView(ListView):
     model = Source
     fields = '__all__'
     template_name = 'source_table.html'
     context_object_name = 'sources'
-    
+    group = "2116388"
+    collection = "2CGA8RXR"
+    filtered_refs = {}
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.references = request_zotero_api_for_collection(self.group,self.collection)
+
     # get the queryset
     def get_queryset(self):
         qs1 = Source.objects.all().order_by('identifier').prefetch_related('references', 'sources')
+        if self.references:
+            # check for each reference if it is in self.references.data
+            for source in qs1:
+                for reference in source.references.all():
+                    for item in self.references[0]:
+                        if item['data']['key'].upper() == reference.key.upper():
+                            self.filtered_refs[reference.key.upper()] = item['bib']
+                            logger.debug('found reference: %s', reference.key)
         return qs1
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = 'Source'
+        context['references'] = self.filtered_refs
         return context
     
 # create a generic create view for source
@@ -71,6 +91,46 @@ class SourceDeleteView(DeleteView):
     pk_url_kwarg = 'source_id'
 
 
+
+def sources(request):
+    # get all sources
+    sources = Source.objects.all().prefetch_related('references', 'sources')
+
+    #setup paginator
+    paginator = Paginator(sources, 50)
+    page_number = request.GET.get('page')
+    sources_page = paginator.get_page(page_number)
+
+    # for each source, get the corresponding bibentry from zotero
+    group = "2116388"
+    collection = "2CGA8RXR"
+
+    cached_references = cache.get('zotero_sources')
+
+    if not cached_references:
+        cache_all_zotero_sources()
+    
+    cached_references = cache.get('zotero_sources', [])  # Attempt to fetch from cache again
+
+    references = cached_references
+    filtered_refs = {}
+    if references:
+        # check for each reference if it is in references.data
+        for source in sources:
+            for reference in source.references.all():
+                for item in references:
+                    if item['data']['key'].upper() == reference.key.upper():
+                        filtered_refs[reference.key] = item['bib']
+                        
+    # setup context
+    context = {
+        'sources': sources_page,
+        'page_title': 'Sources',
+        'references': filtered_refs
+    }
+
+
+    return render(request, 'source_table.html',context)
 
 def create_source(request):
     if request.method == 'POST':
