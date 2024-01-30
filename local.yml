@@ -73,4 +73,4 @@ services:
       env_file:
         - ./.envs/.local/.django
         - ./.envs/.local/.postgres
-      command: /bin/sh -c "sleep 10 && python manage.py run_huey"
+      command: /bin/sh -c "python manage.py run_huey"
