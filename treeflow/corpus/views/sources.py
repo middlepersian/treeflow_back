@@ -57,14 +57,17 @@ class SourceTableView(ListView):
                 for reference in source.references.all():
                     for item in self.references[0]:
                         if item['data']['key'].upper() == reference.key.upper():
+                            reference['ref'] = item['bib']
                             self.filtered_refs[reference.key.upper()] = item['bib']
                             logger.debug('found reference: %s', reference.key)
         return qs1
 
     def get_context_data(self, **kwargs):
+        logger.debug("cot")
         context = super().get_context_data(**kwargs)
         context['page_title'] = 'Source'
         context['references'] = self.filtered_refs
+        logger.info(context)
         return context
     
 # create a generic create view for source
@@ -96,20 +99,14 @@ def sources(request):
     # get all sources
     sources = Source.objects.all().prefetch_related('references', 'sources')
 
-    #setup paginator
-    paginator = Paginator(sources, 50)
-    page_number = request.GET.get('page')
-    sources_page = paginator.get_page(page_number)
-
-    # for each source, get the corresponding bibentry from zotero
-    group = "2116388"
-    collection = "2CGA8RXR"
+    # #setup paginator
+    # paginator = Paginator(sources, 50)
+    # page_number = request.GET.get('page')
+    # sources_page = paginator.get_page(page_number)
 
     cached_references = cache.get('zotero_sources')
-
     if not cached_references:
         cache_all_zotero_sources()
-    
     cached_references = cache.get('zotero_sources', [])  # Attempt to fetch from cache again
 
     references = cached_references
@@ -120,14 +117,16 @@ def sources(request):
             for reference in source.references.all():
                 for item in references:
                     if item['data']['key'].upper() == reference.key.upper():
-                        filtered_refs[reference.key] = item['bib']
-                        
+                        reference.bib = item['bib']
+
+
+
     # setup context
     context = {
-        'sources': sources_page,
+        'sources': list(sources),
         'page_title': 'Sources',
-        'references': filtered_refs
     }
+    logger.debug(context)
 
 
     return render(request, 'source_table.html',context)
