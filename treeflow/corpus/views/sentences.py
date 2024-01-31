@@ -6,6 +6,7 @@ from django.db.models import Prefetch
 import uuid
 import logging
 from treeflow.corpus.models import Text, Section, Token, SectionToken
+from treeflow.datafeed.tasks import cache_all_texts  # Import the Celery task
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,11 @@ def sentences_view(request, text_id=None):
     cache_key_texts = "all_texts"
     texts = cache.get(cache_key_texts)
     if not texts:
-        texts = Text.objects.all()
-        cache.set(cache_key_texts, texts, 300)
-        logger.info("Cache miss for texts")
-
+        logger.info("Cache miss for texts - Fetching texts from database.")
+        cache_all_texts.apply()  # Trigger the Celery task to update cache
+        logger.info("Cache miss for texts - Triggered Celery task to update cache.")
+        texts = cache.get(cache_key_texts)
+        
     selected_text_id = text_id if text_id else request.GET.get('text_id')
 
     # Building the cache key for sentences

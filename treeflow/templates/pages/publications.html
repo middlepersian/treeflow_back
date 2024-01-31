@@ -14,22 +14,35 @@
         <div class="flex flex-col w-full smartphone:px-4 sm:pr-32 sm:pl-16">
           <div class="w-full h-full animate-fade-up">
             {% for publication_group in publications %}
-              <div>
-                <h2 class="text-left uppercase text-h2-gray">{% trans publication_group.name %}</h2>
-                {% for publication in publication_group.data %}
-                  <div class="flex flex-col items-start justify-start">
-                    <span class="flex flex-row my-1 text-xs lg:text-base md:text-sm sm:text-xs">{{ publication.bib|safe }}</span>
-                  </div>
-                {% endfor %}
-              </div>
-              {% if not forloop.last %}
-                <hr class="mt-8" />
-              {% endif %}
-            {% endfor %}
+            <div>
+              <h2 class="text-left uppercase text-h2-gray">{% trans publication_group.name %}</h2>
+              {% for publication in publication_group.data %}
+                <div class="flex flex-col items-start justify-start">
+                  <span class="flex flex-row my-1 text-xs lg:text-base md:text-sm sm:text-xs publication-url">
+                    {% autoescape off %}
+                      {{ publication.bib|urlize }}
+                    {% endautoescape %}
+                  </span>
+                </div>
+              {% endfor %}
+            </div>
+            {% if not forloop.last %}
+              <hr class="mt-8" />
+            {% endif %}
+          {% endfor %}
+          
           </div>
         </div>
       </div>
       {% include 'components/footer.html' %}
     </div>
   </div>
+
+  <style>
+    .publication-url a {
+      color: blue;
+    }
+  </style>
+
+
 {% endblock %}

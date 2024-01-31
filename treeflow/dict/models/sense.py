@@ -9,7 +9,7 @@ class Sense(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
     sense = models.TextField(null=True, blank=True, db_index=True)
     lemma_related = models.BooleanField(default=True)
-    language = models.CharField(max_length=10, blank=True, null=True, db_index=True)
+    language = models.CharField(max_length=15, blank=True, null=True, db_index=True)
     related_senses = models.ManyToManyField('self', blank=True, related_name='sense_related_senses')
     created_at = models.DateTimeField(auto_now_add=True)
     stage = models.CharField(max_length=10, blank=True)

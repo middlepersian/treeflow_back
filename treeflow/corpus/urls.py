@@ -24,12 +24,12 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
-from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib
+from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib, sources
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
-
+from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -64,7 +64,7 @@ urlpatterns = [
     path('bibliography/<uuid:bibEntry_id>/', BibEntryDetailView.as_view(), name='bibliography-detail'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('comment_form/<uuid:related_model_id>/', comment_form, name='comment_form'),    
-    path('sources/', SourceTableView.as_view(), name='sources'),
+    path('sources/',sources, name='sources'),
     path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='update_source'),
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
     path('sources/add/', create_source, name='source_add'),
@@ -73,6 +73,9 @@ urlpatterns = [
     path('sources/manuscripts/', source_manuscripts, name='manuscripts'),
     path('token_lemma_sense/<uuid:token_id>/', token_lemma_sense_view, name='token_lemma_sense'),
     path('save_token/<uuid:token_id>/', save_token, name='save_token'),
+    path('manuscripts/', manuscripts, name='manuscripts'),
+    path('manuscript/<uuid:manuscript_id>/images',get_images_for_manuscript,name='manuscript_images'),
+    path('manuscript/<uuid:manuscript_id>/images/table',get_images_for_manuscript_table,name='manuscript_images_table'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),

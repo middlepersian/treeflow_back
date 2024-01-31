@@ -34,7 +34,7 @@ def request_zotero_api_for_collection(group_key, collection_key):
         r = requests.get(zotero_url)
         if r.ok:
             r = r.json()
-            cache.set(collection_key, r)
+            #cache.set(collection_key, r)
         else:
             raise Exception(f"Request to Zotero API failed with status code {r.status_code}")
     except:
@@ -69,3 +69,37 @@ def request_zotero_api_for_bibentry(bibentry:BibEntry):
     return r, False
 
 # request the whole collection and keep in cache. 
+
+# request a list of entries from the collection and keep in cache.
+def request_zotero_for_list(bibentries:list[BibEntry]):
+    """
+    This function takes a list of BibEntry objects and returns a list of
+    dictionaries of the corresponding entries in the Zotero database.
+    """
+    zotero_ids = [bibentry.key.upper() for bibentry in bibentries]
+
+    # check if the entries are in the cache
+    zotero_entries = cache.get_many(zotero_ids)
+    if len(zotero_entries) == len(zotero_ids):
+        return zotero_entries, True
+    
+    # check which entries are missing from the cache
+    zotero_ids = [zotero_id for zotero_id in zotero_ids if zotero_id not in zotero_entries.keys()]
+
+    # if not for all entries, request them from the Zotero API
+
+    
+    # if not, request them from the Zotero API
+    zotero_url = f"https://api.zotero.org/groups/2116388/items?itemKey={','.join(zotero_ids)}"
+    try:
+        r = requests.get(zotero_url)
+        if r.ok:
+            r = r.json()
+            for entry in r:
+                cache.set(entry['data']['key'], entry)
+        else:
+            raise Exception(f"Request to Zotero API failed with status code {r.status_code}")
+    except:
+        r = None
+
+    return r, False
