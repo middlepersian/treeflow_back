@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.db.models import Count
 from treeflow.corpus.models import Text
 from treeflow.corpus.utils.zotero import request_zotero_api_for_collection
 import logging
@@ -54,14 +55,13 @@ def update_zotero_data_in_cache():
         cache.set(cache_key, current_cache, timeout=None)  # Set no timeout
 
 
-
 def cache_all_texts():
     logger.info("Running cache_all_texts task")
     cache_key_texts = "all_texts"
     current_cache = cache.get(cache_key_texts)
 
     if not current_cache:
-        texts = Text.objects.prefetch_related('token_text').all()
+        texts = Text.objects.annotate(token_count=Count('token_text')).all()
         cache.set(cache_key_texts, texts, 3600)  # Set a 1-hour timeout
         logger.info("Cache miss for texts - Texts have been updated in the cache.")
     else:
