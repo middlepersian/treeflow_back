@@ -24,14 +24,12 @@
       </tr>
     </thead>
     <tbody class="text-gray-700">
-      {% with count=0 %}
       {% for text in texts %}
-      {% with count=count|add:1 %}
         {% csrf_token %}
         <tr class="border-b">
           <td class="px-6 py-4 text-center whitespace-nowrap">
               <div>
-                {{ count }}
+                {{ forloop.counter }}
               </div>
           </td>
         <!-- Title -->
@@ -150,9 +148,7 @@
             {{ text.created_at|date:"Y-m-d H:i" }}
           </td> -->
         </tr>
-      {% endwith %}
       {% endfor %}
-      {% endwith %}
       {% if texts|length == 0 %}
       <tr>
         <td colspan="11" class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">No texts available.</td>
