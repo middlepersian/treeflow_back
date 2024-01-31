@@ -14,6 +14,7 @@
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Genre' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Version' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Stage' %}</th>
+        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Tokens' %}</th>
         {% if request.user.is_authenticated %}
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Main Text View' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sentences View' %}</th>
@@ -124,6 +125,12 @@
             <span class="block w-full mt-1 text-center">{{ text.stage }}</span>
           {% endif %}
         </td>         
+
+
+          <!-- Tokens -->
+          <td class="px-6 py-4 text-center whitespace-nowrap">
+            {{ text.token_text.all|length }}
+          </td>
         {% if request.user.is_authenticated %}
 
           <!-- Main Text View-->
