@@ -6,6 +6,7 @@
   <table class="min-w-full bg-white">
     <thead class="text-white bg-gray-800">
       <tr>
+        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans '' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Title' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Identifier' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sigle' %}</th>
@@ -13,8 +14,8 @@
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Genre' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Version' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Stage' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Main Text View' %}</th>
         {% if request.user.is_authenticated %}
+        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Main Text View' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sentences View' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Tokens View' %}</th>
         {% endif %}
@@ -22,9 +23,16 @@
       </tr>
     </thead>
     <tbody class="text-gray-700">
+      {% with count=0 %}
       {% for text in texts %}
+      {% with count=count|add:1 %}
         {% csrf_token %}
         <tr class="border-b">
+          <td class="px-6 py-4 text-center whitespace-nowrap">
+              <div>
+                {{ count }}
+              </div>
+          </td>
         <!-- Title -->
         <td class="px-6 py-4 whitespace-nowrap">
           {% if request.user.is_authenticated %}
@@ -36,7 +44,7 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
           {% else %}
-            <span>{{ text.title }}</span>
+            <span class="block w-full mt-1 text-center text-blue-500"><a href="{% url 'corpus:sections' text_id=text.id %}">{{ text.title }}</a></span>
           {% endif %}
 
 
@@ -51,7 +59,7 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
           {% else %}
-            <span>{{ text.identifier }}</span>
+            <span class="block w-full mt-1 text-center">{{ text.identifier }}</span>
           {% endif %}
         </td>
 
@@ -66,7 +74,7 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
           {% else %}
-            <span>{{ text.series }}</span>
+            <span class="block w-full mt-1 text-center">{{ text.series }}</span>
           {% endif %}
         </td>
           <!-- Sources -->
@@ -85,7 +93,7 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
           {% else %}
-            <span>{{ text.label }}</span>
+            <span class="block w-full mt-1 text-center">{{ text.label }}</span>
           {% endif %}
         </td>
 
@@ -100,7 +108,7 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
           {% else %}
-            <span>{{ text.version }}</span>
+            <span class="block w-full mt-1 text-center">{{ text.version }}</span>
           {% endif %}
         </td>
         <!-- Stage -->
@@ -114,14 +122,15 @@
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
           {% else %}
-            <span>{{ text.stage }}</span>
+            <span class="block w-full mt-1 text-center">{{ text.stage }}</span>
           {% endif %}
-        </td>
-          <!-- Sections View-->
+        </td>         
+        {% if request.user.is_authenticated %}
+
+          <!-- Main Text View-->
           <td class="px-6 py-4 text-center whitespace-nowrap">
             <a href="{% url 'corpus:sections' text_id=text.id %}">&#128065;</a>
           </td>
-          {% if request.user.is_authenticated %}
 
 
           <!-- Sentences View-->
@@ -140,7 +149,9 @@
             {{ text.created_at|date:"Y-m-d H:i" }}
           </td>
         </tr>
+      {% endwith %}
       {% endfor %}
+      {% endwith %}
       {% if texts|length == 0 %}
       <tr>
         <td colspan="11" class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">No texts available.</td>
