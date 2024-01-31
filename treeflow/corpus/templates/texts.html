@@ -19,7 +19,8 @@
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sentences View' %}</th>
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Tokens View' %}</th>
         {% endif %}
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Created At' %}</th>
+        <!--
+        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Created At' %}</th> -->
       </tr>
     </thead>
     <tbody class="text-gray-700">
@@ -144,10 +145,10 @@
           </td>
 
           {% endif %}
-          <!-- Created At -->
+          <!-- Created At 
           <td class="px-6 py-4 text-center whitespace-nowrap">
             {{ text.created_at|date:"Y-m-d H:i" }}
-          </td>
+          </td> -->
         </tr>
       {% endwith %}
       {% endfor %}
