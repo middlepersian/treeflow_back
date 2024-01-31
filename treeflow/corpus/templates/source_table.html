@@ -12,9 +12,13 @@
       <th class="p-2 border">{% trans 'Description' %}</th>
       <th class="p-2 border">{% trans 'Type' %}</th>
       <th class="p-2 border">{% trans 'Related Sources' %}</th>
+      {% if request.user.is_authenticated %}
       <th class="p-2 border">{% trans 'Zotero Keys' %}</th>
+      {% endif %}
       <th class="border p-2">{% trans 'Zotero Entry' %}</th>
+      {% if request.user.is_authenticated %}
       <th class="p-2 border">{% trans 'Delete' %}</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
@@ -60,14 +64,8 @@
       <td class="p-2 border">{{ source.description }}</td>
       <td class="p-2 border">{{ source.type }}</td>
       <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
-      <td class="p-2 border">
-        <ul>
-          {%for ref in source.references.all %}
-          <li>{{ref}}</li>
-          {%endfor%}
-        </ul></td> 
-        <td class="border p-2">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
-      <td class="p-2 border"> - </td>
+        <td class="border p-2">
+          {% for ref in source.references.all %}<div class="p-2">{{ref.bib|safe|urlize}}</div>{%endfor%}</td>
     </tr>
     {% endfor %}
     {% endif %}
