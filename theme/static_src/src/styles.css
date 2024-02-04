@@ -117,7 +117,7 @@
     pointer-events: none;
 }
 
-#search-page-container .loading-indicator, #search-page-container .htmx-request ~ #results-list {
+#search-page-container .loading-indicator, #search-page-container .htmx-request ~ #results-list, #search-page-container .htmx-request ~ #results-filter {
     display: none;
 }
 

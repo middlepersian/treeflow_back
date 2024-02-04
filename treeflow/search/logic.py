@@ -16,27 +16,30 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
 
     """
 
-    q = criteria["query"]
-    qfield = criteria["query_field"]
-    qtype = criteria["query_type"]
-    i = "" if criteria["case_sensitive"] else "i"
-    lang = criteria["language"]
+    filter_tmp = criteria.copy()
+
+    value = filter_tmp.pop("query")
+    query_field = filter_tmp.pop("query_field")
+    query_type = filter_tmp.pop("query_type")
+    i = "" if filter_tmp.pop("case_sensitive") else "i"
 
     query = (
-        Q(**{f"{qfield}__{i}exact": q})
-        if qtype == "exact"
-        else Q(**{f"{qfield}__{i}startswith": q})
-        if qtype == "prefix"
-        else Q(**{f"{qfield}__{i}endswith": q})
-        if qtype == "suffix"
-        else Q(**{f"{qfield}__{i}regex": q})
-        if qtype == "regex"
-        else Q(**{f"{qfield}__{i}contains": q})
+        Q(**{f"{query_field}__{i}exact": value})
+        if query_type == "exact"
+        else Q(**{f"{query_field}__{i}startswith": value})
+        if query_type == "prefix"
+        else Q(**{f"{query_field}__{i}endswith": value})
+        if query_type == "suffix"
+        else Q(**{f"{query_field}__{i}regex": value})
+        if query_type == "regex"
+        else Q(**{f"{query_field}__{i}contains": value})
     )
 
-    tokens = Token.objects.filter(query, Q(root=criteria["root"]))
-    if lang:
-        tokens &= tokens.filter(Q(language=lang))
+    for k, v in filter_tmp.items():
+        if v and not any(x in k for x in ["logical", "distance", "id"]):
+            query.add(Q(**{k: v}), Q.AND)
+
+    tokens = Token.objects.filter(query)
 
     logger.debug(f"Retrieved {len(tokens)} tokens.")
     logger.debug(tokens.query)
@@ -147,3 +150,14 @@ def get_results(criteria: List):
         sections = filter_sections_by_distance(anchor_tokens, sections, filters)
 
     return sections
+
+
+def narrow_results(results: List, text: None, section: None):
+    query = Q()
+
+    if text: query.add(Q(text_id=text), Q.AND)
+    if section: query.add(Q(id=section), Q.AND)
+
+    filtered = results.filter(query)
+    
+    return filtered
