@@ -143,7 +143,6 @@ def get_results(criteria: List):
 
     if len(criteria) == 1:
         logger.debug("Only anchor token provided, returning sections.")
-        return sections
     elif "logical_operator" in anchor_criterium:
         sections = filter_sections_by_logic(sections, filters)
     elif "distance" in anchor_criterium:
