@@ -4,7 +4,6 @@ include:
 
 variables:
   CI_COMPOSE_HOST: dodgerblue
-  CI_COMPOSE_SERVICE: backend
 
 workflow:
   rules:
