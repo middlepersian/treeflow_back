@@ -2,14 +2,26 @@
     <div class="flex flex-row m-4">
         <div id="sections">
             {% for section in page_obj %}
-                <div id="section" class="mt-6 max-w-[60%]">
-                    <div id="section-details" class="font-bold">
-                        <p>{{ section.identifier }} in {{ section.text }} (<a class="text-off cursor-pointer font-bold hover:text-main-graded-900 underline" href="/corpus/ud-editor/{{section.id}}">UD-Editor</a>)</p>
+                <div id="section" class="mt-6 max-w-[80%]">
+                    <div id="section-details" class="flex flex-row cursor-help group relative w-max gap-x-1 font-bold">
+                        <p>
+                            {{ section.type | title }} {{ section.number | floatformat:"0" }} in
+                            {{ section.text | default:"Untitled" }}
+                            (<a class="text-main-graded-900 cursor-pointer font-bold hover:text-off underline" href="/corpus/ud-editor/{{section.id}}">UD-Editor</a>)
+                        </p>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-main text-sm text-white rounded-md p-2 ml-10 -translate-y-full left-full h-max w-max flex flex-col">
+                            <span>
+                                Section ID: {{ section.identifier }}
+                            </span>
+                            <span>
+                                Text ID: {{ section.text.identifier }}
+                            </span>
+                        </div>
                     </div>
                     <div id="sentence">
                         {% for section_token in section.sectiontoken_set.all %}
                             {% if section_token.token.transcription %}
-                                <span id="token" {% if section_token.token.transcription in queries %}class="bg-main text-white rounded font-bold px-1 mx-1 inline-flex"{% endif %}>{{ section_token.token.transcription }}</span>
+                                <span id="token" {% if section_token.token.transcription in queries %}class="text-off-graded-600 font-bold mx-0.5 inline-flex"{% endif %}>{{ section_token.token.transcription }}</span>
                             {% endif %}                   
                         {% endfor %}
                     </div>
