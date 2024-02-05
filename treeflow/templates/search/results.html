@@ -3,18 +3,24 @@
         <div id="sections">
             {% for section in page_obj %}
                 <div id="section" class="mt-6 max-w-[80%]">
-                    <div id="section-details" class="flex flex-row cursor-help group relative w-max gap-x-1 font-bold">
-                        <p>
+                    <div id="section-details" class="cursor-help group relative flex flex-row w-max gap-x-1 font-bold">
+                        <span>
+                            <a href="{% url 'corpus:sections' text_id=section.text.id %}#{{ section.id }}">&#x1F50D; </a>
                             {{ section.type | title }} {{ section.number | floatformat:"0" }} in
                             {{ section.text | default:"Untitled" }}
-                            (<a class="text-main-graded-900 cursor-pointer font-bold hover:text-off underline" href="/corpus/ud-editor/{{section.id}}">UD-Editor</a>)
-                        </p>
-                        <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-main text-sm text-white rounded-md p-2 ml-10 -translate-y-full left-full h-max w-max flex flex-col">
-                            <span>
-                                Section ID: {{ section.identifier }}
-                            </span>
-                            <span>
-                                Text ID: {{ section.text.identifier }}
+                            (<a class="text-main-graded-900 font-bold hover:text-off" href="{% url 'corpus:ud_editor' section.id %}">UD-Editor</a>)
+                            {% if request.user.is_authenticated %}
+                                <a href="{% url 'corpus:sentences' section.id %}?text_id={{ section.text.id }}" class="text-action-graded-600 hover:text-off-graded-600 font-bold ml-1">&#x270E;</a>
+                            {% endif %}
+                        </span>
+                        <div id="meta-tooltip" class="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-main text-sm text-white rounded-md p-2 ml-10 -translate-y-full left-full h-max flex flex-col min-w-[80%]">
+                            <span>Section: {{ section.identifier }}</span>
+                            <span>Text: {{ section.text.identifier }}</span>
+                            <br>
+                            <span>Translation: <br>
+                                {% for sense in section.senses.all %}
+                                    {{ sense.sense }}
+                                {% endfor %}
                             </span>
                         </div>
                     </div>
