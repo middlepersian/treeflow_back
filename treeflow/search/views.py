@@ -2,10 +2,10 @@ import logging
 from django.views.decorators.http import require_GET
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
-from treeflow.corpus.models import Section, Text
+from treeflow.corpus.models import Section
 from .forms import DistanceFormSet, LogicalFormSet, ResultFilterForm
 from .models import SearchCriteria, SearchSession
-from .logic import get_results, narrow_results
+from .logic import get_results
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +38,9 @@ def get_or_create_session(request, queries=None, results=None):
 def results_view(request):
     page_number = 1
     queries = []
-    text_id = request.GET.get("text", "")
-    section_id = request.GET.get("section", "")
     results = Section.objects.none()
     search_session = SearchSession.objects.none()
-    text = Text.objects.get(id=text_id) if text_id else Text.objects.none()
-    section = Section.objects.get(id=section_id) if section_id else Section.objects.none()
-    filter_form = ResultFilterForm(initial={"text": text, "section": section})
-    
+
     if request.method == "POST":
         layout_selection = request.POST.get("layout_selection", "logical")
         formset = (
@@ -69,18 +64,15 @@ def results_view(request):
 
             search_session = get_or_create_session(request, queries, section_ids)
 
-    elif request.method == "GET":
+    elif request.method == "GET" and "page" in request.GET:
         page_number = request.GET.get("page", 1)
         queries = request.GET.getlist("query", [])
-        filters = {"text": text_id, "section": section_id}
 
         try:
             search_session = get_or_create_session(request, queries)
             results = Section.objects.filter(id__in=search_session.results)
 
-            if text_id or section_id:
-                results = narrow_results(results, text_id, section_id)
-                logger.debug(f"Narrowed down to {len(results)} results.")
+            logger.debug(f"Search session found: {search_session.id}")
 
         except Exception as e:
             logger.debug(f"Search session could not be found: {e}")
@@ -96,9 +88,6 @@ def results_view(request):
         {
             "page_obj": page_obj,
             "queries": queries,
-            "text_id": text_id,
-            "section_id": section_id,
-            "filter_form": filter_form,
         },
     )
 
@@ -108,14 +97,12 @@ def search_page(request):
     queryset = SearchCriteria.objects.none()
     results = Section.objects.none()
     layout_selection = request.GET.get("layout_selection", "logical")
-    filter_form = ResultFilterForm()
     formset = (
         LogicalFormSet(queryset=queryset)
         if layout_selection == "logical"
         else DistanceFormSet(queryset=queryset)
     )
     context = {
-        "filter_form": filter_form,
         "formset": formset,
         "layout_selection": layout_selection,
         "results": results,

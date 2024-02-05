@@ -22,4 +22,8 @@ class Migration(migrations.Migration):
             name='queries',
             field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, default='', null=True), blank=True, null=True, size=None),
         ),
+        migrations.AlterUniqueTogether(
+            name='searchsession',
+            unique_together={('user', 'session_id', 'queries')},
+        ),
     ]

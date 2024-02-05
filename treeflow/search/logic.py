@@ -16,28 +16,12 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
 
     """
 
-    filter_tmp = criteria.copy()
-
-    value = filter_tmp.pop("query")
-    query_field = filter_tmp.pop("query_field")
-    query_type = filter_tmp.pop("query_type")
-    i = "" if filter_tmp.pop("case_sensitive") else "i"
-
+    # TODO: istartswith, regexp, fuzzy
     query = (
-        Q(**{f"{query_field}__{i}exact": value})
-        if query_type == "exact"
-        else Q(**{f"{query_field}__{i}startswith": value})
-        if query_type == "prefix"
-        else Q(**{f"{query_field}__{i}endswith": value})
-        if query_type == "suffix"
-        else Q(**{f"{query_field}__{i}regex": value})
-        if query_type == "regex"
-        else Q(**{f"{query_field}__{i}contains": value})
+        Q(**{f"{criteria['query_field']}__iexact": criteria["query"]})
+        if criteria["query_type"] == "exact"
+        else Q(**{f"{criteria['query_field']}__icontains": criteria["query"]})
     )
-
-    for k, v in filter_tmp.items():
-        if v and not any(x in k for x in ["logical", "distance", "id"]):
-            query.add(Q(**{k: v}), Q.AND)
 
     tokens = Token.objects.filter(query)
 
@@ -135,6 +119,7 @@ def filter_sections_by_distance(
     return sections
 
 
+
 def get_results(criteria: List):
     anchor_criterium = criteria[0]
     filters = criteria[1:]
@@ -143,20 +128,10 @@ def get_results(criteria: List):
 
     if len(criteria) == 1:
         logger.debug("Only anchor token provided, returning sections.")
+        return sections
     elif "logical_operator" in anchor_criterium:
         sections = filter_sections_by_logic(sections, filters)
     elif "distance" in anchor_criterium:
         sections = filter_sections_by_distance(anchor_tokens, sections, filters)
 
     return sections
-
-
-def narrow_results(results: List, text: None, section: None):
-    query = Q()
-
-    if text: query.add(Q(text_id=text), Q.AND)
-    if section: query.add(Q(id=section), Q.AND)
-
-    filtered = results.filter(query)
-    
-    return filtered

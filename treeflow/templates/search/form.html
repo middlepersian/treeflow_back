@@ -20,26 +20,6 @@
             {% endif %}
         </div>
     </div>
-    <div id="is-root" class="flex justify-between items-center gap-4">
-        <label class="font-medium text-gray-900 whitespace-normal">Root?</label>
-        <div class="text-right">
-            {{ form.root }}
-        </div>
-    </div>
-    <div id="case-sensitivity" class="flex justify-between items-center gap-4">
-        <label class="font-medium text-gray-900 whitespace-normal">Language</label>
-        <div class="text-right">
-            {{ form.language }}
-        </div>
-    </div>
-    <hr class="h-px my-4 bg-gray-200 border-0 text-gray-700">
-    <div id="case-sensitivity" class="flex justify-between items-center gap-4">
-        <label class="font-medium text-gray-900 whitespace-normal">Case sensitive?</label>
-        <div class="text-right">
-            {{ form.case_sensitive }}
-        </div>
-    </div>
-
 
     {% if firstForm %}
         <div id="form-initial-marker" class="flex flex-row gap-4 pt-4">
@@ -77,12 +57,34 @@
 
 </div>
 
-    {% comment %} <div id="pos-token" class="flex justify-between items-center gap-4">
-        <label>Part of speech</label>
-        <div class="text-right">
-            {{ form.pos_token }}
+        {% comment %} <div id="pos-token" class="flex justify-between items-center gap-4">
+            <label>Part of speech</label>
+            <div class="text-right">
+                {{ form.pos_token }}
+            </div>
+        </div> {% endcomment %}
+    {% comment %} {% if not firstForm %}
+        <hr class="my-6" />
+        <div id="stopwords" class="flex justify-between items-center gap-4">
+            <label class="font-medium text-gray-900 whitespace-normal">
+                Exclude stopwords?
+            </label>
+            <div class="text-right">
+                {{ form.remove_stopwords }}
+            </div>
         </div>
-    </div> {% endcomment %}
+        <div id="distance" class="flex justify-between items-center gap-4">
+            <label class="font-medium text-gray-900 whitespace-normal">
+                Distance to anchor
+            </label>
+            <div class="text-right">
+                {{ form.distance_type }} 
+            </div>
+            <div class="text-right">
+                {{ form.distance }}
+            </div>
+        </div>
+    {% endif %} {% endcomment %}
     {% comment %} <hr class="my-6" />
     <div id="feature-token">
             <h2 class="font-medium text-gray-900 whitespace-normal">Filter by feature</h2>
