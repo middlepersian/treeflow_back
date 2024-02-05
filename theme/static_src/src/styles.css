@@ -23,6 +23,7 @@
         @apply text-sm text-center md:text-base sm:text-sm;
     }
 
+
 }
 
 * {
@@ -114,4 +115,12 @@
 
 #search-page-container .card .top-right-button button svg {
     pointer-events: none;
+}
+
+#search-page-container .loading-indicator, #search-page-container .htmx-request ~ #results-list, #search-page-container .htmx-request ~ #results-filter {
+    display: none;
+}
+
+#search-page-container .htmx-request.loading-indicator {
+    display: flex;
 }

@@ -5,24 +5,21 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class SearchCriteria(models.Model):
-    # Options
     QUERY_TYPE_CHOICES = [
         ("exact", "Exact"),
-        ("fuzzy", "Fuzzy"),
+        ("contains", "Contains"),
+        ("prefix", "Prefix"),
+        ("suffix", "Suffix"),
+        ("regex", "Regex"),
     ]
 
     FIELD_CHOICES = [
         ("id", "ID"),
-        ("number", "Number"),
-        ("numberInSentence", "Number in sentence"),
-        ("root", "Root"),
-        # ("text", "Text"),
-        ("language", "Language"),
         ("transcription", "Transcription"),
         ("transliteration", "Transliteration"),
         ("avestan", "Avestan"),
         ("gloss", "Gloss"),
-        ("created_at", "Created"),
+        # ("created_at", "Created"),
     ]
 
     LANGUAGE_CHOICES = [
@@ -60,8 +57,12 @@ class SearchCriteria(models.Model):
     query_field = models.CharField(
         blank=False, choices=FIELD_CHOICES, default="transcription"
     )
+    root = models.BooleanField(blank=False, default=False)
+    language = models.CharField(blank=True, choices=LANGUAGE_CHOICES, default="")
 
-    distance = models.PositiveIntegerField(blank=True, null=True, default=0)
+    case_sensitive = models.BooleanField(blank=False, default=False)
+
+    distance = models.PositiveIntegerField(blank=True, null=True, default=1)
     distance_type = models.CharField(
         blank=True,
         choices=DISTANCE_TYPE_CHOICES,
@@ -89,9 +90,11 @@ class SearchSession(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
     )
     session_id = models.CharField(max_length=255, null=True, blank=True)
-    formset = models.ManyToManyField(SearchCriteria, blank=True)
+    filters = models.JSONField(null=True, blank=True)
     results = ArrayField(models.UUIDField(default=uuid.uuid4), null=True, blank=True)
-    queries = ArrayField(models.CharField(blank=True, default=""), null=True, blank=True)
+    queries = ArrayField(
+        models.CharField(blank=True, default=""), null=True, blank=True
+    )
 
     class Meta:
         unique_together = (
