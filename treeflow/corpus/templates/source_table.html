@@ -51,7 +51,7 @@
         </ul>
         <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a>
       </td> 
-      <td class="px-6 py-4 whitespace-nowrap text-center">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-center publication-url">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
       <td class="px-6 py-4 whitespace-nowrap"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
     
     </tr>
@@ -136,4 +136,9 @@
   });
 </script>
 
+<style>
+  .publication-url a {
+    color: blue;
+  }
+</style>
 {% endblock %}
