@@ -3,48 +3,47 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold">{% trans 'Source Table' %}</h1>
 
-<table class="mx-auto table-auto">
-  <thead>
+<table class="min-w-full bg-white">
+  <thead class="text-white bg-gray-800">
     <tr>
-      <th class="p-2 border">{% trans 'Identifier' %}</th>
-      <th class="p-2 border">{% trans 'Description' %}</th>
-      <th class="p-2 border">{% trans 'Type' %}</th>
-      <th class="p-2 border">{% trans 'Related Sources' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Identifier' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Description' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Type' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Related Sources' %}</th>
       {% if request.user.is_authenticated %}
-      <th class="p-2 border">{% trans 'Zotero Keys' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Zotero Keys' %}</th>
       {% endif %}
-      <th class="border p-2">{% trans 'Zotero Entry' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Zotero Entry' %}</th>
       {% if request.user.is_authenticated %}
-      <th class="p-2 border">{% trans 'Delete' %}</th>
+      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Delete' %}</th>
       {% endif %}
     </tr>
   </thead>
-  <tbody>
+  <tbody class="text-gray-900">
     {% if request.user.is_authenticated %}
     {% for source in sources %}
     <tr>
-      <td class="p-2 border">
+      <td class="px-6 py-4 whitespace-nowrap">
         <input type="text" name="identifier" value="{{ source.identifier }}"
             hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow">
+            class="px-3 py-2 text-gray-700 border rounded shadow text-center">
       </td>
-      <td class="p-2 border">
+      <td class="px-6 py-4 whitespace-nowrap">
         <input type="text" name="description" value="{{ source.description }}"
             hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow">
+            class="px-3 py-2 text-gray-700 border rounded shadow text-center">
         </td>
-      <td class="p-2 border">
+      <td class="px-6 py-4 whitespace-nowrap">
         <input type="text" name="type" value="{{ source.type }}"
             hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
             hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow">
+            class="px-3 py-2 text-gray-700 border rounded shadow text-center">
       </td>
-      <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a></td>
-      <td class="p-2 border">
+      <td class="px-6 py-4 whitespace-nowrap">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a></td>
+      <td class="px-6 py-4 whitespace-nowrap">
         <ul>
           {%for ref in source.references.all %}
           <li>{{ref}}</li>
@@ -52,19 +51,19 @@
         </ul>
         <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a>
       </td> 
-      <td class="border p-2">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
-      <td class="p-2 border"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
+      <td class="px-6 py-4 whitespace-nowrap"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
     
     </tr>
     {% endfor %}
     {% else %}
     {% for source in sources %}
     <tr>
-      <td class="p-2 border">{{ source.identifier }}</td>
-      <td class="p-2 border">{{ source.description }}</td>
-      <td class="p-2 border">{{ source.type }}</td>
-      <td class="p-2 border">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
-        <td class="border p-2">
+      <td class="px-6 py-4 whitespace-nowrap text-center">{{ source.identifier }}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">{{ source.description }}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">{{ source.type }}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-center">
           {% for ref in source.references.all %}<div class="p-2">{{ref.bib|safe|urlize}}</div>{%endfor%}</td>
     </tr>
     {% endfor %}
