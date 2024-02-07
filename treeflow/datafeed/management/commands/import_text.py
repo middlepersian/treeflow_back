@@ -814,11 +814,12 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                             section_human = section.replace("sec", "section ")
                             subsection_human = subsection.replace("subsec", "subsection ")
                             subsubsection_human = subsubsection # to do
-                            logger.error(f"{text_identifier}, {chapter_human}, {section_human}, {subsection_human}, {subsubsection_human}")
+                            logger.info(f"Split newpart: {source}, {chapter}, {section}, {subsection}, {subsubsection}")
                             # get or create the chapter object
                             chapter_identifier = source + "_" + chapter
                             assert chapter_identifier is not None
                             if token:
+                                logger.info("Creating chapter object")
                                 (
                                     chapter_obj,
                                     chapter_obj_created,
@@ -842,6 +843,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                 # get or create the section object
                                 section_identifier = source + "_" + chapter + "_" + section
                                 assert section_identifier is not None
+                                logger.info("Creating section object")
                                 (
                                     section_obj,
                                     section_obj_created,
@@ -865,6 +867,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                 # get or create the subsection object
                                 subsection_identifier = source + "_" + chapter + "_" + section + "_" + subsection
                                 assert subsection_identifier is not None
+                                logger.info("Creating subsection object")
                                 (
                                     subsection_obj,
                                     subsection_obj_created,
@@ -901,6 +904,7 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                                 # get or create the subsubsection object
                                 subsubsection_identifier = source + "_" + chapter + "_" + section + "_" + subsection + "_" + subsubsection
                                 assert subsubsection_identifier is not None
+                                logger.info("Creating subsubsection object")
                                 (
                                     subsubsection_obj,
                                     subsubsection_obj_created,
@@ -948,10 +952,23 @@ def import_annotated_file(csv_file, manuscript_id, text_sigle, text_title, text_
                         if prev_chapter:
                             prev_chapter.tokens.add(token)
                             prev_chapter.save()
+                #logger.info("All objects created and saved successfully")            
             except Exception as e:
-                logger.error(
-                    "Row {} - {} - {}".format(df.index[i] + 2, row["newpart"], e)
-                )
+                logger.exception(e)
+                # Log more information about the conflicting previous_id if it's a unique constraint violation
+                if "duplicate key value violates unique constraint" in str(e):
+                    logger.error(f"Duplicate previous_id issue at Row {df.index[i] + 2}: {row['newpart']}")
+                    if prev_chapter:
+                        logger.error(f"prev_chapter ID: {prev_chapter.identifier} - {prev_chapter.id}")
+                    if prev_section:
+                        logger.error(f"prev_section ID: {prev_section.identifier} - {prev_section.id}")
+                    if prev_subsection:
+                        logger.error(f"prev_subsection ID: {prev_subsection.identifier} - {prev_subsection.id}")
+                    if prev_subsubsection:
+                        logger.error(f"prev_subsubsection ID: {prev_subsubsection.identifier} - {prev_subsubsection.id}")
+                else:
+                    logger.error(f"Error at Row {df.index[i] + 2}: {row['newpart']}")
+
 
 
 
