@@ -1,16 +1,22 @@
 from django.forms import modelformset_factory
 from django import forms
 from .models import SearchCriteria, ResultFilter
-from treeflow.corpus.models import Token
+
+shared_fields = (
+    "query",
+    "query_type",
+    "query_field",
+    "root",
+    "language",
+    "case_sensitive",
+)
 
 
 class DistanceForm(forms.ModelForm):
     class Meta:
         model = SearchCriteria
         fields = (
-            "query",
-            "query_type",
-            "query_field",
+            *shared_fields,
             "distance",
             "distance_type",
         )
@@ -20,9 +26,7 @@ class LogicalForm(forms.ModelForm):
     class Meta:
         model = SearchCriteria
         fields = (
-            "query",
-            "query_type",
-            "query_field",
+            *shared_fields,
             "logical_operator",
         )
 
