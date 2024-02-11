@@ -36,7 +36,6 @@ class Text(models.Model):
         return '{}'.format(self.title, self.identifier)
 
     class Meta:
-        ordering = ['series']
         constraints = [
             models.UniqueConstraint(
                 fields=['corpus', 'identifier'], name='text_corpus_identifier'
