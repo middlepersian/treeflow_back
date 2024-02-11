@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
     * {
         @apply font-['Helvetica'] scroll-smooth
@@ -114,4 +115,18 @@
 
 #search-page-container .card .top-right-button button svg {
     pointer-events: none;
+}
+
+#search-page-container .loading-indicator, #search-page-container .htmx-request ~ #results-list, #search-page-container .htmx-request ~ #results-filter {
+    display: none;
+}
+
+#search-page-container .htmx-request.loading-indicator {
+    display: flex;
+}
+
+#search-page-container #section-tooltip {
+    bottom: 105%;
+    left: 125%;
+    width: 80%;
 }

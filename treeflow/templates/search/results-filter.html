@@ -1,0 +1,30 @@
+<h4 class="font-bold text-gray-900 whitespace-normal">Narrow down the search results</h4>
+<form class="flex-1" id="filter-form" hx-get="{% url "search:results" %}?page=1{% for query in queries %}&query={{ query }}{% endfor %}" hx-push-url="true" hx-target="#results-list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% comment %}
+    <div id="stopwords" class="justify-between">
+        <label class="font-medium text-gray-900 whitespace-normal">
+            Exclude stopwords?
+            <div>
+                {{ filter_form.remove_stopwords }}
+            </div>
+        </label>
+    </div>
+    {% endcomment %}
+    <div id="text-selection" class="mt-2 justify-between">
+        <label class="font-medium text-gray-900 whitespace-normal">
+            Source text
+            <div class="w-full">
+                {{ filter_form.text }}
+            </div>
+        </label>
+    </div>
+    <div id="section-selection" class="mt-2 justify-between">
+        <label class="font-medium text-gray-900 whitespace-normal">
+            Section
+            <div>
+                {{ filter_form.section }}
+            </div>
+        </label>
+    </div>
+</form>
+<input form="filter-form" type="submit" value="Apply filters" class="p-2 rounded bg-main text-white hover:bg-main-dark cursor-pointer mt-2 mb-4 transition-colors duration-150" />
