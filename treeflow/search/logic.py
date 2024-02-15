@@ -3,6 +3,7 @@ import time
 from django.core.paginator import Paginator
 from typing import Dict, List
 from django.db.models import Q
+from uuid import UUID
 from treeflow.corpus.models import Section, Token
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
         if v:
             query &= Q(**{k: v})
 
-    tokens_queryset = Token.objects.filter(query).only('id', 'number', 'text', 'language', 'transcription')
+    tokens_queryset = Token.objects.filter(query).only('id').values_list('id', flat=True)
     #log the query
     logger.debug(tokens_queryset.query)
     paginator = Paginator(tokens_queryset, page_size)
@@ -45,31 +46,27 @@ def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
     return tokens
 
 
-
-def identify_sections(tokens: List[Token]) -> List[Section]:
+def identify_sections(tokens: List[UUID], batch_size=1000) -> List[Section]:
     """
-    Identify distinct sections from a list of anchor tokens.
+    Identify distinct sections from a list of anchor token UUIDs using batch processing.
 
-    :param anchors: A list of Token objects to find the sections for.
+    :param tokens: A list of Token UUIDs to find the sections for.
+    :param batch_size: Number of token_ids to process per batch.
     :return: A list of unique Section objects that are associated with the tokens.
     """
+    sections = []
+    for i in range(0, len(tokens), batch_size):
+        batch_token_ids = tokens[i:i + batch_size]
 
-    token_ids = [token.id for token in tokens]
-
-    sections = (
-        Section.objects.filter(
-            sectiontoken__token_id__in=token_ids,
-            type="sentence",
+        batch_sections = Section.objects.filter(
+            sectiontoken__token_id__in=batch_token_ids,
+            type="sentence"
+        ).prefetch_related(
+            "sectiontoken_set",
+            "sectiontoken_set__token"
         )
-        .prefetch_related(
-            "sectiontoken_set",  # Prefetch related SectionToken objects
-            "sectiontoken_set__token",  # Prefetch related Token objects through SectionToken
-        )
-        .distinct().only('id', 'type')
-    )
 
-    logger.debug(f"Identified {len(sections)} sections.")
-    logger.debug(sections.query)
+        sections.extend(list(batch_sections))
 
     return sections
 

@@ -56,7 +56,6 @@ def results_view(request):
         )
 
         if formset.is_valid():
-            # Exclude empty forms, e.g. if query value is empty
             data = [f for f in formset.cleaned_data if f]
             logger.debug(f"Submitted data: {data}")
 
@@ -64,12 +63,22 @@ def results_view(request):
                 results = get_results(data)
                 logger.debug(f"Found {len(results)} results.")
             except Exception as e:
-                logger.debug(f"Could not retrieve results: {e}")
+                logger.error(f"Could not retrieve results: {e}")
 
-            queries = [form["query"] for form in data]
-            section_ids = list(results.values_list("id", flat=True).distinct())
+            queries = [form["query"] for form in data if "query" in form]
+            try:
+                section_ids = [section.id for section in results]
+                logger.debug(f"Found {len(section_ids)} section IDs.")
+                results = Section.objects.filter(id__in=section_ids).prefetch_related("sectiontoken_set", "sectiontoken_set__token", "senses")
+                # log the length of the results
+                logger.debug(f"Found {len(results)} sections with the ids.")          
+            except Exception as e:
+                logger.error(f"Error while extracting section IDs: {e}")
+                section_ids = []
+                results = Section.objects.none()
 
             search_session = get_or_create_session(request, queries, section_ids)
+
 
     elif request.method == "GET":
         logger.info("GET request received.")
@@ -88,7 +97,6 @@ def results_view(request):
         except Exception as e:
             logger.debug(f"Search session could not be found: {e}")
 
-    results = results.prefetch_related("sectiontoken_set", "sectiontoken_set__token", "senses")
     for result in results:
         result.senses_list = list(result.senses.all())
         result.sectiontoken_list = list(result.sectiontoken_set.all())
