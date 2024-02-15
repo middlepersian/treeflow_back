@@ -1,4 +1,5 @@
 import logging
+from django.core.paginator import Paginator
 from typing import Dict, List
 from django.db.models import Q
 from treeflow.corpus.models import Section, Token
@@ -6,14 +7,14 @@ from treeflow.corpus.models import Section, Token
 logger = logging.getLogger(__name__)
 
 
-def retrieve_tokens(criteria: Dict) -> List[Token]:
+def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
     """
-    Retrieve all tokens that match the given criteria.
+    Retrieve all tokens that match the given criteria in batches.
     These tokens will act as potential anchors for further search.
 
     :param criteria: The anchor object containing the search criteria.
+    :param page_size: Number of tokens to retrieve per batch.
     :return: A list of Token objects that match the criteria.
-
     """
 
     filter_tmp = criteria.copy()
@@ -23,26 +24,22 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
     query_type = filter_tmp.pop("query_type")
     i = "" if filter_tmp.pop("case_sensitive") else "i"
 
-    query = (
-        Q(**{f"{query_field}__{i}exact": value})
-        if query_type == "exact"
-        else Q(**{f"{query_field}__{i}startswith": value})
-        if query_type == "prefix"
-        else Q(**{f"{query_field}__{i}endswith": value})
-        if query_type == "suffix"
-        else Q(**{f"{query_field}__{i}regex": value})
-        if query_type == "regex"
-        else Q(**{f"{query_field}__{i}contains": value})
-    )
-
+    # Build the query
+    query = Q(**{f"{query_field}__{i}{query_type}": value})
     for k, v in filter_tmp.items():
-        if v and not any(x in k for x in ["logical", "distance", "id"]):
-            query.add(Q(**{k: v}), Q.AND)
+        if v:
+            query &= Q(**{k: v})
 
-    tokens = Token.objects.filter(query)
+    tokens_queryset = Token.objects.filter(query).only('id', 'number', 'text_id', 'language', 'transcription')
+    paginator = Paginator(tokens_queryset, page_size)
 
-    logger.debug(f"Retrieved {len(tokens)} tokens.")
-    logger.debug(tokens.query)
+    tokens = []
+    for page_num in range(1, paginator.num_pages + 1):
+        page = paginator.page(page_num)
+        tokens.extend(list(page.object_list))
+
+    logger.debug(f"Retrieved {len(tokens)} tokens in batches.")
+    return tokens
 
     return tokens
 
@@ -66,7 +63,7 @@ def identify_sections(tokens: List[Token]) -> List[Section]:
             "sectiontoken_set",  # Prefetch related SectionToken objects
             "sectiontoken_set__token",  # Prefetch related Token objects through SectionToken
         )
-        .distinct()
+        .distinct().only('id', 'type')
     )
 
     logger.debug(f"Identified {len(sections)} sections.")
