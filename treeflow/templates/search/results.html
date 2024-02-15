@@ -2,93 +2,44 @@
     <div class="flex flex-row p-4">
         <div id="sections">
             {% for section in page_obj %}
-                {% with section_senses=section.senses.all section_tokens=section.sectiontoken_set.all %}
-                    <div id="section" class="mt-4 max-w-[80%]">
-                        <div id="section-metadata" class="flex flex-row gap-x-1">
-                            <div id="section-title" class="cursor-help group relative font-bold">
-                                <p>{{ section.type | title }} {{ section.number | floatformat:"0" }} in {{ section.text | default:"Untitled" }}</p>
-                                <div id="section-tooltip" class="flex flex-col scale-0 group-hover:scale-100 transition-opacity absolute bg-main text-sm text-white rounded-md p-2">
-                                    <p>Section: {{ section.identifier }}</p>
-                                    <p class="mb-2">Text: {{ section.text.identifier }}</p>
-                                    <p>Translation:<br>{% for sense in section_senses %}{{ sense.sense }}{% endfor %}</p>
-                                </div>
+                <div id="section_{{ section.id }}" class="mt-4 max-w-[80%]">
+                    <div class="flex flex-row gap-x-1">
+                        <div class="cursor-help group relative font-bold">
+                            <p>{{ section.type | title }} {{ section.number | floatformat:"0" }} in {{ section.text | default:"Untitled" }}</p>
+                            <div class="flex flex-col scale-0 group-hover:scale-100 transition-opacity absolute bg-main text-sm text-white rounded-md p-2">
+                                <p>Section: {{ section.identifier }}</p>
+                                <p class="mb-2">Text: {{ section.text.identifier }}</p>
+                                <p>Translation:<br>{% for sense in section.senses_list %}{{ sense.sense }}{% endfor %}</p>
                             </div>
-                            <div id="ud-link" title="Open Universal Dependency Graph" class="mt-0.5">
-                                <a class="text-main-graded-900 font-bold hover:text-off" href="{% url 'corpus:ud_editor' section.id %}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                                </a>
-                            </div>
-                            <div id="section-link" title="Open section viewer" class="mt-0.5">
-                                <a class="text-main-graded-900 font-bold hover:text-off" href="{% url 'corpus:sections' text_id=section.text.id %}#{{ section.id }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                </a>
-                            </div>
-                        {% if request.user.is_authenticated %}
-                            <div id="edit-link" title="Edit this section" class="mt-0.5">
-                                <a class="text-main-graded-900 font-bold hover:text-off" href="{% url 'corpus:sentence' section.id %}?text_id={{ section.text.id }}">                  
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                </a>
-                            </div>
-                        {% endif %}
                         </div>
-                        <div id="sentence">
-                            {% for section_token in section_tokens %}
-                                {% if section_token.token.transcription %}
-                                    <span id="token" class="{% if section_token.token.transcription in queries %}text-off-graded-600 font-bold {% endif %}{% if not forloop.first and section_token.token.transcription == ',' %}-ml-1{% endif %}">{{ section_token.token.transcription }}</span>
-                                {% endif %}                   
-                            {% endfor %}
-                        </div>
+                        <!-- Section Links -->
+                        {% include "section-links.html" with section=section %}
                     </div>
-                {% endwith %}
+                    <div class="sentence">
+                        {% for section_token in section.sectiontoken_list %}
+                            {% if section_token.token.transcription %}
+                                <span class="{% if section_token.token.transcription in queries %}text-off-graded-600 font-bold {% endif %}{% if not forloop.first and section_token.token.transcription == ',' %}-ml-1{% endif %}">{{ section_token.token.transcription }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
             {% endfor %}
         </div>
+        <!-- Results Filter -->
         <div id="results-filter" class="ml-auto p-4">
             {% include "search/results-filter.html" with queries=queries %}
         </div>
     </div>
-    <div id="pagination" class="flex flex-row mt-6 items-center justify-between border-t border-gray-200 bg-white px-4 py-3 gap-4">
-        <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="flex flex-1 justify-between max-w-[20%]">
-            {% if page_obj.has_previous %}
-                <a 
-                    hx-get="{% url "search:results" %}?page={{ page_obj.previous_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}{% if text_id %}&text={{ text_id }}{% endif %}{% if section_id %}&section={{ section_id }}{% endif %}"
-                    hx-push-url="true" 
-                    hx-target="#results-list"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
-            {% else %}
-                <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Previous</span>
-            {% endif %}
-            {% comment %} TODO: Turn this into an input field {% endcomment %}
-            <span id="current-page" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">{{ page_obj.number }}</span>
-            {% if page_obj.has_next %}
-                <a 
-                    hx-get="{% url "search:results" %}?page={{ page_obj.next_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}{% if text_id %}&text={{ text_id }}{% endif %}{% if section_id %}&section={{ section_id }}{% endif %}"
-                    hx-push-url="true" 
-                    hx-target="#results-list"
-                    class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
-            {% else %}
-                <span class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-md">Next</span>
-            {% endif %}
-        </div>
-        
-        <div id="result-count" class="flex flex-col">
-                <p class="text-sm text-gray-700">
-                Showing
-                <span class="font-medium">{{ page_obj.start_index }}</span>
-                to
-                <span class="font-medium">{{ page_obj.end_index }}</span>
-                of
-                <span class="font-medium">{{ page_obj.paginator.count }}</span>
-                results
-                </p>
-        </div>
-    </div>
+    <!-- Pagination -->
+    {% include "pagination.html" with page_obj=page_obj queries=queries text_id=text_id section_id=section_id %}
 {% else %}
     <div class="flex flex-row m-4 justify-between">
         <div id="no-results" class="inline-flex items-center text-off-graded-700 font-bold gap-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <!-- No Results SVG -->
             <p>No results found.</p>
         </div>
         {% if text_id or section_id %}
+            <!-- Results Filter -->
             <div id="results-filter" class="flex flex-col ml-auto min-w-[20%]">
                 {% include "search/results-filter.html" with queries=queries %}
             </div>
