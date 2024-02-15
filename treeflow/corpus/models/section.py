@@ -41,7 +41,9 @@ class Section(models.Model):
         ]
         indexes = [models.Index(fields= ['id', 'number', 'type']),
                    models.Index(fields=['type']),
-                   models.Index(fields=['number'])]
+                   models.Index(fields=['number']),
+                   models.Index(fields=['type','text'])
+                     ]
 
     def __str__(self) -> str:
         return '{} - {} '.format(self.type, self.identifier)
