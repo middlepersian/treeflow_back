@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class SenseWidget(s2forms.ModelSelect2Widget):
     search_fields = [
-        "sense__icontains",
+        "sense__istartswith",  # Changed from icontains to istartswith
     ]
 
 
@@ -22,7 +22,7 @@ class SectionEditorForm(forms.ModelForm):
         widgets = {
             'senses': s2forms.ModelSelect2MultipleWidget(
                 model='treeflow.dict.models.Sense', 
-                search_fields=['sense__icontains'], 
+                search_fields=['sense__istartswith'], 
                 attrs={'style': 'width: 100%; min-height: 100px;'}  # Adjusted style
             ),
         }
