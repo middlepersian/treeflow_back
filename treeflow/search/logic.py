@@ -31,7 +31,7 @@ def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
         if v:
             query &= Q(**{k: v})
 
-    tokens_queryset = Token.objects.filter(query).only('id', 'number', 'text_id', 'language', 'transcription')
+    tokens_queryset = Token.objects.filter(query).only('id', 'number', 'text', 'language', 'transcription')
     #log the query
     logger.debug(tokens_queryset.query)
     paginator = Paginator(tokens_queryset, page_size)
