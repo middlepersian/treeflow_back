@@ -9,7 +9,7 @@ from treeflow.corpus.models import Section, Token
 logger = logging.getLogger(__name__)
 
 
-def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
+def retrieve_tokens(criteria: Dict, page_size=500) -> List[Token]:
     """
     Retrieve all tokens that match the given criteria in batches.
     These tokens will act as potential anchors for further search.

@@ -97,10 +97,6 @@ def results_view(request):
         except Exception as e:
             logger.debug(f"Search session could not be found: {e}")
 
-    for result in results:
-        result.senses_list = list(result.senses.all())
-        result.sectiontoken_list = list(result.sectiontoken_set.all())
-
     paginator = Paginator(results, 10)
     page_obj = paginator.get_page(page_number) if paginator else None
     logger.info(f"Page object: {page_obj}")
