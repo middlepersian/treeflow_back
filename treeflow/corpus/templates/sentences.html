@@ -119,18 +119,19 @@
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                 class="px-3 py-2 border rounded shadow text-grey-darker">
             </td>
-
+            
             <!-- Avestan -->
             <td id="avestan-cell" class="px-4 py-2 border">
               <input id="avestan-content-{{ token.id }}" type="text"
                 name="avestan"
-                value="{{ token.avestan }}"
+                value="{{ token.avestan|default_if_none:'–' }}"
                 hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                 class="px-3 py-2 border rounded shadow text-grey-darker">
             </td>
+
             <!-- Lemmas -->
             <td id="lemmas-cell" class="px-4 py-2 border"
               hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
@@ -141,7 +142,7 @@
                 {{ lemma.word }}
                 {% if not forloop.last %}, {% endif %}
                 {% empty %}
-                _
+                –
                 {% endfor %}
               </span>
             </td>
@@ -155,7 +156,7 @@
                 {{ sense.sense }}
                 {% if not forloop.last %}, {% endif %}
                 {% empty %}
-                _
+                –
                 {% endfor %}
               </span>
             </td>
@@ -172,7 +173,7 @@
                 {{ pos.pos }}
                 {% endif %}
                 {% empty %}
-                _
+                –
                 {% endfor %}
               </span>
             </td>
@@ -186,7 +187,7 @@
                 {{ feature.feature }}={{ feature.feature_value }}
                 {% if not forloop.last %} | {% endif %}
                 {% empty %}
-                _
+                –
                 {% endfor %}
               </span>
             </td>
