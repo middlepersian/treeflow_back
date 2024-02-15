@@ -39,9 +39,9 @@ class Section(models.Model):
             models.UniqueConstraint(
                 fields=['text', 'identifier'], name='section_text_identifier')
         ]
-        indexes = [models.Index(fields=['type', 'text']),
+        indexes = [models.Index(fields= ['id', 'number', 'type']),
                    models.Index(fields=['type']),
-                   ]
+                   models.Index(fields=['number'])]
 
     def __str__(self) -> str:
         return '{} - {} '.format(self.type, self.identifier)

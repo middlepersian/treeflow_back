@@ -1,4 +1,5 @@
 import logging
+import time
 from django.core.paginator import Paginator
 from typing import Dict, List
 from django.db.models import Q
@@ -31,6 +32,8 @@ def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
             query &= Q(**{k: v})
 
     tokens_queryset = Token.objects.filter(query).only('id', 'number', 'text_id', 'language', 'transcription')
+    #log the query
+    logger.debug(tokens_queryset.query)
     paginator = Paginator(tokens_queryset, page_size)
 
     tokens = []
@@ -41,7 +44,6 @@ def retrieve_tokens(criteria: Dict, page_size=1000) -> List[Token]:
     logger.debug(f"Retrieved {len(tokens)} tokens in batches.")
     return tokens
 
-    return tokens
 
 
 def identify_sections(tokens: List[Token]) -> List[Section]:
@@ -133,6 +135,8 @@ def filter_sections_by_distance(
 
 
 def get_results(criteria: List):
+    start_time = time.time()
+
     anchor_criterium = criteria[0]
     filters = criteria[1:]
     anchor_tokens = retrieve_tokens(anchor_criterium)
@@ -144,6 +148,10 @@ def get_results(criteria: List):
         sections = filter_sections_by_logic(sections, filters)
     elif "distance" in anchor_criterium:
         sections = filter_sections_by_distance(anchor_tokens, sections, filters)
+
+    end_time = time.time()
+    print(f"Total time taken in get_results: {end_time - start_time} seconds")
+     
 
     return sections
 

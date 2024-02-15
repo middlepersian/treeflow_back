@@ -26,15 +26,14 @@ class Token(models.Model):
                               null=True, blank=True, related_name='token_image')
 
     language = models.CharField(max_length=3, null=True, blank=True)
-    transcription = models.TextField(null=True, blank=True)
-    transliteration = models.TextField(null=True, blank=True)
+    transcription = models.CharField(max_length=50, null=True, blank=True)
+    transliteration = models.CharField(max_length=50, null=True, blank=True)
     lemmas = models.ManyToManyField(
         'dict.Lemma', blank=True, through='TokenLemma', related_name='token_lemmas')
     senses = models.ManyToManyField(
         'dict.Sense', blank=True, through='TokenSense', related_name='token_senses')
 
-    avestan = models.TextField(null=True, blank=True)
-
+    avestan = models.CharField(max_length=50, null=True, blank=True)
     previous = models.OneToOneField('self',
                                     related_name='next',
                                     blank=True,
@@ -63,6 +62,8 @@ class Token(models.Model):
             models.Index(fields=['transliteration']),
             models.Index(fields=['number']),
             models.Index(fields=['text']),
+            #add a composite index on id, number, text, language, transcription
+            models.Index(fields=['id', 'number', 'text', 'language', 'transcription']),
         ]
 
     def __str__(self):
