@@ -26,7 +26,7 @@ class Sense(models.Model):
         ordering = ['sense']
 
     def __str__(self):
-        return '{} - {} - {}'.format(self.sense)
+        return '{} - {}'.format(self.sense, self.language)
 
     def save(self, *args, **kwargs):
         # Normalize only the `normalized_field` before saving
