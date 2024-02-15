@@ -47,6 +47,7 @@ def results_view(request):
     filter_form = ResultFilterForm(initial={"text": text, "section": section})
     
     if request.method == "POST":
+        logger.info("POST request received.")
         layout_selection = request.POST.get("layout_selection", "logical")
         formset = (
             LogicalFormSet(request.POST)
@@ -71,6 +72,7 @@ def results_view(request):
             search_session = get_or_create_session(request, queries, section_ids)
 
     elif request.method == "GET":
+        logger.info("GET request received.")
         page_number = request.GET.get("page", 1)
         queries = request.GET.getlist("query", [])
         filters = {"text": text_id, "section": section_id}
@@ -86,10 +88,14 @@ def results_view(request):
         except Exception as e:
             logger.debug(f"Search session could not be found: {e}")
 
-    paginator = Paginator(
-        results.prefetch_related("sectiontoken_set", "sectiontoken_set__token", "senses"), 10
-    )
+    results = results.prefetch_related("sectiontoken_set", "sectiontoken_set__token", "senses")
+    for result in results:
+        result.senses_list = list(result.senses.all())
+        result.sectiontoken_list = list(result.sectiontoken_set.all())
+
+    paginator = Paginator(results, 10)
     page_obj = paginator.get_page(page_number) if paginator else None
+    logger.info(f"Page object: {page_obj}")
 
     return render(
         request,
@@ -102,7 +108,6 @@ def results_view(request):
             "filter_form": filter_form,
         },
     )
-
 
 @require_GET
 def search_page(request):
