@@ -3,31 +3,31 @@
 {% load comment_tags %}
 {% block content %}
 
-<div class="flex flex-col w-full h-screen">
+<div class="flex flex-col w-full h-screen overflow-y-hidden">
 
   <!-- Flex container for the split view -->
-  <div class="flex flex-grow w-full">
+  <div class="flex w-full h-full">
     <!-- Left Column for Tokens -->
-    <div class="w-8/12 overflow-x-auto">
+    <div class="w-8/12 h-full overflow-x-auto overflow-y-scroll">
       <!-- Table for displaying tokens -->
-      <table class="min-w-full">
-        <thead class="text-white bg-gray-800">
+      <table class="relative w-full bg-white">
+        <thead class="text-white">
           <tr>
-            <th class="px-4 py-2">{% trans 'Number in Text' %}</th>
-            <th class="px-4 py-2">{% trans 'Number in Sentence' %}</th>
-            <th class="px-4 py-2">{% trans 'Image' %}</th>
-            <th class="px-4 py-2">{% trans 'Line' %}</th>
-            <th class="px-4 py-2">{% trans 'Transcription' %}</th>
-            <th class="px-4 py-2">{% trans 'Transliteration' %}</th>
-            <th class="px-4 py-2">{% trans 'Avestan' %}</th>
-            <th class="px-4 py-2">{% trans 'Lemmas' %}</th>
-            <th class="px-4 py-2">{% trans 'Senses' %}</th>
-            <th class="px-4 py-2">{% trans 'POS' %}</th>
-            <th class="px-4 py-2">{% trans 'Features' %}</th>
-            <th class="px-4 py-2">{% trans 'Comments' %}</th>
-            <th class="px-4 py-2">{% trans 'Insert Before' %}</th>
-            <th class="px-4 py-2">{% trans 'Insert After' %}</th>
-            <th class="px-4 py-2">{% trans 'Delete Token' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Number in Text' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Number in Sentence' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Image' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Line' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Transcription' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Transliteration' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Avestan' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Lemmas' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Senses' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'POS' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Features' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Comments' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Insert Before' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Insert After' %}</th>
+            <th class="sticky top-0 px-4 py-2 bg-main-dark">{% trans 'Delete Token' %}</th>
           </tr>
         </thead>
         <tbody>
@@ -247,8 +247,9 @@
       </table>
     </div>
     <!-- Right Column for Image -->
-    <div class="w-4/12 h-full p-4" id="iiif-viewer"></div>
-
+    <div class="flex flex-col w-4/12 mx-1">
+    <div class="w-full h-full my-2" id="iiif-viewer"></div>
+    </div>
 
     <!-- Sentence senses modal -->
   <div

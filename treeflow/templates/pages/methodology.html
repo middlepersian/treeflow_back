@@ -3,14 +3,16 @@
 
 {% block content %}
   {% include 'components/subbar.html' %}
+  {% include 'components/mobile_scroller.html' %}
   {% include 'components/hero.html' %}
-  <div class="flex flex-row mt-8 mb-20">
-    <div class="sticky border-r-2 smartphone:hidden sm:block h-fit border-sb-gray opacity-60">
+  <div class="flex flex-row w-full mt-8 mb-20">
+    <div class="sticky hidden border-r-2 sm:block h-fit border-sb-gray opacity-60">
       <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
         <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">{% trans 'Methodology' %}</h1>
       </div>
     </div>
-    <div class="flex flex-col items-start gap-2 pl-16 pr-20 smartphone:px-4 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
+    <div class="flex flex-col items-start w-full gap-2 pl-16 pr-20 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
+      <h1 class="w-full text-2xl text-left underline text-main-dark sm:hidden">{% trans 'Methodology' %}</h1>
       <h2 id="workflow" class="text-left text-h2-gray scroll-mt-24">{% trans 'Workflow' %}</h2>
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
         {% blocktrans %}Among the goals of MPCD is an exact representation of the texts as they appear in the selected manuscripts. Although the manuscripts are transliterated and transcribed in a thorough fashion <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="#orthographicAnnotation">[Orthographic and Phonographic Annotation]</a>, the annotation work does not start from scratch. To accelerate the process, a pre-existing transcription is used as a basis for the annotation work. Proceeding from this transcription, a preliminarily annotated text is prepared by means of a module that we refer to as 'pre-annotation'. Through 'pre-annotation', the transcribed text is tokenized and the individual tokens are lemmatized. Moreover, a default transliteration, a morphological annotation and a default meaning are assigned to each token. The current rule-based pre-annotation, which relies on preexisting glossaries, will be replaced by a neuronal, semi-automated annotation in the course of the project.{% endblocktrans %}
@@ -32,35 +34,33 @@
       <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
         {% blocktrans %}Finally, each token is attributed to an abstract <b>lemma</b>, which shows neither spelling nor phonemic-phonetic variation.{% endblocktrans %}
       </p>
-      <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        <div>
-          <table class="w-2/3 m-auto my-3 border border-collapse table-auto">
-            <thead>
-              <tr>
-                <th class="p-1 text-xs text-center border">
-                  <b>{% trans 'transliteration' %}</b>
-                </th>
-                <th class="p-1 text-xs text-center border">
-                  <b>{% trans 'transcription' %}</b>
-                </th>
-                <th class="p-1 text-xs text-center border">
-                  <b>{% trans 'lemma' %}</b>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="p-1 text-xs text-center border">zltwštˈ</td>
-                <td class="p-1 text-xs text-center border">zardušt</td>
-                <td rowspan="2">zardušt</td>
-              </tr>
-              <tr>
-                <td class="p-1 text-xs text-center border">zltwhštˈ</td>
-                <td class="p-1 text-xs text-center border">zarduxšt</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="w-full mb-5 overflow-x-scroll text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        <table class="m-auto my-3 border border-collapse table-auto sm:w-2/3">
+          <thead>
+            <tr>
+              <th class="p-1 text-xs text-center border">
+                <b>{% trans 'transliteration' %}</b>
+              </th>
+              <th class="p-1 text-xs text-center border">
+                <b>{% trans 'transcription' %}</b>
+              </th>
+              <th class="p-1 text-xs text-center border">
+                <b>{% trans 'lemma' %}</b>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-1 text-xs text-center border">zltwštˈ</td>
+              <td class="p-1 text-xs text-center border">zardušt</td>
+              <td rowspan="2">zardušt</td>
+            </tr>
+            <tr>
+              <td class="p-1 text-xs text-center border">zltwhštˈ</td>
+              <td class="p-1 text-xs text-center border">zarduxšt</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <hr class="w-full -mb-5" />
       <h2 id="grammaticalAnnotation" class="text-left text-h2-gray scroll-mt-24">{% trans 'Grammatical Annotation' %}</h2>
@@ -76,10 +76,10 @@
         </ol>
         {% trans 'The syntactic annotation indicates the syntactic role of a token as well as its dependency in the sentence (see the following figure regarding Dēnkard 6, Kap. 1, 166).' %}
       </div>
-      <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-        <img alt="" src="{% static 'images/schematics/Dk6_1_166_andar.png' %}" class="w-2/3 m-auto mt-2 mb-5" />
-        <div>
-          <table class="w-2/3 m-auto my-3 border border-collapse table-auto">
+      <div class="w-full mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+        <img alt="" src="{% static 'images/schematics/Dk6_1_166_andar.png' %}" class="m-auto mt-2 mb-5 sm:w-2/3" />
+        <div class="w-full overflow-x-scroll">
+          <table class="m-auto my-3 border border-collapse table-auto sm:w-2/3">
             <thead>
               <tr>
                 <th class="p-1 text-xs text-center border">
@@ -167,9 +167,9 @@
       </p>
       <hr class="w-full -mb-5" />
       <h2 id="intertextuality" class="text-left text-h2-gray scroll-mt-24">{% trans 'Intertextuality' %}</h2>
-      <div class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+      <div class="w-full mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
         {% trans 'In Zand texts, i.e., Middle Persian (MP) texts translated from Avestan (Av.), the annotation involves a matching of MP words with their underlying Av. forms and lemmata. See the following example from Yasna 9.1:' %}
-        <div>
+        <div class="overflow-x-scroll">
           <table class="w-2/3 m-auto my-3 border border-collapse table-auto">
             <tr>
               <td class="p-1 text-xs text-center border">
