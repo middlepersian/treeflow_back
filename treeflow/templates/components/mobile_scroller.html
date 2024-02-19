@@ -1,0 +1,28 @@
+{% load static i18n %}
+{% load static tailwind_tags %}
+
+<div class="sticky top-0 z-10 bg-white">
+  <div class="flex flex-row justify-center w-full gap-1 px-2 text-xs border-b border-gray-400 sm:hidden">
+    <a href="{% url 'home' %}">
+      <img src="{% static 'images/MPCD-Logo-Final_transparent_ohne-Schriftzug_web.png' %}" class="relative object-contain h-16" alt="MPCD-Logo" />
+      <div class="absolute ml-[4.5rem] -mt-4 -rotate-45 text-xs font-semibold text-main-dark [text-shadow:0_2px_4px_rgb(0_0_0_/_40%)]">BETA</div>
+    </a>
+  </div>
+  <div class="sm:hidden flex w-full items-center h-12 min-h-[3rem] bg-white overflow-x-scroll">
+    <div class="px-2">
+      <a href="{% url 'home' %}" class="p-2 text-center text-main-dark">{% trans 'About' %}</a>
+    </div>
+    <div class="px-2">
+      <a href="{% url 'methodology' %}" class="p-2 text-center text-main-dark">{% trans 'Methodology' %}</a>
+    </div>
+    <div class="px-2">
+      <a href="{% url 'resources' %}" class="p-2 text-center text-main-dark">{% trans 'Resources' %}</a>
+    </div>
+    <div class="px-2">
+      <a href="{% url 'team' %}" class="p-2 text-center text-main-dark">{% trans 'Team' %}</a>
+    </div>
+    <div class="px-2">
+      <a href="{% url 'contact' %}" class="p-2 text-center text-main-dark">{% trans 'Contact' %}</a>
+    </div>
+  </div>
+</div>

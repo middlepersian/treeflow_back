@@ -3,17 +3,19 @@
 
 {% block content %}
   {% include 'components/subbar.html' %}
+  {% include 'components/mobile_scroller.html' %}
   {% include 'components/hero.html' %}
   <div class="flex flex-row mt-8 mb-20">
-    <div class="sticky border-r-2 smartphone:hidden sm:block h-fit border-sb-gray opacity-60">
+    <div class="sticky hidden border-r-2 sm:block h-fit border-sb-gray opacity-60">
       <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
         <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">{% trans 'Team' %}</h1>
       </div>
     </div>
-    <div class="flex flex-col items-start gap-2 pl-16 pr-20 smartphone:px-4 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
-      <h2 id="iranianStudies" class="text-left smartphone:text-center text-h2-gray scroll-mt-24">{% trans 'Iranian Studies' %}</h2>
-      <div class="flex flex-col mb-4">
-        <div class="flex flex-row flex-wrap items-start w-full smartphone-xs:h-1/6 h-1/5 smartphone:justify-center">
+    <div class="flex flex-col items-start gap-2 pl-16 pr-20 animate-fade-up">
+      <h1 class="w-full text-2xl text-left underline text-main-dark sm:hidden">{% trans 'Team' %}</h1>
+      <h2 id="iranianStudies" class="text-left text-h2-gray scroll-mt-24">{% trans 'Iranian Studies' %}</h2>
+      <div class="flex flex-col mb-4 -ml-8 sm:ml-0">
+        <div class="flex flex-row flex-wrap items-start w-full h-1/5">
           <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
             <div class="flex flex-col items-center rounded">
               <div class="border-8 border-white border-solid">
@@ -233,9 +235,9 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col mb-4">
-        <h2 id="digitalHumanities" class="text-left smartphone:text-center text-h2-gray scroll-mt-24">{% trans 'Digital Humanities' %}</h2>
-        <div class="flex flex-row flex-wrap items-start w-full mt-8 smartphone-xs:h-1/6 h-1/5 smartphone:justify-center">
+      <div class="flex flex-col mb-4 -ml-8 sm:ml-0">
+        <h2 id="digitalHumanities" class="text-left text-h2-gray scroll-mt-24">{% trans 'Digital Humanities' %}</h2>
+        <div class="flex flex-row flex-wrap items-start w-full mt-8 smartphone-xs:h-1/6 h-1/5">
           <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
             <div class="flex flex-col items-center rounded">
               <div class="border-8 border-white border-solid">
@@ -312,7 +314,7 @@
             <div class="flex flex-col items-center rounded">
               <div class="border-8 border-white border-solid">
                 <div class="border-8 border-white border-solid">
-                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Guenther.png' %}" alt="BA Luke Maximilian Günther" />
+                  <img class="object-cover w-full rounded h-60" src="{% static 'images/persons/Günther.jpg' %}" alt="BA Luke Maximilian Günther" />
                 </div>
               </div>
               <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
@@ -346,10 +348,10 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col mb-4">
-        <h2 id="cooperationPartners" class="text-left smartphone:text-center text-h2-gray scroll-mt-24">{% trans 'Cooperation Partners' %}</h2>
+      <div class="flex flex-col mb-4 -ml-8 sm:ml-0">
+        <h2 id="cooperationPartners" class="text-left text-h2-gray scroll-mt-24">{% trans 'Cooperation Partners' %}</h2>
         <div class="flex flex-col pb-10">
-          <div class="flex flex-wrap items-start w-full h-1/5 smartphone:justify-center">
+          <div class="flex flex-wrap items-start w-full h-1/5">
             <div class="flex flex-col justify-center pt-4 m-4 bg-white rounded-md w-72">
               <div class="flex flex-col items-center p-4 text-sm text-center lg:text-base md:text-base sm:text-sm">
                 <h3 class="text-base md:text-xl sm:text-base">Middle Persian Dictionary Project (MPDP)</h3>
