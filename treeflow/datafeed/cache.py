@@ -20,7 +20,7 @@ def cache_all_zotero_sources():
 
     if not current_cache:
         logger.info("Cache miss for sources - Sources have been updated in the cache.")
-        cache.set(cache_key, zotero_data, timeout=3600)  # Set a 1-hour timeout
+        cache.set(cache_key, zotero_data, timeout=None) # Set no timeout
     else:
         logger.info("Cache hit for sources - Sources have not been updated in the cache.")
         cache.set(cache_key, current_cache, timeout=None)  # Set no timeout
@@ -50,7 +50,7 @@ def update_zotero_data_in_cache():
 
     if not current_cache:
         logger.info("Cache miss for publications - Publications have been updated in the cache.")
-        cache.set(cache_key, publications['collections'], timeout=3600)  # Set a 1-hour timeout
+        cache.set(cache_key, publications['collections'], timeout=None) # Set no timeout
     else:
         logger.info("Cache hit for publications - Publications have not been updated in the cache.")
         cache.set(cache_key, current_cache, timeout=None)  # Set no timeout
@@ -63,7 +63,7 @@ def cache_all_texts():
 
     if not current_cache:
         texts = Text.objects.annotate(token_count=Count('token_text')).order_by('identifier')
-        cache.set(cache_key_texts,  texts, 3600)  # Set a 1-hour timeout
+        cache.set(cache_key_texts,  texts, timeout=None)  # Set no timeout
         logger.info("Cache miss fortexts - Texts have been updated in the cache.")
     else:
         logger.info("Cache hit for texts - Texts have not been updated in the cache.")
