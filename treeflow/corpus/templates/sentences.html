@@ -42,7 +42,7 @@
           <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
             <span id="sentence-senses-{{sentence.id}}">
             <ul> {% trans 'Translations' %}:
-              {% for sense in sentence.senses %}
+              {% for sense in sentence.senses.all %}
               <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
               {% endfor %}
             </ul>
