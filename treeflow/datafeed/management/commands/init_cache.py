@@ -11,12 +11,12 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Clean the cache
         cache.clear()
-        logger.debug("Cache has been cleared")
+        logger.info("Cache has been cleared")
         # Call Huey tasks
         update_zotero_data_in_cache()
         cache_all_zotero_sources()
         cache_all_texts() 
         cache_sections_for_texts()
-        logger.debug("Texts, Sections and Zotero data have been updated in the cache")
+        logger.info("Texts, Sections and Zotero data have been updated in the cache")
 
 
