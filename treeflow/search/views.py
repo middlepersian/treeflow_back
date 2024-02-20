@@ -47,7 +47,6 @@ def results_view(request):
     filter_form = ResultFilterForm(initial={"text": text, "section": section})
     
     if request.method == "POST":
-        logger.info("POST request received.")
         layout_selection = request.POST.get("layout_selection", "logical")
         formset = (
             LogicalFormSet(request.POST)
@@ -56,6 +55,7 @@ def results_view(request):
         )
 
         if formset.is_valid():
+            # Exclude empty forms, e.g. if query value is empty
             data = [f for f in formset.cleaned_data if f]
             logger.debug(f"Submitted data: {data}")
 
@@ -63,25 +63,14 @@ def results_view(request):
                 results = get_results(data)
                 logger.debug(f"Found {len(results)} results.")
             except Exception as e:
-                logger.error(f"Could not retrieve results: {e}")
+                logger.debug(f"Could not retrieve results: {e}")
 
-            queries = [form["query"] for form in data if "query" in form]
-            try:
-                section_ids = [section.id for section in results]
-                logger.debug(f"Found {len(section_ids)} section IDs.")
-                results = Section.objects.filter(id__in=section_ids).prefetch_related("sectiontoken_set", "sectiontoken_set__token", "senses")
-                # log the length of the results
-                logger.debug(f"Found {len(results)} sections with the ids.")          
-            except Exception as e:
-                logger.error(f"Error while extracting section IDs: {e}")
-                section_ids = []
-                results = Section.objects.none()
+            queries = [form["query"] for form in data]
+            section_ids = list(results.values_list("id", flat=True).distinct())
 
             search_session = get_or_create_session(request, queries, section_ids)
 
-
     elif request.method == "GET":
-        logger.info("GET request received.")
         page_number = request.GET.get("page", 1)
         queries = request.GET.getlist("query", [])
         filters = {"text": text_id, "section": section_id}
@@ -97,9 +86,10 @@ def results_view(request):
         except Exception as e:
             logger.debug(f"Search session could not be found: {e}")
 
-    paginator = Paginator(results, 10)
+    paginator = Paginator(
+        results.prefetch_related("sectiontoken_set", "sectiontoken_set__token"), 10
+    )
     page_obj = paginator.get_page(page_number) if paginator else None
-    logger.info(f"Page object: {page_obj}")
 
     return render(
         request,
@@ -112,6 +102,7 @@ def results_view(request):
             "filter_form": filter_form,
         },
     )
+
 
 @require_GET
 def search_page(request):

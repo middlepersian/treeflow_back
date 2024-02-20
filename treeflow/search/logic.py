@@ -9,14 +9,15 @@ from treeflow.corpus.models import Section, Token
 logger = logging.getLogger(__name__)
 
 
-def retrieve_tokens(criteria: Dict, page_size=500) -> List[Token]:
+def retrieve_tokens(criteria: Dict) -> List[Token]:
     """
-    Retrieve all tokens that match the given criteria in batches.
+    Retrieve all tokens that match the given criteria.
     These tokens will act as potential anchors for further search.
 
     :param criteria: The anchor object containing the search criteria.
     :param page_size: Number of tokens to retrieve per batch.
     :return: A list of Token objects that match the criteria.
+
     """
 
     filter_tmp = criteria.copy()
@@ -26,47 +27,54 @@ def retrieve_tokens(criteria: Dict, page_size=500) -> List[Token]:
     query_type = filter_tmp.pop("query_type")
     i = "" if filter_tmp.pop("case_sensitive") else "i"
 
-    # Build the query
-    query = Q(**{f"{query_field}__{i}{query_type}": value})
+    query = (
+        Q(**{f"{query_field}__{i}exact": value})
+        if query_type == "exact"
+        else Q(**{f"{query_field}__{i}startswith": value})
+        if query_type == "prefix"
+        else Q(**{f"{query_field}__{i}endswith": value})
+        if query_type == "suffix"
+        else Q(**{f"{query_field}__{i}regex": value})
+        if query_type == "regex"
+        else Q(**{f"{query_field}__{i}contains": value})
+    )
+
     for k, v in filter_tmp.items():
-        if v:
-            query &= Q(**{k: v})
+        if v and not any(x in k for x in ["logical", "distance", "id"]):
+            query.add(Q(**{k: v}), Q.AND)
 
-    tokens_queryset = Token.objects.filter(query).only('id').values_list('id', flat=True)
-    #log the query
-    logger.debug(tokens_queryset.query)
-    paginator = Paginator(tokens_queryset, page_size)
+    tokens = Token.objects.filter(query)
 
-    tokens = []
-    for page_num in range(1, paginator.num_pages + 1):
-        page = paginator.page(page_num)
-        tokens.extend(list(page.object_list))
+    logger.debug(f"Retrieved {len(tokens)} tokens.")
+    logger.debug(tokens.query)
 
-    logger.debug(f"Retrieved {len(tokens)} tokens in batches.")
     return tokens
 
 
-def identify_sections(tokens: List[UUID], batch_size=1000) -> List[Section]:
+def identify_sections(tokens: List[Token]) -> List[Section]:
     """
-    Identify distinct sections from a list of anchor token UUIDs using batch processing.
+    Identify distinct sections from a list of anchor tokens.
 
-    :param tokens: A list of Token UUIDs to find the sections for.
-    :param batch_size: Number of token_ids to process per batch.
+    :param anchors: A list of Token objects to find the sections for.
     :return: A list of unique Section objects that are associated with the tokens.
     """
-    sections = []
-    for i in range(0, len(tokens), batch_size):
-        batch_token_ids = tokens[i:i + batch_size]
 
-        batch_sections = Section.objects.filter(
-            sectiontoken__token_id__in=batch_token_ids,
-            type="sentence"
-        ).prefetch_related(
-            "sectiontoken_set",
-            "sectiontoken_set__token"
+    token_ids = [token.id for token in tokens]
+
+    sections = (
+        Section.objects.filter(
+            sectiontoken__token_id__in=token_ids,
+            type="sentence",
         )
+        .prefetch_related(
+            "sectiontoken_set",  # Prefetch related SectionToken objects
+            "sectiontoken_set__token",  # Prefetch related Token objects through SectionToken
+        )
+        .distinct()
+    )
 
-        sections.extend(list(batch_sections))
+    logger.debug(f"Identified {len(sections)} sections.")
+    logger.debug(sections.query)
 
     return sections
 
