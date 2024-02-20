@@ -63,8 +63,8 @@ def cache_all_texts():
 
     if not current_cache:
         texts = Text.objects.annotate(token_count=Count('token_text')).order_by('identifier')
-        cache.set(cache_key_texts, texts, 3600)  # Set a 1-hour timeout
-        logger.info("Cache miss for texts - Texts have been updated in the cache.")
+        cache.set(cache_key_texts,  texts, 3600)  # Set a 1-hour timeout
+        logger.info("Cache miss fortexts - Texts have been updated in the cache.")
     else:
         logger.info("Cache hit for texts - Texts have not been updated in the cache.")
         cache.set(cache_key_texts, current_cache, timeout=None)

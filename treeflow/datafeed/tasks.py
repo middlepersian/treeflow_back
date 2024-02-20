@@ -9,22 +9,46 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@periodic_task(crontab(hour='*', minute=0))
-def periodic_update_zotero_data_in_cache():
+@task()
+def update_zotero_data_in_cache_task():
     logger.info("Running periodic_update_zotero_data_in_cache task")
     update_zotero_data_in_cache()
 
-@periodic_task(crontab(hour='*', minute=0))
-def periodic_cache_all_zotero_sources():
+@task()
+def cache_all_zotero_sources_task():
     logger.info("Running periodic_cache_all_zotero_sources task")
     cache_all_zotero_sources()
 
-@db_periodic_task(crontab(hour='*', minute=0))
-def periodic_cache_all_texts_and_sections():
-    logger.info("Running combined periodic_cache tasks")
-    cache_texts_task = cache_all_texts.s()
-    cache_sections_task = cache_sections_for_texts.s()
+@task()
+def cache_all_texts_task():
+    cache_all_texts()
 
-    # Chain the tasks
-    pipeline = cache_texts_task.then(cache_sections_task)
+@task()
+def cache_sections_for_texts_task():
+    cache_sections_for_texts()
+
+@task()
+def clear_cache_task():
+    logger.info("Clearing cache")
+    cache.clear()
+
+@db_periodic_task(crontab(hour='*', minute=0))
+def periodic_cache_all_texts_and_sections_task():
+    logger.info("Running combined periodic_cache tasks")
+    clear_cache = clear_cache_task.s()
+    cache_texts = cache_all_texts_task.s()
+    cache_sections = cache_sections_for_texts_task.s()
+
+    # Chain the tasks: clear cache -> cache all texts -> cache sections
+    pipeline = clear_cache.then(cache_texts).then(cache_sections)
     enqueue(pipeline)
+
+@db_periodic_task(crontab(hour='*', minute=0))
+def periodic_zotero_tasks_task():
+    logger.info("Running combined Zotero periodic tasks")
+    update_zotero_data = update_zotero_data_in_cache_task.s()
+    cache_zotero_sources = cache_all_zotero_sources_task.s()
+
+    # Chain the Zotero tasks
+    zotero_pipeline = update_zotero_data.then(cache_zotero_sources)
+    enqueue(zotero_pipeline)
