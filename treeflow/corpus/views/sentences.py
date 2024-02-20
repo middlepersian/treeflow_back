@@ -12,7 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 @login_required
-@cache_page(900)
 def sentences_view(request, text_id=None):
     logger.info('text_id : %s', text_id)
 

@@ -14,8 +14,8 @@ def sections_view(request, text_id=None):
 
     if not texts:
         logger.info("Cache miss for texts - Fetching texts from database.")
-        cache_all_texts.apply()  # Trigger the Celery task to update cache
-        logger.info("Cache miss for texts - Triggered Celery task to update cache.")
+        cache_all_texts.apply()  
+        logger.info("Cache miss for texts - Triggered Huey task to update cache.")
         texts = cache.get(cache_key_texts)
         
     if text_id:

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.cache import cache
-from treeflow.datafeed.cache import update_zotero_data_in_cache, cache_all_texts, cache_all_zotero_sources
+from treeflow.datafeed.cache import update_zotero_data_in_cache, cache_all_texts, cache_all_zotero_sources, cache_sections_for_texts
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,6 +16,7 @@ class Command(BaseCommand):
         update_zotero_data_in_cache()
         cache_all_zotero_sources()
         cache_all_texts() 
-        logger.debug("Text and Zotero data have been updated in the cache")
+        cache_sections_for_texts()
+        logger.debug("Texts, Sections and Zotero data have been updated in the cache")
 
 
