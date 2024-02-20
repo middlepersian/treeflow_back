@@ -1,28 +1,29 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 from django.core.cache import cache
 from django.shortcuts import render
 from django.db.models import Prefetch
-import uuid
+from treeflow.corpus.models import Section, SectionToken, Token
+from treeflow.datafeed.tasks import cache_all_texts
+
 import logging
-from treeflow.corpus.models import Text, Section, Token, SectionToken
-from treeflow.datafeed.tasks import cache_all_texts  # Import the Celery task
 
 logger = logging.getLogger(__name__)
 
 @login_required
+@cache_page(900)
 def sentences_view(request, text_id=None):
     logger.info('text_id : %s', text_id)
 
     # Fetching or caching texts
     cache_key_texts = "all_texts"
     texts = cache.get(cache_key_texts)
-    if not texts:
+    if texts is None:
         logger.info("Cache miss for texts - Fetching texts from database.")
-        cache_all_texts.apply()  # Trigger the Celery task to update cache
-        logger.info("Cache miss for texts - Triggered Celery task to update cache.")
-        texts = cache.get(cache_key_texts)
-        
+        cache_all_texts.delay()  # Non-blocking call to update cache
+        texts = []  # Fallback if cache is still empty
+
     selected_text_id = text_id if text_id else request.GET.get('text_id')
 
     # Building the cache key for sentences
@@ -30,7 +31,7 @@ def sentences_view(request, text_id=None):
     sentences = cache.get(cache_key_sentences)
 
     if sentences is None:
-        # Fetch and cache sentences if not cached
+        logger.info("Cache miss for sentences - Fetching from database.")
         sentences = Section.objects.filter(type='sentence', text=selected_text_id) \
             .prefetch_related(
                 Prefetch(
@@ -42,20 +43,16 @@ def sentences_view(request, text_id=None):
                     'tokens',
                     queryset=Token.objects.select_related('image')
                     .prefetch_related('pos_token', 'feature_token', 'lemmas', 'senses', 'comment_token')
-                    .only('id', 'image')
-                )
-            ) \
-            .only('id', 'number', 'identifier')
-        cache.set(cache_key_sentences, list(sentences), 300)
-        logger.info("Cache miss for sentences")
+                ),
+                'senses'  # Prefetch the many-to-many field 'senses'
+            )
+        cache.set(cache_key_sentences, sentences, 300)
+
 
     # Paginator setup
     paginator = Paginator(sentences, 10)
-
-    # Fetching the correct page based on the page query parameter
-    page_number = request.GET.get('page', 1)  # Default to first page or query parameter
+    page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    logger.info("Page number: %s", page_number)
 
     context = {
         'texts': texts,
@@ -63,5 +60,7 @@ def sentences_view(request, text_id=None):
         'page_obj': page_obj,
         'current_view': 'corpus:sentences'
     }
+
+    logger.info('Rendering sentences.html')
 
     return render(request, 'sentences.html', context)

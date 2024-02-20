@@ -187,16 +187,13 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#templates
 TEMPLATES = [
     {
-        # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATES-BACKEND
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
         "DIRS": [
             str(APPS_DIR / "templates"),
             str(APPS_DIR / "kosh"),
         ],
-        "APP_DIRS": True,
+        "APP_DIRS": False,  # Changed from True to False
         "OPTIONS": {
-            # https://docs.djangoproject.com/en/dev/ref/settings/#template-context-processors
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
@@ -208,9 +205,19 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "treeflow.utils.context_processors.settings_context",
             ],
+            "loaders": [  # Added the loaders here
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ],
+                )
+            ],
         },
     }
 ]
+
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#form-renderer
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
