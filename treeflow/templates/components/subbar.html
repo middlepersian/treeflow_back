@@ -1,7 +1,7 @@
 {% load static i18n %}
 {% load static tailwind_tags %}
 
-<div class="flex w-full h-12 min-h-[3rem] bg-white">
+<div class="sm:flex hidden w-full h-12 min-h-[3rem] bg-white">
   <div class="inline-block px-2 m-auto overflow-hidden text-center cursor-pointer group">
     <a href="{% url 'methodology' %}" class="p-2 text-center cursor-pointer group-hover:text-off font-Helvetica text-main-dark hover:text-off">{% trans 'Methodology' %}</a>
     <div class="group-hover:flex absolute hidden z-[1] flex-col bg-white border-[1px] rounded-md">

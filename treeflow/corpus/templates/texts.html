@@ -1,198 +1,392 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static i18n %}
 {% block content %}
-
-<div class="overflow-x-auto">
-  <table class="min-w-full bg-white">
-    <thead class="text-white bg-gray-800">
-      <tr>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans '' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Title' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Identifier' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sigle' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sources' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Genre' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Version' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Stage' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Tokens' %}</th>
-        {% if request.user.is_authenticated %}
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Main Text View' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Sentences View' %}</th>
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Tokens View' %}</th>
-        {% endif %}
-        <!--
-        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Created At' %}</th> -->
-      </tr>
-    </thead>
-    <tbody class="text-gray-700">
-      {% for text in texts %}
-        {% csrf_token %}
-        <tr class="border-b">
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-              <div>
-                {{ forloop.counter }}
-              </div>
-          </td>
-        <!-- Title -->
-        <td class="px-6 py-4 whitespace-nowrap">
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white" id="texts">
+      <thead class="text-white bg-gray-800">
+        <tr>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(0, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">#</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(1, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Title' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(2, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Identifier' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(3, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Sigle' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(4, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Sources' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(5, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Genre' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(6, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Version' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(7, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Stage' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(8, this);">
+            <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
+              <span class="pr-4 group-hover:pr-0">{% trans 'Tokens' %}</span>
+              <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <line x1="4" y1="6" x2="13" y2="6" />
+                <line x1="4" y1="12" x2="11" y2="12" />
+                <line x1="4" y1="18" x2="11" y2="18" />
+                <polyline points="15 15 18 18 21 15" />
+                <line x1="18" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+          </th>
           {% if request.user.is_authenticated %}
-            <input type="text" name="title"
-              value="{{ text.title }}"
-              hx-post="{% url 'corpus:update_text' text.id %}"
-              hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ text.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
-          {% else %}
-            <span class="block w-full mt-1 text-center text-blue-500"><a href="{% url 'corpus:sections' text_id=text.id %}">{{ text.title }}</a></span>
+            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+              {% trans 'Main Text View' %}
+            </th>
+            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+              {% trans 'Sentences View' %}
+            </th>
+            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+              {% trans 'Tokens View' %}
+            </th>
           {% endif %}
-
-
-           <!-- Identifier -->
-        <td class="px-6 py-4 whitespace-nowrap">
-          {% if request.user.is_authenticated %}
-            <input type="text" name="identifier"
-              value="{{ text.identifier }}"
-              hx-post="{% url 'corpus:update_text' text.id %}"
-              hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ text.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
-          {% else %}
-            <span class="block w-full mt-1 text-center">{{ text.identifier }}</span>
-          {% endif %}
-        </td>
-
-        <!-- Sigle -->
-        <td class="px-6 py-4 whitespace-nowrap">
-          {% if request.user.is_authenticated %}
-            <input type="text" name="series"
-              value="{{ text.series }}"
-              hx-post="{% url 'corpus:update_text' text.id %}"
-              hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ text.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
-          {% else %}
-            <span class="block w-full mt-1 text-center">{{ text.series }}</span>
-          {% endif %}
-        </td>
-          <!-- Sources -->
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            {{ text.sources.all|join:", " }}
-          </td>
-
-        <!-- Genre -->
-        <td class="px-6 py-4 whitespace-nowrap">
-          {% if request.user.is_authenticated %}
-            <input type="text" name="label"
-              value="{{ text.label }}"
-              hx-post="{% url 'corpus:update_text' text.id %}"
-              hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ text.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
-          {% else %}
-            <span class="block w-full mt-1 text-center">{{ text.label }}</span>
-          {% endif %}
-        </td>
-
-        <!-- Version -->
-        <td class="px-6 py-4 whitespace-nowrap">
-          {% if request.user.is_authenticated %}
-            <input type="text" name="version"
-              value="{{ text.version }}"
-              hx-post="{% url 'corpus:update_text' text.id %}"
-              hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ text.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
-          {% else %}
-            <span class="block w-full mt-1 text-center">{{ text.version }}</span>
-          {% endif %}
-        </td>
-        <!-- Stage -->
-        <td class="px-6 py-4 whitespace-nowrap">
-          {% if request.user.is_authenticated %}
-            <input type="text" name="stage"
-              value="{{ text.stage }}"
-              hx-post="{% url 'corpus:update_text' text.id %}"
-              hx-trigger="keyup changed delay:500ms"
-              hx-indicator="#loadingIndicator{{ text.id }}"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
-          {% else %}
-            <span class="block w-full mt-1 text-center">{{ text.stage }}</span>
-          {% endif %}
-        </td>         
-
-
-          <!-- Tokens -->
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            {{ text.token_count }}
-          </td>
-        {% if request.user.is_authenticated %}
-
-          <!-- Main Text View-->
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            <a href="{% url 'corpus:sections' text_id=text.id %}">&#128065;</a>
-          </td>
-
-
-          <!-- Sentences View-->
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            <a href="{% url 'corpus:sentences' text_id=text.id %}">&#128065;</a>
-          </td>
-
-          <!-- Tokens View-->
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            <a href="{% url 'corpus:tokens' text_id=text.id %}">&#128065;</a>
-          </td>
-
-          {% endif %}
-          <!-- Created At 
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            {{ text.created_at|date:"Y-m-d H:i" }}
-          </td> -->
+          <!--          
+        <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Created At' %}</th>           -->
         </tr>
-      {% endfor %}
-      {% if texts|length == 0 %}
-      <tr>
-        <td colspan="11" class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">No texts available.</td>
-      </tr>
-      {% endif %}
-    </tbody>
-  </table>
-</div>
+      </thead>
+      <tbody class="text-gray-700">
+        {% for text in texts %}
+          {% csrf_token %}
+          <tr class="border-b">
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+                <div>
+                  {{ forloop.counter }}
+                </div>
+            </td>
+          <!-- Title -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            {% if request.user.is_authenticated %}
+              <input type="text" name="title"
+                value="{{ text.title }}"
+                hx-post="{% url 'corpus:update_text' text.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ text.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
+            {% else %}
+              <span class="block w-full mt-1 text-center text-blue-500"><a href="{% url 'corpus:sections' text_id=text.id %}">{{ text.title }}</a></span>
+            {% endif %}
+  
+  
+             <!-- Identifier -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            {% if request.user.is_authenticated %}
+              <input type="text" name="identifier"
+                value="{{ text.identifier }}"
+                hx-post="{% url 'corpus:update_text' text.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ text.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
+            {% else %}
+              <span class="block w-full mt-1 text-center">{{ text.identifier }}</span>
+            {% endif %}
+          </td>
+  
+          <!-- Sigle -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            {% if request.user.is_authenticated %}
+              <input type="text" name="series"
+                value="{{ text.series }}"
+                hx-post="{% url 'corpus:update_text' text.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ text.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
+            {% else %}
+              <span class="block w-full mt-1 text-center">{{ text.series }}</span>
+            {% endif %}
+          </td>
+            <!-- Sources -->
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              {{ text.sources.all|join:", " }}
+            </td>
+  
+          <!-- Genre -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            {% if request.user.is_authenticated %}
+              <input type="text" name="label"
+                value="{{ text.label }}"
+                hx-post="{% url 'corpus:update_text' text.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ text.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
+            {% else %}
+              <span class="block w-full mt-1 text-center">{{ text.label }}</span>
+            {% endif %}
+          </td>
+  
+          <!-- Version -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            {% if request.user.is_authenticated %}
+              <input type="text" name="version"
+                value="{{ text.version }}"
+                hx-post="{% url 'corpus:update_text' text.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ text.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
+            {% else %}
+              <span class="block w-full mt-1 text-center">{{ text.version }}</span>
+            {% endif %}
+          </td>
+          <!-- Stage -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            {% if request.user.is_authenticated %}
+              <input type="text" name="stage"
+                value="{{ text.stage }}"
+                hx-post="{% url 'corpus:update_text' text.id %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-indicator="#loadingIndicator{{ text.id }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
+            {% else %}
+              <span class="block w-full mt-1 text-center">{{ text.stage }}</span>
+            {% endif %}
+          </td>         
+  
+  
+            <!-- Tokens -->
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              {{ text.token_count }}
+            </td>
+          {% if request.user.is_authenticated %}
+  
+            <!-- Main Text View-->
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              <a href="{% url 'corpus:sections' text_id=text.id %}">&#128065;</a>
+            </td>
+  
+  
+            <!-- Sentences View-->
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              <a href="{% url 'corpus:sentences' text_id=text.id %}">&#128065;</a>
+            </td>
+  
+            <!-- Tokens View-->
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              <a href="{% url 'corpus:tokens' text_id=text.id %}">&#128065;</a>
+            </td>
+  
+            {% endif %}
+            <!-- Created At 
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              {{ text.created_at|date:"Y-m-d H:i" }}
+            </td> -->
+          </tr>
+        {% endfor %}
+        {% if texts|length == 0 %}
+        <tr>
+          <td colspan="11" class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">No texts available.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 
+  <script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+      // Function to change the input field color based on the response status
+      function changeInputFieldColor(inputField, isSuccess) {
+        if (inputField) {
+          inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon' // Success: light green; Failure: salmon
+          // Reset the color back to original after a delay
+          setTimeout(function () {
+            inputField.style.backgroundColor = '' // Reset to original color
+          }, 2000) // Adjust delay as needed
+        }
+      }
+    
+      // Check if the event target is part of the form interaction
+      if (event.detail.elt.name === 'title' || event.detail.elt.name === 'identifier' || event.detail.elt.name === 'series' || event.detail.elt.name === 'label' || event.detail.elt.name === 'version' || event.detail.elt.name === 'stage') {
+        // Parse the response
+        var response = JSON.parse(event.detail.xhr.responseText)
+    
+        // Change the input field color based on the response
+        changeInputFieldColor(event.detail.elt, response.status === 'success')
+      }
+    })
+  </script>
 
+  <script>
+    function sortTableByType(n, e) {
 
+      resetAll(e);
 
-<script>
+      var table,
+        rows,
+        switching,
+        i,
+        x,
+        y,
+        shouldSwitch,
+        dir,
+        switchcount = 0
+      table = document.getElementById('texts')
+      switching = true
+      // Set the sorting direction to ascending:
+      dir = 'asc'
 
-document.body.addEventListener('htmx:afterRequest', function (event) {
-    // Function to change the input field color based on the response status
-    function changeInputFieldColor(inputField, isSuccess) {
-      if (inputField) {
-        inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon'; // Success: light green; Failure: salmon
-        // Reset the color back to original after a delay
-        setTimeout(function () {
-          inputField.style.backgroundColor = ''; // Reset to original color
-        }, 2000); // Adjust delay as needed
+      e.getElementsByTagName('span')[0].classList.remove('pr-4');
+      e.getElementsByTagName('svg')[0].classList.remove('hidden');
+      e.getElementsByTagName('div')[0].classList.add('bg-white');
+      e.getElementsByTagName('div')[0].classList.add('text-black');
+      
+      // Make a loop that will continue until no switching has been done:
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false
+        rows = table.rows
+        /* Loop through all table rows (except the
+                                            first, which contains table headers): */
+        for (i = 1; i < rows.length - 1; i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false
+          /* Get the two elements you want to compare,
+                                              one from current row and one from the next: */
+          x = rows[i].getElementsByTagName('TD')[n]
+          y = rows[i + 1].getElementsByTagName('TD')[n]
+          /* Check if the two rows should switch place,
+                                              based on the direction, asc or desc: */
+          if (dir == 'asc') {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true
+              break
+            }
+          } else if (dir == 'desc') {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true
+              break
+            }
+          }
+        }
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+                                              and mark that a switch has been done: */
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i])
+          switching = true
+          // Each time a switch is done, increase this count by 1:
+          switchcount++
+        } else {
+          /* If no switching has been done AND the direction is "asc",
+                                              set the direction to "desc" and run the while loop again. */
+          if (switchcount == 0 && dir == 'asc') {
+            dir = 'desc'
+            switching = true
+            e.getElementsByTagName('svg')[0].classList.add('rotate-180');
+          }
+        }
       }
     }
 
-    // Check if the event target is part of the form interaction
-    if (event.detail.elt.name === 'title' || event.detail.elt.name === 'identifier' || event.detail.elt.name === 'series' || event.detail.elt.name === 'label' || event.detail.elt.name === 'version' || event.detail.elt.name === 'stage') {
-      // Parse the response
-      var response = JSON.parse(event.detail.xhr.responseText);
-
-      // Change the input field color based on the response
-      changeInputFieldColor(event.detail.elt, response.status === 'success');
+    function resetAll(e) {
+      var parent= e.parentElement;
+      var spans = parent.getElementsByTagName('span');
+      var svgs = parent.getElementsByTagName('svg');
+      var divs= parent.getElementsByTagName('div');
+      for (var i = 0; i < svgs.length; i++) {
+        spans[i].classList.add('pr-4');
+        svgs[i].classList.add('hidden');
+        svgs[i].classList.remove('rotate-180');
+        divs[i].classList.remove('bg-white');
+        divs[i].classList.remove('text-black');
+      }
     }
-  });
-
-
-</script>
-
+  </script>
 {% endblock %}

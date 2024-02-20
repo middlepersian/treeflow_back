@@ -1,6 +1,9 @@
 import logging
+import time
+from django.core.paginator import Paginator
 from typing import Dict, List
 from django.db.models import Q
+from uuid import UUID
 from treeflow.corpus.models import Section, Token
 
 logger = logging.getLogger(__name__)
@@ -12,6 +15,7 @@ def retrieve_tokens(criteria: Dict) -> List[Token]:
     These tokens will act as potential anchors for further search.
 
     :param criteria: The anchor object containing the search criteria.
+    :param page_size: Number of tokens to retrieve per batch.
     :return: A list of Token objects that match the criteria.
 
     """
@@ -136,6 +140,8 @@ def filter_sections_by_distance(
 
 
 def get_results(criteria: List):
+    start_time = time.time()
+
     anchor_criterium = criteria[0]
     filters = criteria[1:]
     anchor_tokens = retrieve_tokens(anchor_criterium)
@@ -147,6 +153,10 @@ def get_results(criteria: List):
         sections = filter_sections_by_logic(sections, filters)
     elif "distance" in anchor_criterium:
         sections = filter_sections_by_distance(anchor_tokens, sections, filters)
+
+    end_time = time.time()
+    print(f"Total time taken in get_results: {end_time - start_time} seconds")
+     
 
     return sections
 
