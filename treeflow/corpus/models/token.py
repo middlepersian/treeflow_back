@@ -62,8 +62,8 @@ class Token(models.Model):
             models.Index(fields=['transliteration']),
             models.Index(fields=['number']),
             models.Index(fields=['text']),
-            #add a composite index on id, number, text, language, transcription
-            models.Index(fields=['id', 'number', 'text', 'language', 'transcription']),
+            #add a composite index on number, text, language, transcription
+            models.Index(fields=['number', 'text', 'language', 'transcription']),
         ]
 
     def __str__(self):
