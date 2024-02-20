@@ -29,7 +29,7 @@ def cache_sections_for_texts_task():
 
 @task()
 def periodic_texts_and_sections_task():
-    logger.info("Running combined periodic_cache tasks")
+    logger.info("Running combined Texts and Sections tasks")
     cache_texts = cache_all_texts_task.s()
     cache_sections = cache_sections_for_texts_task.s()
 
