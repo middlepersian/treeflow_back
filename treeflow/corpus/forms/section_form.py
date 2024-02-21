@@ -1,10 +1,20 @@
 from django import forms
+from django_select2 import forms as s2forms
 from treeflow.corpus.models.section import Section
 from treeflow.corpus.models.text import Text
 from treeflow.corpus.models.token import Token
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class SectionWidget(s2forms.ModelSelect2MultipleWidget):
+    search_fields = [
+        "identifier__istartswith", 
+    ]
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('attrs', {}).update({'style': 'width: 100%;'})
+        super(SectionWidget, self).__init__(*args, **kwargs)
 
 
 class SectionForm(forms.ModelForm):
@@ -16,18 +26,18 @@ class SectionForm(forms.ModelForm):
         ('after', 'After Reference Section'),
         ('none', 'No Reference Section'),  # Added option for no reference section
     ]
-    insertion_method = forms.ChoiceField(choices=INSERTION_CHOICES, required=True)
+    insertion_method = forms.ChoiceField(choices=INSERTION_CHOICES, required=True, initial='none')
 
     # Make reference_section optional
     reference_section = forms.ModelChoiceField(queryset=Section.objects.all(), required=False)
 
-    # Add a field for selecting related sections
-    related_sections = forms.ModelMultipleChoiceField(queryset=Section.objects.all(), required=False)
-
     class Meta:
         model = Section
         fields = ['identifier', 'type', 'title', 'source', 'container', 
-                  'reference_section', 'insertion_method', 'related_sections']
+                  'reference_section', 'insertion_method', 'related_to']
+        widgets = { 
+            'related_to': SectionWidget(attrs={'style': 'width: 100%; min-height: 100px;'}),
+        }
 
     def __init__(self, *args, **kwargs):
         text_id = kwargs.pop('text_id', None)
@@ -40,11 +50,11 @@ class SectionForm(forms.ModelForm):
                 section_queryset = Section.objects.filter(text=text).order_by('type')
                 self.fields['container'].queryset = section_queryset
                 self.fields['reference_section'].queryset = section_queryset
-                self.fields['related_sections'].queryset = section_queryset
+                self.fields['related_to'].queryset = section_queryset.exclude(id=self.instance.id) if self.instance else section_queryset
             except Text.DoesNotExist:
                 logger.debug("Text with id %s does not exist", text_id) 
         else:
-            logger.debug("No text_id provided")        
+            logger.debug("No text_id provided")  
 
     def clean(self):
         cleaned_data = super().clean()
@@ -54,7 +64,7 @@ class SectionForm(forms.ModelForm):
         insertion_method = self.cleaned_data.get('insertion_method')
         reference_section = self.cleaned_data.get('reference_section')
         selected_token_ids = self.cleaned_data.get('selected_tokens').split(',')
-        related_sections = self.cleaned_data.get('related_sections')
+        related_to = self.cleaned_data.get('related_to')
 
         new_section_data = {
             'identifier': self.cleaned_data.get('identifier'),
@@ -83,7 +93,7 @@ class SectionForm(forms.ModelForm):
                     logger.error(f"Token with ID {token_id} does not exist")
 
         # Add the related sections
-        for section in related_sections:
+        for section in related_to:
             new_section.related_to.add(section)
 
         return new_section
