@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.core.cache import cache
 from django.shortcuts import render
 from django.db.models import Prefetch
-from treeflow.corpus.models import Section, SectionToken, Token
+from treeflow.corpus.models import Section, SectionToken, Token, Text
 from treeflow.datafeed.tasks import cache_all_texts
 
 import logging
@@ -13,53 +13,40 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def sentences_view(request, text_id=None):
-    logger.info('text_id : %s', text_id)
+    logger.info("Accessed sentences_view with text_id: %s", text_id)
 
-    # Fetching or caching texts
-    cache_key_texts = "all_texts"
-    texts = cache.get(cache_key_texts)
-    if texts is None:
-        logger.info("Cache miss for texts - Fetching texts from database.")
-        cache_all_texts.delay()  # Non-blocking call to update cache
-        texts = []  # Fallback if cache is still empty
+    texts = cache.get_or_set("all_texts", lambda: Text.objects.all())
+    logger.debug("Fetched texts for dropdown, total count: %d", len(texts))
 
     selected_text_id = text_id if text_id else request.GET.get('text_id')
+    logger.info("Selected text ID for fetching sentences: %s", selected_text_id)
 
-    # Building the cache key for sentences
-    cache_key_sentences = f"sentences_{selected_text_id}"
-    sentences = cache.get(cache_key_sentences)
-
-    if sentences is None:
-        logger.info("Cache miss for sentences - Fetching from database.")
-        sentences = Section.objects.filter(type='sentence', text=selected_text_id) \
-            .prefetch_related(
-                Prefetch(
-                    'sectiontoken_set',
-                    queryset=SectionToken.objects.filter(section__type='line').select_related('section'),
-                    to_attr='line_sections'
-                ),
-                Prefetch(
-                    'tokens',
-                    queryset=Token.objects.select_related('image')
-                    .prefetch_related('pos_token', 'feature_token', 'lemmas', 'senses', 'comment_token')
-                ),
-                'senses'  # Prefetch the many-to-many field 'senses'
-            )
-        cache.set(cache_key_sentences, sentences, 300)
-
-
-    # Paginator setup
-    paginator = Paginator(sentences, 10)
     page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
+    items_per_page = 10
 
     context = {
         'texts': texts,
         'selected_text_id': selected_text_id or '',
-        'page_obj': page_obj,
         'current_view': 'corpus:sentences'
     }
 
-    logger.info('Rendering sentences.html')
+    if selected_text_id:
+        sentences = Section.objects.filter(type='sentence', text=selected_text_id).prefetch_related('senses')
+        paginator = Paginator(sentences, items_per_page)
+        page_obj = paginator.get_page(page_number)
 
+        # Load tokens for sentences on the current page
+        for sentence in page_obj:
+            section_tokens = SectionToken.objects.filter(section=sentence)
+            token_ids = section_tokens.values_list('token', flat=True)
+            tokens = Token.objects.filter(id__in=token_ids).select_related('image').prefetch_related('lemmas', 'senses', 'pos_token', 'feature_token', 'comment_token')
+            setattr(sentence, 'tokens_list', tokens)
+            logger.debug("Loaded tokens for sentence ID: %s, total tokens: %d", sentence.id, len(tokens))
+
+        context['page_obj'] = page_obj
+    else:
+        context['page_obj'] = Paginator(Section.objects.none(), items_per_page).get_page(1)
+        logger.info("No text ID selected, providing empty paginator.")
+
+    logger.info("Rendering sentences.html for text ID: %s", selected_text_id)
     return render(request, 'sentences.html', context)
