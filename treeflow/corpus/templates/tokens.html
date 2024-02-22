@@ -7,8 +7,13 @@
 
   <!-- Flex container for the split view -->
   <div class="flex w-full h-full">
+    <div class="flex flex-col w-8/12">
+      <div class="flex flex-row items-center justify-center w-full gap-4 py-2 border-b border-white bg-main-dark">
+        <div>{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
+        <div> {% include 'pagination_alt.html' with page_obj=tokens %}</div>
+      </div>
     <!-- Left Column for Tokens -->
-    <div class="w-8/12 h-full overflow-x-auto overflow-y-scroll">
+    <div class="w-full h-full overflow-x-auto overflow-y-scroll">
       <!-- Table for displaying tokens -->
       <table class="relative w-full bg-white">
         <thead class="text-white">
@@ -216,15 +221,14 @@
             <td colspan="6" class="py-4 text-center">{% trans 'No tokens available for the selected text.' %}</td>
           </tr>
           {% endfor %}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Right Column for Image -->
-    <div class="flex flex-col w-4/12 mx-1">
-      <div class="m-2">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
-      <div class="w-full h-full mb-2 -mt-2" id="iiif-viewer"></div>
-    </div>
+    <div class="w-4/12 m-2" id="iiif-viewer"></div>
+    
     <!-- Token Lemma Sense Modal -->
     <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="senseModal">
       <div class="flex items-center justify-center min-h-screen">
@@ -268,8 +272,6 @@
 
   </div>
 
-  <!-- Pagination controls -->
-  <div class="fixed flex justify-center bottom-4 left-[26%]"> {% include 'pagination.html' with page_obj=tokens %}</div>
   <!-- close main div-->
 </div>
 
