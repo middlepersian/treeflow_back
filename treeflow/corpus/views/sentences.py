@@ -11,10 +11,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 @login_required
 def sentences_view(request, text_id=None):
     logger.info("Accessed sentences_view with text_id: %s", text_id)
