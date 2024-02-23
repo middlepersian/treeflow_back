@@ -12,9 +12,8 @@ class TokenPagination(PageNumberPagination):
 
 @extend_schema(tags=['tokens'])
 class TokenViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows tokens to be viewed.
-    """
-    queryset = Token.objects.all()
+    queryset = Token.objects.select_related('text', 'image')\
+                            .prefetch_related('lemmas', 'lemmas__token_lemmas', 'senses', 'senses__token_senses', 'related_tokens')\
+                            .all()
     serializer_class = TokenSerializer
     pagination_class = TokenPagination

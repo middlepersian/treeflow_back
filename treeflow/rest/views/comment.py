@@ -11,9 +11,11 @@ class CommentPagination(PageNumberPagination):
 
 @extend_schema(tags=['comments'])
 class CommentViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows comments to be viewed.
-    """
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.select_related('user', 'dependency', 'image', 'section', 'source', 'token', 'text', 'lemma', 'sense', 'semantic')\
+                              .prefetch_related('user__comment_user', 'dependency__comment_dependency', 'image__comment_image', 
+                                                'section__comment_section', 'source__comment_source', 'token__comment_token', 
+                                                'text__comment_text', 'lemma__comment_lemma', 'sense__comment_sense', 
+                                                'semantic__comment_semantic')\
+                              .all()
     serializer_class = CommentSerializer
-
+    pagination_class = CommentPagination
