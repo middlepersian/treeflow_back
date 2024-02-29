@@ -1,6 +1,5 @@
 from django.db import models
 import uuid as uuid_lib
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 from django.db import transaction
 
@@ -31,7 +30,6 @@ class Section(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
     class Meta:
         ordering = ['number']

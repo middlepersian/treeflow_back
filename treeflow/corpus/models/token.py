@@ -1,8 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-from django.db.models import Q, F
 from django.contrib.postgres.fields import ArrayField
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 from django.db import transaction
 import logging
@@ -48,7 +46,6 @@ class Token(models.Model):
     related_tokens = models.ManyToManyField('self', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
     class Meta:
         ordering = ['number']
