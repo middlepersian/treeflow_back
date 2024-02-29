@@ -58,7 +58,8 @@ class SectionForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        selected_tokens = cleaned_data.get('selected_tokens')
+        return cleaned_data
+
 
     def save(self, commit=True):
         insertion_method = self.cleaned_data.get('insertion_method')
