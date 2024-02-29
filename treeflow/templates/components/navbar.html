@@ -13,6 +13,9 @@
     <a href="{% url 'corpus:manuscripts' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Manuscripts' %}</a>
     <a href="{% url 'corpus:sources' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Sources' %}</a>
     <a href="{% url 'search:search' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Search' %}</a>
+    <a href="{% url 'swagger-ui' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'API' %}</a>
+
+
     {% if user.is_authenticated %}
     <a href="{% url 'kosh' %}" class="px-2 py-4 text-center cursor-pointer text-main-dark hover:text-off">{% trans 'Glossaries' %}</a>
     {% endif %}

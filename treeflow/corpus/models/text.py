@@ -1,7 +1,6 @@
 import uuid as uuid_lib
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from simple_history.models import HistoricalRecords
 from django.conf import settings
 from treeflow.utils.normalize import strip_and_normalize
 
@@ -30,7 +29,6 @@ class Text(models.Model):
     sources = models.ManyToManyField('Source', blank=True, related_name='text_sources')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
     def __str__(self):
         return '{}'.format(self.title, self.identifier)

@@ -1,6 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from treeflow.utils.normalize import strip_and_normalize
@@ -50,7 +49,6 @@ class Comment(models.Model):
     semantic = models.ForeignKey('dict.Semantic', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
     def __str__(self):
         return '{} {}'.format(self.user, self.comment)

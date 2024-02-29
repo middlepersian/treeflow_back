@@ -74,3 +74,32 @@ services:
         - ./.envs/.local/.django
         - ./.envs/.local/.postgres
       command: /bin/sh -c "python manage.py run_huey"
+
+  backup:
+    image: treeflow_production_postgres
+    container_name: backup
+    volumes:
+      - ./compose/production/postgres/maintenance:/maintenance:z
+      - local_postgres_data:/var/lib/postgresql/data:Z
+      - local_postgres_data_backups:/backups:z
+    env_file:
+      - ./.envs/.local/.postgres
+    depends_on:
+      - postgres
+    command: >
+      /bin/sh -c '
+        chmod +x /maintenance/backup;
+        while true; do
+          /maintenance/backup;
+          sleep 5;
+          backups=$$(ls -t /backups);
+          count=0;
+          for backup in $$backups; do
+            count=$$((count+1));
+            if [ $$count -gt 2 ]; then
+              rm /backups/$$backup;
+            fi;
+          done;
+          sleep 43195;
+        done
+      '

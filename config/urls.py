@@ -6,7 +6,7 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.i18n import set_language
-
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from treeflow.views.publications import zotero_view
 from strawberry.django.views import AsyncGraphQLView, GraphQLView
 
@@ -32,6 +32,14 @@ urlpatterns = [
     path("select2/", include("django_select2.urls")),
     # i18n
     path('i18n/setlang/', set_language, name='set_language'),
+    #rest
+    path('api/', include('treeflow.rest.urls', namespace='api')),
+    # drf-spectacular views
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+
 
 
     # Your stuff: custom urls includes go here

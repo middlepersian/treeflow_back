@@ -76,6 +76,8 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "corsheaders",
+    "rest_framework",
+    "drf_spectacular",
     "simple_history",
     "tailwind",
     "theme",
@@ -398,4 +400,23 @@ HUEY = {
     'connection': {
         'url': redis_url,  # Redis instance address.
     },
+}
+
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'MPCD REST API',
+    'DESCRIPTION': 'Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD) ',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
 }
