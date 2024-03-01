@@ -31,8 +31,6 @@ class Section(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
-
     class Meta:
         ordering = ['number']
         constraints = [

@@ -1,6 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 
 
@@ -17,7 +16,6 @@ class Sense(models.Model):
     def related_lemmas(self):
             return self.lemma_related_senses.all()
             
-    history = HistoricalRecords()
     class Meta:
         constraints = [
             models.UniqueConstraint(

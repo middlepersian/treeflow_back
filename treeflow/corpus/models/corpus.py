@@ -1,6 +1,5 @@
 from django.db import models
 import uuid as uuid_lib
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 
 class Corpus(models.Model):
@@ -9,7 +8,6 @@ class Corpus(models.Model):
     slug = models.SlugField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
     
     class Meta:
         ordering = ['name']

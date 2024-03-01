@@ -1,6 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 
 
 class BibEntry(models.Model):
@@ -9,7 +8,6 @@ class BibEntry(models.Model):
     key = models.CharField(blank=True, null=True, max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
 
     def __str__(self):

@@ -1,7 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
 from django.conf import settings
-from simple_history.models import HistoricalRecords
 
 
 class Image(models.Model):
@@ -24,8 +23,6 @@ class Image(models.Model):
     sections = models.ManyToManyField('corpus.Section', related_name='image_sections', through='ImageSection')                                
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
-
     class Meta:
         ordering = ['identifier', 'number']
         constraints = [
@@ -46,8 +43,6 @@ class ImageSection(models.Model):
     image = models.ForeignKey('Image', on_delete=models.CASCADE)
     section = models.ForeignKey('corpus.Section', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    history = HistoricalRecords()
 
 
     class Meta:

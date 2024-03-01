@@ -1,6 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 
 class POS(models.Model):
@@ -10,8 +9,6 @@ class POS(models.Model):
     #upos, xpos
     type = models.CharField(max_length=10, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    history = HistoricalRecords()
     
         
     def __str__(self):
