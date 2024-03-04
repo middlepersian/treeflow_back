@@ -35,22 +35,35 @@ class SectionForm(forms.ModelForm):
                   'reference_section', 'insertion_method', 'related_to']
 
     def __init__(self, *args, **kwargs):
-        self.text_id = kwargs.pop('text_id', None)
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
+            self.text_id = kwargs.pop('text_id', None)
+            self.section_id = kwargs.pop('section_id', None)
+            super().__init__(*args, **kwargs)
 
-        if self.text_id:
-            try:
-                text = Text.objects.get(id=self.text_id)  # Retrieve the text object
-                section_queryset = Section.objects.filter(text=text).order_by('type')
-                self.fields['container'].queryset = section_queryset
-                self.fields['reference_section'].queryset = section_queryset
-                self.fields['related_to'].queryset = section_queryset.exclude(id=self.instance.id) if self.instance else section_queryset
+            section_queryset = Section.objects.all().order_by('type')
+            self.fields['container'].queryset = section_queryset
+            self.fields['reference_section'].queryset = section_queryset
+            self.fields['related_to'].queryset = section_queryset.exclude(id=self.instance.id) if self.instance else section_queryset
 
-            except Text.DoesNotExist:
-                logger.debug("Text with id %s does not exist", self.text_id) 
-        else:
-            logger.debug("No text_id provided")
+            if self.section_id:
+                try:
+                    section = Section.objects.get(id=self.section_id)
+                    self.fields['identifier'].initial = section.identifier if section.identifier else ''
+                    self.fields['type'].initial = section.type if section.type else ''
+                    self.fields['title'].initial = section.title if section.title else ''
+                    self.fields['source'].initial = section.source if section.source else ''
+                    self.fields['container'].initial = section.container if section.container else None
+                    self.fields['related_to'].initial = section.related_to.all() if section.related_to.exists() else None
+                    self.fields['selected_tokens'].initial = ','.join(str(token.id) for token in section.tokens.all()) if section.tokens.exists() else ''
+                except Section.DoesNotExist:
+                    logger.error("Section with id %s does not exist", self.section_id)
+
+            if self.text_id:
+                try:
+                    text = Text.objects.get(id=self.text_id)
+                    self.fields['container'].queryset = Section.objects.filter(text=text)
+                    self.fields['related_to'].queryset = SectionWidget(queryset=Section.objects.filter(text=text).exclude(id=self.section_id))
+                except Text.DoesNotExist:
+                    logger.debug("Text with id %s does not exist", self.text_id)
 
 
     def clean(self):

@@ -122,22 +122,83 @@ document.addEventListener('DOMContentLoaded', function () {
     const selector = document.getElementById('sectionTypeSelector');
     const sectionList = document.getElementById('sectionList');
 
-    function showSectionTooltip(event) {
-        const sectionId = event.target.dataset.sectionId;
-        fetch(`/api/sections/${sectionId}/`)
-            .then(response => response.json())
-            .then(data => {
-                const tooltip = document.getElementById('sectionInfoTooltip');
-                tooltip.innerHTML = `Type: ${data.type}, related to: ${data.related_to || 'None'}`;
+    function editSection(sectionId) {
+    console.log('Edit section:', sectionId);
+    let queryString = `?section_id=${encodeURIComponent(sectionId)}`;
+    htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, {
+        target: '#modalContainer'
+    }).then(() => {
+        document.getElementById('modalTextId').value = sectionId;
+        console.log('Section ID: ' + sectionId);
+        console.log('Edit modal content loaded');
+    });
+    }
 
-                // Position the tooltip near the cursor
-                tooltip.style.left = `${event.pageX + 10}px`;
-                tooltip.style.top = `${event.pageY + 10}px`;
-                tooltip.classList.remove('hidden');
+
+
+    // New function to add icons after sections are loaded
+    function addIconsToSections() {
+        const sections = document.querySelectorAll('.section-item');
+        sections.forEach(section => {
+            // Skip if icon already added
+            if (section.querySelector('.edit-icon')) return;
+
+            // Create edit icon
+            const editIcon = document.createElement('span');
+            editIcon.classList.add('edit-icon');
+            editIcon.innerHTML = '&#9998;'; // Unicode for pencil icon
+            editIcon.style.cursor = 'pointer';
+            editIcon.style.marginLeft = '10px';
+
+            // Edit icon click event
+            editIcon.addEventListener('click', function(event) {
+                event.stopPropagation();
+                // Call function to handle edit action
+                editSection(section.dataset.sectionId);
+            });
+
+            section.appendChild(editIcon);
+        });
+    }
+
+
+    function openSectionFormular(sectionId) {
+        // Logic to open section form with the given sectionId
+        console.log('Open formular for section:', sectionId);
+    }
+
+    function checkUserLoggedIn() {
+        // Implement logic to check if user is logged in
+        return true; // Assuming user is logged in for this example
+    }
+
+    if (checkUserLoggedIn()) {
+        addIconsToSections();
+    }
+
+    function fetchSectionDetails(sectionId) {
+    return fetch(`/api/sections/${sectionId}/`)
+        .then(response => response.json());
+    }
+
+    function showSectionInfo(event) {
+        const sectionId = event.target.dataset.sectionId;
+        fetchSectionDetails(sectionId)
+            .then(data => {
+                const relatedSectionPromises = data.related_to.map(relatedId => fetchSectionDetails(relatedId));
+
+                Promise.all(relatedSectionPromises).then(relatedSections => {
+                    const relatedIdentifiers = relatedSections.map(section => section.identifier).join(', ') || 'None';
+                    const tooltip = document.getElementById('sectionInfoTooltip');
+
+                    tooltip.innerHTML = `Type: ${data.type}, related to: ${relatedIdentifiers}`;
+                    tooltip.style.left = `${event.pageX + 10}px`;
+                    tooltip.style.top = `${event.pageY + 10}px`;
+                    tooltip.classList.remove('hidden');
+                });
             })
             .catch(error => console.error('Error fetching section info:', error));
     }
-
     function hideSectionTooltip() {
         const tooltip = document.getElementById('sectionInfoTooltip');
         tooltip.classList.add('hidden');
@@ -146,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sectionList) {
         sectionList.addEventListener('mouseover', function (event) {
             if (event.target.classList.contains('section-item')) {
-                showSectionTooltip(event);
+                showSectionInfo(event);
             }
         });
 
@@ -170,7 +231,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    
 
     function fetchAndHighlightSectionTokens(sectionId) {
         fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
@@ -192,8 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error fetching tokens for section:', error);
             });
     }
-
-    function loadChildSections(sectionId, parentDiv) {
+        function loadChildSections(sectionId, parentDiv) {
         // Check if child sections are already loaded
         const existingChildList = parentDiv.querySelector('.child-section-list');
         if (existingChildList) {
@@ -212,6 +271,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     childDiv.classList.add('child-section-item');
                     childDiv.textContent = childSection.identifier || 'Untitled';
                     childDiv.dataset.sectionId = childSection.id;
+
+                    // Add edit icon to child sections
+                    const editIcon = document.createElement('span');
+                    editIcon.classList.add('edit-icon');
+                    editIcon.innerHTML = '&#9998;'; // Unicode for pencil icon
+                    editIcon.style.cursor = 'pointer';
+                    editIcon.style.marginLeft = '10px';
+
+                    // Edit icon click event
+                    editIcon.addEventListener('click', function(event) {
+                        event.stopPropagation();
+                        // Call function to handle edit action
+                        editSection(childDiv.dataset.sectionId);
+                    });
+
+                    childDiv.appendChild(editIcon);
 
                     // Add event listener to prevent event bubbling
                     childDiv.addEventListener('click', function (event) {
@@ -232,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
+    // Modify existing functions to call addIconsToSections after sections are loaded
     function loadSectionsOfType(sectionType) {
         fetch(`/corpus/get-sections/${textId}/${sectionType}/`)
             .then(response => response.json())
@@ -243,11 +319,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     sectionDiv.textContent = section.identifier || 'Untitled';
                     sectionDiv.dataset.sectionId = section.id;
 
-                    // Add event listener to load child sections    
                     sectionDiv.addEventListener('click', function () {
                         const isClosingSection = this.querySelector('.child-section-list');
                         loadChildSections(section.id, this);
-                        // Only fetch and highlight tokens if the section is being opened
                         if (!isClosingSection) {
                             fetchAndHighlightSectionTokens(section.id);
                         }
@@ -258,6 +332,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (sections.length === 0) {
                     sectionList.innerHTML = '<p>No sections found for this type.</p>';
+                } else {
+                    addIconsToSections();
                 }
             })
             .catch(error => {
@@ -308,8 +384,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         console.error("CSRF token meta tag not found");
     }
-
-
 
     // Declare the observer at the beginning
     const observer = new MutationObserver(function (mutations) {
