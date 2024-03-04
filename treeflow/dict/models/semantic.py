@@ -1,10 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
-from simple_history.models import HistoricalRecords
 
 
-from .term_tech import TermTech
 
 
 class Semantic(models.Model):
@@ -16,6 +13,5 @@ class Semantic(models.Model):
     #term_techs = models.ManyToManyField(TermTech, blank=True, related_name='semantic_term_techs')
     related_semantics = models.ManyToManyField('self', blank=True)
 
-    history = HistoricalRecords()
 
     # TODO add pointers to taxonomy

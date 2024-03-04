@@ -1,8 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
-from django.conf import settings
 from .bibliography import BibEntry
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 
 
@@ -19,7 +17,6 @@ class Source(models.Model):
     sources = models.ManyToManyField('self',blank=True, related_name='source_sources')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
 
     class Meta:

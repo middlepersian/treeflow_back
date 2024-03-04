@@ -1,7 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from simple_history.models import HistoricalRecords
 from treeflow.utils.normalize import strip_and_normalize
 
 
@@ -25,7 +24,6 @@ class Lemma(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     stage = models.CharField(max_length=10, blank=True)
 
-    history = HistoricalRecords()
 
     class Meta:
         constraints = [
@@ -58,7 +56,6 @@ class LemmaRelation(models.Model):
     )
     # eg hypernymy, hyponymy, meronymy, holonymy, synonymy, antonymy, etc.
     relation_type = models.CharField(max_length=50, null=True, blank=True)
-    history = HistoricalRecords()
 
     class Meta:
         constraints = [
@@ -72,7 +69,6 @@ class LemmaSense(models.Model):
     sense = models.ForeignKey(
         "Sense", on_delete=models.CASCADE, related_name="related_sense"
     )
-    history = HistoricalRecords()
 
     class Meta:
         constraints = [
