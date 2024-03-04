@@ -99,14 +99,383 @@
 
     <div id="modalContainer"></div>
 
+
+    <!-- Tooltip -->
+    <div id="sectionInfoTooltip" class="hidden absolute z-50 px-4 py-2 bg-white rounded-md shadow-lg max-w-xs">
+        <!-- Content will be dynamically inserted -->
+    </div>
+
+
 </div>
 
 <script>
     var textId = '{{ selected_text_id }}';
+    console.log("Selected text ID:", textId);
 </script>
 
-<script src="{% static 'corpus/section_navigator.js'%}"></script>
+<!-- section navigator -->
+
+<script>
+
+// Highlight tokens when a section is clicked
+document.addEventListener('DOMContentLoaded', function () {
+    const selector = document.getElementById('sectionTypeSelector');
+    const sectionList = document.getElementById('sectionList');
+
+    function showSectionTooltip(event) {
+        const sectionId = event.target.dataset.sectionId;
+        fetch(`/api/sections/${sectionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const tooltip = document.getElementById('sectionInfoTooltip');
+                tooltip.innerHTML = `Type: ${data.type}, related to: ${data.related_to || 'None'}`;
+
+                // Position the tooltip near the cursor
+                tooltip.style.left = `${event.pageX + 10}px`;
+                tooltip.style.top = `${event.pageY + 10}px`;
+                tooltip.classList.remove('hidden');
+            })
+            .catch(error => console.error('Error fetching section info:', error));
+    }
+
+    function hideSectionTooltip() {
+        const tooltip = document.getElementById('sectionInfoTooltip');
+        tooltip.classList.add('hidden');
+    }
+
+    if (sectionList) {
+        sectionList.addEventListener('mouseover', function (event) {
+            if (event.target.classList.contains('section-item')) {
+                showSectionTooltip(event);
+            }
+        });
+
+        sectionList.addEventListener('mouseout', function (event) {
+            if (event.target.classList.contains('section-item')) {
+                hideSectionTooltip();
+            }
+        });
+    }
+
+    function highlightSectionTokens(tokenIds) {
+        const stringTokenIds = tokenIds.map(id => id.toString());
+        const tokens = document.querySelectorAll('.token');
+        tokens.forEach(token => {
+            if (stringTokenIds.includes(token.dataset.tokenId)) {
+                // Apply Tailwind class for highlighted tokens
+                token.classList.add('bg-yellow-300'); // Tailwind class for yellow background
+            } else {
+                // Remove Tailwind class for non-highlighted tokens
+                token.classList.remove('bg-yellow-300');
+            }
+        });
+    }
+    
+
+    function fetchAndHighlightSectionTokens(sectionId) {
+        fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
+                highlightSectionTokens(tokenIds);
+
+                // Scroll to the first token of this section
+                if (tokenIds.length > 0) {
+                    const firstTokenId = tokenIds[0];
+                    const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
+                    if (firstTokenElement) {
+                        firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching tokens for section:', error);
+            });
+    }
+
+    function loadChildSections(sectionId, parentDiv) {
+        // Check if child sections are already loaded
+        const existingChildList = parentDiv.querySelector('.child-section-list');
+        if (existingChildList) {
+            // Remove the child list to 'close' the section
+            parentDiv.removeChild(existingChildList);
+            return; // Exit the function
+        }
+        fetch(`/corpus/get-child-sections/${sectionId}/`)
+            .then(response => response.json())
+            .then(childSections => {
+                const childSectionList = document.createElement('div');
+                childSectionList.classList.add('child-section-list');
+
+                childSections.forEach(childSection => {
+                    const childDiv = document.createElement('div');
+                    childDiv.classList.add('child-section-item');
+                    childDiv.textContent = childSection.identifier || 'Untitled';
+                    childDiv.dataset.sectionId = childSection.id;
+
+                    // Add event listener to prevent event bubbling
+                    childDiv.addEventListener('click', function (event) {
+                        event.stopPropagation();
+                        fetchAndHighlightSectionTokens(childSection.id);
+                    });
+
+                    childSectionList.appendChild(childDiv);
+                });
+
+                // Check if child sections are already loaded to avoid duplication
+                if (!parentDiv.querySelector('.child-section-list')) {
+                    parentDiv.appendChild(childSectionList);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching child sections:', error);
+            });
+    }
+
+    function loadSectionsOfType(sectionType) {
+        fetch(`/corpus/get-sections/${textId}/${sectionType}/`)
+            .then(response => response.json())
+            .then(sections => {
+                sectionList.innerHTML = '';
+                sections.forEach(section => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.classList.add('section-item');
+                    sectionDiv.textContent = section.identifier || 'Untitled';
+                    sectionDiv.dataset.sectionId = section.id;
+
+                    // Add event listener to load child sections    
+                    sectionDiv.addEventListener('click', function () {
+                        const isClosingSection = this.querySelector('.child-section-list');
+                        loadChildSections(section.id, this);
+                        // Only fetch and highlight tokens if the section is being opened
+                        if (!isClosingSection) {
+                            fetchAndHighlightSectionTokens(section.id);
+                        }
+                    });
+
+                    sectionList.appendChild(sectionDiv);
+                });
+
+                if (sections.length === 0) {
+                    sectionList.innerHTML = '<p>No sections found for this type.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching sections:', error);
+                sectionList.innerHTML = '<p>Error loading sections.</p>';
+            });
+    }
+
+    selector.addEventListener('change', function () {
+        loadSectionsOfType(this.value);
+    });
+
+    if (selector.options.length > 0) {
+        loadSectionsOfType(selector.options[0].value);
+    }
+});
+</script>
+
+<!-- section creator -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let startTokenId = null;
+    let endTokenId = null;
+    let isSelectingTokens = false;
+    let selectedTokens = []; // Array to hold selected tokens
+    let selectedTokenIds = []; // Array to hold selected token IDs
+    let selectedTokenTexts = ''; // String to hold selected token texts
+
+
+    var csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    if (csrfTokenMeta) {
+        var csrfToken = csrfTokenMeta.getAttribute('content');
+        console.log("CSRF token:", csrfToken);
+        try {
+            if (htmx && csrfToken) {
+                htmx.config.include = (name, value, el) => {
+                    if (name === "csrfmiddlewaretoken") {
+                        return csrfToken;
+                    }
+                    return value;
+                };
+            } else {
+                console.error("HTMX or CSRF token not available");
+            }
+        } catch (e) {
+            console.error("Error configuring HTMX:", e);
+        }
+    } else {
+        console.error("CSRF token meta tag not found");
+    }
+
+
+
+    // Declare the observer at the beginning
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.classList && node.classList.contains('token')) {
+                        addTokenClickListeners();
+                    }
+                });
+            }
+        });
+    });
+
+    // Observer to observe the addition of new tokens
+    function handleTokenClick(tokenElement) {
+        console.log("Token clicked:", tokenElement.dataset.tokenId);
+        const tokenId = tokenElement.dataset.tokenId;
+
+        // When the first token is clicked, highlight it immediately
+        if (startTokenId === null) {
+            startTokenId = tokenId;
+            tokenElement.classList.add('bg-green-200'); // Highlight the first token using Tailwind class
+        }
+        // When the second token is clicked, highlight the range
+        else if (endTokenId === null && tokenId !== startTokenId) {
+            endTokenId = tokenId;
+            highlightTokensBetween(startTokenId, endTokenId); // Highlight tokens between the range using Tailwind class
+        }
+    }
+
+
+    function highlightTokensBetween(startId, endId) {
+        let inRange = false;
+        document.querySelectorAll('.token').forEach(token => {
+            if (token.dataset.tokenId === startId || token.dataset.tokenId === endId) {
+                inRange = !inRange;
+                token.classList.add('bg-green-200');
+            }
+            if (inRange || token.dataset.tokenId === endId) {
+                token.classList.add('bg-green-200');
+            }
+        });
+    }
+
+
+    // Function to add event listeners to tokens
+    function addTokenClickListeners() {
+        document.querySelectorAll('.token').forEach(token => {
+            token.addEventListener('click', function () {
+                if (isSelectingTokens) {
+                    handleTokenClick(this);
+                }
+            });
+        });
+    }
+
+    // Add listeners to existing tokens
+    addTokenClickListeners();
+    document.getElementById('startTokenSelection').addEventListener('click', function () {
+        let mode = this.getAttribute('data-mode');
+
+        // Log the value of textId
+        console.log("Current textId:", textId);
+
+        if (mode === 'select') {
+            // Start selecting tokens logic
+            isSelectingTokens = true;
+            this.textContent = 'Finish Token Selection';
+            this.setAttribute('data-mode', 'finish');
+        } else if (mode === 'finish') {
+            // Finish selecting tokens logic
+            isSelectingTokens = false;
+            selectedTokens = Array.from(document.querySelectorAll('.token'))
+                .filter(token => token.classList.contains('bg-green-200'));
+            selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
+            selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
+    
+            let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
+            console.log("Query string:", queryString);
+            // Issue a GET request with the constructed query string
+            htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, {
+                target: '#modalContainer'
+            }).then(() => {
+                // After the modal content is loaded, set the value of the hidden input
+                document.getElementById('modalTextId').value = textId;
+                console.log('text ID: ' + textId);
+                console.log('Modal content loaded');
+            });
+        
+            // Reset the button for a new selection
+            this.textContent = 'Start Token Selection';
+            this.setAttribute('data-mode', 'select');
+        }
+
+    });
+
+    // Function to show the modal
+    function openModal() {
+        // Ensure the modal exists in the DOM
+        let modal = document.getElementById('sectionModal');
+        console.log('Opening modal');
+        if (modal) {
+            modal.classList.remove('hidden'); // Remove the 'hidden' class to show the modal            
+            // Display the selected tokens
+            document.getElementById('selectedTokensDisplay').textContent = selectedTokenTexts || 'No tokens selected';
+        } else {
+            console.error('Modal not found in the DOM.');
+        }
+    }
+
+
+    function deselectAllTokens() {
+        document.querySelectorAll('.token').forEach(token => {
+            token.classList.remove('bg-green-200'); // Reset the token using Tailwind class
+        });
+        startTokenId = null; // Reset start token ID
+        endTokenId = null;   // Reset end token ID
+        selectedTokenIds = []; // Reset selected token IDs
+    }
+
+
+    function closeModal() {
+        console.log('Closing modal');
+        var modal = document.getElementById('sectionModal');
+        if (modal) {
+            modal.classList.add('hidden'); // Add the 'hidden' class to hide the modal            
+            deselectAllTokens(); // Deselect tokens when closing the modal
+            isSelectingTokens = false; // Reset the token selection flag
+            selectedTokenTexts = ''; // Reset the selected token texts
+        }
+    }
+    
+
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+        console.log('htmx:afterSwap event triggered', event);
+    
+        // Log details about the event target
+        console.log('Event target:', event.target);
+        console.log('Event target ID:', event.target.id);
+    
+        if (event.target.id === 'modalContainer') {
+            console.log('Preparing to open modal based on htmx:afterSwap in #modalContainer');
+    
+            // Attempt to open the modal
+            openModal();
+    
+            // Try to find and bind the closeModal function to the Cancel button
+            const cancelButton = document.querySelector('#sectionModal button[onclick="closeModal()"]');
+            if (cancelButton) {
+                console.log('Cancel button found in the modal, binding closeModal function');
+                cancelButton.onclick = closeModal;
+            } else {
+                console.error('Cancel button not found in the modal.');
+            }
+        }
+    });
+    
+    // Start observing
+    observer.observe(document.body, { childList: true, subtree: true });
+  
+});
+</script>
+
+
 <script src="{% static 'corpus/scroll_to_top.js'%}"></script>
-<script src="{% static 'corpus/section_creator.js'%}"></script>
+
 
 {% endblock content %}

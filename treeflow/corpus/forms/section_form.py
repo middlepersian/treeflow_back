@@ -20,41 +20,38 @@ class SectionWidget(s2forms.ModelSelect2MultipleWidget):
 class SectionForm(forms.ModelForm):
     selected_tokens = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    # Define choices for insertion method
     INSERTION_CHOICES = [
         ('before', 'Before Reference Section'),
         ('after', 'After Reference Section'),
-        ('none', 'No Reference Section'),  # Added option for no reference section
+        ('none', 'No Reference Section'),
     ]
     insertion_method = forms.ChoiceField(choices=INSERTION_CHOICES, required=True, initial='none')
-
-    # Make reference_section optional
     reference_section = forms.ModelChoiceField(queryset=Section.objects.all(), required=False)
+    related_to = forms.ModelMultipleChoiceField(queryset=Section.objects.all(), widget=SectionWidget, required=False)
 
     class Meta:
         model = Section
         fields = ['identifier', 'type', 'title', 'source', 'container', 
                   'reference_section', 'insertion_method', 'related_to']
-        widgets = { 
-            'related_to': SectionWidget(attrs={'style': 'width: 100%; min-height: 100px;'}),
-        }
 
     def __init__(self, *args, **kwargs):
-        text_id = kwargs.pop('text_id', None)
+        self.text_id = kwargs.pop('text_id', None)
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        if text_id:
+        if self.text_id:
             try:
-                text = Text.objects.get(id=text_id)
+                text = Text.objects.get(id=self.text_id)  # Retrieve the text object
                 section_queryset = Section.objects.filter(text=text).order_by('type')
                 self.fields['container'].queryset = section_queryset
                 self.fields['reference_section'].queryset = section_queryset
                 self.fields['related_to'].queryset = section_queryset.exclude(id=self.instance.id) if self.instance else section_queryset
+
             except Text.DoesNotExist:
-                logger.debug("Text with id %s does not exist", text_id) 
+                logger.debug("Text with id %s does not exist", self.text_id) 
         else:
-            logger.debug("No text_id provided")  
+            logger.debug("No text_id provided")
+
 
     def clean(self):
         cleaned_data = super().clean()
@@ -67,13 +64,14 @@ class SectionForm(forms.ModelForm):
         selected_token_ids = self.cleaned_data.get('selected_tokens').split(',')
         related_to = self.cleaned_data.get('related_to')
 
+        text = Text.objects.get(id=self.text_id) 
         new_section_data = {
             'identifier': self.cleaned_data.get('identifier'),
             'type': self.cleaned_data.get('type'),
             'title': self.cleaned_data.get('title'),
             'source': self.cleaned_data.get('source'),
             'container': self.cleaned_data.get('container'),
-            'text': Text.objects.first() if not reference_section else reference_section.text,
+            'text': text,
         }
 
         if insertion_method == 'before' and reference_section:

@@ -18,10 +18,8 @@ def sections_view(request, text_id=None):
         logger.info("Cache miss for texts - Triggered Huey task to update cache.")
         texts = cache.get(cache_key_texts)
         
-    if text_id:
-        selected_text_id = text_id
-    else:
-        selected_text_id = request.GET.get('text_id')
+    selected_text_id = text_id or request.GET.get('text_id')
+    logger.info('selected_text_id: %s', selected_text_id)
 
     # Define the queryset for tokens
     token_queryset = Token.objects.filter(
@@ -44,7 +42,6 @@ def sections_view(request, text_id=None):
     sentence_sections = all_sections.filter(
         type='sentence').prefetch_related(tokens_prefetch)
 
-    logger.info('selected_text_id id: %s', selected_text_id)
 
     # Get distinct section types
     section_types = Section.objects.order_by(

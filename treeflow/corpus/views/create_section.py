@@ -23,30 +23,31 @@ def create_section_view(request):
 
 
 def handle_post_request(request):
-
-    form = SectionForm(request.POST, user=request.user)
+    text_id = request.POST.get('text_id')
+    logger.debug("text_id: %s", text_id)
+    form = SectionForm(request.POST, user=request.user, text_id=text_id)
 
     if form.is_valid():
-        return process_valid_form(request, form)  # Pass 'request' here
+        return process_valid_form(request, form)
     else:
         logger.error("Form is invalid. Errors: %s", form.errors)
         return JsonResponse({'errors': form.errors}, status=400)
 
-
-
 def process_valid_form(request, form):
-    logger.debug("Form is valid. Processing form...")
-    section = form.save()  # This will also handle adding tokens to the section
-
-    logger.debug("Section created with ID: %s", section.id)
-    relative_url = reverse('corpus:sections', kwargs={'text_id': section.text.id})
-
+    section = form.save()
+    text_id = request.POST.get('text_id')  # Get the text_id from the form submission
+    logger.debug("Redirecting to Text ID: %s", text_id)
+    relative_url = reverse('corpus:sections', kwargs={'text_id': text_id})
     response = HttpResponse('')
     response['HX-Redirect'] = relative_url  
     return response
-
+    
 def handle_get_request(request):
     text_id = request.GET.get('text_id')
-    logger.debug("Received GET request with text_id: %s", text_id)
+    logger.debug("text_id: %s", text_id)
     form = SectionForm(text_id=text_id)
-    return render(request, 'section_modal.html', {'form': form})
+    context = {
+        'form': form,
+        'text_id': text_id  # Make sure this is included
+    }
+    return render(request, 'section_modal.html', context)

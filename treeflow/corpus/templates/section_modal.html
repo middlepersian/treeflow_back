@@ -18,7 +18,7 @@
             <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}"
                 method="post" class="space-y-4">
                 {% csrf_token %}
-                <input type="hidden" name="text_id" id="modalTextId" value>
+                <input type="hidden" name="text_id" id="modalTextId" value="{{ text_id }}">
                 <div class="space-y-2">
                     {{ form.as_p }}
                 </div>
