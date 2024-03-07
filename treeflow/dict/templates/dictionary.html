@@ -7,97 +7,44 @@
       <div class="rounded-md shadow-sm shadow-black">
         <input type="text" class="p-2 rounded-md" placeholder="Search..." />
       </div>
-      <div class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
-        {% comment %}Lemma loop{% endcomment %}
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
-        <div class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">Lemma</div>
+      <div id="lemma-list" class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
+        {% for lemma in lemmas %}
+          <div hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
+        {% endfor %}
       </div>
     </div>
     <div class="w-full overflow-hidden">
       {% comment %}Lemma View{% endcomment %}
-      <div class="relative p-2 m-2 rounded-md shadow-sm bg-slate-400 shadow-black">
-        <h3 class="flex flex-row gap-1 italic text-left">{item.lemma.word}</h3>
-        {% if user.is_authenticated %}
-          <div class="absolute top-0 right-0 flex flex-row gap-2 m-2">
-            <input type="button" class="px-1 py-2 font-semibold text-white rounded-md bg-off hover:bg-action" value="Edit Lemma" />
-            <input type="button" class="px-1 py-2 font-semibold text-white rounded-md bg-error hover:bg-action" value="Delete Lemma" />
-          </div>
-        {% else %}
-          <div class="absolute top-0 right-0 m-2">
-            <div class="p-2 my-1 ml-6 underline rounded-md w-fit bg-slate-300">You must be logged in to edit {item.lemma.word}.</div>
-          </div>
-        {% endif %}
-        {% comment %}General View{% endcomment %}
-        <div class="flex flex-col gap-2">
-          <div class="my-1 font-semibold underline">General</div>
-          <div class="flex flex-row gap-2">
-            <div class="relative flex flex-row cursor-default">
-              <div class="p-4 pl-2 bg-white rounded-md w-fit">
-                <span>{item.lemma.language}</span>
-              </div>
-              <div class="absolute flex justify-center w-full -bottom-4">
-                <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
-                  <span>Language</span>
-                </div>
-              </div>
-            </div>
-            <div class="relative flex flex-row cursor-default">
-              <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
-                <span>{multiwordExpression}</span>
-              </div>
-              <div class="absolute flex justify-center w-full -bottom-4">
-                <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
-                  <span>Multiword Exp.</span>
-                </div>
-              </div>
-            </div>
-            <div class="relative flex flex-row cursor-default">
-              <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
-                <span class="pl-1">{categories}</span>
-              </div>
-              <div class="absolute flex justify-center w-full -bottom-4">
-                <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
-                  <span>Categories</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <hr class="w-full mt-5 mb-3 border-black">
-        Related Lemmas
-        {% comment %}https://gitlab.cceh.uni-koeln.de/mpcd/treeflow_front/-/blob/lemma-site/src/routes/Lemmas/Components/LemmaViewRelatedLemmas.js?ref_type=heads{% endcomment %}
-        <hr class="w-full my-3 border-black">
-        Related Senses
-        {% comment %}https://gitlab.cceh.uni-koeln.de/mpcd/treeflow_front/-/blob/lemma-site/src/routes/Lemmas/Components/LemmaViewRelatedSenses.js?ref_type=heads{% endcomment %}
-        <hr class="w-full my-3 border-black">
-        Lemma View Tokens
-        {% comment %} https://gitlab.cceh.uni-koeln.de/mpcd/treeflow_front/-/blob/lemma-site/src/routes/Lemmas/Components/LemmaViewTokens.js?ref_type=heads {% endcomment %}
+      <div id="lemma-details" class="relative p-2 m-2 rounded-md shadow-sm bg-slate-400 shadow-black">
+        <div class="text-center">Please wait while a lemma is being loaded.</div>
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelector('#lemma-list').children[0].click()
+    })
+    
+    function selection(e) {
+      const lemmaList = document.querySelector('#lemma-list')
+    
+      if (lemmaList) {
+        lemmaList.childNodes.forEach((child) => {
+          if (child.nodeType === Node.ELEMENT_NODE) {
+            child.classList.remove('bg-action')
+            child.classList.remove('text-white')
+          }
+        })
+      }
+    
+      e.classList.add('bg-action')
+      e.classList.add('text-white')
+    
+      lemmaList.scrollTo({
+        top: e.offsetTop - lemmaList.offsetTop - 5,
+        behavior: 'smooth'
+      })
+    }
+  </script>
 {% endblock %}

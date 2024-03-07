@@ -1,0 +1,78 @@
+{% comment %} {% if user.is_authenticated %}
+  <div class="absolute top-0 right-0 flex flex-row gap-2 m-2">
+    <input type="button" class="px-1 py-2 font-semibold text-white rounded-md bg-off hover:bg-action" value="Edit Lemma" />
+    <input type="button" class="px-1 py-2 font-semibold text-white rounded-md bg-error hover:bg-action" value="Delete Lemma" />
+  </div>
+{% else %}
+  <div class="absolute top-0 right-0 m-2">
+    <div class="p-2 my-1 ml-6 underline rounded-md w-fit bg-slate-300">You must be logged in to edit this lemma.</div>
+  </div>
+{% endif %} {% endcomment %}
+<h3 class="flex flex-row gap-1 italic text-left">{{ word }}</h3>
+<div class="flex flex-col gap-2">
+  <div class="my-1 font-semibold underline">General</div>
+  <div class="flex flex-row gap-2">
+    <div class="relative flex flex-row cursor-default">
+      <div class="p-4 bg-white rounded-md w-fit">
+        <span class="mx-4">{{ language }}</span>
+      </div>
+      <div class="absolute flex justify-center w-full -bottom-4">
+        <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
+          <span>Language</span>
+        </div>
+      </div>
+    </div>
+    <div class="relative flex flex-row cursor-default">
+      <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
+        <span>{{ multiword_expression }}</span>
+      </div>
+      <div class="absolute flex justify-center w-full -bottom-4">
+        <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
+          <span>Multiword Exp.</span>
+        </div>
+      </div>
+    </div>
+    <div class="relative flex flex-row cursor-default">
+      <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
+        <span class="pl-1">{{ categories }}</span>
+      </div>
+      <div class="absolute flex justify-center w-full -bottom-4">
+        <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
+          <span>Categories</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr class="w-full mt-5 mb-3 border-black" />
+  <div class="my-1 font-semibold underline">Related lemmas</div>
+  <div>
+    {% if related_lemmas %}
+      {% for related_lemma in related_lemmas %}
+        <div class="flex flex-row">
+          <div class="p-2 my-1 ml-6 rounded-md bg-slate-300 w-fit">
+            <div class="hover:underline hover:cursor-pointer">{{ related_lemma.word }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div>No related lemmas found.</div>
+    {% endif %}
+  </div>
+  <hr class="w-full mt-5 mb-3 border-black" />
+  <div class="my-1 font-semibold underline">Related senses</div>
+  <div>
+    {% if related_senses %}
+      {% for related_sense in related_senses %}
+        <div class="flex flex-row">
+          <div class="p-2 my-1 ml-6 rounded-md bg-slate-300 w-fit">
+            <div>
+              {{ related_sense.sense }}<sup>{{ related_sense.language }}</sup>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div>No related senses found.</div>
+    {% endif %}
+  </div>
+</div>
