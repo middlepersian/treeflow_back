@@ -1,8 +1,11 @@
-from ..models import Section
+from ..models import Section, Token, Text
 
 import logging
 
 from django.shortcuts import render, get_object_or_404
+from django.core.cache import cache
+from datetime import datetime
+
 import csv
 
 from django.http import StreamingHttpResponse
@@ -19,17 +22,49 @@ class Echo:
         return value
 
 
-def resolve_sentence(reuquest, section_id=None):
-    sentence = get_object_or_404(Section,id=section_id)
-    meaning = sentence.senses.all()
+def resolve_text(request, text_id):
+    # get Text 
+    logger.debug(f"resolve_text: {text_id}")
+    text = get_object_or_404(Text, id=text_id)
+    # check if text_csv is in cache
+    text_csv = cache.get(f"text_csv_{text_id}")
+    if not text_csv:
+         
+      text = Text.objects.prefetch_related(
+        'section_text',
+        'section_text__senses',
+        'section_text__tokens',
+        'section_text__tokens__lemmas',
+        'section_text__tokens__dependency_token',
+        'section_text__tokens__pos_token',
+        'section_text__tokens__feature_token',
+        'section_text__tokens__comment_token'
+      ).get(id=text_id)
+      # and prefetch all sections of type sentence
+      logger.debug(f"prefetching done")
+      sections = text.section_text.filter(type="sentence")
+      rows = []
+      for section in sections:
+        rows += sentenceToConnl(section)
 
-    tokens = sentence.tokens.all()
-    rows = []
-    for token in tokens:
-        row = tokenToConnl(token)
-        rows.append(row)
-        logger.debug(tokenToConnl(token))
-    
+      
+      text_csv = rows
+      # cache text_csv
+      cache.set(f"text_csv_{text_id}", text_csv, 60*60*24)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer, delimiter='\t')
+    return StreamingHttpResponse(
+        (writer.writerow(row) for row in text_csv),
+        content_type="text/csv",
+        headers={'Content-Disposition': f'attachment; filename="{text.identifier}.csv"'}
+    )
+
+
+
+def resolve_sentence(request, section_id=None):
+    sentence = get_object_or_404(Section, id=section_id)
+    rows = sentenceToConnl(sentence)
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter='\t')
     return StreamingHttpResponse(
@@ -38,7 +73,26 @@ def resolve_sentence(reuquest, section_id=None):
         headers={'Content-Disposition': 'attachment; filename="sentence.csv"'}
     )
 
-        
+def sentenceToConnl(sentence):
+    tokens = sentence.tokens.all()
+    rows = []
+    if tokens:
+      rows = [tokenToConnl(token) for token in tokens]
+
+    max_length = 20
+
+    id_row = ['_']*max_length
+    id_row[0] = f'#SENTENCE_ID = {sentence.identifier}'
+
+    for translation in sentence.senses.all():
+        translation_row = ['_']*max_length
+        translation_row[0] = f'#TRANSLATION = {translation}'
+
+        rows.insert(0, translation_row)
+    rows.insert(0, id_row)
+    rows.append(['']*max_length)
+
+    return rows
 
 
 def tokenToConnl(token):
@@ -77,25 +131,6 @@ def tokenToConnl(token):
     language = str(token.language) if token.language else "_"
     senses_lang = "|".join([str(sense.language) if sense.language else "_" for sense in token.senses.all()])
 
-    logger.debug(f"""{number_in_sentence}\t{transcription}\t{head}\t{
-            deprel}\t{
-            deps}\t{
-            transliteration}\t{
-            line}\t{
-            newParts}\t{
-            lemmas}\t{
-            lemmaLangs}\t{
-            avestan}\t{
-            senses}\t{
-            pos}\t{
-            features}\t{
-            uncertrain}\t{
-            comment}\t{
-            newSuggestions}\t{
-            discussion}\t{
-            language}\t{
-            senses_lang}"""
-    )
     return [number_in_sentence,
                        transcription,
                          head,
