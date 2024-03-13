@@ -61,15 +61,13 @@
 
                 <!-- Sentence content tokens displayed next to the identifier -->
                 <div class="flex flex-wrap sentence-content w-2/8">
-                    {% for token in section.prefetched_tokens %}
-                    <!-- Add data-section-id attribute to each token -->
-                    <span class="token inline-block rounded px-1 py-0.5 m-0.5"
-                        data-token-id="{{ token.id }}"
-                        data-section-id="{{ section.id }}">
-                        <!-- Add this line -->
-                        {{ token.transcription }}
-                    </span>
-                    {% endfor %}
+                        {% for token in section.prefetched_tokens %}
+                            <span class="token inline-block rounded px-1 py-0.5 m-0.5"
+                                data-token-id="{{ token.id }}"
+                                data-section-id="{{ section.id }}">
+                                {{ token.transcription }}
+                            </span>
+                        {% endfor %}
                 </div>
 
                 {% if request.user.is_authenticated %}

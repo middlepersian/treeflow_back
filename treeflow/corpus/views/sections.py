@@ -1,12 +1,11 @@
 from django.shortcuts import render
 from django.core.cache import cache
-from django.db.models import Prefetch
+from django.db.models import Prefetch, prefetch_related_objects
 from treeflow.corpus.models import Section, Token, Text
 from treeflow.datafeed.tasks import cache_all_texts  # Import the Celery task
 from django.core import serializers
 import logging
 logger = logging.getLogger(__name__)
-
 
 def sections_view(request, text_id=None):
     cache_key_texts = "all_texts"
@@ -23,33 +22,37 @@ def sections_view(request, text_id=None):
     else:
         selected_text_id = request.GET.get('text_id')
 
-    # Define the queryset for tokens
-    token_queryset = Token.objects.filter(
-        sectiontoken__section__text_id=selected_text_id,
-        sectiontoken__section__type='sentence'
-    ).order_by('sectiontoken__section__number', 'number_in_sentence')
+    cache_key = f"sections_for_text_{selected_text_id}"
+    cached_data = cache.get(cache_key)
 
-    # Create a Prefetch object for tokens
-    tokens_prefetch = Prefetch(
-        'tokens',
-        queryset=token_queryset,
-        to_attr='prefetched_tokens'
-    )
+    # Adjust the prefetching relationship
+    token_queryset = Token.objects.only('transcription')
+    prefetch = Prefetch('tokens', queryset=token_queryset, to_attr='prefetched_tokens')
 
-    # Fetch all sections for the given text
-    all_sections = Section.objects.filter(text__id=selected_text_id).prefetch_related(
-        'container'
-    )
+    if cached_data:
+        cached_section_ids = cached_data['sentence_section_ids']
+        section_types = cached_data['section_types']
 
-    sentence_sections = all_sections.filter(
-        type='sentence').prefetch_related(tokens_prefetch)
+        # Reconstruct the queryset using the cached IDs and apply prefetching
+        sentence_sections = Section.objects.filter(
+            id__in=cached_section_ids
+        ).prefetch_related(prefetch)
 
-    logger.info('selected_text_id id: %s', selected_text_id)
+        # Debugging: Check if prefetching is working correctly
+        for section in sentence_sections:
+            prefetched_tokens = getattr(section, 'prefetched_tokens', [])
+            logger.debug(f"Section {section.id} has {len(prefetched_tokens)} tokens")
 
-    # Get distinct section types
-    section_types = Section.objects.order_by(
-        'type').values_list('type', flat=True).distinct()
-    section_types = [x for x in section_types if x != 'sentence']
+    else:
+        logger.info(f"Cache miss for sections of text: {selected_text_id}")
+        all_sections = Section.objects.filter(text__id=selected_text_id)
+        sentence_sections = all_sections.filter(type='sentence').prefetch_related(prefetch)
+        section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
+
+        # Debugging: Check if prefetching is working correctly
+        for section in sentence_sections:
+            prefetched_tokens = getattr(section, 'prefetched_tokens', [])
+            logger.debug(f"Section {section.id} has {len(prefetched_tokens)} tokens")
 
     context = {
         'texts': texts,
