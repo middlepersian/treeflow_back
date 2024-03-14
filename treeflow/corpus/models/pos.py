@@ -1,6 +1,9 @@
 import uuid as uuid_lib
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
 from treeflow.utils.normalize import strip_and_normalize
+
 
 class POS(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -8,8 +11,19 @@ class POS(models.Model):
     pos = models.CharField(max_length=10, null=True, blank=True)
     #upos, xpos
     type = models.CharField(max_length=10, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_pos')
+
+    modified_at = models.DateTimeField(auto_now=True)
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='modified_pos',
+        blank=True
+    )
     
         
     def __str__(self):
@@ -23,7 +37,24 @@ class POS(models.Model):
             self.pos = strip_and_normalize('NFC', self.pos)
             # uppercase pos
             self.pos = self.pos.upper()
-        super().save(*args, **kwargs)
 
-    
-    
+        is_new = self._state.adding
+        logger.debug('kwargs before pop: {}'.format(kwargs))
+        user = kwargs.pop('user', None)  
+        logger.debug('kwargs after pop: {}'.format(kwargs))  
+        # Handle the user for created_by and modified_by
+        if is_new and user:
+            self.created_by = user
+            logger.info('Setting created_by: {}'.format(self.created_by))
+        elif not is_new:
+            self.modified_at = timezone.now()
+            self.modified_by = user
+            logger.info('Setting modified_by: {}'.format(self.modified_by))
+
+            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
+            if 'update_fields' in kwargs:
+                update_fields = set(kwargs['update_fields'])
+                update_fields.update({'modified_at', 'modified_by'})
+                kwargs['update_fields'] = list(update_fields)
+
+        super().save(*args, **kwargs)

@@ -84,26 +84,12 @@ def cache_sections_for_texts():
         cache_key = f"sections_for_text_{text.id}"
         if not cache.get(cache_key):
             logger.info(f"Caching sections for text: {text.id}")
-            token_queryset = Token.objects.filter(
-                sectiontoken__section__text=text,
-                sectiontoken__section__type='sentence'
-            ).order_by('sectiontoken__section__number', 'number_in_sentence')
-            tokens_prefetch = Prefetch(
-                'tokens',
-                queryset=token_queryset,
-                to_attr='prefetched_tokens'
-            )
-            all_sections = Section.objects.filter(text=text).prefetch_related(
-                'container'
-            )
-            sentence_sections = all_sections.filter(
-                type='sentence').prefetch_related(tokens_prefetch)
-            section_types = Section.objects.order_by(
-                'type').values_list('type', flat=True).distinct()
-            section_types = [x for x in section_types if x != 'sentence']
+            all_sections = Section.objects.filter(text=text)
+            sentence_section_ids = list(all_sections.filter(type='sentence').values_list('id', flat=True))
+            section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
             
             cache.set(cache_key, {
-                'sentence_sections': sentence_sections,
+                'sentence_section_ids': sentence_section_ids,
                 'section_types': section_types,
             })
             logger.info(f"Sections cached for text: {text.id}")

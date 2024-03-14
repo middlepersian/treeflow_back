@@ -1,5 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
+from django.conf import settings
 from treeflow.utils.normalize import strip_and_normalize
 
 
@@ -10,8 +11,20 @@ class Sense(models.Model):
     lemma_related = models.BooleanField(default=True)
     language = models.CharField(max_length=3, blank=True, null=True, db_index=True)
     related_senses = models.ManyToManyField('self', blank=True, related_name='sense_related_senses')
-    created_at = models.DateTimeField(auto_now_add=True)
     stage = models.CharField(max_length=10, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_senses')
+
+    modified_at = models.DateTimeField(auto_now=True)
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='modified_senses',
+        blank=True
+    )
+
 
     def related_lemmas(self):
             return self.lemma_related_senses.all()
@@ -31,4 +44,24 @@ class Sense(models.Model):
         self.sense = strip_and_normalize('NFC', self.sense)
         #process language
         self.language = self.language.strip().lower()
+
+        is_new = self._state.adding
+        logger.debug('kwargs before pop: {}'.format(kwargs))
+        user = kwargs.pop('user', None)  
+        logger.debug('kwargs after pop: {}'.format(kwargs))  
+        # Handle the user for created_by and modified_by
+        if is_new and user:
+            self.created_by = user
+            logger.info('Setting created_by: {}'.format(self.created_by))
+        elif not is_new:
+            self.modified_at = timezone.now()
+            self.modified_by = user
+            logger.info('Setting modified_by: {}'.format(self.modified_by))
+
+            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
+            if 'update_fields' in kwargs:
+                update_fields = set(kwargs['update_fields'])
+                update_fields.update({'modified_at', 'modified_by'})
+                kwargs['update_fields'] = list(update_fields)
+
         super().save(*args, **kwargs)
