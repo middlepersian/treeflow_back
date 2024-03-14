@@ -73,23 +73,19 @@ def cache_all_texts():
 def cache_sections_for_texts():
     logger.info("Starting cache_sections_for_texts task")
     cache_key_texts = "all_texts"
-    texts = cache.get(cache_key_texts)
-    if not texts:
-        logger.info("Cache miss for texts - Triggering cache_all_texts")
-        cache_all_texts.apply()  
-        texts = cache.get(cache_key_texts)
-        logger.info("Retrieved texts after triggering cache_all_texts")
+    texts = Text.objects.all()
+    cache.set(cache_key_texts, texts)
+    logger.info("Texts cached for quick access")
 
     for text in texts:
         cache_key = f"sections_for_text_{text.id}"
-        if not cache.get(cache_key):
-            logger.info(f"Caching sections for text: {text.id}")
-            all_sections = Section.objects.filter(text=text)
-            sentence_section_ids = list(all_sections.filter(type='sentence').values_list('id', flat=True))
-            section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
-            
-            cache.set(cache_key, {
-                'sentence_section_ids': sentence_section_ids,
-                'section_types': section_types,
-            })
-            logger.info(f"Sections cached for text: {text.id}")
+        logger.info(f"Caching sections for text: {text.id}")
+        all_sections = Section.objects.filter(text=text)
+        sentence_ids = list(all_sections.filter(type='sentence').values_list('id', flat=True))
+        section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
+        
+        cache.set(cache_key, {
+            'sentence_ids': sentence_ids,  
+            'section_types': section_types,
+        })
+        logger.info(f"Sections cached for text: {text.id}")

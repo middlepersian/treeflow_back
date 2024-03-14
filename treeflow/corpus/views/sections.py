@@ -13,57 +13,26 @@ def sections_view(request, text_id=None):
 
     if not texts:
         logger.info("Cache miss for texts - Fetching texts from database.")
-        cache_all_texts.apply()  
-        logger.info("Cache miss for texts - Triggered Huey task to update cache.")
-        texts = cache.get(cache_key_texts)
-        
+        texts = Text.objects.all()
+        cache.set(cache_key_texts, texts)
+        logger.info("Cache updated with texts from database.")
+
     selected_text_id = text_id or request.GET.get('text_id')
     logger.info('selected_text_id: %s', selected_text_id)
 
     cache_key = f"sections_for_text_{selected_text_id}"
     cached_data = cache.get(cache_key)
 
-    # Adjust the prefetching relationship
     token_queryset = Token.objects.only('transcription')
     prefetch = Prefetch('tokens', queryset=token_queryset, to_attr='prefetched_tokens')
 
     if cached_data:
-        cached_section_ids = cached_data['sentence_section_ids']
+        cached_sentence_ids = cached_data['sentence_ids']
         section_types = cached_data['section_types']
 
-        # Reconstruct the queryset using the cached IDs and apply prefetching
         sentence_sections = Section.objects.filter(
-            id__in=cached_section_ids
+            id__in=cached_sentence_ids
         ).prefetch_related(prefetch)
-
-        # Debugging: Check if prefetching is working correctly
-        for section in sentence_sections:
-            prefetched_tokens = getattr(section, 'prefetched_tokens', [])
-            logger.debug(f"Section {section.id} has {len(prefetched_tokens)} tokens")
-
-    else:
-        selected_text_id = request.GET.get('text_id')
-
-    cache_key = f"sections_for_text_{selected_text_id}"
-    cached_data = cache.get(cache_key)
-
-    # Adjust the prefetching relationship
-    token_queryset = Token.objects.only('transcription')
-    prefetch = Prefetch('tokens', queryset=token_queryset, to_attr='prefetched_tokens')
-
-    if cached_data:
-        cached_section_ids = cached_data['sentence_section_ids']
-        section_types = cached_data['section_types']
-
-        # Reconstruct the queryset using the cached IDs and apply prefetching
-        sentence_sections = Section.objects.filter(
-            id__in=cached_section_ids
-        ).prefetch_related(prefetch)
-
-        # Debugging: Check if prefetching is working correctly
-        for section in sentence_sections:
-            prefetched_tokens = getattr(section, 'prefetched_tokens', [])
-            logger.debug(f"Section {section.id} has {len(prefetched_tokens)} tokens")
 
     else:
         logger.info(f"Cache miss for sections of text: {selected_text_id}")
@@ -71,10 +40,10 @@ def sections_view(request, text_id=None):
         sentence_sections = all_sections.filter(type='sentence').prefetch_related(prefetch)
         section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
 
-        # Debugging: Check if prefetching is working correctly
-        for section in sentence_sections:
-            prefetched_tokens = getattr(section, 'prefetched_tokens', [])
-            logger.debug(f"Section {section.id} has {len(prefetched_tokens)} tokens")
+        cache.set(cache_key, {
+            'sentence_ids': list(sentence_sections.values_list('id', flat=True)), 
+            'section_types': section_types
+        })
 
     context = {
         'texts': texts,
