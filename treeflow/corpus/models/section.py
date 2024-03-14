@@ -1,7 +1,9 @@
 from django.db import models
+from django.conf import settings
+from django.db import transaction
+from django.utils import timezone
 import uuid as uuid_lib
 from treeflow.utils.normalize import strip_and_normalize
-from django.db import transaction
 
 
 class Section(models.Model):
@@ -28,8 +30,18 @@ class Section(models.Model):
     senses = models.ManyToManyField(
         'dict.Sense', related_name='section_senses')
 
-    created_at = models.DateTimeField(auto_now_add=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_sections')
+
+    modified_at = models.DateTimeField(auto_now=True)
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='modified_sections',
+        blank=True
+    )
 
     class Meta:
         ordering = ['number']
@@ -63,6 +75,22 @@ class Section(models.Model):
         if self.language:
             # process language
             self.language = self.language.strip().lower()
+
+        # Handle the user for created_by and modified_by
+        if is_new and user:
+            self.created_by = user
+            logger.info('Setting created_by: {}'.format(self.created_by))
+        elif not is_new:
+            self.modified_at = timezone.now()
+            self.modified_by = user
+            logger.info('Setting modified_by: {}'.format(self.modified_by))
+
+            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
+            if 'update_fields' in kwargs:
+                update_fields = set(kwargs['update_fields'])
+                update_fields.update({'modified_at', 'modified_by'})
+                kwargs['update_fields'] = list(update_fields)
+
         super().save(*args, **kwargs)
 
     @classmethod

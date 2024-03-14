@@ -1,8 +1,11 @@
 import uuid as uuid_lib
 from django.db import models
+from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from treeflow.utils.normalize import strip_and_normalize
 from django.db import transaction
+from django.utils import timezone
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -44,11 +47,22 @@ class Token(models.Model):
     multiword_token_number = ArrayField(models.FloatField(
         blank=True, null=True), null=True, blank=True)
     related_tokens = models.ManyToManyField('self', blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_tokens')
+
+    modified_at = models.DateTimeField(auto_now=True)  
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='modified_tokens',
+        blank=True
+    )
 
 
     class Meta:
-        ordering = ['number']
+        ordering = ['text', 'number']
         constraints = [
             models.UniqueConstraint(
                 fields=['text', 'number'], name='token_text_number'
@@ -67,6 +81,9 @@ class Token(models.Model):
         return '{}'.format(self.transcription)
 
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        logger.debug('kwargs before pop: {}'.format(kwargs))
+        user = kwargs.pop('user', None)
         # normalize transcription
         if self.transcription:
             self.transcription = strip_and_normalize('NFC', self.transcription)
@@ -89,7 +106,22 @@ class Token(models.Model):
         if self.gloss:
             self.gloss = strip_and_normalize('NFC', self.gloss)
 
-        # save
+        # Handle the user for created_by and modified_by
+        if is_new and user:
+            self.created_by = user
+            logger.info('Setting created_by: {}'.format(self.created_by))
+        elif not is_new:
+            self.modified_at = timezone.now()
+            self.modified_by = user
+            logger.info('Setting modified_by: {}'.format(self.modified_by))
+
+            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
+            if 'update_fields' in kwargs:
+                update_fields = set(kwargs['update_fields'])
+                update_fields.update({'modified_at', 'modified_by'})
+                kwargs['update_fields'] = list(update_fields)
+
+        # Save the instance
         super().save(*args, **kwargs)
 
     MIN_GAP = 0.01  # Define a class-level constant for the minimum gap
@@ -104,13 +136,10 @@ class Token(models.Model):
 
     @staticmethod
     def calculate_insert_number(before_number, after_number):
-        # Assuming we have a standard gap we observe, e.g., 0.1
-        # The logic here finds the midway point between two numbers,
-        # but you could implement a different logic that suits your needs.
         return (before_number + after_number) / 2.0
 
     @classmethod
-    def insert_before(cls, reference_token_id, new_token_data):
+    def insert_before(cls, reference_token_id, new_token_data, user=None):
         with transaction.atomic():
             reference_token = cls.objects.select_for_update().get(id=reference_token_id)
             text_id = reference_token.text_id
@@ -142,11 +171,11 @@ class Token(models.Model):
                 logger.info('previous token does not exist')
                 logger.info('new token number: {}'.format(new_token.number))
 
-            new_token.save()
+            new_token.save(user=user)
             return new_token
 
     @classmethod
-    def insert_after(cls, reference_token_id, new_token_data):
+    def insert_after(cls, reference_token_id, new_token_data, user=None):
         with transaction.atomic():  # Start a transaction to ensure atomicity.
             # Fetch the reference token with a lock to prevent concurrent modifications.
             reference_token = cls.objects.select_for_update().get(id=reference_token_id)
@@ -169,20 +198,19 @@ class Token(models.Model):
                 logger.info('next token exists')
                 # add the number of the new token
                 new_token.number = new_number
-                logger.info('new token number: {}'.format(new_token.number))
-
+                logger.info('new token number: {}'.format(new_number))
 
             else:
                 logger.info('next token does not exist')
                 new_token.number = reference_token.number + 1
                 logger.info('new token number: {}'.format(reference_token.number + 1))
 
-
             # Update the 'next' field of the reference token to point to the new token.
             new_token.previous = reference_token
-            new_token.save()
+            new_token.save(user=user)
 
             return new_token
+
 
     @classmethod
     def delete_token(cls, token_id):

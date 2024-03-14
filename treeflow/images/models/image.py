@@ -1,5 +1,6 @@
 import uuid as uuid_lib
 from django.db import models
+from django.conf import settings
 
 
 class Image(models.Model):
@@ -20,9 +21,18 @@ class Image(models.Model):
 
     # lines
     sections = models.ManyToManyField('corpus.Section', related_name='image_sections', through='ImageSection')                                
+
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_images')
 
-
+    modified_at = models.DateTimeField(auto_now=True)
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='modified_images',
+        blank=True
+    )
     class Meta:
         ordering = ['identifier', 'number']
         constraints = [
@@ -36,6 +46,29 @@ class Image(models.Model):
 
     def __str__(self):
         return '{}'.format(self.identifier)
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        logger.debug('kwargs before pop: {}'.format(kwargs))
+        user = kwargs.pop('user', None)  
+        logger.debug('kwargs after pop: {}'.format(kwargs))  
+        # Handle the user for created_by and modified_by
+        if is_new and user:
+            self.created_by = user
+            logger.info('Setting created_by: {}'.format(self.created_by))
+        elif not is_new:
+            self.modified_at = timezone.now()
+            self.modified_by = user
+            logger.info('Setting modified_by: {}'.format(self.modified_by))
+
+            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
+            if 'update_fields' in kwargs:
+                update_fields = set(kwargs['update_fields'])
+                update_fields.update({'modified_at', 'modified_by'})
+                kwargs['update_fields'] = list(update_fields)
+
+        super().save(*args, **kwargs)
+
 
 
 class ImageSection(models.Model):
