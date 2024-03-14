@@ -31,11 +31,6 @@ def manuscripts(request):
     # get all Sources of type manuscript
     manuscripts = Source.objects.filter(type="manuscript").order_by("identifier")
 
-    # prefetch Images for each Source
-    # for manuscript in manuscripts:
-    #     manuscript.images = Image.objects.filter(source=manuscript)
-
-    # Render the HTML template index.html with the data in the context variable
     return render(
         request,
         "manuscripts.html",

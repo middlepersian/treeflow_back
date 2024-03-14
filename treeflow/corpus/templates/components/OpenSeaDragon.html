@@ -1,0 +1,27 @@
+<div id="viewer" class="flex flex-col w-full h-full">
+  <div id="openseadragon" class="flex h-full w-full"></div>
+  <script type="text/javascript">
+    // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
+    if (!viewer) {
+      viewer = OpenSeadragon({
+        id: "openseadragon",
+        prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+        tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/{{image}}.tif/info.json`,
+
+        // Options to show the controls
+        showNavigator: true, // Displays a small navigator window
+        showNavigationControl: true, // Displays the navigation controls
+        navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
+        // Additional zoom options
+        minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
+        maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
+        visibilityRatio: 1, // Part of the image must stay visible
+        constrainDuringPan: true, // Image constrained during panning
+        zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
+      });
+    }
+    viewer.open(
+      `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/{{image}}.tif/info.json`
+    );
+  </script>
+</div>
