@@ -31,7 +31,7 @@ from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
 from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
 from treeflow.corpus.views.export_text import resolve_sentence, resolve_text
-from treeflow.corpus.views.openseadragon import sourceSelector, imageSelector, openseadragon
+from treeflow.corpus.views.openseadragon import openseadragon, imageSelector, sourceSelector
 
 app_name = "treeflow.corpus"
 urlpatterns = [

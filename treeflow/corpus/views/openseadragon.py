@@ -11,19 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 def openseadragon(request):
-    """View function for home page of site."""
-    # get the image by its id
-    image_id = request.GET.get("image_id")
-    logger.debug(f"image_id: {image_id}")
-    if not image_id:
-        return None
-    image = Image.objects.get(id=image_id)
-    logger.debug(f"image: {image}")
-    return render(
+    sources = Source.objects.filter(type="manuscript").order_by("identifier")
+    return render (
         request,
         "components/OpenSeaDragon.html",
         context={
-            "image": image.identifier,
+            "sources": sources,
         },
     )
 
