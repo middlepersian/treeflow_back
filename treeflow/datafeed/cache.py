@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.db.models import Prefetch
 from django.db.models import Count
-from treeflow.corpus.models import Text, Section, Token
+from treeflow.corpus.models import Text, Section, Token, Source
 from treeflow.corpus.utils.zotero import request_zotero_api_for_collection
 import logging
 
@@ -89,3 +89,13 @@ def cache_sections_for_texts():
             'section_types': section_types,
         })
         logger.info(f"Sections cached for text: {text.id}")
+
+def cache_manuscripts():
+    logger.info("Starting cache_manuscripts task")
+    cache_key_manuscripts = "manuscripts"
+    
+    logger.info("Fetching manuscripts from database.")
+    manuscripts = Source.objects.filter(type="manuscript").order_by("identifier")
+    
+    logger.info("Manuscripts cached")
+    cache.set(cache_key_manuscripts, manuscripts)

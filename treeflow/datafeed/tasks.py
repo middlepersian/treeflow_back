@@ -4,7 +4,7 @@ from huey import RedisHuey
 from django.core.cache import cache
 from treeflow.corpus.models import Text
 from treeflow.corpus.utils.zotero import request_zotero_api_for_collection
-from treeflow.datafeed.cache import update_zotero_data_in_cache, cache_all_texts, cache_all_zotero_sources, cache_sections_for_texts
+from treeflow.datafeed.cache import update_zotero_data_in_cache, cache_all_texts, cache_all_zotero_sources, cache_sections_for_texts, cache_manuscripts
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,13 +28,18 @@ def cache_sections_for_texts_task():
     cache_sections_for_texts()
 
 @task()
-def periodic_texts_and_sections_task():
-    logger.info("Running combined Texts and Sections tasks")
+def cache_manuscript_task():    
+    cache_manuscripts()
+
+@task()
+def perdiodic_internal_tasks():
+    logger.info("Running combined Texts, Sections and Manuscript tasks")
     cache_texts = cache_all_texts_task.s()
+    cache_manuscripts = cache_manuscript_task.s()
     cache_sections = cache_sections_for_texts_task.s()
 
-    # Chain the tasks: clear cache -> cache all texts -> cache sections
-    pipeline = cache_texts.then(cache_sections)
+    # Chain the tasks: clear cache -> cache all texts -> cache manuscripts -> cache sections
+    pipeline = cache_texts.then(cache_manuscripts).then(cache_sections)
     enqueue(pipeline)
 
 @task()
@@ -55,5 +60,6 @@ def run_periodic_tasks():
     logger.info("Clearing cache")
     cache.clear()
     logger.info("Cache cleared")
-    periodic_texts_and_sections_task()
+    perdiodic_internal_tasks()
     periodic_zotero_tasks()
+    logger.info("Combined periodic_cache tasks completed")
