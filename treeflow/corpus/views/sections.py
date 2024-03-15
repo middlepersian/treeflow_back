@@ -1,13 +1,25 @@
 from django.shortcuts import render
 from django.core.cache import cache
 from django.db.models import Prefetch, prefetch_related_objects
-from treeflow.corpus.models import Section, Token, Text
-from treeflow.datafeed.tasks import cache_all_texts  # Import the Celery task
+from treeflow.corpus.models import Section, Token, Text, Source
 from django.core import serializers
 import logging
 logger = logging.getLogger(__name__)
 
 def sections_view(request, text_id=None):
+    # Cache manuscripts for quick access
+    cache_key_manuscripts = "manuscripts"
+    manuscripts = cache.get(cache_key_manuscripts)
+
+    if manuscripts is None:
+        logger.info("Cache miss for manuscripts - Fetching manuscripts from database.")
+        manuscripts = Source.objects.filter(type="manuscript").order_by("identifier")
+        cache.set(cache_key_manuscripts, manuscripts)
+        logger.info("Manuscripts cached for quick access")
+    else:
+        logger.info("Manuscripts already cached")
+
+    # Fetch or cache texts
     cache_key_texts = "all_texts"
     texts = cache.get(cache_key_texts)
 
@@ -27,6 +39,7 @@ def sections_view(request, text_id=None):
     prefetch = Prefetch('tokens', queryset=token_queryset, to_attr='prefetched_tokens')
 
     if cached_data:
+        logger.info(f"Using cached sections for text: {selected_text_id}")
         cached_sentence_ids = cached_data['sentence_ids']
         section_types = cached_data['section_types']
 
@@ -51,6 +64,9 @@ def sections_view(request, text_id=None):
         'section_types': section_types,
         'selected_text_id': selected_text_id or '',
         'current_view': 'corpus:sections',
+        'manuscripts': manuscripts,  # Add manuscripts to the context
     }
 
     return render(request, 'sections.html', context)
+
+

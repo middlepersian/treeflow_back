@@ -1,23 +1,22 @@
-{% extends "base.html" %}
-{% load static %}
-{% block content %}
-<div class="flex flex-col w-1/2 h-full self-end ">
 
-  <div class="flex flex-row justify-start">
+{% block content %}
+<div class="flex flex-col w-full h-screen">
+  <!-- Selector container with max-width and margin auto for horizontal centering -->
+  <div class="flex flex-row justify-start w-full px-4 lg:max-w-lg mx-auto">
     <select
-    name="source_id"
-    hx-get="{% url 'corpus:imageSelector' %}"
-    hx-target="#imageSelector"
-    id="sourceSelector"
-    class="w-full"
+      name="source_id"
+      hx-get="{% url 'corpus:imageSelector' %}"
+      hx-target="#imageSelector"
+      id="sourceSelector"
+      class="w-full"
     >
-    <option value="" default>Select a Source</option>
-    {% for source in sources %}
-    <option value="{{source.id}}">{{source.identifier}}</option>
-    {% endfor %}
-  </select>
-  <div id="imageSelector"></div>
-</div>
+      <option value="" default>Select a Source</option>
+      {% for source in sources %}
+      <option value="{{source.id}}">{{source.identifier}}</option>
+      {% endfor %}
+    </select>
+    <div id="imageSelector"></div>
+  </div>
 
 <div id="viewer" class="flex flex-col w-full h-full">
   <div id="openseadragon" class="flex h-full w-full"></div>
