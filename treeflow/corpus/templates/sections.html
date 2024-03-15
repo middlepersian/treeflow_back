@@ -4,7 +4,6 @@
 {% block content %}
 
 <!-- Content block starts here -->
-<!-- Assuming the navbar height is automatically adjusted and you don't want to manually calculate it -->
 <div class="flex flex-col w-full">
 
     <!-- Main content and sidebar container -->
@@ -44,7 +43,7 @@
         </div>
 
         <!-- Content Area for sentences -->
-        <div class="col-span-3 overflow-y-auto">
+        <div class="col-span-3 overflow-y-auto relative">
             <!-- Loop over sections of type 'sentence' -->
             {% for section in sentence_sections %}
             <!-- Sentence Block starts -->
@@ -73,7 +72,7 @@
                 {% if request.user.is_authenticated %}
                 <div class="mr-1 font-bold sentence-identifier w-1/8">
                     <a href="{% url 'corpus:sentence' section.id %}"
-                    class="text-xl font-bold text-off hover:text-action"> <!-- Use text-size classes like text-sm, text-lg, text-xl, etc. -->
+                    class="text-xl font-bold text-off hover:text-action"> 
                     &#x270F; <!-- Unicode pencil icon -->
                     </a>
                 </div>
@@ -83,6 +82,14 @@
             {% empty %}
             <p>{% trans 'No sentence sections found for this text.' %}</p>
             {% endfor %}
+
+             <!--
+            <div class="fixed bottom-4 right-4 z-50">
+                <button id="scrollToTopButton" class="scroll-to-top px-4 py-2 text-white font-bold rounded bg-main hover:bg-main-dark">↑</button>
+            </div> -->
+        
+            
+            
         </div>
         
         <!-- Right Column for Image -->
@@ -96,12 +103,6 @@
 
 
     <input type="hidden" id="id_selected_tokens" name="selected_tokens" value>
-
-    <!-- Scroll to Top -->
-    <div class="fixed hidden bottom-5 right-5 scroll-to-top">
-        <button class="px-4 py-2 font-bold text-white rounded bg-main hover:bg-main-dark"
-            onclick="scrollToTop()">↑</button>
-    </div>
 
     <div id="modalContainer"></div>
 
@@ -118,6 +119,7 @@
     var textId = '{{ selected_text_id }}';
     console.log("Selected text ID:", textId);
 </script>
+
 
 <!-- section navigator -->
 
@@ -139,9 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Edit modal content loaded');
     });
     }
-
-
-
     // New function to add icons after sections are loaded
     function addIconsToSections() {
         const sections = document.querySelectorAll('.section-item');
@@ -553,9 +552,6 @@ document.addEventListener('DOMContentLoaded', function () {
   
 });
 </script>
-
-
-<script src="{% static 'corpus/scroll_to_top.js'%}"></script>
 
 
 {% endblock content %}
