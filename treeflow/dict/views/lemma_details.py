@@ -8,6 +8,7 @@ def lemma_details(request, lemma_id):
     related_senses = lemma.related_senses.all()
 
     context = {
+        'id': lemma.id,
         'word': lemma.word,
         'language': lemma.language,
         'categories': lemma.categories,

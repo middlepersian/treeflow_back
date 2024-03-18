@@ -5,15 +5,15 @@
   <div class="flex flex-row overflow-hidden">
     <div class="flex flex-col gap-2 m-2">
       <div class="rounded-md shadow-sm shadow-black">
-        <input type="text" class="p-2 rounded-md" placeholder="Search..." />
+        <input type="text" class="p-2 rounded-md" placeholder="Search..." oninput="search(this)" />
       </div>
       <div id="lemma-list" class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
         {% for lemma in lemmas %}
-          <div hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
+          <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/dictionary/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
         {% endfor %}
       </div>
     </div>
-    <div class="w-full overflow-hidden">
+    <div class="w-full">
       {% comment %}Lemma View{% endcomment %}
       <div id="lemma-details" class="relative p-2 m-2 rounded-md shadow-sm bg-slate-400 shadow-black">
         <div class="text-center">Please wait while a lemma is being loaded.</div>
@@ -23,7 +23,23 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      document.querySelector('#lemma-list').children[0].click()
+      let x = document.getElementById('{{lemma_id}}')
+      if (x) {
+        x.click()
+      } else {
+        let y = document.getElementById('lemma-list').firstElementChild
+        if (y) {
+          y.click()
+        }
+      }
+    })
+    
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+      var targetId = event.detail.target.id
+      if (typeof targetId === 'string' && (targetId === 'lemma-form' || targetId === 'sense-form') && event.detail.xhr.status === 200) {
+        closeLemmaModal()
+        window.location.reload()
+      }
     })
     
     function selection(e) {
@@ -44,6 +60,18 @@
       lemmaList.scrollTo({
         top: e.offsetTop - lemmaList.offsetTop - 5,
         behavior: 'smooth'
+      })
+    }
+    
+    function search(e) {
+      document.querySelector('#lemma-list').childNodes.forEach((child) => {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          if (child.innerText.toLowerCase().includes(e.value.toLowerCase())) {
+            child.style.display = 'block'
+          } else {
+            child.style.display = 'none'
+          }
+        }
       })
     }
   </script>
