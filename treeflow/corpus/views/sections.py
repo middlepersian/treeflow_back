@@ -39,7 +39,7 @@ def sections_view(request, text_id=None):
     prefetch = Prefetch('tokens', queryset=token_queryset, to_attr='prefetched_tokens')
 
     if cached_data:
-        logger.info(f"Using cached sections for text: {selected_text_id}")
+        logger.info(f"Using cached sentences for text: {selected_text_id}")
         cached_sentence_ids = cached_data['sentence_ids']
         section_types = cached_data['section_types']
 

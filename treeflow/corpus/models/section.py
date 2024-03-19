@@ -75,7 +75,9 @@ class Section(models.Model):
         if self.language:
             # process language
             self.language = self.language.strip().lower()
-
+        
+        is_new = self._state.adding
+        user = kwargs.pop('user', None)
         # Handle the user for created_by and modified_by
         if is_new and user:
             self.created_by = user

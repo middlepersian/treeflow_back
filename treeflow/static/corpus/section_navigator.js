@@ -3,43 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const selector = document.getElementById('sectionTypeSelector');
     const sectionList = document.getElementById('sectionList');
 
-    function showSectionInfo(event) {
-        // Use event.target to get the element that triggered the event
-        const sectionId = event.target.dataset.sectionId;
-        fetch(`/corpus/get-section-info/${sectionId}/`)
-            .then(response => response.json())
-            .then(data => {
-                const infoDiv = document.createElement('div');
-                infoDiv.classList.add('section-info');
-                infoDiv.textContent = `Section: ${data.identifier}, Type: ${data.type}`;
-
-                // Position the info div near the mouse cursor
-                infoDiv.style.position = 'absolute';
-                infoDiv.style.left = `${event.pageX + 10}px`;
-                infoDiv.style.top = `${event.pageY + 10}px`;
-
-                document.body.appendChild(infoDiv);
-            })
-            .catch(error => console.error('Error fetching section info:', error));
-    }
-    function removeSectionInfo() {
-        const infoDivs = document.querySelectorAll('.section-info');
-        infoDivs.forEach(div => div.remove());
-    }
-
-    if (sectionList) {
-        sectionList.addEventListener('mouseover', function (event) {
-            if (event.target.classList.contains('section-item')) {
-                showSectionInfo(event);
-            }
-        });
-
-        sectionList.addEventListener('mouseout', function (event) {
-            if (event.target.classList.contains('section-item')) {
-                removeSectionInfo();
-            }
-        });
-    }
 
     function highlightSectionTokens(tokenIds) {
         const stringTokenIds = tokenIds.map(id => id.toString());
