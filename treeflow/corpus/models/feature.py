@@ -38,17 +38,13 @@ class Feature(models.Model):
             self.feature_value = strip_and_normalize('NFC', self.feature_value)
 
         is_new = self._state.adding
-        logger.debug('kwargs before pop: {}'.format(kwargs))
         user = kwargs.pop('user', None)  
-        logger.debug('kwargs after pop: {}'.format(kwargs))  
         # Handle the user for created_by and modified_by
         if is_new and user:
             self.created_by = user
-            logger.info('Setting created_by: {}'.format(self.created_by))
         elif not is_new:
             self.modified_at = timezone.now()
             self.modified_by = user
-            logger.info('Setting modified_by: {}'.format(self.modified_by))
 
             # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
             if 'update_fields' in kwargs:
