@@ -1,6 +1,5 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 
 
 class CatCh(models.TextChoices):
@@ -25,7 +24,6 @@ class TermTech(models.Model):
     category = models.CharField(max_length=10, choices=CatCh.choices, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    history = HistoricalRecords()
 
     def __str__(self):
         return '{}'.format(self.category)

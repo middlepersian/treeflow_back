@@ -1,7 +1,7 @@
 import uuid as uuid_lib
 from django.db import models
-from simple_history.models import HistoricalRecords
 from django.conf import settings
+from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 from treeflow.utils.normalize import strip_and_normalize
 
@@ -48,9 +48,19 @@ class Comment(models.Model):
 
     # semantic
     semantic = models.ForeignKey('dict.Semantic', on_delete=models.CASCADE, null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_comments')
 
-    history = HistoricalRecords()
+    modified_at = models.DateTimeField(auto_now=True)
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='modified_comments',
+        blank=True
+    )
+
 
     def __str__(self):
         return '{} {}'.format(self.user, self.comment)
@@ -62,4 +72,18 @@ class Comment(models.Model):
         # Normalize only the `normalized_field` before saving
         if self.comment:
             self.comment = strip_and_normalize('NFC', self.comment)
-        super().save(*args, **kwargs)
+
+        is_new = self._state.adding
+        user = kwargs.pop('user', None)  
+        # Handle the user for created_by and modified_by
+        if is_new and user:
+            self.created_by = user
+        elif not is_new:
+            self.modified_at = timezone.now()
+            self.modified_by = user
+
+            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
+            if 'update_fields' in kwargs:
+                update_fields = set(kwargs['update_fields'])
+                update_fields.update({'modified_at', 'modified_by'})
+                kwargs['update_fields'] = list(update_fields)

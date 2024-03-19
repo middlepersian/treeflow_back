@@ -4,11 +4,10 @@
 {% block content %}
 
 <!-- Content block starts here -->
-<!-- Assuming the navbar height is automatically adjusted and you don't want to manually calculate it -->
 <div class="flex flex-col w-full">
 
     <!-- Main content and sidebar container -->
-    <div class="grid flex-grow min-h-0 grid-cols-8">
+    <div class="grid grid-cols-8 flex-grow">
 
         <!-- Sidebar -->
         <div
@@ -44,7 +43,7 @@
         </div>
 
         <!-- Content Area for sentences -->
-        <div class="col-span-3 overflow-y-auto">
+        <div class="col-span-3 overflow-y-auto relative">
             <!-- Loop over sections of type 'sentence' -->
             {% for section in sentence_sections %}
             <!-- Sentence Block starts -->
@@ -61,21 +60,19 @@
 
                 <!-- Sentence content tokens displayed next to the identifier -->
                 <div class="flex flex-wrap sentence-content w-2/8">
-                    {% for token in section.prefetched_tokens %}
-                    <!-- Add data-section-id attribute to each token -->
-                    <span class="token inline-block rounded px-1 py-0.5 m-0.5"
-                        data-token-id="{{ token.id }}"
-                        data-section-id="{{ section.id }}">
-                        <!-- Add this line -->
-                        {{ token.transcription }}
-                    </span>
-                    {% endfor %}
+                        {% for token in section.prefetched_tokens %}
+                            <span class="token inline-block rounded px-1 py-0.5 m-0.5"
+                                data-token-id="{{ token.id }}"
+                                data-section-id="{{ section.id }}">
+                                {{ token.transcription }}
+                            </span>
+                        {% endfor %}
                 </div>
 
                 {% if request.user.is_authenticated %}
                 <div class="mr-1 font-bold sentence-identifier w-1/8">
                     <a href="{% url 'corpus:sentence' section.id %}"
-                    class="text-xl font-bold text-off hover:text-action"> <!-- Use text-size classes like text-sm, text-lg, text-xl, etc. -->
+                    class="text-xl font-bold text-off hover:text-action"> 
                     &#x270F; <!-- Unicode pencil icon -->
                     </a>
                 </div>
@@ -85,9 +82,25 @@
             {% empty %}
             <p>{% trans 'No sentence sections found for this text.' %}</p>
             {% endfor %}
-        </div>
 
+        
+            <div class="fixed bottom-4 right-4 z-50">
+                <button id="scrollToTopButton" class="scroll-to-top px-4 py-2 text-white font-bold rounded bg-main hover:bg-main-dark">↑</button>
+            </div> 
+        
+            
+            
+        </div>
+        
+        <!-- Right Column for Image -->
+
+        <div class="col-span-4 sticky top-0 h-screen">
+            <div id="iiif-viewer" class="h-full w-full">  {% include 'components/OpenSeaDragon.html' with sources=manuscripts %}</div>
+        </div>
+         
     </div>
+
+
 
     <input type="hidden" id="id_selected_tokens" name="selected_tokens" value>
 
@@ -103,7 +116,9 @@
 
 <script>
     var textId = '{{ selected_text_id }}';
+    console.log("Selected text ID:", textId);
 </script>
+
 
 <script src="{% static 'corpus/section_navigator.js'%}"></script>
 <script src="{% static 'corpus/scroll_to_top.js'%}"></script>

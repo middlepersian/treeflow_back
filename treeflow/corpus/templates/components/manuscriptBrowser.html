@@ -1,0 +1,19 @@
+<div class="flex flex-col w-full h-full">
+  <div class="p-2 h-fit w-full border-b border border-slate-700">
+    <select
+      id="manuscriptSelect"
+      class="w-1/2"
+      hx-trigger="change"
+      hx-get="manuscript/{{value}}/images"
+      hx-target="#images"
+    >
+      {% for source in sources %}
+      <option value="{{source.id}}">{{source.name}}</option>
+      {% endfor % }
+    </select>
+    <div id="images">
+      <select id=""></select>
+    </div>
+  </div>
+  <div id="openseadragon"></div>
+</div>
