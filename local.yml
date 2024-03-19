@@ -19,7 +19,7 @@ services:
       - ../corpora/texts_exports:/app_data:ro
       - .:/app_output
       - ../users:/user_data:ro
-      
+
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
@@ -34,10 +34,10 @@ services:
       - django
     working_dir: /app/theme/static_src # Make sure this path matches your local structure
     volumes:
-      - .:/app:z 
+      - .:/app:z
     command: /bin/sh -c "npm install && npm run dev"
-    tty: true 
-    
+    tty: true
+
   postgres:
     build:
       context: .
@@ -74,3 +74,16 @@ services:
         - ./.envs/.local/.django
         - ./.envs/.local/.postgres
       command: /bin/sh -c "python manage.py run_huey"
+
+  backup:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: treeflow_production_postgres
+    container_name: backup
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data:Z
+      - local_postgres_data_backups:/backups:z
+    env_file:
+      - ./.envs/.local/.postgres
+    command: /usr/local/bin/backdown

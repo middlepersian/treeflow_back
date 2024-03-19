@@ -1,0 +1,81 @@
+
+{% block content %}
+<div class="flex flex-col w-full h-screen">
+  <!-- Selector container with max-width and margin auto for horizontal centering -->
+  <div class="flex flex-row justify-start w-full px-4 lg:max-w-lg mx-auto">
+    <select
+      name="source_id"
+      hx-get="{% url 'corpus:imageSelector' %}"
+      hx-target="#imageSelector"
+      id="sourceSelector"
+      class="w-full"
+    >
+      <option value="" default>Select a Source</option>
+      {% for source in sources %}
+      <option value="{{source.id}}">{{source.identifier}}</option>
+      {% endfor %}
+    </select>
+    <div id="imageSelector"></div>
+  </div>
+
+<div id="viewer" class="flex flex-col w-full h-full">
+  <div id="openseadragon" class="flex h-full w-full"></div>
+  <script type="text/javascript">
+    
+    let viewer;
+    let currentImage = "";
+    
+    
+    function openNewImage(){
+      let imageID = event.target.value;
+      if(imageID == ""){
+        return;
+      }
+      let imageIdentifier = event.target.selectedOptions[0].text;
+      if(!imageIdentifier){
+        return;
+      }
+      
+      currentImage = imageIdentifier;
+      console.log(currentImage);
+      initViewer(); 
+      if (viewer) {
+        viewer.open(
+          `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
+          );
+        }
+    }
+    
+    function initViewer(){
+
+      
+      if (currentImage) {
+        // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
+        if (!viewer) {
+          viewer = OpenSeadragon({
+            id: "openseadragon",
+            prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+            tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
+            
+            // Options to show the controls
+            showNavigator: true, // Displays a small navigator window
+          showNavigationControl: true, // Displays the navigation controls
+          navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
+          // Additional zoom options
+          minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
+          maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
+          visibilityRatio: 1, // Part of the image must stay visible
+          constrainDuringPan: true, // Image constrained during panning
+          zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
+        });
+      }
+      viewer.open(
+        `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
+        );
+      }
+    }
+  </script>
+</div>
+</div>
+
+{% endblock %}

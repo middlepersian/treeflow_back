@@ -36,7 +36,7 @@ def update_token(request, token_id):
                 if field in request.POST:
                     logger.info(f"Updating {field} for token with ID {token_id}")
                     setattr(token, field, request.POST[field])
-                    token.save(update_fields=[field])
+                    token.save(update_fields=[field], user=request.user)
                     return JsonResponse({'status': 'success', 'message': f'{field} updated successfully'})
                 else:
                     logger.info(f"Field {field} not provided in POST data for token ID {token_id}")
