@@ -9,6 +9,7 @@ from datetime import datetime
 import csv
 
 from django.http import StreamingHttpResponse
+from treeflow.datafeed.management.commands.export_text import text_to_conll
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -26,31 +27,34 @@ def resolve_text(request, text_id):
     # get Text 
     logger.debug(f"resolve_text: {text_id}")
     text = get_object_or_404(Text, id=text_id)
+    # return text_to_conll(text=text)
+
+    text_csv = text_to_conll(text=text)
     # check if text_csv is in cache
-    text_csv = cache.get(f"text_csv_{text_id}")
-    if not text_csv:
+    # text_csv = cache.get(f"text_csv_{text_id}")
+    # if not text_csv:
          
-      text = Text.objects.prefetch_related(
-        'section_text',
-        'section_text__senses',
-        'section_text__tokens',
-        'section_text__tokens__lemmas',
-        'section_text__tokens__dependency_token',
-        'section_text__tokens__pos_token',
-        'section_text__tokens__feature_token',
-        'section_text__tokens__comment_token'
-      ).get(id=text_id)
-      # and prefetch all sections of type sentence
-      logger.debug(f"prefetching done")
-      sections = text.section_text.filter(type="sentence")
-      rows = []
-      for section in sections:
-        rows += sentenceToConnl(section)
+    #   text = Text.objects.prefetch_related(
+    #     'section_text',
+    #     'section_text__senses',
+    #     'section_text__tokens',
+    #     'section_text__tokens__lemmas',
+    #     'section_text__tokens__dependency_token',
+    #     'section_text__tokens__pos_token',
+    #     'section_text__tokens__feature_token',
+    #     'section_text__tokens__comment_token'
+    #   ).get(id=text_id)
+    #   # and prefetch all sections of type sentence
+    #   logger.debug(f"prefetching done")
+    #   sections = text.section_text.filter(type="sentence")
+    #   rows = []
+    #   for section in sections:
+    #     rows += sentenceToConnl(section)
 
       
-      text_csv = rows
-      # cache text_csv
-      cache.set(f"text_csv_{text_id}", text_csv, 60*60*24)
+    #   text_csv = rows
+    #   # cache text_csv
+    #   cache.set(f"text_csv_{text_id}", text_csv, 60*60*24)
 
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer, delimiter='\t')
@@ -59,6 +63,7 @@ def resolve_text(request, text_id):
         content_type="text/csv",
         headers={'Content-Disposition': f'attachment; filename="{text.identifier}.csv"'}
     )
+
 
 
 
