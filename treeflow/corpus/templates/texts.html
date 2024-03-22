@@ -267,7 +267,7 @@
   
             <!-- CONLL-->
             <td class="px-6 py-4 text-center whitespace-nowrap">
-              <a href="{% url 'corpus:conll' text_id=text.id %}">&#128462;</a>
+              <button id="{{text.id}}_conll" hx-swap="none" hx-get="{% url 'corpus:conll_state' text_id=text.id %}">&#128462;</button>
             </td>
             {% endif %}
             <!-- Created At 
@@ -286,7 +286,45 @@
   </div>
 
   <script>
+
+    function conllState(textId) {
+      var button = document.getElementById(textId + '_conll')
+      button.innerHTML = '&#9203;'
+      fetch(`/corpus/status/text/0`.replace('0', textId))
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            // fetch the conll file
+            fetch(
+              `/corpus/export/text/0`.replace('0', textId),
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': '{{ csrf_token }}'
+                }
+              }).then(response => response.blob());
+          }
+          else if (data.status === 'error') {
+            // change the button color to red
+            button.style.backgroundColor = 'salmon'
+            button.style.color = 'black'
+            button.innerHTML = '&#10060;'
+          }
+          else {
+            // set timeout to retry after 5 seconds
+            setTimeout(function () {
+              conllState(textId)
+            }, 5000)
+          }
+        })
+    }
+
     document.body.addEventListener('htmx:afterRequest', function (event) {
+      if (event.detail.elt.id.includes('conll')) {
+        var textId = event.detail.elt.id.split('_')[0]
+        conllState(textId)
+      }
       // Function to change the input field color based on the response status
       function changeInputFieldColor(inputField, isSuccess) {
         if (inputField) {
@@ -297,7 +335,8 @@
           }, 2000) // Adjust delay as needed
         }
       }
-    
+      console.log(event)
+
       // Check if the event target is part of the form interaction
       if (event.detail.elt.name === 'title' || event.detail.elt.name === 'identifier' || event.detail.elt.name === 'series' || event.detail.elt.name === 'label' || event.detail.elt.name === 'version' || event.detail.elt.name === 'stage') {
         // Parse the response
