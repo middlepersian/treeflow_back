@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from drf_spectacular.utils import extend_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from treeflow.corpus.models import Section
 from treeflow.rest.serializers.section import SectionSerializer
@@ -21,10 +22,15 @@ class SectionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SectionSerializer
     pagination_class = SectionPagination
 
-    @extend_schema(operation_id='retrieve_section_by_identifier')
-    def retrieve_by_identifier(self, request, *args, **kwargs):
-        identifier = kwargs.get('identifier')
-        obj = get_object_or_404(self.get_queryset(), identifier=identifier)
-        self.check_object_permissions(request, obj)
-        serializer = self.get_serializer(obj)
-        return Response(serializer.data)
+    @action(detail=False, methods=['get'], url_path='identifier/(?P<identifier>.+)', url_name='retrieve_by_identifier')
+    @extend_schema(operation_id='retrieve_sections_by_identifier')
+    def retrieve_by_identifier(self, request, identifier, *args, **kwargs):
+        sections = self.get_queryset().filter(identifier=identifier)
+        page = self.paginate_queryset(sections)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(sections, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
