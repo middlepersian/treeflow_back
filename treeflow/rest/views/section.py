@@ -34,6 +34,9 @@ class SectionViewSet(viewsets.ReadOnlyModelViewSet):
         logger.info(f"Retrieving sections by identifier: {identifier}")
         try:
             sections = self.get_queryset().filter(identifier=identifier)
+            if not sections.exists():
+                return Response([], status=status.HTTP_404_NOT_FOUND)
+
             page = self.paginate_queryset(sections)
             if page is not None:
                 serializer = self.get_serializer(page, many=True)
@@ -45,17 +48,16 @@ class SectionViewSet(viewsets.ReadOnlyModelViewSet):
             logger.error(f"Error in retrieving sections by identifier: {identifier}", exc_info=True)
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
     @action(detail=False, methods=['get'], url_path='cab/(?P<identifier>.+)', url_name='retrieve_cab_tokens_by_identifier')
     @extend_schema(operation_id='retrieve_cab_tokens_by_identifier')
     def retrieve_cab_tokens_by_identifier(self, request, identifier, *args, **kwargs):
         logger.info(f"Retrieving CAB tokens by identifier: {identifier}")
         try:
-            sections = self.get_queryset().filter(identifier=identifier).prefetch_related('tokens')
-            page = self.paginate_queryset(sections)
-            if page is not None:
-                serializer = CABSectionSerializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
-
+            sections = Section.objects.filter(identifier=identifier).prefetch_related('tokens')
+            if not sections.exists():
+                return Response([], status=status.HTTP_404_NOT_FOUND)
+            
             serializer = CABSectionSerializer(sections, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
