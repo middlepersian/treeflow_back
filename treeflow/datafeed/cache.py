@@ -82,8 +82,7 @@ def cache_sections_for_texts():
         logger.info(f"Caching sections for text: {text.id}")
         all_sections = Section.objects.filter(text=text)
         sentence_ids = list(all_sections.filter(type='sentence').values_list('id', flat=True))
-        section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
-        
+        section_types = set(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())        
         cache.set(cache_key, {
             'sentence_ids': sentence_ids,  
             'section_types': section_types,

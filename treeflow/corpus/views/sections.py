@@ -51,8 +51,7 @@ def sections_view(request, text_id=None):
         logger.info(f"Cache miss for sections of text: {selected_text_id}")
         all_sections = Section.objects.filter(text__id=selected_text_id)
         sentence_sections = all_sections.filter(type='sentence').prefetch_related(prefetch)
-        section_types = list(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
-
+        section_types = set(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
         cache.set(cache_key, {
             'sentence_ids': list(sentence_sections.values_list('id', flat=True)), 
             'section_types': section_types
