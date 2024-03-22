@@ -5,6 +5,10 @@ from django.utils import timezone
 import uuid as uuid_lib
 from treeflow.utils.normalize import strip_and_normalize
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class Section(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -76,6 +80,7 @@ class Section(models.Model):
             self.language = self.language.strip().lower()
         
         is_new = self._state.adding
+        logger.debug(f"Section.save: is_new={is_new}")
         user = kwargs.pop('user', None)
         # Handle the user for created_by and modified_by
         if is_new and user:
