@@ -1,13 +1,10 @@
 from django.core.management import BaseCommand
+from django.core.cache import cache
 
-from treeflow.corpus.models import Text, Token, POS, Feature, Comment, Section, SectionToken
-from treeflow.dict.models import Lemma, Sense
+from treeflow.corpus.models import Text, Token, Section
+from treeflow.dict.models import Sense
 
-from django.http import StreamingHttpResponse, HttpResponse
 from huey.contrib.djhuey import db_task
-import csv
-
-from time import time
 
 import logging
 from uuid import UUID as uuid
@@ -15,15 +12,6 @@ from uuid import UUID as uuid
 logger = logging.getLogger(__name__)
 
 COL_COUNT = 23
-
-class Echo:
-    """An object that implements just the write method of the file-like
-    interface.
-    """
-
-    def write(self, value):
-        """Write the value by returning it, instead of storing in a buffer."""
-        return value
 
 def token_to_conll(token:Token) -> str:
     sections = token.section_tokens.all()
@@ -97,7 +85,7 @@ def sentence_to_conll(section:Section) -> list[str]:
     return [identifier]+translations+comments+tokens+[' \t '*(COL_COUNT-1)]
 
 @db_task()
-def text_to_conll(text:Text) -> list[str]:
+def text_to_conll(text:Text, cache_key) -> list[str]:
     text_identifier = text.identifier
     logger.debug(f"Exporting Text {text_identifier} object with ID {text.id}")
     sentences = Section.objects.filter(text_id=text.id, type='sentence') \
@@ -128,15 +116,8 @@ def text_to_conll(text:Text) -> list[str]:
                 logger.debug(f"First sentence: {sent}")
     logger.debug("Done creating CoNLL file")
 
-    # response = HttpResponse(
-    #     content_type='text/csv',
-    #     headers={'Content-Disposition': f'attachment; filename="{text.identifier}.conll.csv"'}
-    #                         )
-    
-    # writer = csv.writer(response)
-    # for row in conll:
-    #     writer.writerow(row)
-    
+    cache.set(cache_key, {"status": "done", "data": conll})
+
     return conll
 
 

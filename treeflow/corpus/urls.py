@@ -30,7 +30,7 @@ from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
 from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
-from treeflow.corpus.views.export_text import resolve_sentence, resolve_text
+from treeflow.corpus.views.export_text import resolve_text
 from treeflow.corpus.views.openseadragon import openseadragon, imageSelector, sourceSelector
 
 app_name = "treeflow.corpus"
@@ -78,8 +78,7 @@ urlpatterns = [
     path('manuscripts/', manuscripts, name='manuscripts'),
     path('manuscript/<uuid:manuscript_id>/images',get_images_for_manuscript,name='manuscript_images'),
     path('manuscript/<uuid:manuscript_id>/images/table',get_images_for_manuscript_table,name='manuscript_images_table'),
-    path('export/sentence/<uuid:section_id>',resolve_sentence,name='export_sentence'),
-    path('export/text/<uuid:text_id>',resolve_text,name='export_sentence'),
+    path('export/text/<uuid:text_id>',resolve_text,name='conll'),
 
     path('openseadragon/', sourceSelector, name='sourceSelector'),
     path('openseadragon/imageSelect/', imageSelector, name='imageSelector'),

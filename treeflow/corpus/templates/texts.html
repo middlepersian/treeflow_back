@@ -132,6 +132,9 @@
             <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
               {% trans 'Tokens View' %}
             </th>
+            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+              {% trans 'CONLL' %}
+            </th>
           {% endif %}
           <!--          
         <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Created At' %}</th>           -->
@@ -262,6 +265,10 @@
               <a href="{% url 'corpus:tokens' text_id=text.id %}">&#128065;</a>
             </td>
   
+            <!-- CONLL-->
+            <td class="px-6 py-4 text-center whitespace-nowrap">
+              <a href="{% url 'corpus:conll' text_id=text.id %}">&#128065;</a>
+            </td>
             {% endif %}
             <!-- Created At 
             <td class="px-6 py-4 text-center whitespace-nowrap">
