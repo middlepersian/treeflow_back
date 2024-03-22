@@ -33,7 +33,7 @@ def resolve_state(request, text_id):
     text_cache_key = text.identifier+"_conll"
     cached_data = cache.get(text_cache_key)
     if not cached_data:
-        cache.set(text.identifier, {"status":"pending","data":[]},60*5)
+        cache.set(text.identifier, {"status":"started","data":[]})
         cached_data = cache.get(text.identifier)
         text_to_conll(text=text, cache_key=text_cache_key)
         return JsonResponse(cached_data)

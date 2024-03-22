@@ -87,6 +87,7 @@ def sentence_to_conll(section:Section) -> list[str]:
 @db_task()
 def text_to_conll(text:Text, cache_key) -> list[str]:
     text_identifier = text.identifier
+
     logger.debug(f"Exporting Text {text_identifier} object with ID {text.id}")
     sentences = Section.objects.filter(text_id=text.id, type='sentence') \
             .order_by('number') \
@@ -112,8 +113,8 @@ def text_to_conll(text:Text, cache_key) -> list[str]:
             if i % (len(sentences)//10) == 0:
                 logger.debug(f"Processed {i} sentences out of {len(sentences)} sentences. {i/len(sentences)*100:.2f}% done.")
             # log first sentence
-            if i == 0:
-                logger.debug(f"First sentence: {sent}")
+            # if i == 0:
+            #     logger.debug(f"First sentence: {sent}")
     logger.debug("Done creating CoNLL file")
 
     cache.set(cache_key, {"status": "done", "data": conll})

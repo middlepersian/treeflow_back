@@ -294,16 +294,8 @@
         .then(response => response.json())
         .then(data => {
           if (data.status === 'success') {
-            // fetch the conll file
-            fetch(
-              `/corpus/export/text/0`.replace('0', textId),
-              {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRFToken': '{{ csrf_token }}'
-                }
-              }).then(response => response.blob());
+            // change the button to a href link to download the conll file
+            button.outerHTML = '<a class="p-1 rounded bg-main text-white" id="' + textId + '_conll" href="/corpus/export/text/' + textId + '" target="_blank" download>&#128462;</a>'
           }
           else if (data.status === 'error') {
             // change the button color to red
