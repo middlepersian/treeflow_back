@@ -38,7 +38,10 @@
       var targetId = event.detail.target.id
       if (typeof targetId === 'string' && (targetId === 'lemma-form' || targetId === 'sense-form') && event.detail.xhr.status === 200) {
         closeLemmaModal()
-        window.location.reload()
+        let x = document.getElementById('{{lemma_id}}')
+        if (x) {
+          x.click()
+        }
       }
     })
     
