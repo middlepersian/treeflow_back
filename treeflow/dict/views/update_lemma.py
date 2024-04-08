@@ -23,7 +23,7 @@ def update_lemma(request, lemma_id):
                     setattr(lemma, field, new_value)
             
             # Handling multiword_expression update
-            logger.debug(f"Request.POST: {request.POST}")
+            # logger.debug(f"Request.POST: {request.POST}")
             if 'multiword_expression' in request.POST:
                 new_value = request.POST['multiword_expression'] == 'on'
                 # logger.info(f"Updating multiword_expression for lemma with ID {lemma_id} to {new_value}")
