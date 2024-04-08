@@ -35,68 +35,70 @@
         {% include 'components/navbar.html' %}
       </nav>
       {% block content %}
-        {% include 'components/subbar.html' %}
-        {% include 'components/mobile_scroller.html' %}
-        {% include 'components/hero.html' %}
-        <div class="flex flex-row mt-8 mb-20">
-          <div class="sticky hidden border-r-2 sm:block h-fit border-sb-gray opacity-60 dark:border-gray-400">
-            <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
-              <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">MPCD: HOME</h1>
+        <div class="overflow-y-scroll">
+          {% include 'components/subbar.html' %}
+          {% include 'components/mobile_scroller.html' %}
+          {% include 'components/hero.html' %}
+          <div class="flex flex-row mt-8 mb-20">
+            <div class="sticky hidden border-r-2 sm:block h-fit border-sb-gray opacity-60 dark:border-gray-400">
+              <div id="leftheaderTitle" class="w-24 text-center lg:w-48 md:w-32 sm:w-24">
+                <h1 class="sticky w-full uppercase rotate-180 h-fit text-sb-gray" style="writing-mode: vertical-lr; text-orientation: sideways;">MPCD: HOME</h1>
+              </div>
             </div>
-          </div>
-          <div class="flex flex-col items-start gap-2 pl-16 pr-20 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
-            <h1 class="w-full text-2xl text-left underline text-main-dark sm:hidden">MPCD: HOME</h1>
-            <h2 class="text-left text-h2-gray">{% trans 'Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)' %}</h2>
-            <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-              {% trans 'Resulting from its status as the official language of the Sasanian Empire (3rd–7th centuries CE), the Middle Persian language played a prominent transcultural role during a period stretching from late antiquity to the early Islamic period. Besides serving as a medium of communication between the linguistically and culturally diverse areas of Western and Eastern Iran, it was employed as a literary language by several religious traditions.' %}
-            </p>
-            <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-              {% trans 'The Middle Persian corpus consists of Zoroastrian, Manichaean, narrative, administrative and epigraphic sub-corpora. The Zoroastrian Middle Persian corpus represents by far the largest among these and has so far only partially been examined. Our project therefore aims at the creation of a digital corpus of Zoroastrian Middle Persian texts in Pahlavi script (in short: Pahlavi texts) as well as at the development of a comprehensive dictionary covering that corpus.' %}
-            </p>
-            <div>
+            <div class="flex flex-col items-start gap-2 pl-16 pr-20 lg:pr-32 md:pr-28 sm:pr-20 animate-fade-up">
+              <h1 class="w-full text-2xl text-left underline text-main-dark sm:hidden">MPCD: HOME</h1>
+              <h2 class="text-left text-h2-gray">{% trans 'Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)' %}</h2>
               <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-                {% trans 'The corpus consists of roughly 50 texts, containing some 705,000 tokens. As its point of departure, the project relies on the ca. 20 oldest Pahlavi codices (from the 13th–17th centuries CE). The texts contained in those codices will be supplied with several layers of annotation:' %}
+                {% trans 'Resulting from its status as the official language of the Sasanian Empire (3rd–7th centuries CE), the Middle Persian language played a prominent transcultural role during a period stretching from late antiquity to the early Islamic period. Besides serving as a medium of communication between the linguistically and culturally diverse areas of Western and Eastern Iran, it was employed as a literary language by several religious traditions.' %}
               </p>
-              <ol class="flex flex-col w-full p-4 text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
-                <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
-                  {% trans '1. orthographical (transliteration) and phonographical (transcription)' %}
-                </li>
-                <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
-                  {% trans '2. grammatical (morpho-syntactic)' %}
-                </li>
-                <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
-                  {% trans '3. semantic (semasiological and onomasiological)' %}
-                </li>
-                <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
-                  {% trans '4. intertextual (linking Zand texts with their Avestan original)' %}
-                </li>
-              </ol>
+              <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+                {% trans 'The Middle Persian corpus consists of Zoroastrian, Manichaean, narrative, administrative and epigraphic sub-corpora. The Zoroastrian Middle Persian corpus represents by far the largest among these and has so far only partially been examined. Our project therefore aims at the creation of a digital corpus of Zoroastrian Middle Persian texts in Pahlavi script (in short: Pahlavi texts) as well as at the development of a comprehensive dictionary covering that corpus.' %}
+              </p>
+              <div>
+                <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+                  {% trans 'The corpus consists of roughly 50 texts, containing some 705,000 tokens. As its point of departure, the project relies on the ca. 20 oldest Pahlavi codices (from the 13th–17th centuries CE). The texts contained in those codices will be supplied with several layers of annotation:' %}
+                </p>
+                <ol class="flex flex-col w-full p-4 text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+                  <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+                    {% trans '1. orthographical (transliteration) and phonographical (transcription)' %}
+                  </li>
+                  <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+                    {% trans '2. grammatical (morpho-syntactic)' %}
+                  </li>
+                  <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+                    {% trans '3. semantic (semasiological and onomasiological)' %}
+                  </li>
+                  <li class="flex text-xs text-justify lg:text-sm md:text-xs sm:text-xs">
+                    {% trans '4. intertextual (linking Zand texts with their Avestan original)' %}
+                  </li>
+                </ol>
+              </div>
+              <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+                {% url 'methodology' as url_methodology %}
+                {% blocktrans %}Within the overall structure of the project, the corpus and dictionary function as closely interrelated analytical tools even though their focal points differ (syntax vs. semantics). Their technical integration also plays an essential role in the general <a href="{{ url_methodology }}" class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action">workflow</a> of the project. For this purpose, the project employs a web-based working environment that facilitates the collaborative work on the corpus and dictionary. The same environment will also provide a public user interface for enquiries into those resources that have already been processed at a given point in time.'{% endblocktrans %}
+              </p>
+              <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+                {% trans 'The project intends to create a platform that may in the future also be used for the remaining Middle Persian sub-corpora, as well as for the corpora of other Middle Iranian languages. It is thus conducted with a view to the eventual creation of a complete dictionary of Middle Persian (incorporating all of its sub-corpora) as well as to an expansion of the corpus into the domains of other Middle Iranian languages.' %}
+              </p>
+              <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
+                {% trans 'The project is a cooperation between three universities: <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="/team">Ruhr-University Bochum, Freie Universität Berlin and University of Cologne</a> It is funded by the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gepris.dfg.de/gepris/projekt/452473565?language=en" target="_blank">Deutsche Forschungsgemeinschaft (DFG)</a> and designed as a “Langfristvorhaben” (Long-Term Project, 2021–2030).' %}
+              </p>
             </div>
-            <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-              {% url 'methodology' as url_methodology %}
-              {% blocktrans %}Within the overall structure of the project, the corpus and dictionary function as closely interrelated analytical tools even though their focal points differ (syntax vs. semantics). Their technical integration also plays an essential role in the general <a href="{{ url_methodology }}" class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action">workflow</a> of the project. For this purpose, the project employs a web-based working environment that facilitates the collaborative work on the corpus and dictionary. The same environment will also provide a public user interface for enquiries into those resources that have already been processed at a given point in time.'{% endblocktrans %}
-            </p>
-            <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-              {% trans 'The project intends to create a platform that may in the future also be used for the remaining Middle Persian sub-corpora, as well as for the corpora of other Middle Iranian languages. It is thus conducted with a view to the eventual creation of a complete dictionary of Middle Persian (incorporating all of its sub-corpora) as well as to an expansion of the corpus into the domains of other Middle Iranian languages.' %}
-            </p>
-            <p class="mb-5 text-sm text-justify lg:text-sm md:text-xs sm:text-xs">
-              {% trans 'The project is a cooperation between three universities: <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="/team">Ruhr-University Bochum, Freie Universität Berlin and University of Cologne</a> It is funded by the <a class="text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-action" href="https://gepris.dfg.de/gepris/projekt/452473565?language=en" target="_blank">Deutsche Forschungsgemeinschaft (DFG)</a> and designed as a “Langfristvorhaben” (Long-Term Project, 2021–2030).' %}
-            </p>
           </div>
+
+          {% comment %} {% if messages %}
+            {% for message in messages %}
+              <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          {% block modal %}
+
+          {% endblock %} {% endcomment %}
+          {% include 'components/footer.html' %}
         </div>
-
-        {% comment %} {% if messages %}
-          {% for message in messages %}
-            <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
-              {{ message }}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-          {% endfor %}
-        {% endif %}
-
-        {% block modal %}
-
-        {% endblock %} {% endcomment %}
-        {% include 'components/footer.html' %}
       {% endblock %}
     </div>
     {% block inline_javascript %}
