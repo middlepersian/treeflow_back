@@ -9,9 +9,6 @@
       <div class="p-6 bg-white rounded-lg shadow-md">
         {{ lemma_form.media.css }}
         <h2 class="mb-4 text-lg font-semibold text-gray-800">Lemma Form</h2>
-        <script>
-          console.info('{{lemma_form.instance.id}}')
-        </script>
         <form id="lemma-form" method="post" hx-post="{% url 'dict:update_lemma' lemma_form.instance.id %}" hx-target="#lemma-form" hx-swap="outerHTML">
           {% csrf_token %}
           {% for field in lemma_form %}
@@ -49,7 +46,7 @@
               {% endfor %}
             </div>
           {% endfor %}
-          <button type="submit" name="submit_sense" class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-off hover:bg-off-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">{% trans 'Add Sense' %}</button>
+          <button type="submit" name="submit_sense" id="submit_sense" disabled class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm disabled:bg-gray-500 bg-off hover:bg-off-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">{% trans 'Add Sense' %}</button>
         </form>
         {{ sense_form.media.js }}
       </div>
@@ -58,4 +55,13 @@
   <div class="flex justify-end">
     <button onclick="closeLemmaModal()" class="px-4 py-2 mt-4 font-bold text-white rounded bg-error-graded-600 hover:bg-error-graded-800">{% trans 'Close' %}</button>
   </div>
+  <script defer>
+    document.getElementById('id_sense').addEventListener('input', function (e) {
+      if (e.target.value.trim().length > 0) {
+        document.getElementById('submit_sense').disabled = false
+        return
+      }
+      document.getElementById('submit_sense').disabled = true
+    })
+  </script>
 </div>
