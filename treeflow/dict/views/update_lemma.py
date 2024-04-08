@@ -11,10 +11,6 @@ from treeflow.dict.models.sense import Sense
 logger = logging.getLogger(__name__)
 
 def update_lemma(request, lemma_id):
-    logger.debug(f"Request method: {request.method}")
-    logger.debug(f"Request method: {request.POST}")
-    logger.debug(f"Lemma ID: {lemma_id}")
-
     try:
         lemma = get_object_or_404(Lemma, pk=lemma_id)
 
@@ -23,24 +19,24 @@ def update_lemma(request, lemma_id):
             for field in ['word', 'language', 'stage']:
                 if field in request.POST:
                     new_value = request.POST[field]
-                    logger.info(f"Updating {field} for lemma with ID {lemma_id} to {new_value}")
+                    # logger.info(f"Updating {field} for lemma with ID {lemma_id} to {new_value}")
                     setattr(lemma, field, new_value)
             
             # Handling multiword_expression update
             logger.debug(f"Request.POST: {request.POST}")
             if 'multiword_expression' in request.POST:
                 new_value = request.POST['multiword_expression'] == 'on'
-                logger.info(f"Updating multiword_expression for lemma with ID {lemma_id} to {new_value}")
+                # logger.info(f"Updating multiword_expression for lemma with ID {lemma_id} to {new_value}")
                 lemma.multiword_expression = new_value
             else:
                 new_value = False
-                logger.info(f"Updating multiword_expression for lemma with ID {lemma_id} to {new_value}")
+                # logger.info(f"Updating multiword_expression for lemma with ID {lemma_id} to {new_value}")
                 lemma.multiword_expression = new_value
             
             # Handling categories update
             if 'categories' in request.POST:
                 new_categories = request.POST.getlist('categories')
-                logger.info(f"Updating categories for lemma with ID {lemma_id} to {new_categories}")
+                # logger.info(f"Updating categories for lemma with ID {lemma_id} to {new_categories}")
                 lemma.categories = new_categories
 
             # Handling related senses
@@ -48,21 +44,20 @@ def update_lemma(request, lemma_id):
             if related_sense_ids.__len__() > 0:
                 related_senses = Sense.objects.filter(pk__in=related_sense_ids)
                 lemma.related_senses.set(related_senses)
-                logger.info(f"Updated related senses for lemma with ID {lemma_id} to {related_sense_ids}")
+                # logger.info(f"Updated related senses for lemma with ID {lemma_id} to {related_sense_ids}")
             else:
                 lemma.related_senses.clear()
-                logger.info(f"Removed all related senses for lemma with ID {lemma_id}")
+                # logger.info(f"Removed all related senses for lemma with ID {lemma_id}")
 
             # Handling adding related lemmas
             related_lemma_ids = request.POST.getlist('related_lemmas')
-            logger.debug(f"related_lemma_ids: {related_lemma_ids}")
             if related_lemma_ids.__len__() > 0:
                 related_lemmas = Lemma.objects.filter(pk__in=related_lemma_ids)
                 lemma.related_lemmas.set(related_lemmas)
-                logger.info(f"Updated related lemmas for lemma with ID {lemma_id} to {related_lemma_ids}")
+                # logger.info(f"Updated related lemmas for lemma with ID {lemma_id} to {related_lemma_ids}")
             else:
                 lemma.related_lemmas.clear()
-                logger.info(f"Removed all related lemmas for lemma with ID {lemma_id}")
+                # logger.info(f"Removed all related lemmas for lemma with ID {lemma_id}")
 
             lemma.save()
 
