@@ -3,79 +3,83 @@
 
 {% block content %}
 
-
-<table class="min-w-full bg-white">
-  <thead class="text-white bg-gray-800">
-    <tr>
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Identifier' %}</th>
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Description' %}</th>
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Type' %}</th>
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Related Sources' %}</th>
+<div class="w-full h-full overflow-x-auto overflow-y-auto">
+  <table class="relative w-full bg-white">
+    <thead class="text-white">
+      <tr>
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Identifier' %}</th>
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Description' %}</th>
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Type' %}</th>
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Related Sources' %}</th>
+        {% if request.user.is_authenticated %}
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Zotero Keys' %}</th>
+        {% endif %}
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Zotero Entry' %}</th>
+        {% if request.user.is_authenticated %}
+        <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase bg-main-dark">{% trans 'Delete' %}</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody class="text-gray-900">
       {% if request.user.is_authenticated %}
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Zotero Keys' %}</th>
-      {% endif %}
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Zotero Entry' %}</th>
-      {% if request.user.is_authenticated %}
-      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase"">{% trans 'Delete' %}</th>
-      {% endif %}
-    </tr>
-  </thead>
-  <tbody class="text-gray-900">
-    {% if request.user.is_authenticated %}
-    {% for source in sources %}
-    <tr>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <input type="text" name="identifier" value="{{ source.identifier }}"
-            hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow text-center">
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <input type="text" name="description" value="{{ source.description }}"
-            hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow text-center">
+      {% for source in sources %}
+      <tr>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <input type="text" name="identifier" value="{{ source.identifier }}"
+              hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="px-3 py-2 text-center text-gray-700 border rounded shadow">
         </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <input type="text" name="type" value="{{ source.type }}"
-            hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow text-center">
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a></td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <ul>
-          {%for ref in source.references.all %}
-          <li>{{ref}}</li>
-          {%endfor%}
-        </ul>
-        <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a>
-      </td> 
-      <td class="px-6 py-4 whitespace-nowrap text-left publication-url">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
-      <td class="px-6 py-4 whitespace-nowrap"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
-    
-    </tr>
-    {% endfor %}
-    {% else %}
-    {% for source in sources %}
-    <tr>
-      <td class="px-6 py-4 whitespace-nowrap text-center">{{ source.identifier }}</td>
-      <td class="px-6 py-4 whitespace-nowrap text-center">{{ source.description }}</td>
-      <td class="px-6 py-4 whitespace-nowrap text-center">{{ source.type }}</td>
-      <td class="px-6 py-4 whitespace-nowrap text-center">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-left publication-url">
-          {% for ref in source.references.all %}<div class="p-2">{{ref.bib|safe|urlize}}</div>{%endfor%}</td>
-    </tr>
-    {% endfor %}
+        <td class="px-6 py-4 whitespace-nowrap">
+          <input type="text" name="description" value="{{ source.description }}"
+              hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="px-3 py-2 text-center text-gray-700 border rounded shadow">
+          </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <input type="text" name="type" value="{{ source.type }}"
+              hx-post="{% url 'corpus:api_update_source' source.id %}" hx-trigger="keyup changed delay:500ms"
+              hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              class="px-3 py-2 text-center text-gray-700 border rounded shadow">
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">{%for source1 in source.sources.all%}{{source1}}{%endfor%}<a href={%url 'corpus:add_related_source' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a></td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <ul>
+            {%for ref in source.references.all %}
+            <li>{{ref}}</li>
+            {%endfor%}
+          </ul>
+          <a href={%url 'corpus:add_related_bib' source_id=source.id%} class="p-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Edit' %}</a>
+        </td> 
+        <td class="px-6 py-4 text-left whitespace-nowrap publication-url">{% for ref in source.references.all %}{{ref.bib|safe|urlize}}{%endfor%}</td>
+        <td class="px-6 py-4 whitespace-nowrap"><a class="p-2 text-white rounded cursor-pointer bg-error-graded-600 hover:bg-error-graded-800" href="{%url 'corpus:source_delete' source_id=source.id %}">{% trans 'Delete' %}</a></td>
+      
+      </tr>
+      {% endfor %}
+      {% else %}
+      {% for source in sources %}
+      <tr>
+        <td class="px-6 py-4 text-center whitespace-nowrap">{{ source.identifier }}</td>
+        <td class="px-6 py-4 text-center whitespace-nowrap">{{ source.description }}</td>
+        <td class="px-6 py-4 text-center whitespace-nowrap">{{ source.type }}</td>
+        <td class="px-6 py-4 text-center whitespace-nowrap">{%for source1 in source.sources.all%}{{source1}}{%endfor%}</td>
+          <td class="px-6 py-4 text-left whitespace-nowrap publication-url">
+            {% for ref in source.references.all %}<div class="p-2">{{ref.bib|safe|urlize}}</div>{%endfor%}</td>
+      </tr>
+      {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+  <div class="flex justify-center w-full">
+    {% if request.user.is_authenticated %} 
+    <a class="p-2 my-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark" href="{%url 'corpus:source_add'%}">{% trans 'Add New' %}</a>
     {% endif %}
-  </tbody>
-</table>
-{% if request.user.is_authenticated %} 
-<a class="p-2 mx-auto mt-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark" href="{%url 'corpus:source_add'%}">{% trans 'Add New' %}</a>
-{% endif %}
+  </div>
+</div>
 
 <!-- Modal -->
 <div id="modalContainer"></div>
+
 
 <script>
   document.body.addEventListener('htmx:afterRequest', function (event) {
