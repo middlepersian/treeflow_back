@@ -1,12 +1,11 @@
 from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
 from .models import \
     Corpus, Text,\
     Feature, Dependency,\
     Token, BibEntry, Comment, Section, SectionToken, POS, Source
 
-class TokenHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ["transcription", "transliteration",  "previous"]
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ["transcription", "transliteration", "text",  "created_at", "created_by", "modified_at", "modified_by"]
     search_fields = ['transcription']
 
 class TextAdmin(admin.ModelAdmin):
@@ -35,7 +34,7 @@ admin.site.register(BibEntry)
 admin.site.register(Corpus)
 admin.site.register(Text, TextAdmin)
 
-admin.site.register(Token, TokenHistoryAdmin)
+admin.site.register(Token, TokenAdmin)
 admin.site.register(Feature)
 admin.site.register(Dependency,DependencyAdmin)
 admin.site.register(Comment)
