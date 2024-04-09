@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block content %}
-    {% include "search/_partial.html" %}
+  <div class="overflow-y-auto">
+    {% include 'search/_partial.html' %}
     {% include 'components/footer.html' %}
+  </div>
 {% endblock %}
