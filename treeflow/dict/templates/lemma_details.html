@@ -1,0 +1,107 @@
+<div>
+  {% if user.is_authenticated %}
+    <div class="absolute top-0 right-0 flex flex-row gap-2 m-2">
+      <input type="button" hx-get="{% url 'dict:lemma_edit' id %}" hx-target="#lemmaModalContent" hx-trigger="click" class="px-1 py-2 font-semibold text-white rounded-md cursor-pointer bg-off hover:bg-action" onclick="openLemmaModal()" value="Edit Lemma" />
+      {% comment %} <input type="button" class="px-1 py-2 font-semibold text-white rounded-md bg-error hover:bg-action" value="Delete Lemma" /> {% endcomment %}
+    </div>
+  {% else %}
+    <div class="absolute top-0 right-0 m-2">
+      <div class="p-2 my-1 ml-6 underline rounded-md w-fit bg-slate-300">You must be logged in to edit this lemma.</div>
+    </div>
+  {% endif %}
+  <h3 class="flex flex-row gap-1 italic text-left">{{ word }}</h3>
+  <div class="flex flex-col h-full gap-2">
+    <div class="my-1 font-semibold underline">General</div>
+    <div class="flex flex-row gap-2">
+      <div class="relative flex flex-row cursor-default">
+        <div class="p-4 bg-white rounded-md w-fit">
+          <span class="mx-4">{{ language }}</span>
+        </div>
+        <div class="absolute flex justify-center w-full -bottom-4">
+          <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
+            <span>Language</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative flex flex-row cursor-default">
+        <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
+          <span>{{ multiword_expression }}</span>
+        </div>
+        <div class="absolute flex justify-center w-full -bottom-4">
+          <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
+            <span>Multiword Exp.</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative flex flex-row cursor-default">
+        <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
+          <span class="pl-1">{{ categories }}</span>
+        </div>
+        <div class="absolute flex justify-center w-full -bottom-4">
+          <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
+            <span>Categories</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="w-full mt-5 mb-3 border-black" />
+    <div class="my-1 font-semibold underline">Related lemmas</div>
+    <div>
+      {% if related_lemmas %}
+        <div class="flex flex-row flex-wrap w-full gap-2 p-2">
+          {% for related_lemma in related_lemmas %}
+            <div class="p-2 rounded-md bg-slate-300 w-fit hover:underline hover:cursor-pointer" onclick="changeLemma(this)">{{ related_lemma.word }}</div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div>No related lemmas found.</div>
+      {% endif %}
+    </div>
+    <hr class="w-full mt-5 mb-3 border-black" />
+    <div class="my-1 font-semibold underline">Related senses</div>
+    <div>
+      {% if related_senses %}
+        <div class="flex flex-row flex-wrap gap-2 p-2">
+          {% for related_sense in related_senses %}
+            <div class="p-2 rounded-md bg-slate-300 w-fit">
+              {{ related_sense.sense }}<sup>{{ related_sense.language }}</sup>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div>No related senses found.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="lemmaModal">
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
+        <!-- Modal content here -->
+        <div id="lemmaModalContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function changeLemma(e) {
+    const lemmaList = document.querySelector('#lemma-list')
+  
+    if (lemmaList) {
+      lemmaList.childNodes.forEach((child) => {
+        if (child.nodeType === Node.ELEMENT_NODE && child.innerText === e.innerText) {
+          child.click()
+        }
+      })
+    }
+  }
+  
+  function openLemmaModal() {
+    document.getElementById('lemmaModal').classList.remove('hidden')
+  }
+  
+  function closeLemmaModal() {
+    document.getElementById('lemmaModal').classList.add('hidden')
+  }
+</script>
