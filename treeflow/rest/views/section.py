@@ -50,12 +50,14 @@ class SectionListViewSet(viewsets.GenericViewSet):
 
         # Utilizing the unique constraint for filtering by 'text' and 'identifier'
         if text_identifier and identifier:
-            queryset = queryset.filter(text__identifier=text_identifier, identifier=identifier)
+            text = get_object_or_404(Text, identifier=text_identifier)
+            queryset = queryset.filter(text=text.id, identifier=identifier)
             logger.debug(f"Filtered by text identifier and section identifier: {text_identifier}, {identifier}")
 
         # Utilizing the index for filtering by 'text' and 'type'
         elif text_identifier and type:
-            queryset = queryset.filter(text__identifier=text_identifier, type=type)
+            text = get_object_or_404(Text, identifier=text_identifier)
+            queryset = queryset.filter(text=text.id, type=type)
             logger.debug(f"Filtered by text identifier and type: {text_identifier}, {type}")
 
         # Additional filters for identifier or type alone
@@ -64,7 +66,9 @@ class SectionListViewSet(viewsets.GenericViewSet):
                 queryset = queryset.filter(identifier=identifier)
                 logger.debug(f"Filtered by identifier: {identifier}")
             if text_identifier:
-                queryset = queryset.filter(text__identifier=text_identifier)
+                # get the text object
+                text = get_object_or_404(Text, identifier=text_identifier)
+                queryset = queryset.filter(text=text.id)
                 logger.debug(f"Filtered by text identifier: {text_identifier}")
             if type:
                 queryset = queryset.filter(type=type)
