@@ -9,14 +9,10 @@ class TokenSerializer(serializers.ModelSerializer):
             fields = ('id', 'transcription',)
 
 class SectionSerializer(serializers.ModelSerializer):
-        
-            class Meta:
-                model = Section
-                fields = '__all__'
 
-class CABSectionSerializer(serializers.ModelSerializer):
+    text_identifier = serializers.CharField(source='text.identifier', read_only=True)
     tokens = TokenSerializer(many=True, read_only=True)
-    
     class Meta:
         model = Section
         fields = '__all__'
+
