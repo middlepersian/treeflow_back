@@ -8,7 +8,7 @@ from treeflow.rest.views.comment import CommentViewSet
 from treeflow.rest.views.dependency import DependencyViewSet
 from treeflow.rest.views.feature import FeatureViewSet
 from treeflow.rest.views.pos import POSViewSet
-from treeflow.rest.views.section import SectionViewSet
+from treeflow.rest.views.section import SectionListViewSet, SectionRetrieveViewSet
 from treeflow.rest.views.text import TextViewSet
 from treeflow.rest.views.token import TokenViewSet
 # import views for dictionary
@@ -25,7 +25,8 @@ router.register(r'comments', CommentViewSet, basename='comment-list')
 router.register(r'dependencies', DependencyViewSet, basename='dependency-list')
 router.register(r'features', FeatureViewSet, basename='feature-list')
 router.register(r'pos', POSViewSet, basename='pos-list')
-router.register(r'sections', SectionViewSet, basename='section-list')
+router.register(r'sections', SectionListViewSet, basename='section-list')
+router.register(r'sections', SectionRetrieveViewSet, basename='section-detail')
 router.register(r'texts', TextViewSet, basename='text-list')
 router.register(r'tokens', TokenViewSet, basename='token-list')
 

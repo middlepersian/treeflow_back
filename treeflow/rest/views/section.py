@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from treeflow.corpus.models import Section, Token, Text
-from treeflow.rest.serializers.section import TokenSerializer, SectionSerializer
+from treeflow.rest.serializers.section import  SectionSerializer
 
 import logging
 
@@ -19,7 +19,7 @@ class SectionPagination(PageNumberPagination):
     max_page_size = 1000
 
 @extend_schema(tags=['sections'])
-class SectionViewSet(viewsets.GenericViewSet):
+class SectionListViewSet(viewsets.GenericViewSet):
     serializer_class = SectionSerializer
     pagination_class = SectionPagination
 
@@ -30,7 +30,7 @@ class SectionViewSet(viewsets.GenericViewSet):
             OpenApiParameter(name='type', description='Filter by section type when text_identifier is present', required=False, type=str)
         ],
         responses={200: SectionSerializer(many=True)})
-        
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()  # Apply the filters right from the get_queryset
 
@@ -71,3 +71,12 @@ class SectionViewSet(viewsets.GenericViewSet):
                 logger.debug(f"Filtered by type: {type}")
 
         return queryset
+
+class SectionRetrieveViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
