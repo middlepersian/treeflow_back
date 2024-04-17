@@ -1,7 +1,16 @@
-{%extends 'base.html'%} {% load static %} {%block content%}
-<div
-  class="container mx-auto flex flex-row h-full divide-x-2 divide-main-graded-900 shadow-lg"
->
+{%extends 'base.html'%} 
+{% load static %} 
+{%block content%}
+
+<div class="bg-white p-5 shadow-lg">
+  <a href="https://images.cceh.uni-koeln.de/mpcd/manifest.json" class="text-center block hover:text-blue-600" target="_blank" >
+    Access the <img src="{% static 'images/logos/iiif_notext.png' %}" class="mx-auto h-10">  Manifest  
+  </a>
+</div>
+
+
+<div class="container mx-auto flex flex-row h-full divide-x-2 divide-main-graded-900 shadow-lg">
+
   <div class="h-full w-1/5 bg-white p-10 overflow-scroll">
     <ul>
       {% for manuscript in manuscripts %}

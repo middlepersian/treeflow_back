@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.db.models import Prefetch
 from django.db.models import Count
 from treeflow.corpus.models import Text, Section, Token, Source
+from treeflow.dict.models import Lemma
 from treeflow.corpus.utils.zotero import request_zotero_api_for_collection
 import logging
 
@@ -98,3 +99,11 @@ def cache_manuscripts():
     
     logger.info("Manuscripts cached")
     cache.set(cache_key_manuscripts, manuscripts)
+
+
+def cache_lemmas():
+    logger.info("Starting cache_lemmas task")
+    cache_key_lemmas = "lemmas"
+    lemmas = Lemma.objects.only('id', 'word')
+    cache.set(cache_key_lemmas, lemmas)
+    logger.info("Lemmas cached")
