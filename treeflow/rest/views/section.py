@@ -1,13 +1,13 @@
 from rest_framework import viewsets
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.shortcuts import get_object_or_404
 from django.db import models
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
-from treeflow.corpus.models import Section, Token
-from treeflow.rest.serializers.section import SectionSerializer, CABSectionSerializer
+from treeflow.corpus.models import Section, Token, Text
+from treeflow.rest.serializers.section import  SectionSerializer
 
 import logging
 
@@ -18,48 +18,69 @@ class SectionPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
-
 @extend_schema(tags=['sections'])
-class SectionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows sections to be viewed or retrieved by ID or identifier.
-    """
-    queryset = Section.objects.all()
+class SectionListViewSet(viewsets.GenericViewSet):
     serializer_class = SectionSerializer
     pagination_class = SectionPagination
 
-    @action(detail=False, methods=['get'], url_path='identifier/(?P<identifier>.+)', url_name='retrieve_by_identifier')
-    @extend_schema(operation_id='retrieve_sections_by_identifier')
-    def retrieve_by_identifier(self, request, identifier, *args, **kwargs):
-        logger.info(f"Retrieving sections by identifier: {identifier}")
-        try:
-            sections = self.get_queryset().filter(identifier=identifier)
-            if not sections.exists():
-                return Response([], status=status.HTTP_404_NOT_FOUND)
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='identifier', description='Filter by section identifier', required=False, type=str),
+            OpenApiParameter(name='text_identifier', description='Filter by text identifier', required=False, type=str),
+            OpenApiParameter(name='type', description='Filter by section type when text_identifier is present', required=False, type=str)
+        ],
+        responses={200: SectionSerializer(many=True)})
 
-            page = self.paginate_queryset(sections)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()  # Apply the filters right from the get_queryset
 
-            serializer = self.get_serializer(sections, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.error(f"Error in retrieving sections by identifier: {identifier}", exc_info=True)
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
-    @action(detail=False, methods=['get'], url_path='cab/(?P<identifier>.+)', url_name='retrieve_cab_tokens_by_identifier')
-    @extend_schema(operation_id='retrieve_cab_tokens_by_identifier')
-    def retrieve_cab_tokens_by_identifier(self, request, identifier, *args, **kwargs):
-        logger.info(f"Retrieving CAB tokens by identifier: {identifier}")
-        try:
-            sections = Section.objects.filter(identifier=identifier).prefetch_related('tokens')
-            if not sections.exists():
-                return Response([], status=status.HTTP_404_NOT_FOUND)
-            
-            serializer = CABSectionSerializer(sections, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.error(f"Error in retrieving CAB sections by identifier: {identifier}", exc_info=True)
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def get_queryset(self):
+        queryset = Section.objects.all()
+        identifier = self.request.query_params.get('identifier')
+        text_identifier = self.request.query_params.get('text_identifier')
+        type = self.request.query_params.get('type')
+
+        # Utilizing the unique constraint for filtering by 'text' and 'identifier'
+        if text_identifier and identifier:
+            text = get_object_or_404(Text, identifier=text_identifier)
+            queryset = queryset.filter(text=text.id, identifier=identifier)
+            logger.debug(f"Filtered by text identifier and section identifier: {text_identifier}, {identifier}")
+
+        # Utilizing the index for filtering by 'text' and 'type'
+        elif text_identifier and type:
+            text = get_object_or_404(Text, identifier=text_identifier)
+            queryset = queryset.filter(text=text.id, type=type)
+            logger.debug(f"Filtered by text identifier and type: {text_identifier}, {type}")
+
+        # Additional filters for identifier or type alone
+        else:
+            if identifier:
+                queryset = queryset.filter(identifier=identifier)
+                logger.debug(f"Filtered by identifier: {identifier}")
+            if text_identifier:
+                # get the text object
+                text = get_object_or_404(Text, identifier=text_identifier)
+                queryset = queryset.filter(text=text.id)
+                logger.debug(f"Filtered by text identifier: {text_identifier}")
+            if type:
+                queryset = queryset.filter(type=type)
+                logger.debug(f"Filtered by type: {type}")
+
+        return queryset
+
+class SectionRetrieveViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
