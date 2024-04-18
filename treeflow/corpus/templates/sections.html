@@ -93,11 +93,11 @@
         </div>
         
         <!-- Right Column for Image -->
-
         <div class="col-span-4 sticky top-0 h-screen">
-            <div id="iiif-viewer" class="h-full w-full">  {% include 'components/OpenSeaDragon.html' with sources=manuscripts %}</div>
+        <div id="iiif-viewer" class="h-full w-full">
+            {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
         </div>
-         
+        </div>
     </div>
 
 
