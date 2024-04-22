@@ -63,7 +63,7 @@
       </div>
 
       <!-- Right Column for Image -->
-      <div id="iiif-viewer" class="w-1/2 m-2">{% include 'components/OpenSeaDragon.html' with sources=manuscripts %}</div>
+      <div id="iiif-viewer" class="w-1/2 m-2">{% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}</div>
     </div>
 
     <input type="hidden" id="id_selected_tokens" name="selected_tokens" value />

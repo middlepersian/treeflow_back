@@ -56,6 +56,14 @@ def sections_view(request, text_id=None):
             'sentence_ids': list(sentence_sections.values_list('id', flat=True)), 
             'section_types': section_types
         })
+    # Get the first manuscript image associated with the first token of the first sentence
+    first_sentence = sentence_sections.first()
+    manuscript_image = None
+    if first_sentence and first_sentence.prefetched_tokens:
+        first_token = first_sentence.prefetched_tokens[0]
+        # Check if first_token has an associated image and only then access its identifier
+        if first_token.image:
+            manuscript_image = first_token.image.identifier
 
     context = {
         'texts': texts,
@@ -63,9 +71,9 @@ def sections_view(request, text_id=None):
         'section_types': section_types,
         'selected_text_id': selected_text_id or '',
         'current_view': 'corpus:sections',
-        'manuscripts': manuscripts,  # Add manuscripts to the context
+        'manuscripts': manuscripts,
+        'manuscript_image': manuscript_image,  # Pass the manuscript image identifier or None
     }
 
     return render(request, 'sections.html', context)
-
 
