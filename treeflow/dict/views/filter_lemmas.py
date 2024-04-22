@@ -68,7 +68,7 @@ def filter_lemmas(request):
             f'<div id="{lemma.id}" '
             f'hx-get="{url}" '
             f'hx-target="#lemma-details" '
-            f'hx-replace-url="/dict/dictionary/{lemma.id}/" '
+            f'hx-replace-url="/dict/{lemma.id}/" '
             f'onclick="selection(this)" '
             f'class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer '
             f'hover:text-white hover:bg-action shadow-black scroll-m-1">'

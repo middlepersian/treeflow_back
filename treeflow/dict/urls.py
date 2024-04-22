@@ -13,10 +13,10 @@ app_name = "treeflow.dict"
 urlpatterns = [
         path("save_sense/", save_sense, name="save_sense"),
         path("save_lemma/", save_lemma, name="save_lemma"),
-        path("dictionary/", lemmas_list, name="dictionary"),
-        path("dictionary/<uuid:lemma_id>/", lemmas_list, name="lemmas"),
-        path("dictionary/fetch_Lemma/<uuid:lemma_id>/",lemma_details, name="lemma_details"),
-        path("dictionary/edit_Lemma/<uuid:lemma_id>/", lemma_edit, name="lemma_edit"),
-        path("dictionary/update_lemma/<uuid:lemma_id>/", update_lemma, name="update_lemma"),
-        path("dictionary/filter_lemmas/", filter_lemmas, name="filter_lemmas")
+        path("", lemmas_list, name="dictionary"),
+        path("<uuid:lemma_id>/", lemmas_list, name="lemmas"),
+        path("fetch_Lemma/<uuid:lemma_id>/",lemma_details, name="lemma_details"),
+        path("edit_Lemma/<uuid:lemma_id>/", lemma_edit, name="lemma_edit"),
+        path("update_lemma/<uuid:lemma_id>/", update_lemma, name="update_lemma"),
+        path("filter_lemmas/", filter_lemmas, name="filter_lemmas")
 ]

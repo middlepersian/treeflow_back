@@ -56,7 +56,7 @@
 
       <div id="lemma-list" class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
         {% for lemma in lemmas %}
-          <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/dictionary/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
+          <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
         {% endfor %}
       </div>
     </div>
@@ -102,7 +102,7 @@
         closeLemmaModal()
     
         // Refetching current lemma
-        fetch(`/dict/dictionary/fetch_Lemma/${activeId}/`)
+        fetch(`/dict/fetch_Lemma/${activeId}/`)
           .then((response) => response.text())
           .then((data) => {
             document.getElementById('lemma-details').innerHTML = data
