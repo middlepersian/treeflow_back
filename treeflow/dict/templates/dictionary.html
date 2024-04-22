@@ -7,13 +7,51 @@
       <div class="flex flex-col gap-0 rounded-md">
         <div class="relative flex flex-row rounded-md shadow-sm shadow-black">
           <input id="search-input" type="text" class="w-full p-2 pr-6 rounded-md" placeholder="Search..." oninput="changeControls(this)" />
-          <button id="search-button" class="absolute right-0 flex items-center h-full cursor-pointer rounded-r-md hover:bg-off disabled:pointer-events-none group" disabled onclick="search()">
+          <button id="search-button" class="absolute right-0 flex items-center h-full cursor-pointer rounded-r-md hover:bg-off disabled:pointer-events-none group peer" disabled onclick="search()">
             <svg class="w-6 h-6 text-white fill-main group-disabled:fill-main/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </button>
+          <span class="absolute z-10 hidden w-16 p-1 text-sm font-semibold text-center text-white rounded-md select-none -right-5 top-[104%] peer-hover:block bg-main">
+            <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+              <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+            </svg>Search
+          </span>
         </div>
         {% include 'dictionary_controls.html' %}
+      </div>
+
+      <div id="search-settings" class="hidden w-full rounded-md shadow-sm shadow-black">
+        <div class="w-full mb-2 text-sm font-semibold text-center">
+          Search modes<hr class="border-black" />
+        </div>
+        <div class="flex flex-col gap-1 p-1">
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" checked onchange="selectSearchMode(this, 'icontains')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">Contains</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'startswith')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">Starts with</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'endswith')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">Ends with</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'iexact')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">Exact</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'regex')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">RegEx</span>
+          </label>
+        </div>
       </div>
 
       <div id="lemma-list" class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
@@ -31,6 +69,9 @@
   </div>
 
   <script>
+    let activeId
+    let activeSearchMode
+    
     document.addEventListener('DOMContentLoaded', function () {
       let x = document.getElementById('{{lemma_id}}')
       if (x) {
@@ -41,20 +82,51 @@
           y.click()
         }
       }
+    
+      let searchModes = document.getElementById('search-settings').querySelectorAll('label')
+      searchModes.forEach((label) => {
+        if (label.querySelector('input').checked) {
+          activeSearchMode = label.querySelector('input').getAttribute('onchange').split("'")[1]
+        }
+      })
+    
+      console.log('Active search mode:', activeSearchMode)
+    
+      clearSearch()
     })
     
+    // HTMX after lemma update
     document.body.addEventListener('htmx:afterSwap', function (event) {
       var targetId = event.detail.target.id
-      if (typeof targetId === 'string' && (targetId === 'lemma-form' || targetId === 'sense-form') && event.detail.xhr.status === 200) {
+      if (typeof targetId === 'string' && targetId === 'lemma-form' && event.detail.xhr.status === 200) {
         closeLemmaModal()
-        let x = document.getElementById('{{lemma_id}}')
-        if (x) {
-          x.click()
+    
+        // Refetching current lemma
+        fetch(`/dict/dictionary/fetch_Lemma/${activeId}/`)
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById('lemma-details').innerHTML = data
+            htmx.process(document.getElementById('lemma-details'))
+          })
+          .catch((error) => console.error('Error:', error))
+    
+        // Refetching lemma list if necessary
+        if (!document.getElementById('search-input').value.trim().length > 0) {
+          search('')
         }
+      }
+    })
+
+    // Enter key search for input
+    document.getElementById('search-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter'){
+        e.preventDefault()
+        search()
       }
     })
     
     function selection(e) {
+      activeId = e.id
       const lemmaList = document.querySelector('#lemma-list')
     
       if (lemmaList) {
@@ -76,21 +148,34 @@
     }
     
     function search(filter = document.getElementById('search-input').value.trim()) {
-      var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter)
+      var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter) + '&search_mode=' + encodeURIComponent(activeSearchMode)
     
+      // The data returns the filtered lemmas already in HTML-div form.
       fetch(url)
         .then((response) => response.text())
         .then((data) => {
           var lemmaList = document.getElementById('lemma-list')
           lemmaList.innerHTML = data
           htmx.process(lemmaList)
-
-          //If active available, scroll to it
-          
+    
+          if (activeId) {
+            let active = document.getElementById(activeId)
+            if (active) {
+              active.click()
+            }
+          }
+    
+          if (data === '') {
+            document.getElementById('controls-textbox').innerText = 'No lemmas found.'
+            document.getElementById('lemma-list').innerHTML = '<div class="flex w-full h-full"><button class="p-1 m-auto font-semibold text-white rounded-md bg-main hover:bg-off" onclick="clearSearch()">Clear Search</button></div>'
+          } else {
+            document.getElementById('controls-textbox').innerText = 'Loaded ' + data.split('\n').length + ' lemmas.'
+          }
         })
         .catch((error) => console.error('Error:', error))
     }
     
+   
     function changeControls(e) {
       if (e.value.trim().length > 0) {
         document.getElementById('clear-search-button').removeAttribute('disabled')
@@ -103,9 +188,8 @@
     
     function clearSearch() {
       document.getElementById('search-input').value = ''
-      let searchButton = document.getElementById('search-button')
-      searchButton.click()
-      searchButton.setAttribute('disabled', true)
+      search('')
+      document.getElementById('search-button').setAttribute('disabled', true)
       document.getElementById('clear-search-button').setAttribute('disabled', true)
     }
     
@@ -134,6 +218,21 @@
         top: 0,
         behavior: 'smooth'
       })
+    }
+    
+    function toggleSearchSettings() {
+      document.getElementById('search-settings').classList.toggle('hidden')
+    }
+    
+    function selectSearchMode(e, mode) {
+      activeSearchMode = mode
+      let searchSettings = document.getElementById('search-settings')
+      let searchSettingsLabels = searchSettings.querySelectorAll('label')
+      searchSettingsLabels.forEach((label) => {
+        label.querySelector('input').checked = false
+      })
+      e.checked = true
+      console.log('Active search mode:', activeSearchMode)
     }
   </script>
 {% endblock %}

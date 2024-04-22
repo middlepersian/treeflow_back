@@ -9,11 +9,11 @@
       <div class="p-2 my-1 ml-6 underline rounded-md w-fit bg-slate-300">You must be logged in to edit this lemma.</div>
     </div>
   {% endif %}
-  <h3 class="flex flex-row gap-1 italic text-left">{{ word }}</h3>
+  <h3 class="flex flex-row gap-1 p-2 mb-4 text-4xl italic text-left bg-white rounded-md w-fit">{{ word }}</h3>
   <div class="flex flex-col h-full gap-2">
     <div class="flex flex-row gap-2">
       <div class="relative flex flex-row cursor-default">
-        <div class="p-4 bg-white rounded-md w-fit">
+        <div class="p-2 bg-white rounded-md w-fit">
           <span class="mx-4">{{ language }}</span>
         </div>
         <div class="absolute flex justify-center w-full -bottom-4">
@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="relative flex flex-row cursor-default">
-        <div class="w-24 p-4 pl-2 text-center bg-white rounded-md">
+        <div class="w-24 p-2 pl-2 text-center bg-white rounded-md">
           <span>{{ multiword_expression }}</span>
         </div>
         <div class="absolute flex justify-center w-full -bottom-4">
@@ -75,7 +75,7 @@
 
   <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="lemmaModal">
     <div class="flex items-center justify-center min-h-screen">
-      <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
+      <div class="p-4 mx-auto bg-white rounded-lg shadow-lg">
         <!-- Modal content here -->
         <div id="lemmaModalContent"></div>
       </div>
