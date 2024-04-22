@@ -73,11 +73,16 @@ def cache_all_texts():
 
 def cache_sections_for_texts():
     logger.info("Starting cache_sections_for_texts task")
-    cache_key_texts = "all_texts"
-    texts = Text.objects.all()
-    cache.set(cache_key_texts, texts)
-    logger.info("Texts cached for quick access")
+    
+    # Call cache_all_texts to ensure texts are cached
+    cache_all_texts()
 
+    # Since cache_all_texts ensures that all texts are cached under the key "all_texts",
+    # we can retrieve the cached texts directly.
+    cache_key_texts = "all_texts"
+    texts = cache.get(cache_key_texts)
+    
+    # Proceed with caching sections for each text
     for text in texts:
         cache_key = f"sections_for_text_{text.id}"
         logger.info(f"Caching sections for text: {text.id}")
