@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <div class="flex justify-center w-full">
   <div class="flex flex-col p-1 pt-0 shadow-sm rounded-b-md w-fit shadow-black">
     <div class="flex flex-row justify-center gap-1">
@@ -10,7 +12,8 @@
         <span class="absolute z-10 hidden w-16 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-1/2 top-full peer-hover:block bg-main">
           <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
             <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
-          </svg>To top
+          </svg>
+          {% trans 'To top' %}
         </span>
       </div>
       <div class="relative">
@@ -22,7 +25,8 @@
         <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
           <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
             <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
-          </svg>To bottom
+          </svg>
+          {% trans 'To bottom' %}
         </span>
       </div>
       <span class="my-1 border border-l border-main"></span>
@@ -35,7 +39,8 @@
         <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
           <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
             <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
-          </svg>Find active
+          </svg>
+          {% trans 'Find active' %}
         </span>
       </div>
       <div class="relative">
@@ -47,7 +52,8 @@
         <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
           <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
             <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
-          </svg>Clear Search
+          </svg>
+          {% trans 'Clear Search' %}
         </span>
       </div>
       <div class="relative">
@@ -59,12 +65,13 @@
         <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
           <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
             <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
-          </svg>Search settings
+          </svg>
+          {% trans 'Search settings' %}
         </span>
       </div>
     </div>
     <div id="controls-textbox" class="text-xs text-center">
-      Loaded {{lemmas|length}} lemmas.
+      Loaded {{ lemmas|length }} lemmas.
     </div>
   </div>
 </div>

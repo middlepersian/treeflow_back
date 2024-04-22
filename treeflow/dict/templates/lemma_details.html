@@ -1,12 +1,16 @@
+{% load i18n %}
+
 <div>
   {% if user.is_authenticated %}
     <div class="absolute top-0 right-0 flex flex-row gap-2 m-2">
-      <input type="button" hx-get="{% url 'dict:lemma_edit' id %}" hx-target="#lemmaModalContent" hx-trigger="click" class="px-1 py-2 font-semibold text-white rounded-md cursor-pointer bg-off hover:bg-action" onclick="openLemmaModal()" value="Edit Lemma" />
+      <input type="button" hx-get="{% url 'dict:lemma_edit' id %}" hx-target="#lemmaModalContent" hx-trigger="click" class="px-1 py-2 font-semibold text-white rounded-md cursor-pointer bg-off hover:bg-action" onclick="openLemmaModal()" value="{% trans 'Edit Lemma' %}" />
       {% comment %} <input type="button" class="px-1 py-2 font-semibold text-white rounded-md bg-error hover:bg-action" value="Delete Lemma" /> {% endcomment %}
     </div>
   {% else %}
     <div class="absolute top-0 right-0 m-2">
-      <div class="p-2 my-1 ml-6 underline rounded-md w-fit bg-slate-300">You must be logged in to edit this lemma.</div>
+      <div class="p-2 my-1 ml-6 underline rounded-md w-fit bg-slate-300">
+        {% trans 'You must be logged in to edit this lemma.' %}
+      </div>
     </div>
   {% endif %}
   <h3 class="flex flex-row gap-1 p-2 mb-4 text-4xl italic text-left bg-white rounded-md w-fit">{{ word }}</h3>
@@ -18,7 +22,7 @@
         </div>
         <div class="absolute flex justify-center w-full -bottom-4">
           <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
-            <span>Language</span>
+            <span>{% trans 'Language' %}</span>
           </div>
         </div>
       </div>
@@ -28,7 +32,7 @@
         </div>
         <div class="absolute flex justify-center w-full -bottom-4">
           <div class="px-1 text-xs text-center text-white bg-gray-700 rounded-b-sm w-fit">
-            <span>Multiword Exp.</span>
+            <span>{% trans 'Multiword Exp.' %}</span>
           </div>
         </div>
       </div>
@@ -44,7 +48,9 @@
       </div> {% endcomment %}
     </div>
     <hr class="w-full mt-5 mb-3 border-black" />
-    <div class="my-1 font-semibold underline">Related lemmas</div>
+    <div class="my-1 font-semibold underline">
+      {% trans 'Related lemmas' %}
+    </div>
     <div>
       {% if related_lemmas %}
         <div class="flex flex-row flex-wrap w-full gap-2 p-2">
@@ -53,11 +59,15 @@
           {% endfor %}
         </div>
       {% else %}
-        <div>No related lemmas found.</div>
+        <div>
+          {% trans 'No related lemmas found.' %}
+        </div>
       {% endif %}
     </div>
     <hr class="w-full mt-5 mb-3 border-black" />
-    <div class="my-1 font-semibold underline">Related senses</div>
+    <div class="my-1 font-semibold underline">
+      {% trans 'Related senses' %}
+    </div>
     <div>
       {% if related_senses %}
         <div class="flex flex-row flex-wrap gap-2 p-2">
@@ -68,7 +78,9 @@
           {% endfor %}
         </div>
       {% else %}
-        <div>No related senses found.</div>
+        <div>
+          {% trans 'No related senses found.' %}
+        </div>
       {% endif %}
     </div>
   </div>
