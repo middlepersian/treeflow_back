@@ -650,6 +650,8 @@ msgid ""
 "Don't have an account? <a href=\"%(signup_url)s\" class=\"underline hover:"
 "text-off\">Sign up</a>"
 msgstr ""
+"Noch keinen Account? <a href=\"%(signup_url)s\" class=\"underline hover:"
+"text-off\">Hier registrieren</a>"
 
 #: treeflow/templates/account/logout.html:5
 #: treeflow/templates/account/logout.html:8

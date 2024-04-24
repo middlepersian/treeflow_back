@@ -42,8 +42,8 @@ for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
       </div>
       <div class="flex flex-col items-center w-full">
         <div class="flex flex-col w-48 gap-2">
-          <a class="p-2 text-center text-white rounded-md bg-main hover:bg-off button secondaryAction hover:text-white" href="{% url 'account_reset_password' %}">{% trans 'Forgot Password?' %}</a>
-          <button class="p-2 text-center text-white rounded-md primaryAction btn btn-primary bg-main hover:bg-off hover:text-white" type="submit">{% trans 'Sign In' %}</button>
+          {% comment %} <a class="p-2 text-center text-white rounded-md bg-main hover:bg-off button secondaryAction hover:text-white" href="{% url 'account_reset_password' %}">{% trans 'Forgot Password?' %}</a> {% endcomment %}
+          <button class="p-2 text-white rounded-md primaryAction btn btn-primary bg-main hover:bg-off hover:text-white" type="submit">{% trans 'Sign In' %}</button>
         </div>
         {% if not socialaccount_providers %}
           <p class="mt-2 text-sm">

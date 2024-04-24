@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#: treeflow/corpus/templates/texts.html:9
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:18+0000\n"
+"POT-Creation-Date: 2024-04-24 09:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +39,7 @@ msgid "Back to Bibliography"
 msgstr ""
 
 #: treeflow/corpus/templates/bibentry_list.html:7
-#: treeflow/templates/pages/resources.html:76
+#: treeflow/templates/pages/resources.html:77
 msgid "Bibliography"
 msgstr ""
 
@@ -49,20 +48,21 @@ msgid "Key"
 msgstr ""
 
 #: treeflow/corpus/templates/bibentry_list.html:13
-#: treeflow/corpus/templates/texts.html:10
+#: treeflow/corpus/templates/texts.html:23
 msgid "Title"
 msgstr ""
 
-#: treeflow/corpus/templates/comment_form.html:39
+#: treeflow/corpus/templates/comment_form.html:41
 #: treeflow/corpus/templates/source_create.html:12
 #: treeflow/images/templates/image_form.html:8
 #: treeflow/images/templates/image_source.html:14
 msgid "Submit"
 msgstr ""
 
-#: treeflow/corpus/templates/comment_form.html:42
+#: treeflow/corpus/templates/comment_form.html:44
 #: treeflow/corpus/templates/section_editor_form.html:85
 #: treeflow/corpus/templates/token_lemma_sense.html:111
+#: treeflow/dict/templates/lemma_form.html:56
 msgid "Close"
 msgstr ""
 
@@ -85,7 +85,7 @@ msgid "Save"
 msgstr ""
 
 #: treeflow/corpus/templates/pos_feature_form.html:49
-#: treeflow/corpus/templates/section_modal.html:24
+#: treeflow/corpus/templates/section_modal.html:32
 #: treeflow/corpus/templates/source_delete.html:10
 msgid "Cancel"
 msgstr ""
@@ -93,155 +93,156 @@ msgstr ""
 #: treeflow/corpus/templates/section_editor_form.html:71
 #: treeflow/corpus/templates/sense_form.html:22
 #: treeflow/corpus/templates/token_lemma_sense.html:101
+#: treeflow/dict/templates/lemma_form.html:49
 msgid "Add Sense"
 msgstr ""
 
-#: treeflow/corpus/templates/section_modal.html:28
+#: treeflow/corpus/templates/section_modal.html:36
 msgid "Save Section"
 msgstr ""
 
-#: treeflow/corpus/templates/sections.html:25
+#: treeflow/corpus/templates/sections.html:15
 msgid "Start Token Selection"
 msgstr ""
 
-#: treeflow/corpus/templates/sections.html:30
+#: treeflow/corpus/templates/sections.html:21
 msgid "Select Section Type"
 msgstr ""
 
-#: treeflow/corpus/templates/sections.html:86
+#: treeflow/corpus/templates/sections.html:60
 msgid "No sentence sections found for this text."
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:16
-#: treeflow/corpus/templates/sentences.html:15
+#: treeflow/corpus/templates/sentences.html:20
 msgid "Number in Text"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:17
-#: treeflow/corpus/templates/sentences.html:16
-#: treeflow/corpus/templates/tokens.html:17
+#: treeflow/corpus/templates/sentences.html:23
+#: treeflow/corpus/templates/tokens.html:22
 msgid "Number in Sentence"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:18
-#: treeflow/corpus/templates/sentences.html:17
+#: treeflow/corpus/templates/sentences.html:26
 msgid "Image"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:19
-#: treeflow/corpus/templates/sentences.html:18
-#: treeflow/corpus/templates/tokens.html:19
+#: treeflow/corpus/templates/sentences.html:29
+#: treeflow/corpus/templates/tokens.html:24
 msgid "Line"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:20
-#: treeflow/corpus/templates/sentences.html:19
-#: treeflow/corpus/templates/tokens.html:20
+#: treeflow/corpus/templates/sentences.html:32
+#: treeflow/corpus/templates/tokens.html:25
 msgid "Transcription"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:21
-#: treeflow/corpus/templates/sentences.html:20
-#: treeflow/corpus/templates/tokens.html:21
+#: treeflow/corpus/templates/sentences.html:35
+#: treeflow/corpus/templates/tokens.html:26
 msgid "Transliteration"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:22
-#: treeflow/corpus/templates/sentences.html:21
-#: treeflow/corpus/templates/tokens.html:22
+#: treeflow/corpus/templates/sentences.html:38
+#: treeflow/corpus/templates/tokens.html:27
 msgid "Avestan"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:23
-#: treeflow/corpus/templates/sentences.html:22
-#: treeflow/corpus/templates/tokens.html:23
+#: treeflow/corpus/templates/sentences.html:41
+#: treeflow/corpus/templates/tokens.html:28
 msgid "Lemmas"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:24
-#: treeflow/corpus/templates/sentences.html:23
-#: treeflow/corpus/templates/tokens.html:24
+#: treeflow/corpus/templates/sentences.html:44
+#: treeflow/corpus/templates/tokens.html:29
 msgid "Senses"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:25
-#: treeflow/corpus/templates/sentences.html:24
-#: treeflow/corpus/templates/tokens.html:25
+#: treeflow/corpus/templates/sentences.html:47
+#: treeflow/corpus/templates/tokens.html:30
 msgid "POS"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:26
-#: treeflow/corpus/templates/sentences.html:25
-#: treeflow/corpus/templates/tokens.html:26
+#: treeflow/corpus/templates/sentences.html:50
+#: treeflow/corpus/templates/tokens.html:31
 msgid "Features"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:27
-#: treeflow/corpus/templates/sentences.html:26
-#: treeflow/corpus/templates/tokens.html:27
+#: treeflow/corpus/templates/sentences.html:53
+#: treeflow/corpus/templates/tokens.html:32
 msgid "Comments"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:28
-#: treeflow/corpus/templates/sentences.html:27
-#: treeflow/corpus/templates/tokens.html:28
+#: treeflow/corpus/templates/sentences.html:56
+#: treeflow/corpus/templates/tokens.html:33
 msgid "Insert Before"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:29
-#: treeflow/corpus/templates/sentences.html:28
-#: treeflow/corpus/templates/tokens.html:29
+#: treeflow/corpus/templates/sentences.html:59
+#: treeflow/corpus/templates/tokens.html:34
 msgid "Insert After"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:30
-#: treeflow/corpus/templates/sentences.html:29
-#: treeflow/corpus/templates/tokens.html:30
+#: treeflow/corpus/templates/sentences.html:62
+#: treeflow/corpus/templates/tokens.html:35
 msgid "Delete Token"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:37
-#: treeflow/corpus/templates/sentences.html:36
+#: treeflow/corpus/templates/sentences.html:70
 #: treeflow/corpus/templates/source_manuscripts.html:23
-#: treeflow/corpus/templates/source_table.html:11
-#: treeflow/corpus/templates/texts.html:11
+#: treeflow/corpus/templates/source_table.html:10
+#: treeflow/corpus/templates/texts.html:36
 #: treeflow/corpus/templates/ud_editor.html:110
 msgid "Identifier"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:45
-#: treeflow/corpus/templates/sentences.html:44
+#: treeflow/corpus/templates/sentences.html:78
 #: treeflow/corpus/templates/ud_editor.html:124
 msgid "Translations"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:57
-#: treeflow/corpus/templates/sentences.html:56
+#: treeflow/corpus/templates/sentences.html:90
 msgid "Edit Universal Dependencies"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:95
-#: treeflow/corpus/templates/sentences.html:94
-#: treeflow/corpus/templates/tokens.html:63
+#: treeflow/corpus/templates/sentences.html:128
+#: treeflow/corpus/templates/tokens.html:68
 msgid "No line sections"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:211
-#: treeflow/corpus/templates/sentence.html:224
-#: treeflow/corpus/templates/sentences.html:214
-#: treeflow/corpus/templates/sentences.html:231
-#: treeflow/corpus/templates/tokens.html:177
-#: treeflow/corpus/templates/tokens.html:192
+#: treeflow/corpus/templates/sentence.html:212
+#: treeflow/corpus/templates/sentence.html:225
+#: treeflow/corpus/templates/sentences.html:249
+#: treeflow/corpus/templates/sentences.html:266
+#: treeflow/corpus/templates/tokens.html:182
+#: treeflow/corpus/templates/tokens.html:197
 msgid "Insert"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:238
-#: treeflow/corpus/templates/sentences.html:248
+#: treeflow/corpus/templates/sentence.html:239
+#: treeflow/corpus/templates/sentences.html:283
 #: treeflow/corpus/templates/source_manuscripts.html:30
 #: treeflow/corpus/templates/source_manuscripts.html:112
-#: treeflow/corpus/templates/source_table.html:20
-#: treeflow/corpus/templates/source_table.html:56
-#: treeflow/corpus/templates/tokens.html:208
+#: treeflow/corpus/templates/source_table.html:19
+#: treeflow/corpus/templates/source_table.html:55
+#: treeflow/corpus/templates/tokens.html:213
 msgid "Delete"
 msgstr ""
 
@@ -250,8 +251,8 @@ msgid "Are you sure you want to delete this item?"
 msgstr ""
 
 #: treeflow/corpus/templates/source_list.html:4
-#: treeflow/corpus/templates/texts.html:13
-#: treeflow/templates/components/navbar.html:14
+#: treeflow/corpus/templates/texts.html:62
+#: treeflow/templates/components/navbar.html:15
 msgid "Sources"
 msgstr ""
 
@@ -268,12 +269,12 @@ msgid "Page"
 msgstr ""
 
 #: treeflow/corpus/templates/source_manuscripts.html:26
-#: treeflow/corpus/templates/source_table.html:14
+#: treeflow/corpus/templates/source_table.html:13
 msgid "Related Sources"
 msgstr ""
 
 #: treeflow/corpus/templates/source_manuscripts.html:27
-#: treeflow/corpus/templates/tokens.html:16
+#: treeflow/corpus/templates/tokens.html:21
 msgid "Number"
 msgstr ""
 
@@ -291,7 +292,7 @@ msgid "No Manuscripts are available."
 msgstr ""
 
 #: treeflow/corpus/templates/source_related_bibentry.html:4
-#: treeflow/corpus/templates/source_table.html:16
+#: treeflow/corpus/templates/source_table.html:15
 msgid "Zotero Keys"
 msgstr ""
 
@@ -312,24 +313,20 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: treeflow/corpus/templates/source_table.html:6
-msgid "Source Table"
-msgstr ""
-
-#: treeflow/corpus/templates/source_table.html:12
+#: treeflow/corpus/templates/source_table.html:11
 msgid "Description"
 msgstr ""
 
-#: treeflow/corpus/templates/source_table.html:13
+#: treeflow/corpus/templates/source_table.html:12
 msgid "Type"
 msgstr ""
 
-#: treeflow/corpus/templates/source_table.html:18
+#: treeflow/corpus/templates/source_table.html:17
 msgid "Zotero Entry"
 msgstr ""
 
-#: treeflow/corpus/templates/source_table.html:46
-#: treeflow/corpus/templates/source_table.html:53
+#: treeflow/corpus/templates/source_table.html:45
+#: treeflow/corpus/templates/source_table.html:52
 msgid "Edit"
 msgstr ""
 
@@ -346,40 +343,44 @@ msgstr ""
 msgid "Choose a text"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:12
+#: treeflow/corpus/templates/texts.html:49
 msgid "Sigle"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:14
+#: treeflow/corpus/templates/texts.html:75
 msgid "Genre"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:15
+#: treeflow/corpus/templates/texts.html:88
 msgid "Version"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:16
+#: treeflow/corpus/templates/texts.html:101
 msgid "Stage"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:17
+#: treeflow/corpus/templates/texts.html:114
 #: treeflow/corpus/templates/ud_editor.html:112
 msgid "Tokens"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:19
+#: treeflow/corpus/templates/texts.html:127
 msgid "Main Text View"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:20
+#: treeflow/corpus/templates/texts.html:130
 msgid "Sentences View"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:21
+#: treeflow/corpus/templates/texts.html:133
 msgid "Tokens View"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:24
+#: treeflow/corpus/templates/texts.html:136
+msgid "CONLL"
+msgstr ""
+
+#: treeflow/corpus/templates/texts.html:140
 msgid "Created At"
 msgstr ""
 
@@ -387,15 +388,15 @@ msgstr ""
 msgid "Add Lemma"
 msgstr ""
 
-#: treeflow/corpus/templates/tokens.html:18
+#: treeflow/corpus/templates/tokens.html:23
 msgid "Sentence"
 msgstr ""
 
-#: treeflow/corpus/templates/tokens.html:52
+#: treeflow/corpus/templates/tokens.html:57
 msgid "No sentence sections"
 msgstr ""
 
-#: treeflow/corpus/templates/tokens.html:216
+#: treeflow/corpus/templates/tokens.html:221
 msgid "No tokens available for the selected text."
 msgstr ""
 
@@ -421,6 +422,97 @@ msgstr ""
 
 #: treeflow/corpus/templates/update_token.html:53
 msgid "Back to token list"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:9
+#: treeflow/dict/templates/dictionary.html:19
+#: treeflow/templates/components/navbar.html:13
+msgid "Search"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:27
+msgid "Search modes"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:34
+msgid "Contains"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:39
+msgid "Starts with"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:44
+msgid "Ends with"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:49
+msgid "Exact"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:70
+msgid "Please wait while a lemma is being loaded."
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:172
+msgid "No lemmas found."
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:173
+#: treeflow/dict/templates/dictionary_controls.html:56
+msgid "Clear Search"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary_controls.html:16
+msgid "To top"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary_controls.html:29
+msgid "To bottom"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary_controls.html:43
+msgid "Find active"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary_controls.html:69
+msgid "Search settings"
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:6
+msgid "Edit Lemma"
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:13
+msgid "You must be logged in to edit this lemma."
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:26
+msgid "Language"
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:36
+msgid "Multiword Exp."
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:54
+msgid "Related lemmas"
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:65
+msgid "No related lemmas found."
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:71
+msgid "Related senses"
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:84
+msgid "No related senses found."
+msgstr ""
+
+#: treeflow/dict/templates/lemma_form.html:26
+msgid "Update Lemma"
 msgstr ""
 
 #: treeflow/images/templates/image_source.html:8
@@ -519,7 +611,7 @@ msgstr ""
 
 #: treeflow/templates/account/login.html:8
 #: treeflow/templates/account/login.html:12
-#: treeflow/templates/account/login.html:46
+#: treeflow/templates/account/login.html:47
 msgid "Sign In"
 msgstr ""
 
@@ -536,24 +628,20 @@ msgstr ""
 msgid "or"
 msgstr ""
 
-#: treeflow/templates/account/login.html:45
-msgid "Forgot Password?"
-msgstr ""
-
-#: treeflow/templates/account/login.html:50
+#: treeflow/templates/account/login.html:51
 #, python-format
 msgid ""
 "Don't have an account? <a href=\"%(signup_url)s\" class=\"underline hover:"
 "text-off\">Sign up</a>"
 msgstr ""
 
-#: treeflow/templates/account/logout.html:5
-#: treeflow/templates/account/logout.html:8
-#: treeflow/templates/account/logout.html:17
+#: treeflow/templates/account/logout.html:6
+#: treeflow/templates/account/logout.html:12
+#: treeflow/templates/account/logout.html:22
 msgid "Sign Out"
 msgstr ""
 
-#: treeflow/templates/account/logout.html:10
+#: treeflow/templates/account/logout.html:14
 msgid "Are you sure you want to sign out?"
 msgstr ""
 
@@ -680,11 +768,11 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: treeflow/templates/base.html:48
+#: treeflow/templates/base.html:50
 msgid "Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)"
 msgstr ""
 
-#: treeflow/templates/base.html:50
+#: treeflow/templates/base.html:52
 msgid ""
 "Resulting from its status as the official language of the Sasanian Empire "
 "(3rd–7th centuries CE), the Middle Persian language played a prominent "
@@ -694,7 +782,7 @@ msgid ""
 "it was employed as a literary language by several religious traditions."
 msgstr ""
 
-#: treeflow/templates/base.html:53
+#: treeflow/templates/base.html:55
 msgid ""
 "The Middle Persian corpus consists of Zoroastrian, Manichaean, narrative, "
 "administrative and epigraphic sub-corpora. The Zoroastrian Middle Persian "
@@ -705,7 +793,7 @@ msgid ""
 "dictionary covering that corpus."
 msgstr ""
 
-#: treeflow/templates/base.html:57
+#: treeflow/templates/base.html:59
 msgid ""
 "The corpus consists of roughly 50 texts, containing some 705,000 tokens. As "
 "its point of departure, the project relies on the ca. 20 oldest Pahlavi "
@@ -713,23 +801,23 @@ msgid ""
 "codices will be supplied with several layers of annotation:"
 msgstr ""
 
-#: treeflow/templates/base.html:61
+#: treeflow/templates/base.html:63
 msgid "1. orthographical (transliteration) and phonographical (transcription)"
 msgstr ""
 
-#: treeflow/templates/base.html:64
+#: treeflow/templates/base.html:66
 msgid "2. grammatical (morpho-syntactic)"
 msgstr ""
 
-#: treeflow/templates/base.html:67
+#: treeflow/templates/base.html:69
 msgid "3. semantic (semasiological and onomasiological)"
 msgstr ""
 
-#: treeflow/templates/base.html:70
+#: treeflow/templates/base.html:72
 msgid "4. intertextual (linking Zand texts with their Avestan original)"
 msgstr ""
 
-#: treeflow/templates/base.html:76
+#: treeflow/templates/base.html:78
 #, python-format
 msgid ""
 "Within the overall structure of the project, the corpus and dictionary "
@@ -744,7 +832,7 @@ msgid ""
 "processed at a given point in time.'"
 msgstr ""
 
-#: treeflow/templates/base.html:79
+#: treeflow/templates/base.html:81
 msgid ""
 "The project intends to create a platform that may in the future also be used "
 "for the remaining Middle Persian sub-corpora, as well as for the corpora of "
@@ -754,7 +842,7 @@ msgid ""
 "domains of other Middle Iranian languages."
 msgstr ""
 
-#: treeflow/templates/base.html:82
+#: treeflow/templates/base.html:84
 msgid ""
 "The project is a cooperation between three universities: <a class=\"text-sm "
 "lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"/team"
@@ -766,125 +854,126 @@ msgid ""
 "Term Project, 2021–2030)."
 msgstr ""
 
-#: treeflow/templates/components/mobile_scroller.html:6
-#: treeflow/templates/components/navbar.html:10
+#: treeflow/templates/components/mobile_scroller.html:13
+#: treeflow/templates/components/navbar.html:18
 msgid "About"
 msgstr ""
 
-#: treeflow/templates/components/mobile_scroller.html:9
+#: treeflow/templates/components/mobile_scroller.html:16
 #: treeflow/templates/components/subbar.html:6
-#: treeflow/templates/pages/methodology.html:11
-#: treeflow/templates/pages/methodology.html:15
+#: treeflow/templates/pages/methodology.html:12
+#: treeflow/templates/pages/methodology.html:16
 msgid "Methodology"
 msgstr ""
 
-#: treeflow/templates/components/mobile_scroller.html:12
+#: treeflow/templates/components/mobile_scroller.html:19
 #: treeflow/templates/components/subbar.html:26
-#: treeflow/templates/pages/resources.html:11
-#: treeflow/templates/pages/resources.html:15
+#: treeflow/templates/pages/resources.html:12
+#: treeflow/templates/pages/resources.html:16
 msgid "Resources"
 msgstr ""
 
-#: treeflow/templates/components/mobile_scroller.html:15
+#: treeflow/templates/components/mobile_scroller.html:22
 #: treeflow/templates/components/subbar.html:36
-#: treeflow/templates/pages/team.html:11 treeflow/templates/pages/team.html:15
+#: treeflow/templates/pages/team.html:12 treeflow/templates/pages/team.html:16
 msgid "Team"
 msgstr ""
 
-#: treeflow/templates/components/mobile_scroller.html:18
+#: treeflow/templates/components/mobile_scroller.html:25
 #: treeflow/templates/components/navbar.html:19
-#: treeflow/templates/pages/contact.html:10
-#: treeflow/templates/pages/contact.html:14
+#: treeflow/templates/pages/contact.html:11
 #: treeflow/templates/pages/contact.html:15
+#: treeflow/templates/pages/contact.html:16
 msgid "Contact"
 msgstr ""
 
-#: treeflow/templates/components/navbar.html:11
-#: treeflow/templates/pages/publications.html:11
-msgid "Publications"
-msgstr ""
-
-#: treeflow/templates/components/navbar.html:12
+#: treeflow/templates/components/navbar.html:10
 #: treeflow/templates/components/subbar.html:32
-#: treeflow/templates/pages/resources.html:138
+#: treeflow/templates/pages/resources.html:139
 msgid "Texts"
 msgstr ""
 
-#: treeflow/templates/components/navbar.html:13
-#: treeflow/templates/components/subbar.html:31
-#: treeflow/templates/pages/resources.html:132
-msgid "Manuscripts"
+#: treeflow/templates/components/navbar.html:11
+#: treeflow/templates/components/subbar.html:13
+#: treeflow/templates/pages/methodology.html:319
+msgid "Dictionary"
 msgstr ""
 
-#: treeflow/templates/components/navbar.html:15
-msgid "Search"
-msgstr ""
-
-#: treeflow/templates/components/navbar.html:17
+#: treeflow/templates/components/navbar.html:12
 msgid "Glossaries"
 msgstr ""
 
+#: treeflow/templates/components/navbar.html:14
+#: treeflow/templates/components/subbar.html:31
+#: treeflow/templates/pages/resources.html:133
+msgid "Manuscripts"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:16
+msgid "API"
+msgstr ""
+
+#: treeflow/templates/components/navbar.html:17
+#: treeflow/templates/pages/publications.html:12
+msgid "Publications"
+msgstr ""
+
 #: treeflow/templates/components/subbar.html:8
-#: treeflow/templates/pages/methodology.html:16
+#: treeflow/templates/pages/methodology.html:17
 msgid "Workflow"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:9
-#: treeflow/templates/pages/methodology.html:27
+#: treeflow/templates/pages/methodology.html:28
 msgid "Orthographic Annotation"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:10
-#: treeflow/templates/pages/methodology.html:66
+#: treeflow/templates/pages/methodology.html:67
 msgid "Grammatical Annotation"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:11
-#: treeflow/templates/pages/methodology.html:158
+#: treeflow/templates/pages/methodology.html:159
 msgid "Semantic Annotation"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:12
-#: treeflow/templates/pages/methodology.html:169
+#: treeflow/templates/pages/methodology.html:170
 msgid "Intertextuality"
 msgstr ""
 
-#: treeflow/templates/components/subbar.html:13
-#: treeflow/templates/pages/methodology.html:318
-msgid "Dictionary"
-msgstr ""
-
 #: treeflow/templates/components/subbar.html:28
-#: treeflow/templates/pages/resources.html:16
+#: treeflow/templates/pages/resources.html:17
 msgid "Handbooks"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:29
-#: treeflow/templates/pages/resources.html:30
+#: treeflow/templates/pages/resources.html:31
 msgid "Kosh"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:30
-#: treeflow/templates/pages/resources.html:127
+#: treeflow/templates/pages/resources.html:128
 msgid "Zotero"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:38
-#: treeflow/templates/pages/team.html:16
+#: treeflow/templates/pages/team.html:17
 msgid "Iranian Studies"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:39
-#: treeflow/templates/pages/team.html:239
+#: treeflow/templates/pages/team.html:216
 msgid "Digital Humanities"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:40
-#: treeflow/templates/pages/team.html:352
+#: treeflow/templates/pages/team.html:317
 msgid "Cooperation Partners"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:17
+#: treeflow/templates/pages/contact.html:18
 msgid ""
 "For any enquiries or remarks relating to the project, please contact us via "
 "the following email address:<a class=\"text-sm lg:text-sm md:text-xs sm:text-"
@@ -892,11 +981,11 @@ msgid ""
 "\">contact-mpcd@uni-koeln.de</a>"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:19
+#: treeflow/templates/pages/contact.html:20
 msgid "Privacy Protection Statement"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:21
+#: treeflow/templates/pages/contact.html:22
 msgid ""
 "Generally, the <a href=\"https://portal.uni-koeln.de/en/privacy-protection-"
 "statement\" class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:"
@@ -904,24 +993,24 @@ msgid ""
 "a> applies to this project; with the specific additions stated below:"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:23
+#: treeflow/templates/pages/contact.html:24
 msgid "Responsible for the content of this website"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:29
-#: treeflow/templates/pages/contact.html:32
+#: treeflow/templates/pages/contact.html:30
+#: treeflow/templates/pages/contact.html:33
 msgid "University of Cologne"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:32
+#: treeflow/templates/pages/contact.html:33
 msgid "Project number"
 msgstr ""
 
-#: treeflow/templates/pages/contact.html:32
+#: treeflow/templates/pages/contact.html:33
 msgid "VAT identification number"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:18
+#: treeflow/templates/pages/methodology.html:19
 msgid ""
 "Among the goals of MPCD is an exact representation of the texts as they "
 "appear in the selected manuscripts. Although the manuscripts are "
@@ -940,7 +1029,7 @@ msgid ""
 "project."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:21
+#: treeflow/templates/pages/methodology.html:22
 msgid ""
 "Following pre-annotation, the work of the philologists sets in, who cross-"
 "check the pre-annotated text against the manuscript. Transliteration and "
@@ -957,7 +1046,7 @@ msgid ""
 "text-off hover:text-action\" href=\"#dictionary\">[Dictionary]</a>."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:24
+#: treeflow/templates/pages/methodology.html:25
 msgid ""
 "By means of the texts that have been provided with a syntactic annotation, "
 "supported by the philologist’ reviewing of the automatically produced "
@@ -967,7 +1056,7 @@ msgid ""
 "transparent to the end user."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:29
+#: treeflow/templates/pages/methodology.html:30
 msgid ""
 "Each token is provided with a transliteration and a transcription. The "
 "<b>transliteration</b> depicts all kinds of spelling variation found in the "
@@ -977,7 +1066,7 @@ msgid ""
 "stemmatological analyses."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:32
+#: treeflow/templates/pages/methodology.html:33
 #, python-format
 msgid ""
 "The <b>transcription</b> represents a phonemic (phonographic) interpretation "
@@ -998,25 +1087,25 @@ msgid ""
 "the manuscripts."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:35
+#: treeflow/templates/pages/methodology.html:36
 msgid ""
 "Finally, each token is attributed to an abstract <b>lemma</b>, which shows "
 "neither spelling nor phonemic-phonetic variation."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:42
+#: treeflow/templates/pages/methodology.html:43
 msgid "transliteration"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:45
+#: treeflow/templates/pages/methodology.html:46
 msgid "transcription"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:48
+#: treeflow/templates/pages/methodology.html:49
 msgid "lemma"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:68
+#: treeflow/templates/pages/methodology.html:69
 msgid ""
 "Each token receives a morphological and a syntactic annotation based on the "
 "standard <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:"
@@ -1027,32 +1116,32 @@ msgid ""
 "the context:"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:71
+#: treeflow/templates/pages/methodology.html:72
 msgid ""
 "abar ‘up, above’ as ‘Adverb’ with the feature “AdvType=Loc” (i.e. local "
 "adverbial)"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:74
+#: treeflow/templates/pages/methodology.html:75
 msgid ""
 "abar ‘on, over’ as ‘Adposition’ with the feature “AdpType=Prep” (i.e. "
 "preposition)"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:77
+#: treeflow/templates/pages/methodology.html:78
 msgid ""
 "The syntactic annotation indicates the syntactic role of a token as well as "
 "its dependency in the sentence (see the following figure regarding Dēnkard "
 "6, Kap. 1, 166)."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:144
+#: treeflow/templates/pages/methodology.html:145
 msgid ""
 "“and there are some things in religion, for which self-abandonment is to be "
 "done”"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:152
+#: treeflow/templates/pages/methodology.html:153
 msgid ""
 "“Head” or “Root” of the sentence is the verb of the main clause “(be) "
 "inside”. The head of each phrase (subject, adpositional expression, "
@@ -1061,7 +1150,7 @@ msgid ""
 "instance, adpositions are related by “case” to their complement)."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:155
+#: treeflow/templates/pages/methodology.html:156
 msgid ""
 "By means of queries that combine both morphological and syntactic "
 "information, we are able to give quantitative analyses of Middle Persian "
@@ -1071,7 +1160,7 @@ msgid ""
 "can be plural? Which concepts can be realized as subjects?"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:160
+#: treeflow/templates/pages/methodology.html:161
 msgid ""
 "The semantic annotation of the texts is carried out on two levels. On the "
 "lexical level, each token is assigned a meaning in accordance with the given "
@@ -1082,7 +1171,7 @@ msgid ""
 "usual way."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:163
+#: treeflow/templates/pages/methodology.html:164
 msgid ""
 "Particular attention is given to technical terms, that is, words that show a "
 "special meaning when used in a specific semantic context, in which case they "
@@ -1099,7 +1188,7 @@ msgid ""
 "technical term."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:166
+#: treeflow/templates/pages/methodology.html:167
 msgid ""
 "On the sentence level, the annotator provides each sentence with a working "
 "translation. However, this translation is primarily meant to be used "
@@ -1109,62 +1198,62 @@ msgid ""
 "end user."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:171
+#: treeflow/templates/pages/methodology.html:172
 msgid ""
 "In Zand texts, i.e., Middle Persian (MP) texts translated from Avestan "
 "(Av.), the annotation involves a matching of MP words with their underlying "
 "Av. forms and lemmata. See the following example from Yasna 9.1:"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:176
+#: treeflow/templates/pages/methodology.html:177
 msgid "MP transcription"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:212
+#: treeflow/templates/pages/methodology.html:213
 msgid "and"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:215
+#: treeflow/templates/pages/methodology.html:216
 msgid "he"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:218
+#: treeflow/templates/pages/methodology.html:219
 msgid "from"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:221
+#: treeflow/templates/pages/methodology.html:222
 msgid "him"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:224
+#: treeflow/templates/pages/methodology.html:225
 msgid "asked"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:227
+#: treeflow/templates/pages/methodology.html:228
 msgid "Zarathustra"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:230
+#: treeflow/templates/pages/methodology.html:231
 msgid "that"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:233
+#: treeflow/templates/pages/methodology.html:234
 msgid "who"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:236
+#: treeflow/templates/pages/methodology.html:237
 msgid "man"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:239
+#: treeflow/templates/pages/methodology.html:240
 msgid "you are"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:296
+#: treeflow/templates/pages/methodology.html:297
 msgid "And he, Zarathustra, asked him: “who are you, O man?”"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:303
+#: treeflow/templates/pages/methodology.html:304
 msgid ""
 "Through their shared passage IDs, the Zand texts incorporated in the MPCD "
 "database are linked up with their Av. base texts as presented in the "
@@ -1173,14 +1262,14 @@ msgid ""
 "de/\" target=\"_blank\">“Corpus Avesticum Berolinense”</a>, FU Berlin)."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:306
+#: treeflow/templates/pages/methodology.html:307
 msgid ""
 "The linking-up of the MP and Av. texts will provide opportunities for "
 "various kinds of queries into the correspondences between the MP and Av. "
 "lexicon and vice-versa."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:309
+#: treeflow/templates/pages/methodology.html:310
 msgid ""
 "Often the mutual relation between the MP text and its Av. basis cannot be "
 "fully captured on the word level, but it requires taking into account the "
@@ -1191,14 +1280,14 @@ msgid ""
 "adpositional constructions are used to render which Av. case forms?”"
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:312
+#: treeflow/templates/pages/methodology.html:313
 msgid ""
 "Parallel passages within the Zand corpus are also going to be linked up, so "
 "that it will become possible to evaluate diverging meanings of similar or "
 "mutually identical Av. passages."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:315
+#: treeflow/templates/pages/methodology.html:316
 msgid ""
 "Moreover, the incorporation of the Zand texts into the corpus of MPCD will "
 "enable the identification of Zand-specific vocabulary in the context of our "
@@ -1206,7 +1295,7 @@ msgid ""
 "action\" href=\"#dictionary\">dictionary</a>."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:320
+#: treeflow/templates/pages/methodology.html:321
 msgid ""
 "Work on the dictionary consists of two basic steps. The first one takes "
 "place in the form of the <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs "
@@ -1218,7 +1307,7 @@ msgid ""
 "terms receive special attention already during the annotation work."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:323
+#: treeflow/templates/pages/methodology.html:324
 msgid ""
 "The second step in the preparation of the dictionary will be initiated in "
 "the second half of the runtime of the project and focuses on the "
@@ -1229,7 +1318,7 @@ msgid ""
 "researchers coming from other fields."
 msgstr ""
 
-#: treeflow/templates/pages/methodology.html:326
+#: treeflow/templates/pages/methodology.html:327
 msgid ""
 "A typical dictionary entry will comprise the following types of information: "
 "hierarchically arranged meanings, conceptual categories, orthographic and "
@@ -1241,11 +1330,11 @@ msgid ""
 "Berolinense”</a>), and bibliographical references."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:17
+#: treeflow/templates/pages/resources.html:18
 msgid "Handbook Text encoding"
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:19
+#: treeflow/templates/pages/resources.html:20
 #, python-format
 msgid ""
 "The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
@@ -1258,11 +1347,11 @@ msgid ""
 "(e.g. of diacritics or typos)."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:21
+#: treeflow/templates/pages/resources.html:22
 msgid "Handbook Morphology"
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:23
+#: treeflow/templates/pages/resources.html:24
 #, python-format
 msgid ""
 "The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
@@ -1276,11 +1365,11 @@ msgid ""
 "word forms and their corresponding tags."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:25
+#: treeflow/templates/pages/resources.html:26
 msgid "Handbook Syntax"
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:27
+#: treeflow/templates/pages/resources.html:28
 #, python-format
 msgid ""
 "The <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
@@ -1293,7 +1382,7 @@ msgid ""
 "the adaptation of UD to Middle Persian."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:32
+#: treeflow/templates/pages/resources.html:33
 msgid ""
 "To facilitate our lexicographical work, we began with the digitization of "
 "the more important available Middle Persian dictionaries and glossaries "
@@ -1303,7 +1392,7 @@ msgid ""
 "several dictionaries and glossaries in one combined query."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:35
+#: treeflow/templates/pages/resources.html:36
 msgid ""
 "As is well-known to anyone engaged in the philology of Pahlavi, the past "
 "century has seen the use of several conflicting systems of transcribing the "
@@ -1315,7 +1404,7 @@ msgid ""
 "systems used by the respective authors."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:38
+#: treeflow/templates/pages/resources.html:39
 msgid ""
 "The digitized materials coupled with Kosh constitute an important tool for "
 "our work. In order to allow a broader public to benefit from this tool, we "
@@ -1327,50 +1416,50 @@ msgid ""
 "to expand this list in the future:"
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:103
+#: treeflow/templates/pages/resources.html:104
 msgid "Using Kosh"
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:107
+#: treeflow/templates/pages/resources.html:108
 msgid ""
 "First, the user has to select the dictionaries to be searched. The simplest "
 "approach is to select all of them."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:110
+#: treeflow/templates/pages/resources.html:111
 msgid ""
 "Next, one has to select the specific field that is to be searched. In most "
 "cases, the relevant field will be “trc” (transcription), but other fields "
 "such as “sense” (meaning) are searchable as well."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:113
+#: treeflow/templates/pages/resources.html:114
 msgid ""
 "Under “Query Type”, the most relevant options to be chosen are “wildcard” "
 "and “regexp” (regular expressions)."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:116
+#: treeflow/templates/pages/resources.html:117
 msgid ""
 "Through the drop-down menu “Query Size”, the results shown may be restricted "
 "to a certain number."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:119
+#: treeflow/templates/pages/resources.html:120
 msgid ""
 "By entering a keyword (e.g., a Middle Persian word in transcription, "
 "optionally enlarged by wildcards) into the “Search”-field, followed by a "
 "click on “Search”, the search is initiated."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:122
+#: treeflow/templates/pages/resources.html:123
 msgid ""
 "One is further able to define the fields to be shown in the search result: "
 "identifier (“id”), transcription (“trc”), transliteration (“trl”), meaning "
 "(“sense”), morphological features (“gramm”), attestations (“attest”), etc."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:129
+#: treeflow/templates/pages/resources.html:130
 msgid ""
 "We are compiling an extensive bibliography on publications related to MPCD "
 "in a <a class=\"text-sm lg:text-sm md:text-xs sm:text-xs text-off hover:text-"
@@ -1378,7 +1467,7 @@ msgid ""
 "\"_blank\">Zotero database</a>."
 msgstr ""
 
-#: treeflow/templates/pages/resources.html:133
+#: treeflow/templates/pages/resources.html:134
 msgid "Timeline of Manuscripts"
 msgstr ""
 

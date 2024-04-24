@@ -1,13 +1,13 @@
 <ul class="flex flex-col" id="images_{{manuscript.id}}">
     {% for image in images %}
-    <li class="p-0 m-0 h-4 flex flex-row gap-1">│</li>
-    <li class="p-0 m-0 h-4 flex flex-row gap-1">
+    <li class="flex flex-row h-4 gap-1 p-0 m-0 -mt-2 ml-[0.06rem]">│</li>
+    <li class="flex flex-row h-6 gap-1 p-0 m-0">
       <span>{%if forloop.last %}└{%else%}├{%endif%}─</span>
       <div class="flex flex-row gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
-          class="w-5 h-5 hover:fill-off-graded-600 cursor-pointer OSDCaller"
+          class="w-5 h-5 cursor-pointer hover:fill-off-graded-600 OSDCaller"
           id="{{image.identifier}}"
         >
           <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
