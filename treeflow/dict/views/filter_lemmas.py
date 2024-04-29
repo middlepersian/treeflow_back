@@ -1,12 +1,13 @@
+import logging
+import re
+
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import HttpResponse
 from django.urls import reverse
 
+from treeflow.corpus.templatetags.dict_tags import customABCSort
 from treeflow.dict.models.lemma import Lemma
-import re
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,9 @@ def filter_lemmas(request):
 
     # Div generation
     lemma_divs = []
+
+    filtered_lemmas = customABCSort(filtered_lemmas)
+
     for lemma in filtered_lemmas:
         url = reverse('dict:lemma_details', kwargs={'lemma_id': lemma.id})
 

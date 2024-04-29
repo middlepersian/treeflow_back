@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n dict_tags %}
 
 {% block content %}
   <div class="flex flex-row h-full overflow-hidden">
@@ -59,9 +59,11 @@
       <div class="flex flex-row gap-2 p-[2px] overflow-hidden h-full">
         <div id="lemma-alphabet" class="flex flex-col overflow-y-auto rounded-md shadow-sm w-14 shadow-black scrollbar-thin" dir="rtl"></div>
         <div id="lemma-list" class="w-full overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
-          {% for lemma in lemmas %}
-            <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
-          {% endfor %}
+          {% with sortedLemmas=lemmas|customABCSort %}
+            {% for lemma in sortedLemmas %}
+              <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
+            {% endfor %}
+          {% endwith %}
         </div>
       </div>
     </div>
@@ -97,15 +99,15 @@
         }
       })
     
-      clearSearch()
+      clearSearch(false)
     
       insertAlphabetDivider()
       setUpAlphabet()
-
+    
       // Keep width of lemma list to prevent jumping after search
-      let element = document.getElementById('lemma-list');
-      let currentWidth = element.offsetWidth;
-      element.style.width = currentWidth + 'px';
+      let element = document.getElementById('lemma-list')
+      let currentWidth = element.offsetWidth
+      element.style.width = currentWidth + 'px'
     })
     
     // HTMX after lemma update
@@ -201,9 +203,13 @@
       }
     }
     
-    function clearSearch() {
+    function clearSearch(withSearch = true) {
       document.getElementById('search-input').value = ''
-      search('')
+
+      if(withSearch){
+        search('')
+      }
+
       document.getElementById('search-button').setAttribute('disabled', true)
       document.getElementById('clear-search-button').setAttribute('disabled', true)
     }
@@ -251,11 +257,11 @@
     
     function insertAlphabetDivider() {
       let lemmas = document.querySelectorAll('#lemma-list > div:not(:has(*))')
-
+    
       if (lemmas.length === 0) {
         return
       }
-
+    
       lemmas.forEach((lemma) => {
         let letter = lemma.textContent[0]
     
