@@ -56,10 +56,13 @@
         </div>
       </div>
 
-      <div id="lemma-list" class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
-        {% for lemma in lemmas %}
-          <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
-        {% endfor %}
+      <div class="flex flex-row gap-2 p-[2px] overflow-hidden h-full">
+        <div id="lemma-alphabet" class="flex flex-col overflow-y-auto rounded-md shadow-sm w-14 shadow-black scrollbar-thin" dir="rtl"></div>
+        <div id="lemma-list" class="w-full overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
+          {% for lemma in lemmas %}
+            <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
+          {% endfor %}
+        </div>
       </div>
     </div>
     <div class="w-full">
@@ -81,7 +84,7 @@
       if (x) {
         x.click()
       } else {
-        let y = document.getElementById('lemma-list').firstElementChild
+        let y = document.querySelector('#lemma-list > div')
         if (y) {
           y.click()
         }
@@ -95,6 +98,9 @@
       })
     
       clearSearch()
+    
+      insertAlphabetDivider()
+      setUpAlphabet()
     })
     
     // HTMX after lemma update
@@ -173,6 +179,9 @@
           } else {
             document.getElementById('controls-textbox').innerText = 'Loaded ' + data.split('\n').length + ' lemmas.'
           }
+    
+          insertAlphabetDivider()
+          setUpAlphabet()
         })
         .catch((error) => console.error('Error:', error))
     }
@@ -233,6 +242,53 @@
         label.querySelector('input').checked = false
       })
       e.checked = true
+    }
+    
+    function insertAlphabetDivider() {
+      let lemmas = document.querySelectorAll('#lemma-list > div')
+      lemmas.forEach((lemma) => {
+        let letter = lemma.textContent[0]
+    
+        let prevLetter = ''
+        if (lemma.previousElementSibling) {
+          prevLetter = lemma.previousElementSibling.textContent[0]
+        }
+        if (letter !== prevLetter) {
+          let h3 = document.createElement('h3')
+          h3.textContent = letter
+          h3.classList.add('overflow-hidden', 'text-center', 'text-xs', 'before:bg-black', "before:content-['']", 'before:inline-block', 'before:h-[1px]', 'before:relative', 'before:align-middle', 'before:w-1/2', 'before:right-2', 'before:-ml-[50%]', 'after:bg-black', "after:content-['']", 'after:inline-block', 'after:h-[1px]', 'after:relative', 'after:align-middle', 'after:w-1/2', 'after:left-2', 'after:-mr-[50%]')
+          h3.id = letter
+    
+          document.getElementById('lemma-list').insertBefore(h3, lemma)
+        }
+      })
+    }
+    
+    function setUpAlphabet() {
+      let alphabet = new Set()
+      let lemmas = document.querySelectorAll('#lemma-list > div')
+      lemmas.forEach((lemma) => {
+        alphabet.add(lemma.textContent[0])
+      })
+    
+      let alphabetDiv = document.getElementById('lemma-alphabet')
+      alphabetDiv.innerHTML = ''
+      alphabet.forEach((letter) => {
+        let div = document.createElement('div')
+        div.textContent = letter
+        div.classList.add('m-1', 'text-center', 'rounded-sm', 'shadow-sm', 'cursor-pointer', 'hover:text-white', 'hover:bg-action', 'shadow-black', 'text-sm')
+        div.setAttribute('dir', 'ltr')
+        div.addEventListener('click', function () {
+          let lemma = document.querySelector(`#lemma-list > h3[id^="${letter}"]`)
+          if (lemma) {
+            document.getElementById('lemma-list').scrollTo({
+              top: lemma.offsetTop - document.getElementById('lemma-list').offsetTop - 5,
+              behavior: 'smooth'
+            })
+          }
+        })
+        alphabetDiv.appendChild(div)
+      })
     }
   </script>
 {% endblock %}
