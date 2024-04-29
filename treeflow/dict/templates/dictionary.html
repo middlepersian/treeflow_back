@@ -101,6 +101,11 @@
     
       insertAlphabetDivider()
       setUpAlphabet()
+
+      // Keep width of lemma list to prevent jumping after search
+      let element = document.getElementById('lemma-list');
+      let currentWidth = element.offsetWidth;
+      element.style.width = currentWidth + 'px';
     })
     
     // HTMX after lemma update
@@ -245,7 +250,12 @@
     }
     
     function insertAlphabetDivider() {
-      let lemmas = document.querySelectorAll('#lemma-list > div')
+      let lemmas = document.querySelectorAll('#lemma-list > div:not(:has(*))')
+
+      if (lemmas.length === 0) {
+        return
+      }
+
       lemmas.forEach((lemma) => {
         let letter = lemma.textContent[0]
     
@@ -265,13 +275,21 @@
     }
     
     function setUpAlphabet() {
+      let alphabetDiv = document.getElementById('lemma-alphabet')
+      alphabetDiv.classList.remove('hidden')
+    
       let alphabet = new Set()
-      let lemmas = document.querySelectorAll('#lemma-list > div')
+      let lemmas = document.querySelectorAll('#lemma-list > div:not(:has(*))')
+    
+      if (lemmas.length === 0) {
+        alphabetDiv.classList.add('hidden')
+        return
+      }
+    
       lemmas.forEach((lemma) => {
         alphabet.add(lemma.textContent[0])
       })
     
-      let alphabetDiv = document.getElementById('lemma-alphabet')
       alphabetDiv.innerHTML = ''
       alphabet.forEach((letter) => {
         let div = document.createElement('div')
