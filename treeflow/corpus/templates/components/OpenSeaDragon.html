@@ -15,9 +15,6 @@
     <select name="image_id" id="imageSelector" class="w-full p-2 border rounded" onchange="openNewImage()">
     </select>
   </div>
-
-
-
 <!-- OpenSeaDragon viewer -->
   <div id="viewer" class="flex flex-col w-full h-full">
     <div id="openseadragon" class="flex h-full w-full"></div>
@@ -41,43 +38,40 @@
         if (!imageIdentifier) {
           return;
         }
-
         currentImage = imageIdentifier;
-        console.log(currentImage);
         initViewer();
-        if (viewer) {
-          viewer.open(
-            `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
-          );
-        }
       }
-
-      function initViewer() {
-
-
+      function initViewer() {    
+      if (!viewer) {
+          viewer = OpenSeadragon({
+            id: "openseadragon",
+            prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+            // Options to show the controls
+            showNavigator: true, // Displays a small navigator window
+            showNavigationControl: true, // Displays the navigation controls
+            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
+            // Additional zoom options
+            minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
+            maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
+            visibilityRatio: 1, // Part of the image must stay visible
+            constrainDuringPan: true, // Image constrained during panning
+            zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
+          });
+        }
         if (currentImage) {
-          // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
-          if (!viewer) {
-            viewer = OpenSeadragon({
-              id: "openseadragon",
-              prefixUrl: "//openseadragon.github.io/openseadragon/images/",
-              tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
-
-              // Options to show the controls
-              showNavigator: true, // Displays a small navigator window
-              showNavigationControl: true, // Displays the navigation controls
-              navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
-              // Additional zoom options
-              minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
-              maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
-              visibilityRatio: 1, // Part of the image must stay visible
-              constrainDuringPan: true, // Image constrained during panning
-              zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
-            });
-          }
-          viewer.open(
-            `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
-          );
+          fetch(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Image not available');
+              }
+              return response.json();
+            })
+            .then(data => {
+              viewer.open(data);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+      });
         }
       }
     </script>
@@ -95,9 +89,11 @@
         imageSelector.innerHTML = '';
         if (data.length === 0) {
           var option = document.createElement('option');
+          option.selected = true;
           option.value = '';
           option.textContent = 'No images available';
           imageSelector.appendChild(option);
+          imageSelector.selectedIndex = 0; // Automatically select the 'No images available' option
         } else {
           data.forEach(image => {
             var option = document.createElement('option');
@@ -106,8 +102,6 @@
             imageSelector.appendChild(option);
           });
         }
-
-        // Set the selected option of the imageSelector to the manuscript_image value
         imageSelector.value = "{{ manuscript_image }}";
       });
   }
