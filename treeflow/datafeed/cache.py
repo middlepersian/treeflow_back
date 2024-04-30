@@ -3,6 +3,7 @@ from django.db.models import Prefetch
 from django.db.models import Count
 from treeflow.corpus.models import Text, Section, Token, Source
 from treeflow.dict.models import Lemma
+from treeflow.images.models import Image
 from treeflow.corpus.utils.zotero import request_zotero_api_for_collection
 import logging
 
@@ -85,7 +86,6 @@ def cache_sections_for_texts():
     # Proceed with caching sections for each text
     for text in texts:
         cache_key = f"sections_for_text_{text.id}"
-        logger.info(f"Caching sections for text: {text.id}")
         all_sections = Section.objects.filter(text=text)
         sentence_ids = list(all_sections.filter(type='sentence').values_list('id', flat=True))
         section_types = set(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())        
@@ -106,6 +106,14 @@ def cache_manuscripts():
     cache.set(cache_key_manuscripts, manuscripts)
 
 
+def cache_images(): 
+    logger.info("Starting cache_images task")
+    cache_key_images = "images"
+    images = Image.objects.select_related('source')
+    cache.set(cache_key_images, images)
+    logger.info("Images cached")
+
+    
 def cache_lemmas():
     logger.info("Starting cache_lemmas task")
     cache_key_lemmas = "lemmas"

@@ -1,78 +1,115 @@
+{% load static %}
+{% load i18n %}
 
 {% block content %}
-<div class="flex flex-col w-full h-screen">
+<div class="col-span-4 sticky top-0 h-screen">
+
+
   <!-- Selector container with max-width and margin auto for horizontal centering -->
   <div class="flex flex-row justify-start w-full px-4 lg:max-w-lg mx-auto">
-    <select
-      name="source_id"
-      hx-get="{% url 'corpus:imageSelector' %}"
-      hx-target="#imageSelector"
-      id="sourceSelector"
-      class="w-full"
-      onchange="openNewImage();"
-    >
-      <option value="" default>Select a Source</option>
-      {% for source in sources %}
-      <option value="{{source.id}}">{{source.identifier}}</option>
+    <select name="source_id" id="sourceSelector" class="w-full p-2 border rounded">
+      {% for source in manuscripts %}
+        <option value="{{ source.id }}">{{ source.identifier }}</option>
       {% endfor %}
     </select>
-    <div id="imageSelector"></div>
+    <select name="image_id" id="imageSelector" class="w-full p-2 border rounded" onchange="openNewImage()">
+    </select>
   </div>
+<!-- OpenSeaDragon viewer -->
+  <div id="viewer" class="flex flex-col w-full h-full">
+    <div id="openseadragon" class="flex h-full w-full"></div>
+    <script type="text/javascript">
 
+      let viewer;
+      let currentImage = "{{ manuscript_image }}";
 
-<div id="viewer" class="flex flex-col w-full h-full">
-  <div id="openseadragon" class="flex h-full w-full"></div>
-  <script type="text/javascript">
-    let viewer;
-    let currentImage = "{{ manuscript_image }}";
+      document.addEventListener('DOMContentLoaded', function () {
+            if (currentImage) {
+              initViewer(); // Initialize viewer with the first manuscript image on load
+            }
+          });
 
-    document.addEventListener('DOMContentLoaded', function () {
-      if (currentImage) {
-        initViewer(); // Initialize viewer with the first manuscript image on load
+      function openNewImage() {
+        let imageID = event.target.value;
+        if (imageID == "") {
+          return;
+        }
+        let imageIdentifier = event.target.selectedOptions[0].text;
+        if (!imageIdentifier) {
+          return;
+        }
+        currentImage = imageIdentifier;
+        initViewer();
       }
-    });
-
-    function openNewImage() {
-      let selector = document.getElementById('sourceSelector');
-      let imageID = selector.value;
-      if (imageID == "") {
-        return;
-      }
-      let imageIdentifier = selector.selectedOptions[0].text;
-      if (!imageIdentifier) {
-        return;
-      }
-      
-      currentImage = imageIdentifier;
-      console.log(currentImage);
-      initViewer(); 
-    }
-
-    function initViewer() {
-      if (currentImage) {
-        if (!viewer) {
+      function initViewer() {    
+      if (!viewer) {
           viewer = OpenSeadragon({
             id: "openseadragon",
             prefixUrl: "//openseadragon.github.io/openseadragon/images/",
-            tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
-            showNavigator: true,
-            showNavigationControl: true,
-            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT,
-            minZoomLevel: 0.1,
-            maxZoomLevel: 10,
-            visibilityRatio: 1,
-            constrainDuringPan: true,
-            zoomPerScroll: 2,
+            // Options to show the controls
+            showNavigator: true, // Displays a small navigator window
+            showNavigationControl: true, // Displays the navigation controls
+            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
+            // Additional zoom options
+            minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
+            maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
+            visibilityRatio: 1, // Part of the image must stay visible
+            constrainDuringPan: true, // Image constrained during panning
+            zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
           });
-        } else {
-          viewer.open(
-            `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
-          );
+        }
+        if (currentImage) {
+          fetch(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Image not available');
+              }
+              return response.json();
+            })
+            .then(data => {
+              viewer.open(data);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+      });
         }
       }
-    }
-  </script>
+    </script>
+  </div>
 </div>
-</div>
+
+
+<script>
+  function setImages() {
+    var sourceId = document.getElementById('sourceSelector').value;
+    fetch(`/corpus/get-images/${sourceId}/`)
+      .then(response => response.json())
+      .then(data => {
+        var imageSelector = document.getElementById('imageSelector');
+        imageSelector.innerHTML = '';
+        if (data.length === 0) {
+          var option = document.createElement('option');
+          option.selected = true;
+          option.value = '';
+          option.textContent = 'No images available';
+          imageSelector.appendChild(option);
+          imageSelector.selectedIndex = 0; // Automatically select the 'No images available' option
+        } else {
+          data.forEach(image => {
+            var option = document.createElement('option');
+            option.value = image.id;
+            option.textContent = image.identifier;
+            imageSelector.appendChild(option);
+          });
+        }
+        imageSelector.value = "{{ manuscript_image }}";
+      });
+  }
+
+  document.getElementById('sourceSelector').addEventListener('change', setImages);
+
+  // Call the setImages function when the page is loaded
+  document.addEventListener('DOMContentLoaded', setImages);
+</script>
 
 {% endblock %}
