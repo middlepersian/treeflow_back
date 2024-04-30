@@ -66,17 +66,17 @@ def filter_lemmas(request):
     filtered_lemmas = customABCSort(filtered_lemmas)
 
     for lemma in filtered_lemmas:
-        url = reverse('dict:lemma_details', kwargs={'lemma_id': lemma.id})
+        url = reverse('dict:lemma_details', kwargs={'lemma_id': lemma['id']})
 
         div_html = (
-            f'<div id="{lemma.id}" '
+            f'<div id="{lemma["id"]}" '
             f'hx-get="{url}" '
             f'hx-target="#lemma-details" '
-            f'hx-replace-url="/dict/{lemma.id}/" '
+            f'hx-replace-url="/dict/{lemma["id"]}/" '
             f'onclick="selection(this)" '
             f'class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer '
             f'hover:text-white hover:bg-action shadow-black scroll-m-1">'
-            f'{lemma.word}'
+            f'{lemma["word"]}'
             f'</div>'
         )
         lemma_divs.append(div_html)
