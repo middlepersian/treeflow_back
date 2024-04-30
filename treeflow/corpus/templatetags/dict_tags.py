@@ -33,7 +33,10 @@ def customABCSort(data):
     'y', 'ŷ',
     'z', 'ź', 'ż', 'ž'
 ]
-
-    sorted_data = sorted(data, key=lambda x: custom_alphabetical_order.index(x.word[0]))
+    
+    try:
+        sorted_data = sorted(data.values(), key=lambda x: custom_alphabetical_order.index(x['word'][0]))
+    except Exception as e:
+        print(f"dict_tags error occured: {e}")
 
     return sorted_data
