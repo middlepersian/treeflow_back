@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 {% block content %}
-  <div class="overflow-x-auto">
-    <table class="min-w-full bg-white" id="texts">
-      <thead class="text-white bg-gray-800">
+  <div class="w-full h-full overflow-x-auto overflow-y-auto scrollbar-thin">
+    <table class="relative w-full bg-white" id="texts">
+      <thead class="text-white">
         <tr>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(0, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(0, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">#</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -18,7 +18,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(1, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(1, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Title' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -31,7 +31,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(2, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(2, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Identifier' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -44,7 +44,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(3, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(3, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Sigle' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -57,7 +57,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(4, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(4, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Sources' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -70,7 +70,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(5, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(5, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Genre' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -83,7 +83,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(6, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(6, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Version' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -96,7 +96,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(7, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(7, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Stage' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -109,7 +109,7 @@
               </svg>
             </div>
           </th>
-          <th class="px-6 py-3 my-auto text-xs font-medium tracking-wider text-center uppercase cursor-pointer group" onClick="sortTableByType(8, this);">
+          <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(8, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
               <span class="pr-4 group-hover:pr-0">{% trans 'Tokens' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -123,16 +123,16 @@
             </div>
           </th>
           {% if request.user.is_authenticated %}
-            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+            <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default bg-main-dark">
               {% trans 'Main Text View' %}
             </th>
-            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+            <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default bg-main-dark">
               {% trans 'Sentences View' %}
             </th>
-            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+            <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default bg-main-dark">
               {% trans 'Tokens View' %}
             </th>
-            <th class="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default">
+            <th class="sticky top-0 px-6 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default bg-main-dark">
               {% trans 'CONLL' %}
             </th>
           {% endif %}
@@ -295,7 +295,7 @@
         .then(data => {
           if (data.status === 'success') {
             // change the button to a href link to download the conll file
-            button.outerHTML = '<a class="p-1 rounded bg-main text-white" id="' + textId + '_conll" href="/corpus/export/text/' + textId + '" target="_blank" download>&#128462;</a>'
+            button.outerHTML = '<a class="p-1 text-white rounded bg-main" id="' + textId + '_conll" href="/corpus/export/text/' + textId + '" target="_blank" download>&#128462;</a>'
           }
           else if (data.status === 'error') {
             // change the button color to red

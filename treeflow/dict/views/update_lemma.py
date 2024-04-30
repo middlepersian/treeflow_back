@@ -4,10 +4,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 
+from treeflow.datafeed.tasks import cache_lemmas_task
 from treeflow.dict.models import Lemma
 from treeflow.dict.models.sense import Sense
 
-# Set up logging
 logger = logging.getLogger(__name__)
 
 def update_lemma(request, lemma_id):
@@ -60,8 +60,11 @@ def update_lemma(request, lemma_id):
                 # logger.info(f"Removed all related lemmas for lemma with ID {lemma_id}")
 
             lemma.save()
-
             updated_lemma_html = render_to_string('lemma_details.html', {'lemma': lemma})
+
+            # Update lemma cache
+            cache_lemmas_task()
+
             return HttpResponse(updated_lemma_html)
 
         else:

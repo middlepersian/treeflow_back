@@ -1,86 +1,28 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static tailwind_tags i18n %}
 
 {% block content %}
-
-<!-- Content block starts here -->
-<div class="flex flex-col w-full">
-
-    <!-- Main content and sidebar container -->
-    <div class="grid grid-cols-8 flex-grow">
-
-        <!-- Sidebar -->
-        <div
-            class="sticky top-[4rem] h-[calc(100vh-4rem)] overflow-y-auto col-span-1 bg-gray-100 p-4 z-10">
-
-            <!-- Text Dropdown -->
-            <div class="flex-none max-w-xs">{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
-
-            <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
-            {% if request.user.is_authenticated %}
-            <button id="startTokenSelection"
-                class="px-4 py-2 mt-4 font-bold text-white rounded bg-main hover:bg-main-dark"
-                data-mode="select">
-                {% trans 'Start Token Selection' %}
-            </button>
-            {% endif %}
-            <!-- Sidebar Content Including Edit Button -->
-            <div class="z-10 px-4 py-2 bg-gray-200 shadow-md">
-                <h2 class="mb-4 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
-                <!-- Dropdown Menu for selecting section type -->
-                <select id="sectionTypeSelector" class="mb-4">
-                    {% for section_type in section_types %}
-                    <option value="{{ section_type }}">{{ section_type|title }}</option>
-                    {% endfor %}
-                </select>
-                <!-- Section List Placeholder -->
-                <div id="sectionList">
-                    <!-- Sections will be dynamically loaded here -->
-                </div>
-
-            </div>
-
+  <div class="flex flex-row h-full overflow-y-hidden">
+    <!-- Sidebar -->
+    <div class="flex flex-col bg-gray-100">
+      <div class="flex flex-col justify-center gap-2 p-2">
+        <!-- Text Dropdown -->
+        <div class="flex-none max-w-xs">
+          {% include 'text_dropdown.html' with text_id=selected_text_id %}
         </div>
-
-        <!-- Content Area for sentences -->
-        <div class="col-span-3 overflow-y-auto relative">
-            <!-- Loop over sections of type 'sentence' -->
-            {% for section in sentence_sections %}
-            <!-- Sentence Block starts -->
-            <div
-                class="flex items-center p-2 mb-2 bg-white rounded shadow sentence">
-                <!-- Display sentence section title or identifier with a fixed width -->
-                <div id="{{ section.id }}" class="mr-1 font-bold sentence-identifier w-1/8">
-                    <a href="{% url 'corpus:ud_editor' section.id %}"
-                    class="text-main hover:text-main-dark">
-                    {{ section.number|default:"Untitled" }} 
-                  </a>
-                </div>
-
-
-                <!-- Sentence content tokens displayed next to the identifier -->
-                <div class="flex flex-wrap sentence-content w-2/8">
-                        {% for token in section.prefetched_tokens %}
-                            <span class="token inline-block rounded px-1 py-0.5 m-0.5"
-                                data-token-id="{{ token.id }}"
-                                data-section-id="{{ section.id }}">
-                                {{ token.transcription }}
-                            </span>
-                        {% endfor %}
-                </div>
-
-                {% if request.user.is_authenticated %}
-                <div class="mr-1 font-bold sentence-identifier w-1/8">
-                    <a href="{% url 'corpus:sentence' section.id %}"
-                    class="text-xl font-bold text-off hover:text-action"> 
-                    &#x270F; <!-- Unicode pencil icon -->
-                    </a>
-                </div>
-                {% endif %}
-                
-            </div>
-            {% empty %}
-            <p>{% trans 'No sentence sections found for this text.' %}</p>
+        <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
+        {% if request.user.is_authenticated %}
+          <button id="startTokenSelection" class="w-full px-4 py-2 font-bold text-white rounded bg-main hover:bg-off" data-mode="select">{% trans 'Start Token Selection' %}</button>
+        {% endif %}
+      </div>
+      <!-- Sidebar Content Including Edit Button -->
+      <div class="bg-gray-200 shadow-md">
+        <div class="flex flex-col justify-center w-full">
+          <h2 class="m-0 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
+          <!-- Dropdown Menu for selecting section type -->
+          <select id="sectionTypeSelector" class="m-auto">
+            {% for section_type in section_types %}
+              <option value="{{ section_type }}">{{ section_type|title }}</option>
             {% endfor %}
 
         
@@ -98,30 +40,57 @@
             {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
  
         </div>
+        <hr class="w-full mt-1 border-p-gray" />
+      </div>
+      <!-- Section List -->
+      <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin"></div>
+    </div>
+    <!-- Content Area for sentences -->
+    <div id="sentence-area" class="w-1/2 overflow-y-scroll scrollbar-thin">
+      <!-- Loop over sections of type 'sentence' -->
+      {% for section in sentence_sections %}
+        <!-- Sentence Block starts -->
+        <div class="flex items-center p-2 mb-2 bg-white rounded shadow sentence">
+          <!-- Display sentence section title or identifier with a fixed width -->
+          <div id="{{ section.id }}" class="mr-1 font-bold sentence-identifier w-1/8">
+            <a href="{% url 'corpus:ud_editor' section.id %}" class="text-main hover:text-main-dark">{{ section.number|default:'Untitled' }}</a>
+          </div>
+
+          <!-- Sentence content tokens displayed next to the identifier -->
+          <div class="flex flex-wrap sentence-content w-2/8">
+            {% for token in section.prefetched_tokens %}
+              <span class="token inline-block rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}" data-section-id="{{ section.id }}">{{ token.transcription }}</span>
+            {% endfor %}
+          </div>
+
+          {% if request.user.is_authenticated %}
+            <div class="mr-1 font-bold sentence-identifier w-1/8">
+              <a href="{% url 'corpus:sentence' section.id %}" class="text-xl font-bold text-off hover:text-action">&#x270F; <!-- Unicode pencil icon --></a>
+            </div>
+          {% endif %}
+        </div>
+        {% empty %}
+        <p>
+          {% trans 'No sentence sections found for this text.' %}
+        </p>
+      {% endfor %}
     </div>
 
-
-
-    <input type="hidden" id="id_selected_tokens" name="selected_tokens" value>
-
-    <!-- Scroll to Top -->
-    <div class="fixed hidden bottom-5 right-5 scroll-to-top">
-        <button class="px-4 py-2 font-bold text-white rounded bg-main hover:bg-main-dark"
-            onclick="scrollToTop()">↑</button>
+    <!-- Right Column for Image -->
+    <div id="iiif-viewer" class="w-1/2 m-2">
+      {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
     </div>
+
+    <input type="hidden" id="id_selected_tokens" name="selected_tokens" value />
 
     <div id="modalContainer"></div>
+  </div>
 
-</div>
+  <script>
+    var textId = '{{ selected_text_id }}'
+    console.log('Selected text ID:', textId)
+  </script>
 
-<script>
-    var textId = '{{ selected_text_id }}';
-    console.log("Selected text ID:", textId);
-</script>
-
-
-<script src="{% static 'corpus/section_navigator.js'%}"></script>
-<script src="{% static 'corpus/scroll_to_top.js'%}"></script>
-<script src="{% static 'corpus/section_creator.js'%}"></script>
-
-{% endblock content %}
+  <script src="{% static 'corpus/section_navigator.js' %}"></script>
+  <script src="{% static 'corpus/section_creator.js' %}"></script>
+{% endblock %}

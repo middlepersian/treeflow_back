@@ -2,6 +2,7 @@
 {% load static i18n %}
 
 {% block content %}
+<div class="overflow-y-scroll">
   {% include 'components/hero.html' %}
   <div className="flex flex-col">
     <div className="flex flex-col w-full pb-20">
@@ -37,10 +38,15 @@
       {% include 'components/footer.html' %}
     </div>
   </div>
+</div>
 
   <style>
     .publication-url a {
-      color: blue;
+      color: rgb(1, 53, 97);
+      text-decoration: underline;
+    }
+    .publication-url a:hover {
+      color: rgb(149, 193, 31);
     }
   </style>
 
