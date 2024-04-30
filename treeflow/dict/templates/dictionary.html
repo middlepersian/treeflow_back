@@ -3,7 +3,7 @@
 
 {% block content %}
   <div class="flex flex-row h-full overflow-hidden">
-    <div class="flex flex-col gap-2 m-2">
+    <div class="flex flex-col gap-2 m-2 max-w-[2/5]">
       <div class="flex flex-col gap-0 rounded-md">
         <div class="relative flex flex-row rounded-md shadow-sm shadow-black">
           <input id="search-input" type="text" class="w-full p-2 pr-6 rounded-md" placeholder="{% trans 'Search' %}..." oninput="changeControls(this)" />
@@ -58,7 +58,7 @@
 
       <div class="flex flex-row gap-2 p-[2px] overflow-hidden h-full">
         <div id="lemma-alphabet" class="flex flex-col overflow-y-auto rounded-md shadow-sm w-14 shadow-black scrollbar-thin" dir="rtl"></div>
-        <div id="lemma-list" class="w-full overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
+        <div id="lemma-list" class="w-full max-w-lg overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
           {% with sortedLemmas=lemmas|customABCSort %}
             {% for lemma in sortedLemmas %}
               <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
@@ -67,9 +67,9 @@
         </div>
       </div>
     </div>
-    <div class="w-full">
+    <div class="flex flex-col w-full mb-2">
       {% comment %}Lemma View{% endcomment %}
-      <div id="lemma-details" class="relative p-2 m-2 rounded-md shadow-sm bg-slate-400 shadow-black">
+      <div id="lemma-details" class="relative p-2 m-2 overflow-y-auto rounded-md shadow-sm bg-slate-400 shadow-black scrollbar-thin">
         <div class="text-center">
           {% trans 'Please wait while a lemma is being loaded.' %}
         </div>
