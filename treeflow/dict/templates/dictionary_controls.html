@@ -1,0 +1,77 @@
+{% load i18n %}
+
+<div class="flex justify-center w-full">
+  <div class="flex flex-col p-1 pt-0 shadow-sm rounded-b-md w-fit shadow-black">
+    <div class="flex flex-row justify-center gap-1">
+      <div class="relative">
+        <button class="p-1 text-lg text-white border-none shadow-sm outline-none cursor-pointer rounded-b-md shadow-black bg-off-white hover:bg-off peer" onclick="scrollToTop()">
+          <svg class="w-6 h-6 fill-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /> <polyline points="16 12 12 8 8 12" /> <line x1="12" y1="16" x2="12" y2="8" />
+          </svg>
+        </button>
+        <span class="absolute z-10 hidden w-16 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-1/2 top-full peer-hover:block bg-main">
+          <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+            <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+          </svg>
+          {% trans 'To top' %}
+        </span>
+      </div>
+      <div class="relative">
+        <button class="p-1 text-lg text-white border-none shadow-sm outline-none cursor-pointer rounded-b-md shadow-black bg-off-white hover:bg-off peer" onclick="scrollToBottom()">
+          <svg class="w-6 h-6 fill-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /> <polyline points="8 12 12 16 16 12" /> <line x1="12" y1="8" x2="12" y2="16" />
+          </svg>
+        </button>
+        <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
+          <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+            <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+          </svg>
+          {% trans 'To bottom' %}
+        </span>
+      </div>
+      <span class="my-1 border border-l border-main"></span>
+      <div class="relative">
+        <button class="p-1 text-lg text-white border-none shadow-sm outline-none cursor-pointer rounded-b-md shadow-black bg-off-white hover:bg-off peer" onclick="scrollToActive()">
+          <svg class="w-6 h-6 rounded-full text-main fill-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" /> <circle cx="12" cy="12" r="9" /> <line x1="12" y1="3" x2="12" y2="7" /> <line x1="12" y1="21" x2="12" y2="18" /> <line x1="3" y1="12" x2="7" y2="12" /> <line x1="21" y1="12" x2="18" y2="12" /> <line x1="12" y1="12" x2="12" y2="12.01" />
+          </svg>
+        </button>
+        <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
+          <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+            <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+          </svg>
+          {% trans 'Find active' %}
+        </span>
+      </div>
+      <div class="relative">
+        <button id="clear-search-button" class="p-1 text-lg text-white border-none shadow-sm outline-none cursor-pointer rounded-b-md shadow-black bg-off-white hover:bg-off disabled:cursor-default disabled:hover:bg-off-white peer group" disabled onclick="clearSearch()">
+          <svg class="w-6 h-6 fill-main group-disabled:fill-main/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" /> <line x1="15" y1="9" x2="9" y2="15" /> <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+        </button>
+        <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
+          <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+            <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+          </svg>
+          {% trans 'Clear Search' %}
+        </span>
+      </div>
+      <div class="relative">
+        <button class="p-1 text-lg text-white border-none shadow-sm outline-none cursor-pointer rounded-b-md shadow-black bg-off-white hover:bg-off peer" onclick="toggleSearchSettings()">
+          <svg class="w-6 h-6 rounded-full text-main fill-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" /> <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
+        <span class="absolute z-10 hidden w-20 p-1 text-sm font-semibold text-center text-white rounded-md select-none -left-3/4 top-full peer-hover:block bg-main">
+          <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+            <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+          </svg>
+          {% trans 'Search settings' %}
+        </span>
+      </div>
+    </div>
+    <div id="controls-textbox" class="text-xs text-center">
+      Loaded {{ lemmas|length }} lemmas.
+    </div>
+  </div>
+</div>
