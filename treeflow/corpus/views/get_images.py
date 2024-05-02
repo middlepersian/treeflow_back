@@ -7,34 +7,27 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_images_view(request, source_id, manuscript_image=None):
+def get_images_view(request):
+    source_identifier = request.GET.get("source_identifier", None)
+ 
+    logger.info(f"source_identifier: {source_identifier}")
 
-    cache_key_images = f"images_{source_id}_{manuscript_image}"
-    logger.info(f"source_id: {source_id}, manuscript_image: {manuscript_image}")
+    cache_key_images = "images"
     images = cache.get(cache_key_images)
-    
-    logger.info(f"source_id: {source_id}, manuscript_image: {manuscript_image}")
 
     if images is None:
         logger.info("Cache miss for images - Fetching images from database.")
         images = Image.objects.select_related("source")
-
         cache.set(cache_key_images, images)
     else:
         logger.info("Images already cached")
 
-    if manuscript_image:
-        images = images.filter(identifier=manuscript_image)
-        source = images.first().source
-    else:
-        images = images.filter(source_id=source_id)    
+    if source_identifier:
+        logger.info(f"Filtering images for source_identifier: {source_identifier}")
+        images = images.filter(source__identifier=source_identifier)
+        logger.info(f"Images: {images}")
 
     data = list(images.values())
     response = JsonResponse(data, safe=False)
-
-    # Add the manuscript_image and source to the response
-    if manuscript_image:
-        response['manuscript_image'] = manuscript_image
-        response['source'] = source.identifier if source else source_id
 
     return response

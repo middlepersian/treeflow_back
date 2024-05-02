@@ -9,7 +9,7 @@
   <div class="flex flex-row justify-start w-full px-4 lg:max-w-lg mx-auto">
     <select name="source_id" id="sourceSelector" class="w-full p-2 border rounded">
       {% for source in manuscripts %}
-        <option value="{{ source.id }}">{{ source.identifier }}</option>
+        <option value="{{ source.identifier }}">{{ source.identifier }}</option>
       {% endfor %}
     </select>
     <select name="image_id" id="imageSelector" class="w-full p-2 border rounded" onchange="openNewImage()">
@@ -20,96 +20,213 @@
     <div id="openseadragon" class="flex h-full w-full"></div>
     <script type="text/javascript">
 
-      let viewer;
-      let currentImage = "{{ manuscript_image }}";
+    let viewer;
+    let currentImage = "{{ manuscript_image }}";
+    // check if currentImage is "{{ manuscript_image }}"; and  update the selectors
+    //var sourceId = document.getElementById('sourceSelector').value;
 
-      document.addEventListener('DOMContentLoaded', function () {
-            if (currentImage) {
-              initViewer(); // Initialize viewer with the first manuscript image on load
+    let sourceSelector = document.getElementById('sourceSelector');
+    let imageSelector = document.getElementById('imageSelector');
+    let sourceId = sourceSelector.value;
+    let imageIdentifier = imageSelector.value;
+
+    console.log('currentImage:', currentImage);
+    console.log('sourceId:', sourceId);
+
+    // split the currentImage to get the sourceId and imageId
+    if (currentImage) {
+      let splitImage = currentImage.split('_');
+      sourceIdentifier = splitImage[0];
+      imageIdentifier = currentImage;
+      // log
+      console.log('sourceIdentifier:', sourceIdentifier);
+      console.log('imageIdentifier:', imageIdentifier);
+    }
+
+
+    function updateSelectorsBasedOnCurrentImage() {
+        console.log('Executing updateSelectorsBasedOnCurrentImage');
+
+        let splitImage = currentImage.split('_');
+        if (splitImage.length < 2) {
+            console.log('CurrentImage format is incorrect.');
+            return; // Ensure currentImage format is as expected
+        }
+
+        let currentSourceIdentifier = splitImage[0];
+        console.log('Current source identifier:', currentSourceIdentifier);
+
+        // Set the source selector if the option exists
+        let sourceOptionExists = Array.from(sourceSelector.options).some(option => option.value === currentSourceIdentifier);
+        if (sourceOptionExists) {
+            sourceSelector.value = currentSourceIdentifier;
+            console.log('Source selector updated to:', currentSourceIdentifier);
+        } else {
+            console.log('Source Identifier not found in selector options:', currentSourceIdentifier);
+        }
+
+        updateImageOptions(currentSourceIdentifier, currentImage);
+    }
+
+    function updateImageOptions(sourceIdentifier, manuscriptImage) {
+        console.log('Fetching images for source_identifier:', sourceIdentifier);
+        let baseUrl = '/corpus/get-images/';
+        let params = new URLSearchParams();
+
+        if (sourceIdentifier) {
+            params.append('source_identifier', sourceIdentifier);
+        }
+
+        fetch(`${baseUrl}?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                // update the sourceSelector
+                // get the current sourceIdentifier and set it as selected
+                sourceSelector.value = sourceIdentifier;
+
+                // update the imageSelector
+
+                imageSelector.innerHTML = '';
+                let found = false;
+
+                data.forEach(image => {
+                    let option = document.createElement('option');
+                    option.value = image.id;
+                    option.textContent = image.identifier;
+                    imageSelector.appendChild(option);
+                    if (image.identifier === manuscriptImage) {
+                        option.selected = true;
+                        found = true;
+                        console.log('Image selector updated to:', manuscriptImage);
+                    }
+                });
+
+                if (!found) {
+                    console.log('Manuscript image ID not found in options:', manuscriptImage);
+                    imageSelector.value = '';
+                }
+
+                if (viewer) {
+                    viewer.destroy();
+                    viewer = null;
+                }
+                initViewer(); // Re-initialize viewer with the selected image
+                updateSourceSelector(sourceIdentifier); // Update the source selector
+            })
+            .catch(error => console.error('Error fetching images:', error));
+    }
+
+
+    function updateSourceSelector(sourceIdentifier) {
+        // This assumes you have the source options loaded or you need to load them here
+        console.log('Available options at the time of update:', Array.from(sourceSelector.options).map(opt => opt.value));
+
+        const sourceOption = Array.from(sourceSelector.options).find(option => option.value === sourceIdentifier);
+        if (sourceOption) {
+            sourceSelector.value = sourceIdentifier;
+            console.log('Source selector successfully updated to:', sourceIdentifier);
+        } else {
+            console.log('sourceIdentifier not found in options:', sourceIdentifier);
+        }
+    }
+    function openNewImage() {
+      let imageID = event.target.value;
+      if (imageID == "") {
+        return;
+      }
+      let imageIdentifier = event.target.selectedOptions[0].text;
+      if (!imageIdentifier) {
+        return;
+      }
+      currentImage = imageIdentifier;
+      initViewer();
+    }
+
+    function initViewer() {
+      if (currentImage) {
+        // Check if the image is available on the IIIF server
+        fetch(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
+          .then(response => {
+            if (response.ok) {
+              // Image is available, initialize the viewer
+              if (!viewer) {
+                viewer = OpenSeadragon({
+                  id: "openseadragon",
+                  prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+                  tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
+                  showNavigator: true,
+                });
+              }
+              viewer.open(
+                `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
+              );
+            } else {
+              // Image is not available, show a message or handle it as needed
+              console.log('Image not available');
             }
           });
+      } 
+    }
 
-      function openNewImage() {
-        let imageID = event.target.value;
-        if (imageID == "") {
-          return;
-        }
-        let imageIdentifier = event.target.selectedOptions[0].text;
-        if (!imageIdentifier) {
-          return;
-        }
-        currentImage = imageIdentifier;
-        initViewer();
+    function setImages() {
+      let sourceId = document.getElementById('sourceSelector').value;
+      let baseUrl = '/corpus/get-images/';
+      let params = new URLSearchParams();
+
+      if (sourceId) {
+          params.append('source_identifier', sourceId);
       }
-      function initViewer() {    
-      if (!viewer) {
-          viewer = OpenSeadragon({
-            id: "openseadragon",
-            prefixUrl: "//openseadragon.github.io/openseadragon/images/",
-            // Options to show the controls
-            showNavigator: true, // Displays a small navigator window
-            showNavigationControl: true, // Displays the navigation controls
-            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
-            // Additional zoom options
-            minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
-            maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
-            visibilityRatio: 1, // Part of the image must stay visible
-            constrainDuringPan: true, // Image constrained during panning
-            zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
-          });
-        }
-        if (currentImage) {
-          fetch(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Image not available');
+
+      fetch(`${baseUrl}?${params.toString()}`)
+          .then(response => response.json())
+          .then(data => {
+              var imageSelector = document.getElementById('imageSelector');
+              imageSelector.innerHTML = '';
+              if (data.length === 0) {
+                  var option = document.createElement('option');
+                  option.selected = true;
+                  option.value = '';
+                  option.textContent = 'No images available';
+                  imageSelector.appendChild(option);
+                  imageSelector.selectedIndex = 0; // Automatically select the 'No images available' option
+              } else {
+                  data.forEach(image => {
+                      var option = document.createElement('option');
+                      option.value = image.id;
+                      option.textContent = image.identifier;
+                      imageSelector.appendChild(option);
+                  });
+                  // Initialize the viewer with the first image from the list if available
+                  if (data.length > 0) {
+                      currentImage = data[0].identifier;
+                      initViewer();
+                  }
               }
-              return response.json();
-            })
-            .then(data => {
-              viewer.open(data);
-            })
-            .catch(error => {
-              console.error('Error:', error);
-      });
+          })
+          .catch(error => console.error('Error fetching images:', error));
+
+    }
+
+    // Ensure the updateSelectorsBasedOnCurrentImage function is called appropriately on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function () {
+        // Log for debugging
+        console.log('DOMContentLoaded event triggered.');
+        console.log('Current image at DOMContentLoaded:', currentImage);
+
+        if (currentImage) {
+            updateSelectorsBasedOnCurrentImage();
+        } else {
+            console.log('CurrentImage is not set properly, fetching images for default source.');
+            console.log('CurrentImage:', currentImage);
+            setImages(); // Call setImages by default if no specific currentImage is provided
         }
-      }
-    </script>
+    });
+    document.getElementById('sourceSelector').addEventListener('change', setImages);
+
+  </script>
   </div>
 </div>
 
 
-<script>
-  function setImages() {
-    var sourceId = document.getElementById('sourceSelector').value;
-    fetch(`/corpus/get-images/${sourceId}/`)
-      .then(response => response.json())
-      .then(data => {
-        var imageSelector = document.getElementById('imageSelector');
-        imageSelector.innerHTML = '';
-        if (data.length === 0) {
-          var option = document.createElement('option');
-          option.selected = true;
-          option.value = '';
-          option.textContent = 'No images available';
-          imageSelector.appendChild(option);
-          imageSelector.selectedIndex = 0; // Automatically select the 'No images available' option
-        } else {
-          data.forEach(image => {
-            var option = document.createElement('option');
-            option.value = image.id;
-            option.textContent = image.identifier;
-            imageSelector.appendChild(option);
-          });
-        }
-        imageSelector.value = "{{ manuscript_image }}";
-      });
-  }
-
-  document.getElementById('sourceSelector').addEventListener('change', setImages);
-
-  // Call the setImages function when the page is loaded
-  document.addEventListener('DOMContentLoaded', setImages);
-</script>
 
 {% endblock %}
