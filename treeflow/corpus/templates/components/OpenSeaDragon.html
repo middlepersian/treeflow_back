@@ -20,96 +20,110 @@
     <div id="openseadragon" class="flex h-full w-full"></div>
     <script type="text/javascript">
 
-      let viewer;
-      let currentImage = "{{ manuscript_image }}";
+    let viewer;
+    let currentImage = "{{ manuscript_image }}";
+    // check if currentImage is "{{ manuscript_image }}"; and  update the selectors
+    let sourceSelector = document.getElementById('sourceSelector');
+    let imageSelector = document.getElementById('imageSelector');
+    let sourceId = sourceSelector.value;
+    let imageId = imageSelector.value;
+    // split the currentImage to get the sourceId and imageId
+    if (currentImage) {
+      let splitImage = currentImage.split('_');
+      sourceId = splitImage[0];
+      imageId = splitImage[1];
+    }
 
-      document.addEventListener('DOMContentLoaded', function () {
-            if (currentImage) {
-              initViewer(); // Initialize viewer with the first manuscript image on load
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (currentImage) {
+
+        // check if currentImage is "{{ manuscript_image }}"; and  update the selectors
+        let sourceSelector = document.getElementById('sourceSelector');
+        let imageSelector = document.getElementById('imageSelector');
+        let sourceId = sourceSelector.value;
+        let imageId = imageSelector.value;
+
+        initViewer(); // Initialize viewer with the first manuscript image on load
+
+      }
+      setImages();
+    });
+
+    function openNewImage() {
+      let imageID = event.target.value;
+      if (imageID == "") {
+        return;
+      }
+      let imageIdentifier = event.target.selectedOptions[0].text;
+      if (!imageIdentifier) {
+        return;
+      }
+      currentImage = imageIdentifier;
+      initViewer();
+    }
+
+    function initViewer() {
+      if (currentImage) {
+        // Check if the image is available on the IIIF server
+        fetch(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
+          .then(response => {
+            if (response.ok) {
+              // Image is available, initialize the viewer
+              if (!viewer) {
+                viewer = OpenSeadragon({
+                  id: "openseadragon",
+                  prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+                  tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
+                  showNavigator: true,
+                });
+              }
+              viewer.open(
+                `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`
+              );
+            } else {
+              // Image is not available, show a message or handle it as needed
+              console.log('Image not available');
             }
           });
+      } 
+    }
 
-      function openNewImage() {
-        let imageID = event.target.value;
-        if (imageID == "") {
-          return;
-        }
-        let imageIdentifier = event.target.selectedOptions[0].text;
-        if (!imageIdentifier) {
-          return;
-        }
-        currentImage = imageIdentifier;
-        initViewer();
-      }
-      function initViewer() {    
-      if (!viewer) {
-          viewer = OpenSeadragon({
-            id: "openseadragon",
-            prefixUrl: "//openseadragon.github.io/openseadragon/images/",
-            // Options to show the controls
-            showNavigator: true, // Displays a small navigator window
-            showNavigationControl: true, // Displays the navigation controls
-            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
-            // Additional zoom options
-            minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
-            maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
-            visibilityRatio: 1, // Part of the image must stay visible
-            constrainDuringPan: true, // Image constrained during panning
-            zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
-          });
-        }
-        if (currentImage) {
-          fetch(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Image not available');
-              }
-              return response.json();
-            })
-            .then(data => {
-              viewer.open(data);
-            })
-            .catch(error => {
-              console.error('Error:', error);
-      });
-        }
-      }
-    </script>
+    function setImages() {
+      var sourceId = document.getElementById('sourceSelector').value;
+      fetch(`/corpus/get-images/${sourceId}/`)
+        .then(response => response.json())
+        .then(data => {
+          var imageSelector = document.getElementById('imageSelector');
+          imageSelector.innerHTML = '';
+          if (data.length === 0) {
+            var option = document.createElement('option');
+            option.selected = true;
+            option.value = '';
+            option.textContent = 'No images available';
+            imageSelector.appendChild(option);
+            imageSelector.selectedIndex = 0; // Automatically select the 'No images available' option
+          } else {
+            data.forEach(image => {
+              var option = document.createElement('option');
+              option.value = image.id;
+              option.textContent = image.identifier;
+              imageSelector.appendChild(option);
+            });
+          }
+          // Initialize the viewer with the first image from the list
+          currentImage = data[0].identifier;
+          initViewer();
+        });
+    }
+
+  document.getElementById('sourceSelector').addEventListener('change', setImages);
+  // Call the setImages function when the page is loaded
+  document.addEventListener('DOMContentLoaded', setImages);
+  </script>
   </div>
 </div>
 
 
-<script>
-  function setImages() {
-    var sourceId = document.getElementById('sourceSelector').value;
-    fetch(`/corpus/get-images/${sourceId}/`)
-      .then(response => response.json())
-      .then(data => {
-        var imageSelector = document.getElementById('imageSelector');
-        imageSelector.innerHTML = '';
-        if (data.length === 0) {
-          var option = document.createElement('option');
-          option.selected = true;
-          option.value = '';
-          option.textContent = 'No images available';
-          imageSelector.appendChild(option);
-          imageSelector.selectedIndex = 0; // Automatically select the 'No images available' option
-        } else {
-          data.forEach(image => {
-            var option = document.createElement('option');
-            option.value = image.id;
-            option.textContent = image.identifier;
-            imageSelector.appendChild(option);
-          });
-        }
-        imageSelector.value = "{{ manuscript_image }}";
-      });
-  }
-
-  document.getElementById('sourceSelector').addEventListener('change', setImages);
-
-  // Call the setImages function when the page is loaded
-  document.addEventListener('DOMContentLoaded', setImages);
-</script>
 
 {% endblock %}
