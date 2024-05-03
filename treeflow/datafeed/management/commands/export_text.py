@@ -101,6 +101,10 @@ def text_to_conll(text:Text, cache_key) -> list[str]:
         "literature", "new_suggestion", "discussion", "gloss", "token_lang", "meaning_lang", "lemma_langs"
     ]
 
+    if len(sentences) == 0:
+        logger.debug("No sentences found")
+        cache.set(cache_key, {"status": "error", "error": "No sentences found"})
+        return []
     # header_row = "\t".join(header)
     conll = []
     if sentences:
@@ -110,7 +114,7 @@ def text_to_conll(text:Text, cache_key) -> list[str]:
             for line in sent:
                 conll.append(line.split("\t"))
             # log out 10% steps
-            if i % (len(sentences)//10) == 0:
+            if len(sentences)//10 > 0 and i % (len(sentences)//10) == 0:
                 logger.debug(f"Processed {i} sentences out of {len(sentences)} sentences. {i/len(sentences)*100:.2f}% done.")
             # log first sentence
             # if i == 0:
