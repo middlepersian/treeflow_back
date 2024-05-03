@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     const firstTokenId = tokenIds[0];
                     const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
                     if (firstTokenElement) {
-                        firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        let sentenceArea = document.getElementById('sentence-area');
+                        sentenceArea.scrollTo({ top: firstTokenElement.offsetTop - sentenceArea.offsetTop, behavior: 'smooth' });
                     }
                 }
             })
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 sectionList.innerHTML = '';
                 sections.forEach(section => {
                     const sectionDiv = document.createElement('div');
-                    sectionDiv.classList.add('section-item');
+                    sectionDiv.classList.add('section-item', 'cursor-pointer', 'hover:bg-action/50', 'rounded-md', 'pl-1');
                     sectionDiv.textContent = section.identifier || 'Untitled';
                     sectionDiv.dataset.sectionId = section.id;
 
@@ -98,6 +99,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (!isClosingSection) {
                             fetchAndHighlightSectionTokens(section.id);
                         }
+
+                        sectionList.querySelectorAll('.section-item').forEach(item => {
+                            item.classList.remove('bg-action');
+                        });
+                        this.classList.add('bg-action');
                     });
 
                     sectionList.appendChild(sectionDiv);

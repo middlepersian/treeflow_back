@@ -1,51 +1,149 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n dict_tags %}
 
 {% block content %}
   <div class="flex flex-row h-full overflow-hidden">
     <div class="flex flex-col gap-2 m-2">
-      <div class="rounded-md shadow-sm shadow-black">
-        <input type="text" class="p-2 rounded-md" placeholder="Search..." oninput="search(this)" />
+      <div class="flex flex-col gap-0 rounded-md">
+        <div class="relative flex flex-row rounded-md shadow-sm shadow-black">
+          <input id="search-input" type="text" class="w-full p-2 pr-6 rounded-md" placeholder="{% trans 'Search' %}..." oninput="changeControls(this)" />
+          <button id="search-button" class="absolute right-0 flex items-center h-full cursor-pointer rounded-r-md hover:bg-off disabled:pointer-events-none group peer" disabled onclick="search()">
+            <svg class="w-6 h-6 text-white fill-main group-disabled:fill-main/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+          <span class="absolute z-10 hidden w-16 p-1 text-sm font-semibold text-center text-white rounded-md select-none -right-5 top-[104%] peer-hover:block bg-main">
+            <svg class="absolute left-0 w-full h-2 rotate-180 text-main-dark-graded-900 bottom-full" x="0px" y="0px" viewBox="0 0 255 255">
+              <polygon class="fill-current" points="0,0 127.5,127.5 255,0" />
+            </svg>
+            {% trans 'Search' %}
+          </span>
+        </div>
+        {% include 'dictionary_controls.html' %}
       </div>
-      <div id="lemma-list" class="flex flex-col w-full h-full gap-1 overflow-y-scroll rounded-md shadow-sm shadow-black scrollbar-thin">
-        {% for lemma in lemmas %}
-          <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/dictionary/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
-        {% endfor %}
+
+      <div id="search-settings" class="hidden w-full rounded-md shadow-sm shadow-black">
+        <div class="w-full mb-2 text-sm font-semibold text-center">
+          {% trans 'Search modes' %}
+          <hr class="border-black" />
+        </div>
+        <div class="flex flex-col gap-1 p-1">
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" checked onchange="selectSearchMode(this, 'icontains')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">{% trans 'Contains' %}</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'startswith')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">{% trans 'Starts with' %}</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'endswith')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">{% trans 'Ends with' %}</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'iexact')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">{% trans 'Exact' %}</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'regex')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+            <span class="text-sm ms-3">RegEx</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex flex-row gap-2 p-[2px] overflow-hidden h-full">
+        <div id="lemma-alphabet" class="flex flex-col overflow-y-auto rounded-md shadow-sm w-14 shadow-black scrollbar-thin" dir="rtl"></div>
+        <div id="lemma-list" class="w-full overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
+          {% with sortedLemmas=lemmas|customABCSort %}
+            {% for lemma in sortedLemmas %}
+              <div id="{{ lemma.id }}" hx-get="{% url 'dict:lemma_details' lemma.id %}" hx-target="#lemma-details" hx-replace-url="/dict/{{ lemma.id }}/" hx onclick="selection(this)" class="p-1 m-1 mb-0 text-center rounded-sm shadow-sm cursor-pointer hover:text-white hover:bg-action shadow-black scroll-m-1">{{ lemma.word }}</div>
+            {% endfor %}
+          {% endwith %}
+        </div>
       </div>
     </div>
     <div class="w-full">
       {% comment %}Lemma View{% endcomment %}
       <div id="lemma-details" class="relative p-2 m-2 rounded-md shadow-sm bg-slate-400 shadow-black">
-        <div class="text-center">Please wait while a lemma is being loaded.</div>
+        <div class="text-center">
+          {% trans 'Please wait while a lemma is being loaded.' %}
+        </div>
       </div>
     </div>
   </div>
 
   <script>
+    let activeId
+    let activeSearchMode
+    
     document.addEventListener('DOMContentLoaded', function () {
       let x = document.getElementById('{{lemma_id}}')
       if (x) {
         x.click()
       } else {
-        let y = document.getElementById('lemma-list').firstElementChild
+        let y = document.querySelector('#lemma-list > div')
         if (y) {
           y.click()
         }
       }
+    
+      let searchModes = document.getElementById('search-settings').querySelectorAll('label')
+      searchModes.forEach((label) => {
+        if (label.querySelector('input').checked) {
+          activeSearchMode = label.querySelector('input').getAttribute('onchange').split("'")[1]
+        }
+      })
+    
+      clearSearch(false)
+    
+      insertAlphabetDivider()
+      setUpAlphabet()
+    
+      // Keep width of lemma list to prevent jumping after search
+      let element = document.getElementById('lemma-list')
+      let currentWidth = element.offsetWidth
+      element.style.width = currentWidth + 'px'
     })
     
+    // HTMX after lemma update
     document.body.addEventListener('htmx:afterSwap', function (event) {
       var targetId = event.detail.target.id
-      if (typeof targetId === 'string' && (targetId === 'lemma-form' || targetId === 'sense-form') && event.detail.xhr.status === 200) {
+      if (typeof targetId === 'string' && targetId === 'lemma-form' && event.detail.xhr.status === 200) {
         closeLemmaModal()
-        let x = document.getElementById('{{lemma_id}}')
-        if (x) {
-          x.click()
+    
+        // Refetching current lemma
+        fetch(`/dict/fetch_Lemma/${activeId}/`)
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById('lemma-details').innerHTML = data
+            htmx.process(document.getElementById('lemma-details'))
+          })
+          .catch((error) => console.error('Error:', error))
+    
+        // Refetching lemma list if necessary
+        if (!document.getElementById('search-input').value.trim().length > 0) {
+          search('')
+        } else{
+          search()
         }
       }
     })
     
+    // Enter key search for input
+    document.getElementById('search-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        search()
+      }
+    })
+    
     function selection(e) {
+      activeId = e.id
       const lemmaList = document.querySelector('#lemma-list')
     
       if (lemmaList) {
@@ -66,15 +164,156 @@
       })
     }
     
-    function search(e) {
-      document.querySelector('#lemma-list').childNodes.forEach((child) => {
-        if (child.nodeType === Node.ELEMENT_NODE) {
-          if (child.innerText.toLowerCase().includes(e.value.toLowerCase())) {
-            child.style.display = 'block'
-          } else {
-            child.style.display = 'none'
+    function search(filter = document.getElementById('search-input').value.trim()) {
+      var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter) + '&search_mode=' + encodeURIComponent(activeSearchMode)
+    
+      // The data returns the filtered lemmas already in HTML-div form.
+      fetch(url)
+        .then((response) => response.text())
+        .then((data) => {
+          var lemmaList = document.getElementById('lemma-list')
+          lemmaList.innerHTML = data
+          htmx.process(lemmaList)
+    
+          if (activeId) {
+            let active = document.getElementById(activeId)
+            if (active) {
+              active.click()
+            }
           }
+    
+          if (data === '') {
+            document.getElementById('controls-textbox').innerText = '{% trans "No lemmas found." %}'
+            document.getElementById('lemma-list').innerHTML = '<div class="flex w-full h-full"><button class="p-1 m-auto font-semibold text-white rounded-md bg-main hover:bg-off" onclick="clearSearch()">{% trans "Clear Search" %}</button></div>'
+          } else {
+            document.getElementById('controls-textbox').innerText = 'Loaded ' + data.split('\n').length + ' lemmas.'
+          }
+    
+          insertAlphabetDivider()
+          setUpAlphabet()
+        })
+        .catch((error) => console.error('Error:', error))
+    }
+    
+    function changeControls(e) {
+      if (e.value.trim().length > 0) {
+        document.getElementById('clear-search-button').removeAttribute('disabled')
+        document.getElementById('search-button').removeAttribute('disabled')
+      } else {
+        document.getElementById('clear-search-button').setAttribute('disabled', true)
+        document.getElementById('search-button').setAttribute('disabled', true)
+      }
+    }
+    
+    function clearSearch(withSearch = true) {
+      document.getElementById('search-input').value = ''
+
+      if(withSearch){
+        search('')
+      }
+
+      document.getElementById('search-button').setAttribute('disabled', true)
+      document.getElementById('clear-search-button').setAttribute('disabled', true)
+    }
+    
+    function scrollToActive() {
+      const lemmaList = document.querySelector('#lemma-list')
+      const active = document.querySelector('.bg-action')
+      if (active) {
+        lemmaList.scrollTo({
+          top: active.offsetTop - lemmaList.offsetTop - 5,
+          behavior: 'smooth'
+        })
+      }
+    }
+    
+    function scrollToBottom() {
+      const lemmaList = document.querySelector('#lemma-list')
+      lemmaList.scrollTo({
+        top: lemmaList.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+    
+    function scrollToTop() {
+      const lemmaList = document.querySelector('#lemma-list')
+      lemmaList.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+    
+    function toggleSearchSettings() {
+      document.getElementById('search-settings').classList.toggle('hidden')
+    }
+    
+    function selectSearchMode(e, mode) {
+      activeSearchMode = mode
+      let searchSettings = document.getElementById('search-settings')
+      let searchSettingsLabels = searchSettings.querySelectorAll('label')
+      searchSettingsLabels.forEach((label) => {
+        label.querySelector('input').checked = false
+      })
+      e.checked = true
+    }
+    
+    function insertAlphabetDivider() {
+      let lemmas = document.querySelectorAll('#lemma-list > div:not(:has(*))')
+    
+      if (lemmas.length === 0) {
+        return
+      }
+    
+      lemmas.forEach((lemma) => {
+        let letter = lemma.textContent[0]
+    
+        let prevLetter = ''
+        if (lemma.previousElementSibling) {
+          prevLetter = lemma.previousElementSibling.textContent[0]
         }
+        if (letter !== prevLetter) {
+          let h3 = document.createElement('h3')
+          h3.textContent = letter
+          h3.classList.add('overflow-hidden', 'text-center', 'text-xs', 'before:bg-black', "before:content-['']", 'before:inline-block', 'before:h-[1px]', 'before:relative', 'before:align-middle', 'before:w-1/2', 'before:right-2', 'before:-ml-[50%]', 'after:bg-black', "after:content-['']", 'after:inline-block', 'after:h-[1px]', 'after:relative', 'after:align-middle', 'after:w-1/2', 'after:left-2', 'after:-mr-[50%]')
+          h3.id = letter
+    
+          document.getElementById('lemma-list').insertBefore(h3, lemma)
+        }
+      })
+    }
+    
+    function setUpAlphabet() {
+      let alphabetDiv = document.getElementById('lemma-alphabet')
+      alphabetDiv.classList.remove('hidden')
+    
+      let alphabet = new Set()
+      let lemmas = document.querySelectorAll('#lemma-list > div:not(:has(*))')
+    
+      if (lemmas.length === 0) {
+        alphabetDiv.classList.add('hidden')
+        return
+      }
+    
+      lemmas.forEach((lemma) => {
+        alphabet.add(lemma.textContent[0])
+      })
+    
+      alphabetDiv.innerHTML = ''
+      alphabet.forEach((letter) => {
+        let div = document.createElement('div')
+        div.textContent = letter
+        div.classList.add('m-1', 'text-center', 'rounded-sm', 'shadow-sm', 'cursor-pointer', 'hover:text-white', 'hover:bg-action', 'shadow-black', 'text-sm')
+        div.setAttribute('dir', 'ltr')
+        div.addEventListener('click', function () {
+          let lemma = document.querySelector(`#lemma-list > h3[id^="${letter}"]`)
+          if (lemma) {
+            document.getElementById('lemma-list').scrollTo({
+              top: lemma.offsetTop - document.getElementById('lemma-list').offsetTop - 5,
+              behavior: 'smooth'
+            })
+          }
+        })
+        alphabetDiv.appendChild(div)
       })
     }
   </script>

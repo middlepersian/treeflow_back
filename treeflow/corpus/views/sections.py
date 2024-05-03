@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.core.cache import cache
 from django.db.models import Prefetch, prefetch_related_objects
 from treeflow.corpus.models import Section, Token, Text, Source
+from treeflow.images.models import Image
 from django.core import serializers
 import logging
 logger = logging.getLogger(__name__)
@@ -18,6 +19,18 @@ def sections_view(request, text_id=None):
         logger.info("Manuscripts cached for quick access")
     else:
         logger.info("Manuscripts already cached")
+
+
+    # cache images 
+    cache_key_images = "images"
+    images = cache.get(cache_key_images)
+    if images is None:
+        logger.info("Cache miss for images - Fetching images from database.")
+        images = Image.objects.select_related('source')
+        cache.set(cache_key_images, images)
+        logger.info("Images cached for quick access")
+    else:
+        logger.info("Images already cached")    
 
     # Fetch or cache texts
     cache_key_texts = "all_texts"
@@ -72,6 +85,7 @@ def sections_view(request, text_id=None):
         'selected_text_id': selected_text_id or '',
         'current_view': 'corpus:sections',
         'manuscripts': manuscripts,
+        'images': images,
         'manuscript_image': manuscript_image,  # Pass the manuscript image identifier or None
     }
 
