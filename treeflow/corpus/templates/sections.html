@@ -2,81 +2,308 @@
 {% load static tailwind_tags i18n %}
 
 {% block content %}
-  <div class="flex flex-row h-full overflow-y-hidden">
-    <!-- Sidebar -->
-    <div class="flex flex-col bg-gray-100">
-      <div class="flex flex-col justify-center gap-2 p-2">
-        <!-- Text Dropdown -->
-        <div class="flex-none max-w-xs">
-          {% include 'text_dropdown.html' with text_id=selected_text_id %}
-        </div>
-        <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
-        {% if request.user.is_authenticated %}
-          <button id="startTokenSelection" class="w-full px-4 py-2 font-bold text-white rounded bg-main hover:bg-off" data-mode="select">{% trans 'Start Token Selection' %}</button>
-        {% endif %}
+<div class="flex flex-row h-full overflow-y-hidden">
+  <!-- Sidebar -->
+  <div class="flex flex-col bg-gray-100">
+    <div class="flex flex-col justify-center gap-2 p-2">
+      <!-- Text Dropdown -->
+      <div class="flex-none max-w-xs">
+        {% include 'text_dropdown.html' with text_id=selected_text_id %}
       </div>
-      <!-- Sidebar Content Including Edit Button -->
-      <div class="bg-gray-200 shadow-md">
-        <div class="flex flex-col justify-center w-full">
-          <h2 class="m-0 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
-          <!-- Dropdown Menu for selecting section type -->
-          <select id="sectionTypeSelector" class="m-auto">
-            {% for section_type in section_types %}
-              <option value="{{ section_type }}">{{ section_type|title }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <hr class="w-full mt-1 border-p-gray" />
+      <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
+      {% if request.user.is_authenticated %}
+      <button id="startTokenSelection" class="w-full px-4 py-2 font-bold text-white rounded bg-main hover:bg-off"
+        data-mode="select">{% trans 'Start Token Selection' %}</button>
+      {% endif %}
+    </div>
+    <!-- Sidebar Content Including Edit Button -->
+    <div class="bg-gray-200 shadow-md">
+      <div class="flex flex-col justify-center w-full">
+        <h2 class="m-0 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
+        <!-- Dropdown Menu for selecting section type -->
+        <select id="sectionTypeSelector" class="m-auto">
+          {% for section_type in section_types %}
+          <option value="{{ section_type }}">{{ section_type|title }}</option>
+          {% endfor %}
+        </select>
       </div>
-      <!-- Section List -->
-      <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin"></div>
+      <hr class="w-full mt-1 border-p-gray" />
     </div>
-    <!-- Content Area for sentences -->
-    <div id="sentence-area" class="w-1/2 overflow-y-scroll scrollbar-thin">
-      <!-- Loop over sections of type 'sentence' -->
-      {% for section in sentence_sections %}
-        <!-- Sentence Block starts -->
-        <div class="flex items-center p-2 mb-2 bg-white rounded shadow sentence">
-          <!-- Display sentence section title or identifier with a fixed width -->
-          <div id="{{ section.id }}" class="mr-1 font-bold sentence-identifier w-1/8">
-            <a href="{% url 'corpus:ud_editor' section.id %}" class="text-main hover:text-main-dark">{{ section.number|default:'Untitled' }}</a>
-          </div>
+    <!-- Section List -->
+    <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin"></div>
+  </div>
+  <!-- Content Area for sentences -->
+  <div id="sentence-area" class="w-1/2 overflow-y-scroll scrollbar-thin">
+    <!-- Loop over sections of type 'sentence' -->
+    {% for section in sentence_sections %}
+    <!-- Sentence Block starts -->
+    <div class="flex items-center p-2 mb-2 bg-white rounded shadow sentence">
+      <!-- Display sentence section title or identifier with a fixed width -->
+      <div id="{{ section.id }}" class="mr-1 font-bold sentence-identifier w-1/8">
+        <a href="{% url 'corpus:ud_editor' section.id %}"
+          class="text-main hover:text-main-dark">{{section.number|default:'Untitled' }}</a>
+      </div>
 
-          <!-- Sentence content tokens displayed next to the identifier -->
-          <div class="flex flex-wrap sentence-content w-2/8">
-            {% for token in section.prefetched_tokens %}
-              <span class="token inline-block rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}" data-section-id="{{ section.id }}">{{ token.transcription }}</span>
-            {% endfor %}
-          </div>
+      <!-- Sentence content tokens displayed next to the identifier -->
+      <div class="flex flex-wrap sentence-content w-2/8">
+        {% for token in section.prefetched_tokens %}
+        <span class="token inline-block rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}"
+          data-section-id="{{ section.id }}">{{ token.transcription }}</span>
+        {% endfor %}
+      </div>
 
-          {% if request.user.is_authenticated %}
-            <div class="mr-1 font-bold sentence-identifier w-1/8">
-              <a href="{% url 'corpus:sentence' section.id %}" class="text-xl font-bold text-off hover:text-action">&#x270F; <!-- Unicode pencil icon --></a>
-            </div>
-          {% endif %}
-        </div>
-        {% empty %}
-        <p>
-          {% trans 'No sentence sections found for this text.' %}
-        </p>
-      {% endfor %}
+      {% if request.user.is_authenticated %}
+      <div class="mr-1 font-bold sentence-identifier w-1/8">
+        <button onclick="location.href='{% url 'corpus:sentence' section.id %}'"
+          class="text-sm bg-blue-500 text-white py-1 px-2 rounded">Edit</button>
+      </div>
+      {% endif %}
     </div>
-
-    <!-- Right Column for Image -->
-    <div id="iiif-viewer" class="w-1/2 m-2">
-      {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
-    </div>
-
-    <input type="hidden" id="id_selected_tokens" name="selected_tokens" value />
-
-    <div id="modalContainer"></div>
+    {% empty %}
+    <p>
+      {% trans 'No sentence sections found for this text.' %}
+    </p>
+    {% endfor %}
   </div>
 
-  <script>
-    var textId = '{{ selected_text_id }}'
-    console.log('Selected text ID:', textId)
-  </script>
+  <!-- Right Column for Image -->
+  <div id="iiif-viewer" class="w-1/2 m-2">
+    {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
+  </div>
 
-  <script src="{% static 'corpus/section_navigator.js' %}"></script>
-  <script src="{% static 'corpus/section_creator.js' %}"></script>
+  <input type="hidden" id="id_selected_tokens" name="selected_tokens" value />
+
+  <div id="modalContainer"></div>
+</div>
+
+<script>
+  var textId = '{{ selected_text_id }}'
+  console.log('Selected text ID:', textId)
+</script>
+
+<!-- Section State -->
+<script>
+  const appState = {
+    selectedSectionId: null,
+    selectedTokens: [],
+    selectedTokenIds: [],
+    selectedTokenTexts: [],
+    startTokenId: null,
+    endTokenId: null,
+    isSelectingTokens: false,
+    csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+  };
+
+  function dispatchCustomEvent(eventName, detail) {
+    const event = new CustomEvent(eventName, { detail });
+    document.dispatchEvent(event);
+  }
+
+  function updateTokenSelection(startId, endId, isSelected) {
+    console.log(`Updating token selection: startId=${startId}, endId=${endId}, isSelected=${isSelected}`);
+    if (!isSelected) {
+      deselectAllTokens();
+    } else {
+      appState.startTokenId = startId;
+      appState.endTokenId = endId;
+      if (appState.startTokenId && appState.endTokenId) {
+        highlightTokensBetween(appState.startTokenId, appState.endTokenId);
+      }
+    }
+  }
+
+  function handleTokenClick(event) {
+    const tokenElement = event.currentTarget;
+    const tokenId = tokenElement.dataset.tokenId;
+    console.log("Token clicked:", tokenId);
+
+    if (appState.isSelectingTokens) {
+      if (appState.startTokenId === null) {
+        console.log("First token selected:", tokenId);
+        appState.startTokenId = tokenId;
+        highlightSingleToken(tokenId); // Highlight the first token immediately
+      } else if (appState.endTokenId === null && tokenId !== appState.startTokenId) {
+        appState.endTokenId = tokenId; // Store the end token ID
+        console.log("Second token selected:", tokenId);
+        highlightTokensBetween(appState.startTokenId, appState.endTokenId); // Highlight all tokens between the first and second
+      }
+    } else {
+      console.log("Click ignored, not in selection mode.");
+    }
+  }
+
+  function highlightSingleToken(tokenId) {
+    const tokenElement = document.querySelector(`.token[data-token-id="${tokenId}"]`);
+    if (tokenElement) {
+      tokenElement.classList.add('bg-green-200');
+    }
+  }
+
+  function highlightTokensBetween(startId, endId) {
+    const tokens = document.querySelectorAll('.token');
+    let inRange = false;
+    console.log(`Highlighting from ${startId} to ${endId}`);
+
+    tokens.forEach(token => {
+      const tokenId = token.dataset.tokenId;
+      if (tokenId === startId) {
+        inRange = true; // Start highlighting from startId
+        token.classList.add('bg-green-200');
+        console.log(`Started highlighting at ${tokenId}`);
+      }
+      if (inRange) {
+        token.classList.add('bg-green-200');
+      }
+      if (tokenId === endId) {
+        console.log(`Stopped highlighting at ${tokenId}`);
+        inRange = false; // Stop highlighting after reaching endId
+      }
+    });
+    updateSelectedTokens();
+  }
+  function updateSelectedTokens() {
+    const selectedTokens = document.querySelectorAll('.token.bg-green-200');
+    appState.selectedTokenIds = Array.from(selectedTokens, token => token.dataset.tokenId);
+    appState.selectedTokenTexts = Array.from(selectedTokens, token => token.textContent); // Correctly update as an array
+  }
+
+  function deselectAllTokens() {
+    document.querySelectorAll('.token').forEach(token => {
+      token.classList.remove('bg-green-200');
+    });
+    appState.startTokenId = null;
+    appState.endTokenId = null;
+    appState.selectedTokenIds = [];
+    appState.selectedTokenTexts = '';
+  }
+
+  document.addEventListener('sectionSelected', function (e) {
+    appState.selectedSectionId = e.detail.sectionId;
+    console.log(`Section ${appState.selectedSectionId} selected for editing.`);
+  });
+
+  document.addEventListener('startTokenSelection', function () {
+    appState.isSelectingTokens = true;
+    console.log("Token selection mode activated.");
+  });
+
+  document.addEventListener('finishTokenSelection', function () {
+    appState.isSelectingTokens = false;
+    console.log("Token selection mode deactivated.");
+    updateSelectedTokens(); // Ensure we update the selected tokens' state when finishing selection.
+  });
+
+
+</script>
+
+<!-- Section Creator -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const observer = new MutationObserver(mutations => {
+      console.log("Detected mutations:", mutations.length);
+      mutations.forEach(mutation => {
+        if (mutation.addedNodes.length) {
+          console.log("Added nodes count:", mutation.addedNodes.length);
+          mutation.addedNodes.forEach(node => {
+            if (node.classList && node.classList.contains('token')) {
+              console.log("New token detected.");
+              addTokenClickListeners(); // Re-attach listeners to all tokens including new ones
+            }
+          });
+        }
+      });
+    });
+
+    document.getElementById('startTokenSelection').addEventListener('click', function () {
+      let mode = this.getAttribute('data-mode');
+      console.log("Current mode before toggle:", mode);
+      if (mode === 'select') {
+        dispatchCustomEvent('startTokenSelection', {});
+        this.textContent = 'Finish Token Selection';
+        this.setAttribute('data-mode', 'finish');
+        appState.isSelectingTokens = true;
+        addTokenClickListeners(); // Attach event listeners when starting selection
+        console.log("Token selection started:", appState.isSelectingTokens);
+      } else if (mode === 'finish') {
+        dispatchCustomEvent('finishTokenSelection', {});
+        appState.isSelectingTokens = false;
+        console.log("Token selection finished:", appState.isSelectingTokens);
+        console.log("Selected tokens:", appState.selectedTokenIds);
+        console.log("Selected tokens text:", appState.selectedTokenTexts);
+        let queryString = `?tokens=${encodeURIComponent(appState.selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
+        console.log("Query string:", queryString);
+        htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, { target: '#modalContainer' }).then(() => {
+          document.getElementById('modalTextId').value = textId;
+          console.log('Modal content loaded');
+        });
+        this.textContent = 'Start Token Selection';
+        this.setAttribute('data-mode', 'select');
+      }
+    });
+
+    function addTokenClickListeners() {
+      const tokens = document.querySelectorAll('.token');
+      tokens.forEach(token => {
+        token.removeEventListener('click', handleTokenClick); // Remove existing listeners to prevent duplicates
+        token.addEventListener('click', handleTokenClick);
+      });
+      console.log("Event listeners attached to", tokens.length, "tokens");
+    }
+
+    function handleModalCloseClick(event) {
+      event.stopPropagation(); // Prevent event from bubbling up to other elements
+      closeModal(); // Call closeModal to handle the closing logic
+    }
+
+    function closeModal() {
+      let modal = document.getElementById('sectionModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        deselectAllTokens(); // Reset token selection state
+        console.log("Modal closed and tokens deselected.");
+      } else {
+        console.error('Modal not found in the DOM.');
+      }
+    }
+
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+      if (event.target.id === 'modalContainer') {
+        openModal();
+        const cancelButton = document.querySelector('#sectionModal button');
+        if (cancelButton) {
+          cancelButton.removeEventListener('click', handleModalCloseClick); // Remove any existing listeners to prevent duplicates
+          cancelButton.addEventListener('click', handleModalCloseClick); // Attach the proper event handler
+        } else {
+          console.error('Cancel button not found in the modal.');
+        }
+      }
+    });
+
+    function openModal() {
+      let modal = document.getElementById('sectionModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        let displayElement = document.getElementById('selectedTokensDisplay');
+        if (displayElement) {
+          let displayText = appState.selectedTokenTexts.join(', ') || 'No tokens selected';
+          displayElement.textContent = displayText;
+          console.log("Display updated with tokens:", displayText);
+        } else {
+          console.error('selectedTokensDisplay element not found in the DOM.');
+        }
+      } else {
+        console.error('Modal not found in the DOM.');
+      }
+    }
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+
+</script>
+
+
+
+<!-- Section Navigator -->
+<script src="{% static 'corpus/section_navigator.js' %}"></script>
+
 {% endblock %}

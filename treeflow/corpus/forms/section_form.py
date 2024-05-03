@@ -47,9 +47,6 @@ class SectionForm(forms.ModelForm):
         else:
             logger.debug("No text_id provided")        
 
-    def clean(self):
-        cleaned_data = super().clean()
-        selected_tokens = cleaned_data.get('selected_tokens')
 
     def save(self, commit=True):
         insertion_method = self.cleaned_data.get('insertion_method')
