@@ -15,12 +15,6 @@
   {% endif %}
   <h3 class="flex flex-row gap-1 p-2 mb-4 text-4xl text-left bg-white rounded-md w-fit font-bold text-main-dark-graded-900">{{ word }}</h3>
   <div class="flex flex-col h-full gap-2">
-    <div class="flex flex-row gap-2">
-      <div class="relative flex flex-row cursor-default">
-        <div class="p-2 rounded-md w-fit">
-          {% trans 'Language' %}: <a href="https://glottolog.org/glottolog?iso={{ language }}" target="_blank" class="font-bold text-main-dark-graded-700">{{ language }}</a></div>
-      </div>
-    </div>
     
     <div class="flex flex-row gap-2">
       {% if multiword_expression %}
