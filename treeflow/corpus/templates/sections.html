@@ -199,6 +199,7 @@
 <!-- Section Creator -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+
     const observer = new MutationObserver(mutations => {
       console.log("Detected mutations:", mutations.length);
       mutations.forEach(mutation => {
@@ -215,6 +216,8 @@
     });
 
     document.getElementById('startTokenSelection').addEventListener('click', function () {
+      event.preventDefault(); // Prevent any default action
+      event.stopPropagation(); // Stop the event from propagating
       let mode = this.getAttribute('data-mode');
       console.log("Current mode before toggle:", mode);
       if (mode === 'select') {
@@ -250,17 +253,21 @@
       console.log("Event listeners attached to", tokens.length, "tokens");
     }
 
-    function handleModalCloseClick(event) {
-      event.stopPropagation(); // Prevent event from bubbling up to other elements
-      closeModal(); // Call closeModal to handle the closing logic
-    }
 
     function closeModal() {
       let modal = document.getElementById('sectionModal');
       if (modal) {
         modal.classList.add('hidden');
         deselectAllTokens(); // Reset token selection state
-        console.log("Modal closed and tokens deselected.");
+        // Reset additional state variables
+        appState.selectedSectionId = null;
+        appState.selectedTokens = [];
+        appState.selectedTokenIds = [];
+        appState.selectedTokenTexts = [];
+        appState.startTokenId = null;
+        appState.endTokenId = null;
+        appState.isSelectingTokens = false;
+        console.log("Modal closed and all states reset.");
       } else {
         console.error('Modal not found in the DOM.');
       }
@@ -268,14 +275,8 @@
 
     document.body.addEventListener('htmx:afterSwap', function (event) {
       if (event.target.id === 'modalContainer') {
+        console.log("Modal container swapped, opening modal...");
         openModal();
-        const cancelButton = document.querySelector('#sectionModal button');
-        if (cancelButton) {
-          cancelButton.removeEventListener('click', handleModalCloseClick); // Remove any existing listeners to prevent duplicates
-          cancelButton.addEventListener('click', handleModalCloseClick); // Attach the proper event handler
-        } else {
-          console.error('Cancel button not found in the modal.');
-        }
       }
     });
 
@@ -283,6 +284,8 @@
       let modal = document.getElementById('sectionModal');
       if (modal) {
         modal.classList.remove('hidden');
+        console.log("Modal should now be visible.");
+        setupCancelButton();
         let displayElement = document.getElementById('selectedTokensDisplay');
         if (displayElement) {
           let displayText = appState.selectedTokenTexts.join(', ') || 'No tokens selected';
@@ -296,6 +299,41 @@
       }
     }
 
+    function setupCancelButton() {
+      var cancelButton = document.getElementById('cancelButton');
+      if (cancelButton) {
+        cancelButton.addEventListener('click', function () {
+          var modal = document.getElementById('sectionModal');
+          if (modal) {
+            modal.classList.add('hidden');
+            // Reset form fields within the modal
+            var form = document.getElementById('sectionForm');
+            if (form) {
+              form.reset(); // Resets all form fields to their initial values
+            }
+            // Reset custom JavaScript state if any
+            if (appState.selectedTokens) {
+              deselectAllTokens(); // Reset token selection state
+              // Reset additional state variables
+              appState.selectedSectionId = null;
+              appState.selectedTokens = [];
+              appState.selectedTokenIds = [];
+              appState.selectedTokenTexts = [];
+              appState.startTokenId = null;
+              appState.endTokenId = null;
+              appState.isSelectingTokens = false;
+              console.log("Modal closed and all states reset.");
+            }
+            console.log("Modal should now be hidden.");
+          } else {
+            console.error('Modal not found in the DOM.');
+          }
+        });
+        console.log("Event listener attached to cancel button.");
+      } else {
+        console.error('Cancel button not found.');
+      }
+    }
     observer.observe(document.body, { childList: true, subtree: true });
   });
 

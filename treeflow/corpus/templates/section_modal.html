@@ -1,22 +1,18 @@
 <!-- section_modal.html -->
 {% load i18n %}
+{% load static %}
 
-<div id="sectionModal"
-    class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
-        <!-- Load jQuery -->
-        <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<div id="sectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
+    <!-- Load jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <!-- Load Select2 JS (Make sure to use the correct version and path) -->
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <div class="flex items-center justify-center min-h-screen">
-        <div
-            class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
+        <div class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
             {{ form.media.css }}
             <h2 class="mb-4 text-lg font-bold">Create New Section</h2>
-            <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}"
-                method="post" class="space-y-4">
+            <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}" method="post" class="space-y-4">
                 {% csrf_token %}
                 <input type="hidden" name="text_id" id="modalTextId" value="{{ text_id }}">
                 <div class="space-y-2">
@@ -27,7 +23,7 @@
                     <div id="selectedTokensDisplay"></div>
                 </div>
                 <div class="flex justify-between mt-6">
-                    <button type="button"
+                    <button type="button" id="cancelButton"
                         class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none">
                         {% trans 'Cancel' %}
                     </button>
@@ -41,3 +37,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var cancelButton = document.getElementById('cancelButton');
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function () {
+                var modal = document.getElementById('sectionModal');
+                if (modal) {
+                    modal.classList.add('hidden'); // Hide the modal
+
+                    // Reset form fields within the modal
+                    var form = document.getElementById('sectionForm');
+                    if (form) {
+                        form.reset(); // Resets all form fields to their initial values
+                    }
+
+                    // Example: Reset custom JavaScript state if any
+                    if (window.appState && appState.selectedTokens) {
+                        deselectAllTokens(); // Reset token selection state
+                        // Reset additional state variables
+                        appState.selectedSectionId = null;
+                        appState.selectedTokens = [];
+                        appState.selectedTokenIds = [];
+                        appState.selectedTokenTexts = [];
+                        appState.startTokenId = null;
+                        appState.endTokenId = null;
+                        appState.isSelectingTokens = false;
+                        console.log("Modal closed and all states reset.");
+                    }
+
+                    // Clear any specific display elements
+                    var tokensDisplay = document.getElementById('selectedTokensDisplay');
+                    if (tokensDisplay) {
+                        tokensDisplay.innerHTML = ''; // Clear the display of selected tokens
+                    }
+
+                    console.log("Modal closed and state reset.");
+                }
+            });
+        }
+    });
+</script>
