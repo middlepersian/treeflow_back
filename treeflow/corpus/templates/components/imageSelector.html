@@ -1,6 +1,6 @@
 {% if images %}
 {% load static %}
-<select id="imageSelector" name="image_id" onchange="openNewImage();">
+<select id="image-selector" name="image_id" onchange="openNewImage();">
   <option value="" default>Select an Image</option>
   {% for image in images%}
   <option value="{{image.id}}">{{image.identifier}}</option>

@@ -9,6 +9,7 @@ from treeflow.corpus.views.delete_token import delete_token_view
 from treeflow.corpus.views.texts import texts_view
 from treeflow.corpus.views.sections import sections_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_child_sections, get_tokens_for_section
+from treeflow.corpus.views.get_images import get_images_view
 from treeflow.corpus.views.create_section import create_section_view
 from treeflow.corpus.views.section_editor import section_editor_form_view
 from treeflow.corpus.views.save_section import save_section_view
@@ -31,7 +32,7 @@ from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
 from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
 from treeflow.corpus.views.export_text import resolve_text, download_text, resolve_state
-from treeflow.corpus.views.openseadragon import openseadragon, imageSelector, sourceSelector
+from treeflow.corpus.views.openseadragon import openseadragon, imageSelector
 
 app_name = "treeflow.corpus"
 urlpatterns = [
@@ -57,6 +58,7 @@ urlpatterns = [
     path('get-child-sections/<uuid:section_id>/', get_child_sections, name='get_child_sections'),
     path('get-tokens-for-section/<uuid:section_id>/', get_tokens_for_section, name='get_tokens_for_section'),
     path('get-feature-formset/<uuid:token_id>/', get_feature_formset, name='get_feature_formset'),
+    path('get-images/', get_images_view, name='get_images'),
     path('create_section/', create_section_view, name='create_section'),
     path('display_tokens/', display_tokens_view, name='display_tokens'),
     path('load_section_modal/', load_section_modal, name='load_section_modal'),
@@ -81,7 +83,6 @@ urlpatterns = [
     path('export/text/<uuid:text_id>',download_text,name='conll'),
     path('status/text/<uuid:text_id>',resolve_state,name='conll_state'),
 
-    path('openseadragon/', sourceSelector, name='sourceSelector'),
     path('openseadragon/imageSelect/', imageSelector, name='imageSelector'),
     path('openseadragon/viewer/', openseadragon, name='imageViewer'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
