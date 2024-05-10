@@ -1,0 +1,13 @@
+
+<!-- List of sections with HTMX trigger to get section data -->
+{% for section in sections %}
+<div class="section-item flex justify-between items-center p-2 hover:bg-gray-100 rounded-md"
+     hx-get="{% url 'corpus:get_section_data' section.id %}"
+     hx-trigger="click"
+     hx-swap="innerHTML"
+     hx-target="#section-data-{{ section.id }}"
+     data-json-response="true">
+    <span class="section-title">{{ section.identifier }}</span>
+    <div id="section-data-{{ section.id }}" class="section-data"></div>
+</div>
+{% endfor %}

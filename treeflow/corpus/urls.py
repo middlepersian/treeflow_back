@@ -25,20 +25,22 @@ from treeflow.corpus.views.sentences import sentences_view
 from treeflow.corpus.views.bib_edit import BibEntryCreateView
 from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
-from treeflow.corpus.views.sources import SourceTableView, source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib, sources
+from treeflow.corpus.views.sources import source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib, sources
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
+from treeflow.corpus.views.update_section import update_section_view
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
 from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
-from treeflow.corpus.views.export_text import resolve_text, download_text, resolve_state
+from treeflow.corpus.views.export_text import  download_text, resolve_state
 from treeflow.corpus.views.openseadragon import openseadragon, imageSelector
 
 app_name = "treeflow.corpus"
 urlpatterns = [
-    path('update_token/<uuid:token_id>', update_token, name='update_token'),
+    path('update_section/<uuid:section_id>', update_section_view, name='update_section'),
     path('update_source/<uuid:source_id>', update_source, name='api_update_source'),
     path('update_text/<uuid:text_id>/', update_text, name='update_text'),
+    path('update_token/<uuid:token_id>', update_token, name='update_token'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
     path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
     path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'),

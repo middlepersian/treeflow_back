@@ -81,267 +81,170 @@
   console.log('Selected text ID:', textId)
 </script>
 
-<!-- Section State -->
-<script>
-  const appState = {
-    selectedSectionId: null,
-    selectedTokens: [],
-    selectedTokenIds: [],
-    selectedTokenTexts: [],
-    startTokenId: null,
-    endTokenId: null,
-    isSelectingTokens: false,
-    csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-  };
-
-  function dispatchCustomEvent(eventName, detail) {
-    const event = new CustomEvent(eventName, { detail });
-    document.dispatchEvent(event);
-  }
-
-  function updateTokenSelection(startId, endId, isSelected) {
-    console.log(`Updating token selection: startId=${startId}, endId=${endId}, isSelected=${isSelected}`);
-    if (!isSelected) {
-      deselectAllTokens();
-    } else {
-      appState.startTokenId = startId;
-      appState.endTokenId = endId;
-      if (appState.startTokenId && appState.endTokenId) {
-        highlightTokensBetween(appState.startTokenId, appState.endTokenId);
-      }
-    }
-  }
-
-  function handleTokenClick(event) {
-    const tokenElement = event.currentTarget;
-    const tokenId = tokenElement.dataset.tokenId;
-    console.log("Token clicked:", tokenId);
-
-    if (appState.isSelectingTokens) {
-      if (appState.startTokenId === null) {
-        console.log("First token selected:", tokenId);
-        appState.startTokenId = tokenId;
-        highlightSingleToken(tokenId); // Highlight the first token immediately
-      } else if (appState.endTokenId === null && tokenId !== appState.startTokenId) {
-        appState.endTokenId = tokenId; // Store the end token ID
-        console.log("Second token selected:", tokenId);
-        highlightTokensBetween(appState.startTokenId, appState.endTokenId); // Highlight all tokens between the first and second
-      }
-    } else {
-      console.log("Click ignored, not in selection mode.");
-    }
-  }
-
-  function highlightSingleToken(tokenId) {
-    const tokenElement = document.querySelector(`.token[data-token-id="${tokenId}"]`);
-    if (tokenElement) {
-      tokenElement.classList.add('bg-green-200');
-    }
-  }
-
-  function highlightTokensBetween(startId, endId) {
-    const tokens = document.querySelectorAll('.token');
-    let inRange = false;
-    console.log(`Highlighting from ${startId} to ${endId}`);
-
-    tokens.forEach(token => {
-      const tokenId = token.dataset.tokenId;
-      if (tokenId === startId) {
-        inRange = true; // Start highlighting from startId
-        token.classList.add('bg-green-200');
-        console.log(`Started highlighting at ${tokenId}`);
-      }
-      if (inRange) {
-        token.classList.add('bg-green-200');
-      }
-      if (tokenId === endId) {
-        console.log(`Stopped highlighting at ${tokenId}`);
-        inRange = false; // Stop highlighting after reaching endId
-      }
-    });
-    updateSelectedTokens();
-  }
-  function updateSelectedTokens() {
-    const selectedTokens = document.querySelectorAll('.token.bg-green-200');
-    appState.selectedTokenIds = Array.from(selectedTokens, token => token.dataset.tokenId);
-    appState.selectedTokenTexts = Array.from(selectedTokens, token => token.textContent); // Correctly update as an array
-  }
-
-  function deselectAllTokens() {
-    document.querySelectorAll('.token').forEach(token => {
-      token.classList.remove('bg-green-200');
-    });
-    appState.startTokenId = null;
-    appState.endTokenId = null;
-    appState.selectedTokenIds = [];
-    appState.selectedTokenTexts = '';
-  }
-
-  document.addEventListener('sectionSelected', function (e) {
-    appState.selectedSectionId = e.detail.sectionId;
-    console.log(`Section ${appState.selectedSectionId} selected for editing.`);
-  });
-
-  document.addEventListener('startTokenSelection', function () {
-    appState.isSelectingTokens = true;
-    console.log("Token selection mode activated.");
-  });
-
-  document.addEventListener('finishTokenSelection', function () {
-    appState.isSelectingTokens = false;
-    console.log("Token selection mode deactivated.");
-    updateSelectedTokens(); // Ensure we update the selected tokens' state when finishing selection.
-  });
-
-
-</script>
-
-<!-- Section Creator -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-
-    const observer = new MutationObserver(mutations => {
-      console.log("Detected mutations:", mutations.length);
-      mutations.forEach(mutation => {
-        if (mutation.addedNodes.length) {
-          console.log("Added nodes count:", mutation.addedNodes.length);
-          mutation.addedNodes.forEach(node => {
-            if (node.classList && node.classList.contains('token')) {
-              console.log("New token detected.");
-              addTokenClickListeners(); // Re-attach listeners to all tokens including new ones
-            }
-          });
-        }
-      });
-    });
-
-    document.getElementById('startTokenSelection').addEventListener('click', function () {
-      event.preventDefault(); // Prevent any default action
-      event.stopPropagation(); // Stop the event from propagating
-      let mode = this.getAttribute('data-mode');
-      console.log("Current mode before toggle:", mode);
-      if (mode === 'select') {
-        dispatchCustomEvent('startTokenSelection', {});
-        this.textContent = 'Finish Token Selection';
-        this.setAttribute('data-mode', 'finish');
-        appState.isSelectingTokens = true;
-        addTokenClickListeners(); // Attach event listeners when starting selection
-        console.log("Token selection started:", appState.isSelectingTokens);
-      } else if (mode === 'finish') {
-        dispatchCustomEvent('finishTokenSelection', {});
-        appState.isSelectingTokens = false;
-        console.log("Token selection finished:", appState.isSelectingTokens);
-        console.log("Selected tokens:", appState.selectedTokenIds);
-        console.log("Selected tokens text:", appState.selectedTokenTexts);
-        let queryString = `?tokens=${encodeURIComponent(appState.selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
-        console.log("Query string:", queryString);
-        htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, { target: '#modalContainer' }).then(() => {
-          document.getElementById('modalTextId').value = textId;
-          console.log('Modal content loaded');
-        });
-        this.textContent = 'Start Token Selection';
-        this.setAttribute('data-mode', 'select');
-      }
-    });
-
-    function addTokenClickListeners() {
-      const tokens = document.querySelectorAll('.token');
-      tokens.forEach(token => {
-        token.removeEventListener('click', handleTokenClick); // Remove existing listeners to prevent duplicates
-        token.addEventListener('click', handleTokenClick);
-      });
-      console.log("Event listeners attached to", tokens.length, "tokens");
-    }
-
-
-    function closeModal() {
-      let modal = document.getElementById('sectionModal');
-      if (modal) {
-        modal.classList.add('hidden');
-        deselectAllTokens(); // Reset token selection state
-        // Reset additional state variables
-        appState.selectedSectionId = null;
-        appState.selectedTokens = [];
-        appState.selectedTokenIds = [];
-        appState.selectedTokenTexts = [];
-        appState.startTokenId = null;
-        appState.endTokenId = null;
-        appState.isSelectingTokens = false;
-        console.log("Modal closed and all states reset.");
-      } else {
-        console.error('Modal not found in the DOM.');
-      }
-    }
-
-    document.body.addEventListener('htmx:afterSwap', function (event) {
-      if (event.target.id === 'modalContainer') {
-        console.log("Modal container swapped, opening modal...");
-        openModal();
-      }
-    });
-
-    function openModal() {
-      let modal = document.getElementById('sectionModal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        console.log("Modal should now be visible.");
-        setupCancelButton();
-        let displayElement = document.getElementById('selectedTokensDisplay');
-        if (displayElement) {
-          let displayText = appState.selectedTokenTexts.join(', ') || 'No tokens selected';
-          displayElement.textContent = displayText;
-          console.log("Display updated with tokens:", displayText);
-        } else {
-          console.error('selectedTokensDisplay element not found in the DOM.');
-        }
-      } else {
-        console.error('Modal not found in the DOM.');
-      }
-    }
-
-    function setupCancelButton() {
-      var cancelButton = document.getElementById('cancelButton');
-      if (cancelButton) {
-        cancelButton.addEventListener('click', function () {
-          var modal = document.getElementById('sectionModal');
-          if (modal) {
-            modal.classList.add('hidden');
-            // Reset form fields within the modal
-            var form = document.getElementById('sectionForm');
-            if (form) {
-              form.reset(); // Resets all form fields to their initial values
-            }
-            // Reset custom JavaScript state if any
-            if (appState.selectedTokens) {
-              deselectAllTokens(); // Reset token selection state
-              // Reset additional state variables
-              appState.selectedSectionId = null;
-              appState.selectedTokens = [];
-              appState.selectedTokenIds = [];
-              appState.selectedTokenTexts = [];
-              appState.startTokenId = null;
-              appState.endTokenId = null;
-              appState.isSelectingTokens = false;
-              console.log("Modal closed and all states reset.");
-            }
-            console.log("Modal should now be hidden.");
-          } else {
-            console.error('Modal not found in the DOM.');
-          }
-        });
-        console.log("Event listener attached to cancel button.");
-      } else {
-        console.error('Cancel button not found.');
-      }
-    }
-    observer.observe(document.body, { childList: true, subtree: true });
-  });
-
-</script>
-
-
 
 <!-- Section Navigator -->
-<script src="{% static 'corpus/section_navigator.js' %}"></script>
+<script>
+  // Highlight tokens when a section is clicked
+  document.addEventListener('DOMContentLoaded', function () {
+    const selector = document.getElementById('sectionTypeSelector');
+    const sectionList = document.getElementById('sectionList');
+
+
+    function highlightSectionTokens(tokenIds) {
+      const stringTokenIds = tokenIds.map(id => id.toString());
+      const tokens = document.querySelectorAll('.token');
+      tokens.forEach(token => {
+        if (stringTokenIds.includes(token.dataset.tokenId)) {
+          // Apply Tailwind class for highlighted tokens
+          token.classList.add('bg-yellow-300'); // Tailwind class for yellow background
+        } else {
+          // Remove Tailwind class for non-highlighted tokens
+          token.classList.remove('bg-yellow-300');
+        }
+      });
+    }
+
+
+    function fetchAndHighlightSectionTokens(sectionId) {
+      fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
+        .then(response => response.json())
+        .then(data => {
+          const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
+          highlightSectionTokens(tokenIds);
+
+          // Scroll to the first token of this section
+          if (tokenIds.length > 0) {
+            const firstTokenId = tokenIds[0];
+            const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
+            if (firstTokenElement) {
+              firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+           }
+          }
+          // Dispatch event with sectionId when tokens are fetched
+          dispatchCustomEvent('sectionSelected', { sectionId: sectionId });
+        })
+        .catch(error => {
+          console.error('Error fetching tokens for section:', error);
+        });
+    }
+
+    function loadChildSections(sectionId, parentDiv) {
+      // Check if child sections are already loaded
+      const existingChildList = parentDiv.querySelector('.child-section-list');
+      if (existingChildList) {
+        // Remove the child list to 'close' the section
+        parentDiv.removeChild(existingChildList);
+        return; // Exit the function
+      }
+      fetch(`/corpus/get-child-sections/${sectionId}/`)
+        .then(response => response.json())
+        .then(childSections => {
+          const childSectionList = document.createElement('div');
+          childSectionList.classList.add('child-section-list');
+          childSectionList.style.paddingLeft = '20px'; // Indent child sections to visually nest them
+
+          childSections.forEach(childSection => {
+            const childDiv = document.createElement('div');
+            childDiv.classList.add('child-section-item');
+            childDiv.textContent = childSection.identifier || 'Untitled';
+            childDiv.dataset.sectionId = childSection.id;
+
+            // Add edit button
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.classList.add('edit-btn', 'text-sm', 'ml-2', 'mb-2', 'bg-blue-500', 'text-white', 'rounded', 'px-1', 'py-1'); // Added margin-bottom mb-2 for space between buttons vertically
+            editBtn.onclick = function () {
+              const sectionModal = document.getElementById('sectionModal');
+              const form = document.getElementById('sectionForm');
+              form.setAttribute('hx-get', `/corpus/load-section-modal/${childSection.id}/?edit_mode=true`);
+              form.setAttribute('hx-trigger', 'load');
+              sectionModal.style.display = 'block';
+            };
+            editBtn.classList.add('hover:bg-blue-700'); // Change hover color
+            childDiv.appendChild(editBtn);
+            // Add event listener to prevent event bubbling
+            childDiv.addEventListener('click', function (event) {
+              event.stopPropagation();
+              fetchAndHighlightSectionTokens(childSection.id);
+            });
+
+            childSectionList.appendChild(childDiv);
+          });
+
+          // Check if child sections are already loaded to avoid duplication
+          if (!parentDiv.querySelector('.child-section-list')) {
+            parentDiv.appendChild(childSectionList);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching child sections:', error);
+        });
+    }
+
+    function loadSectionsOfType(sectionType) {
+      fetch(`/corpus/get-sections/${textId}/${sectionType}/`)
+        .then(response => response.json())
+        .then(sections => {
+          sectionList.innerHTML = '';
+          sections.forEach(section => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.classList.add('section-item', 'cursor-pointer', 'hover:bg-action/50', 'rounded-md', 'pl-1');
+            sectionDiv.textContent = section.identifier || 'Untitled';
+            sectionDiv.dataset.sectionId = section.id;
+
+            // Add edit button
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.classList.add('edit-btn', 'text-sm', 'ml-2', 'mb-2', 'bg-blue-500', 'text-white', 'rounded', 'px-1', 'py-1'); // Added margin-bottom mb-2 for space between buttons vertically
+
+            let queryString = `?section_id=${encodeURIComponent(section.id)}&text_id=${encodeURIComponent(textId)}`;
+            console.log("Query string:", queryString);
+            editBtn.onclick = function () {
+              htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, { target: '#modalContainer' }).then(() => {
+              document.getElementById('modalTextId').value = textId;
+              console.log('Modal content loaded');
+            }); 
+            };
+            editBtn.classList.add('hover:bg-blue-700'); // Change hover color
+            sectionDiv.appendChild(editBtn);
+
+            // Add event listener to load child sections    
+            sectionDiv.addEventListener('click', function () {
+              const isClosingSection = this.querySelector('.child-section-list');
+              loadChildSections(section.id, this);
+              // Only fetch and highlight tokens if the section is being opened
+              if (!isClosingSection) {
+                fetchAndHighlightSectionTokens(section.id);
+              }
+
+              sectionList.querySelectorAll('.section-item').forEach(item => {
+                item.classList.remove('bg-action');
+              });
+              this.classList.add('bg-action');
+            });
+
+            sectionList.appendChild(sectionDiv);
+          });
+
+          if (sections.length === 0) {
+            sectionList.innerHTML = '<p>No sections found for this type.</p>';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching sections:', error);
+          sectionList.innerHTML = '<p>Error loading sections.</p>';
+        });
+    }
+
+    selector.addEventListener('change', function () {
+      loadSectionsOfType(this.value);
+    });
+
+    if (selector.options.length > 0) {
+      loadSectionsOfType(selector.options[0].value);
+    }
+  });
+
+</script>
 
 {% endblock %}
