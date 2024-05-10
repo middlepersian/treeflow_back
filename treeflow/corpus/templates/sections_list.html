@@ -1,12 +1,9 @@
-<div style="overflow-y: auto; max-height: 400px;"> <!-- Scrollable container -->
+<div class="overflow-y-scroll h-screen pb-10"> <!-- Scrollable container using full viewport height with bottom padding -->
     <!-- List of sections with HTMX trigger to get section data -->
     {% for section in sections %}
     <div class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md"
-         hx-get="{% url 'corpus:get_section_data' section.id %}"
-         hx-trigger="click"
-         hx-swap="innerHTML"
-         hx-target="#section-data-{{ section.id }}"
-         data-json-response="true">
+        hx-get="{% url 'corpus:get_section_data' section.id %}" hx-trigger="click" hx-swap="innerHTML"
+        hx-target="#section-data-{{ section.id }}" data-json-response="true">
         <span class="section-title">{{ section.identifier }}</span>
         <div id="section-data-{{ section.id }}" class="section-data ml-4 mt-2"></div>
     </div>
