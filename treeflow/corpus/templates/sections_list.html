@@ -4,7 +4,12 @@
     <div class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md"
         hx-get="{% url 'corpus:get_section_data' section.id %}" hx-trigger="click" hx-swap="innerHTML"
         hx-target="#section-data-{{ section.id }}" data-json-response="true">
-        <span class="section-title">{{ section.identifier }}</span>
+        <div class="flex justify-between items-center">
+            <span class="section-title">{{ section.identifier }}</span>
+            <!-- Edit button placed to the right of the section -->
+            <button class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    onclick="location.href='{% url 'corpus:update_section' section.id %}'">Edit</button>
+        </div>
         <div id="section-data-{{ section.id }}" class="section-data ml-4 mt-2"></div>
     </div>
     {% endfor %}
