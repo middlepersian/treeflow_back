@@ -7,6 +7,7 @@ from treeflow.corpus.views.tokens import tokens_view
 from treeflow.corpus.views.insert_after_token import insert_after_token_view
 from treeflow.corpus.views.insert_before_token import insert_before_token_view
 from treeflow.corpus.views.delete_token import delete_token_view
+from treeflow.corpus.views.delete_section import delete_section_view
 from treeflow.corpus.views.texts import texts_view
 from treeflow.corpus.views.sections import sections_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_tokens_for_section, get_section_data
@@ -37,8 +38,9 @@ from treeflow.corpus.views.openseadragon import openseadragon, imageSelector
 
 app_name = "treeflow.corpus"
 urlpatterns = [
-    path('update_section/<uuid:section_id>', update_section_view, name='update_section'),
-    path('update_source/<uuid:source_id>', update_source, name='api_update_source'),
+    path('delete_section/<uuid:section_id>/', delete_section_view, name='delete_section'),
+    path('update_section/<uuid:section_id>/', update_section_view, name='update_section'),
+    path('update_source/<uuid:source_id>/', update_source, name='api_update_source'),
     path('update_text/<uuid:text_id>/', update_text, name='update_text'),
     path('update_token/<uuid:token_id>', update_token, name='update_token'),
     path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
