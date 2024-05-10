@@ -1,6 +1,7 @@
 from django.urls import include, path, re_path
 from treeflow.corpus.views.update_token import update_token
 from treeflow.corpus.views.update_text import update_text
+from treeflow.corpus.views.update_section import update_section_view
 from treeflow.corpus.views.ud_editor import ud_editor, saveNewDependency, deleteDependency, setNewRoot
 from treeflow.corpus.views.tokens import tokens_view
 from treeflow.corpus.views.insert_after_token import insert_after_token_view
@@ -8,7 +9,7 @@ from treeflow.corpus.views.insert_before_token import insert_before_token_view
 from treeflow.corpus.views.delete_token import delete_token_view
 from treeflow.corpus.views.texts import texts_view
 from treeflow.corpus.views.sections import sections_view
-from treeflow.corpus.views.get_sections import get_sections_by_type, get_child_sections, get_tokens_for_section
+from treeflow.corpus.views.get_sections import get_sections_by_type, get_tokens_for_section, get_section_data
 from treeflow.corpus.views.get_images import get_images_view
 from treeflow.corpus.views.create_section import create_section_view
 from treeflow.corpus.views.section_editor import section_editor_form_view
@@ -27,7 +28,6 @@ from treeflow.corpus.views.bibentry import BibEntryListView, BibEntryDetailView
 from treeflow.corpus.views.comment_form import comment_form
 from treeflow.corpus.views.sources import source_manuscripts , SourceUpdateView, SourceDeleteView, create_source, add_related_source, add_related_bib, sources
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
-from treeflow.corpus.views.update_section import update_section_view
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
@@ -56,8 +56,8 @@ urlpatterns = [
     path('save_section/', save_section_view, name='save_section'),
     path('save_section/<uuid:section_id>', save_section_view, name='save_section'),
     path('dropdown_redirect/', dropdown_redirect, name='dropdown_redirect'),
-    path('get-sections/<uuid:text_id>/<str:section_type>/', get_sections_by_type, name='get_sections_by_type'),
-    path('get-child-sections/<uuid:section_id>/', get_child_sections, name='get_child_sections'),
+    path('get-sections-by-type/', get_sections_by_type, name='get_sections_by_type'),
+    path('get-section-data/<uuid:section_id>/', get_section_data, name='get_section_data'),
     path('get-tokens-for-section/<uuid:section_id>/', get_tokens_for_section, name='get_tokens_for_section'),
     path('get-feature-formset/<uuid:token_id>/', get_feature_formset, name='get_feature_formset'),
     path('get-images/', get_images_view, name='get_images'),
@@ -84,7 +84,6 @@ urlpatterns = [
     path('manuscript/<uuid:manuscript_id>/images/table',get_images_for_manuscript_table,name='manuscript_images_table'),
     path('export/text/<uuid:text_id>',download_text,name='conll'),
     path('status/text/<uuid:text_id>',resolve_state,name='conll_state'),
-
     path('openseadragon/imageSelect/', imageSelector, name='imageSelector'),
     path('openseadragon/viewer/', openseadragon, name='imageViewer'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),

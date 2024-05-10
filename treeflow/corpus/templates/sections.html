@@ -4,7 +4,7 @@
 {% block content %}
 <div class="flex flex-row h-full overflow-y-hidden">
   <!-- Sidebar -->
-  <div class="flex flex-col bg-gray-100">
+  <div class="w-1/8 bg-gray-100">
     <div class="flex flex-col justify-center gap-2 p-2">
       <!-- Text Dropdown -->
       <div class="flex-none max-w-xs">
@@ -16,24 +16,34 @@
         data-mode="select">{% trans 'Start Token Selection' %}</button>
       {% endif %}
     </div>
-    <!-- Sidebar Content Including Edit Button -->
+    <!-- Sidebar Content Including Section Type Selector -->
     <div class="bg-gray-200 shadow-md">
-      <div class="flex flex-col justify-center w-full">
+      <!-- Section Type Selector Container -->
+      <div id="sectionSelectorContainer" class="flex flex-col justify-center gap-2 p-2">
         <h2 class="m-0 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
-        <!-- Dropdown Menu for selecting section type -->
-        <select id="sectionTypeSelector" class="m-auto">
+        <!-- Hidden input for textId -->
+        <input type="hidden" id="textId" name="textId" value="{{ selected_text_id }}">
+
+        <!-- Section Type Selector -->
+        <select id="sectionTypeSelector" name="sectionTypeSelector" hx-get="{% url 'corpus:get_sections_by_type' %}"
+          hx-target="#sectionList" hx-trigger="load, change" hx-include="#textId, #sectionTypeSelector"
+          hx-indicator="#loadingIndicator">
           {% for section_type in section_types %}
           <option value="{{ section_type }}">{{ section_type|title }}</option>
           {% endfor %}
         </select>
+        <div id="loadingIndicator" class="hidden">Loading...</div>
       </div>
-      <hr class="w-full mt-1 border-p-gray" />
     </div>
     <!-- Section List -->
-    <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin"></div>
+    <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin">
+      <!-- Sections will be loaded here -->
+    </div>
+
   </div>
+
   <!-- Content Area for sentences -->
-  <div id="sentence-area" class="w-1/2 overflow-y-scroll scrollbar-thin">
+  <div id="sentence-area" class="w-2/4 overflow-y-scroll scrollbar-thin">
     <!-- Loop over sections of type 'sentence' -->
     {% for section in sentence_sections %}
     <!-- Sentence Block starts -->
@@ -80,171 +90,83 @@
   var textId = '{{ selected_text_id }}'
   console.log('Selected text ID:', textId)
 </script>
-
-
 <!-- Section Navigator -->
 <script>
-  // Highlight tokens when a section is clicked
-  document.addEventListener('DOMContentLoaded', function () {
-    const selector = document.getElementById('sectionTypeSelector');
-    const sectionList = document.getElementById('sectionList');
+document.body.addEventListener('htmx:afterSwap', function (event) {
+  if (event.detail.target.classList.contains('section-data')) {
+    event.stopPropagation(); // Stop event propagation
+    const container = event.detail.target;
 
-
-    function highlightSectionTokens(tokenIds) {
-      const stringTokenIds = tokenIds.map(id => id.toString());
-      const tokens = document.querySelectorAll('.token');
-      tokens.forEach(token => {
-        if (stringTokenIds.includes(token.dataset.tokenId)) {
-          // Apply Tailwind class for highlighted tokens
-          token.classList.add('bg-yellow-300'); // Tailwind class for yellow background
-        } else {
-          // Remove Tailwind class for non-highlighted tokens
-          token.classList.remove('bg-yellow-300');
-        }
-      });
+    // Check if the child sections are meant to be hidden (toggle state)
+    if (container.getAttribute('data-visible') === 'true') {
+      container.innerHTML = ''; // Clear the content to hide child sections
+      container.setAttribute('data-visible', 'false'); // Update visibility state
+      return; // Exit the function
     }
 
-
-    function fetchAndHighlightSectionTokens(sectionId) {
-      fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
-        .then(response => response.json())
-        .then(data => {
-          const tokenIds = data.tokens; // Assuming the backend sends an array of token IDs
-          highlightSectionTokens(tokenIds);
-
-          // Scroll to the first token of this section
-          if (tokenIds.length > 0) {
-            const firstTokenId = tokenIds[0];
-            const firstTokenElement = document.querySelector(`.token[data-token-id="${firstTokenId}"]`);
-            if (firstTokenElement) {
-              firstTokenElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-           }
-          }
-          // Dispatch event with sectionId when tokens are fetched
-          dispatchCustomEvent('sectionSelected', { sectionId: sectionId });
-        })
-        .catch(error => {
-          console.error('Error fetching tokens for section:', error);
-        });
-    }
-
-    function loadChildSections(sectionId, parentDiv) {
-      // Check if child sections are already loaded
-      const existingChildList = parentDiv.querySelector('.child-section-list');
-      if (existingChildList) {
-        // Remove the child list to 'close' the section
-        parentDiv.removeChild(existingChildList);
-        return; // Exit the function
+    // Try to parse the JSON data if not already loaded
+    try {
+      const data = JSON.parse(container.innerText);
+      container.innerHTML = ''; // Clear the existing content
+      // Process and display child sections recursively
+      if (data.child_sections) {
+        const list = createNestedList(data.child_sections);
+        container.appendChild(list);
+        container.setAttribute('data-visible', 'true'); // Set visibility state
       }
-      fetch(`/corpus/get-child-sections/${sectionId}/`)
-        .then(response => response.json())
-        .then(childSections => {
-          const childSectionList = document.createElement('div');
-          childSectionList.classList.add('child-section-list');
-          childSectionList.style.paddingLeft = '20px'; // Indent child sections to visually nest them
-
-          childSections.forEach(childSection => {
-            const childDiv = document.createElement('div');
-            childDiv.classList.add('child-section-item');
-            childDiv.textContent = childSection.identifier || 'Untitled';
-            childDiv.dataset.sectionId = childSection.id;
-
-            // Add edit button
-            const editBtn = document.createElement('button');
-            editBtn.textContent = 'Edit';
-            editBtn.classList.add('edit-btn', 'text-sm', 'ml-2', 'mb-2', 'bg-blue-500', 'text-white', 'rounded', 'px-1', 'py-1'); // Added margin-bottom mb-2 for space between buttons vertically
-            editBtn.onclick = function () {
-              const sectionModal = document.getElementById('sectionModal');
-              const form = document.getElementById('sectionForm');
-              form.setAttribute('hx-get', `/corpus/load-section-modal/${childSection.id}/?edit_mode=true`);
-              form.setAttribute('hx-trigger', 'load');
-              sectionModal.style.display = 'block';
-            };
-            editBtn.classList.add('hover:bg-blue-700'); // Change hover color
-            childDiv.appendChild(editBtn);
-            // Add event listener to prevent event bubbling
-            childDiv.addEventListener('click', function (event) {
-              event.stopPropagation();
-              fetchAndHighlightSectionTokens(childSection.id);
-            });
-
-            childSectionList.appendChild(childDiv);
-          });
-
-          // Check if child sections are already loaded to avoid duplication
-          if (!parentDiv.querySelector('.child-section-list')) {
-            parentDiv.appendChild(childSectionList);
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching child sections:', error);
-        });
+      // Process and highlight tokens if necessary
+      if (data.tokens) {
+        highlightSectionTokens(data.tokens);
+      }
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
     }
+  }
+});
 
-    function loadSectionsOfType(sectionType) {
-      fetch(`/corpus/get-sections/${textId}/${sectionType}/`)
-        .then(response => response.json())
-        .then(sections => {
-          sectionList.innerHTML = '';
-          sections.forEach(section => {
-            const sectionDiv = document.createElement('div');
-            sectionDiv.classList.add('section-item', 'cursor-pointer', 'hover:bg-action/50', 'rounded-md', 'pl-1');
-            sectionDiv.textContent = section.identifier || 'Untitled';
-            sectionDiv.dataset.sectionId = section.id;
-
-            // Add edit button
-            const editBtn = document.createElement('button');
-            editBtn.textContent = 'Edit';
-            editBtn.classList.add('edit-btn', 'text-sm', 'ml-2', 'mb-2', 'bg-blue-500', 'text-white', 'rounded', 'px-1', 'py-1'); // Added margin-bottom mb-2 for space between buttons vertically
-
-            let queryString = `?section_id=${encodeURIComponent(section.id)}&text_id=${encodeURIComponent(textId)}`;
-            console.log("Query string:", queryString);
-            editBtn.onclick = function () {
-              htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, { target: '#modalContainer' }).then(() => {
-              document.getElementById('modalTextId').value = textId;
-              console.log('Modal content loaded');
-            }); 
-            };
-            editBtn.classList.add('hover:bg-blue-700'); // Change hover color
-            sectionDiv.appendChild(editBtn);
-
-            // Add event listener to load child sections    
-            sectionDiv.addEventListener('click', function () {
-              const isClosingSection = this.querySelector('.child-section-list');
-              loadChildSections(section.id, this);
-              // Only fetch and highlight tokens if the section is being opened
-              if (!isClosingSection) {
-                fetchAndHighlightSectionTokens(section.id);
-              }
-
-              sectionList.querySelectorAll('.section-item').forEach(item => {
-                item.classList.remove('bg-action');
-              });
-              this.classList.add('bg-action');
-            });
-
-            sectionList.appendChild(sectionDiv);
-          });
-
-          if (sections.length === 0) {
-            sectionList.innerHTML = '<p>No sections found for this type.</p>';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching sections:', error);
-          sectionList.innerHTML = '<p>Error loading sections.</p>';
-        });
-    }
-
-    selector.addEventListener('change', function () {
-      loadSectionsOfType(this.value);
+function createNestedList(sections) {
+  const list = document.createElement('ul');
+  list.classList.add('child-section-list');
+  sections.forEach(section => {
+    const item = document.createElement('li');
+    item.textContent = section.identifier;
+    item.dataset.sectionId = section.id; // Store section ID for token fetching
+    item.addEventListener('click', function() {
+      fetchTokensForSection(section.id);
     });
-
-    if (selector.options.length > 0) {
-      loadSectionsOfType(selector.options[0].value);
+    if (section.child_sections && section.child_sections.length > 0) {
+      const childList = createNestedList(section.child_sections); // Recursive call
+      item.appendChild(childList);
     }
+    list.appendChild(item);
+  });
+  return list;
+}
+
+function fetchTokensForSection(sectionId) {
+  fetch(`/path/to/get_tokens_for_section/${sectionId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.tokens) {
+        highlightSectionTokens(data.tokens);
+      }
+    })
+    .catch(error => console.error('Error fetching tokens:', error));
+}
+
+function highlightSectionTokens(tokenIds) {
+  const stringTokenIds = tokenIds.map(id => id.toString());
+  const tokens = document.querySelectorAll('.token');
+  tokens.forEach(token => {
+    token.classList.toggle('bg-yellow-300', stringTokenIds.includes(token.dataset.tokenId));
   });
 
+  // Scroll to the first highlighted token
+  const firstHighlighted = document.querySelector('.token.bg-yellow-300');
+  if (firstHighlighted) {
+    firstHighlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
 </script>
 
 {% endblock %}
