@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-22 13:52+0000\n"
+"POT-Creation-Date: 2024-05-13 12:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,11 +105,11 @@ msgstr "Abschnitt speichern"
 msgid "Start Token Selection"
 msgstr "Tokenauswhal starten"
 
-#: treeflow/corpus/templates/sections.html:19
+#: treeflow/corpus/templates/sections.html:21
 msgid "Select Section Type"
 msgstr "Abschnittstyp auswählen"
 
-#: treeflow/corpus/templates/sections.html:59
+#: treeflow/corpus/templates/sections.html:60
 msgid "No sentence sections found for this text."
 msgstr "Es wurden keine Satzabschnitte für diesen Text gefunden."
 
@@ -450,15 +450,23 @@ msgstr "Endet mit"
 msgid "Exact"
 msgstr "Exakt"
 
-#: treeflow/dict/templates/dictionary.html:70
+#: treeflow/dict/templates/dictionary.html:60
+msgid "Relatives"
+msgstr "Verwandte Lemmata"
+
+#: treeflow/dict/templates/dictionary.html:60
+msgid "Expects lemma word, e.g. \"kirdan\""
+msgstr "Erwartet Wörter, z. B. \"kirdan\""
+
+#: treeflow/dict/templates/dictionary.html:77
 msgid "Please wait while a lemma is being loaded."
 msgstr "Bitte warten Sie, bis ein Lemma geladen wurde."
 
-#: treeflow/dict/templates/dictionary.html:172
+#: treeflow/dict/templates/dictionary.html:198
 msgid "No lemmas found."
 msgstr "Keine Lemmas gefunden."
 
-#: treeflow/dict/templates/dictionary.html:173
+#: treeflow/dict/templates/dictionary.html:199
 #: treeflow/dict/templates/dictionary_controls.html:56
 msgid "Clear Search"
 msgstr "Suche löschen"
@@ -483,31 +491,33 @@ msgstr "Suchmodi"
 msgid "Edit Lemma"
 msgstr "Lemma bearbeiten"
 
-#: treeflow/dict/templates/lemma_details.html:13
+#: treeflow/dict/templates/lemma_details.html:11
 msgid "You must be logged in to edit this lemma."
 msgstr "Sie müssen eingeloggt sein, um dieses Lemma zu bearbeiten."
 
-#: treeflow/dict/templates/lemma_details.html:26
-msgid "Language"
-msgstr "Sprache"
-
-#: treeflow/dict/templates/lemma_details.html:36
-msgid "Multiword Exp."
+#: treeflow/dict/templates/lemma_details.html:18
+#, fuzzy
+#| msgid "Multiword Exp."
+msgid "Multiword Expression"
 msgstr "Multiword Aus."
 
-#: treeflow/dict/templates/lemma_details.html:54
+#: treeflow/dict/templates/lemma_details.html:24
 msgid "Related lemmas"
 msgstr "Verwandte Lemmas"
 
-#: treeflow/dict/templates/lemma_details.html:65
+#: treeflow/dict/templates/lemma_details.html:30
+msgid "Search for relatives"
+msgstr "Verwandte Lemmata suchen"
+
+#: treeflow/dict/templates/lemma_details.html:43
 msgid "No related lemmas found."
 msgstr "Keine verwandten Lemmas gefunden."
 
-#: treeflow/dict/templates/lemma_details.html:71
+#: treeflow/dict/templates/lemma_details.html:49
 msgid "Related senses"
 msgstr "Verwandte Bedeutungen"
 
-#: treeflow/dict/templates/lemma_details.html:84
+#: treeflow/dict/templates/lemma_details.html:62
 msgid "No related senses found."
 msgstr "Keine verwandten Bedeutungen gefunden."
 
@@ -619,7 +629,7 @@ msgstr ""
 
 #: treeflow/templates/account/login.html:8
 #: treeflow/templates/account/login.html:12
-#: treeflow/templates/account/login.html:46
+#: treeflow/templates/account/login.html:47
 msgid "Sign In"
 msgstr "Login"
 
@@ -640,26 +650,22 @@ msgstr ""
 msgid "or"
 msgstr "oder"
 
-#: treeflow/templates/account/login.html:45
-msgid "Forgot Password?"
-msgstr "Passwort vergessen?"
-
-#: treeflow/templates/account/login.html:50
+#: treeflow/templates/account/login.html:51
 #, python-format
 msgid ""
 "Don't have an account? <a href=\"%(signup_url)s\" class=\"underline hover:"
 "text-off\">Sign up</a>"
 msgstr ""
-"Noch keinen Account? <a href=\"%(signup_url)s\" class=\"underline hover:"
-"text-off\">Hier registrieren</a>"
+"Noch keinen Account? <a href=\"%(signup_url)s\" class=\"underline hover:text-"
+"off\">Hier registrieren</a>"
 
-#: treeflow/templates/account/logout.html:5
-#: treeflow/templates/account/logout.html:8
-#: treeflow/templates/account/logout.html:17
+#: treeflow/templates/account/logout.html:6
+#: treeflow/templates/account/logout.html:12
+#: treeflow/templates/account/logout.html:22
 msgid "Sign Out"
 msgstr "Logout"
 
-#: treeflow/templates/account/logout.html:10
+#: treeflow/templates/account/logout.html:14
 msgid "Are you sure you want to sign out?"
 msgstr "Sicher, dass Sie sich ausloggen möchten?"
 
@@ -1041,12 +1047,12 @@ msgid "Iranian Studies"
 msgstr "Iranistik"
 
 #: treeflow/templates/components/subbar.html:39
-#: treeflow/templates/pages/team.html:240
+#: treeflow/templates/pages/team.html:248
 msgid "Digital Humanities"
 msgstr "Digital Humanities"
 
 #: treeflow/templates/components/subbar.html:40
-#: treeflow/templates/pages/team.html:353
+#: treeflow/templates/pages/team.html:349
 msgid "Cooperation Partners"
 msgstr "Kooperationspartner"
 
@@ -1802,6 +1808,12 @@ msgstr "Benutzername"
 #: treeflow/users/views.py:25
 msgid "Information successfully updated"
 msgstr "Inforationen erfolgreich aktualisiert."
+
+#~ msgid "Language"
+#~ msgstr "Sprache"
+
+#~ msgid "Forgot Password?"
+#~ msgstr "Passwort vergessen?"
 
 #~ msgid "lemmas"
 #~ msgstr "Lemmas"
