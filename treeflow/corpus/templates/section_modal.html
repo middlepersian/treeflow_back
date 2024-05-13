@@ -1,33 +1,27 @@
-<!-- section_modal.html -->
+<!-- Simplified section_modal.html -->
 {% load i18n %}
 {% load static %}
 
-<div id="sectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
-
+<div id="sectionModal" class="fixed inset-0 z-10 overflow-y-auto bg-gray-500 bg-opacity-50" style="display: block;">
+    <!-- Ensure modal is visible by setting display to block -->
     <div class="flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
-            <h2 class="mb-4 text-lg font-bold">{% if edit_mode %}Edit Section{% else %}Create New Section{% endif %}</h2>
-            <form id="sectionForm" hx-post="{% if edit_mode %}{% url 'corpus:update_section' section.id %}{% else %}{% url 'corpus:create_section' %}{% endif %}" method="post" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="text_id" id="modalTextId" value="{{ text_id }}">
-                <div class="space-y-2">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto">
+            <h2 class="mb-4 text-lg font-bold">Simple Modal</h2> <!-- Static title for testing -->
+            <form id="sectionForm" method="post" hx-post="{% url 'corpus:update_section' section.id %}">
+                <!-- Simplified action for testing -->
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <!-- Ensure CSRF token is included -->
+                <div>
                     {{ form.as_p }}
+
                 </div>
-                <div class="my-4 selected-tokens-list">
-                    <h3 class="font-semibold">Selected Tokens:</h3>
-                    <div id="selectedTokensDisplay"></div>
-                </div>
+
                 <div class="flex justify-between mt-6">
-                    <button type="button" id="cancelButton"
-                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none">
-                        Cancel
-                    </button>
-                    <button type="submit" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-500 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
-                        {% if edit_mode %}Update Section{% else %}Save Section{% endif %}
-                    </button>
+                    <button type="button"
+                        onclick="document.getElementById('sectionModal').style.display='none';">Cancel</button>
+                    <button type="submit">Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-

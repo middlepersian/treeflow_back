@@ -27,7 +27,7 @@
         <!-- Section Type Selector -->
         <select id="sectionTypeSelector" name="sectionTypeSelector" hx-get="{% url 'corpus:get_sections_by_type' %}"
           hx-target="#sectionList" hx-trigger="load, change" hx-include="#textId, #sectionTypeSelector"
-          hx-indicator="#loadingIndicator">
+          hx-indicator="#loadingIndicator" hx-swap="innerHTML">
           {% for section_type in section_types %}
           <option value="{{ section_type }}">{{ section_type|title }}</option>
           {% endfor %}
@@ -36,7 +36,7 @@
       </div>
     </div>
     <!-- Section List -->
-    <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin">
+    <div id="sectionList" class="sections-container pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin">
       <!-- Sections will be loaded here -->
     </div>
 
