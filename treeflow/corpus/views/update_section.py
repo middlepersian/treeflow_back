@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from treeflow.corpus.models.section import Section
-from treeflow.corpus.forms.section_form import SectionForm
+from treeflow.corpus.forms.section_tokens_form import SectionForm
 import logging
 
 logger = logging.getLogger(__name__)

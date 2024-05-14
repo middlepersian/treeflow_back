@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from treeflow.corpus.forms.section_form import SectionForm
+from treeflow.corpus.forms.section_tokens_form import SectionForm
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
 import logging

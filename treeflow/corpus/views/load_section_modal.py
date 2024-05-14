@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 import logging
-from treeflow.corpus.forms.section_form import SectionForm
+from treeflow.corpus.forms.section_tokens_form import SectionForm
 from treeflow.corpus.models.section import Section
 
 logger = logging.getLogger(__name__)
