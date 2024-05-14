@@ -7,7 +7,7 @@
 
     <!-- Load Select2 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    
+
     <!-- Load Select2 JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
@@ -16,7 +16,7 @@
             {{ form.media.css }}
 
             <h2 class="mb-6 text-xl font-semibold text-gray-800">Edit Section</h2>
-            <form id="sectionForm" method="post" hx-post="{% url 'corpus:update_section' section.id %}">
+            <form id="sectionForm" method="post" hx-post="{% url 'corpus:update_section' section.id %}" hx-trigger="submit" hx-swap="none">
                 <input type="hidden" name="text_id" value="{{ section.text_id }}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                 <div class="space-y-4">
@@ -34,7 +34,7 @@
 
                 <div class="flex justify-between items-center mt-8">
                     <button type="button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-                        onclick="document.getElementById('sectionModal').style.display='none';">Cancel</button>
+                        onclick="closeModal();">Cancel</button>
                     <button type="submit"
                         class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Save</button>
                 </div>
@@ -46,9 +46,16 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        $('.select2').select2({
-            dropdownParent: $('#sectionModal')
-        });
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.successful && event.detail.target.id === 'sectionForm') {
+            closeModal();
+        }
     });
+
+    function closeModal() {
+        var modal = document.getElementById('sectionModal');
+        if (modal) {
+            modal.style.display = 'none';
+            htmx.find('#sectionTypeSelector').dispatchEvent(new Event('change'));        }
+    }
 </script>

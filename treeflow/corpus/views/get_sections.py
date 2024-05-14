@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_sections_by_type(request):
+    
     text_id = request.GET.get('textId')
     section_type = request.GET.get('sectionTypeSelector')
 
