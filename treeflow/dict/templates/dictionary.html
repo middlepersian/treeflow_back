@@ -3,11 +3,19 @@
 
 {% block content %}
   <div class="flex flex-row h-full overflow-hidden">
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+    <div class="flex flex-col gap-2 m-2 max-w-[2/5]">
+      <div class="flex flex-col gap-0 rounded-md">
+        <div class="relative flex flex-row rounded-md shadow-sm shadow-black">
+          <input id="search-input" type="text" class="w-full p-2 pr-6 rounded-md" placeholder="{% trans 'Search' %}..." oninput="changeControls(this)" />
+          <button id="search-button" class="absolute right-0 flex items-center h-full cursor-pointer rounded-r-md hover:bg-main disabled:pointer-events-none group peer" disabled onclick="search()">
+=======
     <div class="flex flex-col gap-2 m-2">
       <div class="flex flex-col gap-0 rounded-md">
         <div class="relative flex flex-row rounded-md shadow-sm shadow-black">
           <input id="search-input" type="text" class="w-full p-2 pr-6 rounded-md" placeholder="{% trans 'Search' %}..." oninput="changeControls(this)" />
           <button id="search-button" class="absolute right-0 flex items-center h-full cursor-pointer rounded-r-md hover:bg-off disabled:pointer-events-none group peer" disabled onclick="search()">
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
             <svg class="w-6 h-6 text-white fill-main group-disabled:fill-main/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -29,6 +37,15 @@
         </div>
         <div class="flex flex-col gap-1 p-1">
           <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'icontains')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-main"></div>
+            <span class="text-sm ms-3">{% trans 'Contains' %}</span>
+          </label>
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" checked onchange="selectSearchMode(this, 'startswith')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-main"></div>
+=======
             <input type="checkbox" value="" class="sr-only peer" checked onchange="selectSearchMode(this, 'icontains')" />
             <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
             <span class="text-sm ms-3">{% trans 'Contains' %}</span>
@@ -36,20 +53,52 @@
           <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
             <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'startswith')" />
             <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
             <span class="text-sm ms-3">{% trans 'Starts with' %}</span>
           </label>
           <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
             <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'endswith')" />
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-main"></div>
+=======
             <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
             <span class="text-sm ms-3">{% trans 'Ends with' %}</span>
           </label>
           <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
             <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'iexact')" />
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-main"></div>
+=======
             <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
             <span class="text-sm ms-3">{% trans 'Exact' %}</span>
           </label>
           <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
             <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'regex')" />
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-main"></div>
+            <span class="text-sm ms-3">RegEx</span>
+          </label>
+          <hr class="my-1 border-black" />
+          <label class="inline-flex items-center px-2 rounded-md cursor-pointer hover:bg-slate-300/50">
+            <input type="checkbox" value="" class="sr-only peer" onchange="selectSearchMode(this, 'relatives')" />
+            <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-main"></div>
+            <span class="text-sm ms-3">{% trans 'Relatives' %} <span class="block text-xs">{% trans 'Expects lemma word, e.g. "kirdan"' %}</span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex flex-row gap-2 p-[2px] overflow-y-hidden h-full">
+        {% comment %}Alphabet & List{% endcomment %}
+        <div id="lemma-alphabet-parent" class="flex flex-col rounded-md shadow-sm shadow-black"></div>
+        <div id="lemma-list" class="w-full min-w-[12rem] max-w-lg overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin"></div>
+      </div>
+    </div>
+    <div class="flex flex-col w-full mb-2">
+      {% comment %}Lemma Details{% endcomment %}
+      <div id="lemma-details" class="relative p-2 m-2 overflow-y-auto rounded-md">
+=======
             <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-off"></div>
             <span class="text-sm ms-3">RegEx</span>
           </label>
@@ -70,6 +119,7 @@
     <div class="w-full">
       {% comment %}Lemma View{% endcomment %}
       <div id="lemma-details" class="relative p-2 m-2 rounded-md shadow-sm bg-slate-400 shadow-black">
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
         <div class="text-center">
           {% trans 'Please wait while a lemma is being loaded.' %}
         </div>
@@ -78,6 +128,26 @@
   </div>
 
   <script>
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+    const DEFAULT_SEARCH_MODE = 'startswith'
+    let activeSearchMode
+    let currentSearchLetter = 'a'
+    
+    let activeId
+    
+    let startUp = true
+    let alphabet = new Set()
+    
+    document.addEventListener('DOMContentLoaded', function () {
+      let searchModes = document.getElementById('search-settings').querySelectorAll('label')
+      searchModes.forEach((label) => {
+        if (label.querySelector('input').checked) {
+          activeSearchMode = label.querySelector('input').getAttribute('onchange').split("'")[1]
+        }
+      })
+    
+      bootDict()
+=======
     let activeId
     let activeSearchMode
     
@@ -108,6 +178,7 @@
       let element = document.getElementById('lemma-list')
       let currentWidth = element.offsetWidth
       element.style.width = currentWidth + 'px'
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
     })
     
     // HTMX after lemma update
@@ -127,8 +198,13 @@
     
         // Refetching lemma list if necessary
         if (!document.getElementById('search-input').value.trim().length > 0) {
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+          search(currentSearchLetter)
+        } else {
+=======
           search('')
         } else{
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
           search()
         }
       }
@@ -138,24 +214,174 @@
     document.getElementById('search-input').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault()
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+        if (!document.getElementById('search-input').value.trim().length > 0) {
+          selectSpecificSearchMode(DEFAULT_SEARCH_MODE)
+          clearSearch()
+          scrollToActive()
+          return
+        }
+=======
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
         search()
       }
     })
     
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+    // MARK: Boot
+    function bootDict() {
+      let bootThen = (data) => {
+        alphabet = new Set()
+        data.split('\n').forEach((line) => {
+          const parser = new DOMParser()
+          const htmlElement = parser.parseFromString(line, 'text/html')
+          let text = htmlElement.documentElement.textContent.toLocaleLowerCase()
+          let id = line.match(/id="([^"]*)"/)[1]
+          alphabet.add(text[0])
+          if ('{{lemma_id}}' == id && text[0] !== currentSearchLetter) {
+            currentSearchLetter = text[0]
+          }
+        })
+      }
+    
+      let bootFinally = () => {
+        selectSpecificSearchMode(DEFAULT_SEARCH_MODE)
+        clearSearch(false)
+        setUpAlphabet()
+        search(currentSearchLetter)
+      }
+    
+      defaultQuery('', bootThen, bootFinally)
+    }
+    
+    // MARK: Search
+    function defaultQuery(filter, paramThen, paramFinally) {
+      var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter) + '&search_mode=' + encodeURIComponent(activeSearchMode)
+    
+      // The data returns the filtered lemmas already in HTML-div form.
+      fetch(url)
+        .then((response) => response.text())
+        .then((data) => {
+          paramThen(data)
+        })
+        .finally(() => {
+          paramFinally()
+        })
+        .catch((error) => console.error('Error:', error))
+    }
+    
+    function search(filter = document.getElementById('search-input').value.trim().length > 0 ? document.getElementById('search-input').value.trim() : currentSearchLetter) {
+      let searchThen = (data) => {
+        var lemmaList = document.getElementById('lemma-list')
+        lemmaList.innerHTML = data
+        htmx.process(lemmaList)
+    
+        if (activeId) {
+          let active = document.getElementById(activeId)
+          if (active) {
+            active.click()
+          }
+        }
+    
+        if (data === '') {
+          document.getElementById('controls-textbox').innerText = '{% trans "No lemmas found." %}'
+          document.getElementById('lemma-list').innerHTML = '<div class="flex w-full h-full"><button class="p-1 m-auto font-semibold text-white rounded-md bg-main hover:bg-main" onclick="clearSearch()">{% trans "Clear Search" %}</button></div>'
+        } else {
+          document.getElementById('controls-textbox').innerText = 'Loaded ' + data.split('\n').length + ' lemmas.'
+        }
+      }
+    
+      let searchFinally = () => {
+        insertAlphabetDivider()
+    
+        if (startUp) {
+          let x = document.getElementById('{{lemma_id}}')
+          if (x) {
+            x.click()
+          } else {
+            let y = document.querySelector('#lemma-list > div')
+            if (y) {
+              y.click()
+            }
+          }
+          startUp = false
+        }
+      }
+    
+      defaultQuery(filter, searchThen, searchFinally)
+    }
+    
+    function clearSearch(withSearch = true) {
+      document.getElementById('search-input').value = ''
+    
+      if (withSearch) {
+        searchWithBypass(currentSearchLetter)
+      }
+    
+      document.getElementById('search-button').setAttribute('disabled', true)
+      document.getElementById('clear-search-button').setAttribute('disabled', true)
+    }
+    
+    function changeControls(e) {
+      if (e.value.trim().length > 0) {
+        document.getElementById('clear-search-button').removeAttribute('disabled')
+        document.getElementById('search-button').removeAttribute('disabled')
+      } else {
+        document.getElementById('clear-search-button').setAttribute('disabled', true)
+        document.getElementById('search-button').setAttribute('disabled', true)
+      }
+    }
+    
+    function selectSearchMode(e, mode) {
+      activeSearchMode = mode
+      let searchSettings = document.getElementById('search-settings')
+      let searchSettingsLabels = searchSettings.querySelectorAll('label')
+      searchSettingsLabels.forEach((label) => {
+        label.querySelector('input').checked = false
+      })
+      e.checked = true
+    }
+    
+    function selectSpecificSearchMode(mode) {
+      activeSearchMode = mode
+      let searchModes = document.getElementById('search-settings').querySelectorAll('label')
+      searchModes.forEach((label) => {
+        if (label.querySelector('input').getAttribute('onchange').split("'")[1] === mode) {
+          label.querySelector('input').checked = true
+        } else {
+          label.querySelector('input').checked = false
+        }
+      })
+    }
+    
+    function searchWithBypass(letter) {
+      let currentSearchMode = activeSearchMode
+      activeSearchMode = DEFAULT_SEARCH_MODE
+      search(letter)
+      activeSearchMode = currentSearchMode
+    }
+    
+    // MARK: Lemma list
+    function selection(e) {
+      // Called from filter_lemmas.py
+      activeId = e.id
+      currentSearchLetter = e.textContent[0]
+=======
     function selection(e) {
       activeId = e.id
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
       const lemmaList = document.querySelector('#lemma-list')
     
       if (lemmaList) {
         lemmaList.childNodes.forEach((child) => {
           if (child.nodeType === Node.ELEMENT_NODE) {
-            child.classList.remove('bg-action')
+            child.classList.remove('bg-main')
             child.classList.remove('text-white')
           }
         })
       }
     
-      e.classList.add('bg-action')
+      e.classList.add('bg-main')
       e.classList.add('text-white')
     
       lemmaList.scrollTo({
@@ -164,6 +390,9 @@
       })
     }
     
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+    // MARK: Alphabet
+=======
     function search(filter = document.getElementById('search-input').value.trim()) {
       var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter) + '&search_mode=' + encodeURIComponent(activeSearchMode)
     
@@ -257,6 +486,7 @@
       e.checked = true
     }
     
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
     function insertAlphabetDivider() {
       let lemmas = document.querySelectorAll('#lemma-list > div:not(:has(*))')
     
@@ -270,6 +500,16 @@
         let prevLetter = ''
         if (lemma.previousElementSibling) {
           prevLetter = lemma.previousElementSibling.textContent[0]
+<<<<<<< 5be52c03d4914af1da2a530e26fd5d5a9094d5d9
+        }
+        if (letter !== prevLetter) {
+          let h3 = document.createElement('h3')
+          h3.textContent = letter
+          h3.classList.add('overflow-hidden', 'text-center', 'text-xs', 'before:bg-black', "before:content-['']", 'before:inline-block', 'before:h-[1px]', 'before:relative', 'before:align-middle', 'before:w-1/2', 'before:right-2', 'before:-ml-[50%]', 'after:bg-black', "after:content-['']", 'after:inline-block', 'after:h-[1px]', 'after:relative', 'after:align-middle', 'after:w-1/2', 'after:left-2', 'after:-mr-[50%]')
+    
+          document.getElementById('lemma-list').insertBefore(h3, lemma)
+=======
+>>>>>>> 53bbe69b052117be1b79b86efb91c0acd45d65eb
         }
         if (letter !== prevLetter) {
           let h3 = document.createElement('h3')
@@ -315,6 +555,110 @@
         })
         alphabetDiv.appendChild(div)
       })
+    }
+    
+    function setUpAlphabet() {
+      let alphabetParent = document.getElementById('lemma-alphabet-parent')
+    
+      let alphabetDiv = document.createElement('div')
+      alphabetDiv.classList.add('flex', 'flex-col', 'w-24', 'overflow-y-auto', 'rounded-md', 'shadow-sm', 'shadow-black', 'scrollbar-thin')
+      alphabetDiv.id = 'lemma-alphabet'
+      alphabetDiv.setAttribute('dir', 'rtl')
+      alphabetParent.appendChild(alphabetDiv)
+    
+      alphabetParent.classList.remove('hidden')
+    
+      if (alphabet.size === 0) {
+        alphabetParent.classList.add('hidden')
+        return
+      }
+    
+      alphabetParent.innerHTML = ''
+    
+      alphabet.forEach((letter) => {
+        let div = document.createElement('div')
+        div.textContent = letter
+        div.classList.add('m-1', 'text-center', 'rounded-sm', 'shadow-sm', 'cursor-pointer', 'hover:text-white', 'hover:bg-main', 'shadow-black', 'text-sm')
+        div.setAttribute('dir', 'ltr')
+        div.addEventListener('click', function () {
+          clearSearch(false)
+          searchWithBypass(letter)
+        })
+        alphabetDiv.appendChild(div)
+      })
+    
+      let outerDiv = document.createElement('div')
+      outerDiv.classList.add('relative', 'overflow-visible')
+    
+      let allDiv = document.createElement('div')
+      allDiv.textContent = 'all'
+      allDiv.classList.add('m-1', 'text-sm', 'font-semibold', 'text-center', 'rounded-sm', 'shadow-sm', 'cursor-pointer', 'hover:text-white', 'hover:bg-main', 'shadow-black', 'peer')
+      allDiv.setAttribute('dir', 'ltr')
+      allDiv.addEventListener('click', function () {
+        clearSearch(false)
+        search('')
+      })
+    
+      const span = document.createElement('span')
+      span.classList.add('absolute', 'z-50', 'w-20', 'p-1', 'hidden', 'text-sm', 'font-semibold', 'text-center', 'text-white', 'rounded-md', 'select-none', 'left-full', 'top-[15%]', 'peer-hover:block', 'bg-main')
+    
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      svg.classList.add('absolute', 'right-[55%]', 'w-full', 'h-2', 'rotate-90', 'text-main', 'bottom-full', 'top-[8%]')
+      svg.setAttribute('x', '0px')
+      svg.setAttribute('y', '0px')
+      svg.setAttribute('viewBox', '0 0 255 255')
+    
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      polygon.classList.add('fill-current')
+      polygon.setAttribute('points', '0,0 127.5,127.5 255,0')
+    
+      svg.appendChild(polygon)
+    
+      span.appendChild(svg)
+      span.appendChild(document.createTextNode('Expect loading time'))
+    
+      outerDiv.appendChild(allDiv)
+      outerDiv.appendChild(span)
+    
+      alphabetParent.appendChild(outerDiv)
+    
+      let border = document.createElement('hr')
+      border.classList.add('border-black')
+      alphabetParent.appendChild(border)
+    
+      alphabetParent.appendChild(alphabetDiv)
+    }
+    
+    // MARK: Control buttons
+    function scrollToActive() {
+      const lemmaList = document.querySelector('#lemma-list')
+      const active = lemmaList.querySelector('div > .bg-main')
+      if (active) {
+        lemmaList.scrollTo({
+          top: active.offsetTop - lemmaList.offsetTop - 5,
+          behavior: 'smooth'
+        })
+      }
+    }
+    
+    function scrollToBottom() {
+      const lemmaList = document.querySelector('#lemma-list')
+      lemmaList.scrollTo({
+        top: lemmaList.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+    
+    function scrollToTop() {
+      const lemmaList = document.querySelector('#lemma-list')
+      lemmaList.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+    
+    function toggleSearchSettings() {
+      document.getElementById('search-settings').classList.toggle('hidden')
     }
   </script>
 {% endblock %}
