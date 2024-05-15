@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-24 09:04+0000\n"
+"POT-Creation-Date: 2024-05-13 12:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -450,15 +450,23 @@ msgstr ""
 msgid "Exact"
 msgstr ""
 
-#: treeflow/dict/templates/dictionary.html:70
+#: treeflow/dict/templates/dictionary.html:60
+msgid "Relatives"
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:60
+msgid "Expects lemma word, e.g. \"kirdan\""
+msgstr ""
+
+#: treeflow/dict/templates/dictionary.html:77
 msgid "Please wait while a lemma is being loaded."
 msgstr ""
 
-#: treeflow/dict/templates/dictionary.html:172
+#: treeflow/dict/templates/dictionary.html:198
 msgid "No lemmas found."
 msgstr ""
 
-#: treeflow/dict/templates/dictionary.html:173
+#: treeflow/dict/templates/dictionary.html:199
 #: treeflow/dict/templates/dictionary_controls.html:56
 msgid "Clear Search"
 msgstr ""
@@ -483,31 +491,31 @@ msgstr ""
 msgid "Edit Lemma"
 msgstr ""
 
-#: treeflow/dict/templates/lemma_details.html:13
+#: treeflow/dict/templates/lemma_details.html:11
 msgid "You must be logged in to edit this lemma."
 msgstr ""
 
-#: treeflow/dict/templates/lemma_details.html:26
-msgid "Language"
+#: treeflow/dict/templates/lemma_details.html:18
+msgid "Multiword Expression"
 msgstr ""
 
-#: treeflow/dict/templates/lemma_details.html:36
-msgid "Multiword Exp."
-msgstr ""
-
-#: treeflow/dict/templates/lemma_details.html:54
+#: treeflow/dict/templates/lemma_details.html:24
 msgid "Related lemmas"
 msgstr ""
 
-#: treeflow/dict/templates/lemma_details.html:65
+#: treeflow/dict/templates/lemma_details.html:30
+msgid "Search for relatives"
+msgstr ""
+
+#: treeflow/dict/templates/lemma_details.html:43
 msgid "No related lemmas found."
 msgstr ""
 
-#: treeflow/dict/templates/lemma_details.html:71
+#: treeflow/dict/templates/lemma_details.html:49
 msgid "Related senses"
 msgstr ""
 
-#: treeflow/dict/templates/lemma_details.html:84
+#: treeflow/dict/templates/lemma_details.html:62
 msgid "No related senses found."
 msgstr ""
 
@@ -964,12 +972,12 @@ msgid "Iranian Studies"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:39
-#: treeflow/templates/pages/team.html:216
+#: treeflow/templates/pages/team.html:248
 msgid "Digital Humanities"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:40
-#: treeflow/templates/pages/team.html:317
+#: treeflow/templates/pages/team.html:349
 msgid "Cooperation Partners"
 msgstr ""
 
