@@ -9,36 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 def update_section_view(request, section_id=None):
-    edit_mode = bool(section_id)
     section = get_object_or_404(Section, id=section_id) if section_id else None
     if request.method == "POST":
         form = SectionForm(request.POST, instance=section)
         if form.is_valid():
-            updated_section = form.save()
+            form.save()
             logger.info("Section updated successfully")
-            text_id = updated_section.text_id
-            section_type = updated_section.type
-            sections = Section.objects.filter(text_id=text_id, type=section_type)
-            logger.info("Rendering sections list")
-            return render(request, "sections_list.html", {"sections": sections})
+            return JsonResponse({"status": "success", "message": "Section updated successfully"})
         else:
             logger.error("Form is not valid: %s", form.errors)
-            return JsonResponse(
-                {
-                    "status": "error",
-                    "message": "Form is not valid",
-                    "errors": form.errors,
-                },
-                status=400,
-            )
+            return JsonResponse({"status": "error", "message": "Form is not valid", "errors": form.errors}, status=400)
     else:  # GET request
-        logger.info("Rendering section modal")
-        try:
-            form = SectionForm(instance=section)
-            context = {"form": form, "section": section, "edit_mode": edit_mode}
-            return HttpResponse(render(request, "section_modal.html", context))
-        except Exception as e:
-            logger.error(f"Error rendering section modal: {e}")
-            return JsonResponse(
-                {"status": "error", "message": "Error rendering section modal"}
-            )
+        form = SectionForm(instance=section)
+        context = {"form": form, "section": section, "edit_mode": bool(section_id)}
+        return render(request, "section_modal.html", context)
