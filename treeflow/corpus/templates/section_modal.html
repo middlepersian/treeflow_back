@@ -16,7 +16,8 @@
             {{ form.media.css }}
 
             <h2 class="mb-6 text-xl font-semibold text-gray-800">Edit Section</h2>
-            <form id="sectionForm" method="post" hx-post="{% url 'corpus:update_section' section.id %}" hx-trigger="submit" hx-swap="none">
+            <form id="sectionForm" method="post" hx-post="{% url 'corpus:update_section' section.id %}"
+                hx-trigger="submit">
                 <input type="hidden" name="text_id" value="{{ section.text_id }}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                 <div class="space-y-4">
@@ -46,16 +47,19 @@
 </div>
 
 <script>
-    document.body.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.successful && event.detail.target.id === 'sectionForm') {
-            closeModal();
-        }
-    });
-
     function closeModal() {
         var modal = document.getElementById('sectionModal');
         if (modal) {
             modal.style.display = 'none';
-            htmx.find('#sectionTypeSelector').dispatchEvent(new Event('change'));        }
+        }
     }
+
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+    console.log(event.detail.xhr.responseURL);
+    if (event.detail.xhr.responseURL.includes('update_section')) {
+        closeModal();  // Close the modal if the request URL is for updating section
+        htmx.trigger('#sectionTypeSelector', 'change');  // Trigger change event to update the section list
+    }
+});
+
 </script>

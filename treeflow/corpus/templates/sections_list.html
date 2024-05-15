@@ -23,25 +23,3 @@
     {% endfor %}
 </div>
 
-<script>
-    document.body.addEventListener('htmx:beforeSwap', function (event) {
-        if (event.target.classList.contains('section-data')) {
-            var isVisible = event.target.getAttribute('data-visible') === 'true';
-            if (isVisible) {
-                event.preventDefault(); // Prevent HTMX from swapping the content
-                event.target.style.display = 'none';
-                event.target.setAttribute('data-visible', 'false');
-            } else {
-                event.target.style.display = 'block';
-                event.target.setAttribute('data-visible', 'true');
-            }
-        }
-    });
-
-    document.body.addEventListener('htmx:afterSwap', function (event) {
-        if (event.target.classList.contains('section-data')) {
-            event.target.style.display = 'block';
-            event.target.setAttribute('data-visible', 'true');
-        }
-    });
-</script>
