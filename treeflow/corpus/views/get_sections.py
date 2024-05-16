@@ -18,23 +18,20 @@ def get_sections_by_type(request):
 
 def get_section_data(request, section_id):
     logger.debug(f"Received section_id: {section_id}")  
-    try:
-        # Fetch the section and its child sections
-        section = Section.objects.get(id=section_id)
-        child_sections = Section.objects.filter(container__id=section_id).values('id', 'identifier', 'type')
-        
-        # Fetch tokens for the section
-        tokens = list(section.tokens.values_list('id', flat=True))
-        
-        # Prepare the response data
-        data = {
-            'child_sections': list(child_sections),
-            'tokens': tokens
-        }
-        return JsonResponse(data, safe=False)
-    except Section.DoesNotExist:
-        return JsonResponse({'error': 'Section not found'}, status=404)
+    # Fetch the section and its child sections
+    section = Section.objects.get(id=section_id)
+    child_sections = Section.objects.filter(container__id=section_id).values('id', 'identifier', 'type')
     
+    # Fetch tokens for the section
+    tokens = list(section.tokens.values_list('id', flat=True))
+    
+    # Prepare the response data
+    context = {
+        'child_sections': list(child_sections),
+        'tokens': tokens
+    }
+    return render(request, 'section_data.html', context)
+
 def get_tokens_for_section(request, section_id):
     try:
         section = Section.objects.get(id=section_id)

@@ -1,25 +1,58 @@
 <div class="overflow-y-scroll h-screen pb-10">
-    <!-- Scrollable container using full viewport height with bottom padding -->
-    <!-- List of sections with HTMX trigger to get section data -->
     {% for section in sections %}
-    <div class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md"
-        hx-get="{% url 'corpus:get_section_data' section.id %}" hx-trigger="click" hx-swap="innerHTML"
-        hx-target="#section-data-{{ section.id }}" data-json-response="true">
+    <div id="section-item-{{ section.id }}" class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md">
         <div class="flex justify-between items-center">
-            <span class="section-title">{{ section.identifier }}</span>
-            <!-- Edit button placed to the right of the section -->
+            <span class="section-title cursor-pointer" hx-get="{% url 'corpus:get_section_data' section.id %}"
+                hx-target="#section-data-{{ section.id }}" hx-swap="innerHTML" hx-trigger="click"
+                onclick="toggleSectionVisibility('{{ section.id }}', event);">
+                {{ section.identifier }}
+            </span>
+            <!-- Edit and Delete buttons -->
             <button class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
                 hx-get="{% url 'corpus:update_section' section.id %}" hx-trigger="click" hx-target="#modalContainer"
                 onclick="event.stopPropagation();">Edit</button>
-            <!-- Delete button placed to the right of the edit button -->
             <button class="delete-button bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="innerHTML"
-                hx-target="#sectionList" hx-confirm="Are you sure you want to delete this section?"
-                onclick="event.stopPropagation();">
-                Delete</button>
+                hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="none"
+                hx-confirm="Are you sure you want to delete this section?">
+                Delete
+            </button>
         </div>
-        <div id="section-data-{{ section.id }}" class="section-data ml-4 mt-2"></div>
+        <!-- Placeholder for child sections -->
+        <div id="section-data-{{ section.id }}" class="hidden"></div>
     </div>
     {% endfor %}
 </div>
 
+
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+        console.log('Request completed with status:', event.detail.xhr.status);
+        if (event.detail.xhr.status === 200) {
+            var response = JSON.parse(event.detail.xhr.responseText);
+            if (response.status === 'success' && response.section_id) {
+                var sectionElement = document.getElementById('section-item-' + response.section_id);
+                if (sectionElement) {
+                    sectionElement.remove(); // Remove the section element from the DOM
+                }
+            } else {
+                console.error('Failed to delete the section');
+            }
+        }
+    });
+</script>
+
+<script>
+    function toggleSectionVisibility(sectionId, event) {
+        var element = document.getElementById('section-data-' + sectionId);
+        if (element) {
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+            } else {
+                element.classList.add('hidden');
+            }
+        } else {
+            console.error('Element not found: section-data-' + sectionId);
+        }
+        event.preventDefault();
+    }
+</script>
