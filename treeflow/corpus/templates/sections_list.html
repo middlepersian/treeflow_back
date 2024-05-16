@@ -13,7 +13,7 @@
                 onclick="event.stopPropagation();">Edit</button>
             <button class="delete-button bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                 hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="none"
-                hx-confirm="Are you sure you want to delete this section?">
+                hx-confirm="Are you sure you want to delete this section?" onclick="event.stopPropagation();">
                 Delete
             </button>
         </div>
@@ -23,20 +23,27 @@
     {% endfor %}
 </div>
 
-
 <script>
     document.body.addEventListener('htmx:afterRequest', function (event) {
-        console.log('Request completed with status:', event.detail.xhr.status);
-        if (event.detail.xhr.status === 200) {
-            var response = JSON.parse(event.detail.xhr.responseText);
-            if (response.status === 'success' && response.section_id) {
-                var sectionElement = document.getElementById('section-item-' + response.section_id);
-                if (sectionElement) {
-                    sectionElement.remove(); // Remove the section element from the DOM
+        const contentType = event.detail.xhr.getResponseHeader("Content-Type");
+        if (event.target.classList.contains('delete-button')) {
+            console.log('HTMX request completed from delete button:', event);
+            try {
+                var response = JSON.parse(event.detail.xhr.responseText);
+                if (response.status === 'success' && response.section_id) {
+                    var sectionElement = document.getElementById('section-item-' + response.section_id);
+                    if (sectionElement) {
+                        sectionElement.remove(); // Remove the section element from the DOM
+                    }
+                } else {
+                    console.error('Failed to delete the section');
                 }
-            } else {
-                console.error('Failed to delete the section');
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
             }
+        } else if (contentType && contentType.includes("text/html")) {
+            // HTML responses are handled by HTMX, no need to process here
+            console.log('HTML content received, handled by HTMX.');
         }
     });
 </script>

@@ -1,19 +1,21 @@
 <div>
     {% for section in child_sections %}
-    <div id="section-item-{{ section.id }}" class="section_child py-2 px-4 flex justify-between items-center bg-gray-100 rounded-md hover:bg-gray-200 ml-2" section-id="{{ section.id }}">
+    <div id="section-item-{{ section.id }}"
+        class="section_child py-2 px-4 flex justify-between items-center bg-gray-100 rounded-md hover:bg-gray-200 ml-2"
+        section-id="{{ section.id }}">
         <span class="text-gray-700 font-medium">{{ section.identifier }}</span>
         <div>
             <!-- Edit and Delete buttons -->
-            <button class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded transition duration-300 ease-in-out"
+            <button
+                class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded transition duration-300 ease-in-out"
                 hx-get="{% url 'corpus:update_section' section.id %}" hx-trigger="click" hx-target="#modalContainer"
                 onclick="event.stopPropagation();">Edit</button>
-            <button class="delete-button bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded transition duration-300 ease-in-out"
-                hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="innerHTML"
-                hx-target="#sectionList" hx-confirm="Are you sure you want to delete this section?"
-                onclick="event.stopPropagation();">
-                Delete</button>
+            <button class="delete-button bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="none"
+                hx-confirm="Are you sure you want to delete this section?" onclick="event.stopPropagation();">
+                Delete
+            </button>
         </div>
     </div>
     {% endfor %}
 </div>
-
