@@ -17,5 +17,13 @@
             </button>
         </div>
     </div>
+    <!-- Placeholder for further nested child sections -->
+    <div id="section-data-{{ section.id }}" class="hidden"></div>
+    <!-- Recursive include to handle nested child sections -->
+    {% if section.child_sections %}
+        <div class="ml-4">
+            {% include "section_data.html" with child_sections=section.child_sections %}
+        </div>
+    {% endif %}
     {% endfor %}
 </div>

@@ -87,3 +87,5 @@ class Comment(models.Model):
                 update_fields = set(kwargs['update_fields'])
                 update_fields.update({'modified_at', 'modified_by'})
                 kwargs['update_fields'] = list(update_fields)
+
+        super().save(*args, **kwargs)
