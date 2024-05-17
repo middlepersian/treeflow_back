@@ -8,7 +8,6 @@ from treeflow.corpus.models.comment import Comment
 from treeflow.corpus.forms.section_edit_display_tokens import SectionForm
 from treeflow.corpus.forms.comment_section_form import CommentSectionForm
 
-
 logger = logging.getLogger(__name__)
 
 def update_section_view(request, section_id=None):
@@ -18,21 +17,27 @@ def update_section_view(request, section_id=None):
     if request.method == "POST":
         form = SectionForm(request.POST, instance=section)
         CommentFormSet = modelformset_factory(Comment, form=CommentSectionForm, extra=0, can_delete=True)
-        comment_formset = CommentFormSet(request.POST, queryset=Comment.objects.none())
+        comment_formset = CommentFormSet(request.POST, queryset=Comment.objects.filter(section=section))
 
         logger.info("Processing POST request...")
         if form.is_valid() and comment_formset.is_valid():
             with transaction.atomic():
                 updated_section = form.save()
                 logger.info(f"Section {updated_section.id} saved successfully.")
-                
+
                 comment_instances = comment_formset.save(commit=False)
                 for comment in comment_instances:
                     comment.section = updated_section
                     comment.user = request.user
                     comment.save()
                     logger.info(f"Comment {comment.id} linked to section {updated_section.id} and saved.")
-                
+
+                # Handle deletions
+                for form in comment_formset.deleted_forms:
+                    if form.instance.pk:
+                        form.instance.delete()
+                        logger.info(f"Comment {form.instance.id} deleted.")
+
                 comment_formset.save_m2m()
                 logger.info("All comments updated successfully with section.")
                 return JsonResponse({"status": "success", "message": "Section and comments updated successfully"})

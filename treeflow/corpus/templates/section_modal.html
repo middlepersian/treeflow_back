@@ -45,7 +45,12 @@
                                             {% for comment_form in comment_formset %}
                                             <div class="comment-form">
                                                 {{ comment_form.as_p }}
+                                                {% if comment_form.instance.comment %}
+                                                <!-- Check if there is a comment -->
+                                                <p>Comment by: {{ comment_form.instance.user }}</p>
+                                                {% endif %}
                                             </div>
+                                            <hr> <!-- Added line division between comments -->
                                             {% endfor %}
                                             {% else %}
                                             <p>No comments available.</p>
