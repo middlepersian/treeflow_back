@@ -2,9 +2,9 @@
     {% for section in sections %}
     <div id="section-item-{{ section.id }}" class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md">
         <div class="flex justify-between items-center">
-            <span class="section-title cursor-pointer" hx-get="{% url 'corpus:get_section_data' section.id %}"
-                hx-target="#section-data-{{ section.id }}" hx-swap="innerHTML" hx-trigger="click"
-                onclick="toggleSectionVisibility('{{ section.id }}', event);">
+            <span id="section-id-{{ section.id }}" class="section-title cursor-pointer"
+                hx-get="{% url 'corpus:get_section_data' section.id %}" hx-target="#section-data-{{ section.id }}"
+                hx-swap="innerHTML" hx-trigger="click" onclick="handleSectionClick('{{ section.id }}', event);">
                 {{ section.identifier }}
             </span>
             <!-- Edit and Delete buttons -->
@@ -44,11 +44,17 @@
         } else if (contentType && contentType.includes("text/html")) {
             // HTML responses are handled by HTMX, no need to process here
             console.log('HTML content received, handled by HTMX.');
+
         }
     });
 </script>
 
 <script>
+    function handleSectionClick(sectionId, event) {
+        toggleSectionVisibility(sectionId, event);
+        fetchAndHighlightTokens(sectionId);
+    }
+
     function toggleSectionVisibility(sectionId, event) {
         var element = document.getElementById('section-data-' + sectionId);
         if (element) {
@@ -61,5 +67,36 @@
             console.error('Element not found: section-data-' + sectionId);
         }
         event.preventDefault();
+    }
+
+    function fetchAndHighlightTokens(sectionId) {
+        console.log('Fetching tokens for section:', sectionId);
+        fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.tokens) {
+                    highlightTokens(data.tokens);
+                } else {
+                    console.error('No tokens found for section:', sectionId);
+                }
+            })
+            .catch(error => console.error('Error fetching tokens:', error));
+    }
+
+    function highlightTokens(tokenIds) {
+        // Remove existing highlights from all tokens
+        document.querySelectorAll('.token').forEach(token => {
+            token.classList.remove('bg-yellow-300'); // Assuming 'bg-yellow-300' is the Tailwind class for highlighting
+        });
+
+        // Apply new highlights to the fetched tokens
+        tokenIds.forEach(tokenId => {
+            //console.log('Highlighting token:', tokenId);
+            const tokenElement = document.querySelector(`.token[data-token-id="${tokenId}"]`);
+            if (tokenElement) {
+                console.log('Highlighting token:', tokenId);
+                tokenElement.classList.add('bg-yellow-300'); // Apply the Tailwind class for highlighting
+            }
+        });
     }
 </script>

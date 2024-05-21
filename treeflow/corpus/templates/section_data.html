@@ -1,9 +1,12 @@
 <div>
     {% for section in child_sections %}
     <div id="section-item-{{ section.id }}"
-        class="section_child py-2 px-4 flex justify-between items-center bg-gray-100 rounded-md hover:bg-gray-200 ml-2"
-        section-id="{{ section.id }}">
-        <span class="text-gray-700 font-medium">{{ section.identifier }}</span>
+        class="section_child py-2 px-4 flex justify-between items-center bg-gray-100 rounded-md hover:bg-gray-200 ml-2">
+        <span id="section-id-{{ section.id }}" class="section-title cursor-pointer"
+            hx-get="{% url 'corpus:get_section_data' section.id %}" hx-target="#section-data-{{ section.id }}"
+            hx-swap="innerHTML" hx-trigger="click" onclick="handleSectionClick('{{ section.id }}', event);">
+            {{ section.identifier }}
+        </span>
         <div>
             <!-- Edit and Delete buttons -->
             <button
@@ -18,12 +21,12 @@
         </div>
     </div>
     <!-- Placeholder for further nested child sections -->
-    <div id="section-data-{{ section.id }}" class="hidden"></div>
+    <div id="section-data-{{ section.id }}" class="hidden" data-tokens="{{ tokens|join:',' }}"></div>
     <!-- Recursive include to handle nested child sections -->
     {% if section.child_sections %}
-        <div class="ml-4">
-            {% include "section_data.html" with child_sections=section.child_sections %}
-        </div>
+    <div class="ml-4">
+        {% include "section_data.html" with child_sections=section.child_sections %}
+    </div>
     {% endif %}
     {% endfor %}
 </div>

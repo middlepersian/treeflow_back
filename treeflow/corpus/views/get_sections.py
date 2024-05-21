@@ -14,12 +14,14 @@ def get_sections_by_type(request):
     logger.debug(f"Received sectionType: {section_type}")
 
     sections = Section.objects.filter(text_id=text_id, type=section_type)
-    return render(request, "sections_list.html", {"sections": sections})
+    return render(request, "section_list.html", {"sections": sections})
 
 
 def fetch_nested_sections(section_id):
     """Recursively fetch child sections."""
-    section = Section.objects.get(id=section_id)
+    #section = Section.objects.get(id=section_id)
+    #logger.debug(f"Fetching nested sections for section: {section.identifier}")
+    logger.debug(f"Fetching nested sections for section_id: {section_id}")
     child_sections = Section.objects.filter(container__id=section_id)
     nested_sections = []
     for child in child_sections:
@@ -37,14 +39,10 @@ def get_section_data(request, section_id):
     # Fetch the section and its nested child sections
     nested_sections = fetch_nested_sections(section_id)
     
-    # Fetch tokens for the section
-    section = Section.objects.get(id=section_id)
-    tokens = list(section.tokens.values_list('id', flat=True))
     
     # Prepare the response data
     context = {
         'child_sections': nested_sections,
-        'tokens': tokens
     }
     return render(request, 'section_data.html', context)
 
