@@ -65,14 +65,21 @@
       <div class="flex flex-row gap-2 p-[2px] overflow-y-hidden h-full">
         {% comment %}Alphabet & List{% endcomment %}
         <div id="lemma-alphabet-parent" class="flex flex-col rounded-md shadow-sm shadow-black"></div>
-        <div id="lemma-list" class="w-full min-w-[12rem] max-w-lg overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin"></div>
+        <div id="lemma-list" class="w-full min-w-[12rem] max-w-lg overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
+          <div class="flex items-center h-full">
+            {% include 'loading_bite.html' %}
+          </div>
+        </div>
       </div>
     </div>
-    <div class="flex flex-col w-full mb-2">
+    <div class="relative flex flex-col w-full mb-2">
       {% comment %}Lemma Details{% endcomment %}
+      <div id="loading-bite" class="absolute bottom-0 z-10 flex-col items-center hidden gap-2 p-2 bg-white rounded-md shadow-sm shadow-black"></div>
+      <div id="info-board" class="absolute bottom-0 z-10 flex-col items-center hidden gap-2 p-2 bg-white rounded-md shadow-sm shadow-black"></div>
       <div id="lemma-details" class="relative p-2 m-2 overflow-y-auto rounded-md">
-        <div class="text-center">
-          {% trans 'Please wait while a lemma is being loaded.' %}
+        <div class="flex flex-col items-center gap-2 text-center">
+          <span>{% trans 'Please wait while a lemma is being loaded.' %}</span>
+          {% include 'loading_bite.html' %}
         </div>
       </div>
     </div>
@@ -80,8 +87,9 @@
 
   <script>
     const DEFAULT_SEARCH_MODE = 'startswith'
+    const DEFAULT_SEARCH_LETTER = 'a'
     let activeSearchMode
-    let currentSearchLetter = 'a'
+    let currentSearchLetter = DEFAULT_SEARCH_LETTER
     
     let activeId
     
@@ -101,6 +109,8 @@
     
     // HTMX after lemma update
     document.body.addEventListener('htmx:afterSwap', function (event) {
+      stopLoading()
+
       var targetId = event.detail.target.id
       if (typeof targetId === 'string' && targetId === 'lemma-form' && event.detail.xhr.status === 200) {
         closeLemmaModal()
@@ -120,6 +130,17 @@
         } else {
           search()
         }
+
+        let infoBoard = document.getElementById('info-board')
+        infoBoard.classList.remove('hidden')
+        infoBoard.classList.add('flex')
+        infoBoard.innerHTML= '<span>Changes saved succesfully</span><div><svg class="w-8 h-8 text-off" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>'
+
+        setTimeout(() => {
+          infoBoard.classList.remove('flex')
+          infoBoard.classList.add('hidden')
+          infoBoard.innerHTML = ''
+        }, 5000)
       }
     })
     
@@ -163,6 +184,7 @@
     
     // MARK: Search
     function search(filter = document.getElementById('search-input').value.trim().length > 0 ? document.getElementById('search-input').value.trim() : currentSearchLetter) {
+      startLoading('Searching lemmas')
       var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter) + '&search_mode=' + encodeURIComponent(activeSearchMode)
     
       // The data returns the filtered lemmas already in HTML-div form.
@@ -202,6 +224,7 @@
             }
             startUp = false
           }
+          stopLoading()
         })
         .catch((error) => console.error('Error:', error))
     }
@@ -274,6 +297,8 @@
     
       e.classList.add('bg-main')
       e.classList.add('text-white')
+    
+      startLoading('Loading lemma')
     
       lemmaList.scrollTo({
         top: e.offsetTop - lemmaList.offsetTop - 5,
@@ -378,7 +403,7 @@
       alphabetParent.appendChild(alphabetDiv)
     }
     
-    // MARK: Control buttons
+    // MARK: Control
     function scrollToActive() {
       const lemmaList = document.querySelector('#lemma-list')
       const active = lemmaList.querySelector('div > .bg-main')
@@ -408,6 +433,20 @@
     
     function toggleSearchSettings() {
       document.getElementById('search-settings').classList.toggle('hidden')
+    }
+    
+    function startLoading(text) {
+      let loadingBite = document.getElementById('loading-bite')
+      loadingBite.classList.remove('hidden')
+      loadingBite.classList.add('flex')
+      loadingBite.innerHTML = '<span>' + text + '</span><div class="flex justify-center w-full gap-x-1"><div class="w-1 h-4 ease-in-out rounded-md bg-off animate-infinite animate-fade-up animate-delay-0"></div><div class="w-1 h-5 rounded-md bg-off animate-infinite animate-fade-up animate-delay-75"></div><div class="w-1 h-6 rounded-md bg-off animate-infinite animate-fade-up animate-delay-150"></div><div class="w-1 h-5 rounded-md bg-off animate-infinite animate-fade-up animate-delay-[225ms]"></div><div class="w-1 h-4 rounded-md bg-off animate-infinite animate-fade-up animate-delay-300"></div></div>'
+    }
+
+    function stopLoading() {
+      let loadingBite = document.getElementById('loading-bite')
+      loadingBite.classList.remove('flex')
+      loadingBite.classList.add('hidden')
+      loadingBite.innerHTML = ''
     }
   </script>
 {% endblock %}
