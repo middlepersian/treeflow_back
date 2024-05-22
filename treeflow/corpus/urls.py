@@ -16,7 +16,8 @@ from treeflow.corpus.views.create_section import create_section_view
 from treeflow.corpus.views.section_editor import section_editor_form_view
 from treeflow.corpus.views.save_section import save_section_view
 from treeflow.corpus.views.display_tokens import display_tokens_view
-from treeflow.corpus.views.load_section_modal import load_section_modal
+from treeflow.corpus.views.load_section_modal_create import load_section_modal_create
+from treeflow.corpus.views.load_section_modal_update import load_section_modal_update
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
 from treeflow.corpus.views.bib_edit import BibEntryListView, BibEntryCreateView
@@ -55,6 +56,7 @@ urlpatterns = [
     path('sections/<uuid:text_id>', sections_view, name='sections'),
     path('section/', section_editor_form_view, name='section'),
     path('section/<uuid:section_id>', section_editor_form_view, name='section'),
+    path('create_section/', create_section_view, name='create_section'),
     path('save_section/', save_section_view, name='save_section'),
     path('save_section/<uuid:section_id>', save_section_view, name='save_section'),
     path('dropdown_redirect/', dropdown_redirect, name='dropdown_redirect'),
@@ -63,9 +65,9 @@ urlpatterns = [
     path('get-tokens-for-section/<uuid:section_id>/', get_tokens_for_section, name='get_tokens_for_section'),
     path('get-feature-formset/<uuid:token_id>/', get_feature_formset, name='get_feature_formset'),
     path('get-images/', get_images_view, name='get_images'),
-    path('create_section/', create_section_view, name='create_section'),
     path('display_tokens/', display_tokens_view, name='display_tokens'),
-    path('load_section_modal/', load_section_modal, name='load_section_modal'),
+    path('load_section_modal_create/', load_section_modal_create, name='load_section_modal_create'),
+    path('load_section_modal_update/', load_section_modal_update, name='load_section_modal_update'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('pos_feature_form/<uuid:token_id>/', pos_feature_form, name='pos_feature_form'),
     path('bibliography/', BibEntryListView.as_view(), name='bibliography'),

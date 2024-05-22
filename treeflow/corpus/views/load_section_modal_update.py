@@ -1,11 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 import logging
-from treeflow.corpus.forms.section_edit_display_tokens import SectionForm
+from treeflow.corpus.forms.section_create import SectionForm
 from treeflow.corpus.models.section import Section
 
 logger = logging.getLogger(__name__)
 
-def load_section_modal(request):
+def load_section_modal_update(request):
     section_id = request.GET.get('section_id')
     logger.debug("Loading section modal with section_id: %s", section_id)
     selected_tokens = request.GET.get('tokens', '')
@@ -30,4 +30,4 @@ def load_section_modal(request):
         'text_id': text_id,
         'section': section  # Pass the section object to the context
     }
-    return render(request, 'section_modal.html', context)
+    return render(request, 'section_modal_update.html', context)

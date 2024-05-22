@@ -5,7 +5,7 @@ from django.db import transaction
 import logging
 from treeflow.corpus.models.section import Section
 from treeflow.corpus.models.comment import Comment
-from treeflow.corpus.forms.section_edit_display_tokens import SectionForm
+from treeflow.corpus.forms.section_edit import SectionForm
 from treeflow.corpus.forms.comment_section_form import CommentSectionForm
 
 logger = logging.getLogger(__name__)

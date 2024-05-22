@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
             console.log("Query string:", queryString);
             // Issue a GET request with the constructed query string
-            htmx.ajax('GET', '/corpus/load_section_modal/' + queryString, {
+            htmx.ajax('GET', '/corpus/load_section_modal_create/' + queryString, {
                 target: '#modalContainer'
             }).then(() => {
                 // After the modal content is loaded, set the value of the hidden input

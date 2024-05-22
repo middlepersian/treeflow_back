@@ -164,7 +164,7 @@ class Section(models.Model):
         return default_min_gap
 
     @classmethod
-    def insert_before(cls, reference_section_id, new_section_data):
+    def insert_before(cls, reference_section_id, new_section_data, user=None):
         with transaction.atomic():
             reference_section = cls.objects.select_for_update().get(
                 id=reference_section_id
@@ -197,12 +197,12 @@ class Section(models.Model):
                 new_section.previous = previous_section
 
             # Save the new section
-            new_section.save()
+            new_section.save(user=user)
 
             return new_section
 
     @classmethod
-    def insert_after(cls, reference_section_id, new_section_data):
+    def insert_after(cls, reference_section_id, new_section_data, user=None):
         with transaction.atomic():
             reference_section = cls.objects.select_for_update().get(
                 id=reference_section_id
@@ -233,7 +233,7 @@ class Section(models.Model):
 
             # Link the new section with the reference section
             new_section.previous = reference_section
-            new_section.save()
+            new_section.save(user=user)
 
             return new_section
 
