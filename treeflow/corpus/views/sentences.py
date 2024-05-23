@@ -37,7 +37,16 @@ def get_sentences(text_id, page_number, items_per_page):
     paginator = Paginator(sentences, items_per_page)
     page_obj = paginator.get_page(page_number)
     logger.info("Number of sentences on current page: %d", len(page_obj))  # Log count after pagination
-    return page_obj
+
+    # Fetch the image of the first token of the first sentence on the page, if available
+    first_sentence = page_obj.object_list.first()
+    first_token_image = None
+    if first_sentence and first_sentence.tokens.exists():
+        first_token = first_sentence.tokens.first()
+        if first_token and first_token.image:
+            first_token_image = first_token.image 
+
+    return page_obj, first_token_image
 
 @login_required
 def sentences_view(request, text_id=None):
@@ -55,10 +64,12 @@ def sentences_view(request, text_id=None):
     }
 
     if selected_text_id:
-        page_obj = get_sentences(selected_text_id, page_number, items_per_page)
+        page_obj, first_token_image = get_sentences(selected_text_id, page_number, items_per_page)
         context["page_obj"] = page_obj
+        context["first_token_image"] = first_token_image  # Add the image URL to the context
     else:
         context["page_obj"] = Paginator(Section.objects.none(), items_per_page).get_page(1)
+        context["first_token_image"] = None  # Ensure consistency in context
         logger.info("No text ID selected, providing empty paginator.")
 
     logger.info("Rendering sentences.html for text ID: %s", selected_text_id)
