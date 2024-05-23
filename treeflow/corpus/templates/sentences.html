@@ -2,448 +2,468 @@
 {% load static i18n %}
 {% load comment_tags %}
 {% block content %}
-  <div class="flex flex-col w-full h-screen overflow-y-hidden">
-    <!-- Flex container for the split view -->
-    <div class="flex w-full h-full">
-      <div class="flex flex-col w-8/12">
-        <div class="flex flex-row items-center justify-center w-full gap-4 py-2 border-b border-white bg-main-dark">
-          <div>{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
-          <div> {% include 'pagination_alt.html' %}</div>
-        </div>
-        <!-- Left Column for Tokens -->
-        <div class="w-full h-full overflow-x-auto overflow-y-auto scrollbar-thin">
-          <!-- Table for displaying tokens -->
-          <table class="relative w-full bg-white">
-            <thead class="text-white">
-              <tr>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Number in Text' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Number in Sentence' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Image' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Line' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Transcription' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Transliteration' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Avestan' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Lemmas' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Senses' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'POS' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Features' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Comments' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Insert Before' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Insert After' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Delete Token' %}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sentence in page_obj %}
+<div class="flex flex-col w-full h-screen overflow-y-hidden">
+  <!-- Flex container for the split view -->
+  <div class="flex w-full h-full">
+    <div class="flex flex-col w-8/12">
+      <div class="flex flex-row items-center justify-center w-full gap-4 py-2 border-b border-white bg-main-dark">
+        <div>{% include 'text_dropdown.html' with text_id=selected_text_id %}</div>
+        <div> {% include 'pagination_alt.html' %}</div>
+      </div>
+      <!-- Flex container for the table and the zoom buttons -->
+      <div class="flex flex-row justify-center space-x-2 py-2">
+        <button onclick="zoomIn()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+          Zoom In (+)
+        </button>
+        <button onclick="zoomOut()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+          Zoom Out (-)
+        </button>
+      </div>
+      <!-- Left Column for Tokens -->
+      <div id="tokens-table" class="w-full h-full overflow-x-auto overflow-y-auto scrollbar-thin">
+        <!-- Table for displaying tokens -->
+        <table class="relative w-full bg-white">
+          <thead class="text-white">
+            <tr>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Number in Text' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Number in Sentence' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Image' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Line' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Transcription' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Transliteration' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Avestan' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Lemmas' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Senses' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'POS' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Features' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Comments' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Insert Before' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Insert After' %}
+              </th>
+              <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                {% trans 'Delete Token' %}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sentence in page_obj %}
             <!-- Sentence Header Row -->
-            <tr  class="bg-blue-100 sentence-header-row">
-              <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">{% trans 'Identifier' %}: {{ sentence.identifier }}</span></td>
+            <tr class="bg-blue-100 sentence-header-row">
+              <td id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span
+                  id="sentence-{{ sentence.identifier }}">{% trans 'Identifier' %}: {{ sentence.identifier }}</span>
+              </td>
             </tr>
             <tr class="bg-blue-100 sentence-header-row">
-              <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID: {{ sentence.id }}</span></td>
+              <td id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID:
+                  {{sentence.id }}</span></td>
             </tr>
-            <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+            <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"
+              hx-target="#sentenceSensesModalContent" hx-trigger="click">
               <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
                 <span id="sentence-senses-{{sentence.id}}">
-                <ul> {% trans 'Translations' %}:
-                  {% for sense in sentence.senses.all %}
-                  <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
-                  {% endfor %}
-                </ul>
+                  <ul> {% trans 'Translations' %}:
+                    {% for sense in sentence.senses.all %}
+                    <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
+                    {% endfor %}
+                  </ul>
                 </span>
               </td>
             </tr>
-    
+
             <!-- UD -->
             <tr class="bg-blue-100 sentence-header-row">
-              <td  id="sentence-ud-cell" colspan="15" class="px-4 py-2 font-bold text-blue-500 hover:text-blue-700">
-               <a href="{% url 'corpus:ud_editor' sentence.id %}">{% trans 'Edit Universal Dependencies' %}
+              <td id="sentence-ud-cell" colspan="15" class="px-4 py-2 font-bold text-blue-500 hover:text-blue-700">
+                <a href="{% url 'corpus:ud_editor' sentence.id %}">{% trans 'Edit Universal Dependencies' %}
               </td>
-            </td>
-    
+              </td>
+
             </tr>
-    
-              {% for token in sentence.tokens_list %}
-              <tr class="mb-4 overflow-hidden bg-white rounded shadow-lg"
-                id="token-{{token.id}}">
-                {% csrf_token %}
-    
-                <!-- Number in Text -->
-                <td class="px-4 py-2 text-center border">{{ token.number }}</td>
-    
-                <!-- Number in Sentence -->
-                <td class="px-4 py-2 border">
-                  <input type="text" name="number_in_sentence"
-                    value="{{ token.number_in_sentence }}"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="keyup changed delay:500ms"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="w-full px-3 py-2 border rounded shadow text-grey-darker">
-                </td>
-    
-    
-                <!-- Image -->
-                <td class="px-4 py-2 border">
-                  {{ token.image.identifier }}
-                </td>
-    
-                <!-- Line -->
-                <td class="px-4 py-2 border">
-                  <!-- Display 'line' type sections -->
-                  {% for section_token in token.line_sections %}
-                  {{ section_token.section.number }}
-                  <!-- Display the title or other fields -->
+
+            {% for token in sentence.tokens_list %}
+            <tr class="mb-4 overflow-hidden bg-white rounded shadow-lg" id="token-{{token.id}}">
+              {% csrf_token %}
+
+              <!-- Number in Text -->
+              <td class="px-4 py-2 text-center border">{{ token.number }}</td>
+
+              <!-- Number in Sentence -->
+              <td class="px-4 py-2 border">
+                <input type="text" name="number_in_sentence" value="{{ token.number_in_sentence }}"
+                  hx-post="{% url 'corpus:update_token' token.id %}" hx-trigger="keyup changed delay:500ms"
+                  hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="w-full px-3 py-2 border rounded shadow text-grey-darker">
+              </td>
+
+
+              <!-- Image -->
+              <td class="px-4 py-2 border">
+                {{ token.image.identifier }}
+              </td>
+
+              <!-- Line -->
+              <td class="px-4 py-2 border">
+                <!-- Display 'line' type sections -->
+                {% for section_token in token.line_sections %}
+                {{ section_token.section.number }}
+                <!-- Display the title or other fields -->
+                {% empty %}
+                {% trans 'No line sections' %}
+                {% endfor %}
+              </td>
+
+              <!-- Transcription -->
+              <td id="transcription-cell" class="px-4 py-2 border">
+                <input id="transcription-content-{{ token.id }}" type="text" name="transcription"
+                  value="{{ token.transcription }}" hx-post="{% url 'corpus:update_token' token.id %}"
+                  hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ token.id }}"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="px-3 py-2 border rounded shadow text-grey-darker">
+              </td>
+              <!-- Transliteration -->
+              <td id="transliteration-cell" class="px-4 py-2 border">
+                <input id="transliteration-content-{{ token.id }}" type="text" name="transliteration"
+                  value="{{ token.transliteration }}" hx-post="{% url 'corpus:update_token' token.id %}"
+                  hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ token.id }}"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="px-3 py-2 border rounded shadow text-grey-darker">
+              </td>
+
+              <!-- Avestan -->
+              <td id="avestan-cell" class="px-4 py-2 border">
+                <input id="avestan-content-{{ token.id }}" type="text" name="avestan"
+                  value="{{ token.avestan|default_if_none:'–' }}" hx-post="{% url 'corpus:update_token' token.id %}"
+                  hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ token.id }}"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="px-3 py-2 border rounded shadow text-grey-darker">
+              </td>
+
+              <!-- Lemmas -->
+              <td id="lemmas-cell" class="px-4 py-2 border" hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+                hx-target="#senseModalContent" hx-trigger="click">
+                <span id="lemma-content-{{ token.id }}">
+                  {% for lemma in token.lemmas.all %}
+                  {{ lemma.word }}
+                  {% if not forloop.last %}, {% endif %}
                   {% empty %}
-                  {% trans 'No line sections' %}
+                  –
                   {% endfor %}
-                </td>
-    
-                <!-- Transcription -->
-                <td id="transcription-cell" class="px-4 py-2 border">
-                  <input id="transcription-content-{{ token.id }}" type="text"
-                    name="transcription"
-                    value="{{ token.transcription }}"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="keyup changed delay:500ms"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="px-3 py-2 border rounded shadow text-grey-darker">
-                </td>
-                <!-- Transliteration -->
-                <td id="transliteration-cell" class="px-4 py-2 border">
-                  <input id="transliteration-content-{{ token.id }}" type="text"
-                    name="transliteration"
-                    value="{{ token.transliteration }}"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="keyup changed delay:500ms"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="px-3 py-2 border rounded shadow text-grey-darker">
-                </td>
-                
-                <!-- Avestan -->
-                <td id="avestan-cell" class="px-4 py-2 border">
-                  <input id="avestan-content-{{ token.id }}" type="text"
-                    name="avestan"
-                    value="{{ token.avestan|default_if_none:'–' }}"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="keyup changed delay:500ms"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="px-3 py-2 border rounded shadow text-grey-darker">
-                </td>
-    
-                <!-- Lemmas -->
-                <td id="lemmas-cell" class="px-4 py-2 border"
-                  hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
-                  hx-target="#senseModalContent"
-                  hx-trigger="click">
-                  <span id="lemma-content-{{ token.id }}">
-                    {% for lemma in token.lemmas.all %}
-                    {{ lemma.word }}
-                    {% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                    –
-                    {% endfor %}
-                  </span>
-                </td>
-    
-                <!-- Senses -->
-                <td id="sense-cell" class="px-4 py-2 border"
-                  hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
-                  hx-target="#senseModalContent" hx-trigger="click">
-                  <span id="sense-content-{{ token.id }}">
-                    {% for sense in token.senses.all %}
-                    {{ sense.sense }}
-                    {% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                    –
-                    {% endfor %}
-                  </span>
-                </td>
-    
-                <!-- POS -->
-                <td id="pos-cell" class="px-4 py-2 border"
-                  hx-get="{% url 'corpus:pos_feature_form' token.id %}"
-                  hx-target="#featureModalContent" hx-trigger="click">
-                  <span id="pos-content-{{ token.id }}">
-                    <!--show selected POS-->
-                    <!-- Show selected POS if available -->
-                    {% for pos in token.pos_token.all %}
-                    {% if pos.pos %}
-                    {{ pos.pos }}
-                    {% endif %}
-                    {% empty %}
-                    –
-                    {% endfor %}
-                  </span>
-                </td>
-    
-                <!-- Features -->
-                <td id="features-cell" class="px-4 py-2 border"
-                  hx-get="{% url 'corpus:pos_feature_form' token.id %}"
-                  hx-target="#featureModalContent" hx-trigger="click">
-                  <span id="features-content-{{ token.id }}">
-                    {% for feature in token.feature_token.all %}
-                    {{ feature.feature }}={{ feature.feature_value }}
-                    {% if not forloop.last %} | {% endif %}
-                    {% empty %}
-                    –
-                    {% endfor %}
-                  </span>
-                </td>
-    
-                <!-- Comments -->
-                <td id="comments-cell" class="px-4 py-2 border"
-                  hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
-                  hx-target="#commentModalContent"
-                  hx-trigger="click">
-                  <span id="comment-content-{{ token.id }}">
-                    {% render_comments_for_model token %}
-                  </span>
-                </td> 
-    
-                <!-- Insert Before Button -->
-                <td class="px-4 py-2 border">
-                  <form method="post"
-                    action="{% url 'corpus:insert_before_token' token.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="token_id" value="{{ token.id }}">
-                    <input type="hidden" name="source" value="sentences">
-                    <input type="hidden" name="page" value="{{ request.GET.page }}">
-                    <input type="hidden" name="text_id"
-                      value="{{ selected_text_id }}">
-                    <input type="hidden" name="sentence_id"
-                      value="{{ sentence.id }}">
-                    <input type="submit" value={% trans 'Insert' %}
-                      class="px-2 py-1 font-bold text-white rounded cursor-pointer bg-action hover:bg-action-graded-700 focus:outline-none focus:shadow-outline">
-                  </form>
-                </td>
-    
-                <!-- Insert After Button -->
-                <td class="px-4 py-2 border">
-                  <form method="post"
-                    action="{% url 'corpus:insert_after_token' token.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="token_id" value="{{ token.id }}">
-                    <input type="hidden" name="source" value="sentences">
-                    <input type="hidden" name="page" value="{{ request.GET.page }}">
-                    <input type="hidden" name="text_id"
-                      value="{{ selected_text_id }}">
-                    <input type="hidden" name="sentence_id"
-                      value="{{ sentence.id }}">
-                    <input type="submit" value={% trans 'Insert' %}
-                      class="px-2 py-1 font-bold text-white rounded cursor-pointer bg-off hover:bg-off-dark focus:outline-none focus:shadow-outline">
-                  </form>
-                </td>
-    
-                <!-- Delete Button -->
-                <td class="px-4 py-2 border">
-                  <form method="post"
-                    action="{% url 'corpus:delete_token' token.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="token_id" value="{{ token.id }}">
-                    <input type="hidden" name="source" value="sentences">
-                    <input type="hidden" name="page" value="{{ request.GET.page }}">
-                    <input type="hidden" name="text_id"
-                      value="{{ selected_text_id }}">
-                    <input type="hidden" name="sentence_id"
-                      value="{{ sentence.id }}">
-                    <input type="submit" value={% trans 'Delete' %}
-                      class="px-2 py-1 font-bold text-white bg-red-500 rounded cursor-pointer hover:bg-red-700 focus:outline-none focus:shadow-outline">
-                  </form>
-                </td>
-              </tr>
-              {% endfor %}
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <!-- Right Column for Image -->
-        <div class="w-4/12 m-2" id="iiif-viewer"></div>
+                </span>
+              </td>
 
-      <!-- Sentence senses modal -->
-      <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="sentenceSensesModal">
-        <div class="flex items-center justify-center min-h-screen">
-          <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
-          <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
-            <!-- Modal content here -->
-            <div id="sentenceSensesModalContent"></div>
-          </div>
-        </div>
-      </div>
+              <!-- Senses -->
+              <td id="sense-cell" class="px-4 py-2 border" hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+                hx-target="#senseModalContent" hx-trigger="click">
+                <span id="sense-content-{{ token.id }}">
+                  {% for sense in token.senses.all %}
+                  {{ sense.sense }}
+                  {% if not forloop.last %}, {% endif %}
+                  {% empty %}
+                  –
+                  {% endfor %}
+                </span>
+              </td>
 
-      <!-- Token Lemma Sense Modal -->
-      <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="senseModal">
-        <div class="flex items-center justify-center min-h-screen">
-          <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
-          <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
-            <!-- Modal content here -->
-            <div id="senseModalContent"></div>
-          </div>
-        </div>
-      </div>
+              <!-- POS -->
+              <td id="pos-cell" class="px-4 py-2 border" hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+                hx-target="#featureModalContent" hx-trigger="click">
+                <span id="pos-content-{{ token.id }}">
+                  <!--show selected POS-->
+                  <!-- Show selected POS if available -->
+                  {% for pos in token.pos_token.all %}
+                  {% if pos.pos %}
+                  {{ pos.pos }}
+                  {% endif %}
+                  {% empty %}
+                  –
+                  {% endfor %}
+                </span>
+              </td>
 
-      <!-- POS and Feature Modal -->
-      <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="featureModal">
-        <div class="flex items-center justify-center min-h-screen">
-          <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
-            <!-- Add p-4 for padding -->
-            <!-- Modal content here -->
-            <div id="featureModalContent"></div>
-            <!-- Add p-4 for padding -->
-          </div>
-        </div>
-      </div>
+              <!-- Features -->
+              <td id="features-cell" class="px-4 py-2 border" hx-get="{% url 'corpus:pos_feature_form' token.id %}"
+                hx-target="#featureModalContent" hx-trigger="click">
+                <span id="features-content-{{ token.id }}">
+                  {% for feature in token.feature_token.all %}
+                  {{ feature.feature }}={{ feature.feature_value }}
+                  {% if not forloop.last %} | {% endif %}
+                  {% empty %}
+                  –
+                  {% endfor %}
+                </span>
+              </td>
 
-      <!-- Comment Modal -->
-      <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="commentModal">
-        <div class="flex items-center justify-center min-h-screen">
-          <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
-            <!-- Add p-4 for padding -->
-            <!-- Modal content here -->
-            <div id="commentModalContent"></div>
-            <!-- Add p-4 for padding -->
-          </div>
+              <!-- Comments -->
+              <td id="comments-cell" class="px-4 py-2 border"
+                hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
+                hx-target="#commentModalContent" hx-trigger="click">
+                <span id="comment-content-{{ token.id }}">
+                  {% render_comments_for_model token %}
+                </span>
+              </td>
+
+              <!-- Insert Before Button -->
+              <td class="px-4 py-2 border">
+                <form method="post" action="{% url 'corpus:insert_before_token' token.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="token_id" value="{{ token.id }}">
+                  <input type="hidden" name="source" value="sentences">
+                  <input type="hidden" name="page" value="{{ request.GET.page }}">
+                  <input type="hidden" name="text_id" value="{{ selected_text_id }}">
+                  <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
+                  <input type="submit" value={% trans 'Insert' %}
+                    class="px-2 py-1 font-bold text-white rounded cursor-pointer bg-action hover:bg-action-graded-700 focus:outline-none focus:shadow-outline">
+                </form>
+              </td>
+
+              <!-- Insert After Button -->
+              <td class="px-4 py-2 border">
+                <form method="post" action="{% url 'corpus:insert_after_token' token.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="token_id" value="{{ token.id }}">
+                  <input type="hidden" name="source" value="sentences">
+                  <input type="hidden" name="page" value="{{ request.GET.page }}">
+                  <input type="hidden" name="text_id" value="{{ selected_text_id }}">
+                  <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
+                  <input type="submit" value={% trans 'Insert' %}
+                    class="px-2 py-1 font-bold text-white rounded cursor-pointer bg-off hover:bg-off-dark focus:outline-none focus:shadow-outline">
+                </form>
+              </td>
+
+              <!-- Delete Button -->
+              <td class="px-4 py-2 border">
+                <form method="post" action="{% url 'corpus:delete_token' token.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="token_id" value="{{ token.id }}">
+                  <input type="hidden" name="source" value="sentences">
+                  <input type="hidden" name="page" value="{{ request.GET.page }}">
+                  <input type="hidden" name="text_id" value="{{ selected_text_id }}">
+                  <input type="hidden" name="sentence_id" value="{{ sentence.id }}">
+                  <input type="submit" value={% trans 'Delete' %}
+                    class="px-2 py-1 font-bold text-white bg-red-500 rounded cursor-pointer hover:bg-red-700 focus:outline-none focus:shadow-outline">
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Right Column for Image -->
+    <div class="w-4/12 m-2" id="iiif-viewer">
+      {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
+    </div>
+
+    <!-- Sentence senses modal -->
+    <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50"
+      id="sentenceSensesModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+        <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
+          <!-- Modal content here -->
+          <div id="sentenceSensesModalContent"></div>
         </div>
       </div>
     </div>
 
-    <!-- close main div -->
+    <!-- Token Lemma Sense Modal -->
+    <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="senseModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
+        <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg">
+          <!-- Modal content here -->
+          <div id="senseModalContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POS and Feature Modal -->
+    <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="featureModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="featureModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="commentModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="commentModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="{% static 'corpus/prev_next_navigator.js' %}"></script>
+  <!-- close main div -->
+</div>
 
-  <script>
-    // Function to close the comment modal
-    function closeCommentModal() {
-      console.log('Closing Comment Modal')
-      document.getElementById('commentModal').classList.add('hidden')
-    }
-    
-    function closeFeatureModal() {
-      console.log('Closing Feature Modal')
-      document.getElementById('featureModal').classList.add('hidden')
-    }
-    
-    function closeSenseModal() {
-      console.log('Closing Sense Modal')
-      document.getElementById('senseModal').classList.add('hidden')
-    }
-    
-    function closeSentenceSensesModal() {
-      console.log('Closing Sentence Senses Modal')
-      document.getElementById('sentenceSensesModal').classList.add('hidden')
-    }
-    
-    document.body.addEventListener('htmx:afterRequest', function (event) {
-      // Function to change the input field color based on the response status
-      function changeInputFieldColor(inputField, isSuccess) {
-        if (inputField) {
-          inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon' // Success: light green; Failure: salmon
-          // Reset the color back to original after a delay
-          setTimeout(function () {
-            inputField.style.backgroundColor = '' // Reset to original color
-          }, 2000) // Adjust delay as needed
-        }
-      }
-    
-      // Check if the event target is part of the form interaction
-      if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.name === 'avestan' || event.detail.elt.name === 'number_in_sentence') {
-        // Parse the response
-        var response = JSON.parse(event.detail.xhr.responseText)
-    
-        // Change the input field color based on the response
-        changeInputFieldColor(event.detail.elt, response.status === 'success')
-      }
-    })
-    
-    document.body.addEventListener('htmx:afterSwap', function (event) {
-      console.log('htmx:afterSwap event triggered')
-      console.log(event.detail)
-      // Check if the swap is for loading sentence senses modal content
-      if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-        console.log('Sentence Senses Modal Content Loaded')
-        document.getElementById('sentenceSensesModal').classList.remove('hidden')
-      }
-      // add logic for sense modal
-      if (event.detail.target.id === 'senseModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-        console.log('Sense Modal Content Loaded')
-        document.getElementById('senseModal').classList.remove('hidden')
-      }
-      // Add logic for comment modal
-      if (event.detail.target.id === 'commentModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-        console.log('Comment Modal Content Loaded')
-        document.getElementById('commentModal').classList.remove('hidden')
-      }
-      // Check if the swap is for loading modal content
-      if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
-        console.log('Feature Modal Content Loaded')
-        document.getElementById('featureModal').classList.remove('hidden')
-      }
-      // Check if the swap is for the feature form
-      if (event.detail.target.id === 'pos-feature-form') {
-        console.log('Feature form submission, closing modal')
-        closeFeatureModal()
-      }
-      // Check if the swap is for the comment form
-      if (event.detail.target.id === 'comment-form') {
-        console.log('Comment form submission, closing modal')
-        closeCommentModal()
-      }
-    
-      // Check if the swap is for the sense form
-      if (event.detail.target.id === 'token-form') {
-        console.log('Sense form submission, closing modal')
-        closeSenseModal()
-      }
-    
-      if (event.detail.target.id === 'section-form') {
-        console.log('Section form submission, closing modal')
-        closeSentenceSensesModal()
-      }
-    })
-    
-    window.onload = function () {
-      var sentenceId = '{{ sentence_id }}'
-      if (sentenceId) {
-        var element = document.getElementById('sentence-' + sentenceId)
-        if (element) {
-          element.scrollIntoView()
-        }
+<script src="{% static 'corpus/prev_next_navigator.js' %}"></script>
+
+<script>
+  // Function to close the comment modal
+  function closeCommentModal() {
+    console.log('Closing Comment Modal')
+    document.getElementById('commentModal').classList.add('hidden')
+  }
+
+  function closeFeatureModal() {
+    console.log('Closing Feature Modal')
+    document.getElementById('featureModal').classList.add('hidden')
+  }
+
+  function closeSenseModal() {
+    console.log('Closing Sense Modal')
+    document.getElementById('senseModal').classList.add('hidden')
+  }
+
+  function closeSentenceSensesModal() {
+    console.log('Closing Sentence Senses Modal')
+    document.getElementById('sentenceSensesModal').classList.add('hidden')
+  }
+
+  document.body.addEventListener('htmx:afterRequest', function (event) {
+    // Function to change the input field color based on the response status
+    function changeInputFieldColor(inputField, isSuccess) {
+      if (inputField) {
+        inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon' // Success: light green; Failure: salmon
+        // Reset the color back to original after a delay
+        setTimeout(function () {
+          inputField.style.backgroundColor = '' // Reset to original color
+        }, 2000) // Adjust delay as needed
       }
     }
-  </script>
+
+    // Check if the event target is part of the form interaction
+    if (event.detail.elt.name === 'transcription' || event.detail.elt.name === 'transliteration' || event.detail.elt.name === 'avestan' || event.detail.elt.name === 'number_in_sentence') {
+      // Parse the response
+      var response = JSON.parse(event.detail.xhr.responseText)
+
+      // Change the input field color based on the response
+      changeInputFieldColor(event.detail.elt, response.status === 'success')
+    }
+  })
+
+  document.body.addEventListener('htmx:afterSwap', function (event) {
+    console.log('htmx:afterSwap event triggered')
+    console.log(event.detail)
+    // Check if the swap is for loading sentence senses modal content
+    if (event.detail.target.id === 'sentenceSensesModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log('Sentence Senses Modal Content Loaded')
+      document.getElementById('sentenceSensesModal').classList.remove('hidden')
+    }
+    // add logic for sense modal
+    if (event.detail.target.id === 'senseModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log('Sense Modal Content Loaded')
+      document.getElementById('senseModal').classList.remove('hidden')
+    }
+    // Add logic for comment modal
+    if (event.detail.target.id === 'commentModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log('Comment Modal Content Loaded')
+      document.getElementById('commentModal').classList.remove('hidden')
+    }
+    // Check if the swap is for loading modal content
+    if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log('Feature Modal Content Loaded')
+      document.getElementById('featureModal').classList.remove('hidden')
+    }
+    // Check if the swap is for the feature form
+    if (event.detail.target.id === 'pos-feature-form') {
+      console.log('Feature form submission, closing modal')
+      closeFeatureModal()
+    }
+    // Check if the swap is for the comment form
+    if (event.detail.target.id === 'comment-form') {
+      console.log('Comment form submission, closing modal')
+      closeCommentModal()
+    }
+
+    // Check if the swap is for the sense form
+    if (event.detail.target.id === 'token-form') {
+      console.log('Sense form submission, closing modal')
+      closeSenseModal()
+    }
+
+    if (event.detail.target.id === 'section-form') {
+      console.log('Section form submission, closing modal')
+      closeSentenceSensesModal()
+    }
+  })
+
+  window.onload = function () {
+    var sentenceId = '{{ sentence_id }}'
+    if (sentenceId) {
+      var element = document.getElementById('sentence-' + sentenceId)
+      if (element) {
+        element.scrollIntoView()
+      }
+    }
+  }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var fontSizeIndex = 3; // Start with 'text-base' which is at index 3 in the fontSizeClasses array
+    var fontSizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'];
+
+    function updateFontSize() {
+      var tokensTable = document.getElementById('tokens-table');
+      if (tokensTable) {
+        // Remove all other font size classes
+        fontSizeClasses.forEach(size => {
+          tokensTable.classList.remove(size);
+        });
+        // Add the new font size class
+        tokensTable.classList.add(fontSizeClasses[fontSizeIndex]);
+      }
+    }
+
+    window.zoomIn = function () {
+      if (fontSizeIndex < fontSizeClasses.length - 1) {
+        fontSizeIndex++;
+        updateFontSize();
+      }
+    };
+
+    window.zoomOut = function () {
+      if (fontSizeIndex > 0) {
+        fontSizeIndex--;
+        updateFontSize();
+      }
+    };
+  });
+</script>
 {% endblock %}
