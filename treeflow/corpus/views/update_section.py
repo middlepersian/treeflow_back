@@ -63,4 +63,4 @@ def update_section_view(request, section_id=None):
             "section": section,
             "edit_mode": bool(section_id)
         }
-        return render(request, "section_modal.html", context)
+        return render(request, "section_modal_update.html", context)

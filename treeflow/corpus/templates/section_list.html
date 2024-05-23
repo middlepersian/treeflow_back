@@ -9,7 +9,7 @@
             </span>
             <!-- Edit and Delete buttons -->
             <button class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                hx-get="{% url 'corpus:update_section' section.id %}" hx-trigger="click" hx-target="#modalContainer"
+                hx-get="{% url 'corpus:update_section' section.id %}" hx-trigger="click" hx-target="#editSectionModal"
                 onclick="event.stopPropagation();">Edit</button>
             <button class="delete-button bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                 hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="none"
