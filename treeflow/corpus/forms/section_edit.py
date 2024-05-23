@@ -78,8 +78,16 @@ class SectionForm(forms.ModelForm):
 
                 if self.text:
                     # filter sections based on the text
+                    logger.info(f"Filtering sections based on text: {self.text}")
+
                     section_queryset = Section.objects.filter(text=self.text).order_by(
                         "type"
                     )
                     self.fields["previous"].queryset = section_queryset
                     self.fields["container"].queryset = section_queryset
+                    self.fields["related_to"].queryset = section_queryset
+                    # log that the sections have been filtered
+                    logger.info(
+                        f"Sections filtered based on text: {self.text} - {section_queryset.count()} sections found."
+                    )
+                    
