@@ -93,66 +93,79 @@
   console.log('Selected text ID:', textId)
 </script>
 
-<!-- Include the JavaScript file for the section_creator.js -->
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    let startTokenId = null;
-    let endTokenId = null;
-    let isSelectingTokens = false;
-    let selectedTokens = [];
-    let selectedTokenIds = [];
-    let selectedTokenTexts = '';
+  class TokenSelector {
+    constructor() {
+      this.startTokenId = null;
+      this.endTokenId = null;
+      this.isSelectingTokens = false;
+      this.selectedTokens = [];
+      this.selectedTokenIds = [];
+      this.selectedTokenTexts = '';
 
-    // Define deselectAllTokens globally on the window object
-    window.deselectAllTokens = function () {
+      this.csrfToken = this.getCsrfToken();
+      this.initHtmxConfig();
+      this.addTokenClickListeners();
+      this.setupObserver();
+      this.bindEventListeners();
+    }
+
+    deselectAllTokens() {
       document.querySelectorAll('.token.bg-green-200').forEach(token => {
         token.classList.remove('bg-green-200');
       });
-      // Reset any other relevant state variables here
-      startTokenId = null;
-      endTokenId = null;
-      selectedTokenIds = [];
-      selectedTokens = [];
-      selectedTokenTexts = '';
+      this.resetSelectionState();
       console.log('All tokens have been deselected.');
-    };
-
-    var csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-    var csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
-
-    if (csrfToken) {
-      htmx.config.include = (name, value, el) => {
-        if (name === "csrfmiddlewaretoken") {
-          return csrfToken;
-        }
-        return value;
-      };
-    } else {
-      console.error("CSRF token not available");
     }
 
-    function addTokenClickListeners() {
+    resetSelectionState() {
+      this.startTokenId = null;
+      this.endTokenId = null;
+      this.selectedTokenIds = [];
+      this.selectedTokens = [];
+      this.selectedTokenTexts = '';
+    }
+
+    getCsrfToken() {
+      const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+      return csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+    }
+
+    initHtmxConfig() {
+      if (this.csrfToken) {
+        htmx.config.include = (name, value, el) => {
+          if (name === "csrfmiddlewaretoken") {
+            return this.csrfToken;
+          }
+          return value;
+        };
+      } else {
+        console.error("CSRF token not available");
+      }
+    }
+
+    addTokenClickListeners() {
       document.querySelectorAll('.token').forEach(token => {
-        token.addEventListener('click', function () {
-          if (isSelectingTokens) {
-            handleTokenClick(this);
+        token.addEventListener('click', () => {
+          if (this.isSelectingTokens) {
+            this.handleTokenClick(token);
           }
         });
       });
     }
 
-    function handleTokenClick(tokenElement) {
+    handleTokenClick(tokenElement) {
       const tokenId = tokenElement.dataset.tokenId;
-      if (startTokenId === null) {
-        startTokenId = tokenId;
+      if (this.startTokenId === null) {
+        this.startTokenId = tokenId;
         tokenElement.classList.add('bg-green-200');
-      } else if (endTokenId === null && tokenId !== startTokenId) {
-        endTokenId = tokenId;
-        highlightTokensBetween(startTokenId, endTokenId);
+      } else if (this.endTokenId === null && tokenId !== this.startTokenId) {
+        this.endTokenId = tokenId;
+        this.highlightTokensBetween(this.startTokenId, this.endTokenId);
       }
     }
 
-    function highlightTokensBetween(startId, endId) {
+    highlightTokensBetween(startId, endId) {
       let inRange = false;
       document.querySelectorAll('.token').forEach(token => {
         if (token.dataset.tokenId === startId || token.dataset.tokenId === endId) {
@@ -165,99 +178,138 @@
       });
     }
 
-    document.getElementById('startTokenSelection').addEventListener('click', function () {
-      let mode = this.getAttribute('data-mode');
-      if (mode === 'select') {
-        isSelectingTokens = true;
-        this.textContent = 'Finish Token Selection';
-        this.setAttribute('data-mode', 'finish');
-      } else if (mode === 'finish') {
-        isSelectingTokens = false;
-        selectedTokens = Array.from(document.querySelectorAll('.token.bg-green-200'));
-        selectedTokenIds = selectedTokens.map(token => token.dataset.tokenId);
-        selectedTokenTexts = selectedTokens.map(token => token.textContent).join(', ');
-        let queryString = `?tokens=${encodeURIComponent(selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
-        htmx.ajax('GET', '/corpus/load_section_modal_create/' + queryString, {
-          target: '#modalContainer'
-        }).then(() => {
-          document.getElementById('modalTextId').value = textId;
+    setupObserver() {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            console.log('A child node has been added or removed.');
+          }
         });
-        this.textContent = 'Start Token Selection';
-        this.setAttribute('data-mode', 'select');
-      }
-    });
-
-
-    function deselectAllTokens() {
-      document.querySelectorAll('.token.bg-green-200').forEach(token => {
-        token.classList.remove('bg-green-200');
       });
-      startTokenId = null;
-      endTokenId = null;
-      selectedTokenIds = [];
+      observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    document.body.addEventListener('htmx:afterSwap', function (event) {
-      if (event.target.id === 'modalContainer') {
-        openModal();
-      }
-    });
+    bindEventListeners() {
+      document.getElementById('startTokenSelection').addEventListener('click', (event) => {
+        const mode = event.target.getAttribute('data-mode');
+        if (mode === 'select') {
+          this.startSelectionMode(event.target);
+        } else if (mode === 'finish') {
+          this.finishSelectionMode(event.target);
+        }
+      });
 
-    function openModal() {
-      let modal = document.getElementById('sectionModal');
+      document.body.addEventListener('htmx:afterSwap', (event) => {
+        if (event.target.id === 'modalContainer') {
+          this.openModal();
+        }
+      });
+    }
+
+    startSelectionMode(button) {
+      this.isSelectingTokens = true;
+      button.textContent = 'Finish Token Selection';
+      button.setAttribute('data-mode', 'finish');
+    }
+
+    finishSelectionMode(button) {
+      this.isSelectingTokens = false;
+      this.selectedTokens = Array.from(document.querySelectorAll('.token.bg-green-200'));
+      this.selectedTokenIds = this.selectedTokens.map(token => token.dataset.tokenId);
+      this.selectedTokenTexts = this.selectedTokens.map(token => token.textContent).join(', ');
+      const queryString = `?tokens=${encodeURIComponent(this.selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
+      console.log("Sending AJAX request to load modal with queryString:", queryString);
+      htmx.ajax('GET', '/corpus/load_section_modal_create/' + queryString, {
+        target: '#modalContainer'
+      }).then(() => {
+        console.log("Modal content loaded successfully.");
+        document.getElementById('modalTextId').value = textId;
+        document.getElementById('selectedTokensDisplay').textContent = this.selectedTokenTexts;
+        this.deselectAllTokens();
+        console.log('Tokens deselected and selection state reset.');
+      }).catch(error => {
+        console.error("Failed to load modal content:", error);
+      });
+      button.textContent = 'Start Token Selection';
+      button.setAttribute('data-mode', 'select');
+    }
+
+    openModal() {
+      console.log('Attempting to open modal...');
+      const modalContainer = document.getElementById('modalContainer');
+      if (!document.getElementById('sectionModal')) {
+        const modalHTML = `
+          <div id="sectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
+            <div class="flex items-center justify-center min-h-screen">
+              <div class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
+                <h2 class="mb-4 text-lg font-bold">Create New Section</h2>
+                <form id="sectionForm" class="space-y-4" hx-post="/corpus/create_section/" method="post">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="${this.csrfToken}">
+                  <input type="hidden" id="modalTextId" name="text_id" value="">
+                  <div class="my-4 selected-tokens-list">
+                    <h3 class="font-semibold">Selected Tokens:</h3>
+                    <div id="selectedTokensDisplay"></div>
+                  </div>
+                  <div class="flex justify-between mt-6">
+                    <button type="button" id="closeModalButton" class="px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Submit</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>`;
+        modalContainer.innerHTML = modalHTML;
+      }
+      const modal = document.getElementById('sectionModal');
       if (modal) {
+        console.log('Modal found, removing hidden class.');
         modal.classList.remove('hidden');
-        document.getElementById('selectedTokensDisplay').textContent = window.selectedTokenTexts || 'No tokens selected';
-        bindModalEventListeners(modal);  // Pass the modal element as an argument
+        console.log('Modal class list after removing hidden:', modal.classList);
+
+        const selectedTokensDisplay = document.getElementById('selectedTokensDisplay');
+        selectedTokensDisplay.textContent = this.selectedTokenTexts || 'No tokens selected';
+        console.log('Selected tokens display updated with text:', selectedTokensDisplay.textContent);
+
+        this.bindModalEventListeners(modal);
+        console.log('Modal event listeners bound.');
       } else {
         console.error('Modal not found in the DOM.');
+        console.log('Failed to open modal because the modal element does not exist in the DOM.');
       }
     }
 
-    function bindModalEventListeners(modal) {  // Receive the modal element as a parameter
-      var closeModalButton = modal.querySelector('#closeModalButton');
+    bindModalEventListeners(modal) {
+      const closeModalButton = modal.querySelector('#closeModalButton');
       if (closeModalButton) {
-        closeModalButton.addEventListener('click', closeModal);
+        closeModalButton.addEventListener('click', () => {
+          this.closeModal(modal);
+          console.log('Close button clicked.');
+        });
+      } else {
+        console.log('Close button not found.');
       }
     }
 
-    document.body.addEventListener('click', function (event) {
-      if (event.target.id === 'closeModalButton') {
-        closeModal();
-      }
-    });
-
-    function closeModal() {
-      var modal = document.getElementById('sectionModal');
+    closeModal(modal) {
+      console.log('Attempting to close modal...');
       if (modal) {
         modal.classList.add('hidden');
-        window.deselectAllTokens();
-        window.isSelectingTokens = false;
-        window.selectedTokenTexts = '';
+        console.log('Modal class list after adding hidden:', modal.classList);
         document.dispatchEvent(new CustomEvent('modalClosed'));
-        console.log('Modal closed and state reset.');
+        console.log('modalClosed event dispatched.');
+        modal.remove(); // Remove the modal from the DOM
+        console.log('Modal removed from DOM.');
       } else {
         console.error('Attempted to close a modal that does not exist.');
       }
     }
+  }
 
-    
-    addTokenClickListeners();
-
-    // Define the observer for observing changes in the DOM
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          console.log('A child node has been added or removed.');
-        }
-      });
-    });
-
-
-    observer.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    new TokenSelector();
   });
-
 </script>
+
 
 
 {% endblock %}
