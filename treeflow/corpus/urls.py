@@ -2,6 +2,7 @@ from django.urls import include, path, re_path
 from treeflow.corpus.views.update_token import update_token
 from treeflow.corpus.views.update_text import update_text
 from treeflow.corpus.views.update_section import update_section_view
+from treeflow.corpus.views.update_section_token import update_section_token_view
 from treeflow.corpus.views.ud_editor import ud_editor, saveNewDependency, deleteDependency, setNewRoot
 from treeflow.corpus.views.tokens import tokens_view
 from treeflow.corpus.views.insert_after_token import insert_after_token_view
@@ -18,6 +19,7 @@ from treeflow.corpus.views.save_section import save_section_view
 from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal_create import load_section_modal_create
 from treeflow.corpus.views.load_section_modal_update import load_section_modal_update
+from treeflow.corpus.views.line_form import line_form_view
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
 from treeflow.corpus.views.bib_edit import BibEntryListView, BibEntryCreateView
@@ -41,6 +43,7 @@ app_name = "treeflow.corpus"
 urlpatterns = [
     path('delete_section/<uuid:section_id>/', delete_section_view, name='delete_section'),
     path('update_section/<uuid:section_id>/', update_section_view, name='update_section'),
+    path('update_section_token/<uuid:token_id>/', update_section_token_view, name='update_section_token'),
     path('update_source/<uuid:source_id>/', update_source, name='api_update_source'),
     path('update_text/<uuid:text_id>/', update_text, name='update_text'),
     path('update_token/<uuid:token_id>', update_token, name='update_token'),
@@ -68,6 +71,7 @@ urlpatterns = [
     path('display_tokens/', display_tokens_view, name='display_tokens'),
     path('load_section_modal_create/', load_section_modal_create, name='load_section_modal_create'),
     path('load_section_modal_update/', load_section_modal_update, name='load_section_modal_update'),
+    path('line-form/<uuid:token_id>/', line_form_view, name='line_form'),  
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('pos_feature_form/<uuid:token_id>/', pos_feature_form, name='pos_feature_form'),
     path('bibliography/', BibEntryListView.as_view(), name='bibliography'),

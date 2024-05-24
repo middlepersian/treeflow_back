@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.shortcuts import render
 from treeflow.corpus.models import Section, Token, Text, Source
-
+    
 logger = logging.getLogger(__name__)
 
 
@@ -27,11 +27,17 @@ def get_texts():
 
 
 def get_sentences(text_id, page_number, items_per_page):
+    
+    line_prefetch = Prefetch(
+        'section_tokens',
+        queryset=Section.objects.filter(type='line'),
+        to_attr='line_sections'
+    )
     token_prefetch = Prefetch(
         "tokens",
         queryset=Token.objects.select_related("image").prefetch_related(
             "lemmas", "senses", "pos_token", "feature_token", "comment_token"
-        ),
+        ).prefetch_related(line_prefetch),
         to_attr="tokens_list",
     )
 
@@ -64,11 +70,16 @@ def sentences_view(request, text_id=None):
     page_number = request.GET.get("page", 1)
     items_per_page = 10
 
+
+    # Fetch all sections of type 'line' for the dropdown options
+    all_line_sections = Section.objects.filter(type='line').order_by('identifier')
+
     context = {
         "manuscripts": manuscripts,
         "texts": texts,
         "selected_text_id": selected_text_id or "",
         "current_view": "corpus:sentences",
+        "all_line_sections": all_line_sections,
     }
 
     if selected_text_id:

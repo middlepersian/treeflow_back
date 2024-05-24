@@ -84,7 +84,8 @@
             </td>
 
             <!-- Line -->
-            <td class="px-4 py-2 border">
+            <td class="px-4 py-2 border" hx-get="{% url 'corpus:line_form' token.id %}" hx-target="#lineModalContent"
+              hx-trigger="click">
               <!-- Display 'line' type sections -->
               {% for section_token in token.line_sections %}
               {{ section_token.section.number }}
@@ -229,6 +230,18 @@
     <div class="flex flex-col w-4/12 mx-1">
       <div class="w-full h-full my-2" id="iiif-viewer">
         {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
+      </div>
+    </div>
+
+    <!-- Line Modal -->
+    <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="lineModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="lineModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
       </div>
     </div>
 

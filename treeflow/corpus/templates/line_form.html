@@ -1,0 +1,42 @@
+{% load static i18n %}
+
+<!-- line_form.html -->
+<div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <!-- This element is to trick the browser into centering the modal contents. -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block p-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+            role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+            <form id="line-form" method="post" hx-post="{% url 'corpus:line_form' token_id=token.id %}"
+                hx-trigger="submit" hx-swap="none" class="p-4 mt-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-headline">
+                        {% trans 'Line Form' %}
+                    </h3>
+                </div>
+                {% csrf_token %}
+                <!-- Print the token ID for debugging -->
+                <input type="hidden" name="token_id" value="{{ token.id }}">
+                <p>Token: {{ token.transliteration }}</p>
+                <div class="mb-4">
+                    {{ form.as_p }}
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="button"
+                        class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-error-graded-600 hover:bg-error-graded-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                        onclick="closeLineModal()">
+                        {% trans 'Cancel' %}
+                    </button>
+                    <button type="submit"
+                        class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-main hover:bg-main-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                        {% trans 'Save' %}
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,6 @@
 import logging
 from django import forms
 from treeflow.corpus.models.section import Section
-from treeflow.corpus.forms.comment_form import CommentForm
 from django_select2 import forms as s2forms
 
 # Configure logging
@@ -52,7 +51,6 @@ class SectionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SectionForm, self).__init__(*args, **kwargs)  # Initialize the form first
-        self.comment_form = CommentForm(self.data or None)
         if (
             self.instance and self.instance.pk
         ):  # Check if instance is not None and has a primary key
@@ -90,4 +88,3 @@ class SectionForm(forms.ModelForm):
                     logger.info(
                         f"Sections filtered based on text: {self.text} - {section_queryset.count()} sections found."
                     )
-                    

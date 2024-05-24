@@ -126,16 +126,16 @@
               <td class="px-4 py-2 border">
                 {{ token.image.identifier }}
               </td>
-
               <!-- Line -->
-              <td class="px-4 py-2 border">
-                <!-- Display 'line' type sections -->
-                {% for section_token in token.line_sections %}
-                {{ section_token.section.number }}
-                <!-- Display the title or other fields -->
-                {% empty %}
-                {% trans 'No line sections' %}
-                {% endfor %}
+              <td id="line-cell-{{ token.id }}" class="px-4 py-2 border">
+                <select name="section" id="line-section-{{ token.id }}" class="form-control select2" disabled>
+                  {% for line in all_line_sections %}
+                  <option value="{{ line.id }}" {% if token.line_sections.first and line.id == token.line_sections.first.section.id %}selected{% endif %}>
+                      {{ line.identifier }}
+                  </option>
+                  {% endfor %}
+              </select>
+              </form>
               </td>
 
               <!-- Transcription -->
@@ -281,6 +281,19 @@
       {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
     </div>
 
+
+    <!-- Line Modal -->
+    <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="lineModal">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="p-4 mx-auto bg-white rounded-lg shadow-lg w-96">
+          <!-- Add p-4 for padding -->
+          <!-- Modal content here -->
+          <div id="lineModalContent"></div>
+          <!-- Add p-4 for padding -->
+        </div>
+      </div>
+    </div>
+
     <!-- Sentence senses modal -->
     <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50"
       id="sentenceSensesModal">
@@ -335,7 +348,10 @@
 <script src="{% static 'corpus/prev_next_navigator.js' %}"></script>
 
 <script>
-  // Function to close the comment modal
+  function closeLineModal() {
+    console.log('Closing Line Modal')
+    document.getElementById('lineModal').classList.add('hidden')
+  }
   function closeCommentModal() {
     console.log('Closing Comment Modal')
     document.getElementById('commentModal').classList.add('hidden')
@@ -396,11 +412,17 @@
       console.log('Comment Modal Content Loaded')
       document.getElementById('commentModal').classList.remove('hidden')
     }
-    // Check if the swap is for loading modal content
+    // Check if the swap is for featureModalContent
     if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
       console.log('Feature Modal Content Loaded')
       document.getElementById('featureModal').classList.remove('hidden')
     }
+    // Check if the swap is for the line modal
+    if (event.detail.target.id === 'lineModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+      console.log('Line Modal Content Loaded')
+      document.getElementById('lineModal').classList.remove('hidden')
+    }
+
     // Check if the swap is for the feature form
     if (event.detail.target.id === 'pos-feature-form') {
       console.log('Feature form submission, closing modal')
@@ -422,6 +444,14 @@
       console.log('Section form submission, closing modal')
       closeSentenceSensesModal()
     }
+
+    // Check if the swap is for the line form
+    if (event.detail.target.id === 'line-form') {
+      console.log('Line form submission, closing modal')
+      closeLineModal()
+    }
+
+
   })
 
   window.onload = function () {
