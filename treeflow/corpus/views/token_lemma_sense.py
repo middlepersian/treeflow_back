@@ -1,11 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from treeflow.corpus.models import Section, Token  # Import the Token model
-from treeflow.corpus.forms.section_editor_form import SectionEditorForm
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseBadRequest
+from treeflow.corpus.models import Token  # Import the Token model
 from treeflow.corpus.forms.token_form import TokenForm  # Import the TokenForm
 from treeflow.dict.forms.sense_form import SenseForm
 from treeflow.dict.forms.lemma_form import LemmaForm
 import logging
-from django.db import transaction
 
 
 logger = logging.getLogger(__name__)
