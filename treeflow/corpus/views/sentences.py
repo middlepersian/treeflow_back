@@ -71,15 +71,11 @@ def sentences_view(request, text_id=None):
     items_per_page = 10
 
 
-    # Fetch all sections of type 'line' for the dropdown options
-    all_line_sections = Section.objects.filter(type='line').order_by('identifier')
-
     context = {
         "manuscripts": manuscripts,
         "texts": texts,
         "selected_text_id": selected_text_id or "",
         "current_view": "corpus:sentences",
-        "all_line_sections": all_line_sections,
     }
 
     if selected_text_id:
@@ -87,14 +83,14 @@ def sentences_view(request, text_id=None):
             selected_text_id, page_number, items_per_page
         )
         context["page_obj"] = page_obj
-        context["first_token_image"] = (
-            first_token_image  # Add the image URL to the context
+        context["manuscript_image"] = (
+            first_token_image  
         )
     else:
         context["page_obj"] = Paginator(
             Section.objects.none(), items_per_page
         ).get_page(1)
-        context["first_token_image"] = None  # Ensure consistency in context
+        context["manuscript_image"] = None  # Ensure consistency in context
         logger.info("No text ID selected, providing empty paginator.")
 
     logger.info("Rendering sentences.html for text ID: %s", selected_text_id)

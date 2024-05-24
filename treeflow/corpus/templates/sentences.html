@@ -128,14 +128,13 @@
               </td>
               <!-- Line -->
               <td id="line-cell-{{ token.id }}" class="px-4 py-2 border">
-                <select name="section" id="line-section-{{ token.id }}" class="form-control select2" disabled>
-                  {% for line in all_line_sections %}
-                  <option value="{{ line.id }}" {% if token.line_sections.first and line.id == token.line_sections.first.section.id %}selected{% endif %}>
-                      {{ line.identifier }}
-                  </option>
+                <span id="line-section-{{ token.id }}">
+                  {% for line_section in token.line_sections.all %}
+                    {{ line_section.section.identifier }}
+                  {% empty %}
+                    None
                   {% endfor %}
-              </select>
-              </form>
+                </span>
               </td>
 
               <!-- Transcription -->
