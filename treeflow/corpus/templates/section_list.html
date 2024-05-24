@@ -1,4 +1,4 @@
-<div class="overflow-y-scroll h-screen pb-10">
+<div class="overflow-y-auto">
     {% for section in sections %}
     <div id="section-item-{{ section.id }}" class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md">
         <div class="flex justify-between items-center">
@@ -22,7 +22,6 @@
     </div>
     {% endfor %}
 </div>
-
 <script>
     document.body.addEventListener('htmx:afterRequest', function (event) {
         const contentType = event.detail.xhr.getResponseHeader("Content-Type");
@@ -44,10 +43,11 @@
         } else if (contentType && contentType.includes("text/html")) {
             // HTML responses are handled by HTMX, no need to process here
             console.log('HTML content received, handled by HTMX.');
-
         }
     });
+
 </script>
+
 
 <script>
     function handleSectionClick(sectionId, event) {
@@ -84,19 +84,23 @@
     }
 
     function highlightTokens(tokenIds) {
-        // Remove existing highlights from all tokens
-        document.querySelectorAll('.token').forEach(token => {
-            token.classList.remove('bg-yellow-300'); // Assuming 'bg-yellow-300' is the Tailwind class for highlighting
-        });
+    // Remove existing highlights from all tokens
+    document.querySelectorAll('.token').forEach(token => {
+        token.classList.remove('bg-yellow-300'); // Assuming 'bg-yellow-300' is the Tailwind class for highlighting
+    });
 
-        // Apply new highlights to the fetched tokens
-        tokenIds.forEach(tokenId => {
-            //console.log('Highlighting token:', tokenId);
-            const tokenElement = document.querySelector(`.token[data-token-id="${tokenId}"]`);
-            if (tokenElement) {
-                console.log('Highlighting token:', tokenId);
-                tokenElement.classList.add('bg-yellow-300'); // Apply the Tailwind class for highlighting
+    // Apply new highlights to the fetched tokens and scroll to the first highlighted token
+    let firstHighlighted = true; // Flag to track the first token to highlight
+    tokenIds.forEach(tokenId => {
+        const tokenElement = document.querySelector(`.token[data-token-id="${tokenId}"]`);
+        if (tokenElement) {
+            console.log('Highlighting token:', tokenId);
+            tokenElement.classList.add('bg-yellow-300'); // Apply the Tailwind class for highlighting
+            if (firstHighlighted) {
+                tokenElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstHighlighted = false; // Reset the flag so only the first token is scrolled to
             }
-        });
-    }
+        }
+    });
+}
 </script>
