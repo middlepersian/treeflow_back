@@ -5,7 +5,7 @@ class SenseWidget(s2forms.ModelSelect2MultipleWidget):
         "sense__istartswith",
     ]
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('attrs', {}).update({'style': 'width: 100%;'})
+        kwargs.setdefault('attrs', {}).update({'style': 'width: 100%;','data-minimum-input-length': 1,})
         super(SenseWidget, self).__init__(*args, **kwargs)
 
 
@@ -15,5 +15,6 @@ class LemmaWidget(s2forms.ModelSelect2MultipleWidget):
         "word__istartswith", 
     ]
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('attrs', {}).update({'style': 'width: 100%;'})
+        kwargs.setdefault('attrs', {}).update({'style': 'width: 100%;','data-minimum-input-length': 1,})
+
         super(LemmaWidget, self).__init__(*args, **kwargs)
