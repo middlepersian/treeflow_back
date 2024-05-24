@@ -8,6 +8,7 @@ from treeflow.corpus.models import Section, Token, Text, Source
 
 logger = logging.getLogger(__name__)
 
+
 def cache_manuscripts():
     cache_key = "manuscripts"
     manuscripts = cache.get(cache_key)
@@ -20,8 +21,10 @@ def cache_manuscripts():
         logger.info("Manuscripts already cached")
     return manuscripts
 
+
 def get_texts():
-    return cache.get_or_set("all_texts", lambda: Text.objects.all(), timeout=3600)  # Cache for 1 hour
+    return cache.get_or_set("all_texts", lambda: Text.objects.all(), timeout=None)
+
 
 def get_sentences(text_id, page_number, items_per_page):
     token_prefetch = Prefetch(
@@ -29,14 +32,18 @@ def get_sentences(text_id, page_number, items_per_page):
         queryset=Token.objects.select_related("image").prefetch_related(
             "lemmas", "senses", "pos_token", "feature_token", "comment_token"
         ),
-        to_attr="tokens_list"
+        to_attr="tokens_list",
     )
 
     logger.info("Fetching sentences for text ID: %s", text_id)
-    sentences = Section.objects.filter(type="sentence", text=text_id).prefetch_related(token_prefetch)
+    sentences = Section.objects.filter(type="sentence", text=text_id).prefetch_related(
+        token_prefetch
+    )
     paginator = Paginator(sentences, items_per_page)
     page_obj = paginator.get_page(page_number)
-    logger.info("Number of sentences on current page: %d", len(page_obj))  # Log count after pagination
+    logger.info(
+        "Number of sentences on current page: %d", len(page_obj)
+    )  # Log count after pagination
 
     # Fetch the image of the first token of the first sentence on the page, if available
     first_sentence = page_obj.object_list.first()
@@ -44,9 +51,10 @@ def get_sentences(text_id, page_number, items_per_page):
     if first_sentence and first_sentence.tokens.exists():
         first_token = first_sentence.tokens.first()
         if first_token and first_token.image:
-            first_token_image = first_token.image 
+            first_token_image = first_token.image
 
     return page_obj, first_token_image
+
 
 @login_required
 def sentences_view(request, text_id=None):
@@ -64,11 +72,17 @@ def sentences_view(request, text_id=None):
     }
 
     if selected_text_id:
-        page_obj, first_token_image = get_sentences(selected_text_id, page_number, items_per_page)
+        page_obj, first_token_image = get_sentences(
+            selected_text_id, page_number, items_per_page
+        )
         context["page_obj"] = page_obj
-        context["first_token_image"] = first_token_image  # Add the image URL to the context
+        context["first_token_image"] = (
+            first_token_image  # Add the image URL to the context
+        )
     else:
-        context["page_obj"] = Paginator(Section.objects.none(), items_per_page).get_page(1)
+        context["page_obj"] = Paginator(
+            Section.objects.none(), items_per_page
+        ).get_page(1)
         context["first_token_image"] = None  # Ensure consistency in context
         logger.info("No text ID selected, providing empty paginator.")
 
