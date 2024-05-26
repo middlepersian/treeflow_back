@@ -1,52 +1,51 @@
-from django.shortcuts import render, get_object_or_404
-from django.template.loader import render_to_string
-from treeflow.corpus.forms.line_form import SectionLineForm
-from treeflow.corpus.models.section import Section
-from treeflow.corpus.models.token import Token
-from treeflow.corpus.models.section import SectionToken  
 import logging
+from django.shortcuts import render
+
+from treeflow.corpus.forms.line_form import CreateLineSectionForm, AssignLineSectionForm
+from treeflow.corpus.models.token import Token
+
 
 logger = logging.getLogger(__name__)
 
-def line_form_view(request, token_id=None):
-    logger.info("Handling request for token_id: %s", token_id)
-    
-    # Fetch the token or return a 404 if not found
-    token = get_object_or_404(Token, pk=token_id) if token_id else None
+from django.template.loader import render_to_string
 
-    # Check if the token has any 'line' type sections associated with it
-    line_sections = SectionToken.objects.filter(token=token, section__type='line').select_related('section')
-    line = line_sections.first().section if line_sections.exists() else None
-    lines = [line] if line else []
+def line_form_view(request, token_id):
+    token = Token.objects.get(pk=token_id)
+    create_form = CreateLineSectionForm()  # Initialize forms at the beginning
+    assign_form = AssignLineSectionForm()
 
     if request.method == 'POST':
-        logger.info("POST request received for token_id: %s", token_id)
-        return handle_post_request(request, token, line)
-    else:
-        logger.info("GET request received for token_id: %s", token_id)
-        return handle_get_request(request, token, line, lines)
+        if 'create_line' in request.POST:
+            create_form = CreateLineSectionForm(request.POST)  # Reassign if POST
+            if create_form.is_valid():
+                new_line = create_form.save(commit=False)
+                new_line.type = 'line'  # Ensure the type is set to 'line'
+                new_line.save()
+                create_form = CreateLineSectionForm()  # Reinitialize the form
+                assign_form = AssignLineSectionForm()  # Ensure other form is also reset
+                return render(request, 'line_modal.html', {
+                    'token': token,
+                    'create_form': create_form,
+                    'assign_form': assign_form
+                })
+            
+        elif 'assign_line' in request.POST:
+            assign_form = AssignLineSectionForm(request.POST)  # Reassign if POST
+            if assign_form.is_valid():
+                token.line_section = assign_form.cleaned_data['line_section']
+                token.save()
+                # pass the data to line_data and then to line_update
+                line_data = render_to_string('line_data.html', {'token': token})
+                return render(request, 'line_update.html', {'line_data': line_data, 'token_id': token_id})
+            
+    if request.method == 'GET':
+        token = Token.objects.get(pk=token_id)
+        create_form = CreateLineSectionForm()  # Initialize forms at the beginning
+        assign_form = AssignLineSectionForm()
 
-def handle_post_request(request, token, line):
-    form = SectionLineForm(request.POST, instance=line)
-    if form.is_valid():
-        # If a line already exists, update it, otherwise create a new one
-        if not line:
-            line = Section(type='line')
-            line.save()
-            SectionToken.objects.create(token=token, section=line)
-        form.save()
+        return render(request, 'line_modal.html', {
+            'token': token,
+            'create_form': create_form,
+            'assign_form': assign_form
+        })
 
-        # Refresh the token instance from the database
-        token.refresh_from_db()
-
-        # Prepare and return the response
-        context = {
-            'token_id': token.id,
-            'line_data': render_to_string('line_data.html', {'token': token}),
-        }
-        logger.info("Line saved successfully")
-        return render(request, 'line_update.html', context)
-
-def handle_get_request(request, token, line, lines):
-    form = SectionLineForm(instance=line)
-    return render(request, 'line_form.html', {'form': form, 'token': token, 'lines': lines})
