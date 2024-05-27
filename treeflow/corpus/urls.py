@@ -34,7 +34,6 @@ from treeflow.corpus.views.sources import source_manuscripts , SourceUpdateView,
 from treeflow.corpus.views.dropdown_redirect import dropdown_redirect
 from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
-from treeflow.corpus.views.save_line import save_line_view
 from treeflow.corpus.views.save_token import save_token
 from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
 from treeflow.corpus.views.export_text import  download_text, resolve_state
@@ -62,7 +61,6 @@ urlpatterns = [
     path('section/', section_editor_form_view, name='section'),
     path('section/<uuid:section_id>', section_editor_form_view, name='section'),
     path('create_section/', create_section_view, name='create_section'),
-    path('save_line/', save_line_view, name='save_line'),
     path('save_section/', save_section_view, name='save_section'),
     path('save_section/<uuid:section_id>', save_section_view, name='save_section'),
     path('dropdown_redirect/', dropdown_redirect, name='dropdown_redirect'),

@@ -1,7 +1,7 @@
-{% for section_token in token.section_tokens.all %}
-    {% if section_token.section.type == 'line' %}
-        {{ section_token.section.identifier }}
+{% for section in token.section_tokens.all %}
+    {% if section.type == 'line' %}
+        {{ section.identifier }}
     {% endif %}
 {% empty %}
-    _
+    No sections available.
 {% endfor %}

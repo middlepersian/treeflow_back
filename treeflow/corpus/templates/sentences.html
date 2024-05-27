@@ -131,14 +131,14 @@
               <td id="line-cell-{{ token.id }}" class="px-4 py-2 border"hx-get="{% url 'corpus:line_form' token.id %}"
               hx-target="#lineModalContent" hx-trigger="click">
                 <span id="line-content-{{ token.id }}">
-                  {% for line_section in token.line_sections.all %}
-                    {{ line_section.section.identifier }}
+                  {% for line_section in token.line_sections %}
+                    {{ line_section.identifier }}
                   {% empty %}
                     None
                   {% endfor %}
                 </span>
               </td>
-
+                        
               <!-- Transcription -->
               <td id="transcription-cell" class="px-4 py-2 border">
                 <input id="transcription-content-{{ token.id }}" type="text" name="transcription"
@@ -447,6 +447,11 @@
     if (event.detail.target.id === 'section-form') {
       console.log('Section form submission, closing modal')
       closeSentenceSensesModal()
+    }
+
+    if (event.detail.target.id === 'assign-line-form') {
+      console.log('Assign Line form submission, closing modal')
+      closeLineModal()
     }
 
 
