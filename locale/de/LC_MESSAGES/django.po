@@ -157,7 +157,7 @@ msgstr "Avestan"
 #: treeflow/corpus/templates/sentences.html:41
 #: treeflow/corpus/templates/tokens.html:28
 msgid "Lemmas"
-msgstr "Lemmas"
+msgstr "Lemmata"
 
 #: treeflow/corpus/templates/sentence.html:24
 #: treeflow/corpus/templates/sentences.html:44
@@ -464,7 +464,7 @@ msgstr "Bitte warten Sie, bis ein Lemma geladen wurde."
 
 #: treeflow/dict/templates/dictionary.html:198
 msgid "No lemmas found."
-msgstr "Keine Lemmas gefunden."
+msgstr "Keine Lemmata gefunden."
 
 #: treeflow/dict/templates/dictionary.html:199
 #: treeflow/dict/templates/dictionary_controls.html:56
@@ -503,7 +503,7 @@ msgstr "Multiword Aus."
 
 #: treeflow/dict/templates/lemma_details.html:24
 msgid "Related lemmas"
-msgstr "Verwandte Lemmas"
+msgstr "Verwandte Lemmata"
 
 #: treeflow/dict/templates/lemma_details.html:30
 msgid "Search for relatives"
@@ -511,7 +511,7 @@ msgstr "Verwandte Lemmata suchen"
 
 #: treeflow/dict/templates/lemma_details.html:43
 msgid "No related lemmas found."
-msgstr "Keine verwandten Lemmas gefunden."
+msgstr "Keine verwandten Lemmata gefunden."
 
 #: treeflow/dict/templates/lemma_details.html:49
 msgid "Related senses"
