@@ -7,7 +7,9 @@
                 hx-swap="innerHTML" hx-trigger="click" onclick="handleSectionClick('{{ section.id }}', event);">
                 {{ section.identifier }}
             </span>
+            <!--make this available only to registered users-->
             <!-- Edit and Delete buttons -->
+            {% if user.is_authenticated %}
             <button class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
                 hx-get="{% url 'corpus:update_section' section.id %}" hx-trigger="click" hx-target="#editSectionModal"
                 onclick="event.stopPropagation();">Edit</button>
@@ -16,6 +18,7 @@
                 hx-confirm="Are you sure you want to delete this section?" onclick="event.stopPropagation();">
                 Delete
             </button>
+            {% endif %}
         </div>
         <!-- Placeholder for child sections -->
         <div id="section-data-{{ section.id }}" class="hidden"></div>
