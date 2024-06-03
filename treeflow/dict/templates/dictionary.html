@@ -65,14 +65,21 @@
       <div class="flex flex-row gap-2 p-[2px] overflow-y-hidden h-full">
         {% comment %}Alphabet & List{% endcomment %}
         <div id="lemma-alphabet-parent" class="flex flex-col rounded-md shadow-sm shadow-black"></div>
-        <div id="lemma-list" class="w-full min-w-[12rem] max-w-lg overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin"></div>
+        <div id="lemma-list" class="w-full min-w-[12rem] max-w-lg overflow-y-auto rounded-md shadow-sm shadow-black scrollbar-thin">
+          <div class="flex items-center h-full">
+            {% include 'loading_bite.html' %}
+          </div>
+        </div>
       </div>
     </div>
-    <div class="flex flex-col w-full mb-2">
+    <div class="relative flex flex-col w-full mb-2">
       {% comment %}Lemma Details{% endcomment %}
+      <div id="loading-bite" class="absolute bottom-0 z-10 flex-col items-center hidden gap-2 p-2 bg-white rounded-md shadow-sm shadow-black"></div>
+      <div id="info-board" class="absolute bottom-0 z-10 flex-col items-center hidden gap-2 p-2 bg-white rounded-md shadow-sm shadow-black"></div>
       <div id="lemma-details" class="relative p-2 m-2 overflow-y-auto rounded-md">
-        <div class="text-center">
-          {% trans 'Please wait while a lemma is being loaded.' %}
+        <div class="flex flex-col items-center gap-2 text-center">
+          <span>{% trans 'Please wait while a lemma is being loaded.' %}</span>
+          {% include 'loading_bite.html' %}
         </div>
       </div>
     </div>
@@ -80,8 +87,9 @@
 
   <script>
     const DEFAULT_SEARCH_MODE = 'startswith'
+    const DEFAULT_SEARCH_LETTER = 'a'
     let activeSearchMode
-    let currentSearchLetter = 'a'
+    let currentSearchLetter = DEFAULT_SEARCH_LETTER
     
     let activeId
     
@@ -101,6 +109,8 @@
     
     // HTMX after lemma update
     document.body.addEventListener('htmx:afterSwap', function (event) {
+      stopLoading()
+
       var targetId = event.detail.target.id
       if (typeof targetId === 'string' && targetId === 'lemma-form' && event.detail.xhr.status === 200) {
         closeLemmaModal()
@@ -120,6 +130,17 @@
         } else {
           search()
         }
+
+        let infoBoard = document.getElementById('info-board')
+        infoBoard.classList.remove('hidden')
+        infoBoard.classList.add('flex')
+        infoBoard.innerHTML= '<span>Changes saved succesfully</span><div><svg class="w-8 h-8 text-off" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>'
+
+        setTimeout(() => {
+          infoBoard.classList.remove('flex')
+          infoBoard.classList.add('hidden')
+          infoBoard.innerHTML = ''
+        }, 5000)
       }
     })
     
@@ -139,85 +160,73 @@
     
     // MARK: Boot
     function bootDict() {
-      let bootThen = (data) => {
-        alphabet = new Set()
-        data.split('\n').forEach((line) => {
-          const parser = new DOMParser()
-          const htmlElement = parser.parseFromString(line, 'text/html')
-          let text = htmlElement.documentElement.textContent.toLocaleLowerCase()
-          let id = line.match(/id="([^"]*)"/)[1]
-          alphabet.add(text[0])
-          if ('{{lemma_id}}' == id && text[0] !== currentSearchLetter) {
-            currentSearchLetter = text[0]
+      fetch("{% url 'dict:fetch_alphabet' %}")
+        .then((response) => response.json())
+        .then((data) => {
+          alphabet = new Set()
+    
+          Object.values(data)[0].forEach((letter) => {
+            alphabet.add(letter)
+          })
+    
+          if ('{{lemma_first_letter}}' !== currentSearchLetter && '{{lemma_first_letter}}' !== '') {
+            currentSearchLetter = '{{lemma_first_letter}}'
           }
         })
-      }
-    
-      let bootFinally = () => {
-        selectSpecificSearchMode(DEFAULT_SEARCH_MODE)
-        clearSearch(false)
-        setUpAlphabet()
-        search(currentSearchLetter)
-      }
-    
-      defaultQuery('', bootThen, bootFinally)
+        .finally(() => {
+          selectSpecificSearchMode(DEFAULT_SEARCH_MODE)
+          clearSearch(false)
+          setUpAlphabet()
+          search(currentSearchLetter)
+        })
+        .catch((error) => console.error('Error:', error))
     }
     
     // MARK: Search
-    function defaultQuery(filter, paramThen, paramFinally) {
+    function search(filter = document.getElementById('search-input').value.trim().length > 0 ? document.getElementById('search-input').value.trim() : currentSearchLetter) {
+      startLoading('Searching lemmas')
       var url = "{% url 'dict:filter_lemmas' %}?filter_word=" + encodeURIComponent(filter) + '&search_mode=' + encodeURIComponent(activeSearchMode)
     
       // The data returns the filtered lemmas already in HTML-div form.
       fetch(url)
         .then((response) => response.text())
         .then((data) => {
-          paramThen(data)
-        })
-        .finally(() => {
-          paramFinally()
-        })
-        .catch((error) => console.error('Error:', error))
-    }
+          var lemmaList = document.getElementById('lemma-list')
+          lemmaList.innerHTML = data
+          htmx.process(lemmaList)
     
-    function search(filter = document.getElementById('search-input').value.trim().length > 0 ? document.getElementById('search-input').value.trim() : currentSearchLetter) {
-      let searchThen = (data) => {
-        var lemmaList = document.getElementById('lemma-list')
-        lemmaList.innerHTML = data
-        htmx.process(lemmaList)
-    
-        if (activeId) {
-          let active = document.getElementById(activeId)
-          if (active) {
-            active.click()
-          }
-        }
-    
-        if (data === '') {
-          document.getElementById('controls-textbox').innerText = '{% trans "No lemmas found." %}'
-          document.getElementById('lemma-list').innerHTML = '<div class="flex w-full h-full"><button class="p-1 m-auto font-semibold text-white rounded-md bg-main hover:bg-main" onclick="clearSearch()">{% trans "Clear Search" %}</button></div>'
-        } else {
-          document.getElementById('controls-textbox').innerText = 'Loaded ' + data.split('\n').length + ' lemmas.'
-        }
-      }
-    
-      let searchFinally = () => {
-        insertAlphabetDivider()
-    
-        if (startUp) {
-          let x = document.getElementById('{{lemma_id}}')
-          if (x) {
-            x.click()
-          } else {
-            let y = document.querySelector('#lemma-list > div')
-            if (y) {
-              y.click()
+          if (activeId) {
+            let active = document.getElementById(activeId)
+            if (active) {
+              active.click()
             }
           }
-          startUp = false
-        }
-      }
     
-      defaultQuery(filter, searchThen, searchFinally)
+          if (data === '') {
+            document.getElementById('controls-textbox').innerText = '{% trans "No lemmas found." %}'
+            document.getElementById('lemma-list').innerHTML = '<div class="flex w-full h-full"><button class="p-1 m-auto font-semibold text-white rounded-md bg-main hover:bg-main" onclick="clearSearch()">{% trans "Clear Search" %}</button></div>'
+          } else {
+            document.getElementById('controls-textbox').innerText = 'Loaded ' + data.split('\n').length + ' lemmas.'
+          }
+        })
+        .finally(() => {
+          insertAlphabetDivider()
+    
+          if (startUp) {
+            let x = document.getElementById('{{lemma_id}}')
+            if (x) {
+              x.click()
+            } else {
+              let y = document.querySelector('#lemma-list > div')
+              if (y) {
+                y.click()
+              }
+            }
+            startUp = false
+          }
+          stopLoading()
+        })
+        .catch((error) => console.error('Error:', error))
     }
     
     function clearSearch(withSearch = true) {
@@ -288,6 +297,8 @@
     
       e.classList.add('bg-main')
       e.classList.add('text-white')
+    
+      startLoading('Loading lemma')
     
       lemmaList.scrollTo({
         top: e.offsetTop - lemmaList.offsetTop - 5,
@@ -392,7 +403,7 @@
       alphabetParent.appendChild(alphabetDiv)
     }
     
-    // MARK: Control buttons
+    // MARK: Control
     function scrollToActive() {
       const lemmaList = document.querySelector('#lemma-list')
       const active = lemmaList.querySelector('div > .bg-main')
@@ -422,6 +433,20 @@
     
     function toggleSearchSettings() {
       document.getElementById('search-settings').classList.toggle('hidden')
+    }
+    
+    function startLoading(text) {
+      let loadingBite = document.getElementById('loading-bite')
+      loadingBite.classList.remove('hidden')
+      loadingBite.classList.add('flex')
+      loadingBite.innerHTML = '<span>' + text + '</span><div class="flex justify-center w-full gap-x-1"><div class="w-1 h-4 ease-in-out rounded-md bg-off animate-infinite animate-fade-up animate-delay-0"></div><div class="w-1 h-5 rounded-md bg-off animate-infinite animate-fade-up animate-delay-75"></div><div class="w-1 h-6 rounded-md bg-off animate-infinite animate-fade-up animate-delay-150"></div><div class="w-1 h-5 rounded-md bg-off animate-infinite animate-fade-up animate-delay-[225ms]"></div><div class="w-1 h-4 rounded-md bg-off animate-infinite animate-fade-up animate-delay-300"></div></div>'
+    }
+
+    function stopLoading() {
+      let loadingBite = document.getElementById('loading-bite')
+      loadingBite.classList.remove('flex')
+      loadingBite.classList.add('hidden')
+      loadingBite.innerHTML = ''
     }
   </script>
 {% endblock %}

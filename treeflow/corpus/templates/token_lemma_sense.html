@@ -48,14 +48,11 @@
             <div class="p-6 bg-white rounded-lg shadow-md">
                 {{ lemma_form.media.css }}
                 <h2 class="mb-4 text-lg font-semibold text-gray-800">Lemma Form</h2>
-                <form id="lemma-form" method="post"
-                    hx-post="{% url 'dict:save_lemma' %}"
-                    hx-target="#lemma-form" hx-swap="outerHTML">
+                <form id="lemma-plain-form" method="post" hx-post="{% url 'dict:save_lemma' %}" hx-target="#lemma-plain-form" hx-swap="outerHTML">
                     {% csrf_token %}
                     {% for field in lemma_form %}
                     <div class="mb-4">
-                        <label for="{{ field.id_for_label }}"
-                            class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
                         {{ field }}
                         {% if field.help_text %}
                         <p class="mt-2 text-sm text-gray-600">{{ field.help_text }}</p>

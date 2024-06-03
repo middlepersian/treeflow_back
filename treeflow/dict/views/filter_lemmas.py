@@ -56,7 +56,7 @@ def filter_lemmas(request):
 
     if cached_query is not None and cached_query.exists():
         if search_mode == 'relatives' and filter_word:
-            initial_lemma = Lemma.objects.filter(word__iexact=filter_word).first()
+            initial_lemma = cached_query.filter(word__iexact=filter_word).first()
             if hasattr(initial_lemma, 'related_lemmas'):
                 related_lemmas = initial_lemma.related_lemmas.all()
                 filtered_lemmas = related_lemmas

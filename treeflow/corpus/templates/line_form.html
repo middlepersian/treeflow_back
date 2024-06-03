@@ -1,0 +1,16 @@
+<form class="space-y-4" id="line-form" method="post" hx-post="{% url 'corpus:line_form' token.id %}"
+    hx-target="#line-form" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div class="space-y-2">
+        {% for field in create_form %}
+        <div class="mb-2">
+            <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+            <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                value="{{ field.value|default_if_none:'' }}">
+        </div>
+        {% endfor %}
+    </div>
+    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Create
+        Line</button>
+</form>
