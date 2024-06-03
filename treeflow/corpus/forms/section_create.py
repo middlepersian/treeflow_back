@@ -1,5 +1,4 @@
 from django import forms
-from django_select2 import forms as s2forms
 from treeflow.corpus.models.section import Section
 from treeflow.corpus.models.text import Text
 from treeflow.corpus.models.token import Token

@@ -77,7 +77,11 @@
 <script>
   function searchForRelatives(lemmaWord) {
     selectSpecificSearchMode("relatives")
+    
     document.getElementById('search-input').value = lemmaWord
+    document.getElementById('search-button').disabled = false
+    document.getElementById('clear-search-button').disabled = false
+
     search(lemmaWord)
   }
 

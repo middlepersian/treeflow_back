@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 import logging
-from treeflow.corpus.forms.section_form import SectionForm
+from treeflow.corpus.forms.section_create import SectionForm
 from treeflow.corpus.models.section import Section
 
 logger = logging.getLogger(__name__)
 
-def load_section_modal(request):
+def load_section_modal_create(request):
     section_id = request.GET.get('section_id')
     selected_tokens = request.GET.get('tokens', '')
     text_id = request.GET.get('text_id')
@@ -20,4 +20,4 @@ def load_section_modal(request):
         logger.debug("Creating new section with text_id: %s, selected_tokens: %s", text_id, selected_tokens)
         form = SectionForm(initial={'selected_tokens': selected_tokens}, text_id=text_id)
 
-    return render(request, 'section_modal.html', {'form': form})
+    return render(request, 'section_modal_create.html', {'form': form})

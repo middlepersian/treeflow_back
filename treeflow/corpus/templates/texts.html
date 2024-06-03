@@ -160,7 +160,7 @@
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                 class="block w-full mt-1 text-center rounded-md shadow-sm form-input" />
             {% else %}
-              <span class="block w-full mt-1 text-center text-blue-500"><a href="{% url 'corpus:sections' text_id=text.id %}">{{ text.title }}</a></span>
+            <a class="block w-full mt-1 text-center text-blue-500" href="{% url 'corpus:sections' text_id=text.id %}">{{ text.title }}</a>
             {% endif %}
   
   
@@ -195,7 +195,7 @@
           </td>
             <!-- Sources -->
             <td class="px-6 py-4 text-center whitespace-nowrap">
-              {{ text.sources.all|join:", " }}
+              <div>{{ text.sources.all|join:", " }}</div>
             </td>
   
           <!-- Genre -->
@@ -245,7 +245,7 @@
   
             <!-- Tokens -->
             <td class="px-6 py-4 text-center whitespace-nowrap" id="{{text.id}}_count">
-              {{ text.token_count }}
+              <div>{{ text.token_count }}</div>
             </td>
           {% if request.user.is_authenticated %}
   
@@ -286,37 +286,34 @@
   </div>
 
   <script>
-
     function conllState(textId) {
       var button = document.getElementById(textId + '_conll')
       var count = document.getElementById(textId + '_count')
       var tokenCount = parseInt(count.innerHTML)
       // change the timeout depending on the number of tokens
       var timeout = tokenCount < 1000 ? 5000 : tokenCount < 5000 ? 10000 : 15000
-
+    
       button.innerHTML = '&#9203;'
       fetch(`/corpus/status/text/0`.replace('0', textId))
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           if (data.status === 'success') {
             // change the button to a href link to download the conll file
             button.outerHTML = '<a class="p-1 text-white rounded bg-main" id="' + textId + '_conll" href="/corpus/export/text/' + textId + '" target="_blank" download>&#128462;</a>'
-          }
-          else if (data.status === 'error') {
+          } else if (data.status === 'error') {
             // change the button color to red
             button.style.backgroundColor = 'salmon'
             button.style.color = 'black'
             button.innerHTML = '&#10060;'
-          }
-          else {
+          } else {
             // set timeout to retry after 5 seconds
             setTimeout(function () {
               conllState(textId)
-            },timeout)
+            }, timeout)
           }
         })
     }
-
+    
     document.body.addEventListener('htmx:afterRequest', function (event) {
       if (event.detail.elt.id.includes('conll')) {
         var textId = event.detail.elt.id.split('_')[0]
@@ -333,7 +330,7 @@
         }
       }
       console.log(event)
-
+    
       // Check if the event target is part of the form interaction
       if (event.detail.elt.name === 'title' || event.detail.elt.name === 'identifier' || event.detail.elt.name === 'series' || event.detail.elt.name === 'label' || event.detail.elt.name === 'version' || event.detail.elt.name === 'stage') {
         // Parse the response
@@ -346,90 +343,80 @@
   </script>
 
   <script>
+    /**
+     * Sorts the table by a specific column when the column header is clicked.
+     * @param {number} n - The index of the column to sort by.
+     * @param {HTMLElement} e - The element representing the column header.
+     */
     function sortTableByType(n, e) {
+      // Reset all other column headers
+      resetAll(e)
 
-      resetAll(e);
+      // Get the table and rows
+      var table = document.getElementById('texts')
+      var rows = Array.from(table.rows).slice(1)
 
-      var table,
-        rows,
-        switching,
-        i,
-        x,
-        y,
-        shouldSwitch,
-        dir,
-        switchcount = 0
-      table = document.getElementById('texts')
-      switching = true
-      // Set the sorting direction to ascending:
-      dir = 'asc'
+      // Determine the sort direction
+      var dir = e.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc'
 
-      e.getElementsByTagName('span')[0].classList.remove('pr-4');
-      e.getElementsByTagName('svg')[0].classList.remove('hidden');
-      e.getElementsByTagName('div')[0].classList.add('bg-white');
-      e.getElementsByTagName('div')[0].classList.add('text-black');
-      
-      // Make a loop that will continue until no switching has been done:
-      while (switching) {
-        // Start by saying: no switching is done:
-        switching = false
-        rows = table.rows
-        /* Loop through all table rows (except the
-                                            first, which contains table headers): */
-        for (i = 1; i < rows.length - 1; i++) {
-          // Start by saying there should be no switching:
-          shouldSwitch = false
-          /* Get the two elements you want to compare,
-                                              one from current row and one from the next: */
-          x = rows[i].getElementsByTagName('TD')[n]
-          y = rows[i + 1].getElementsByTagName('TD')[n]
-          /* Check if the two rows should switch place,
-                                              based on the direction, asc or desc: */
-          if (dir == 'asc') {
-            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-              // If so, mark as a switch and break the loop:
-              shouldSwitch = true
-              break
-            }
-          } else if (dir == 'desc') {
-            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-              // If so, mark as a switch and break the loop:
-              shouldSwitch = true
-              break
-            }
-          }
-        }
-        if (shouldSwitch) {
-          /* If a switch has been marked, make the switch
-                                              and mark that a switch has been done: */
-          rows[i].parentNode.insertBefore(rows[i + 1], rows[i])
-          switching = true
-          // Each time a switch is done, increase this count by 1:
-          switchcount++
+      // Update the appearance of the clicked column header
+      e.getElementsByTagName('span')[0].classList.remove('pr-4')
+      e.getElementsByTagName('svg')[0].classList.remove('hidden')
+      e.getElementsByTagName('div')[0].classList.add('bg-white')
+      e.getElementsByTagName('div')[0].classList.add('text-black')
+
+      // Update the rotation of the sort icon
+      if (dir === 'asc') {
+        e.getElementsByTagName('svg')[0].classList.remove('rotate-180')
+      } else {
+        e.getElementsByTagName('svg')[0].classList.add('rotate-180')
+      }
+
+      // Sort the rows based on the column values
+      rows.sort(function (a, b) {
+        let tdA = a.getElementsByTagName('TD')[n].children[0]
+        let tdB = b.getElementsByTagName('TD')[n].children[0]
+
+        var x = tdA.tagName === 'INPUT' ? tdA.value.trim().toLowerCase() : tdA.innerHTML.trim().toLowerCase()
+        var y = tdB.tagName === 'INPUT' ? tdB.value.trim().toLowerCase() : tdB.innerHTML.trim().toLowerCase()
+
+        var numX = parseFloat(x)
+        var numY = parseFloat(y)
+
+        if (!isNaN(numX) && !isNaN(numY)) {
+          return dir === 'asc' ? numX - numY : numY - numX
         } else {
-          /* If no switching has been done AND the direction is "asc",
-                                              set the direction to "desc" and run the while loop again. */
-          if (switchcount == 0 && dir == 'asc') {
-            dir = 'desc'
-            switching = true
-            e.getElementsByTagName('svg')[0].classList.add('rotate-180');
-          }
+          return dir === 'asc' ? x.localeCompare(y) : y.localeCompare(x)
         }
-      }
-    }
+      })
 
+      // Reorder the rows in the table
+      rows.forEach(function (row) {
+        table.appendChild(row)
+      })
+
+      // Update the sort direction attribute
+      e.setAttribute('data-sort-dir', dir)
+    }
+    
+    /**
+     * Resets the sorting direction and styling of all table headers except the specified header.
+     *
+     * @param {HTMLElement} e - The table header element to exclude from the reset.
+     */
     function resetAll(e) {
-      var parent= e.parentElement;
-      var spans = parent.getElementsByTagName('span');
-      var svgs = parent.getElementsByTagName('svg');
-      var divs= parent.getElementsByTagName('div');
-      for (var i = 0; i < svgs.length; i++) {
-        spans[i].classList.add('pr-4');
-        svgs[i].classList.add('hidden');
-        svgs[i].classList.remove('rotate-180');
-        divs[i].classList.remove('bg-white');
-        divs[i].classList.remove('text-black');
-      }
+      var headers = document.querySelectorAll('#texts th')
+      headers.forEach(function (header) {
+        if (header !== e) {
+          header.setAttribute('data-sort-dir', '')
+          var span = header.querySelector('span')
+          var svg = header.querySelector('svg')
+          var div = header.querySelector('div')
+          if (span) span.classList.add('pr-4')
+          if (svg) svg.classList.add('hidden')
+          if (div) div.classList.remove('bg-white', 'text-black')
+        }
+      })
     }
   </script>
 {% endblock %}

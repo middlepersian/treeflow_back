@@ -45,8 +45,6 @@ def pos_feature_form(request, token_id=None):
                         logger.info(f"Deleting Feature instance: {form.instance}")
                         form.instance.delete()
                     elif form.has_changed() and form.cleaned_data:
-                        # Add checks for critical fields in your Feature model
-                        # Assuming 'feature' and 'feature_value' are critical fields
                         if 'feature' in form.cleaned_data and form.cleaned_data['feature'] and \
                                 'feature_value' in form.cleaned_data and form.cleaned_data['feature_value']:
                             logger.info(f"Saving Feature instance: {form.instance}")

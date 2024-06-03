@@ -39,15 +39,16 @@
                         {% endfor %}
                     </div>
                     <div class="flex items-center justify-between">
-                        <button type="submit"
-                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-main hover:bg-main-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
-                            {% trans 'Save' %}
-                        </button>
                         <button type="button"
                             class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-error-graded-600 hover:bg-error-graded-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
                             onclick="closeFeatureModal()">
                             {% trans 'Cancel' %}
                         </button>
+                        <button type="submit"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-main hover:bg-main-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                            {% trans 'Save' %}
+                        </button>
+
                     </div>
             </form>
         </div>

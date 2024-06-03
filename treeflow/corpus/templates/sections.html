@@ -2,81 +2,316 @@
 {% load static tailwind_tags i18n %}
 
 {% block content %}
-  <div class="flex flex-row h-full overflow-y-hidden">
-    <!-- Sidebar -->
-    <div class="flex flex-col bg-gray-100">
-      <div class="flex flex-col justify-center gap-2 p-2">
-        <!-- Text Dropdown -->
-        <div class="flex-none max-w-xs">
-          {% include 'text_dropdown.html' with text_id=selected_text_id %}
-        </div>
-        <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
-        {% if request.user.is_authenticated %}
-          <button id="startTokenSelection" class="w-full px-4 py-2 font-bold text-white rounded bg-main hover:bg-off" data-mode="select">{% trans 'Start Token Selection' %}</button>
-        {% endif %}
+<div class="flex flex-row h-full overflow-y-hidden">
+  <!-- Sidebar -->
+  <div class="w-1/8 bg-gray-100 h-full flex flex-col">
+    <div class="flex flex-col justify-center gap-2 p-2">
+      <!-- Text Dropdown -->
+      <div class="flex-none max-w-xs">
+        {% include 'text_dropdown.html' with text_id=selected_text_id %}
       </div>
-      <!-- Sidebar Content Including Edit Button -->
-      <div class="bg-gray-200 shadow-md">
-        <div class="flex flex-col justify-center w-full">
-          <h2 class="m-0 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
-          <!-- Dropdown Menu for selecting section type -->
-          <select id="sectionTypeSelector" class="m-auto">
-            {% for section_type in section_types %}
-              <option value="{{ section_type }}">{{ section_type|title }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <hr class="w-full mt-1 border-p-gray" />
+      <!-- Edit Button (Conditionally Rendered for Authenticated Users) -->
+      {% if request.user.is_authenticated %}
+      <button id="startTokenSelection" class="w-full px-4 py-2 font-bold text-white rounded bg-main hover:bg-off"
+        data-mode="select">{% trans 'Start Token Selection' %}</button>
+      {% endif %}
+    </div>
+    <!-- Sidebar Content Including Section Type Selector -->
+    <div class="bg-gray-200 shadow-md flex-grow">
+      <!-- Section Type Selector Container -->
+      <div id="sectionSelectorContainer" class="flex flex-col justify-start gap-2 p-2">
+        <h2 class="m-0 text-lg font-bold">{% trans 'Select Section Type' %}</h2>
+        <!-- Hidden input for textId -->
+        <input type="hidden" id="textId" name="textId" value="{{ selected_text_id }}">
+
+        <!-- Section Type Selector -->
+        <select id="sectionTypeSelector" name="sectionTypeSelector" hx-get="{% url 'corpus:get_sections_by_type' %}"
+          hx-target="#sectionList" hx-trigger="load, change" hx-include="#textId, #sectionTypeSelector"
+          hx-indicator="#loadingIndicator" hx-swap="innerHTML">
+          {% for section_type in section_types %}
+          <option value="{{ section_type }}">{{ section_type|title }}</option>
+          {% endfor %}
+        </select>
+        <div id="loadingIndicator" class="hidden">Loading...</div>
       </div>
-      <!-- Section List -->
-      <div id="sectionList" class="pl-2 overflow-y-scroll bg-gray-200 scrollbar-thin"></div>
     </div>
-    <!-- Content Area for sentences -->
-    <div id="sentence-area" class="w-1/2 overflow-y-scroll scrollbar-thin">
-      <!-- Loop over sections of type 'sentence' -->
-      {% for section in sentence_sections %}
-        <!-- Sentence Block starts -->
-        <div class="flex items-center p-2 mb-2 bg-white rounded shadow sentence">
-          <!-- Display sentence section title or identifier with a fixed width -->
-          <div id="{{ section.id }}" class="mr-1 font-bold sentence-identifier w-1/8">
-            <a href="{% url 'corpus:ud_editor' section.id %}" class="text-main hover:text-main-dark">{{ section.number|default:'Untitled' }}</a>
-          </div>
-
-          <!-- Sentence content tokens displayed next to the identifier -->
-          <div class="flex flex-wrap sentence-content w-2/8">
-            {% for token in section.prefetched_tokens %}
-              <span class="token inline-block rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}" data-section-id="{{ section.id }}">{{ token.transcription }}</span>
-            {% endfor %}
-          </div>
-
-          {% if request.user.is_authenticated %}
-            <div class="mr-1 font-bold sentence-identifier w-1/8">
-              <a href="{% url 'corpus:sentence' section.id %}" class="text-xl font-bold text-off hover:text-action">&#x270F; <!-- Unicode pencil icon --></a>
-            </div>
-          {% endif %}
-        </div>
-        {% empty %}
-        <p>
-          {% trans 'No sentence sections found for this text.' %}
-        </p>
-      {% endfor %}
+    <!-- Section List -->
+    <div id="sectionList" class="sections-container pl-2 overflow-y-scroll bg-gray-200 h-full scrollbar-thin">
+      <!-- Sections will be loaded here -->
     </div>
-
-    <!-- Right Column for Image -->
-    <div id="iiif-viewer" class="w-1/2 m-2">
-      {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
-    </div>
-
-    <input type="hidden" id="id_selected_tokens" name="selected_tokens" value />
-
-    <div id="modalContainer"></div>
   </div>
 
-  <script>
-    var textId = '{{ selected_text_id }}'
-    console.log('Selected text ID:', textId)
-  </script>
 
-  <script src="{% static 'corpus/section_navigator.js' %}"></script>
-  <script src="{% static 'corpus/section_creator.js' %}"></script>
+  <!-- Content Area for sentences -->
+  <div id="sentence-area" class="w-2/4 overflow-y-scroll scrollbar-thin">
+    <!-- Loop over sections of type 'sentence' -->
+    {% for section in sentence_sections %}
+    <!-- Sentence Block starts -->
+    <div class="flex items-center p-2 mb-2 bg-white rounded shadow sentence">
+      <!-- Display sentence section title or identifier with a fixed width -->
+      <div id="{{ section.id }}" class="mr-1 font-bold sentence-identifier w-1/8">
+        <a href="{% url 'corpus:ud_editor' section.id %}"
+          class="text-main hover:text-main-dark">{{section.number|default:'Untitled' }}</a>
+      </div>
+
+      <!-- Sentence content tokens displayed next to the identifier -->
+      <div class="flex flex-wrap sentence-content w-2/8">
+        {% for token in section.prefetched_tokens %}
+        <span class="token inline-block rounded px-1 py-0.5 m-0.5" data-token-id="{{ token.id }}"
+          data-section-id="{{ section.id }}">{{ token.transcription }}</span>
+        {% endfor %}
+      </div>
+
+      {% if request.user.is_authenticated %}
+      <div class="mr-1 font-bold sentence-identifier w-1/8">
+        <button onclick="location.href='{% url 'corpus:sentence' section.id %}'"
+          class="text-sm bg-blue-500 text-white py-1 px-2 rounded">Edit</button>
+      </div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <p>
+      {% trans 'No sentence sections found for this text.' %}
+    </p>
+    {% endfor %}
+  </div>
+
+  <!-- Right Column for Image -->
+  <div id="iiif-viewer" class="w-1/2 m-2">
+    {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
+  </div>
+
+  <input type="hidden" id="id_selected_tokens" name="selected_tokens" value />
+
+  <div id="createSectionModal"></div>
+  <div id="editSectionModal"></div>
+
+</div>
+
+
+
+<script>
+  var textId = '{{ selected_text_id }}'
+  console.log('Selected text ID:', textId)
+</script>
+
+<script>
+  class TokenSelector {
+    constructor() {
+      this.startTokenId = null;
+      this.endTokenId = null;
+      this.isSelectingTokens = false;
+      this.selectedTokens = [];
+      this.selectedTokenIds = [];
+      this.selectedTokenTexts = '';
+
+      this.csrfToken = this.getCsrfToken();
+      this.initHtmxConfig();
+      this.addTokenClickListeners();
+      this.setupObserver();
+      this.bindEventListeners();
+    }
+
+    deselectAllTokens() {
+      document.querySelectorAll('.token.bg-green-200').forEach(token => {
+        token.classList.remove('bg-green-200');
+      });
+      this.resetSelectionState();
+      console.log('All tokens have been deselected.');
+    }
+
+    resetSelectionState() {
+      this.startTokenId = null;
+      this.endTokenId = null;
+      this.selectedTokenIds = [];
+      this.selectedTokens = [];
+      this.selectedTokenTexts = '';
+    }
+
+    getCsrfToken() {
+      const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+      return csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+    }
+
+    initHtmxConfig() {
+      if (this.csrfToken) {
+        htmx.config.include = (name, value, el) => {
+          if (name === "csrfmiddlewaretoken") {
+            return this.csrfToken;
+          }
+          return value;
+        };
+      } else {
+        console.error("CSRF token not available");
+      }
+    }
+
+    addTokenClickListeners() {
+      document.querySelectorAll('.token').forEach(token => {
+        token.addEventListener('click', () => {
+          if (this.isSelectingTokens) {
+            this.handleTokenClick(token);
+          }
+        });
+      });
+    }
+
+    handleTokenClick(tokenElement) {
+      const tokenId = tokenElement.dataset.tokenId;
+      if (this.startTokenId === null) {
+        this.startTokenId = tokenId;
+        tokenElement.classList.add('bg-green-200');
+      } else if (this.endTokenId === null && tokenId !== this.startTokenId) {
+        this.endTokenId = tokenId;
+        this.highlightTokensBetween(this.startTokenId, this.endTokenId);
+      }
+    }
+
+    highlightTokensBetween(startId, endId) {
+      let inRange = false;
+      document.querySelectorAll('.token').forEach(token => {
+        if (token.dataset.tokenId === startId || token.dataset.tokenId === endId) {
+          inRange = !inRange;
+          token.classList.add('bg-green-200');
+        }
+        if (inRange || token.dataset.tokenId === endId) {
+          token.classList.add('bg-green-200');
+        }
+      });
+    }
+
+    setupObserver() {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            console.log('A child node has been added or removed.');
+          }
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    bindEventListeners() {
+      document.getElementById('startTokenSelection').addEventListener('click', (event) => {
+        const mode = event.target.getAttribute('data-mode');
+        if (mode === 'select') {
+          this.startSelectionMode(event.target);
+        } else if (mode === 'finish') {
+          this.finishSelectionMode(event.target);
+        }
+      });
+
+      document.body.addEventListener('htmx:afterSwap', (event) => {
+        if (event.target.id === 'createSectionModal') {
+          this.openModal();
+        }
+      });
+    }
+
+    startSelectionMode(button) {
+      this.isSelectingTokens = true;
+      button.textContent = 'Finish Token Selection';
+      button.setAttribute('data-mode', 'finish');
+    }
+
+    finishSelectionMode(button) {
+      this.isSelectingTokens = false;
+      this.selectedTokens = Array.from(document.querySelectorAll('.token.bg-green-200'));
+      this.selectedTokenIds = this.selectedTokens.map(token => token.dataset.tokenId);
+      this.selectedTokenTexts = this.selectedTokens.map(token => token.textContent).join(', ');
+      const queryString = `?tokens=${encodeURIComponent(this.selectedTokenIds.join(','))}&text_id=${encodeURIComponent(textId)}`;
+      console.log("Sending AJAX request to load modal with queryString:", queryString);
+      htmx.ajax('GET', '/corpus/load_section_modal_create/' + queryString, {
+        target: '#createSectionModal'
+      }).then(() => {
+        console.log("Modal content loaded successfully.");
+        document.getElementById('modalTextId').value = textId;
+        document.getElementById('selectedTokensDisplay').textContent = this.selectedTokenTexts;
+        this.deselectAllTokens();
+        console.log('Tokens deselected and selection state reset.');
+      }).catch(error => {
+        console.error("Failed to load modal content:", error);
+      });
+      button.textContent = 'Start Token Selection';
+      button.setAttribute('data-mode', 'select');
+    }
+
+    openModal() {
+      console.log('Attempting to open modal...');
+      const modalContainer = document.getElementById('createSectionModal');
+      if (!document.getElementById('sectionModal')) {
+        const modalHTML = `
+          <div id="sectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
+            <div class="flex items-center justify-center min-h-screen">
+              <div class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
+                <h2 class="mb-4 text-lg font-bold">Create New Section</h2>
+                <form id="sectionForm" class="space-y-4" hx-post="/corpus/create_section/" method="post">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="${this.csrfToken}">
+                  <input type="hidden" id="modalTextId" name="text_id" value="">
+                  <div class="my-4 selected-tokens-list">
+                    <h3 class="font-semibold">Selected Tokens:</h3>
+                    <div id="selectedTokensDisplay"></div>
+                  </div>
+                  <div class="flex justify-between mt-6">
+                    <button type="button" id="closeModalButton" class="px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Submit</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>`;
+        modalContainer.innerHTML = modalHTML;
+      }
+      const modal = document.getElementById('sectionModal');
+      if (modal) {
+        console.log('Modal found, removing hidden class.');
+        modal.classList.remove('hidden');
+        console.log('Modal class list after removing hidden:', modal.classList);
+
+        const selectedTokensDisplay = document.getElementById('selectedTokensDisplay');
+        selectedTokensDisplay.textContent = this.selectedTokenTexts || 'No tokens selected';
+        console.log('Selected tokens display updated with text:', selectedTokensDisplay.textContent);
+
+        this.bindModalEventListeners(modal);
+        console.log('Modal event listeners bound.');
+      } else {
+        console.error('Modal not found in the DOM.');
+        console.log('Failed to open modal because the modal element does not exist in the DOM.');
+      }
+    }
+
+    bindModalEventListeners(modal) {
+      const closeModalButton = modal.querySelector('#closeModalButton');
+      if (closeModalButton) {
+        closeModalButton.addEventListener('click', () => {
+          this.closeModal(modal);
+          console.log('Close button clicked.');
+        });
+      } else {
+        console.log('Close button not found.');
+      }
+    }
+
+    closeModal(modal) {
+      console.log('Attempting to close modal...');
+      if (modal) {
+        modal.classList.add('hidden');
+        console.log('Modal class list after adding hidden:', modal.classList);
+        document.dispatchEvent(new CustomEvent('modalClosed'));
+        console.log('modalClosed event dispatched.');
+        modal.remove(); // Remove the modal from the DOM
+        console.log('Modal removed from DOM.');
+      } else {
+        console.error('Attempted to close a modal that does not exist.');
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    new TokenSelector();
+  });
+</script>
+
+
+
 {% endblock %}
