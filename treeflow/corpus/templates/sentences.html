@@ -16,51 +16,57 @@
           <table class="relative w-full bg-white">
             <thead class="text-white">
               <tr>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Number in Text' %}
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
+                  {% trans 'Controls' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
-                  {% trans 'Number in Sentence' %}
-                </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Image' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Line' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Transcription' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Transliteration' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Avestan' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Lemmas' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Senses' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'POS' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Features' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark">
                   {% trans 'Comments' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider cursor-pointer w-min bg-main-dark hover:underline" onclick="toggleMetaData()">
+                  {% trans 'Metadata' %}
+                </th>
+                <th class="sticky top-0 hidden p-2 bg-main-dark meta-data-header whitespace-nowrap">
+                  {% trans 'No. in Text' %}
+                </th>
+                <th class="sticky top-0 hidden p-2 bg-main-dark meta-data-header whitespace-nowrap">
+                  {% trans 'No. in Sentence' %}
+                </th>
+                {% comment %} <th class="sticky top-0 p-2 tracking-wider bg-main-dark">
                   {% trans 'Insert Before' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider bg-main-dark">
                   {% trans 'Insert After' %}
                 </th>
-                <th class="sticky top-0 px-4 py-2 bg-main-dark">
+                <th class="sticky top-0 p-2 tracking-wider bg-main-dark">
                   {% trans 'Delete Token' %}
-                </th>
+                </th> {% endcomment %}
               </tr>
             </thead>
             <tbody>
@@ -98,28 +104,30 @@
                 id="token-{{token.id}}">
                 {% csrf_token %}
     
-                <!-- Number in Text -->
-                <td class="px-4 py-2 text-center border">{{ token.number }}</td>
-    
-                <!-- Number in Sentence -->
-                <td class="px-4 py-2 border">
-                  <input type="text" name="number_in_sentence"
-                    value="{{ token.number_in_sentence }}"
-                    hx-post="{% url 'corpus:update_token' token.id %}"
-                    hx-trigger="keyup changed delay:500ms"
-                    hx-indicator="#loadingIndicator{{ token.id }}"
-                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="w-full px-3 py-2 border rounded shadow text-grey-darker">
+                <!-- Controls -->
+                <td class="border">
+                  <div class="flex flex-row">
+                    <svg class="w-8 h-8 text-action"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z"/>
+                    </svg>
+                    <svg class="w-8 h-8 text-off"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"/>
+                    </svg>
+                    <svg class="w-8 h-8 text-red-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    
+                  </div>
                 </td>
     
     
                 <!-- Image -->
-                <td class="px-4 py-2 border">
+                <td class="p-2 border">
                   {{ token.image.identifier }}
                 </td>
     
                 <!-- Line -->
-                <td class="px-4 py-2 border">
+                <td class="p-2 border">
                   <!-- Display 'line' type sections -->
                   {% for section_token in token.line_sections %}
                   {{ section_token.section.number }}
@@ -130,7 +138,7 @@
                 </td>
     
                 <!-- Transcription -->
-                <td id="transcription-cell" class="px-4 py-2 border">
+                <td id="transcription-cell" class="p-2 border">
                   <input id="transcription-content-{{ token.id }}" type="text"
                     name="transcription"
                     value="{{ token.transcription }}"
@@ -138,10 +146,10 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="px-3 py-2 border rounded shadow text-grey-darker">
+                    class="w-full p-2 border rounded shadow text-grey-darker">
                 </td>
                 <!-- Transliteration -->
-                <td id="transliteration-cell" class="px-4 py-2 border">
+                <td id="transliteration-cell" class="p-2 border">
                   <input id="transliteration-content-{{ token.id }}" type="text"
                     name="transliteration"
                     value="{{ token.transliteration }}"
@@ -149,11 +157,11 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="px-3 py-2 border rounded shadow text-grey-darker">
+                    class="w-full p-2 border rounded shadow text-grey-darker">
                 </td>
                 
                 <!-- Avestan -->
-                <td id="avestan-cell" class="px-4 py-2 border">
+                <td id="avestan-cell" class="p-2 border">
                   <input id="avestan-content-{{ token.id }}" type="text"
                     name="avestan"
                     value="{{ token.avestan|default_if_none:'–' }}"
@@ -161,11 +169,11 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="px-3 py-2 border rounded shadow text-grey-darker">
+                    class="w-full p-2 border rounded shadow text-grey-darker">
                 </td>
     
                 <!-- Lemmas -->
-                <td id="lemmas-cell" class="px-4 py-2 border"
+                <td id="lemmas-cell" class="p-2 border"
                   hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
                   hx-target="#senseModalContent"
                   hx-trigger="click">
@@ -180,7 +188,7 @@
                 </td>
     
                 <!-- Senses -->
-                <td id="sense-cell" class="px-4 py-2 border"
+                <td id="sense-cell" class="p-2 border"
                   hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
                   hx-target="#senseModalContent" hx-trigger="click">
                   <span id="sense-content-{{ token.id }}">
@@ -194,7 +202,7 @@
                 </td>
     
                 <!-- POS -->
-                <td id="pos-cell" class="px-4 py-2 border"
+                <td id="pos-cell" class="p-2 text-center border"
                   hx-get="{% url 'corpus:pos_feature_form' token.id %}"
                   hx-target="#featureModalContent" hx-trigger="click">
                   <span id="pos-content-{{ token.id }}">
@@ -211,7 +219,7 @@
                 </td>
     
                 <!-- Features -->
-                <td id="features-cell" class="px-4 py-2 border"
+                <td id="features-cell" class="p-2 border"
                   hx-get="{% url 'corpus:pos_feature_form' token.id %}"
                   hx-target="#featureModalContent" hx-trigger="click">
                   <span id="features-content-{{ token.id }}">
@@ -225,7 +233,7 @@
                 </td>
     
                 <!-- Comments -->
-                <td id="comments-cell" class="px-4 py-2 border"
+                <td id="comments-cell" class="p-2 border"
                   hx-get="{% url 'corpus:comment_form' token.id %}?related_model_type=token"
                   hx-target="#commentModalContent"
                   hx-trigger="click">
@@ -233,9 +241,29 @@
                     {% render_comments_for_model token %}
                   </span>
                 </td> 
+
+                <!-- Metadata -->
+                <td class="p-2 text-center border cursor-pointer group" onclick="toggleMetaData()">
+                  <div class="text-lg tracking-wide group-hover:text-off">...</div>
+                </td>
+
+                <!-- Number in Text -->
+                <td class="hidden px-4 py-2 text-center border meta-data-cell">{{ token.number }}</td>
+    
+                <!-- Number in Sentence -->
+                <td class="hidden px-4 py-2 border meta-data-cell">
+                  <input type="text" name="number_in_sentence"
+                    value="{{ token.number_in_sentence }}"
+                    hx-post="{% url 'corpus:update_token' token.id %}"
+                    hx-trigger="keyup changed delay:500ms"
+                    hx-indicator="#loadingIndicator{{ token.id }}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="w-full px-3 py-2 border rounded shadow text-grey-darker">
+                </td>
+
     
                 <!-- Insert Before Button -->
-                <td class="px-4 py-2 border">
+                {% comment %} <td class="p-2 border">
                   <form method="post"
                     action="{% url 'corpus:insert_before_token' token.id %}">
                     {% csrf_token %}
@@ -252,7 +280,7 @@
                 </td>
     
                 <!-- Insert After Button -->
-                <td class="px-4 py-2 border">
+                <td class="p-2 border">
                   <form method="post"
                     action="{% url 'corpus:insert_after_token' token.id %}">
                     {% csrf_token %}
@@ -269,7 +297,7 @@
                 </td>
     
                 <!-- Delete Button -->
-                <td class="px-4 py-2 border">
+                <td class="p-2 border">
                   <form method="post"
                     action="{% url 'corpus:delete_token' token.id %}">
                     {% csrf_token %}
@@ -283,7 +311,7 @@
                     <input type="submit" value={% trans 'Delete' %}
                       class="px-2 py-1 font-bold text-white bg-red-500 rounded cursor-pointer hover:bg-red-700 focus:outline-none focus:shadow-outline">
                   </form>
-                </td>
+                </td> {% endcomment %}
               </tr>
               {% endfor %}
               {% endfor %}
@@ -445,5 +473,9 @@
         }
       }
     }
+
+    function toggleMetaData(){
+      var elements = document.querySelectorAll('.meta-data-header, .meta-data-cell');
+      elements.forEach(element => element.classList.toggle('hidden'));    }
   </script>
 {% endblock %}
