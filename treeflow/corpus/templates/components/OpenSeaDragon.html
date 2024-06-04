@@ -155,6 +155,16 @@
                   prefixUrl: "//openseadragon.github.io/openseadragon/images/",
                   tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
                   showNavigator: true,
+                  showRotationControl: true,
+                  showFullPageControl: true,
+                  showHomeControl: true,
+                  showZoomControl: true,
+                  showSequenceControl: true,
+                  showReferenceStrip: true,
+                  maxZoomPixelRatio: 10, // Allows for higher zoom levels by increasing the maximum zoom pixel ratio
+                  minZoomLevel: 0.1, // Allows for smaller minimum zoom to see the image in a smaller scale
+                  visibilityRatio: 1, // Ensures the entire image must be within the viewer when zooming
+                  constrainDuringPan: true // Ensures image constraints are maintained during panning
                 });
               }
               viewer.open(

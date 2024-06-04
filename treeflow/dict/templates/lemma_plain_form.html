@@ -1,0 +1,21 @@
+{% load static i18n %}
+
+<form id="lemma-plain-form" method="post" hx-post="{% url 'dict:save_lemma' %}" hx-target="#lemma-plain-form" hx-swap="outerHTML">
+    {% csrf_token %}
+    {% for field in lemma_form %}
+    <div class="mb-4">
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <p class="mt-2 text-sm text-gray-600">{{ field.help_text }}</p>
+        {% endif %}
+        {% for error in field.errors %}
+        <p class="text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit" name="submit_lemma"
+        class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-off hover:bg-off-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+        {% trans 'Add Lemma' %}
+    </button>
+</form>

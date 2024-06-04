@@ -1,5 +1,5 @@
 import logging
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from treeflow.dict.forms.sense_form import SenseForm
 
@@ -22,7 +22,6 @@ def save_sense(request):
             else:
                 # Handle non-HTMX request if necessary
                 logger.info("Non-HTMX request for sense creation.")
-                # return redirect('some_view')
 
         else:
             logger.error(f"Form errors: {form.errors}")
@@ -33,7 +32,6 @@ def save_sense(request):
             else:
                 # Handle non-HTMX request with form errors if necessary
                 logger.info("Non-HTMX request with form errors.")
-                # return render(request, 'your_template_with_errors.html', {'form': form})
 
     else:
         logger.warning("Received non-POST request on save_sense view.")

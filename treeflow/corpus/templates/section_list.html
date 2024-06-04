@@ -1,0 +1,109 @@
+<div class="overflow-y-auto">
+    {% for section in sections %}
+    <div id="section-item-{{ section.id }}" class="section-item flex flex-col p-2 hover:bg-gray-100 rounded-md">
+        <div class="flex justify-between items-center">
+            <span id="section-id-{{ section.id }}" class="section-title cursor-pointer"
+                hx-get="{% url 'corpus:get_section_data' section.id %}" hx-target="#section-data-{{ section.id }}"
+                hx-swap="innerHTML" hx-trigger="click" onclick="handleSectionClick('{{ section.id }}', event);">
+                {{ section.identifier }}
+            </span>
+            <!--make this available only to registered users-->
+            <!-- Edit and Delete buttons -->
+            {% if user.is_authenticated %}
+            <button class="edit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                hx-get="{% url 'corpus:update_section' section.id %}" hx-trigger="click" hx-target="#editSectionModal"
+                onclick="event.stopPropagation();">Edit</button>
+            <button class="delete-button bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                hx-post="{% url 'corpus:delete_section' section.id %}" hx-trigger="click" hx-swap="none"
+                hx-confirm="Are you sure you want to delete this section?" onclick="event.stopPropagation();">
+                Delete
+            </button>
+            {% endif %}
+        </div>
+        <!-- Placeholder for child sections -->
+        <div id="section-data-{{ section.id }}" class="hidden"></div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+        const contentType = event.detail.xhr.getResponseHeader("Content-Type");
+        if (event.target.classList.contains('delete-button')) {
+            console.log('HTMX request completed from delete button:', event);
+            try {
+                var response = JSON.parse(event.detail.xhr.responseText);
+                if (response.status === 'success' && response.section_id) {
+                    var sectionElement = document.getElementById('section-item-' + response.section_id);
+                    if (sectionElement) {
+                        sectionElement.remove(); // Remove the section element from the DOM
+                    }
+                } else {
+                    console.error('Failed to delete the section');
+                }
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+            }
+        } else if (contentType && contentType.includes("text/html")) {
+            // HTML responses are handled by HTMX, no need to process here
+            console.log('HTML content received, handled by HTMX.');
+        }
+    });
+
+</script>
+
+
+<script>
+    function handleSectionClick(sectionId, event) {
+        toggleSectionVisibility(sectionId, event);
+        fetchAndHighlightTokens(sectionId);
+    }
+
+    function toggleSectionVisibility(sectionId, event) {
+        var element = document.getElementById('section-data-' + sectionId);
+        if (element) {
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+            } else {
+                element.classList.add('hidden');
+            }
+        } else {
+            console.error('Element not found: section-data-' + sectionId);
+        }
+        event.preventDefault();
+    }
+
+    function fetchAndHighlightTokens(sectionId) {
+        console.log('Fetching tokens for section:', sectionId);
+        fetch(`/corpus/get-tokens-for-section/${sectionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.tokens) {
+                    highlightTokens(data.tokens);
+                } else {
+                    console.error('No tokens found for section:', sectionId);
+                }
+            })
+            .catch(error => console.error('Error fetching tokens:', error));
+    }
+
+    function highlightTokens(tokenIds) {
+    // Remove existing highlights from all tokens
+    document.querySelectorAll('.token').forEach(token => {
+        token.classList.remove('bg-yellow-300'); // Assuming 'bg-yellow-300' is the Tailwind class for highlighting
+    });
+
+    // Apply new highlights to the fetched tokens and scroll to the first highlighted token
+    let firstHighlighted = true; // Flag to track the first token to highlight
+    tokenIds.forEach(tokenId => {
+        const tokenElement = document.querySelector(`.token[data-token-id="${tokenId}"]`);
+        if (tokenElement) {
+            console.log('Highlighting token:', tokenId);
+            tokenElement.classList.add('bg-yellow-300'); // Apply the Tailwind class for highlighting
+            if (firstHighlighted) {
+                tokenElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstHighlighted = false; // Reset the flag so only the first token is scrolled to
+            }
+        }
+    });
+}
+</script>

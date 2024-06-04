@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         sentenceArea.scrollTo({ top: firstTokenElement.offsetTop - sentenceArea.offsetTop, behavior: 'smooth' });
                     }
                 }
+                 // Dispatch event with sectionId when tokens are fetched
+                 dispatchCustomEvent('sectionSelected', { sectionId: sectionId });
             })
             .catch(error => {
                 console.error('Error fetching tokens for section:', error);
@@ -60,6 +62,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     childDiv.classList.add('child-section-item');
                     childDiv.textContent = childSection.identifier || 'Untitled';
                     childDiv.dataset.sectionId = childSection.id;
+
+                    // Add edit button
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.classList.add('edit-btn', 'text-sm', 'ml-2', 'mb-2', 'bg-blue-500', 'text-white', 'rounded', 'px-1', 'py-1'); // Added margin-bottom mb-2 for space between buttons vertically
+                    editBtn.onclick = function() {
+                        // Add edit functionality here
+                    };
+                    editBtn.classList.add('hover:bg-blue-700'); // Change hover color
+                    childDiv.appendChild(editBtn);
+
 
                     // Add event listener to prevent event bubbling
                     childDiv.addEventListener('click', function (event) {
@@ -90,6 +103,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     sectionDiv.classList.add('section-item', 'cursor-pointer', 'hover:bg-action/50', 'rounded-md', 'pl-1');
                     sectionDiv.textContent = section.identifier || 'Untitled';
                     sectionDiv.dataset.sectionId = section.id;
+
+                    // Add edit button
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.classList.add('edit-btn', 'text-sm', 'ml-2', 'mb-2', 'bg-blue-500', 'text-white', 'rounded', 'px-1', 'py-1'); // Added margin-bottom mb-2 for space between buttons vertically
+                    editBtn.onclick = function() {
+                        // Add edit functionality here
+                    };
+                    editBtn.classList.add('hover:bg-blue-700'); // Change hover color
+                    sectionDiv.appendChild(editBtn);
 
                     // Add event listener to load child sections    
                     sectionDiv.addEventListener('click', function () {
