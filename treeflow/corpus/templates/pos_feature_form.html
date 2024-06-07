@@ -8,30 +8,32 @@
     </div>
     <div class="inline-block p-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
       <div class="flex flex-row w-full">
-        <form id="pos-feature-form" method="post" hx-post="{% url 'corpus:pos_feature_form' token_id=token.id %}" hx-trigger="submit" hx-swap="none" class="flex flex-row p-4 mt-4">
+        <form id="pos-feature-form" method="post" hx-post="{% url 'corpus:pos_feature_form' token_id=token.id %}" hx-trigger="submit" hx-swap="none" class="flex flex-row p-4">
           {% csrf_token %}
-          <div class="mb-4">
+          <div>
             <label class="block mb-2 text-sm font-bold text-gray-700" for="pos">Part of Speech:</label>
-            <div class="p-2 bg-gray-100">
-              {{ pos_formset.management_form }}
-              {% for form in pos_formset %}
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                  {{ form.id }}
-                  {{ form.pos.label_tag }} {{ form.pos }}
-                  {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
-                </div>
-              {% endfor %}
-            </div>
-            <div id="features-container">
-              {{ feature_formset.management_form }}
-              {% for form in feature_formset %}
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                  {{ form.id }}
-                  {{ form.feature.label_tag }} {{ form.feature }}
-                  {{ form.feature_value.label_tag }} {{ form.feature_value }}
-                  {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
-                </div>
-              {% endfor %}
+            <div class="grid grid-cols-2">
+              <div class="p-2 bg-gray-100">
+                {{ pos_formset.management_form }}
+                {% for form in pos_formset %}
+                  <div class="grid grid-cols-2 gap-4 mb-4">
+                    {{ form.id }}
+                    {{ form.pos.label_tag }} {{ form.pos }}
+                    {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
+                  </div>
+                {% endfor %}
+              </div>
+              <div id="features-container" class="contents">
+                {{ feature_formset.management_form }}
+                {% for form in feature_formset %}
+                  <div class="grid grid-cols-2 gap-4 p-2 mb-4">
+                    {{ form.id }}
+                    {{ form.feature.label_tag }} {{ form.feature }}
+                    {{ form.feature_value.label_tag }} {{ form.feature_value }}
+                    {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
+                  </div>
+                {% endfor %}
+              </div>
             </div>
             <div class="flex flex-row items-center gap-2">
               <button type="submit" class="px-4 py-2 text-base font-medium text-white rounded-md bg-main hover:bg-main-dark">{% trans 'Save' %}</button>

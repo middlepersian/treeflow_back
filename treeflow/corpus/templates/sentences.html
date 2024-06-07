@@ -330,13 +330,10 @@
       <!-- Right Column for Image -->
         <div class="w-4/12 m-2" id="iiif-viewer"></div>
 
+      <!-- Modals -->
       <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="mainModal">
         <div class="flex items-center justify-center min-h-screen">
-          <!-- Increase the width of the modal. Example: w-3/4 for wider modal -->
-          {% comment %} <div class="w-3/4 p-4 mx-auto bg-white rounded-lg shadow-lg"> {% endcomment %}
-            <!-- Modal content here -->
-            <div id="mainModalContent" class="w-3/4 mx-auto bg-white rounded-lg shadow-lg"></div>
-          {% comment %} </div> {% endcomment %}
+          <div id="mainModalContent" class="w-3/4 mx-auto bg-white rounded-lg shadow-lg"></div>
         </div>
       </div>
     <!-- close main div -->
@@ -351,11 +348,6 @@
       document.getElementById('navigationControls').classList.toggle('pointer-events-none');
       document.getElementById('toggleTransparencyBack').classList.toggle('hidden');
       document.getElementById('toggleTransparencyBack').classList.toggle('flex');
-    }
-
-    function closeModal(id){
-      console.log(`Closing ${id} Modal`);
-      document.getElementById(id).classList.add('hidden');
     }
 
     // Function to close the comment modal
@@ -405,7 +397,6 @@
       console.log('htmx:afterSwap event triggered')
       console.log(event.detail)
       // Check if the swap is for loading sentence senses modal content
-      console.log(event.detail)
       if (event.detail.target.id === 'mainModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
         document.getElementById('mainModal').classList.remove('hidden')
       }
@@ -444,6 +435,7 @@
 
     function toggleMetaData(){
       var elements = document.querySelectorAll('.meta-data-header, .meta-data-cell');
-      elements.forEach(element => element.classList.toggle('hidden'));    }
+      elements.forEach(element => element.classList.toggle('hidden'));    
+    }
   </script>
 {% endblock %}
