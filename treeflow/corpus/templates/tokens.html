@@ -18,24 +18,20 @@
       <table id="mainTable" class="relative w-full bg-white">
         <thead class="text-white">
           <tr>
-            <th class="sticky top-0 p-2 tracking-wider w-min bg-main-dark z-[1]">
-              {% trans 'Controls' %}
-            </th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Sentence' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Line' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Transcription' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Transliteration' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Avestan' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Lemmas' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Senses' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'POS' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Features' %}</th>
-            <th class="sticky top-0 p-2 w-min bg-main-dark">{% trans 'Comments' %}</th>
-            <th class="sticky top-0 p-2 tracking-wider cursor-pointer w-min bg-main-dark hover:underline" onclick="toggleMetaData()">
-              {% trans 'Metadata' %}
-            </th>
-            <th class="sticky top-0 hidden p-2 w-min bg-main-dark meta-data-header whitespace-nowrap">{% trans 'Number' %}</th>
-            <th class="sticky top-0 hidden p-2 w-min bg-main-dark meta-data-header whitespace-nowrap">{% trans 'Number in Sentence' %}</th>
+            <th class="sticky top-0 py-2 px-1 tracking-wider font-medium w-min bg-main-dark z-[1]">{% trans 'Controls' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'Sentence' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'Line' %}</th>
+            <th class="sticky top-0 py-2 px-1 font-medium tracking-wider min-w-[8rem] w-min bg-main-dark">{% trans 'Transcription' %}</th>
+            <th class="sticky top-0 py-2 px-1 font-medium tracking-wider min-w-[8rem] w-min bg-main-dark">{% trans 'Transliteration' %}</th>
+            <th class="sticky top-0 py-2 px-1 font-medium tracking-wider min-w-[8rem] w-min bg-main-dark">{% trans 'Avestan' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'Lemmas' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'Senses' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'POS' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'Features' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">{% trans 'Comments' %}</th>
+            <th class="sticky top-0 px-1 py-2 font-medium tracking-wider cursor-pointer w-min bg-main-dark hover:underline" onclick="toggleMetaData()">{% trans 'Metadata' %}</th>
+            <th class="sticky top-0 hidden px-1 py-2 font-medium w-min bg-main-dark meta-data-header whitespace-nowrap">{% trans 'No.' %}</th>
+            <th class="sticky top-0 hidden px-1 py-2 font-medium w-min bg-main-dark meta-data-header whitespace-nowrap">{% trans 'No. in Sentence' %}</th>
           </tr>
         </thead>
         <tbody>
@@ -239,8 +235,8 @@
             </td>
 
             <!-- Metadata -->
-            <td class="p-2 text-center border cursor-pointer group" onclick="toggleMetaData()">
-              <div class="text-lg tracking-wide group-hover:text-off">...</div>
+            <td class="p-2 text-center border cursor-pointer hover:bg-action hover:text-white" onclick="toggleMetaData()">
+              <div class="text-lg tracking-wide">...</div>
             </td>
 
             <!-- Number -->
