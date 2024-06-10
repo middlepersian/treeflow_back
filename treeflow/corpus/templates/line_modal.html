@@ -1,81 +1,69 @@
+{% load static i18n %}
 {% block content %}
-
-<div class="container mx-auto">
+  <div class="container mx-auto">
     <!-- Load jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <!-- Load Select2 JS (Make sure to use the correct version and path) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
+    <div id="lineModal" class="p-2 overflow-hidden bg-white rounded shadow">
+      <div class="px-4 py-5 sm:px-6">
+        <h2 class="m-0 text-lg font-semibold text-gray-800">Line Sections for: {{ token.transcription }}</h2>
+      </div>
+      <div class="border-t border-gray-200">
+        <dl>
+          <!-- Assign Line Section -->
+          <div class="px-4 py-5 bg-white sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Assign Line Section</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              {{ assign_form.media.css }}
+              <form id="assign-line-form" method="post" hx-post="{% url 'corpus:line_form' token.id %}" hx-target="#assign-line-form" hx-swap="outerHTML">
+                {% csrf_token %}
+                <input type="hidden" name="section_id" value="{{ section.id }}" />
+                <div class="space-y-2">
+                  {% for field in assign_form %}
+                    <div class="mb-2">
+                      <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                      {{ field }}
+                    </div>
+                  {% endfor %}
+                  <button type="submit" name="assign_line" class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-700">Assign Line</button>
+                </div>
+              </form>
+              {{ assign_form.media.js }}
+            </dd>
+          </div>
 
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="lineModal">
-        <div class="container mx-auto px-4 py-12">
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg max-w-4xl mx-auto">
-                <div class="px-4 py-5 sm:px-6">
-                    <h2 class="text-lg leading-6 font-bold text-gray-900">Line Sections for: {{ token.transcription }}
-                    </h2>
+          <!-- Create New Line Section -->
+          <div class="px-4 py-5 bg-gray-50 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Create New Line Section</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <form class="space-y-4" id="line-form" method="post" hx-post="{% url 'corpus:line_form' token.id %}" hx-target="#line-form" hx-swap="outerHTML">
+                {% csrf_token %}
+                <div class="space-y-2">
+                  {% for field in create_form %}
+                    <div class="mb-2">
+                      <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                      <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" value="{{ field.value|default_if_none:'' }}" />
+                    </div>
+                  {% endfor %}
                 </div>
-                <div class="border-t border-gray-200">
-                    <dl>
-                        <!-- Assign Line Section -->
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Assign Line Section</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {{ assign_form.media.css }}
-                                <form id="assign-line-form" method="post"
-                                    hx-post="{% url 'corpus:line_form' token.id %}" hx-target="#assign-line-form"
-                                    hx-swap="outerHTML">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="section_id" value="{{ section.id }}">
-                                    <div class="space-y-2">
-                                        {% for field in assign_form %}
-                                        <div class="mb-2">
-                                            <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
-                                            {{ field }}
-                                        </div>
-                                        {% endfor %}
-                                        <button type="submit" name="assign_line"
-                                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Assign
-                                            Line</button>
-                                </form>
-                                {{ assign_form.media.js }}
-                            </dd>
-                        </div>
-
-                        <!-- Create New Line Section -->
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Create New Line Section</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                <form class="space-y-4" id="line-form" method="post"
-                                    hx-post="{% url 'corpus:line_form' token.id %}" hx-target="#line-form"
-                                    hx-swap="outerHTML">
-                                    {% csrf_token %}
-                                    <div class="space-y-2">
-                                        {% for field in create_form %}
-                                        <div class="mb-2">
-                                            <label class="block text-sm font-medium text-gray-700">{{ field.label}}</label>
-                                            <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}"
-                                                id="{{ field.id_for_label }}"
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                value="{{ field.value|default_if_none:'' }}">
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    <button type="submit" name="create_line"
-                                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Create
-                                        Line</button>
-                                </form>
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
-                <!-- Button to close the modal -->
-                <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                    <button type="button" class="mt-3 px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-                        onclick="closeLineModal()">Close</button>
-                </div>
-            </div>
-        </div>
+                <button type="submit" name="create_line" class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-700">Create Line</button>
+              </form>
+            </dd>
+          </div>
+        </dl>
+      </div>
     </div>
-
-    {% endblock %}
+    <div class="flex flex-row gap-2 p-2">
+      <button type="button" class="px-4 py-2 text-white rounded bg-error-graded-600 hover:bg-error-graded-800" onclick="closeLineModal()">{% trans 'Close' %}</button>
+      <button onclick="toggleTransparency()" class="flex flex-row px-4 py-2 text-white rounded bg-off hover:bg-off-dark">
+        <svg class="w-6 h-6 text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" /> <path d="M16 8v-4h-12v12.01h4" stroke-dasharray=".001 4" /> <rect x="8" y="8" width="12" height="12" rx="2" />
+        </svg>
+        <span>{% trans 'Toggle Transparency' %}</span>
+      </button>
+    </div>
+  </div>
+{% endblock %}

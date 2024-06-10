@@ -183,14 +183,15 @@
                 </td>
     
                 <!-- Line -->
-                <td class="p-2 border">
-                  <!-- Display 'line' type sections -->
-                  {% for section_token in token.line_sections %}
-                  {{ section_token.section.number }}
-                  <!-- Display the title or other fields -->
-                  {% empty %}
-                    None
-                  {% endfor %}
+                <td id="line-cell-{{ token.id }}" class="p-2 border cursor-pointer hover:bg-action hover:text-white" hx-get="{% url 'corpus:line_form' token.id %}"
+                  hx-target="#mainModalContent" hx-trigger="click">
+                  <span id="line-content-{{ token.id }}">
+                    {% for line_section in token.line_sections %}
+                      {{ line_section.identifier }}
+                    {% empty %}
+                      None
+                    {% endfor %}
+                  </span>
                 </td>
     
                 <!-- Transcription -->
@@ -373,6 +374,11 @@
     
     function closeSentenceSensesModal() {
       console.log('Closing Sentence Senses Modal')
+      document.getElementById('mainModal').classList.add('hidden')
+    }
+
+    function closeLineModal() {
+      console.log('Closing Line Modal')
       document.getElementById('mainModal').classList.add('hidden')
     }
     
