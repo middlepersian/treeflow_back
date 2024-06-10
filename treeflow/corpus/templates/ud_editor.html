@@ -69,6 +69,13 @@
     <input type="hidden" name="section_id" value="{{section.id}}" />
     </form>
 
+
+    <!-- Root Toggle -->
+    <form class "mx-2" id="saveNewRoot" action="../setNewRoot/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="section_id" value="{{section.id}}" />
+    </form>
+
     <form
       class="mx-2"
       id="updateDep"
