@@ -333,7 +333,9 @@
 
       </div>
       <!-- Right Column for Image -->
-        <div class="w-4/12 m-2" id="iiif-viewer"></div>
+        <div class="w-4/12 m-2" id="iiif-viewer">
+          {% include 'components/OpenSeaDragon.html' with sources=manuscripts manuscript_image=manuscript_image %}
+        </div>
 
       <!-- Modals -->
       <div class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50" id="mainModal">
