@@ -125,7 +125,7 @@
             <td class="p-2 border">
               <!-- Display 'line' type sections -->
               {% for section_token in token.line_sections %}
-              {{ section_token.section.number }}
+              {{ section_token.section.identifier }}
               <!-- Display the title or other fields -->
               {% empty %}
               {% trans 'No line sections' %}

@@ -4,6 +4,11 @@ from .models import \
     Feature, Dependency,\
     Token, BibEntry, Comment, Section, SectionToken, POS, Source
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'section', 'created_at', 'modified_at')
+    list_filter = ('section', 'user')
+    search_fields = ('id',)  # Search only by ID
+    ordering = ('-created_at',)
 class TokenAdmin(admin.ModelAdmin):
     list_display = ["transcription", "transliteration", "text",  "created_at", "created_by", "modified_at", "modified_by"]
     search_fields = ['transcription']
@@ -37,7 +42,7 @@ admin.site.register(Text, TextAdmin)
 admin.site.register(Token, TokenAdmin)
 admin.site.register(Feature)
 admin.site.register(Dependency,DependencyAdmin)
-admin.site.register(Comment)
+admin.site.register(Comment, CommentAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(SectionToken)
 admin.site.register(POS)

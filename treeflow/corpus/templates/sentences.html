@@ -63,31 +63,35 @@
             <tbody>
               {% for sentence in page_obj %}
             <!-- Sentence Header Row -->
-            <tr  class="bg-blue-100 sentence-header-row">
-              <td  id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.identifier }}">{% trans 'Identifier' %}: {{ sentence.identifier }}</span></td>
+            <tr class="bg-blue-100 sentence-header-row">
+              <td id="sentence-identifier-cell" colspan="15" class="px-4 py-2"><span
+                  id="sentence-{{ sentence.identifier }}">{% trans 'Identifier' %}: {{ sentence.identifier }}</span>
+              </td>
             </tr>
             <tr class="bg-blue-100 sentence-header-row">
-              <td  id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID: {{ sentence.id }}</span></td>
+              <td id="sentence-id-cell" colspan="15" class="px-4 py-2"><span id="sentence-{{ sentence.id }}">ID:
+                  {{sentence.id }}</span></td>
             </tr>
-            <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"hx-target="#sentenceSensesModalContent"  hx-trigger="click">
+            <tr class="bg-blue-100 sentence-header-row" hx-get="{% url 'corpus:section' sentence.id %}"
+              hx-target="#sentenceSensesModalContent" hx-trigger="click">
               <td id="sentence-senses-cell" colspan="15" class="px-4 py-2">
                 <span id="sentence-senses-{{sentence.id}}">
-                <ul> {% trans 'Translations' %}:
-                  {% for sense in sentence.senses.all %}
-                  <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
-                  {% endfor %}
-                </ul>
+                  <ul> {% trans 'Translations' %}:
+                    {% for sense in sentence.senses.all %}
+                    <li>{{sense.language}} - <span class="font-semibold">{{sense.sense}} </span></li>
+                    {% endfor %}
+                  </ul>
                 </span>
               </td>
             </tr>
-    
+
             <!-- UD -->
             <tr class="bg-blue-100 sentence-header-row">
-              <td  id="sentence-ud-cell" colspan="15" class="px-4 py-2 font-bold text-blue-500 hover:text-blue-700">
-               <a href="{% url 'corpus:ud_editor' sentence.id %}">{% trans 'Edit Universal Dependencies' %}
+              <td id="sentence-ud-cell" colspan="15" class="px-4 py-2 font-bold text-blue-500 hover:text-blue-700">
+                <a href="{% url 'corpus:ud_editor' sentence.id %}">{% trans 'Edit Universal Dependencies' %}
               </td>
-            </td>
-    
+              </td>
+
             </tr>
     
               {% for token in sentence.tokens_list %}
@@ -185,7 +189,7 @@
                   {{ section_token.section.number }}
                   <!-- Display the title or other fields -->
                   {% empty %}
-                  {% trans 'No line sections' %}
+                    None
                   {% endfor %}
                 </td>
     
@@ -339,7 +343,8 @@
     <!-- close main div -->
   </div>
 
-  <script src="{% static 'corpus/prev_next_navigator.js' %}"></script>
+  <!-- close main div -->
+</div>
 
   <script>
     function toggleTransparency(){
