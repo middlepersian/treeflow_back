@@ -14,7 +14,7 @@ from treeflow.corpus.views.sections import sections_view
 from treeflow.corpus.views.get_sections import get_sections_by_type, get_tokens_for_section, get_section_data
 from treeflow.corpus.views.get_images import get_images_view
 from treeflow.corpus.views.create_section import create_section_view
-from treeflow.corpus.views.section_editor import section_editor_form_view
+from treeflow.corpus.views.section_editor import section_editor_form_view, section_merge, renumber_sections
 from treeflow.corpus.views.save_section import save_section_view
 from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal_create import load_section_modal_create
@@ -95,6 +95,8 @@ urlpatterns = [
     path('status/text/<uuid:text_id>',resolve_state,name='conll_state'),
     path('openseadragon/imageSelect/', imageSelector, name='imageSelector'),
     path('openseadragon/viewer/', openseadragon, name='imageViewer'),
+    path('sections/merge/<uuid:section_id>', section_merge, name='section_merge'),
+    path('sections/renumber/', renumber_sections, name='renumber_sections'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_after/$', insert_after_token_view, name='insert_after_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/insert_before/$', insert_before_token_view, name='insert_before_token'),
     re_path(r'^tokens/(?P<token_id>[0-9a-f-]+)/delete/$', delete_token_view, name='delete_token'),

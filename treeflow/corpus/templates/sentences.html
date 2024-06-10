@@ -271,6 +271,10 @@
               </td>
             </tr>
             {% endfor %}
+            <tr><td class="bg-action">
+
+              <button hx-get="{% url 'corpus:section_merge' sentence.id %}">Merge Sentences</button></tr>
+            </td>
             {% endfor %}
           </tbody>
         </table>
