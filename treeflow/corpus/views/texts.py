@@ -3,6 +3,9 @@ from django.shortcuts import render
 from treeflow.corpus.forms.text_form import TextForm
 from treeflow.datafeed.cache import cache_all_texts 
 import logging
+from django.urls import reverse
+from django.middleware.csrf import get_token
+from treeflow.corpus.forms.text_genre_form import TextGenreForm
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,16 @@ def texts_view(request):
     logger.debug("request method: %s", request.method)
 
     form = TextForm()
+    csrf_token = get_token(request)
 
-    context = {'texts': texts, 'form': form}
+    text_forms = []
+    for text in texts:
+        genre_form = TextGenreForm(
+            initial={'label': text.label if text.label is not None else 'None'},
+            hx_post_url=reverse('corpus:update_text', kwargs={'text_id' : text.id}),
+            csrf_token=csrf_token,
+        )
+        text_forms.append((text, genre_form))
+
+    context = {'text_forms': text_forms, 'form': form}
     return render(request, 'texts.html', context)
