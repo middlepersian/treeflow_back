@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load i18n %}
 {% block content %}
   <div class="container mx-auto">
     <!-- Load jQuery -->
@@ -7,7 +7,8 @@
     <!-- Load Select2 JS (Make sure to use the correct version and path) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
-    <div id="lineModal" class="p-2 overflow-hidden bg-white rounded shadow">
+    <!-- It is mandatory for this div to have “fixed inset-0” in its classes (I don't know why, but without the htmx breaks) -->
+    <div id="lineModal" class="fixed inset-0 p-2 m-auto overflow-hidden bg-white rounded shadow h-fit w-fit">
       <div class="px-4 py-5 sm:px-6">
         <h2 class="m-0 text-lg font-semibold text-gray-800">Line Sections for: {{ token.transcription }}</h2>
       </div>
@@ -55,15 +56,15 @@
           </div>
         </dl>
       </div>
-    </div>
-    <div class="flex flex-row gap-2 p-2">
-      <button type="button" class="px-4 py-2 text-white rounded bg-error-graded-600 hover:bg-error-graded-800" onclick="closeLineModal()">{% trans 'Close' %}</button>
-      <button onclick="toggleTransparency()" class="flex flex-row px-4 py-2 text-white rounded bg-off hover:bg-off-dark">
-        <svg class="w-6 h-6 text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" /> <path d="M16 8v-4h-12v12.01h4" stroke-dasharray=".001 4" /> <rect x="8" y="8" width="12" height="12" rx="2" />
-        </svg>
-        <span>{% trans 'Toggle Transparency' %}</span>
-      </button>
+      <div class="flex flex-row gap-2 pt-2">
+        <button type="button" class="px-4 py-2 text-white rounded bg-error-graded-600 hover:bg-error-graded-800" onclick="closeLineModal()">{% trans 'Close' %}</button>
+        <button onclick="toggleTransparency()" class="flex flex-row px-4 py-2 text-white rounded bg-off hover:bg-off-dark">
+          <svg class="w-6 h-6 text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" /> <path d="M16 8v-4h-12v12.01h4" stroke-dasharray=".001 4" /> <rect x="8" y="8" width="12" height="12" rx="2" />
+          </svg>
+          <span>{% trans 'Toggle Transparency' %}</span>
+        </button>
+      </div>
     </div>
   </div>
 {% endblock %}
