@@ -34,7 +34,7 @@ def sentence_view(request, sentence_id):
     # get the first token of the sentence
     first_token = sentence.tokens.first()
     # get the image of the first token
-    if first_token.image:
+    if first_token and first_token.image:
         first_token_image = first_token.image
     else:
         first_token_image = None
