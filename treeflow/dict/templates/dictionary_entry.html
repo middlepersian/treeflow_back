@@ -1,0 +1,35 @@
+{% extends 'base.html' %} {% load static i18n %} {% block content %}
+<div class="flex flex-col overflow-auto">
+<h1>{{lemma.word}}</h1>
+<table class="border-collapse border border-main">
+  <thead>
+    <tr>
+      <th class="border border-main">sense</th>
+      <th class="border border-main">attestations</th>
+    </tr>
+  </thead>
+  <tbody class="">
+
+      {% for sense in lemma.related_senses.all %}
+      <tr>
+          <td class="border border-main p-4">{{sense.sense}}</td>
+          <td class="border border-main p-4">
+                <div class="flex flex-wrap gap-1 items-center">
+
+                    {%for token in sense.token_senses.all%} 
+                    {% if lemma in token.lemmas.all %}
+                    {% for section in token.section_tokens.all %} 
+                    {% if section.type == "sentence" %} 
+                    <div class="p-1 "><input class="mr-1" type="checkbox"><span class="text-inherit cursor-pointer hover:text-off-graded-600">{{section.identifier}}</span></div> 
+                    {%endif%}
+                    {%endfor%}
+                    {%endif%}
+                    {%endfor%}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

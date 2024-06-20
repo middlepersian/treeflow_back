@@ -38,18 +38,26 @@ def section_merge(request,section_id=None):
     section_source = get_object_or_404(Section,id=section_id)
     if section_source.type != "sentence":
         return JsonResponse({'status': 'error', 'message': 'Section is not of type sentence'})
-    if not section_source.next:
+    section_target = Section.objects.filter(previous=section_source.id).first()
+    if not section_target:
         return JsonResponse({'status': 'error', 'message': 'Section has no next section'})
 
-    section_target = section_source.next
+    # section_target = section_source.next
     if section_target.type != "sentence":
         return JsonResponse({'status': 'error', 'message': 'Next section is not of type sentence'})
     
     logger.debug("source: %s" % section_source, "target: %s" % section_target)
 
-    # targets next is now sources next
-    new_next = section_target.next
-    section_source.next = new_next
+    # if source has a previous section, set it as previous for target
+    section_target_next = Section.objects.filter(previous=section_target.id).first()
+    if section_target_next:
+        section_target_next.previous = section_source
+        section_target_next.save()
+    # # targets next is now sources next
+    # if section_target.next:
+    #     new_next = section_target.next
+    #     section_source.next = new_next
+    
 
     # get highest token number in source        
     last_token_source_number = 0.0
@@ -67,21 +75,20 @@ def section_merge(request,section_id=None):
     
     # save changes
     section_source.save()
-    section_target.save()
+    section_target.delete()
+
 
     return JsonResponse({'status': 'success', 'message': 'Sections merged successfully'})
 
 
-def renumber_sections(request):
+def renumber_sections(request,text_id=None):
     """
         Renumbers all sections in a text based on their order, to close gaps in numbering, only for authenticated users
     """
     logger.debug("renumber_sections")
     if not request.user.is_authenticated:
         return JsonResponse({'status': 'error', 'message': 'User not authenticated'})
-    try:
-        text_id = request.POST.get('text_id')
-    except:
+    if not text_id:
         return JsonResponse({'status': 'error', 'message': 'Text ID not provided'})
     
     _renumber_sections(text_id)
@@ -89,10 +96,11 @@ def renumber_sections(request):
 
 @db_task()
 def _renumber_sections(text_id):
-    sections = Section.objects.filter(text_id=text_id, type="sentence").order_by('order')
+    sections = Section.objects.filter(text_id=text_id, type="sentence").order_by('number')
     logger.debug("sections: %s" % sections)
     i = 1.0
     for section in sections:
         section.number = i
+        section.identifier = "_".join(section.identifier.split("_")[:-1]+[str(i)])
         section.save()
         i += 1.0
