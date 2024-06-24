@@ -1,56 +1,46 @@
 {% load static i18n %}
 
 <!-- pos_feature_form.html -->
-<div class="fixed inset-0 z-10 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+<div class="container mx-auto overflow-auto">
+  <div class="inline-block w-full p-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+    <form id="pos-feature-form" method="post" hx-post="{% url 'corpus:pos_feature_form' token_id=token.id %}" hx-trigger="submit" hx-swap="none" class="flex flex-row w-full p-4">
+      {% csrf_token %}
+      <div class="w-full">
+        <label class="block mb-2 text-sm font-bold text-gray-700" for="pos">Part of Speech:</label>
+        <div class="grid grid-cols-2">
+          <div class="p-2 bg-gray-100">
+            {{ pos_formset.management_form }}
+            {% for form in pos_formset %}
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                {{ form.id }}
+                {{ form.pos.label_tag }} {{ form.pos }}
+                {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
+              </div>
+            {% endfor %}
+          </div>
+          <div id="features-container" class="contents">
+            {{ feature_formset.management_form }}
+            {% for form in feature_formset %}
+              <div class="grid grid-cols-2 gap-4 p-2 mb-4">
+                {{ form.id }}
+                {{ form.feature.label_tag }} {{ form.feature }}
+                {{ form.feature_value.label_tag }} {{ form.feature_value }}
+                {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
+              </div>
+            {% endfor %}
+          </div>
         </div>
-        <!-- This element is to trick the browser into centering the modal contents. -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block p-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-            role="dialog" aria-modal="true" aria-labelledby="modal-headline">
-            <form id="pos-feature-form" method="post" hx-post="{% url 'corpus:pos_feature_form' token_id=token.id %}"
-                hx-trigger="submit" hx-swap="none" class="p-4 mt-4">
-                {% csrf_token %} <!-- Include the CSRF token right inside the form tag -->
-                <div class="mb-4">
-                    <label class="block mb-2 text-sm font-bold text-gray-700" for="pos">
-                        Part of Speech:
-                    </label>
-                    <div class="p-2 bg-gray-100">
-                        {{ pos_formset.management_form }}
-                        {% for form in pos_formset %}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            {{ form.id }}
-                            {{ form.pos.label_tag }} {{ form.pos }}
-                            {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div id="features-container">
-                        {{ feature_formset.management_form }}
-                        {% for form in feature_formset %}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            {{ form.id }}
-                            {{ form.feature.label_tag }} {{ form.feature }}
-                            {{ form.feature_value.label_tag }} {{ form.feature_value }}
-                            {{ form.DELETE.label_tag }} {{ form.DELETE }} <!-- Render the delete checkbox -->
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <button type="button"
-                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-error-graded-600 hover:bg-error-graded-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
-                            onclick="closeFeatureModal()">
-                            {% trans 'Cancel' %}
-                        </button>
-                        <button type="submit"
-                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white border border-transparent rounded-md shadow-sm bg-main hover:bg-main-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
-                            {% trans 'Save' %}
-                        </button>
-
-                    </div>
-            </form>
-        </div>
+      </div>
+    </form>
+    <div class="flex flex-row items-center gap-2">
+      <button type="submit" class="px-4 py-2 text-base font-medium text-white rounded-md bg-main hover:bg-main-dark">{% trans 'Save' %}</button>
+      <button type="button" class="px-4 py-2 text-base font-medium text-white rounded-md bg-error-graded-600 hover:bg-error-graded-800" onclick="closeFeatureModal()">{% trans 'Cancel' %}</button>
+      <button onclick="toggleTransparency()" class="flex flex-row px-4 py-2 text-base font-medium text-white rounded bg-off hover:bg-off-dark">
+        <svg class="w-6 h-6 text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" /> <path d="M16 8v-4h-12v12.01h4" stroke-dasharray=".001 4" /> <rect x="8" y="8" width="12" height="12" rx="2" />
+        </svg>
+        <span>{% trans 'Toggle Transparency' %}</span>
+      </button>
     </div>
+  </div>
 </div>
