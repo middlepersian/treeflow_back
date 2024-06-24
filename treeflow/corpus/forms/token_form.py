@@ -7,7 +7,7 @@ class TokenForm(forms.ModelForm):
 
     class Meta:
         model = Token
-        fields = ['transcription', 'transliteration', 'lemmas', 'senses']
+        fields = ['transcription', 'transliteration', 'language', 'lemmas', 'senses', 'gloss']
         widgets = {
             'lemmas': LemmaWidget,  # Assign LemmaWidget to 'lemmas' field
             'senses': SenseWidget,  # Assign SenseWidget to 'senses' field
@@ -22,4 +22,7 @@ class TokenForm(forms.ModelForm):
         })
         self.fields['transliteration'].widget.attrs.update({
             'style': 'max-height: 200px; resize: vertical; width: 100%; border-radius: 5px;',
+        })
+        self.fields['gloss'].widget.attrs.update({
+            'style': 'max-height: 150px; resize: none; width: 100%; border-radius: 5px;',
         })
