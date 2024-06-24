@@ -1,277 +1,206 @@
-{% extends 'base.html' %} 
-{% load static i18n %} 
+{% extends 'base.html' %}
+{% load static i18n %}
 {% block content %}
-
-
-<div class="flex flex-col w-full h-screen">
-
-
-  <!-- Header or top space (adjust the height accordingly) -->
-  <div class="h-25"> <!-- This is a placeholder for the header, adjust the class as needed -->
-    <!-- Your header content goes here -->
-  </div>
-
-  <!-- Flex container for the split view -->
-  <div class="flex flex-grow overflow-hidden">
-    
-  <!-- Left Column for the Table -->
-  <div class="w-1/2 overflow-auto">
+  <div class="flex flex-col w-full h-screen overflow-hidden">
+    <!-- Flex container for the split view -->
+    <div class="flex w-full h-full">
+      <!-- Left Column for the Table -->
+       <div class="flex flex-col w-1/2">
+         <!-- Pagination controls -->
+         <div class="flex justify-center w-full pt-1 bg-main-dark">
+           {% include 'source_pagination_alt.html' with page_obj=manuscripts %}
+          </div>
           {% if manuscripts %}
-  <table class="min-w-full mt-6 bg-white">
-    <thead>
-      <tr>
-        <th class="p-2 border">{% trans 'Identifier' %}</th>
-        <th class="p-2 border">{% trans 'View' %}</th>
-        <th class="p-2 border">{% trans 'Page' %}</th>
-        <th class="p-2 border">{% trans 'Related Sources' %}</th>
-        <th class="p-2 border">{% trans 'Number' %}</th>
-        <!-- <th class="p-2 border">Edit</th> -->
-        {% if request.user.is_authenticated %}
-      <th class="p-2 border">{% trans 'Delete' %}</th> 
-      {%endif%}
-      </tr>
-    </thead>
-    <tbody>
-      {% if request.user.is_authenticated %}
-      <tr><td colspan="6" class="p-1">
-        <a href="{% url 'images:create_image' %}"
-        class="flex w-full p-2 font-bold text-white rounded bg-main hover:bg-main-dark"
-        >{% trans 'Add New' %}</button>
-      </td></tr>
-      {% endif %}
-      {% if request.user.is_authenticated %} 
-      {% for manuscript in manuscripts %}
-      <tr id="{{manuscript.identifier}}">
-        <td class="p-2 border">
-          <input
-            type="text"
-            name="identifier"
-            value="{{ manuscript.identifier }}"
-            hx-post="{% url 'images:edit_image' manuscript.id %}"
-            hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ manuscript.id }}"
-            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow"
-          />
-        </td>
-        <td class="border">
-          <button
-            class="flex items-center justify-center w-full h-full mx-auto"
-            onclick="test('{{manuscript | safe}}')"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              data-identifier="{{manuscript.identifier}}"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              class="w-5 h-5 cursor-pointer hover:fill-off"
-              onclick="(e)=>test(e)"
-            >
-              <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-              <path
-                fill-rule="evenodd"
-                d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-        </td>
-        <td class="p-2 border">
-          <input
-            type="text"
-            name="page"
-            value="{{ manuscript.page }}"
-            hx-post="{% url 'images:edit_image' manuscript.id %}"
-            hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ manuscript.id }}"
-            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow"
-          />
-        </td>
-        <td class="border">
-          <div id="">{{ manuscript.source }}</div><a href="{% url 'images:change_source_for_image' image_id=manuscript.id %}" class="p-1 m-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">
-            {% trans 'Change' %}
-          </button>
-        </td>
-        <td class="p-2 border">
-          <input
-            type="text"
-            name="number"
-            value="{{ manuscript.number }}"
-            hx-post="{% url 'images:edit_image' manuscript.id %}"
-            hx-trigger="keyup changed delay:500ms"
-            hx-indicator="#loadingIndicator{{ manuscript.id }}"
-            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            class="px-3 py-2 text-gray-700 border rounded shadow"
-          />
-        </td>
-        <td
-          
-          class="p-2 border"
-        ><button hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="{% url 'images:delete_image' image_id=manuscript.id %}" hx-trigger="" class="p-2 text-white rounded bg-error-graded-600 hover:bg-error-graded-800">
-          {% trans 'Delete' %}
-        </button>
-        </td>
-      </tr>
-      {% endfor %} 
-      <!--  if logged in-->
-      {% else %} 
-      {% for manuscript in manuscripts %}
+          <div class="overflow-x-auto overflow-y-auto scrollbar-thin">
+          <table class="relative min-w-full bg-white">
+            <thead class="sticky top-0 text-white">
+              <tr class="bg-main-dark">
+                <th class="px-1 py-2 font-medium tracking-wider w-min">
+                  {% trans 'Identifier' %}
+                </th>
+                <th class="px-1 py-2 font-medium tracking-wider w-min">
+                  {% trans 'View' %}
+                </th>
+                <th class="px-1 py-2 font-medium tracking-wider w-min">
+                  {% trans 'Page' %}
+                </th>
+                <th class="px-1 py-2 font-medium tracking-wider w-min">
+                  {% trans 'Related Sources' %}
+                </th>
+                <th class="px-1 py-2 font-medium tracking-wider w-min">
+                  {% trans 'Number' %}
+                </th>
+                <!-- <th class="px-1 py-2 font-medium tracking-wider w-min">Edit</th> -->
+                {% if request.user.is_authenticated %}
+                  <th class="px-1 py-2 font-medium tracking-wider w-min">
+                    {% trans 'Delete' %}
+                  </th>
+                {% endif %}
+              </tr>
+              {% if request.user.is_authenticated %}
+                <tr class="bg-white shadow-sm shadow-black">
+                  <td class="w-full p-1" colspan="100%">
+                    <a href="{% url 'images:create_image' %}" class="flex w-full p-2 font-bold text-white rounded bg-main hover:bg-main-dark">{% trans 'Add New' %}</a>
+                  </td>
+                </tr>
+              {% endif %}
+            </thead>
+            <tbody>
+              {% if request.user.is_authenticated %}
+                {% for manuscript in manuscripts %}
+                  <tr id="{{ manuscript.identifier }}">
+                    <td class="p-2 border">
+                      <input type="text" name="identifier" value="{{ manuscript.identifier }}" hx-post="{% url 'images:edit_image' manuscript.id %}" hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ manuscript.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="px-3 py-2 text-gray-700 border rounded shadow" />
+                    </td>
+                    <td class="border">
+                      <button class="flex items-center justify-center w-full h-full mx-auto" onclick="test('{{ manuscript|safe }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" data-identifier="{{ manuscript.identifier }}" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 cursor-pointer hover:fill-off" onclick="(e)=>test(e)">
+                          <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                          <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </td>
+                    <td class="p-2 border">
+                      <input type="text" name="page" value="{{ manuscript.page }}" hx-post="{% url 'images:edit_image' manuscript.id %}" hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ manuscript.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="px-3 py-2 text-gray-700 border rounded shadow" />
+                    </td>
+                    <td class="border">
+                      <div class="text-center">{{ manuscript.source }}</div><a href="{% url 'images:change_source_for_image' image_id=manuscript.id %}" class="p-1 m-2 text-white rounded cursor-pointer bg-main hover:bg-main-dark">{% trans 'Change' %}</a>
+                    </td>
+                    <td class="p-2 border">
+                      <input type="text" name="number" value="{{ manuscript.number }}" hx-post="{% url 'images:edit_image' manuscript.id %}" hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ manuscript.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="px-3 py-2 text-gray-700 border rounded shadow" />
+                    </td>
+                    <td class="p-2 border">
+                      <button hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="{% url 'images:delete_image' image_id=manuscript.id %}" hx-trigger="" class="p-1 text-white rounded bg-error-graded-600 hover:bg-error-graded-800">{% trans 'Delete' %}</button>
+                    </td>
+                  </tr>
+                {% endfor %}
+                <!-- if logged in -->
+              {% else %}
+                {% for manuscript in manuscripts %}
+                  <tr id="{{ manuscript.identifier }}">
+                    <td class="p-2 border">{{ manuscript.identifier }}</td>
+                    <td class="p-2 border">
+                      <button class="flex items-center justify-center w-full h-full mx-auto" onclick="test('{{ manuscript|safe }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" data-identifier="{{ manuscript.identifier }}" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 cursor-pointer hover:fill-off" onclick="(e)=>test(e)">
+                          <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                          <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </td>
+                    <td class="p-2 border">{{ manuscript.page }}</td>
+                    <td class="p-2 border">{{ manuscript.source }}</td>
+                    <td class="p-2 border">{{ manuscript.number }}</td>
+                  </tr>
+                {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>
+            {% trans 'No Manuscripts are available.' %}
+          </p>
+        {% endif %}
+      </div>
+      </div>
 
-      <tr id="{{manuscript.identifier}}">
-        <td class="p-2 border">{{ manuscript.identifier}}</td>
-        <td class="p-2 border">
-        <button
-        class="flex items-center justify-center w-full h-full mx-auto"
-        onclick="test('{{manuscript | safe}}')"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          data-identifier="{{manuscript.identifier}}"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          class="w-5 h-5 cursor-pointer hover:fill-off"
-          onclick="(e)=>test(e)"
-        >
-          <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-          <path
-            fill-rule="evenodd"
-            d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </button>
-        </td>
-        <td class="p-2 border">{{ manuscript.page }}</td>
-        <td class="p-2 border">{{ manuscript.source }}</td>
-        <td class="p-2 border">{{ manuscript.number }}</td>
-       </tr>
-      {% endfor %} {% endif %}
-    </tbody>
-  </table>
-  {% else %}
-  <p>{% trans 'No Manuscripts are available.' %}</p>
-  {% endif %}</div>
-
-    <!-- Image Viewer - Adjust the top value if your header height changes -->
-    <div id="openseadragon1" class="fixed top-0 right-0 flex items-center justify-center w-1/2 h-full"> </div>
-
-
+      <!-- Image Viewer - Adjust the top value if your header height changes -->
+      <div id="openseadragon1" class="fixed top-0 right-0 flex items-center justify-center w-1/2 h-full"></div>
+    </div>
   </div>
-  <!-- Pagination controls -->
-
-  <div class="absolute bottom-0 flex justify-center w-full py-4"> {% include 'source_pagination.html' with page_obj=manuscripts %}</div>
-
-
-</div>
-
-
 
   <!-- JS -->
 
   <script src="{% static 'openseadragon/openseadragon.min.js' %}"></script>
 
   <script type="text/javascript">
-    let viewer;
-    let currentImage = "";
-
+    let viewer
+    let currentImage = ''
+    
     function test(event) {
-      console.log(event);
+      console.log(event)
       old = document.getElementById(currentImage)
-      if (old){
-        old.classList.remove("bg-main")
+      if (old) {
+        old.classList.remove('bg-main')
       }
-      currentImage = event;
-      document.getElementById(currentImage).classList.add("bg-main")
-
-    // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
-    if (!viewer) {
-          viewer = OpenSeadragon({
-            id: "openseadragon1",
-            prefixUrl: "//openseadragon.github.io/openseadragon/images/",
-            tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
-
-            // Options to show the controls
-            showNavigator: true,  // Displays a small navigator window
-            showNavigationControl: true, // Displays the navigation controls
-            navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
-                        // Additional zoom options
-            minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
-            maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
-            visibilityRatio: 1, // Part of the image must stay visible
-            constrainDuringPan: true, // Image constrained during panning
-            zoomPerScroll: 2, // Speed of zoom per mouse scroll (adjust as needed)
-          });
-        } 
-      viewer.open(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`);
-  
-
-
+      currentImage = event
+      document.getElementById(currentImage).classList.add('bg-main')
+    
+      // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
+      if (!viewer) {
+        viewer = OpenSeadragon({
+          id: 'openseadragon1',
+          prefixUrl: '//openseadragon.github.io/openseadragon/images/',
+          tileSources: `https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`,
+    
+          // Options to show the controls
+          showNavigator: true, // Displays a small navigator window
+          showNavigationControl: true, // Displays the navigation controls
+          navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_RIGHT, // Location of navigation controls
+          // Additional zoom options
+          minZoomLevel: 0.1, // Minimum zoom level (adjust as needed)
+          maxZoomLevel: 10, // Maximum zoom level (adjust as needed)
+          visibilityRatio: 1, // Part of the image must stay visible
+          constrainDuringPan: true, // Image constrained during panning
+          zoomPerScroll: 2 // Speed of zoom per mouse scroll (adjust as needed)
+        })
+      }
+      viewer.open(`https://images.cceh.uni-koeln.de/iipsrv?IIIF=/nfs/cceh/projects/images-mpcd/${currentImage}.tif/info.json`)
     }
   </script>
 
-
-<script>
-  document.body.addEventListener("htmx:afterRequest", function (event) {
-    // Function to change the input field color based on the response status
-    function changeInputFieldColor(inputField, isSuccess) {
-      if (inputField) {
-        inputField.style.backgroundColor = isSuccess ? "lightgreen" : "salmon"; // Success: light green; Failure: salmon
-        // Reset the color back to original after a delay
-        setTimeout(function () {
-          inputField.style.backgroundColor = ""; // Reset to original color
-        }, 2000); // Adjust delay as needed
+  <script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+      // Function to change the input field color based on the response status
+      function changeInputFieldColor(inputField, isSuccess) {
+        if (inputField) {
+          inputField.style.backgroundColor = isSuccess ? 'lightgreen' : 'salmon' // Success: light green; Failure: salmon
+          // Reset the color back to original after a delay
+          setTimeout(function () {
+            inputField.style.backgroundColor = '' // Reset to original color
+          }, 2000) // Adjust delay as needed
+        }
+      }
+    
+      // Check if the event target is part of the form interaction
+      if (event.detail.elt.name === 'identifier' || event.detail.elt.name === 'page' || event.detail.elt.name === 'number') {
+        // Parse the response
+        var response = JSON.parse(event.detail.xhr.responseText)
+    
+        // Change the input field color based on the response
+        changeInputFieldColor(event.detail.elt, response.status === 'success')
+      }
+    })
+    
+    function handleFormSuccess(response) {
+      console.log('Form submission success response received')
+      if (response.status === 'success') {
+        closeFeatureModal()
+        document.querySelector('#pos-cell').innerHTML = response.pos_data_html
+        document.querySelector('#features-cell').innerHTML = response.features_data_html
+      } else {
+        closeFeatureModal()
       }
     }
-
-    // Check if the event target is part of the form interaction
-    if (
-      event.detail.elt.name === "identifier" ||
-      event.detail.elt.name === "page" ||
-      event.detail.elt.name === "number"
-    ) {
-      // Parse the response
-      var response = JSON.parse(event.detail.xhr.responseText);
-
-      // Change the input field color based on the response
-      changeInputFieldColor(event.detail.elt, response.status === "success");
+    
+    function closeFeatureModal() {
+      console.log('Closing Feature Modal')
+      document.getElementById('featureModal').classList.add('hidden')
     }
-  });
-
-  function handleFormSuccess(response) {
-    console.log("Form submission success response received");
-    if (response.status === "success") {
-      closeFeatureModal();
-      document.querySelector("#pos-cell").innerHTML = response.pos_data_html;
-      document.querySelector("#features-cell").innerHTML =
-        response.features_data_html;
-    } else {
-      closeFeatureModal();
-    }
-  }
-
-  function closeFeatureModal() {
-    console.log("Closing Feature Modal");
-    document.getElementById("featureModal").classList.add("hidden");
-  }
-
-  document.body.addEventListener("htmx:afterSwap", function (event) {
-    console.log("htmx:afterSwap event triggered");
-    console.log(event.detail);
-
-    // Check if the swap is for loading modal content
-    if (
-      event.detail.target.id === "featureModalContent" &&
-      !event.detail.target.querySelector("[hx-swap-oob]")
-    ) {
-      console.log("Feature Modal Content Loaded");
-      document.getElementById("featureModal").classList.remove("hidden");
-    }
-    // Check if the swap is for the feature form
-    if (event.detail.target.id === "pos-feature-form") {
-      console.log("Feature form submission, closing modal");
-      closeFeatureModal();
-    }
-  });
-</script>
+    
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+      console.log('htmx:afterSwap event triggered')
+      console.log(event.detail)
+    
+      // Check if the swap is for loading modal content
+      if (event.detail.target.id === 'featureModalContent' && !event.detail.target.querySelector('[hx-swap-oob]')) {
+        console.log('Feature Modal Content Loaded')
+        document.getElementById('featureModal').classList.remove('hidden')
+      }
+      // Check if the swap is for the feature form
+      if (event.detail.target.id === 'pos-feature-form') {
+        console.log('Feature form submission, closing modal')
+        closeFeatureModal()
+      }
+    })
+  </script>
 {% endblock %}

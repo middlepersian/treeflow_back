@@ -1,0 +1,52 @@
+<!-- Pagination controls -->
+<div class="flex items-center justify-between">
+  <div class="flex justify-between flex-1 sm:hidden">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+    {% else %}
+      <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Previous</span>
+    {% endif %}
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+    {% else %}
+      <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Next</span>
+    {% endif %}
+  </div>
+
+  <div class="flex-row items-center justify-between flex-1 hidden gap-2 p-1 rounded-md shadow-sm sm:flex shadow-black bg-off-white">
+    <div>
+      <nav class="relative inline-flex rounded-md shadow-sm" aria-label="Pagination">
+        <!-- Previous Page Link with ID -->
+        <!-- First Page Link -->
+        {% if page_obj.has_previous %}
+          <a href="?page=1" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:text-white hover:bg-off rounded-l-md">&lt;&lt;</a>
+          <a id="prevPageLink" href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold leading-5 text-gray-700 bg-white border border-gray-300 select-none hover:text-white hover:bg-off">&lt;</a>
+        {% else %}
+          <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-300 bg-white border border-gray-300 cursor-not-allowed select-none rounded-l-md">&lt;&lt;</span>
+          <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-300 bg-white border border-gray-300 cursor-not-allowed">&lt;</span>
+        {% endif %}
+        <div class="relative flex flex-col items-center px-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 cursor-default">
+          <span>Page</span>
+          <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </div>
+        <!-- Next Page Link with ID -->
+        {% if page_obj.has_next %}
+          <a id="nextPageLink" href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:text-white hover:bg-off">&gt;</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold leading-5 text-gray-500 bg-white border border-gray-300 hover:text-white hover:bg-off rounded-r-md">&gt;&gt;</a>
+        {% else %}
+          <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-300 bg-white border border-gray-300 cursor-not-allowed">&gt;</span>
+          <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-300 bg-white border border-gray-300 cursor-not-allowed select-none rounded-r-md">&gt;&gt;</span>
+        {% endif %}
+      </nav>
+    </div>
+    <div class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md cursor-default">
+      Showing
+      <span class="font-medium">{{ page_obj.start_index }}</span>
+      to
+      <span class="font-medium">{{ page_obj.end_index }}</span>
+      of
+      <span class="font-medium">{{ page_obj.paginator.count }}</span>
+      results
+    </div>
+  </div>
+</div>
