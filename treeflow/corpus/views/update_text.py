@@ -24,7 +24,7 @@ def update_text(request, text_id):
 
         if request.method == 'POST':
             # Handling default fields
-            for field in ['title', 'identifier', 'series', 'label', 'version']:
+            for field in ['title', 'identifier', 'series', 'label', 'stage', 'version']:
                 if field in request.POST:
                     logger.info(f"Updating {field} for text with ID {text_id}")
                     setattr(text, field, request.POST[field])
