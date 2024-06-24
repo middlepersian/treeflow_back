@@ -2,7 +2,9 @@ from enum import StrEnum
 
 
 class TextStage(StrEnum):
-    untouched = "untouched"
-    in_progress = "inprogress"
-    finished = "finished"
-    unset = ""
+    raw = "Raw"
+    preannotated = "Preannotated"
+    prereview = "Pre-Reviewed"
+    inprogress = "In Progress"
+    annotated = "Annotated"
+    reviewed = "Reviewed"

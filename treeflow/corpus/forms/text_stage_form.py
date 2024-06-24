@@ -1,5 +1,7 @@
 from django import forms
-from treeflow.corpus.enums.text_genre import TextGenre
+
+from treeflow.corpus.enums.text_stage import TextStage
+
 
 class HTMXSelectWidget(forms.Select):
     def __init__(self, *args, **kwargs):
@@ -19,9 +21,9 @@ class HTMXSelectWidget(forms.Select):
         })
         return super().render(name, value, attrs, renderer)
 
-class TextGenreForm(forms.Form):
-    label = forms.ChoiceField(
-        choices=[(label.name, label.value) for label in TextGenre],
+class TextStageForm(forms.Form):
+    stage = forms.ChoiceField(
+        choices=[(stage.name, stage.value) for stage in TextStage],
         widget=HTMXSelectWidget(),
     )
 
@@ -29,8 +31,8 @@ class TextGenreForm(forms.Form):
         hx_post_url = kwargs.pop('hx_post_url', '')
         csrf_token = kwargs.pop('csrf_token', '')
         super().__init__(*args, **kwargs)
-        self.fields['label'].widget = HTMXSelectWidget(
+        self.fields['stage'].widget = HTMXSelectWidget(
             hx_post_url=hx_post_url,
             csrf_token=csrf_token,
-            choices=self.fields['label'].choices
+            choices=self.fields['stage'].choices
         )
