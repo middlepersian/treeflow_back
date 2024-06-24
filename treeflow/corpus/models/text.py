@@ -19,7 +19,7 @@ class Text(models.Model):
     # version
     version = models.CharField(max_length=20, null=True, blank=True)
 
-    stage = models.CharField(max_length=10, blank=True)
+    stage = models.CharField(max_length=20, blank=True)
     
     editors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="text_editors")
     collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="text_collaborators")

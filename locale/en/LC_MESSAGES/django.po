@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 12:41+0000\n"
+"POT-Creation-Date: 2024-06-24 12:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,22 +48,32 @@ msgid "Key"
 msgstr ""
 
 #: treeflow/corpus/templates/bibentry_list.html:13
-#: treeflow/corpus/templates/texts.html:23
+#: treeflow/corpus/templates/texts.html:10
 msgid "Title"
 msgstr ""
 
-#: treeflow/corpus/templates/comment_form.html:41
+#: treeflow/corpus/templates/comment_form.html:31
 #: treeflow/corpus/templates/source_create.html:12
 #: treeflow/images/templates/image_form.html:8
 #: treeflow/images/templates/image_source.html:14
 msgid "Submit"
 msgstr ""
 
-#: treeflow/corpus/templates/comment_form.html:44
+#: treeflow/corpus/templates/comment_form.html:32
+#: treeflow/corpus/templates/line_modal.html:60
 #: treeflow/corpus/templates/section_editor_form.html:85
-#: treeflow/corpus/templates/token_lemma_sense.html:111
+#: treeflow/corpus/templates/token_lemma_sense.html:89
 #: treeflow/dict/templates/lemma_form.html:56
 msgid "Close"
+msgstr ""
+
+#: treeflow/corpus/templates/comment_form.html:37
+#: treeflow/corpus/templates/line_modal.html:65
+#: treeflow/corpus/templates/pos_feature_form.html:42
+#: treeflow/corpus/templates/sentences.html:331
+#: treeflow/corpus/templates/token_lemma_sense.html:94
+#: treeflow/corpus/templates/tokens.html:261
+msgid "Toggle Transparency"
 msgstr ""
 
 #: treeflow/corpus/templates/display_tokens.html:5
@@ -78,172 +88,176 @@ msgstr ""
 msgid "No tokens selected."
 msgstr ""
 
-#: treeflow/corpus/templates/pos_feature_form.html:44
+#: treeflow/corpus/templates/pos_feature_form.html:36
 #: treeflow/corpus/templates/section_editor_form.html:40
-#: treeflow/corpus/templates/token_lemma_sense.html:39
+#: treeflow/corpus/templates/token_lemma_sense.html:31
 msgid "Save"
 msgstr ""
 
-#: treeflow/corpus/templates/pos_feature_form.html:49
-#: treeflow/corpus/templates/section_modal.html:32
+#: treeflow/corpus/templates/pos_feature_form.html:37
+#: treeflow/corpus/templates/section_modal_create.html:22
 #: treeflow/corpus/templates/source_delete.html:10
 msgid "Cancel"
 msgstr ""
 
 #: treeflow/corpus/templates/section_editor_form.html:71
-#: treeflow/corpus/templates/sense_form.html:22
-#: treeflow/corpus/templates/token_lemma_sense.html:101
+#: treeflow/corpus/templates/sense_form.html:21
+#: treeflow/corpus/templates/token_lemma_sense.html:81
 #: treeflow/dict/templates/lemma_form.html:49
 msgid "Add Sense"
 msgstr ""
 
-#: treeflow/corpus/templates/section_modal.html:36
+#: treeflow/corpus/templates/section_modal_create.html:26
 msgid "Save Section"
 msgstr ""
 
-#: treeflow/corpus/templates/sections.html:15
+#: treeflow/corpus/templates/sections.html:16
 msgid "Start Token Selection"
 msgstr ""
 
-#: treeflow/corpus/templates/sections.html:21
+#: treeflow/corpus/templates/sections.html:23
 msgid "Select Section Type"
 msgstr ""
 
-#: treeflow/corpus/templates/sections.html:60
+#: treeflow/corpus/templates/sections.html:74
 msgid "No sentence sections found for this text."
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:16
-#: treeflow/corpus/templates/sentences.html:20
 msgid "Number in Text"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:17
-#: treeflow/corpus/templates/sentences.html:23
-#: treeflow/corpus/templates/tokens.html:22
 msgid "Number in Sentence"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:18
-#: treeflow/corpus/templates/sentences.html:26
+#: treeflow/corpus/templates/sentences.html:23
 msgid "Image"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:19
-#: treeflow/corpus/templates/sentences.html:29
-#: treeflow/corpus/templates/tokens.html:24
+#: treeflow/corpus/templates/sentences.html:26
+#: treeflow/corpus/templates/tokens.html:23
 msgid "Line"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:20
-#: treeflow/corpus/templates/sentences.html:32
-#: treeflow/corpus/templates/tokens.html:25
+#: treeflow/corpus/templates/sentences.html:29
+#: treeflow/corpus/templates/tokens.html:24
 msgid "Transcription"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:21
-#: treeflow/corpus/templates/sentences.html:35
-#: treeflow/corpus/templates/tokens.html:26
+#: treeflow/corpus/templates/sentences.html:32
+#: treeflow/corpus/templates/tokens.html:25
 msgid "Transliteration"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:22
-#: treeflow/corpus/templates/sentences.html:38
-#: treeflow/corpus/templates/tokens.html:27
+#: treeflow/corpus/templates/sentences.html:35
+#: treeflow/corpus/templates/tokens.html:26
 msgid "Avestan"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:23
-#: treeflow/corpus/templates/sentences.html:41
-#: treeflow/corpus/templates/tokens.html:28
+#: treeflow/corpus/templates/sentences.html:38
+#: treeflow/corpus/templates/tokens.html:27
 msgid "Lemmas"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:24
-#: treeflow/corpus/templates/sentences.html:44
-#: treeflow/corpus/templates/tokens.html:29
+#: treeflow/corpus/templates/sentences.html:41
+#: treeflow/corpus/templates/tokens.html:28
 msgid "Senses"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:25
-#: treeflow/corpus/templates/sentences.html:47
-#: treeflow/corpus/templates/tokens.html:30
+#: treeflow/corpus/templates/sentences.html:44
+#: treeflow/corpus/templates/tokens.html:29
 msgid "POS"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:26
-#: treeflow/corpus/templates/sentences.html:50
-#: treeflow/corpus/templates/tokens.html:31
+#: treeflow/corpus/templates/sentences.html:47
+#: treeflow/corpus/templates/tokens.html:30
 msgid "Features"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:27
-#: treeflow/corpus/templates/sentences.html:53
-#: treeflow/corpus/templates/tokens.html:32
+#: treeflow/corpus/templates/sentences.html:50
+#: treeflow/corpus/templates/tokens.html:31
 msgid "Comments"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:28
-#: treeflow/corpus/templates/sentences.html:56
-#: treeflow/corpus/templates/tokens.html:33
 msgid "Insert Before"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:29
-#: treeflow/corpus/templates/sentences.html:59
-#: treeflow/corpus/templates/tokens.html:34
 msgid "Insert After"
 msgstr ""
 
 #: treeflow/corpus/templates/sentence.html:30
-#: treeflow/corpus/templates/sentences.html:62
-#: treeflow/corpus/templates/tokens.html:35
 msgid "Delete Token"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:37
-#: treeflow/corpus/templates/sentences.html:70
-#: treeflow/corpus/templates/source_manuscripts.html:23
+#: treeflow/corpus/templates/sentence.html:38
+#: treeflow/corpus/templates/sentences.html:68
+#: treeflow/corpus/templates/source_manuscripts.html:19
 #: treeflow/corpus/templates/source_table.html:10
-#: treeflow/corpus/templates/texts.html:36
-#: treeflow/corpus/templates/ud_editor.html:110
+#: treeflow/corpus/templates/texts.html:104
+#: treeflow/corpus/templates/ud_editor.html:117
 msgid "Identifier"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:45
-#: treeflow/corpus/templates/sentences.html:78
-#: treeflow/corpus/templates/ud_editor.html:124
+#: treeflow/corpus/templates/sentence.html:47
+#: treeflow/corpus/templates/sentences.html:79
+#: treeflow/corpus/templates/ud_editor.html:131
 msgid "Translations"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:57
-#: treeflow/corpus/templates/sentences.html:90
+#: treeflow/corpus/templates/sentence.html:59
+#: treeflow/corpus/templates/sentences.html:91
 msgid "Edit Universal Dependencies"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:95
-#: treeflow/corpus/templates/sentences.html:128
-#: treeflow/corpus/templates/tokens.html:68
+#: treeflow/corpus/templates/sentence.html:94
+#: treeflow/corpus/templates/tokens.html:131
 msgid "No line sections"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:212
-#: treeflow/corpus/templates/sentence.html:225
-#: treeflow/corpus/templates/sentences.html:249
-#: treeflow/corpus/templates/sentences.html:266
-#: treeflow/corpus/templates/tokens.html:182
-#: treeflow/corpus/templates/tokens.html:197
+#: treeflow/corpus/templates/sentence.html:195
+#: treeflow/corpus/templates/sentence.html:207
 msgid "Insert"
 msgstr ""
 
-#: treeflow/corpus/templates/sentence.html:239
-#: treeflow/corpus/templates/sentences.html:283
-#: treeflow/corpus/templates/source_manuscripts.html:30
-#: treeflow/corpus/templates/source_manuscripts.html:112
+#: treeflow/corpus/templates/sentence.html:219
+#: treeflow/corpus/templates/source_manuscripts.html:36
+#: treeflow/corpus/templates/source_manuscripts.html:73
 #: treeflow/corpus/templates/source_table.html:19
 #: treeflow/corpus/templates/source_table.html:55
-#: treeflow/corpus/templates/tokens.html:213
 msgid "Delete"
+msgstr ""
+
+#: treeflow/corpus/templates/sentences.html:20
+#: treeflow/corpus/templates/tokens.html:21
+msgid "Controls"
+msgstr ""
+
+#: treeflow/corpus/templates/sentences.html:53
+#: treeflow/corpus/templates/texts.html:96
+#: treeflow/corpus/templates/tokens.html:32
+msgid "Metadata"
+msgstr ""
+
+#: treeflow/corpus/templates/sentences.html:56
+msgid "No. in Text"
+msgstr ""
+
+#: treeflow/corpus/templates/sentences.html:59
+#: treeflow/corpus/templates/tokens.html:34
+msgid "No. in Sentence"
 msgstr ""
 
 #: treeflow/corpus/templates/source_delete.html:8
@@ -251,7 +265,6 @@ msgid "Are you sure you want to delete this item?"
 msgstr ""
 
 #: treeflow/corpus/templates/source_list.html:4
-#: treeflow/corpus/templates/texts.html:62
 #: treeflow/templates/components/navbar.html:15
 msgid "Sources"
 msgstr ""
@@ -260,7 +273,7 @@ msgstr ""
 msgid "No sources yet."
 msgstr ""
 
-#: treeflow/corpus/templates/source_manuscripts.html:24
+#: treeflow/corpus/templates/source_manuscripts.html:22
 msgid "View"
 msgstr ""
 
@@ -268,26 +281,25 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
-#: treeflow/corpus/templates/source_manuscripts.html:26
+#: treeflow/corpus/templates/source_manuscripts.html:28
 #: treeflow/corpus/templates/source_table.html:13
 msgid "Related Sources"
 msgstr ""
 
-#: treeflow/corpus/templates/source_manuscripts.html:27
-#: treeflow/corpus/templates/tokens.html:21
+#: treeflow/corpus/templates/source_manuscripts.html:31
 msgid "Number"
 msgstr ""
 
-#: treeflow/corpus/templates/source_manuscripts.html:39
+#: treeflow/corpus/templates/source_manuscripts.html:43
 #: treeflow/corpus/templates/source_table.html:75
 msgid "Add New"
 msgstr ""
 
-#: treeflow/corpus/templates/source_manuscripts.html:93
+#: treeflow/corpus/templates/source_manuscripts.html:67
 msgid "Change"
 msgstr ""
 
-#: treeflow/corpus/templates/source_manuscripts.html:153
+#: treeflow/corpus/templates/source_manuscripts.html:100
 msgid "No Manuscripts are available."
 msgstr ""
 
@@ -343,60 +355,65 @@ msgstr ""
 msgid "Choose a text"
 msgstr ""
 
+#: treeflow/corpus/templates/texts.html:23
+msgid "Siglum"
+msgstr ""
+
+#: treeflow/corpus/templates/texts.html:36
+msgid "Manuscript"
+msgstr ""
+
 #: treeflow/corpus/templates/texts.html:49
-msgid "Sigle"
-msgstr ""
-
-#: treeflow/corpus/templates/texts.html:75
-msgid "Genre"
-msgstr ""
-
-#: treeflow/corpus/templates/texts.html:88
-msgid "Version"
-msgstr ""
-
-#: treeflow/corpus/templates/texts.html:101
-msgid "Stage"
-msgstr ""
-
-#: treeflow/corpus/templates/texts.html:114
-#: treeflow/corpus/templates/ud_editor.html:112
-msgid "Tokens"
-msgstr ""
-
-#: treeflow/corpus/templates/texts.html:127
 msgid "Main Text View"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:130
+#: treeflow/corpus/templates/texts.html:52
 msgid "Sentences View"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:133
+#: treeflow/corpus/templates/texts.html:57
+msgid "Genre"
+msgstr ""
+
+#: treeflow/corpus/templates/texts.html:70
+msgid "Stage"
+msgstr ""
+
+#: treeflow/corpus/templates/texts.html:83
+#: treeflow/corpus/templates/ud_editor.html:119
+msgid "Tokens"
+msgstr ""
+
+#: treeflow/corpus/templates/texts.html:117
+msgid "Version"
+msgstr ""
+
+#: treeflow/corpus/templates/texts.html:130
 msgid "Tokens View"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:136
+#: treeflow/corpus/templates/texts.html:133
 msgid "CONLL"
 msgstr ""
 
-#: treeflow/corpus/templates/texts.html:140
-msgid "Created At"
-msgstr ""
-
-#: treeflow/corpus/templates/token_lemma_sense.html:70
+#: treeflow/corpus/templates/token_lemma_sense.html:56
+#: treeflow/dict/templates/lemma_plain_form.html:19
 msgid "Add Lemma"
 msgstr ""
 
-#: treeflow/corpus/templates/tokens.html:23
+#: treeflow/corpus/templates/tokens.html:22
 msgid "Sentence"
 msgstr ""
 
-#: treeflow/corpus/templates/tokens.html:57
+#: treeflow/corpus/templates/tokens.html:33
+msgid "No."
+msgstr ""
+
+#: treeflow/corpus/templates/tokens.html:120
 msgid "No sentence sections"
 msgstr ""
 
-#: treeflow/corpus/templates/tokens.html:221
+#: treeflow/corpus/templates/tokens.html:250
 msgid "No tokens available for the selected text."
 msgstr ""
 
@@ -408,7 +425,7 @@ msgstr ""
 msgid "Center"
 msgstr ""
 
-#: treeflow/corpus/templates/ud_editor.html:106
+#: treeflow/corpus/templates/ud_editor.html:113
 msgid "Edit Sentence"
 msgstr ""
 
@@ -458,15 +475,15 @@ msgstr ""
 msgid "Expects lemma word, e.g. \"kirdan\""
 msgstr ""
 
-#: treeflow/dict/templates/dictionary.html:77
+#: treeflow/dict/templates/dictionary.html:83
 msgid "Please wait while a lemma is being loaded."
 msgstr ""
 
-#: treeflow/dict/templates/dictionary.html:198
+#: treeflow/dict/templates/dictionary.html:208
 msgid "No lemmas found."
 msgstr ""
 
-#: treeflow/dict/templates/dictionary.html:199
+#: treeflow/dict/templates/dictionary.html:209
 #: treeflow/dict/templates/dictionary_controls.html:56
 msgid "Clear Search"
 msgstr ""
@@ -776,11 +793,11 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: treeflow/templates/base.html:50
+#: treeflow/templates/base.html:52
 msgid "Zoroastrian Middle Persian Digital Corpus and Dictionary (MPCD)"
 msgstr ""
 
-#: treeflow/templates/base.html:52
+#: treeflow/templates/base.html:54
 msgid ""
 "Resulting from its status as the official language of the Sasanian Empire "
 "(3rd–7th centuries CE), the Middle Persian language played a prominent "
@@ -790,7 +807,7 @@ msgid ""
 "it was employed as a literary language by several religious traditions."
 msgstr ""
 
-#: treeflow/templates/base.html:55
+#: treeflow/templates/base.html:57
 msgid ""
 "The Middle Persian corpus consists of Zoroastrian, Manichaean, narrative, "
 "administrative and epigraphic sub-corpora. The Zoroastrian Middle Persian "
@@ -801,7 +818,7 @@ msgid ""
 "dictionary covering that corpus."
 msgstr ""
 
-#: treeflow/templates/base.html:59
+#: treeflow/templates/base.html:61
 msgid ""
 "The corpus consists of roughly 50 texts, containing some 705,000 tokens. As "
 "its point of departure, the project relies on the ca. 20 oldest Pahlavi "
@@ -809,23 +826,23 @@ msgid ""
 "codices will be supplied with several layers of annotation:"
 msgstr ""
 
-#: treeflow/templates/base.html:63
+#: treeflow/templates/base.html:65
 msgid "1. orthographical (transliteration) and phonographical (transcription)"
 msgstr ""
 
-#: treeflow/templates/base.html:66
+#: treeflow/templates/base.html:68
 msgid "2. grammatical (morpho-syntactic)"
 msgstr ""
 
-#: treeflow/templates/base.html:69
+#: treeflow/templates/base.html:71
 msgid "3. semantic (semasiological and onomasiological)"
 msgstr ""
 
-#: treeflow/templates/base.html:72
+#: treeflow/templates/base.html:74
 msgid "4. intertextual (linking Zand texts with their Avestan original)"
 msgstr ""
 
-#: treeflow/templates/base.html:78
+#: treeflow/templates/base.html:80
 #, python-format
 msgid ""
 "Within the overall structure of the project, the corpus and dictionary "
@@ -840,7 +857,7 @@ msgid ""
 "processed at a given point in time.'"
 msgstr ""
 
-#: treeflow/templates/base.html:81
+#: treeflow/templates/base.html:83
 msgid ""
 "The project intends to create a platform that may in the future also be used "
 "for the remaining Middle Persian sub-corpora, as well as for the corpora of "
@@ -850,7 +867,7 @@ msgid ""
 "domains of other Middle Iranian languages."
 msgstr ""
 
-#: treeflow/templates/base.html:84
+#: treeflow/templates/base.html:86
 msgid ""
 "The project is a cooperation between three universities: <a class=\"text-sm "
 "lg:text-sm md:text-xs sm:text-xs text-off hover:text-action\" href=\"/team"
@@ -972,12 +989,12 @@ msgid "Iranian Studies"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:39
-#: treeflow/templates/pages/team.html:248
+#: treeflow/templates/pages/team.html:264
 msgid "Digital Humanities"
 msgstr ""
 
 #: treeflow/templates/components/subbar.html:40
-#: treeflow/templates/pages/team.html:349
+#: treeflow/templates/pages/team.html:365
 msgid "Cooperation Partners"
 msgstr ""
 
