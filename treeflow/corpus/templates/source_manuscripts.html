@@ -120,10 +120,10 @@
       console.log(event)
       old = document.getElementById(currentImage)
       if (old) {
-        old.classList.remove('bg-main')
+        old.classList.remove('bg-action')
       }
       currentImage = event
-      document.getElementById(currentImage).classList.add('bg-main')
+      document.getElementById(currentImage).classList.add('bg-action')
     
       // Only initialize OpenSeadragon once and update the tile source if the viewer already exists
       if (!viewer) {
