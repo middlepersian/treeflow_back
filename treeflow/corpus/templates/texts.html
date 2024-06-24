@@ -20,7 +20,7 @@
           </th>
           <th class="sticky top-0 w-32 px-2 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer group bg-main-dark" onClick="sortTableByType(1, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
-              <span>{% trans 'Sigle' %}</span>
+              <span>{% trans 'Siglum' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" />
                 <line x1="4" y1="6" x2="13" y2="6" />
@@ -33,7 +33,7 @@
           </th>
           <th class="sticky top-0 px-2 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-pointer w-36 group bg-main-dark" onClick="sortTableByType(2, this);">
             <div class="flex flex-row justify-center p-2 rounded-2xl group-hover:bg-white group-hover:text-black">
-              <span>{% trans 'Manuscripts' %}</span>
+              <span>{% trans 'Manuscript' %}</span>
               <svg class="hidden w-4 h-4 font-bold text-black group-hover:block" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" />
                 <line x1="4" y1="6" x2="13" y2="6" />
@@ -154,7 +154,7 @@
                 <a class="block w-full mt-1 text-center text-blue-500" href="{% url 'corpus:sections' text_id=text.id %}">{{ text.title }}</a>
               {% endif %}
             
-            <!-- Sigle -->
+            <!-- Siglum -->
             <td class="p-2">
               {% if request.user.is_authenticated %}
                 <input type="text" name="series"
