@@ -2,9 +2,11 @@
 {% load static i18n %}
 
 {% block content %}
+  <div class="overflow-y-scroll">
     <form method="POST" action="{% url 'images:create_image' %}" enctype="multipart/form-data" class="flex flex-col items-start justify-between max-w-md gap-4 p-4 mx-auto">
-        {% csrf_token %}
+      {% csrf_token %}
       {{ form }}
-      <input type="submit" value={% trans 'Submit' %} class="flex w-full p-2 font-bold text-white rounded bg-main hover:bg-main-graded-600" />
+      <input type="submit" value="{% trans 'Submit' %}" class="flex w-full p-2 font-bold text-white rounded bg-main hover:bg-main-graded-600" />
     </form>
+  </div>
 {% endblock %}

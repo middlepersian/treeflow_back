@@ -2,15 +2,17 @@
 {% load static i18n %}
 
 {% block content %}
+  <div class="overflow-y-scroll">
     <form method="POST" class="flex flex-col gap-4 p-4 mx-auto" action="{% url 'images:change_source_for_image' image_id=image.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="image_id" value="{{ image_id }}">
-        <label for="source">{% trans 'Select a source' %}:</label>
-        <select name="source_id" id="source">
-            {% for source in sources %}
-                <option value="{{ source.id }}">{{ source.identifier }}</option>
-            {% endfor %}
-        </select>
-        <button class="p-2 font-bold text-white rounded cursor-pointer bg-main hover:bg-main-600" type="submit">{% trans 'Submit' %}</button>
+      {% csrf_token %}
+      <input type="hidden" name="image_id" value="{{ image_id }}" />
+      <label for="source">{% trans 'Select a source' %}:</label>
+      <select name="source_id" id="source">
+        {% for source in sources %}
+          <option value="{{ source.id }}">{{ source.identifier }}</option>
+        {% endfor %}
+      </select>
+      <button class="p-2 font-bold text-white rounded cursor-pointer bg-main hover:bg-main-600" type="submit">{% trans 'Submit' %}</button>
     </form>
+  </div>
 {% endblock %}
