@@ -36,7 +36,8 @@ def save_token(request, token_id=None):
                 'transcription_data': render_to_string('transcription_data.html', {'token': token}),
                 'transliteration_data': render_to_string('transliteration_data.html', {'token': token}),
                 'lemma_data': render_to_string('lemma_data.html', {'token': token}),
-                'sense_data': render_to_string('sense_data.html', {'token': token})
+                'sense_data': render_to_string('sense_data.html', {'token': token}),
+                'gloss_data': render_to_string('gloss_data.html', {'token': token})
             }
             return render(request, 'token_lemma_sense_update.html', context)
         else:

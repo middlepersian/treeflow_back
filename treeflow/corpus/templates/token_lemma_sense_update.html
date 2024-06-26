@@ -7,6 +7,10 @@
     {{ transliteration_data|safe }}
 </div>
 
+<div id="gloss-content-{{ token_id }}" hx-swap-oob="true">
+    {{ gloss_data|safe }}
+</div>
+
 <div id="lemma-content-{{ token_id }}" hx-swap-oob="true">
     {{ lemma_data|safe }}
 </div>

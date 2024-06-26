@@ -35,6 +35,9 @@
                   {% trans 'Avestan' %}
                 </th>
                 <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">
+                  {% trans 'Gloss' %}
+                </th>
+                <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">
                   {% trans 'Lemmas' %}
                 </th>
                 <th class="sticky top-0 px-1 py-2 font-medium tracking-wider w-min bg-main-dark">
@@ -203,7 +206,7 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="w-full p-2 border rounded shadow text-grey-darker">
+                    class="w-full p-2 border rounded shadow">
                 </td>
                 <!-- Transliteration -->
                 <td id="transliteration-cell" class="p-2 border">
@@ -214,7 +217,7 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="w-full p-2 border rounded shadow text-grey-darker">
+                    class="w-full p-2 border rounded shadow">
                 </td>
                 
                 <!-- Avestan -->
@@ -226,7 +229,16 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="w-full p-2 border rounded shadow text-grey-darker">
+                    class="w-full p-2 border rounded shadow">
+                </td>
+
+                <!-- Gloss -->
+                <td id="gloss-cell" class="p-2 border cursor-pointer hover:bg-action hover:text-white"
+                  hx-get="{% url 'corpus:token_lemma_sense' token.id %}"
+                  hx-target="#mainModalContent" hx-trigger="click">
+                  <span id="gloss-content-{{ token.id }}">
+                    {{ token.gloss }}
+                  </span>
                 </td>
     
                 <!-- Lemmas -->
@@ -315,7 +327,7 @@
                     hx-trigger="keyup changed delay:500ms"
                     hx-indicator="#loadingIndicator{{ token.id }}"
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    class="w-full px-3 py-2 border rounded shadow text-grey-darker">
+                    class="w-full px-3 py-2 border rounded shadow">
                 </td>
               </tr>
               {% endfor %}

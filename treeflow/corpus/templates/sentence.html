@@ -74,7 +74,7 @@
               <input type="text" name="number_in_sentence" value="{{ token.number_in_sentence }}"
                 hx-post="{% url 'corpus:update_token' token.id %}" hx-trigger="keyup changed delay:500ms"
                 hx-indicator="#loadingIndicator{{ token.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="w-full px-3 py-2 border rounded shadow text-grey-darker">
+                class="w-full px-3 py-2 border rounded shadow">
             </td>
 
 
@@ -101,7 +101,7 @@
                 value="{{ token.transcription }}" hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="px-3 py-2 border rounded shadow text-grey-darker">
+                class="px-3 py-2 border rounded shadow">
             </td>
             <!-- Transliteration -->
             <td id="transliteration-cell" class="px-4 py-2 border">
@@ -109,7 +109,7 @@
                 value="{{ token.transliteration }}" hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="px-3 py-2 border rounded shadow text-grey-darker">
+                class="px-3 py-2 border rounded shadow">
             </td>
 
             <!-- Avestan -->
@@ -118,7 +118,7 @@
                 value="{{ token.avestan|default_if_none:'–' }}" hx-post="{% url 'corpus:update_token' token.id %}"
                 hx-trigger="keyup changed delay:500ms" hx-indicator="#loadingIndicator{{ token.id }}"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                class="px-3 py-2 border rounded shadow text-grey-darker">
+                class="px-3 py-2 border rounded shadow">
             </td>
 
             <!-- Lemmas -->
