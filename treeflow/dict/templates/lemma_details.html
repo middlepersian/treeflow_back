@@ -22,7 +22,7 @@
     <div class="flex flex-row gap-2 mb-1 font-semibold">
       <span class="my-auto underline">{% trans 'Related lemmas' %}</span>
       {% if related_lemmas %}
-        <button class="flex flex-row p-1 text-white rounded-md shadow-sm cursor-pointer bg-off shadow-black hover:bg-main" onclick="searchForRelatives('{{word}}')">
+        <button class="flex flex-row p-1 text-white rounded-md shadow-sm cursor-pointer bg-off shadow-black hover:bg-main" onclick="searchForRelatives('{{ word }}')">
           <svg class="w-6 h-6 text-white rotate-180" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" /> <circle cx="12" cy="18" r="2" /> <circle cx="7" cy="6" r="2" /> <circle cx="17" cy="6" r="2" /> <path d="M7 8v2a2 2 0 0 0 2 2h6a2 2 0 0 0 2 -2v-2" /> <line x1="12" y1="12" x2="12" y2="16" />
           </svg>
@@ -30,24 +30,39 @@
         </button>
       {% endif %}
     </div>
-    <div>
-      {% if related_lemmas %}
-        <div class="flex flex-row flex-wrap w-full gap-2 p-2">
-          {% for related_lemma in related_lemmas %}
-            <div class="p-2 rounded-md bg-slate-300 w-fit hover:underline hover:cursor-pointer" onclick="changeLemma(this)">{{ related_lemma.word }}</div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="p-2">
-          {% trans 'No related lemmas found.' %}
-        </div>
-      {% endif %}
+    <div id="related-lemmas-div" class="grid hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 delay-200 gap-2">
+      <div class="overflow-hidden">
+        {% if related_lemmas %}
+          <div class="flex flex-row flex-wrap w-full gap-2 p-2">
+            {% for related_lemma in related_lemmas %}
+              <div class="p-2 rounded-md bg-slate-300 w-fit hover:underline hover:cursor-pointer" onclick="changeLemma(this)">{{ related_lemma.word }}</div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="p-2">
+            {% trans 'No related lemmas found.' %}
+          </div>
+        {% endif %}
+      </div>
+      <div id="toggle-related-div" class="justify-center hidden w-full bg-gray-400 cursor-pointer hover:bg-gray-600" onclick="toggleRelatedLemmas()">
+        <svg class="w-8 h-8 rotate-180 text-off" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+      </div>
     </div>
     <hr class="w-full mt-5 border-black" />
-    <div class="mb-1 font-semibold underline">
-      {% trans 'Related senses' %}
+    <div class="flex flex-row gap-2 mb-1 font-semibold">
+      <span class="my-auto underline">{% trans 'Senses' %}</span>
+      {% if related_senses and user.is_authenticated %}
+        <button id="attestation-btn" class="flex flex-row p-1 text-white rounded-md shadow-sm cursor-pointer bg-off shadow-black hover:bg-main" hx-get="{% url 'dict:fetch_attestations' id %}" hx-target="#attestation-div" hx-trigger="click" onclick="toggleAttestations()">
+          <svg class="w-6 h-6 text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" /> <line x1="4" y1="20" x2="7" y2="20" /> <line x1="14" y1="20" x2="21" y2="20" /> <line x1="6.9" y1="15" x2="13.8" y2="15" /> <line x1="10.2" y1="6.3" x2="16" y2="20" /> <polyline points="5 20 11 4 13 4 20 20" />
+          </svg>
+          <span>{% trans 'View attestations' %}</span>
+        </button>
+      {% endif %}
     </div>
-    <div>
+    <div id="attestation-div" class="overflow-hidden" onchange="console.log('test')">
       {% if related_senses %}
         <div class="flex flex-row flex-wrap gap-2 p-2">
           {% for related_sense in related_senses %}
@@ -76,15 +91,15 @@
 
 <script>
   function searchForRelatives(lemmaWord) {
-    selectSpecificSearchMode("relatives")
-    
+    selectSpecificSearchMode('relatives')
+  
     document.getElementById('search-input').value = lemmaWord
     document.getElementById('search-button').disabled = false
     document.getElementById('clear-search-button').disabled = false
-
+  
     search(lemmaWord)
   }
-
+  
   function changeLemma(e) {
     const lemmaList = document.querySelector('#lemma-list')
   
@@ -104,4 +119,34 @@
   function closeLemmaModal() {
     document.getElementById('lemmaModal').classList.add('hidden')
   }
+  
+  function toggleRelatedLemmas() {
+    const relatedLemmasDiv = document.getElementById('related-lemmas-div')
+  
+    if (relatedLemmasDiv.classList.contains('grid-rows-[0fr]')) {
+      relatedLemmasDiv.classList.remove('grid-rows-[0fr]')
+      relatedLemmasDiv.classList.add('grid-rows-[1fr]')
+    }
+    //else {
+    //  relatedLemmasDiv.classList.remove('grid-rows-[1fr]')
+    //  relatedLemmasDiv.classList.add('grid-rows-[0fr]')
+    //}
+  }
+  
+  function toggleAttestations() {
+    startLoading('Fetching attestations...')
+  }
+  
+  document.addEventListener('htmx:afterRequest', () => {
+    const relatedLemmasDiv = document.getElementById('related-lemmas-div')
+    relatedLemmasDiv.classList.add('grid-rows-[0fr]')
+  
+    const relatedLemmasToggle = document.getElementById('toggle-related-div')
+    relatedLemmasToggle.classList.remove('hidden')
+    relatedLemmasToggle.classList.add('flex')
+  
+    document.getElementById('attestation-btn').classList.add('hidden')
+  
+    stopLoading()
+  })
 </script>

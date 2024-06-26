@@ -1,35 +1,35 @@
-{% extends 'base.html' %} {% load static i18n %} {% block content %}
-<div class="flex flex-col overflow-auto">
-<h1>{{lemma.word}}</h1>
-<table class="border-collapse border border-main">
-  <thead>
-    <tr>
-      <th class="border border-main">sense</th>
-      <th class="border border-main">attestations</th>
-    </tr>
-  </thead>
-  <tbody class="">
-
-      {% for sense in lemma.related_senses.all %}
-      <tr>
-          <td class="border border-main p-4">{{sense.sense}}</td>
-          <td class="border border-main p-4">
-                <div class="flex flex-wrap gap-1 items-center">
-
-                    {%for token in sense.token_senses.all%} 
-                    {% if lemma in token.lemmas.all %}
-                    {% for section in token.section_tokens.all %} 
-                    {% if section.type == "sentence" %} 
-                    <div class="p-1 "><input class="mr-1" type="checkbox"><span class="text-inherit cursor-pointer hover:text-off-graded-600">{{section.identifier}}</span></div> 
-                    {%endif%}
-                    {%endfor%}
-                    {%endif%}
-                    {%endfor%}
-                </div>
-            </td>
+{% load static i18n %}
+{% block content %}
+  <div class="flex flex-col overflow-auto scrollbar-thin">
+    <table class="border border-collapse border-main">
+      <thead>
+        <tr>
+          <th class="border border-main">Sense</th>
+          <th class="border border-main">Attestations</th>
         </tr>
+      </thead>
+      <tbody class="">
+        {% for sense in lemma.related_senses.all %}
+          <tr>
+            <td class="p-4 pt-1 text-center align-top border border-main">{{ sense.sense }}</td>
+            <td class="p-4 border border-main">
+              <div class="flex flex-wrap items-center gap-1">
+                {% for token in sense.token_senses.all %}
+                  {% if lemma in token.lemmas.all %}
+                    {% for section in token.section_tokens.all %}
+                      {% if section.type == 'sentence' %}
+                        <div class="p-1">
+                          <input class="mr-1 cursor-pointer" type="checkbox" /><span class="cursor-pointer text-inherit hover:text-off-graded-600">{{ section.identifier }}</span>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </td>
+          </tr>
         {% endfor %}
-    </tbody>
-</table>
-</div>
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

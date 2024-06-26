@@ -22,5 +22,5 @@ urlpatterns = [
         path("update_lemma/<uuid:lemma_id>/", update_lemma, name="update_lemma"),
         path("filter_lemmas/", filter_lemmas, name="filter_lemmas"),
         path("fetch_alphabet/", fetch_alphabet, name="fetch_alphabet"),
-        path("fetch_attestations/<uuid:lemma_id>/",edit_lemma_details, name="fetch_attestations")
+        path("fetch_attestations/<uuid:lemma_id>/", edit_lemma_details, name="fetch_attestations")
 ]
