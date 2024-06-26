@@ -38,8 +38,8 @@
                 {% endif %}
               </tr>
               {% if request.user.is_authenticated %}
-                <button class="absolute z-10 p-2 py-1 mt-4 font-bold text-white rounded-r bg-main hover:bg-off group">
-                  <a href="{% url 'images:create_image' %}" class="block w-3 overflow-hidden duration-500 whitespace-nowrap group-hover:w-full transition-[width]">+ {% trans 'Add New' %}</a> 
+                <button class="absolute z-10 mt-4 font-bold text-white rounded-r bg-main hover:bg-off group">
+                  <a href="{% url 'images:create_image' %}" class="block w-4 p-1 overflow-hidden duration-500 whitespace-nowrap group-hover:w-full transition-[width]">+ {% trans 'Add New' %}</a> 
                 </button>
               {% endif %}
             </thead>
