@@ -113,7 +113,7 @@ msgstr "Abschnitt speichern"
 
 #: treeflow/corpus/templates/sections.html:16
 msgid "Start Token Selection"
-msgstr "Tokenauswhal starten"
+msgstr "Tokenauswahl starten"
 
 #: treeflow/corpus/templates/sections.html:23
 msgid "Select Section Type"
