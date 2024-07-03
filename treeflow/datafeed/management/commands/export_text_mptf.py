@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 COL_COUNT = 23
 
-def token_to_conll(token:Token) -> str:
+def token_to_mptf(token:Token) -> str:
     sections = token.section_tokens.all()
     lemmas = token.lemmas.all()
 
@@ -26,6 +26,7 @@ def token_to_conll(token:Token) -> str:
     # folio
     folio = str(token.image.identifier) if token.image else "_"
     line = "|".join([str(line.number) if line.number else "_" for line in sections if line.type == "line"]) or "_"
+    # only first token with newPart, than _ until first Token of next newPart
     newParts = "|".join([str(section.identifier) for section in sections if section.type != "sentence" and section.type != "line"]) or "_"
     
     # Lemmas
@@ -41,7 +42,7 @@ def token_to_conll(token:Token) -> str:
     pos = "|".join([str(pos.pos) if pos.pos else "_" for pos in token.pos_token.all()]) or "_"
     features = "|".join([f"{str(feature.feature)}={str(feature.feature_value)}" for feature in token.feature_token.all()]) or "_"
     
-    comment, uncertrain, newSuggestions, discussion = comments_to_conll(token)
+    comment, uncertrain, newSuggestions, discussion = comments_to_mptf(token)
     # term_tech
     # TODO: term. tech. verknüpfen
     term_tech = "_"
@@ -61,7 +62,7 @@ def token_to_conll(token:Token) -> str:
 
     return "\t".join(token_row)
 
-def comments_to_conll(token:Token) -> list[str]:
+def comments_to_mptf(token:Token) -> list[str]:
     comments = token.comment_token.all()
     uncertrain = "|".join([str(comment.uncertain) for comment in comments]) or "_"
     comment = "|".join([str(comment.comment) for comment in comments]) or "_"
@@ -69,23 +70,23 @@ def comments_to_conll(token:Token) -> list[str]:
     discussion = "|".join([str(comment.to_discuss) for comment in comments]) or "_"
     return [comment, uncertrain, newSuggestions, discussion]
 
-def sense_to_conll(sense:Sense) -> str:
+def sense_to_mptf(sense:Sense) -> str:
     """ Returns a CoNLL line for a Sense object """
     return f"#TRANSLATION = {sense}"+"\t_"*(COL_COUNT-1)
 
-def sentence_to_conll(section:Section) -> list[str]:
+def sentence_to_mptf(section:Section) -> list[str]:
     """ Gets all tokens from a sentence and returns a list of CoNLL lines, one for each token, first items are the sentence metadata"""
     identifier = f"#SENTENCE ID = {section.identifier}"+"\t_"*(COL_COUNT-1) if section.identifier else "_\t_"*(COL_COUNT-1)
-    translations = [sense_to_conll(sense) for sense in section.senses.all()]
+    translations = [sense_to_mptf(sense) for sense in section.senses.all()]
     if not section.comment_section.all():
         comments = [f"#COMMENT ="+"\t_"*(COL_COUNT-1)]
     else:
         comments = [f"#COMMENT = {comment.comment}"+"\t_"*(COL_COUNT-1) for comment in section.comment_section.all()]
-    tokens = [token_to_conll(token) for token in section.tokens.all()]
+    tokens = [token_to_mptf(token) for token in section.tokens.all()]
     return [identifier]+translations+comments+tokens+[' \t '*(COL_COUNT-1)]
 
 @db_task()
-def text_to_conll(text:Text, cache_key) -> list[str]:
+def text_to_mptf(text:Text, cache_key) -> list[str]:
     text_identifier = text.identifier
 
     logger.debug(f"Exporting Text {text_identifier} object with ID {text.id}")
@@ -106,24 +107,24 @@ def text_to_conll(text:Text, cache_key) -> list[str]:
         cache.set(cache_key, {"status": "error", "error": "No sentences found"})
         return []
     # header_row = "\t".join(header)
-    conll = []
+    mptf = []
     if sentences:
-        conll.append(header)
+        mptf.append(header)
         for i,sentence in enumerate(sentences):
-            sent = sentence_to_conll(sentence)
+            sent = sentence_to_mptf(sentence)
             for line in sent:
-                conll.append(line.split("\t"))
+                mptf.append(line.split("\t"))
             # log out 10% steps
             if len(sentences)//10 > 0 and i % (len(sentences)//10) == 0:
                 logger.debug(f"Processed {i} sentences out of {len(sentences)} sentences. {i/len(sentences)*100:.2f}% done.")
             # log first sentence
             # if i == 0:
             #     logger.debug(f"First sentence: {sent}")
-    logger.debug("Done creating CoNLL file")
+    logger.debug("Done creating mptf file")
 
-    cache.set(cache_key, {"status": "done", "data": conll})
+    cache.set(cache_key, {"status": "done", "data": mptf})
 
-    return conll
+    return mptf
 
 
 
@@ -163,7 +164,7 @@ class Command(BaseCommand):
             with open(f"{text.identifier}.conll.csv", 'w') as f:
                 f.write(header_row + '\n')
                 for i,sentence in enumerate(sentences):
-                    sent = self.sentence_to_conll(sentence)
+                    sent = self.sentence_to_mptf(sentence)
                     for line in sent:
                         f.write(line+'\n')
                     # log out 10% steps
@@ -174,7 +175,7 @@ class Command(BaseCommand):
                         logger.debug(f"First sentence: {sent}")
         logger.debug("Done creating CoNLL file")
 
-    def token_to_conll(self,token:Token) -> str:
+    def token_to_mptf(self,token:Token) -> str:
         sections = token.section_tokens.all()
         lemmas = token.lemmas.all()
 
@@ -202,7 +203,7 @@ class Command(BaseCommand):
         pos = "|".join([str(pos.pos) if pos.pos else "_" for pos in token.pos_token.all()]) or "_"
         features = "|".join([f"{str(feature.feature)}={str(feature.feature_value)}" for feature in token.feature_token.all()]) or "_"
         
-        comment, uncertrain, newSuggestions, discussion = self.comments_to_conll(token)
+        comment, uncertrain, newSuggestions, discussion = self.comments_to_mptf(token)
         # term_tech
         # TODO: term. tech. verknüpfen
         term_tech = "_"
@@ -222,7 +223,7 @@ class Command(BaseCommand):
 
         return "\t".join(token_row)
 
-    def comments_to_conll(self,token:Token) -> list[str]:
+    def comments_to_mptf(self,token:Token) -> list[str]:
         comments = token.comment_token.all()
         uncertrain = "|".join([str(comment.uncertain) for comment in comments]) or "_"
         comment = "|".join([str(comment.comment) for comment in comments]) or "_"
@@ -230,19 +231,18 @@ class Command(BaseCommand):
         discussion = "|".join([str(comment.to_discuss) for comment in comments]) or "_"
         return [comment, uncertrain, newSuggestions, discussion]
 
-    def sense_to_conll(self,sense:Sense) -> str:
+    def sense_to_mptf(self,sense:Sense) -> str:
         """ Returns a CoNLL line for a Sense object """
         return f"#TRANSLATION = {sense}"+"\t_"*(COL_COUNT-1)
 
-    def sentence_to_conll(self,section:Section) -> list[str]:
+    def sentence_to_mptf(self,section:Section) -> list[str]:
         """ Gets all tokens from a sentence and returns a list of CoNLL lines, one for each token, first items are the sentence metadata"""
         identifier = f"#SENTENCE ID = {section.identifier}"+"\t_"*(COL_COUNT-1) if section.identifier else "_\t_"*(COL_COUNT-1)
-        translations = [self.sense_to_conll(sense) for sense in section.senses.all()]
+        translations = [self.sense_to_mptf(sense) for sense in section.senses.all()]
         if not section.comment_section.all():
             comments = [f"#COMMENT ="+"\t_"*(COL_COUNT-1)]
         else:
             comments = [f"#COMMENT = {comment.comment}"+"\t_"*(COL_COUNT-1) for comment in section.comment_section.all()]
-        tokens = [self.token_to_conll(token) for token in section.tokens.all()]
+        tokens = [self.token_to_mptf(token) for token in section.tokens.all()]
         return [identifier]+translations+comments+tokens+[' \t '*(COL_COUNT-1)]
 
-    
