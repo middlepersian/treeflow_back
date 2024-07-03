@@ -130,7 +130,10 @@
               {% trans 'Tokens View' %}
             </th>
             <th class="sticky top-0 hidden px-2 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default bg-main-dark meta-data-header">
-              {% trans 'CONLL' %}
+              {% trans 'MPTF' %}
+            </th>
+            <th class="sticky top-0 hidden px-2 py-3 text-xs font-medium tracking-wider text-center uppercase cursor-default bg-main-dark meta-data-header">
+              {% trans 'CONNL-U' %}
             </th>
           {% endif %}
         {% comment %} <th class="px-2 py-3 text-xs font-medium tracking-wider text-center uppercase">{% trans 'Created At' %}</th> {% endcomment %}
@@ -256,9 +259,13 @@
                 <a href="{% url 'corpus:tokens' text_id=text.id %}">&#128065;</a>
               </td>
             
-              <!-- CONLL-->
+              <!-- MPFT -->
               <td class="hidden px-2 py-4 text-center whitespace-nowrap meta-data-cell">
-                <button id="{{text.id}}_conll" hx-swap="none" hx-get="{% url 'corpus:conll_state' text_id=text.id %}">&#128462;</button>
+                <button id="{{text.id}}_mptf" hx-swap="none" hx-get="{% url 'corpus:mptf_state' text_id=text.id %}">&#128462;</button>
+              </td>
+              <!-- CONLL-U -->
+              <td class="hidden px-2 py-4 text-center whitespace-nowrap meta-data-cell">
+                <button id="{{text.id}}_conllu" hx-swap="none" hx-get="{% url 'corpus:conllu_state' text_id=text.id %}">&#128462;</button>
               </td>
               {% endif %}
               <!-- Created At 
@@ -277,20 +284,20 @@
   </div>
 
   <script>
-    function conllState(textId) {
-      var button = document.getElementById(textId + '_conll')
+    function mptfState(textId) {
+      var button = document.getElementById(textId + '_mptf')
       var count = document.getElementById(textId + '_count')
       var tokenCount = parseInt(count.innerHTML)
       // change the timeout depending on the number of tokens
       var timeout = tokenCount < 1000 ? 5000 : tokenCount < 5000 ? 10000 : 15000
     
       button.innerHTML = '&#9203;'
-      fetch(`/corpus/status/text/0`.replace('0', textId))
+      fetch(`/corpus/status/text/mptf/0`.replace('0', textId))
         .then((response) => response.json())
         .then((data) => {
           if (data.status === 'success') {
-            // change the button to a href link to download the conll file
-            button.outerHTML = '<a class="p-1 text-white rounded bg-main" id="' + textId + '_conll" href="/corpus/export/text/' + textId + '" target="_blank" download>&#128462;</a>'
+            // change the button to a href link to download the mptf file
+            button.outerHTML = '<a class="p-1 text-white rounded bg-main" id="' + textId + '_mptf" href="/corpus/export/text/mptf/' + textId + '" target="_blank" download>&#128462;</a>'
           } else if (data.status === 'error') {
             // change the button color to red
             button.style.backgroundColor = 'salmon'
@@ -299,18 +306,51 @@
           } else {
             // set timeout to retry after 5 seconds
             setTimeout(function () {
-              conllState(textId)
+              mptfState(textId)
+            }, timeout)
+          }
+        })
+    }
+    
+    function conlluState(textId) {
+      var button = document.getElementById(textId + '_conllu')
+      console.log(button)
+      var count = document.getElementById(textId + '_count')
+      var tokenCount = parseInt(count.innerHTML)
+      // change the timeout depending on the number of tokens
+      var timeout = tokenCount < 1000 ? 5000 : tokenCount < 5000 ? 10000 : 15000
+      console.log("conlluState",textId)
+      button.innerHTML = '&#9203;'
+      fetch(`/corpus/status/text/conllu/0`.replace('0', textId))
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === 'success') {
+            // change the button to a href link to download the conllu file
+            button.outerHTML = '<a class="p-1 text-white rounded bg-main" id="' + textId + '_conllu" href="/corpus/export/text/conllu/' + textId + '" target="_blank" download>&#128462;</a>'
+          } else if (data.status === 'error') {
+            // change the button color to red
+            button.style.backgroundColor = 'salmon'
+            button.style.color = 'black'
+            button.innerHTML = '&#10060;'
+          } else {
+            // set timeout to retry after 5 seconds
+            setTimeout(function () {
+              conlluState(textId)
             }, timeout)
           }
         })
     }
     
     document.body.addEventListener('htmx:afterRequest', function (event) {
-      if (event.detail.elt.id.includes('conll')) {
+      if (event.detail.elt.id.includes('mptf')) {
         var textId = event.detail.elt.id.split('_')[0]
-        conllState(textId)
+        mptfState(textId)
       }
-    
+      if (event.detail.elt.id.includes('conllu')) {
+        var textId = event.detail.elt.id.split('_')[0]
+        conlluState(textId)
+      }
+
       // Function to change the input field color based on the response status
       function changeInputFieldColor(inputField, isSuccess) {
         if (inputField) {
