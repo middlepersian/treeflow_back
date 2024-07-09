@@ -1,33 +1,19 @@
-<!-- section_modal_create.html -->
-{% load i18n %}
 
-<div id="sectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50">
-    <div class="flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-md p-6 mx-auto bg-white rounded-lg shadow-xl modal-content">
-            {{ form.media.css }}
-            <h2 class="mb-4 text-lg font-bold">Create New Section</h2>
-            <form id="sectionForm" hx-post="{% url 'corpus:create_section' %}" method="post" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="text_id" id="modalTextId" value="{{ text_id }}">
-                <div class="space-y-2">
-                    {{ form.as_p }}
-                </div>
-                <div class="my-4 selected-tokens-list">
-                    <h3 class="font-semibold">Selected Tokens:</h3>
-                    <div id="selectedTokensDisplay"></div>
-                </div>
-                <div class="flex justify-between mt-6">
-                    <button type="button" id="closeModalButton"
-                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none">
-                        {% trans 'Cancel' %}
-                    </button>
-                    <button type="submit"
-                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-500 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
-                        {% trans 'Save Section' %}
-                    </button>
-                </div>
-            </form>
-            {{ form.media.js }}
-        </div>
-    </div>
-</div>
+{% extends 'components/section_modal.html' %}
+
+{% block title %}Create New Section{% endblock %}
+
+{% block url %}{% url 'corpus:create_section' %}{% endblock %}
+
+{% block form_fields %}
+  <input type="hidden" name="text_id" value="{{ text_id }}">
+  <div class="space-y-2">
+      {{ form.as_p }}
+  </div>
+  <div class="my-4 selected-tokens-list">
+      <h3 class="font-semibold">Selected Tokens:</h3>
+      {% for token in tokens %}
+          <span>{{ token.transcription }}</span>{% if not forloop.last %},{% endif %}
+      {% endfor %}
+  </div>
+{% endblock %}

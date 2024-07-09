@@ -18,11 +18,7 @@ from treeflow.corpus.views.section_editor import section_editor_form_view
 from treeflow.corpus.views.save_section import save_section_view
 from treeflow.corpus.views.display_tokens import display_tokens_view
 from treeflow.corpus.views.load_section_modal_create import load_section_modal_create
-from treeflow.corpus.views.load_section_modal_update import load_section_modal_update
 from treeflow.corpus.views.line_form import line_form_view
-from treeflow.corpus.views.get_feature_formset import get_feature_formset
-from treeflow.corpus.views.pos_feature_form import pos_feature_form
-from treeflow.corpus.views.bib_edit import BibEntryListView, BibEntryCreateView
 from treeflow.corpus.views.get_feature_formset import get_feature_formset
 from treeflow.corpus.views.pos_feature_form import pos_feature_form
 from treeflow.corpus.views.sentence import sentence_view
@@ -48,8 +44,8 @@ urlpatterns = [
     path('update_source/<uuid:source_id>/', update_source, name='api_update_source'),
     path('update_text/<uuid:text_id>/', update_text, name='update_text'),
     path('update_token/<uuid:token_id>', update_token, name='update_token'),
-    path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'), 
-    path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'), 
+    path('ud-editor/<uuid:section_id>/', ud_editor, name='ud_editor'),
+    path('ud-editor/saveNewDependency/', saveNewDependency, name='saveDependency'),
     path('ud-editor/deleteDependency/', deleteDependency, name='deleteDependency'),
     path('ud-editor/setNewRoot/', setNewRoot, name='setNewRoot'),
     path('texts/', texts_view, name='texts'),
@@ -71,14 +67,13 @@ urlpatterns = [
     path('get-images/', get_images_view, name='get_images'),
     path('display_tokens/', display_tokens_view, name='display_tokens'),
     path('load_section_modal_create/', load_section_modal_create, name='load_section_modal_create'),
-    path('load_section_modal_update/', load_section_modal_update, name='load_section_modal_update'),
-    path('line-form/<uuid:token_id>/', line_form_view, name='line_form'),  
+    path('line-form/<uuid:token_id>/', line_form_view, name='line_form'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
     path('pos_feature_form/<uuid:token_id>/', pos_feature_form, name='pos_feature_form'),
     path('bibliography/', BibEntryListView.as_view(), name='bibliography'),
     path('bibliography/<uuid:bibEntry_id>/', BibEntryDetailView.as_view(), name='bibliography-detail'),
     path('bibliography/create/', BibEntryCreateView.as_view(), name='bibliography-create'),
-    path('comment_form/<uuid:related_model_id>/', comment_form, name='comment_form'),    
+    path('comment_form/<uuid:related_model_id>/', comment_form, name='comment_form'),
     path('sources/',sources, name='sources'),
     path('sources/edit/<uuid:source_id>/', SourceUpdateView.as_view(), name='update_source'),
     path('sources/delete/<uuid:source_id>/', SourceDeleteView.as_view(), name='source_delete'),
