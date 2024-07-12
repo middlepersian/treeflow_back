@@ -36,7 +36,7 @@ from treeflow.corpus.views.update_source import update_source
 from treeflow.corpus.views.token_lemma_sense import token_lemma_sense_view
 from treeflow.corpus.views.save_token import save_token
 from treeflow.corpus.views.manuscripts import manuscripts, get_images_for_manuscript, get_images_for_manuscript_table
-from treeflow.corpus.views.export_text import  download_text, resolve_state
+from treeflow.corpus.views.export_text import  download_text_mpft, resolve_state_mpft, download_text_conllu, resolve_state_conllu
 from treeflow.corpus.views.openseadragon import openseadragon, imageSelector
 
 
@@ -91,8 +91,10 @@ urlpatterns = [
     path('manuscripts/', manuscripts, name='manuscripts'),
     path('manuscript/<uuid:manuscript_id>/images',get_images_for_manuscript,name='manuscript_images'),
     path('manuscript/<uuid:manuscript_id>/images/table',get_images_for_manuscript_table,name='manuscript_images_table'),
-    path('export/text/<uuid:text_id>',download_text,name='conll'),
-    path('status/text/<uuid:text_id>',resolve_state,name='conll_state'),
+    path('export/text/mptf/<uuid:text_id>',download_text_mpft,name='mptf'),
+    path('export/text/conllu/<uuid:text_id>',download_text_conllu,name='conllu'),
+    path('status/text/mptf/<uuid:text_id>',resolve_state_mpft,name='mptf_state'),
+    path('status/text/conllu/<uuid:text_id>',resolve_state_conllu,name='conllu_state'),
     path('openseadragon/imageSelect/', imageSelector, name='imageSelector'),
     path('openseadragon/viewer/', openseadragon, name='imageViewer'),
     path('sections/merge/<uuid:section_id>', section_merge, name='section_merge'),
