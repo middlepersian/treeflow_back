@@ -1,44 +1,23 @@
-{% if page_obj %}
-    <div class="flex flex-row p-4">
-        <div id="sections">
-            {% for section in page_obj %}
-                <div id="section" class="mt-4 max-w-[80%]">
-                    <div id="section-metadata" class="flex flex-row gap-x-1">
-                        <div id="section-title" class="cursor-help group relative font-bold">
-                            <p>{{ section.type | title }} {{ section.number | floatformat:"0" }} in {{ section.text | default:"Untitled" }}</p>
-                            <div id="section-tooltip" class="flex flex-col scale-0 group-hover:scale-100 transition-opacity absolute bg-main text-sm text-white rounded-md p-2">
-                                <p>Section: {{ section.identifier }}</p>
-                                <p class="mb-2">Text: {{ section.text.identifier }}</p>
-                                <p>Translation:<br>{% for sense in section.senses.all %}{{ sense.sense }}{% endfor %}</p>
-                            </div>
-                        </div>
-                        <!-- include section-links.html -->
-                        {% include "search/section-links.html" with section=section %}
-                    </div>
-                    <div id="sentence">
-                        {% for section_token in section.sectiontoken_set.all %}
-                            <span id="token" class="{% if section_token.token.transcription in queries %}text-off-graded-600 font-bold {% endif %}{% if not forloop.first and section_token.token.transcription == ',' %}-ml-1{% endif %}">{{ section_token.token.transcription }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        <div id="results-filter" class="ml-auto p-4">
-            {% include "search/results-filter.html" with queries=queries %}
-        </div>
+<div class="flex flex-col gap-2 p-2">
+  <script>
+    console.log('{{ queries }}')
+  </script>
+  {% for section in page_obj %}
+    <div>
+      <p class="capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+      {% for section_token in section.tokens.all %}
+        <span class="{% if section_token.transcription in queries %}text-off-graded-600 font-bold {% endif %}">{{ section_token.transcription }}</span>
+      {% endfor %}
     </div>
-    <!-- include pagination.html -->
-    {% include 'search/pagination.html' with page_obj=page_obj queries=queries text_id=text_id section_id=section_id %}
-{% else %}
-    <div class="flex flex-row m-4 justify-between">
-        <div id="no-results" class="inline-flex items-center text-off-graded-700 font-bold gap-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            <p>No results found.</p>
-        </div>
-        {% if text_id or section_id %}
-            <div id="results-filter" class="flex flex-col ml-auto min-w-[20%]">
-                {% include "search/results-filter.html" with queries=queries %}
-            </div>
-        {% endif %}
+  {% empty %}
+    <div id="no-results" class="flex items-center font-bold text-off-graded-700 gap-x-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <p>No results found.</p>
     </div>
-{% endif %}
+  {% endfor %}
+  {% include 'search/pagination.html' with page_obj=page_obj queries=queries %}
+</div>
