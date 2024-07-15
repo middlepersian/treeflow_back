@@ -16,5 +16,5 @@
       <p>No results found.</p>
     </div>
   {% endfor %}
-  {% include 'search/pagination.html' with page_obj=page_obj queries=queries %}
+  {% include 'search/pagination.html' with page_obj=page_obj queries=queries total_pages=total_pages %}
 </div>

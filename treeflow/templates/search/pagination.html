@@ -3,17 +3,30 @@
     {% if page_obj.has_previous %}
       <a 
         hx-get="{% url 'search:results' %}?page={{ page_obj.previous_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
-        {% comment %} hx-push-url="true"  {% endcomment %}
         hx-target="#results-list"
         class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-main hover:text-white" onclick="activateLoadingIndicator()">Previous</a>
     {% else %}
       <span class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Previous</span>
     {% endif %}
-    <span id="current-page" class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md">{{ page_obj.number }}</span>
+    {% if page_obj.number <= total_pages and page_obj.number > 0 %}
+    <div class="relative flex flex-col">
+      <input type="number" min="1" max="{{ total_pages }}" value="{{ page_obj.number }}" 
+       placeholder="1 - {{ total_pages }}" 
+       class="w-32 px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md invalid:bg-red-300"
+       id="page-input"
+       oninput="updateGetParameter(this.value);">
+      <button id="submit-button"
+      type="submit"
+      hx-target="#results-list"
+      class="absolute text-center bg-main hover:bg-main-dark w-fit rounded-b-md top-full left-[40%] hidden"
+      ><svg class="w-6 h-6 text-white"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <line x1="5" y1="12" x2="19" y2="12" />  <line x1="15" y1="16" x2="19" y2="12" />  <line x1="15" y1="8" x2="19" y2="12" /></svg></button>
+    </div>
+    {% else %}
+      <span class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md">{{ page_obj.number }}</span>
+    {% endif %}
     {% if page_obj.has_next %}
       <a 
         hx-get="{% url 'search:results' %}?page={{ page_obj.next_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
-        {% comment %} hx-push-url="true"  {% endcomment %}
         hx-target="#results-list"
         class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-main hover:text-white" onclick="activateLoadingIndicator()">Next</a>
     {% else %}
@@ -33,3 +46,26 @@
     </p>
   </div>
 </div>
+
+<script>
+  function updateGetParameter(e) {
+    const submitButton = document.getElementById('submit-button');
+    if(e <= {{ total_pages }} && e > 0) {
+      submitButton.classList.remove('hidden');
+    }else {
+      submitButton.classList.add('hidden')
+    };
+    const url = `{% url 'search:results' %}?page=${e}{% for query in queries %}&query={{ query }}{% endfor %}`;
+    submitButton.setAttribute('hx-get', url);
+    htmx.process(submitButton);
+  }
+
+  document.getElementById('page-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (this.value <= {{ total_pages }} && this.value > 0) {
+        document.getElementById('submit-button').click()
+      }
+    }
+  })
+</script>

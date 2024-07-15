@@ -68,12 +68,15 @@ def results_view(request):
     paginator = Paginator(results, 10)
     page_obj = paginator.get_page(page_number)
 
+    total_pages = paginator.num_pages
+
     return render(
         request,
         "search/results.html",
         {
             "page_obj": page_obj,
             "queries": queries,
+            "total_pages": total_pages,
         },
     )
 
