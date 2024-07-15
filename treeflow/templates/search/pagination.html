@@ -1,23 +1,23 @@
-<div id="pagination" class="flex flex-row items-center justify-between gap-4 px-4 py-3 mt-6 bg-white border-t border-gray-200">
-  <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="flex flex-1 justify-between max-w-[20%]">
+<div id="pagination" class="flex flex-row items-center justify-between gap-4 px-4 py-3 mt-6 border-t border-gray-200">
+  <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="flex justify-between w-1/5">
     {% if page_obj.has_previous %}
       <a 
         hx-get="{% url 'search:results' %}?page={{ page_obj.previous_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
-        hx-push-url="true" 
+        {% comment %} hx-push-url="true"  {% endcomment %}
         hx-target="#results-list"
-        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+        class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-main hover:text-white" onclick="activateLoadingIndicator()">Previous</a>
     {% else %}
-      <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Previous</span>
+      <span class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Previous</span>
     {% endif %}
-    <span id="current-page" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">{{ page_obj.number }}</span>
+    <span id="current-page" class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md">{{ page_obj.number }}</span>
     {% if page_obj.has_next %}
       <a 
         hx-get="{% url 'search:results' %}?page={{ page_obj.next_page_number }}{% for query in queries %}&query={{ query }}{% endfor %}"
-        hx-push-url="true" 
+        {% comment %} hx-push-url="true"  {% endcomment %}
         hx-target="#results-list"
-        class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+        class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-main hover:text-white" onclick="activateLoadingIndicator()">Next</a>
     {% else %}
-      <span class="inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Next</span>
+      <span class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md cursor-default">Next</span>
     {% endif %}
   </div>
   
@@ -29,7 +29,7 @@
       <span class="font-medium">{{ page_obj.end_index }}</span>
       of
       <span class="font-medium">{{ page_obj.paginator.count }}</span>
-      results
+      results.
     </p>
   </div>
 </div>

@@ -1,13 +1,15 @@
+import json
 import logging
 import time
-from typing import Dict, List, Union
+from typing import Dict, List
 
-from django.core.paginator import Page, Paginator
-from django.db.models import Prefetch, Q, QuerySet
-from django.shortcuts import get_object_or_404, render
+from django.core.paginator import Paginator
+from django.db.models import Q, QuerySet
+from django.http import HttpRequest
+from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
-from treeflow.corpus.models import Section, SectionToken, Text
+from treeflow.corpus.models import Section, SectionToken
 
 from .forms import LogicalFormSet, ResultFilterForm
 from .models import SearchCriteria
@@ -53,18 +55,7 @@ def results_view(request):
     # filter_form = ResultFilterForm(initial={"text": text, "section": section})
 
     try:
-        # if request.method == "POST":
         results = handle_request(request)
-
-        # Request method of next page is GET; GET takes all sections..
-        # elif request.method == "GET":
-            # queries = request.GET.getlist("query", [])
-            # logger.debug(f"Queries (GET): {queries}")
-            # results = SectionToken.objects.filter()  # Start with all sections
-            # if text_id or section_id:
-            #     logger.debug(f"Text ID: {text_id}, Section ID: {section_id}")
-            #     results = narrow_results(results, text_id, section_id)
-
     except Exception as e:
         logger.error(f"Error processing request: {e}")
         results = Section.objects.none()
@@ -86,10 +77,11 @@ def results_view(request):
         },
     )
 
-def handle_request(request) -> QuerySet:
+def handle_request(request: HttpRequest) -> QuerySet:
     """
     Handle form submission for search results.
     """
+    # Retrieve layout selection and set formset class
     # layout_selection = request.POST.get("layout_selection", "logical")
     formset_class = LogicalFormSet
     formset = formset_class(request.GET)
@@ -97,12 +89,23 @@ def handle_request(request) -> QuerySet:
     if formset.is_valid():
         logger.debug("Formset is valid.")
         data = [f for f in formset.cleaned_data if f]
-        # MARK: - data
+        
+        # Save formset data to session
+        request.session['formset_data'] = json.dumps(data)
+
         results = get_results(data)
         logger.debug(f"Found {len(results)} results.")
-    else: # TODO Formset on next Page invalid --> No proper querying/filtering?
-        logger.error("Formset is invalid.")
-        results = Section.objects.none()
+    else:
+        # If formset is invalid, check if there's saved formset data in session
+        formset_data_json = request.session.get('formset_data', None)
+        if formset_data_json:
+            formset_data = json.loads(formset_data_json)
+            results = get_results(formset_data)
+            logger.debug("Used formset data from session.")
+        else:
+            logger.error("Formset is invalid and no session data found.")
+            results = Section.objects.none()
+    
     return results
 
 def get_results(criteria: List) -> QuerySet:
@@ -191,45 +194,3 @@ def filter_sections_by_logic(candidate_sections: QuerySet, token_search_inputs: 
 #     """
 #     Filter sections by distance.
 #     """
-
-#     section_ids = []
-
-#     for token_search_input in token_search_inputs:
-#         filter_tokens = retrieve_tokens(token_search_input)
-#         filter_sections = identify_sections(filter_tokens)
-#         candidate_sections &= filter_sections
-#         ids = [token.id for token in filter_tokens]
-
-#         distance = token_search_input["distance"]
-#         distance_type = token_search_input["distance_type"]
-
-#         for section in candidate_sections:
-#             q_objects = Q()
-
-#             for anchor in anchor_tokens:
-#                 if distance_type == "both":
-#                     q_objects |= Q(number__range=(anchor.number - distance, anchor.number + distance))
-#                 elif distance_type == "before":
-#                     q_objects |= Q(number__range=(anchor.number - distance, anchor.number))
-#                 elif distance_type == "after":
-#                     q_objects |= Q(number__range=(anchor.number, anchor.number + distance))
-
-#             tokens = section.tokens.filter(q_objects, id__in=ids)
-
-#             if tokens:
-#                 section_ids.append(section.id)
-
-#     sections = Section.objects.filter(id__in=section_ids)
-
-#     return sections
-
-# def narrow_results(results: QuerySet, text_id=None, section_id=None) -> QuerySet:
-#     """
-#     Narrow down results based on text and section IDs.
-#     """
-#     query = Q()
-#     if text_id:
-#         query &= Q(text_id=text_id)
-#     if section_id:
-#         query &= Q(id=section_id)
-#     return results.filter(query)

@@ -1,10 +1,7 @@
 <div class="flex flex-col gap-2 p-2">
-  <script>
-    console.log('{{ queries }}')
-  </script>
   {% for section in page_obj %}
     <div>
-      <p class="capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+      <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
       {% for section_token in section.tokens.all %}
         <span class="{% if section_token.transcription in queries %}text-off-graded-600 font-bold {% endif %}">{{ section_token.transcription }}</span>
       {% endfor %}
