@@ -1,4 +1,4 @@
-<form id="form-set" hx-post="{% url "search:results" %}" hx-target="#results-list" hx-indicator="#loadingIndicator" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<form id="form-set" hx-get="{% url "search:results" %}" hx-target="#results-list" hx-indicator="#loadingIndicator" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <input type="hidden" name="layout_selection" value="{{ layout_selection }}">
     {% if formset.non_form_errors %}
         <div id="formset-errors">
@@ -10,12 +10,12 @@
     <div class="cards">
         {{ formset.management_form }}
         <div id="empty-form" style="display:none">
-            <div class="card relative">
+            <div class="relative card">
                 {% include 'search/form.html' with form=formset.empty_form firstForm=False layout=layout_selection %}
             </div>
         </div>
         {% for form in formset %}
-            <div id="form-initial" class="card relative">
+            <div id="form-initial" class="relative card">
                 {% include 'search/form.html' with form=form firstForm=forloop.first layout=layout_selection %}
             </div>
         {% endfor %}
