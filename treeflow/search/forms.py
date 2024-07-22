@@ -1,6 +1,6 @@
 from django.forms import modelformset_factory
 from django import forms
-from .models import SearchCriteria, ResultFilter
+from .models import SearchCriteria
 
 shared_fields = (
     "query",
@@ -31,14 +31,6 @@ class LogicalForm(forms.ModelForm):
         )
 
 
-class ResultFilterForm(forms.ModelForm):
-    class Meta:
-        model = ResultFilter
-        fields = (
-            "text",
-            "section",
-            "remove_stopwords",
-        )
 
 
 DistanceFormSet = modelformset_factory(SearchCriteria, form=DistanceForm, extra=1)

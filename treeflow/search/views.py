@@ -11,7 +11,9 @@ from django.views.decorators.http import require_GET
 
 from treeflow.corpus.models import Section, SectionToken
 
-from .forms import LogicalFormSet, ResultFilterForm
+from django.db import connection
+
+from .forms import LogicalFormSet
 from .models import SearchCriteria
 
 logger = logging.getLogger(__name__)
@@ -24,7 +26,6 @@ def search_page(request):
     Render the search page with the appropriate form and layout selection.
     """
     layout_selection = request.GET.get("layout_selection", "logical")
-    # filter_form = ResultFilterForm()
     queryset = SearchCriteria.objects.none()
     formset_class = LogicalFormSet
     formset = formset_class(queryset=queryset)
@@ -47,12 +48,6 @@ def results_view(request):
     """
     page_number = request.GET.get("page", 1)
     results = None
-    # text_id = request.GET.get("text", "")
-    # section_id = request.GET.get("section", "")
-
-    # text = get_object_or_404(Text, id=text_id) if text_id else None
-    # section = get_object_or_404(Section, id=section_id) if section_id else None
-    # filter_form = ResultFilterForm(initial={"text": text, "section": section})
 
     try:
         results = handle_request(request)
@@ -84,8 +79,6 @@ def handle_request(request: HttpRequest) -> QuerySet:
     """
     Handle form submission for search results.
     """
-    # Retrieve layout selection and set formset class
-    # layout_selection = request.POST.get("layout_selection", "logical")
     formset_class = LogicalFormSet
     formset = formset_class(request.GET)
 
@@ -158,14 +151,17 @@ def retrieve_tokens(criteria: Dict) -> QuerySet:
         "regex": f"token__{query_field}__{case_insensitive_prefix}regex",
         "contains": f"token__{query_field}__{case_insensitive_prefix}contains",
     }
-
+    logger.debug(f"Query lookup: {query_lookup.get(query_type, query_lookup['contains'])} : {value}")
     query = Q(**{query_lookup.get(query_type, query_lookup["contains"]): value})
 
     for k, v in criteria.items():
         if v and not any(x in k for x in ["logical", "distance", "id"]):
             query &= Q(**{k: v})
 
-    return SectionToken.objects.filter(query).prefetch_related("token", "section")
+    candidates = SectionToken.objects.filter(query).prefetch_related("token", "section")
+    logger.debug(f"Found {candidates.count()} candidates.")
+    logger.debug(f"Query: {candidates.query}")
+    return candidates
 
 def identify_sections(tokens: QuerySet) -> QuerySet:
     """
@@ -188,12 +184,3 @@ def filter_sections_by_logic(candidate_sections: QuerySet, token_search_inputs: 
             candidate_sections |= filter_sections
 
     return candidate_sections
-
-# def filter_sections_by_distance(
-#     anchor_tokens: List[Token],
-#     candidate_sections: List[Section],
-#     token_search_inputs: List[Dict],
-# ) -> List[Section]:
-#     """
-#     Filter sections by distance.
-#     """
