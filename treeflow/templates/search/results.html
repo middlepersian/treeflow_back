@@ -1,20 +1,30 @@
-<div class="flex flex-col gap-2 p-2">
-  {% for section in page_obj %}
-    <div>
-      <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
-      {% for section_token in section.tokens.all %}
-        <span class="{% if section_token.transcription in queries %}text-off-graded-600 font-bold {% endif %}">{{ section_token.transcription }}</span>
-      {% endfor %}
-    </div>
-  {% empty %}
-    <div id="no-results" class="flex items-center font-bold text-off-graded-700 gap-x-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-        <line x1="12" y1="9" x2="12" y2="13"></line>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </svg>
-      <p>No results found.</p>
-    </div>
-  {% endfor %}
+{% load search_tags %}
+
+<div>
+  {% include 'search/pagination.html' with page_obj=page_obj queries=queries total_pages=total_pages %}
+  <div class="flex flex-col gap-2 p-4">
+    {% for section in page_obj %}
+      <script>
+        console.log('{{queries}}')
+      </script>
+      <div>
+        <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+        {% for section_token in section.tokens.all %}
+          <span class="{% highlight_if_match section_token.transcription queries %}">{{ section_token.transcription }}</span>
+        {% empty %}
+          <span>{{ section_token.transcription }}</span>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <div id="no-results" class="flex items-center font-bold text-off-graded-700 gap-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <p>No results found.</p>
+      </div>
+    {% endfor %}
+  </div>
   {% include 'search/pagination.html' with page_obj=page_obj queries=queries total_pages=total_pages %}
 </div>
