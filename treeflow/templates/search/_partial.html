@@ -9,7 +9,8 @@
                 <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
                 <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
             </select>
-            <label class="font-bold text-gray-900 whitespace-nowrap">Search tokens
+            <label class="font-bold text-gray-900 whitespace-nowrap">
+                Search tokens
                 {% if layout_selection == "distance" %}by looking for entries with a specific distance between them{% endif %}
                 {% if layout_selection == "logical" %}by combining queries using logical operators{% endif %}
             </label>
@@ -23,21 +24,18 @@
             <h3>Results</h3>
         </div>
         <div id="loadingIndicator" class="flex-row justify-center hidden">
-            <img class="w-20 h-20 m-6" src="{% static 'search/three-dots.svg' %}"/>
+            <img class="w-20 h-20 m-6" src="{% static 'search/three-dots.svg' %}" />
         </div>
         <div id="results-list" class="flex flex-col">
         </div>
     </div>
 </div>
+
 <script>
   const addForm = (buttonElement) => {
     const currentForm = buttonElement.parentElement.parentElement.id;
-    // console.log("Button pressed on form:", currentForm);
-    // const formSet = document.getElementById('form_set');
-
     const formsCountElement = document.getElementById('id_form-TOTAL_FORMS');
     const formsCount = parseInt(formsCountElement.value);
-
     const emptyFormHtml = document.getElementById('empty-form').innerHTML;
     const uniqueId = Date.now() + Math.random().toString(36).substring(2, 11);
 
@@ -53,30 +51,30 @@
     const formToRemove = buttonElement.parentElement.parentElement;
     const formsCountElement = document.getElementById('id_form-TOTAL_FORMS');
     const formsCount = parseInt(formsCountElement.value);
-    
+
     if (formsCount > 1) {
       formToRemove.remove();
       formsCountElement.value = formsCount - 1;
     }
   }
 
-    const activateLoadingIndicator = () => {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator.classList.contains('hidden')) {
-            loadingIndicator.classList.remove('hidden');
-            loadingIndicator.classList.add('flex');
-        }
+  const activateLoadingSVG = () => {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator.classList.contains('hidden')) {
+      loadingIndicator.classList.remove('hidden');
+      loadingIndicator.classList.add('flex');
     }
+  }
 
-    const deactivateLoadingIndicator = () => {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator.classList.contains('flex')) {
-            loadingIndicator.classList.remove('flex');
-            loadingIndicator.classList.add('hidden');
-        }
+  const deactivateLoadingSVG = () => {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator.classList.contains('flex')) {
+      loadingIndicator.classList.remove('flex');
+      loadingIndicator.classList.add('hidden');
     }
+  }
 
-    document.body.addEventListener('htmx:afterSwap', function (event) {
-        deactivateLoadingIndicator();
-    });
+  document.body.addEventListener('htmx:afterSwap', function () {
+    deactivateLoadingSVG();
+  });
 </script>
