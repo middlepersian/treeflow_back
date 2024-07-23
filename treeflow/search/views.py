@@ -44,6 +44,7 @@ def search_page(request):
         return render(request, "search/_partial.html", context)
 
     return render(request, "pages/search.html", context)
+    return render(request, "pages/search.html", context)
 
 def results_view(request):
     """
