@@ -14,7 +14,10 @@ from treeflow.corpus.models import Section, SectionToken
 
 from django.db import connection
 
+from django.forms import BaseModelFormSet
+
 from .forms import LogicalFormSet
+from .forms import DistanceFormSet
 from .models import SearchCriteria
 
 logger = logging.getLogger(__name__)
@@ -26,7 +29,7 @@ def search_page(request):
     """
     Render the search page with the appropriate form and layout selection.
     """
-    layout_selection = request.GET.get("layout_selection", "logical")
+    layout_selection = request.GET.get("layout_selection", "logical-section")
     queryset = SearchCriteria.objects.none()
     formset_class = LogicalFormSet
     formset = formset_class(queryset=queryset)
@@ -45,7 +48,6 @@ def search_page(request):
         return render(request, "search/_partial.html", context)
 
     return render(request, "pages/search.html", context)
-    return render(request, "pages/search.html", context)
 
 def results_view(request):
     """
@@ -56,16 +58,18 @@ def results_view(request):
     results = None
     queries.clear()
 
-    # text_id = request.GET.get("text", "")
-    # section_id = request.GET.get("section", "")
-
-    # text = get_object_or_404(Text, id=text_id) if text_id else None
-    # section = get_object_or_404(Section, id=section_id) if section_id else None
-    # filter_form = ResultFilterForm(initial={"text": text, "section": section})
-
+    
     if (not request.GET.get("just_pages", False)):
         try:
-            results = handle_request(request)
+            layout_selection = request.GET.get("layout_selection", "logical-section")
+            if "logical" in layout_selection:
+                formset = LogicalFormSet(request.GET)
+            else:
+                formset = DistanceFormSet(request.GET)
+            
+            query_formset_type = layout_selection
+
+            results = handle_request(request,formset,query_formset_type)
         except Exception as e:
             logger.error(f"Error processing request: {e}")
             results = Section.objects.none()
@@ -113,21 +117,17 @@ def results_view(request):
         },
     )
 
-def handle_request(request: HttpRequest) -> QuerySet:
+def handle_request(request: HttpRequest,formset:BaseModelFormSet,query_formset_type) -> QuerySet:
     """
     Handle form submission for search results.
     """
-    formset_class = LogicalFormSet
-    formset = formset_class(request.GET)
-
     if formset.is_valid():
         logger.debug("Formset is valid.")
         data = [f for f in formset.cleaned_data if f]
-        
         # Save formset data to session
         request.session['formset_data'] = json.dumps(data)
-
-        results = get_results(data)
+        
+        results = get_results(data,query_formset_type)
         logger.debug(f"Found {len(results)} results.")
         request.session['results'] = json.dumps(list(results.values()), cls=DjangoJSONEncoder)
     else:
@@ -143,7 +143,7 @@ def handle_request(request: HttpRequest) -> QuerySet:
     
     return results
 
-def get_results(criteria: List) -> QuerySet:
+def get_results(criteria: List,query_formset_type) -> QuerySet:
     """
     Retrieve search results based on given criteria.
     """
@@ -152,16 +152,31 @@ def get_results(criteria: List) -> QuerySet:
         return Section.objects.none()
 
     queries.clear()
+
     for form in criteria:
         queries.add(form["query"])
+
     anchor_criterion = criteria[0]
     filters = criteria[1:]
-    anchor_tokens = retrieve_tokens(anchor_criterion)
-    sections = identify_sections(anchor_tokens)
 
-    if filters:
-        if "logical_operator" in anchor_criterion:
-            sections = filter_sections_by_logic(sections, filters)
+   
+    logger.debug(f"query_formset_type: {query_formset_type}")
+    if query_formset_type == "logical-section":
+        logger.debug("Retrieving tokens based on anchor criterion.")
+        anchor_tokens = retrieve_tokens(anchor_criterion)
+        sections = identify_sections(anchor_tokens)
+        if filters:
+            if "logical_operator" in anchor_criterion:
+                sections = filter_sections_by_logic(sections, filters)
+    
+    elif query_formset_type == "logical-token":
+        anchor_tokens = retrieve_tokens_with_filters(criteria)
+        sections = identify_sections(anchor_tokens)
+
+    elif query_formset_type == "distance-section":
+        sections = Section.objects.none()
+    else:
+        return Section.objects.none()
         # elif "distance" in anchor_criterion:
         #     sections = filter_sections_by_distance(anchor_tokens, sections, filters)
 
@@ -199,12 +214,58 @@ def retrieve_tokens(criteria: Dict) -> QuerySet:
     logger.debug(f"Query: {candidates.query}")
     return candidates
 
+def retrieve_tokens_with_filters(filters: List[Dict]) -> QuerySet:
+    query = Q(section__type__exact="sentence")
+    sectionTokens = SectionToken.objects.filter(query)
+    logger.debug("213 filtering tokens with filters")
+    logger.debug(f"214 Filters: {filters}")
+    for i,filter in enumerate(filters):
+        criteria = filter.copy()
+        value = criteria.pop("query", None)
+        query_field = criteria.pop("query_field", "")
+        query_type = criteria.pop("query_type", "contains")
+        case_sensitive = criteria.pop("case_sensitive", False)
+        case_insensitive_prefix = "" if case_sensitive else "i"
+        
+        query_lookup = {
+        "exact": f"token__{query_field}__{case_insensitive_prefix}exact",
+        "prefix": f"token__{query_field}__{case_insensitive_prefix}startswith",
+        "suffix": f"token__{query_field}__{case_insensitive_prefix}endswith",
+        "regex": f"token__{query_field}__{case_insensitive_prefix}regex",
+        "contains": f"token__{query_field}__{case_insensitive_prefix}contains",
+        }
+
+        if i == 0 or criteria['logical_operator'] == "AND":
+            query &= Q(**{query_lookup.get(query_type, query_lookup["contains"]): value})
+        elif criteria['logical_operator'] == "OR":
+            query |= Q(**{query_lookup.get(query_type, query_lookup["contains"]): value})
+        elif criteria['logical_operator'] == "NOT":
+            query &= ~Q(**{query_lookup.get(query_type, query_lookup["contains"]): value})
+
+        for k, v in criteria.items():
+            if v and not any(x in k for x in ["logical", "distance", "id"]):
+                query &= Q(**{k: v})
+        
+        logger.debug(f"Query lookup: query: {query} : {value}")
+
+    logger.debug(f"Query lookup: {query} : {value}")
+    candidates = SectionToken.objects.filter(query).prefetch_related("token", "section")
+    logger.debug(f"Found {candidates.count()} candidates.")
+    logger.debug(f"Query: {candidates.query}")
+    return candidates
+
+        
+
+
+
+
+
 def identify_sections(tokens: QuerySet) -> QuerySet:
     """
     Identify sections related to a list of SectionTokens.
     """
     token_ids = tokens.values_list('id', flat=True)
-    return Section.objects.filter(sectiontoken__id__in=token_ids, type="sentence").distinct()
+    return Section.objects.filter(sectiontoken__id__in=token_ids,type="sentence").distinct()
 
 def filter_sections_by_logic(candidate_sections: QuerySet, token_search_inputs: List[Dict]) -> QuerySet:
     """

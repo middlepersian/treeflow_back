@@ -6,13 +6,14 @@
         </div>
         <div id="search-type" class="flex flex-row items-center gap-4 m-4">
             <select id="search-type-selection" class="rounded" name="layout_selection" hx-get="{% url 'search:search' %}" hx-target="#search-page-container" hx-swap="outerHTML">
-                <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
+                <option value="logical-section" {% if layout_selection == "logical-section" %}selected{% endif %}>Section - Logical operators</option>
+                <option value="logical-token" {% if layout_selection == "logical-token" %}selected{% endif %}>Token - Logical operators</option>
                 <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
             </select>
             <label class="font-bold text-gray-900 whitespace-nowrap">
                 Search tokens
                 {% if layout_selection == "distance" %}by looking for entries with a specific distance between them{% endif %}
-                {% if layout_selection == "logical" %}by combining queries using logical operators{% endif %}
+                {% if "logical" in layout_selection %}by combining queries using logical operators{% endif %}
             </label>
         </div>
         <div id="search-forms" class="overflow-x-auto text-center">

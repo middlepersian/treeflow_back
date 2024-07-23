@@ -8,7 +8,7 @@
         console.log('{{queries}}')
       </script>
       <div>
-        <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+        <p class="font-semibold capitalize"><a href="/corpus/sentence/{{section.id}}" target="blank">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</a></p>
         {% for section_token in section.tokens.all %}
           <span class="{% highlight_if_match section_token.transcription queries %}">{{ section_token.transcription }}</span>
         {% empty %}

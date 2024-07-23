@@ -34,5 +34,4 @@ class LogicalForm(forms.ModelForm):
 
 
 DistanceFormSet = modelformset_factory(SearchCriteria, form=DistanceForm, extra=1)
-
 LogicalFormSet = modelformset_factory(SearchCriteria, form=LogicalForm, extra=1)

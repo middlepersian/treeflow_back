@@ -20,6 +20,8 @@ class SearchCriteria(models.Model):
         ("avestan", "Avestan"),
         ("gloss", "Gloss"),
         ("lemmas__word", "Lemma"),
+        ("senses__sense", "Sense"),
+        ("token_pos__pos", "POS"),
         # ("created_at", "Created"),
     ]
 
@@ -72,12 +74,9 @@ class SearchCriteria(models.Model):
 
     logical_operator = models.CharField(
         blank=True,
-        choices=[("AND", "AND"), ("OR", "OR")],
+        choices=[("AND", "AND"), ("OR", "OR"), ("NOT", "NOT")],
         default="AND",
     )
 
     # TODO: Missing fields
-    # lemmas
-    # senses
-    # pos
     # features

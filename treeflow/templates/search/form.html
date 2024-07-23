@@ -54,7 +54,7 @@
         </div>
     {% endif %}
 
-    {% if layout == "distance" and not firstForm %}
+    {% if "distance" in layout and not firstForm %}
         <div id="distance-values" class="flex flex-col pt-4">
             <label class="text-sm font-semibold text-gray-900">
                 Distance to anchor in steps
@@ -66,7 +66,7 @@
         </div>
     {% endif %}
 
-    {% if layout == "logical" and not firstForm %}
+    {% if "logical" in layout  and not firstForm %}
         <div id="logical-values" class="flex flex-row justify-between gap-4 pt-4">
             <label class="font-medium text-gray-900">
                 Logical operator
