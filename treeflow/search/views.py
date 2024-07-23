@@ -38,12 +38,16 @@ def search_page(request):
         "layout_selection": layout_selection,
         "results": Section.objects.none(),
     }
-    request.session.flush()
+
+    # Clear session data
+    if 'results' in request.session:
+        del request.session['results']
+    if 'formset_data' in request.session:
+        del request.session['formset_data']
 
     if request.headers.get("HX-Request"):
         return render(request, "search/_partial.html", context)
 
-    return render(request, "pages/search.html", context)
     return render(request, "pages/search.html", context)
 
 def results_view(request):
