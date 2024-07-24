@@ -8,7 +8,7 @@
             <select id="search-type-selection" class="rounded" name="layout_selection" hx-get="{% url 'search:search' %}" hx-target="#search-page-container" hx-swap="outerHTML">
                 <option value="logical-section" {% if layout_selection == "logical-section" %}selected{% endif %}>Section - Logical operators</option>
                 <option value="logical-token" {% if layout_selection == "logical-token" %}selected{% endif %}>Token - Logical operators</option>
-                <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
+                <option value="distance-section" {% if layout_selection == "distance-section" %}selected{% endif %}>Token distance</option>
             </select>
             <label class="font-bold text-gray-900 whitespace-nowrap">
                 Search tokens
