@@ -21,7 +21,7 @@ class SearchCriteria(models.Model):
         ("gloss", "Gloss"),
         ("lemmas__word", "Lemma"),
         ("senses__sense", "Sense"),
-        ("token_pos__pos", "POS"),
+        ("pos_token__pos", "POS"),
         # ("created_at", "Created"),
     ]
 
