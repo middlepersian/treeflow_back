@@ -12,7 +12,7 @@
             </select>
             <label class="font-bold text-gray-900 whitespace-nowrap">
                 Search tokens
-                {% if layout_selection == "distance" %}by looking for entries with a specific distance between them{% endif %}
+                {% if "distance" in layout_selection %}by looking for entries with a specific distance between them{% endif %}
                 {% if "logical" in layout_selection %}by combining queries using logical operators{% endif %}
             </label>
         </div>

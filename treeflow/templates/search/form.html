@@ -54,7 +54,7 @@
         </div>
     {% endif %}
 
-    {% if "distance" in layout and not firstForm %}
+    {% if layout == "distance-section" and not firstForm %}
         <div id="distance-values" class="flex flex-col pt-4">
             <label class="text-sm font-semibold text-gray-900">
                 Distance to anchor in steps
