@@ -5,7 +5,10 @@
   <div class="flex flex-col gap-2 p-4">
     {% for section in page_obj %}
       <div>
-        <p class="font-semibold capitalize"><a href="/corpus/sentence/{{section.id}}" target="blank">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</a></p>
+        <div class="flex flex-row gap-2">
+          <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+          {% include "search/section-links.html" with section=section %}
+        </div>
         {% for section_token in section.tokens.all %}
           <span class="">{{ section_token.transcription }}</span>
         {% empty %}

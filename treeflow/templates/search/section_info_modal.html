@@ -1,0 +1,38 @@
+<div class="flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-md p-2 mx-auto bg-white rounded-lg shadow-xl">
+    <h2 class="m-4 text-lg font-bold">{{ section.text }}</h2>
+    <div class="flex flex-row justify-center w-full gap-4">
+      <div class="flex flex-col text-right">
+        <div>ID:</div>
+        <div>Type:</div>
+        <div>Number:</div>
+        <div>Identifier:</div>
+        <div>Text Identifier:</div>
+        <div>Translation(s):</div>
+      </div>
+      <div class="flex flex-col">
+        <div>{{ section.id }}</div>
+        <div>{{ section.type|title }}</div>
+        <div>{{ section.number|floatformat:'0' }}</div>
+        <div>{{ section.identifier }}</div>
+        <div>{{ section.text.identifier }}</div>
+        <div class="flex flex-col gap-2 overflow-y-auto max-h-48 scrollbar-thin">
+          {% for sense in section.senses.all %}
+            {% if sense.sense %}
+              <div class="p-1 rounded-md bg-off-white">
+                <span class="font-semibold text-off">{{ sense.language }}</span> {{ sense.sense }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <button class="px-4 py-2 text-white rounded bg-error-graded-600 hover:bg-error-graded-800" onclick="closeSectionInfoModal()">Close</button>
+  </div>
+</div>
+
+<script>
+  function closeSectionInfoModal() {
+    document.getElementById('section-info-modal').classList.add('hidden')
+  }
+</script>
