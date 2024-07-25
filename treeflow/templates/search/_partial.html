@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <div id="search-page-container" class="flex flex-col gap-4 p-4">
     <div id="search" class="flex flex-col border shadow shadow-black/10">
         <div class="flex items-center justify-center w-full h-12 font-semibold shadow shadow-black/10">
@@ -19,7 +19,7 @@
             {% include "search/formset.html" %}
         </div>
     </div>
-    <div id="results" class="flex flex-col border shadow shadow-black/10">
+    <div id="results-div" class="flex-col hidden border shadow shadow-black/10">
         <div class="flex items-center justify-center w-full h-12 font-semibold shadow shadow-black/10">
             <h3>Results</h3>
         </div>
@@ -30,6 +30,8 @@
         </div>
     </div>
 </div>
+
+<div id="section-info-modal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50"></div>
 
 <script>
   const addForm = (buttonElement) => {
@@ -59,6 +61,14 @@
   }
 
   const activateLoadingSVG = () => {
+    document.getElementById('results-list').innerHTML = '';
+
+    const resultsDiv = document.getElementById('results-div');
+    if (resultsDiv.classList.contains('hidden')) {
+      resultsDiv.classList.remove('hidden');
+      resultsDiv.classList.add('flex');
+    }
+
     const loadingIndicator = document.getElementById('loadingIndicator');
     if (loadingIndicator.classList.contains('hidden')) {
       loadingIndicator.classList.remove('hidden');

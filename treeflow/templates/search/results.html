@@ -8,7 +8,10 @@
         console.log('{{queries}}')
       </script>
       <div>
-        <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+        <div class="flex flex-row gap-2">
+          <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+          {% include "search/section-links.html" with section=section %}
+        </div>
         {% for section_token in section.tokens.all %}
           <span class="{% highlight_if_match section_token.transcription queries %}">{{ section_token.transcription }}</span>
         {% empty %}
