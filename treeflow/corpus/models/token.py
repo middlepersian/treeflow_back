@@ -1,7 +1,12 @@
 import uuid as uuid_lib
+from typing import List
+
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.constraints import UniqueConstraint
+
+import treeflow.corpus.models
 from treeflow.utils.normalize import strip_and_normalize
 from django.db import transaction
 from django.utils import timezone
@@ -9,6 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Token(models.Model):
+    NEW_NUMBER_GAP = 0.01
 
     id = models.UUIDField(
         primary_key=True, default=uuid_lib.uuid4, editable=False)
@@ -20,24 +26,24 @@ class Token(models.Model):
     visible = models.BooleanField(default=True)
 
     text = models.ForeignKey('Text', on_delete=models.CASCADE,
-                             null=True, blank=True, related_name='token_text')
+                             null=True, blank=True, related_name='text_tokens')
     image = models.ForeignKey('images.Image', on_delete=models.CASCADE,
-                              null=True, blank=True, related_name='token_image')
+                              null=True, blank=True, related_name='image_tokens')
 
     language = models.CharField(max_length=3, null=True, blank=True)
     transcription = models.CharField(max_length=50, null=True, blank=True)
     transliteration = models.CharField(max_length=50, null=True, blank=True)
     lemmas = models.ManyToManyField(
-        'dict.Lemma', blank=True, through='TokenLemma', related_name='token_lemmas')
+        'dict.Lemma', blank=True, through='TokenLemma', related_name='lemma_tokens')
     senses = models.ManyToManyField(
-        'dict.Sense', blank=True, through='TokenSense', related_name='token_senses')
+        'dict.Sense', blank=True, through='TokenSense', related_name='sense_tokens')
 
     avestan = models.CharField(max_length=50, null=True, blank=True)
     previous = models.OneToOneField('self',
-                                    related_name='next',
-                                    blank=True,
-                                    null=True,
-                                    on_delete=models.SET_NULL, db_index=True)
+                                     related_name='next',
+                                     blank=True,
+                                     null=True,
+                                     on_delete=models.SET_NULL)
 
     gloss = models.TextField(blank=True, null=True)
 
@@ -49,11 +55,11 @@ class Token(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_tokens')
 
-    modified_at = models.DateTimeField(auto_now=True)  
+    modified_at = models.DateTimeField(auto_now=True)
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name='modified_tokens',
         blank=True
     )
@@ -64,14 +70,13 @@ class Token(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['text', 'number'], name='token_text_number'
-            )
+            ),
         ]
         indexes = [
             models.Index(fields=['transcription']),
             models.Index(fields=['transliteration']),
             models.Index(fields=['number']),
             models.Index(fields=['text']),
-            #add a composite index on number, text, language, transcription
             models.Index(fields=['number', 'text', 'language', 'transcription']),
         ]
 
@@ -81,45 +86,33 @@ class Token(models.Model):
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         user = kwargs.pop('user', None)
-        # normalize transcription
+
         if self.transcription:
             self.transcription = strip_and_normalize('NFC', self.transcription)
 
-        # normalize transliteration
         if self.transliteration:
-            self.transliteration = strip_and_normalize(
-                'NFC', self.transliteration)
+            self.transliteration = strip_and_normalize('NFC', self.transliteration)
 
-        # normalize language
-        if self.language:
-            # lowercase
-            self.language = self.language.strip().lower()
-
-        # normalize avestan
         if self.avestan:
             self.avestan = strip_and_normalize('NFC', self.avestan)
 
-        # normalize gloss
         if self.gloss:
             self.gloss = strip_and_normalize('NFC', self.gloss)
 
-        # Handle the user for created_by and modified_by
+        if self.language:
+            self.language = self.language.strip().lower()
+
         if is_new and user:
             self.created_by = user
         elif not is_new:
             self.modified_at = timezone.now()
             self.modified_by = user
-
-            # Ensure 'modified_at' and 'modified_by' are included in 'update_fields'
             if 'update_fields' in kwargs:
                 update_fields = set(kwargs['update_fields'])
                 update_fields.update({'modified_at', 'modified_by'})
                 kwargs['update_fields'] = list(update_fields)
 
-        # Save the instance
         super().save(*args, **kwargs)
-
-    MIN_GAP = 0.01  # Define a class-level constant for the minimum gap
 
     @staticmethod
     def find_nearest_tokens(token_number, text_id):
@@ -141,7 +134,7 @@ class Token(models.Model):
             previous_token, next_token = cls.find_nearest_tokens(
                 reference_token.number, text_id)
             before_number = previous_token.number if previous_token else (
-                reference_token.number - cls.MIN_GAP)
+                reference_token.number - cls.NEW_NUMBER_GAP)
             after_number = reference_token.number
             new_number = cls.calculate_insert_number(
                 before_number, after_number)
@@ -180,7 +173,7 @@ class Token(models.Model):
 
             # Prepare and validate the new token number based on the position it should take.
             before_number = reference_token.number
-            after_number = next_token.number if next_token else (before_number + cls.MIN_GAP)
+            after_number = next_token.number if next_token else (before_number + cls.NEW_NUMBER_GAP)
             new_number = cls.calculate_insert_number(before_number, after_number)
 
             # Create the new token with the proper number and additional data provided.
@@ -206,7 +199,6 @@ class Token(models.Model):
 
             return new_token
 
-
     @classmethod
     def delete_token(cls, token_id):
         with transaction.atomic():
@@ -228,6 +220,9 @@ class Token(models.Model):
 
             # Now delete the token
             token_to_delete.delete()
+
+    def sentence(self) -> 'treeflow.corpus.models.Section':
+        return treeflow.corpus.models.Section.objects.get(type='sentence', tokens=self)
 
 
 class TokenLemma(models.Model):

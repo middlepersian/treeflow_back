@@ -23,7 +23,7 @@ def get_tokens_between_subsections(subsection_identifier:str) -> QuerySet:
     except Text.DoesNotExist:
         logger.info("Text with id {} does not exist".format(text_id))
         return Token.objects.none()
-    
+
     # get next section of the same type
     try:
         next_section = Section.objects.filter(text__id=text.id).filter(type=section.type).filter(number__gt=section.number).order_by("number").prefetch_related("tokens").first()
@@ -41,7 +41,7 @@ def get_tokens_between_subsections(subsection_identifier:str) -> QuerySet:
     else:
         try:
             text = section.text
-            tokens = Token.objects.filter(Q(text__id=text.id)).filter(Q(number__range=[section.tokens.first().number, text.token_text.last().number]))
+            tokens = Token.objects.filter(Q(text__id=text.id)).filter(Q(number__range=[section.tokens.first().number, text.text_tokens.last().number]))
             return tokens
         except Token.DoesNotExist:
             logger.info("No tokens found")
@@ -58,4 +58,3 @@ class Command(BaseCommand):
         subsection_identifier = options['subsection_identifier']
 
 
-        

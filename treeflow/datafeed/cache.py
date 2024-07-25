@@ -64,7 +64,7 @@ def cache_all_texts():
     current_cache = cache.get(cache_key_texts)
 
     if not current_cache:
-        texts = Text.objects.annotate(token_count=Count('token_text')).order_by('identifier')
+        texts = Text.objects.annotate(token_count=Count('text_tokens')).order_by('identifier')
         cache.set(cache_key_texts,  texts, timeout=None)  # Set no timeout
         logger.info("Cache miss for texts - Texts have been updated in the cache.")
     else:
@@ -74,7 +74,7 @@ def cache_all_texts():
 
 def cache_sections_for_texts():
     logger.info("Starting cache_sections_for_texts task")
-    
+
     # Call cache_all_texts to ensure texts are cached
     cache_all_texts()
 
@@ -82,15 +82,15 @@ def cache_sections_for_texts():
     # we can retrieve the cached texts directly.
     cache_key_texts = "all_texts"
     texts = cache.get(cache_key_texts)
-    
+
     # Proceed with caching sections for each text
     for text in texts:
         cache_key = f"sections_for_text_{text.id}"
         all_sections = Section.objects.filter(text=text)
         sentence_ids = list(all_sections.filter(type='sentence').values_list('id', flat=True))
-        section_types = set(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())        
+        section_types = set(all_sections.exclude(type='sentence').values_list('type', flat=True).distinct())
         cache.set(cache_key, {
-            'sentence_ids': sentence_ids,  
+            'sentence_ids': sentence_ids,
             'section_types': section_types,
         })
         logger.info(f"Sections cached for text: {text.id}")
@@ -98,22 +98,22 @@ def cache_sections_for_texts():
 def cache_manuscripts():
     logger.info("Starting cache_manuscripts task")
     cache_key_manuscripts = "manuscripts"
-    
+
     logger.info("Fetching manuscripts from database.")
     manuscripts = Source.objects.filter(type="manuscript").order_by("identifier")
-    
+
     logger.info("Manuscripts cached")
     cache.set(cache_key_manuscripts, manuscripts)
 
 
-def cache_images(): 
+def cache_images():
     logger.info("Starting cache_images task")
     cache_key_images = "images"
     images = Image.objects.select_related('source')
     cache.set(cache_key_images, images)
     logger.info("Images cached")
 
-    
+
 def cache_lemmas():
     logger.info("Starting cache_lemmas task")
     cache_key_lemmas = "lemmas"
