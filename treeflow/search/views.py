@@ -181,7 +181,7 @@ def get_results(criteria: List,query_formset_type) -> QuerySet:
         sections = identify_sections(anchor_tokens)
 
     elif query_formset_type == "distance-section":
-        sections = distance(criteria)
+        sections = distance_search(criteria)
     else:
         return Section.objects.none()
     
@@ -283,10 +283,10 @@ def filter_sections_by_logic(candidate_sections: QuerySet, token_search_inputs: 
 
     return candidate_sections
 
-def distance(filter_tokens: List[Dict]) -> QuerySet:
+def distance_search(filter_tokens: List[Dict]) -> QuerySet:
     anchor_criteria = filter_tokens[0]
     search_filters = filter_tokens[1:]
-    sections = distance5(anchor_criteria,search_filters)
+    sections = distance(anchor_criteria,search_filters)
     return sections
 
 def create_query_dict_from_criteria(criteria: Dict,model_ref="",) -> dict:
@@ -297,24 +297,10 @@ def create_query_dict_from_criteria(criteria: Dict,model_ref="",) -> dict:
     case_sensitive = _criteria.pop("case_sensitive", False)
     case_insensitive_prefix = "" if case_sensitive else "i"
     model_ref = model_ref + "__" if model_ref else ""
-    query_type_str = ""
-    match query_type:
-        case "exact":
-            query_type_str = "exact"
-        case "prefix":
-            query_type_str = "startswith"
-        case "suffix":
-            query_type_str = "endswith"
-        case "regex":
-            query_type_str = "regex"
-        case "contains":
-            query_type_str = "contains"
-        case _:
-            query_type_str = "contains"
 
-    return {f"{model_ref}{query_field}__{case_insensitive_prefix}{query_type_str}": value}
+    return {f"{model_ref}{query_field}__{case_insensitive_prefix}{query_type}": value}
 
-def distance5(anchor_criteria: dict, search_criteria: list[dict]):
+def distance(anchor_criteria: dict, search_criteria: list[dict]):
     anchors = Section.objects.filter(
         Q(**create_query_dict_from_criteria(anchor_criteria, "tokens")),
         tokens__number_in_sentence__isnull=False,
