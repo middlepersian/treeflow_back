@@ -5,12 +5,14 @@ from typing import Dict, List
 from django.core.paginator import Paginator
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render
+from django.core.cache import cache
 from django.views.decorators.http import require_GET
 
+from uuid import uuid4
 
-from treeflow.corpus.models import Section, SectionToken
+from treeflow.corpus.models import Section, SectionToken, Token
 
 from django.forms import BaseModelFormSet
 
@@ -62,6 +64,7 @@ def results_view(request):
     page_number = request.GET.get("page", 1)
     results_per_page = request.GET.get("results_per_page", 10)
     results = None
+    key = None 
     queries.clear()
 
     
@@ -76,7 +79,7 @@ def results_view(request):
             
             query_formset_type = layout_selection
 
-            results = handle_request(request,formset,query_formset_type)
+            results, key = handle_request(request,formset,query_formset_type)
         except Exception as e:
             logger.error(f"Error processing request: {e}")
             results = Section.objects.none()
@@ -88,6 +91,7 @@ def results_view(request):
         formset_data_json = request.session.get('formset_data', None)
         json.loads(formset_data_json)
         formset_data = json.loads(formset_data_json)
+        key = request.session.get("key", None)
         for form in formset_data:
             queries.add(form["query"])
 
@@ -115,6 +119,7 @@ def results_view(request):
         {
             "page_obj": page_obj,
             "queries": queries,
+            "key": key,
             "total_pages": total_pages,
             "results_settings": {
                 "per_page": results_per_page,
@@ -128,6 +133,7 @@ def handle_request(request: HttpRequest,formset:BaseModelFormSet,query_formset_t
     """
     Handle form submission for search results.
     """
+    key = None
     if formset.is_valid():
         logger.debug("Formset is valid.")
         data = [f for f in formset.cleaned_data if f]
@@ -135,10 +141,11 @@ def handle_request(request: HttpRequest,formset:BaseModelFormSet,query_formset_t
         request.session['formset_data'] = json.dumps(data)
         
         logger.debug(f"Before get_results")
-        results= get_results(data,query_formset_type)
+        results,key= get_results(data,query_formset_type)
         logger.debug(f"After get_results")
         logger.debug(f"Found {len(results)} results.")
         request.session['results'] = json.dumps(list(results.values()), cls=DjangoJSONEncoder)
+        request.session["key"] = key
     else:
         # If formset is invalid, check if there's saved formset data in session
         formset_data_json = request.session.get('formset_data', None)
@@ -150,12 +157,14 @@ def handle_request(request: HttpRequest,formset:BaseModelFormSet,query_formset_t
             logger.error("Formset is invalid and no session data found.")
             results = Section.objects.none()
     
-    return results
+    return results, key
 
 def get_results(criteria: List,query_formset_type) -> QuerySet:
     """
     Retrieve search results based on given criteria.
     """
+    
+    key = None
     if not criteria:
         logger.error("No criteria provided")
         return Section.objects.none()
@@ -170,24 +179,24 @@ def get_results(criteria: List,query_formset_type) -> QuerySet:
    
     if query_formset_type == "logical-section":
         logger.debug("Retrieving tokens based on anchor criterion.")
-        anchor_tokens = retrieve_tokens(anchor_criterion)
+        anchor_tokens, key = retrieve_tokens(anchor_criterion)
         sections = identify_sections(anchor_tokens)
         if filters:
             if "logical_operator" in anchor_criterion:
-                sections = filter_sections_by_logic(sections, filters)
+                sections = filter_sections_by_logic(sections, filters, key)
     
     elif query_formset_type == "logical-token":
-        anchor_tokens = retrieve_tokens_with_filters(criteria)
+        anchor_tokens, key = retrieve_tokens_with_filters(criteria)
         sections = identify_sections(anchor_tokens)
 
     elif query_formset_type == "distance-section":
-        sections = distance_search(criteria)
+        sections, key = distance_search(criteria)
     else:
         return Section.objects.none()
     
-    return sections
+    return sections, key
 
-def retrieve_tokens(criteria: Dict) -> QuerySet:
+def retrieve_tokens(criteria: Dict, key=None) -> QuerySet:
     """
     Retrieve SectionTokens based on the search criteria.
     """
@@ -201,11 +210,11 @@ def retrieve_tokens(criteria: Dict) -> QuerySet:
         return SectionToken.objects.none()
 
     query_lookup = {
-        "exact": f"token__{query_field}__{case_insensitive_prefix}exact",
-        "prefix": f"token__{query_field}__{case_insensitive_prefix}startswith",
-        "suffix": f"token__{query_field}__{case_insensitive_prefix}endswith",
-        "regex": f"token__{query_field}__{case_insensitive_prefix}regex",
-        "contains": f"token__{query_field}__{case_insensitive_prefix}contains",
+        "exact": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "prefix": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "suffix": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "regex": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "contains": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
     }
     logger.debug(f"Query lookup: {query_lookup.get(query_type, query_lookup['contains'])} : {value}")
     query = Q(**{query_lookup.get(query_type, query_lookup["contains"]): value})
@@ -217,7 +226,21 @@ def retrieve_tokens(criteria: Dict) -> QuerySet:
     candidates = SectionToken.objects.filter(query).prefetch_related("token", "section")
     logger.debug(f"Found {candidates.count()} candidates.")
     logger.debug(f"Query: {candidates.query}")
-    return candidates
+    
+    if not key:
+        key = f"{uuid4()}"
+        if candidates:
+            candiates_list = list(candidates.values_list("token_id",flat=True))
+            logger.debug(f"ANCHORS: Setting cache with key: {key} and {len(candiates_list)} tokens.")
+            cache.set(key+"anchors",candiates_list, timeout=120)
+    else:
+        
+        if candidates:
+            candiates_list = list(candidates.values_list("token_id",flat=True))
+            logger.debug(f"HITS: Setting cache with key: {key} and {len(candiates_list)} tokens.")
+            cache.set(key+"hits",candiates_list, timeout=120)
+    
+    return candidates, key
 
 def retrieve_tokens_with_filters(filters: List[Dict]) -> QuerySet:
     query = Q(section__type__exact="sentence")
@@ -234,11 +257,11 @@ def retrieve_tokens_with_filters(filters: List[Dict]) -> QuerySet:
         case_insensitive_prefix = "" if case_sensitive else "i"
         
         query_lookup = {
-        "exact": f"token__{query_field}__{case_insensitive_prefix}exact",
-        "prefix": f"token__{query_field}__{case_insensitive_prefix}startswith",
-        "suffix": f"token__{query_field}__{case_insensitive_prefix}endswith",
-        "regex": f"token__{query_field}__{case_insensitive_prefix}regex",
-        "contains": f"token__{query_field}__{case_insensitive_prefix}contains",
+        "exact": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "startswith": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "endwith": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "regex": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
+        "contains": f"token__{query_field}__{case_insensitive_prefix}{query_type}",
         }
 
         if i == 0 or criteria['logical_operator'] == "AND":
@@ -252,34 +275,38 @@ def retrieve_tokens_with_filters(filters: List[Dict]) -> QuerySet:
             if v and not any(x in k for x in ["logical", "distance", "id"]):
                 query &= Q(**{k: v})
         
-        logger.debug(f"Query lookup: query: {query} : {value}")
 
-    logger.debug(f"Query lookup: {query} : {value}")
     candidates = SectionToken.objects.filter(query).prefetch_related("token", "section")
-    logger.debug(f"Found {candidates.count()} candidates.")
-    logger.debug(f"Query: {candidates.query}")
-    return candidates
+    key = f"{uuid4()}"
+    if candidates:
+        cache.set(key+"anchors", list(Token.objects.filter(id__in=[c.token.id for c in candidates]).only("id").values_list("id",flat=True)), timeout=120)
+
+    return candidates, key
 
         
 def identify_sections(tokens: QuerySet) -> QuerySet:
     """
     Identify sections related to a list of SectionTokens.
     """
+    logger.debug(f"Tokens: {tokens}")
     token_ids = tokens.values_list('id', flat=True)
     return Section.objects.filter(sectiontoken__id__in=token_ids,type="sentence").distinct()
 
-def filter_sections_by_logic(candidate_sections: QuerySet, token_search_inputs: List[Dict]) -> QuerySet:
+def filter_sections_by_logic(candidate_sections: QuerySet, token_search_inputs: List[Dict], key) -> QuerySet:
     """
     Filter sections based on logical operators (AND/OR).
     """
     for token_search_input in token_search_inputs:
-        filter_tokens = retrieve_tokens(token_search_input)
+        filter_tokens, key = retrieve_tokens(token_search_input,key)
         filter_sections = identify_sections(filter_tokens)
-
+        
         if token_search_input.get("logical_operator") == "AND":
             candidate_sections = candidate_sections.filter(id__in=filter_sections.values_list("id", flat=True))
         else:  # OR
             candidate_sections |= filter_sections
+            
+    # update cache with hits
+    
 
     return candidate_sections
 
@@ -301,6 +328,13 @@ def create_query_dict_from_criteria(criteria: Dict,model_ref="",) -> dict:
     return {f"{model_ref}{query_field}__{case_insensitive_prefix}{query_type}": value}
 
 def distance(anchor_criteria: dict, search_criteria: list[dict]):
+    key = None
+    section_ids = []
+    anchor_token_ids = []
+    search_token_ids = []
+    
+    sections = Section.objects.none()
+    
     anchors = Section.objects.filter(
         Q(**create_query_dict_from_criteria(anchor_criteria, "tokens")),
         tokens__number_in_sentence__isnull=False,
@@ -314,9 +348,15 @@ def distance(anchor_criteria: dict, search_criteria: list[dict]):
         )
     logger.debug(f"Found {anchors.count()} anchors.")
     
-    section_ids = []
+
     for anchor in anchors:
-        anchor_tokens = anchor.tokens.filter(Q(**create_query_dict_from_criteria(anchor_criteria))).values_list('number_in_sentence', flat=True)
+        anchor_tokens = anchor.tokens.filter(Q(**create_query_dict_from_criteria(anchor_criteria))).only("id","number_in_sentence")
+
+        anchor_token_ids.append(anchor_tokens.values_list('id', flat=True))
+
+        anchor_tokens = anchor_tokens.values_list('number_in_sentence', flat=True)
+
+        
         for criteria in search_criteria:
             distance = criteria.get("distance", 1)
             distance_type = criteria.get("distance_type", "after")
@@ -331,10 +371,27 @@ def distance(anchor_criteria: dict, search_criteria: list[dict]):
             query = {"number_in_sentence__in": numbers}
 
             if anchor.tokens.filter(Q(Q(**create_query_dict_from_criteria(criteria), **query))).exists():
+
                 section_ids.append(anchor.id)
+
+                search_token_ids.append(anchor.tokens.filter(Q(Q(**create_query_dict_from_criteria(criteria), **query))).values_list('id', flat=True))
+
                 continue
 
     sections = Section.objects.filter(id__in=section_ids).distinct().prefetch_related("tokens","text")
-
-    return sections
     
+    key = f"{uuid4()}"
+    if section_ids:
+        cache.set(key+"hits", list(Token.objects.filter(id__in=[t for tokens in search_token_ids for t in tokens]).only("id").values_list("id",flat=True)), timeout=120)
+        cache.set(key+"anchors", list(Token.objects.filter(id__in=[t for tokens in anchor_token_ids for t in tokens]).only("id").values_list("id",flat=True)), timeout=120)
+
+    return sections, key
+    
+def get_anchors_from_cache(request,key_value) -> list:
+    logger.debug(f"Getting anchors from cache with key: {key_value}")
+    anchors = cache.get(str(key_value)+"anchors",[])
+    cache.set(str(key_value)+"anchors",anchors, timeout=120)
+    hits = cache.get(str(key_value)+"hits",[])
+    cache.set(str(key_value)+"hits",hits, timeout=120)
+    logger.debug(f"Found {len(anchors)} anchors.")
+    return JsonResponse({"anchors":anchors,"hits":hits})
