@@ -4,37 +4,46 @@
 
 {% if key %}
 <script>
-  key = "{{key}}";
+  function fetchHighlighting(){
+    key = "{{key}}";
 
-  fetch('{% url "search:anchors" key_value=key %}').then(response => response.json()).then(data => {
+    fetch('{% url "search:anchors" key_value=key %}').then(response => response.json()).then(data => {
 
-    document.querySelectorAll('span').forEach(span => {
-      const id = span.getAttribute('id');
-      if (data.anchors.includes(id)) {
-        span.classList.add('text-blue-500');
-      } else if (data.hits && data.hits.includes(id)) {
-        span.classList.add('text-red-500');
-      }
+      document.querySelectorAll('span.token-span').forEach(span => {
+        const id = span.getAttribute('id');
+        if (data.anchors.includes(id)) {
+          span.classList.add('font-bold', 'text-off');
+        } 
+        if (data.hits && data.hits.includes(id)) {
+          span.classList.add('bg-main', 'font-bold', 'text-white');
+        } 
+        if (span.textContent == "None") {
+          span.classList.add('text-red-500');
+        }
+      });
+    }).catch(error => {
+      console.error(error);
     });
-  }).catch(error => {
-    console.error(error);
-  });
+  }
+  
+  document.addEventListener('htmx:afterSwap', () => { fetchHighlighting(); });
+  fetchHighlighting();
 </script>
 {% endif %}
 
 {% endblock %}
 
 <div>
-  {% include 'search/pagination.html' with page_obj=pasge_obj queries=queries total_pages=total_pages %}
+  {% include 'search/pagination.html' with page_obj=page_obj queries=queries total_pages=total_pages %}
   <div class="flex flex-col gap-2 p-4">
     {% for section in page_obj %}
       <div>
         <div class="flex flex-row gap-2" id="{{section.id}}">
-          <p class="font-semibold capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
+          <p class="font-semibold capitalize">{{ section.text }} ({{ section.text.series }}), {{ section.type }} {{ section.number|floatformat:'0' }}</p>
           {% include "search/section-links.html" with section=section %}
         </div>
         {% for section_token in section.tokens.all %}
-          <span class="" id="{{section_token.id}}">{{ section_token.transcription }}</span>
+          <span class="token-span" id="{{section_token.id}}">{{ section_token.transcription }}</span>
         {% empty %}
           <span>{{ section_token.transcription }}</span>
         {% endfor %}
