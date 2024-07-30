@@ -1,7 +1,7 @@
 <div class="flex items-center justify-center min-h-screen">
-  <div class="w-full max-w-md p-2 mx-auto bg-white rounded-lg shadow-xl">
-    <h2 class="m-4 text-lg font-bold">{{ section.text }}</h2>
-    <div class="flex flex-row justify-center w-full gap-4">
+  <div class="w-full p-2 mx-auto bg-white rounded-lg shadow-xl max-w-7xl">
+    <h2 class="m-4 text-lg font-bold">{{ section.text }} ({{ section.text.series }})</h2>
+    <div class="flex flex-row justify-center w-full gap-4 mb-4">
       <div class="flex flex-col text-right">
         <div>ID:</div>
         <div>Type:</div>
@@ -27,7 +27,92 @@
         </div>
       </div>
     </div>
-    <button class="px-4 py-2 text-white rounded bg-error-graded-600 hover:bg-error-graded-800" onclick="closeSectionInfoModal()">Close</button>
+
+    <div class="m-auto overflow-hidden overflow-x-auto scrollbar-thin">
+      <table>
+        <thead>
+          <tr>
+            <th class="sticky -left-[1px] bg-white pr-4 font-normal text-left border border-collapse">
+              <span class="p-1 rounded-md bg-off-graded-300">Section + line</span>
+            </th>
+            {% for part in section.tokens.all %}
+              <th class="font-normal text-left bg-gray-300 border border-collapse">
+                <div class="flex flex-col">
+                  {% for token in part.section_tokens.all %}
+                    <span class="whitespace-nowrap">{{ token.identifier }}</span>
+                  {% endfor %}
+                </div>
+              </th>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th class="sticky -left-[1px] bg-white pr-4 font-normal text-left border border-b-black border-collapse">
+              <span class="p-1 rounded-md bg-off-graded-300">Transcription</span>
+            </th>
+            {% for part in section.tokens.all %}
+              <th class="font-normal text-left border border-collapse border-b-black">{{ part.transcription }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sticky -left-[1px] bg-white pr-4 border border-collapse">
+              <span class="p-1 rounded-md bg-off-graded-300">Transliteration</span>
+            </td>
+            {% for part in section.tokens.all %}
+              <td class="border border-collapse">{{ part.transliteration }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="sticky -left-[1px] bg-white pr-4 border border-collapse">
+              <span class="p-1 rounded-md bg-off-graded-300">Translation</span>
+            </td>
+            {% for part in section.tokens.all %}
+              <td class="border border-collapse whitespace-nowrap">
+                {% for sense in part.senses.all %}
+                  <span>{{ sense.sense }}</span>
+                  {% if not forloop.last %}
+                    <span>|</span>
+                  {% endif %}
+                {% endfor %}
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="sticky -left-[1px] bg-white pr-4 border border-collapse">
+              <span class="p-1 rounded-md bg-off-graded-300">PoS</span>
+            </td>
+            {% for part in section.tokens.all %}
+              <td class="border border-collapse whitespace-nowrap">
+                {% for pos in part.pos_token.all %}
+                  <span>{{ pos.pos }}</span>
+                  {% if not forloop.last %}
+                    <span>|</span>
+                  {% endif %}
+                {% endfor %}
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="sticky -left-[1px] bg-white pr-4 border border-collapse">
+              <span class="p-1 rounded-md bg-off-graded-300 whitespace-nowrap">Features without type</span>
+            </td>
+            {% for part in section.tokens.all %}
+              <td class="border border-collapse whitespace-nowrap">
+                {% for feature in part.feature_token.all %}
+                  <span>{{ feature.feature_value }}</span>
+                  {% if not forloop.last %}
+                    <span>|</span>
+                  {% endif %}
+                {% endfor %}
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="px-4 py-2 mt-4 text-white rounded bg-error-graded-600 hover:bg-error-graded-800" onclick="closeSectionInfoModal()">Close</button>
   </div>
 </div>
 

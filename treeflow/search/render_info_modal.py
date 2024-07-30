@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from treeflow.corpus.models.section import Section
 
@@ -9,7 +9,7 @@ def render_info_modal(request):
     """
     
     section_id = request.GET.get("section_id", "")
-    section = Section.objects.get(id=section_id)
+    section = get_object_or_404(Section.objects.prefetch_related("tokens", "tokens__section_tokens", "tokens__pos_token", "tokens__feature_token", "tokens__senses"), id=section_id)
 
     context = {
         "section": section,
