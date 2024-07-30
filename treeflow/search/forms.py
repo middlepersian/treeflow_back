@@ -11,8 +11,9 @@ shared_fields = (
     "case_sensitive",
 )
 
-
 class DistanceForm(forms.ModelForm):
+    distance = forms.DecimalField(min_value=1)
+
     class Meta:
         model = SearchCriteria
         fields = (
@@ -21,7 +22,6 @@ class DistanceForm(forms.ModelForm):
             "distance_type",
         )
 
-
 class LogicalForm(forms.ModelForm):
     class Meta:
         model = SearchCriteria
@@ -29,9 +29,6 @@ class LogicalForm(forms.ModelForm):
             *shared_fields,
             "logical_operator",
         )
-
-
-
 
 DistanceFormSet = modelformset_factory(SearchCriteria, form=DistanceForm, extra=1)
 LogicalFormSet = modelformset_factory(SearchCriteria, form=LogicalForm, extra=1)
