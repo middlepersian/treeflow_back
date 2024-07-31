@@ -22,6 +22,12 @@ class SearchCriteria(models.Model):
         ("lemmas__word", "Lemma"),
         ("senses__sense", "Sense"),
         ("pos_token__pos", "POS"),
+        ("feature_token__feature_value", "Feature without type"),
+        ("comment_token__comment", "Comment"),
+        ("comment_token__uncertain", "Uncertain"),
+        ("comment_token__to_discuss", "To discuss"),
+        ("comment_token__new_suggestion", "New suggestion"),
+        ("text__series", "Sigle"),
         # ("created_at", "Created"),
     ]
 
@@ -78,5 +84,3 @@ class SearchCriteria(models.Model):
         default="AND",
     )
 
-    # TODO: Missing fields
-    # features
