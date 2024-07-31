@@ -10,6 +10,7 @@
     fetch('{% url "search:anchors" key_value=key %}').then(response => response.json()).then(data => {
 
       document.querySelectorAll('span.token-span').forEach(span => {
+        span.classList.remove('font-bold', 'text-off', 'bg-main', 'text-white', 'text-red-500');
         const id = span.getAttribute('id');
         if (data.anchors.includes(id)) {
           span.classList.add('font-bold', 'text-off');

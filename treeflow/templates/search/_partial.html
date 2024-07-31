@@ -1,4 +1,38 @@
 {% load static i18n %}
+{% block extra_head %}
+
+{% if key %}
+<script>
+  function fetchHighlighting(){
+    key = "{{key}}";
+
+    fetch('{% url "search:anchors" key_value=key %}').then(response => response.json()).then(data => {
+
+      document.querySelectorAll('span.token-span').forEach(span => {
+        span.classList.remove('font-bold', 'text-off', 'bg-main', 'text-white', 'text-red-500');
+        const id = span.getAttribute('id');
+        if (data.anchors.includes(id)) {
+          span.classList.add('font-bold', 'text-off');
+        } 
+        if (data.hits && data.hits.includes(id)) {
+          span.classList.add('bg-main', 'font-bold', 'text-white');
+        } 
+        if (span.textContent == "None") {
+          span.classList.add('text-red-500');
+        }
+      });
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+  
+  document.addEventListener('htmx:afterSwap', () => { fetchHighlighting(); });
+  fetchHighlighting();
+</script>
+{% endif %}
+
+{% endblock %}
+
 <div id="search-page-container" class="flex flex-col gap-4 p-4">
     <div id="search" class="flex flex-col border shadow shadow-black/10">
         <div class="flex items-center justify-center w-full h-12 font-semibold shadow shadow-black/10">
