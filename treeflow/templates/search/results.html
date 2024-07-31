@@ -1,23 +1,64 @@
-<div class="flex flex-col gap-2 p-2">
-  <script>
-    console.log('{{ queries }}')
-  </script>
-  {% for section in page_obj %}
-    <div>
-      <p class="capitalize">{{ section.type }} {{ section.number|floatformat:'0' }}, {{ section.text }}</p>
-      {% for section_token in section.tokens.all %}
-        <span class="{% if section_token.transcription in queries %}text-off-graded-600 font-bold {% endif %}">{{ section_token.transcription }}</span>
-      {% endfor %}
-    </div>
-  {% empty %}
-    <div id="no-results" class="flex items-center font-bold text-off-graded-700 gap-x-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-        <line x1="12" y1="9" x2="12" y2="13"></line>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </svg>
-      <p>No results found.</p>
-    </div>
-  {% endfor %}
-  {% include 'search/pagination.html' with page_obj=page_obj queries=queries %}
+{% load search_tags %}
+
+{% block extra_head %}
+
+{% if key %}
+<script>
+  function fetchHighlighting(){
+    key = "{{key}}";
+
+    fetch('{% url "search:anchors" key_value=key %}').then(response => response.json()).then(data => {
+
+      document.querySelectorAll('span.token-span').forEach(span => {
+        span.classList.remove('font-bold', 'text-off', 'bg-main', 'text-white', 'text-red-500');
+        const id = span.getAttribute('id');
+        if (data.anchors.includes(id)) {
+          span.classList.add('font-bold', 'text-off');
+        } 
+        if (data.hits && data.hits.includes(id)) {
+          span.classList.add('bg-main', 'font-bold', 'text-white');
+        } 
+        if (span.textContent == "None") {
+          span.classList.add('text-red-500');
+        }
+      });
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+  
+  document.addEventListener('htmx:afterSwap', () => { fetchHighlighting(); });
+  fetchHighlighting();
+</script>
+{% endif %}
+
+{% endblock %}
+
+<div>
+  {% include 'search/pagination.html' with page_obj=page_obj queries=queries total_pages=total_pages %}
+  <div class="flex flex-col gap-2 p-4">
+    {% for section in page_obj %}
+      <div>
+        <div class="flex flex-row gap-2" id="{{section.id}}">
+          <p class="font-semibold capitalize">{{ section.text }} ({{ section.text.series }}), {{ section.type }} {{ section.number|floatformat:'0' }}</p>
+          {% include "search/section-links.html" with section=section %}
+        </div>
+        {% for section_token in section.tokens.all %}
+          <span class="token-span" id="{{section_token.id}}">{{ section_token.transcription }}</span>
+        {% empty %}
+          <span>{{ section_token.transcription }}</span>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <div id="no-results" class="flex items-center font-bold text-off-graded-700 gap-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <p>No results found.</p>
+      </div>
+    {% endfor %}
+  </div>
+  {% include 'search/pagination.html' with page_obj=page_obj queries=queries total_pages=total_pages %}
 </div>

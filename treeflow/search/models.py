@@ -8,8 +8,8 @@ class SearchCriteria(models.Model):
     QUERY_TYPE_CHOICES = [
         ("exact", "Exact"),
         ("contains", "Contains"),
-        ("prefix", "Prefix"),
-        ("suffix", "Suffix"),
+        ("startswith", "Prefix"),
+        ("endswith", "Suffix"),
         ("regex", "Regex"),
     ]
 
@@ -19,6 +19,15 @@ class SearchCriteria(models.Model):
         ("transliteration", "Transliteration"),
         ("avestan", "Avestan"),
         ("gloss", "Gloss"),
+        ("lemmas__word", "Lemma"),
+        ("senses__sense", "Sense"),
+        ("pos_token__pos", "POS"),
+        ("feature_token__feature_value", "Feature without type"),
+        ("comment_token__comment", "Comment"),
+        ("comment_token__uncertain", "Uncertain"),
+        ("comment_token__to_discuss", "To discuss"),
+        ("comment_token__new_suggestion", "New suggestion"),
+        ("text__series", "Sigle"),
         # ("created_at", "Created"),
     ]
 
@@ -71,43 +80,7 @@ class SearchCriteria(models.Model):
 
     logical_operator = models.CharField(
         blank=True,
-        choices=[("AND", "AND"), ("OR", "OR")],
+        choices=[("AND", "AND"), ("OR", "OR"), ("NOT", "NOT")],
         default="AND",
     )
 
-    # TODO: Missing fields
-    # lemmas
-    # senses
-    # pos
-    # features
-
-
-class SearchSession(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, null=False, unique=True
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
-    )
-    session_id = models.CharField(max_length=255, null=True, blank=True)
-    results = ArrayField(models.UUIDField(default=uuid.uuid4), null=True, blank=True)
-    queries = ArrayField(
-        models.CharField(blank=True, default=""), null=True, blank=True
-    )
-
-    class Meta:
-        unique_together = (
-            "user",
-            "session_id",
-            "queries",
-        )
-
-
-class ResultFilter(models.Model):
-    text = models.ForeignKey(
-        "corpus.Text", null=True, blank=True, on_delete=models.CASCADE
-    )
-    section = models.ForeignKey(
-        "corpus.Section", null=True, blank=True, on_delete=models.CASCADE
-    )
-    remove_stopwords = models.BooleanField(default=False)
