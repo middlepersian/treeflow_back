@@ -288,6 +288,7 @@ def identify_sections(tokens: QuerySet) -> QuerySet:
     """
     Identify sections related to a list of SectionTokens.
     """
+    
     logger.debug(f"Tokens: {tokens}")
     token_ids = tokens.values_list('id', flat=True)
     return Section.objects.filter(sectiontoken__id__in=token_ids,type="sentence").distinct()
@@ -335,50 +336,97 @@ def distance(anchor_criteria: dict, search_criteria: list[dict]):
     
     sections = Section.objects.none()
     
+    # First: Get all Sections that contain the anchor Tokens
     anchors = Section.objects.filter(
         Q(**create_query_dict_from_criteria(anchor_criteria, "tokens")),
         tokens__number_in_sentence__isnull=False,
         type="sentence"
     ).distinct()
 
-    # filtering for sections that have all search criteria
+    # Filtering for sections that additionaly have all search criteria
     for criteria in search_criteria:
         anchors = anchors.filter(
             Q(**create_query_dict_from_criteria(criteria, "tokens")),
         )
     logger.debug(f"Found {anchors.count()} anchors.")
     
-
+    # Second: Check for each anchor if there is one anchor token, that meets all search criteria
     for anchor in anchors:
-        anchor_tokens = anchor.tokens.filter(Q(**create_query_dict_from_criteria(anchor_criteria))).only("id","number_in_sentence")
+        # Get the tokens of the anchor, that meet the anchor criteria
+        anchor_tokens = anchor.tokens.filter(Q(**create_query_dict_from_criteria(anchor_criteria)))
+        anchor_tokens_temp = anchor_tokens
 
         anchor_token_ids.append(anchor_tokens.values_list('id', flat=True))
-
-        anchor_tokens = anchor_tokens.values_list('number_in_sentence', flat=True)
-
         
-        for criteria in search_criteria:
+        # get the number of the anchor tokens in the sentence
+        anchor_tokens = anchor_tokens.values_list('number_in_sentence', flat=True)
+        
+        hit_candidates = {
+            anchor_token: [] for anchor_token in anchor_tokens
+        }
+        
+        search_token_canditates = []
+        criteria_resutlts = []
+        
+        """
+        Now get the distance and distance type for each search criteria
+        """
+        for i,criteria in enumerate(search_criteria):
             distance = criteria.get("distance", 1)
             distance_type = criteria.get("distance_type", "after")
-            anchor_token_distances = [a + distance for a in anchor_tokens] + [a - distance for a in anchor_tokens]
-
-            numbers = anchor_token_distances
+            
+            
+            # possible numbers for the search tokens depending on the distance and distance type
+            numbers = [a + distance for a in anchor_tokens] + [a - distance for a in anchor_tokens]
             if distance_type == "after":
                 numbers = [a + distance for a in anchor_tokens]
             elif distance_type == "before":
                 numbers = [a - distance for a in anchor_tokens]
 
             query = {"number_in_sentence__in": numbers}
-
+            # check if there is at least one token that meets the search criteria
+            # if so, add the token to the search_token_ids and append True to the criteria_results
+            # to check if all criteria are met
             if anchor.tokens.filter(Q(Q(**create_query_dict_from_criteria(criteria), **query))).exists():
-
-                section_ids.append(anchor.id)
-
+                criteria_resutlts.append(True)
                 search_token_ids.append(anchor.tokens.filter(Q(Q(**create_query_dict_from_criteria(criteria), **query))).values_list('id', flat=True))
-
                 continue
-
+            
+            # if there is no token that meets the search criteria, add False to the criteria_results
+            criteria_resutlts.append(False)
+            
+        # if there are more than one anchor token, that meets the anchor criteria, check if there is at least one token that meets all search criteria
+        if len(anchor_tokens_temp) > 1:
+            for anchor_token in anchor_tokens_temp:
+                query_list = []
+                for criteria in search_criteria:
+                    distance = criteria.get("distance", 1)
+                    distance_type = criteria.get("distance_type", "after")
+                    numbers = [anchor_token.number_in_sentence + distance, anchor_token.number_in_sentence - distance]
+                    if distance_type == "after":
+                        numbers = [anchor_token.number_in_sentence + distance]
+                    elif distance_type == "before":
+                        numbers = [anchor_token.number_in_sentence - distance]
+                    query = {"number_in_sentence__in": numbers}
+                    query_list.append(Q(Q(**create_query_dict_from_criteria(criteria), **query)))
+                anchor_tokens_temp1 = anchor_tokens_temp.exclude(id=anchor_token.id)
+                
+                
+                for query in query_list:
+                    anchor_tokens_temp1 = anchor_tokens_temp1.filter(query)
+                
+                
+                if anchor_tokens_temp1.exists():
+                    criteria_resutlts.append(True)
+                    search_token_ids.append(anchor_tokens_temp1.values_list('id', flat=True))
+                    break
+                else:
+                    criteria_resutlts.append(False)
+                    
+        if all(criteria_resutlts):
+            section_ids.append(anchor.id)
     sections = Section.objects.filter(id__in=section_ids).distinct().prefetch_related("tokens","text")
+    
     
     key = f"{uuid4()}"
     if section_ids:
@@ -386,12 +434,22 @@ def distance(anchor_criteria: dict, search_criteria: list[dict]):
         cache.set(key+"anchors", list(Token.objects.filter(id__in=[t for tokens in anchor_token_ids for t in tokens]).only("id").values_list("id",flat=True)), timeout=120)
 
     return sections, key
+
     
 def get_anchors_from_cache(request,key_value) -> list:
-    logger.debug(f"Getting anchors from cache with key: {key_value}")
+    """Get anchors from cache.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        key_value (str): The key value used to retrieve anchors from cache.
+
+    Returns:
+        list: A list of anchors and hits.
+    """
     anchors = cache.get(str(key_value)+"anchors",[])
-    cache.set(str(key_value)+"anchors",anchors, timeout=120)
     hits = cache.get(str(key_value)+"hits",[])
+    
+    # Update Cache
+    cache.set(str(key_value)+"anchors",anchors, timeout=120)
     cache.set(str(key_value)+"hits",hits, timeout=120)
-    logger.debug(f"Found {len(anchors)} anchors.")
     return JsonResponse({"anchors":anchors,"hits":hits})
