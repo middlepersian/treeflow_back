@@ -1,17 +1,17 @@
-<div id="criteria" class="text-left">
-    <div id="query-type" class="flex justify-between items-center gap-4">
+<div id="criteria" class="flex flex-col gap-2 mt-2 text-left">
+    <div id="query-type" class="flex items-center justify-between gap-4">
         <label>Query type</label>
         <div class="text-right">
             {{ form.query_type }}
         </div>
     </div>
-    <div id="query-field" class="flex justify-between items-center gap-4">
+    <div id="query-field" class="flex items-center justify-between gap-4">
         <label>Query field</label>
         <div class="text-right">
             {{ form.query_field }}
         </div>
     </div>
-    <div id="query-value" class="flex justify-between items-center gap-4">
+    <div id="query-value" class="flex items-center justify-between gap-4">
         <label>Query value</label>
         <div class="text-right">
             {{ form.query }}
@@ -20,20 +20,20 @@
             {% endif %}
         </div>
     </div>
-    <div id="is-root" class="flex justify-between items-center gap-4">
+    <div id="is-root" class="flex items-center justify-between gap-4">
         <label class="font-medium text-gray-900 whitespace-normal">Root?</label>
         <div class="text-right">
             {{ form.root }}
         </div>
     </div>
-    <div id="case-sensitivity" class="flex justify-between items-center gap-4">
+    <div id="case-sensitivity" class="flex items-center justify-between gap-4">
         <label class="font-medium text-gray-900 whitespace-normal">Language</label>
         <div class="text-right">
             {{ form.language }}
         </div>
     </div>
-    <hr class="h-px my-4 bg-gray-200 border-0 text-gray-700">
-    <div id="case-sensitivity" class="flex justify-between items-center gap-4">
+    <hr class="h-px my-4 text-gray-700 bg-gray-200 border-0">
+    <div id="case-sensitivity" class="flex items-center justify-between gap-4">
         <label class="font-medium text-gray-900 whitespace-normal">Case sensitive?</label>
         <div class="text-right">
             {{ form.case_sensitive }}
@@ -54,20 +54,20 @@
         </div>
     {% endif %}
 
-    {% if layout == "distance" and not firstForm %}
+    {% if layout == "distance-section" and not firstForm %}
         <div id="distance-values" class="flex flex-col pt-4">
             <label class="text-sm font-semibold text-gray-900">
                 Distance to anchor in steps
             </label>
-            <div class="flex flex-row gap-4 justify-between">
+            <div class="flex flex-row justify-between gap-4">
                 {{ form.distance_type }} 
                 {{ form.distance }}
             </div>
         </div>
     {% endif %}
 
-    {% if layout == "logical" and not firstForm %}
-        <div id="logical-values" class="flex flex-row gap-4 justify-between pt-4">
+    {% if "logical" in layout  and not firstForm %}
+        <div id="logical-values" class="flex flex-row justify-between gap-4 pt-4">
             <label class="font-medium text-gray-900">
                 Logical operator
             </label>
@@ -77,7 +77,7 @@
 
 </div>
 
-    {% comment %} <div id="pos-token" class="flex justify-between items-center gap-4">
+    {% comment %} <div id="pos-token" class="flex items-center justify-between gap-4">
         <label>Part of speech</label>
         <div class="text-right">
             {{ form.pos_token }}
@@ -86,13 +86,13 @@
     {% comment %} <hr class="my-6" />
     <div id="feature-token">
             <h2 class="font-medium text-gray-900 whitespace-normal">Filter by feature</h2>
-            <div id="feature-token-feature" class="flex justify-between items-center gap-4">
+            <div id="feature-token-feature" class="flex items-center justify-between gap-4">
                 <label>Feature type</label>
                 <div class="text-right">
                     {{ form.feature }}
                 </div>
             </div>
-            <div id="feature-token-value" class="flex justify-between items-center gap-4">
+            <div id="feature-token-value" class="flex items-center justify-between gap-4">
                 <label>Feature value</label>
                 <div class="text-right">
                     {{ form.feature }}
@@ -101,13 +101,13 @@
     </div>
     <div id="lemmas">
             <h2 class="font-medium text-gray-900 whitespace-normal">Lemmas</h2>
-            <div id="lemmas-lemma" class="flex justify-between items-center gap-4">
+            <div id="lemmas-lemma" class="flex items-center justify-between gap-4">
                 <label>Lemma</label>
                 <div class="text-right">
                     {{ form.lemma }}
                 </div>
             </div>
-            <div id="lemmas-language" class="flex justify-between items-center gap-4">
+            <div id="lemmas-language" class="flex items-center justify-between gap-4">
                 <label>Language</label>
                 <div class="text-right">
                     {{ form.lemma_language }}
@@ -116,13 +116,13 @@
     </div>
     <div id="senses">
             <h2 class="font-medium text-gray-900 whitespace-normal">Senses</h2>
-            <div id="senses-sense" class="flex justify-between items-center gap-4">
+            <div id="senses-sense" class="flex items-center justify-between gap-4">
                 <label>Sense</label>
                 <div class="text-right">
                     {{ form.sense }}
                 </div>
             </div>
-            <div id="senses-language" class="flex justify-between items-center gap-4">
+            <div id="senses-language" class="flex items-center justify-between gap-4">
                 <label>Language</label>
                 <div class="text-right">
                     {{ form.sense_language }}

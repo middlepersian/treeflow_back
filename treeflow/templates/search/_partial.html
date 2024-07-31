@@ -1,62 +1,125 @@
-{% load static %}
-<div id="search-page-container" class="flex flex-col">
-    <div id="search" class="flex flex-col">
-        <button id="toggle-search" class="h-12 font-semibold">
+{% load static i18n %}
+{% block extra_head %}
+
+{% if key %}
+<script>
+  function fetchHighlighting(){
+    key = "{{key}}";
+
+    fetch('{% url "search:anchors" key_value=key %}').then(response => response.json()).then(data => {
+
+      document.querySelectorAll('span.token-span').forEach(span => {
+        span.classList.remove('font-bold', 'text-off', 'bg-main', 'text-white', 'text-red-500');
+        const id = span.getAttribute('id');
+        if (data.anchors.includes(id)) {
+          span.classList.add('font-bold', 'text-off');
+        } 
+        if (data.hits && data.hits.includes(id)) {
+          span.classList.add('bg-main', 'font-bold', 'text-white');
+        } 
+        if (span.textContent == "None") {
+          span.classList.add('text-red-500');
+        }
+      });
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+  
+  document.addEventListener('htmx:afterSwap', () => { fetchHighlighting(); });
+  fetchHighlighting();
+</script>
+{% endif %}
+
+{% endblock %}
+
+<div id="search-page-container" class="flex flex-col gap-4 p-4">
+    <div id="search" class="flex flex-col border shadow shadow-black/10">
+        <div class="flex items-center justify-center w-full h-12 font-semibold shadow shadow-black/10">
             <h3>Search</h3>
-        </button>
-        <div id="search-type" class="flex flex-row gap-4 items-center m-4">
-            <select id="search-type-selection" name="layout_selection" hx-get="{% url 'search:search' %}" hx-target="#search-page-container" hx-swap="outerHTML">
-                <option value="logical" {% if layout_selection == "logical" %}selected{% endif %}>Logical operators</option>
-                <option value="distance" {% if layout_selection == "distance" %}selected{% endif %}>Token distance</option>
+        </div>
+        <div id="search-type" class="flex flex-row items-center gap-4 m-4">
+            <select id="search-type-selection" class="rounded" name="layout_selection" hx-get="{% url 'search:search' %}" hx-target="#search-page-container" hx-swap="outerHTML">
+                <option value="logical-section" {% if layout_selection == "logical-section" %}selected{% endif %}>Section - Logical operators</option>
+                <option value="logical-token" {% if layout_selection == "logical-token" %}selected{% endif %}>Token - Logical operators</option>
+                <option value="distance-section" {% if layout_selection == "distance-section" %}selected{% endif %}>Token distance</option>
             </select>
-            <label class="font-bold text-gray-900 whitespace-normal">Search tokens
-                {% if layout_selection == "distance" %}by looking for entries with a specific distance between them{% endif %}
-                {% if layout_selection == "logical" %}by combining queries using logical operators{% endif %}
+            <label class="font-bold text-gray-900 whitespace-nowrap">
+                Search tokens
+                {% if "distance" in layout_selection %}by looking for entries with a specific distance between them{% endif %}
+                {% if "logical" in layout_selection %}by combining queries using logical operators{% endif %}
             </label>
         </div>
         <div id="search-forms" class="overflow-x-auto text-center">
             {% include "search/formset.html" %}
         </div>
     </div>
-    <div id="results" class="flex flex-col">
-        <button id="toggle-results" class="h-12 font-semibold">
+    <div id="results-div" class="flex-col hidden border shadow shadow-black/10">
+        <div class="flex items-center justify-center w-full h-12 font-semibold shadow shadow-black/10">
             <h3>Results</h3>
-        </button>
-        <div id="loadingIndicator" class="loading-indicator flex flex-row justify-center">
-            <img class="m-6 h-20 w-20" src="{% static 'search/three-dots.svg' %}"/>
+        </div>
+        <div id="loadingIndicator" class="flex-row justify-center hidden">
+            <img class="w-20 h-20 m-6" src="{% static 'search/three-dots.svg' %}" />
         </div>
         <div id="results-list" class="flex flex-col">
         </div>
     </div>
 </div>
+
+<div id="section-info-modal" class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-50"></div>
+
 <script>
   const addForm = (buttonElement) => {
-  const currentForm = buttonElement.parentElement.parentElement.id
-  // console.log("Button pressed on form:", currentForm)
-  // const formSet = document.getElementById('form_set')
+    const currentForm = buttonElement.parentElement.parentElement.id;
+    const formsCountElement = document.getElementById('id_form-TOTAL_FORMS');
+    const formsCount = parseInt(formsCountElement.value);
+    const emptyFormHtml = document.getElementById('empty-form').innerHTML;
+    const uniqueId = Date.now() + Math.random().toString(36).substring(2, 11);
 
-  const formsCountElement = document.getElementById('id_form-TOTAL_FORMS')
-  const formsCount = parseInt(formsCountElement.value)
+    let newFormHtml = emptyFormHtml
+      .replace(/__prefix__/g, formsCount)
+      .replace('<div', `<div id="form-${uniqueId}"`);
 
-  const emptyFormHtml = document.getElementById('empty-form').innerHTML
-  const uniqueId = Date.now() + Math.random().toString(36).substring(2, 11);
-
-  let newFormHtml = emptyFormHtml
-    .replace(/__prefix__/g, formsCount)
-    .replace('<div', `<div id="form-${uniqueId}"`)
-
-  document.getElementById(currentForm).insertAdjacentHTML('afterend', newFormHtml)          
-  formsCountElement.value = formsCount + 1
-}
-
-const removeForm = (buttonElement) => {
-  const formToRemove = buttonElement.parentElement.parentElement;
-  const formsCountElement = document.getElementById('id_form-TOTAL_FORMS');
-  const formsCount = parseInt(formsCountElement.value);
-  
-  if (formsCount > 1) {
-    formToRemove.remove();
-    formsCountElement.value = formsCount - 1;
+    document.getElementById(currentForm).insertAdjacentHTML('afterend', newFormHtml);
+    formsCountElement.value = formsCount + 1;
   }
-}
+
+  const removeForm = (buttonElement) => {
+    const formToRemove = buttonElement.parentElement.parentElement;
+    const formsCountElement = document.getElementById('id_form-TOTAL_FORMS');
+    const formsCount = parseInt(formsCountElement.value);
+
+    if (formsCount > 1) {
+      formToRemove.remove();
+      formsCountElement.value = formsCount - 1;
+    }
+  }
+
+  const activateLoadingSVG = () => {
+    document.getElementById('results-list').innerHTML = '';
+
+    const resultsDiv = document.getElementById('results-div');
+    if (resultsDiv.classList.contains('hidden')) {
+      resultsDiv.classList.remove('hidden');
+      resultsDiv.classList.add('flex');
+    }
+
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator.classList.contains('hidden')) {
+      loadingIndicator.classList.remove('hidden');
+      loadingIndicator.classList.add('flex');
+    }
+  }
+
+  const deactivateLoadingSVG = () => {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator.classList.contains('flex')) {
+      loadingIndicator.classList.remove('flex');
+      loadingIndicator.classList.add('hidden');
+    }
+  }
+
+  document.body.addEventListener('htmx:afterSwap', function () {
+    deactivateLoadingSVG();
+  });
 </script>
