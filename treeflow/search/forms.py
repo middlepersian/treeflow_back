@@ -12,8 +12,6 @@ shared_fields = (
 )
 
 class DistanceForm(forms.ModelForm):
-    distance = forms.DecimalField(min_value=1)
-
     class Meta:
         model = SearchCriteria
         fields = (
@@ -21,6 +19,11 @@ class DistanceForm(forms.ModelForm):
             "distance",
             "distance_type",
         )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['distance'].min_value = 1
+        
 
 class LogicalForm(forms.ModelForm):
     class Meta:

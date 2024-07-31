@@ -39,7 +39,9 @@
               <th class="font-normal text-left bg-gray-300 border border-collapse">
                 <div class="flex flex-col">
                   {% for token in part.section_tokens.all %}
+                  {% if token.type != "sentence" %}
                     <span class="whitespace-nowrap">{{ token.identifier }}</span>
+                    {% endif %}
                   {% endfor %}
                 </div>
               </th>
